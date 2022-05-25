@@ -1,0 +1,171 @@
+{
+	"embedColor": 3092790,
+	"embedColorGreen": 5763719,
+	"embedColorRed": 15548997,
+	"embedColorYellow": 16705372,
+	"botSwitches": {
+		"fpb": true,
+		"commands": true,
+		"automod": false,
+		"registerCommands": true
+	},
+	"eval": {
+		"allowed": true,
+		"whitelist": [
+            "615761944154210305",
+			"485793265568841728"
+		]
+	},
+	"mainServer": {
+		"id":"739308099709567021",
+		"MPStaffRoles": [
+			"mpmanager",
+			"mpadmin",
+			"mppublicadmin",
+			"mpfarmmanager"
+		],
+		"staffRoles": [
+			"owner",
+			"mod",
+			"helper"
+		],
+		"DFRoles": [
+			"dfgreen",
+			"dfblue",
+			"dforange",
+			"dfyellow"
+		],
+		"RFRoles": [
+			"rfpink",
+			"rfgreen",
+			"rfdarkblue",
+			"rforange"
+		],
+		"roles": {
+			"owner": "972276292953194547",
+			"admin": "972276292953194547",
+			"mod": "972276292953194547",
+			"helper": "972276292953194547",
+			"mpmanager": "975273021076017152",
+			"mpadmin": "975273092735713350",
+			"mppublicadmin": "975273145915285535",
+			"mpfarmmanager": "975273192140730428",
+			"trustedfarmer": "975273239993524264",
+			"mpstaff": "975273375607963668",
+			"mpmanagement": "975441860501852161",
+			"loa": "975465123240083506",
+			"dfmember": "975441860501852161",
+			"dfgreen": "",
+			"dfblue": "",
+			"dfornage": "",
+			"dfyellow": "",
+			"rfmember": "741104037918670941",
+			"rfpink": "",
+			"rfgreen": "",
+			"rfdarkblue": "",
+			"rforange": "",
+			"everyone": "739308099709567021",
+			"levels": {
+				"one": {
+					"id": "825543490745139272",
+					"age": 10,
+					"messages": 500,
+					"number": 1
+				},
+				"two": {
+					"id": "829471922806980608",
+					"age": 20,
+					"messages": 1000,
+					"number": 2
+				},
+				"three": {
+					"id": "830681226172039178",
+					"age": 30,
+					"messages": 1500,
+					"number": 3
+				},
+				"four": {
+					"id": "903539742103203920",
+					"age": 40,
+					"messages": 2000,
+					"number": 4
+				},
+				"five": {
+					"id": "903539725611184179",
+					"age": 50,
+					"messages": 2500,
+					"number": 5
+				},
+				"six": {
+					"id": "957060627300495410",
+					"age": 70,
+					"messages": 3500,
+					"number": 6
+				},
+				"seven": {
+					"id": "957060694795235328",
+					"age": 90,
+					"messages": 4500,
+					"number": 7
+				},
+				"eight": {
+					"id": "957060729897385994",
+					"age": 110,
+					"messages": 5500,
+					"number": 8
+				},
+				"nine": {
+					"id": "957060799992565871",
+					"age": 130,
+					"messages": 6500,
+					"number": 9
+				},
+				"ten": {
+					"id": "957060820766953534",
+					"age": 150,
+					"messages": 7500,
+					"number": 10
+				},
+				"eleven": {
+					"id": "957064919717666816",
+					"age": 170,
+					"messages": 10000,
+					"number": 11
+				},
+				"twelve": {
+					"id": "957064982330228827",
+					"age": 200,
+					"messages": 15000,
+					"number": 12
+				},
+				"thirteen": {
+					"id": "957065039628619797",
+					"age": 250,
+					"messages": 20000,
+					"number": 13
+				},
+				"fourteen": {
+					"id": "957065084016918568",
+					"age": 300,
+					"messages": 25000,
+					"number": 14
+				},
+				"fifteen": {
+					"id": "957065133656522782",
+					"age": 365,
+					"messages": 30000,
+					"number": 15
+				}
+			}
+		},
+		"channels": {
+			"caselogs": "778848112588095559",
+			"modchat": "778848112588095559",
+			"modlogs": "778848112588095559",
+			"botcommands": "778848112588095559",
+			"fpbtesting": "778848112588095559",
+			"fs22_silage": "778848112588095559",
+			"fs22_grain": "778848112588095559"
+		}
+	}
+}

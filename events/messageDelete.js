@@ -4,8 +4,8 @@ module.exports = {
     tracker: false,
     frs: false,
     execute: async (client, msg) => {
-        const channel = await client.channels.fetch(require("../config.json").mainServer.channels.modlogs);
-        if (!client.config.botSwitches.automod) return;
+        const channel = await client.channels.fetch(client.config.mainServer.channels.modlogs);
+        if (!client.config.botSwitches.logs) return;
         if (msg.partial) return;
         if (msg.author.bot) return;
         if (msg.guild?.id !== client.config.mainServer.id) return;

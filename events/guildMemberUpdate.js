@@ -20,5 +20,9 @@ module.exports = {
         client.channels.cache.get('778848112588095559').messages.fetch('978864042124906547').then((msg)=>{ msg.edit({embeds: [new client.embed(msg.embeds[0])
             .setDescription(`<@&${client.config.mainServer.roles.dfgreen}>: ${df.dfgreen.members.size}\n${df_green}\n\n<@&${client.config.mainServer.roles.dfblue}>: ${df.dfblue.members.size}\n${df_blue}\n\n<@&${client.config.mainServer.roles.dforange}>: ${df.dforange.members.size}\n${df_orange}\n\n<@&${client.config.mainServer.roles.dfyellow}>: ${df.dfyellow.members.size}\n${df_yellow}`)]})})
         
+        const tf = {
+            trusted: await guild.roles.fetch(client.config.mainServer.roles.trustedfarmer)
+        };
+        const mp_tf = await tf.trusted.members.map(e=>`<@${e.user.id}>`).join("\n") || " ";
     }
 }

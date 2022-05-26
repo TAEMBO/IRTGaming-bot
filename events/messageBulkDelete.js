@@ -6,8 +6,8 @@ module.exports = {
     frs: false,
     execute: async (client, messages) => {
         console.log("messages" + messages)
-        const channel = await client.channels.fetch(require("../config.json").mainServer.channels.modlogs);
-         if (!client.config.botSwitches.automod) return;
+        const channel = await client.channels.fetch(client.config.mainServer.channels.modlogs);
+         if (!client.config.botSwitches.logs) return;
          let text = "";
          messages.forEach((e)=>{
              text += `${e.author.tag}: ${e.content}\n`;

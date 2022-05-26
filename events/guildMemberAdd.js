@@ -15,8 +15,9 @@ module.exports = {
             return true;
         });
         
-        /* if (evadingCase) {
-            client.punishments.addPunishment("ban", member, { reason: `mute evasion (Case #${evadingCase.id})` }, client.user.id); */
+        if (evadingCase) {
+            return;
+            client.punishments.addPunishment("ban", member, { reason: `mute evasion (Case #${evadingCase.id})` }, client.user.id);
         } else {
         if (!client.config.botSwitches.logs) return;
         if (member.guild.id !== client.config.mainServer.id) return;

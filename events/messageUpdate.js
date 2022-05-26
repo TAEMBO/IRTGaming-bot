@@ -5,8 +5,8 @@ module.exports = {
     tracker: false,
     frs: false,
     execute: async (client, oldMsg, newMsg) => {
-        const channel = await client.channels.fetch(require("../config.json").mainServer.channels.modlogs);
-        if (!client.config.botSwitches.automod) return;
+        const channel = await client.channels.fetch(client.config.mainServer.channels.modlogs);
+        if (!client.config.botSwitches.logs) return;
         if (oldMsg.partial) return;
         if (newMsg.partial) return;
         if (client.bannedWords._content.some(word => newMsg.content.toLowerCase().includes(word)) && newMsg.guild.id === client.config.mainServer.id && newMsg.channel.id !== client.config.mainServer.channels.modchat) newMsg.delete();

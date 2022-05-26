@@ -18,7 +18,7 @@ module.exports = {
         if (evadingCase) {
             client.punishments.addPunishment("ban", member, { reason: `mute evasion (Case #${evadingCase.id})` }, client.user.id);
         } else {
-        if (!client.config.botSwitches.automod) return;
+        if (!client.config.botSwitches.logs) return;
         if (member.guild.id !== client.config.mainServer.id) return;
         const oldInvites = client.invites;
         const newInvites = await member.guild.invites.fetch();

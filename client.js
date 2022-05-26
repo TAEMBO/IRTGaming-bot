@@ -198,7 +198,7 @@ class YClient extends Client {
     };
     async punish(client, interaction, type) {
         if (!client.hasModPerms(client, interaction.member)) return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mod}> role to use this command.`, ephemeral: true, allowedMentions: {roles: false}});
-        if (type !== 'warn' && interaction.member.roles.cache.has(client.config.mainServer.roles.minimod)) return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mod}> role to use this command.`, ephemeral: true, allowedMentions: {roles: false}});
+        if (type !== ('warn' || 'mute') && interaction.member.roles.cache.has(client.config.mainServer.roles.helper)) return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mod}> role to use this command.`, ephemeral: true, allowedMentions: {roles: false}});
         const member = interaction.options.getMember("member");
         const time = interaction.options.getString("time");
         const reason = interaction.options.getString("reason") ?? "None";

@@ -7,6 +7,7 @@
 		"fpb": true,
 		"commands": true,
 		"automod": false,
+		"logs": false,
 		"registerCommands": true
 	},
 	"eval": {

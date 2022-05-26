@@ -21,11 +21,11 @@ module.exports = {
             } catch (err) {
                 console.log(err)
             }
-            /* try {
+            try {
                 DF = await axios.get(client.tokens.df, {timeout: 500});
             } catch (err) {
                 console.log(err)
-            } */
+            }
             try {
                 RF = await axios.get(client.tokens.rf, {timeout: 500});
             } catch (err) {
@@ -41,9 +41,9 @@ module.exports = {
                 if (PG) {
                     await client.FSstatsAll(client, PG, embed, totalCount)
                 }
-                /* if (DF) {
+                if (DF) {
                     await client.FSstatsAll(client, DF, embed, totalCount)
-                } */
+                }
                 if (RF) {
                     await client.FSstatsAll(client, RF, embed, totalCount)
                 }
@@ -58,7 +58,7 @@ module.exports = {
             client.FSstats(client, interaction, client.tokens.pg);
         } else if (subCmd === 'df') {
             interaction.reply('Disabled')
-            // client.FSstats(client, interaction, client.tokens.df);
+            client.FSstats(client, interaction, client.tokens.df);
         } else if (subCmd === 'rf') {
             client.FSstats(client, interaction, client.tokens.rf);
         }

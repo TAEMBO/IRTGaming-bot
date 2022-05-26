@@ -347,5 +347,7 @@ module.exports = {
 	.setName("perks")
 	.setDescription("Views ranking perks."))
 	.addSubcommand((optt)=>optt
-	.setName("nerd_stats").setDescription("Views more formal statistics."))
+	.setName("nerd_stats").setDescription("Views more formal statistics.")),
+	disabled: true
+
 };

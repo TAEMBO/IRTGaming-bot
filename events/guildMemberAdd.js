@@ -19,6 +19,16 @@ module.exports = {
             return;
             client.punishments.addPunishment("ban", member, { reason: `mute evasion (Case #${evadingCase.id})` }, client.user.id);
         } else {
+            const wchannel = await client.channel.fetch(client.config.mainServer.channels.welcome);
+            const embed = new Discord.MessageEmbed()
+            .setTitle(`Welcome to ${member.guild.name} ${member.user.tag}!`)
+            .setColor(client.config.embedColor)
+            .setThumbnail(member.user.avatarURL({ format: 'png', dynamic: true, size: 2048}) || member.user.defaultAvatarURL)
+            .setDescription(`Please familiarize yourself with our <#552590507352653827> and head over to <#666239346239602688> to gain access to more channels & receive notification about community news.`)
+            .addFields({name: 'Useful channels', value: `Our Gameservers: <#739100711073218611>\nReport Players: <#739620161811775550>\nCome chat with us!: <#552565546093248512>`})
+            .setFooter({text: `Member ${member.guild.memberCount.toLocaleString()}`})
+            wchannel.send({content: `<@${member.user.id}>`, embeds: [embed]})
+
         if (!client.config.botSwitches.logs) return;
         if (member.guild.id !== client.config.mainServer.id) return;
         const oldInvites = client.invites;

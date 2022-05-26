@@ -19,7 +19,7 @@ module.exports = {
             return;
             client.punishments.addPunishment("ban", member, { reason: `mute evasion (Case #${evadingCase.id})` }, client.user.id);
         } else {
-            const wchannel = await client.channel.fetch(client.config.mainServer.channels.welcome);
+            const wchannel = await client.channels.fetch(client.config.mainServer.channels.welcome);
             const embed = new Discord.MessageEmbed()
             .setTitle(`Welcome to ${member.guild.name} ${member.user.tag}!`)
             .setColor(client.config.embedColor)

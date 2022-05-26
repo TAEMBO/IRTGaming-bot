@@ -4,7 +4,7 @@ module.exports = {
     giveaway: false,
 	frs: false,
     execute: async (client, message) => {
-    if (!client.config.botSwitches.commands && (!client.config.eval.whitelist.includes(message.author.id) || !message.member.roles.cache.has(client.config.mainServer.roles.mod))) return; // bot is being run in dev mode and a non eval whitelisted or non bot dev user sent a interaction. ignore the interaction.
+    if (!client.config.botSwitches.commands && !client.config.eval.whitelist.includes(message.author.id)) return; // bot is being run in dev mode and a non eval whitelisted user sent a message. ignore the message.
 	if (message.partial) return;
 	if (message.author.bot) return;
 	if (message.channel.type === "DM") {
@@ -84,6 +84,7 @@ module.exports = {
 
 		// repeated messages
 		if (message.content.length > 10 && ["https://", "http://", "@everyone", "@here", ".com", ".ru", ".org", ".net", ".xyz"].some(x => message.content.toLowerCase().includes(x)) && message.guild.id === client.config.mainServer.id && !client.hasModPerms(client, message.member)) {
+			if (!client.config.botSwitches.automod) return;
 			const thisContent = message.content.slice(0, 32);
 			if (client.repeatedMessages[message.author.id]) {
 				if (thisContent.includes('tenor')) {

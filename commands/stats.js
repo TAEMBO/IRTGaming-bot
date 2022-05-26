@@ -57,7 +57,6 @@ module.exports = {
         } else if (subCmd === 'pg') {
             client.FSstats(client, interaction, client.tokens.pg);
         } else if (subCmd === 'df') {
-            interaction.reply('Disabled')
             client.FSstats(client, interaction, client.tokens.df);
         } else if (subCmd === 'rf') {
             client.FSstats(client, interaction, client.tokens.rf);

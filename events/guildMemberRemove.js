@@ -5,8 +5,8 @@ module.exports = {
     tracker: false,
     frs: false,
     execute: async (client, member) => {
-        const channel = await client.channels.fetch(require("../config.json").mainServer.channels.modlogs)
-        if (!client.config.botSwitches.automod) return;
+        const channel = await client.channels.fetch(client.config.mainServer.channels.modlogs)
+        if (!client.config.botSwitches.logs) return;
         if (member.guild.id !== client.config.mainServer.id) return;
 
         const embed = new Discord.MessageEmbed()

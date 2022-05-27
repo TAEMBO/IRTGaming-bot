@@ -15,9 +15,7 @@ module.exports = {
             const name = interaction.options.getString("username");
             let arr = require('../databases/FMstaff.json');
 
-            console.log(arr)
             arr = client.removeCustomValue(arr, name)
-            console.log(arr)
             fs.writeFileSync(path.resolve('./databases/FMstaff.json'), JSON.stringify(arr))
             client.FMstaff._content = require("../databases/FMstaff.json");
     

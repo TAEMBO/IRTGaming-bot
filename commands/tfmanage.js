@@ -15,9 +15,7 @@ module.exports = {
             const name = interaction.options.getString("username");
             let arr = require('../databases/TFstaff.json');
 
-            console.log(arr)
             arr = client.removeCustomValue(arr, name)
-            console.log(arr)
             fs.writeFileSync(path.resolve('./databases/TFstaff.json'), JSON.stringify(arr))
             client.TFstaff._content = require("../databases/TFstaff.json");
     

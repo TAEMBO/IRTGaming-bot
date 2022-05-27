@@ -146,21 +146,15 @@ class YClient extends Client {
     }
     async FSstatsAll (client, serverName, embed, totalCount) {
         if (serverName.data.slots.used !== 0) {
-            console.log('a')
             totalCount.push(serverName.data.slots.used)
-            console.log('b')
             const playerInfo = [];
             await serverName.data.slots.players.forEach(player => {
                 if (player.name === undefined) return;
-                console.log('c')
                 playerInfo.push(`\`${player.name}\` ${(player.isAdmin ? ' :detective:' : '')}${(client.FMstaff._content.includes(player.name) ? ':farmer:' : '')}${(client.TFstaff._content.includes(player.name) ? ':angel:' : '')} **|** ${('0' + Math.floor(player.uptime/60)).slice(-2)}:${('0' + (player.uptime % 60)).slice(-2)}`);
                 })
-                console.log('d')
             embed.addFields(
                 {name: `${serverName.data.server.name} - ${serverName.data.slots.used}/${serverName.data.slots.capacity} - ${('0' + Math.floor((serverName.data.server.dayTime/3600/1000))).slice(-2)}:${('0' + Math.floor((serverName.data.server.dayTime/60/1000)%60)).slice(-2)}`, value: `${playerInfo.join("\n")}`}
-                
             )
-            console.log('e')
         }
     }
     removeCustomValue(array, value){

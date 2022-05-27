@@ -51,7 +51,7 @@ module.exports = {
             {name: 'DF Green', value: 'green'},
             {name: 'DF Blue', value: 'blue'},
             {name: 'DF Orange', value: 'orange'},
-            {name: 'DF Yellow', value: 'yellow'},
+            {name: 'DF Yellow', value: 'yellow'}
         )
         .setRequired(true))
 };

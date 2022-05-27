@@ -23,7 +23,8 @@ module.exports = {
     .addStringOption((opt) => opt
       .setName('options')
       .setDescription('Restart as well?')
-      .addChoice('Update and restart', 'ur')
-      .addChoice('Update', 'u')
+      .addChoices(
+        {name: 'Update and restart', value: 'ur'},
+        {name: 'Update', value: 'u'})
       .setRequired(true))
 };

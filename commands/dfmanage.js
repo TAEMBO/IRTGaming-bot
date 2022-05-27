@@ -47,9 +47,11 @@ module.exports = {
     .addStringOption((opt)=>opt
         .setName("role")
         .setDescription("the role to add or remove")
-        .addChoice('DF Green', 'green')
-        .addChoice('DF Blue', 'blue')
-        .addChoice('DF Orange', 'orange')
-        .addChoice('DF Yellow', 'yellow')
+        .addChoices(
+            {name: 'DF Green', value: 'green'},
+            {name: 'DF Blue', value: 'blue'},
+            {name: 'DF Orange', value: 'orange'},
+            {name: 'DF Yellow', value: 'yellow'},
+        )
         .setRequired(true))
 };

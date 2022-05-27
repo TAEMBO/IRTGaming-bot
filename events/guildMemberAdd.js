@@ -19,6 +19,18 @@ module.exports = {
             return;
             client.punishments.addPunishment("ban", member, { reason: `mute evasion (Case #${evadingCase.id})` }, client.user.id);
         } else {
+            const index = member.guild.memberCount;
+			const suffix = ((index) => {
+				const numbers = index.toString().split('').reverse(); // eg. 1850 -> [0, 5, 8, 1]
+				if (numbers[1] === '1') { // this is some -teen
+					return 'th';
+				} else {
+					if (numbers[0] === '1') return 'st';
+					else if (numbers[0] === '2') return 'nd';
+					else if (numbers[0] === '3') return 'rd';
+					else return 'th';
+				}
+			})(index);
             const wchannel = await client.channels.fetch(client.config.mainServer.channels.welcome);
             const embed = new Discord.MessageEmbed()
             .setTitle(`Welcome to ${member.guild.name} ${member.user.tag}!`)
@@ -26,7 +38,7 @@ module.exports = {
             .setThumbnail(member.user.avatarURL({ format: 'png', dynamic: true, size: 2048}) || member.user.defaultAvatarURL)
             .setDescription(`Please familiarize yourself with our <#552590507352653827> and head over to <#666239346239602688> to gain access to more channels & receive notification about community news.`)
             .addFields({name: 'Useful channels', value: `Our Gameservers: <#739100711073218611>\nReport Players: <#739620161811775550>\nCome chat with us!: <#552565546093248512>`})
-            .setFooter({text: `Member ${member.guild.memberCount.toLocaleString()}`})
+            .setFooter({text: `${index}${suffix} member`})
             wchannel.send({content: `<@${member.user.id}>`, embeds: [embed]})
 
         if (!client.config.botSwitches.logs) return;

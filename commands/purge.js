@@ -26,5 +26,6 @@ module.exports = {
 		await interaction.reply(`Successfully deleted ${amount} messages.`);
 
 	},
-	data: new SlashCommandBuilder().setName("purge").setDescription("Purges messages in a channel.").addIntegerOption((opt)=>opt.setName("amount").setDescription("The amount of messages to purge.").setRequired(true)).addUserOption((opt)=>opt.setName("user").setDescription("The user to purge messages from.").setRequired(false))
+	data: new SlashCommandBuilder().setName("purge").setDescription("Purges messages in a channel.").addIntegerOption((opt)=>opt.setName("amount").setDescription("The amount of messages to purge.").setRequired(true)).addUserOption((opt)=>opt.setName("user").setDescription("The user to purge messages from.").setRequired(false)),
+	disabled: true
 };

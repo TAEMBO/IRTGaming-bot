@@ -24,6 +24,6 @@ module.exports = {
             trusted: await guild.roles.fetch(client.config.mainServer.roles.trustedfarmer)
         };
         const mp_tf = await tf.trusted.members.map(e=>`<@${e.user.id}>`).join("\n") || " ";
-        client.channels.cache.get('778848112588095559').messages.fetch('979534380349419520').then((msg)=>{msg.edit({content: `<@&${client.config.mainServer.roles.trustedfarmer}>: ${tf.dfgreen.members.size}\n${mp_tf}`, allowedMentions: {roles: false}})})
+        client.channels.cache.get('778848112588095559').messages.fetch('979534380349419520').then((msg)=>{msg.edit({content: `<@&${client.config.mainServer.roles.trustedfarmer}>: ${tf.trusted.members.size}\n${mp_tf}`, allowedMentions: {roles: false}})})
     }
 }

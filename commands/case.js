@@ -73,6 +73,5 @@ module.exports = {
 		}
 	},
 	data: new SlashCommandBuilder().setName("case").setDescription("Views a member's cases, or a single case ID.").addSubcommand((optt)=>optt.setName("view").setDescription("Views a single case ID").addIntegerOption((opt)=>opt.setName("id").setDescription("The ID of the case.").setRequired(true))).addSubcommand((optt)=>optt.setName("member").setDescription("Views all a members cases").addUserOption((opt)=>opt.setName("user").setDescription("The user whomm's punishments you want to view.").setRequired(true)).addIntegerOption((opt)=>opt.setName("page").setDescription("The page number.").setRequired(false))).addSubcommand((optt)=>optt.setName("update").setDescription("Updates a cases reason.").addIntegerOption((opt)=>opt.setName("case_id").setDescription("The ID Of The Case To Update.").setRequired(true)).addStringOption((opt)=>opt.setName("reason").setDescription("The New Reason For The Case.").setRequired(true))),
-	category: 'Moderation',
-	alias: ['cases'],
+	disabled: true
 };

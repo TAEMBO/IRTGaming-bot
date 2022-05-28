@@ -189,6 +189,9 @@ module.exports = {
 		console.log('restart')
 		message.reply('Restarting...').then(async ()=> eval(process.exit(-1)))
 	}
+	if (message.content.startsWith('!register') && client.isMPStaff(client, message.member)) {
+		client.guilds.cache.get(client.config.mainServer.id).commands.set(client.registery).catch((e)=>{console.log(`Couldn't register commands bcuz: ${e}`)});
+	}
 	// auto responses
 	if (message.content.toLowerCase().includes('giants moment')) {
 		message.react('™️');

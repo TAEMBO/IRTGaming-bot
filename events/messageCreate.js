@@ -153,7 +153,6 @@ module.exports = {
 		];
 		// if message was not sent in a blacklisted channel and this is the right server, count towards user level
 		if (!BLACKLISTED_CHANNELS.includes(message.channel.id) && message.guild.id === client.config.mainServer.id){ 
-			return;
 			client.userLevels.incrementUser(message.author.id);
 			const eligiblity = await client.userLevels.getEligible(message.member);			
 			let nextRoleKey;
@@ -175,7 +174,7 @@ module.exports = {
 			if(nextRoleReq.eligible){
 			message.member.roles.add(nextRole);
 			message.member.roles.remove(lastRole);
-			client.channels.cache.get(client.config.mainServer.channels.botcommands).send({content: `<@${message.author.id}> has received the <@&${nextRole}> role.`, allowedMentions: {roles: false}});
+			// client.channels.cache.get(client.config.mainServer.channels.botcommands).send({content: `<@${message.author.id}> has received the <@&${nextRole}> role.`, allowedMentions: {roles: false}});
 			}
 			}
 		}
@@ -185,6 +184,10 @@ module.exports = {
 		message.delete()
 		client.punishments.addPunishment("warn", message.member, { reason: "Discord advertisement" }, client.user.id)
 		message.channel.send("No advertising other Discord servers.").then(x => setTimeout(() => x.delete(), 10000))
+	}
+	if (message.content.startsWith("!restart") && client.config.eval.whitelist.includes(message.author.id)) {
+		console.log('restart')
+		message.reply('Restarting...').then(async ()=> eval(process.exit(-1)))
 	}
 	// auto responses
 	if (message.content.toLowerCase().includes('giants moment')) {

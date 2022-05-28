@@ -61,7 +61,7 @@ module.exports = {
 
 	// useless staff ping mute
 	const punishableRoleMentions = [
-		client.config.mainServer.roles.minimod,
+		client.config.mainServer.roles.helper,
 		client.config.mainServer.roles.mod
 	];
 	if (message.mentions.roles.some(mentionedRole => punishableRoleMentions.includes(mentionedRole.id))) {
@@ -153,6 +153,7 @@ module.exports = {
 		];
 		// if message was not sent in a blacklisted channel and this is the right server, count towards user level
 		if (!BLACKLISTED_CHANNELS.includes(message.channel.id) && message.guild.id === client.config.mainServer.id){ 
+			return;
 			client.userLevels.incrementUser(message.author.id);
 			const eligiblity = await client.userLevels.getEligible(message.member);			
 			let nextRoleKey;
@@ -186,5 +187,8 @@ module.exports = {
 		message.channel.send("No advertising other Discord servers.").then(x => setTimeout(() => x.delete(), 10000))
 	}
 	// auto responses
+	if (message.content.toLowerCase().includes('giants moment')) {
+		message.react('™️');
+	}
 }
 }

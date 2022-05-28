@@ -9,24 +9,24 @@ console.log(client.config.botSwitches)
 // global properties
 client.on("ready", async () => {
 	client.guilds.cache.forEach(async (e)=>{await e.members.fetch();});
-	await client.channels.fetch(require("./config.json").mainServer.channels.modlogs).then((channel)=>{channel.send(`:warning: Bot restarted :warning:\n${client.config.eval.whitelist.map(x => `<@${x}>`).join(' ')}`)});
+	await client.channels.fetch(client.config.mainServer.channels.testing_zone).then((channel)=>{channel.send(`:warning: Bot restarted :warning:\n${client.config.eval.whitelist.map(x => `<@${x}>`).join(' ')}`)});
 	setInterval(()=>{client.guilds.cache.get(client.config.mainServer.id).invites.fetch().then((invs)=>{invs.forEach(async(inv)=>{client.invites.set(inv.code, {uses: inv.uses, creator: inv.inviter.id})})})}, 500000)
 	if(client.config.botSwitches.registerCommands) client.guilds.cache.get(client.config.mainServer.id).commands.set(client.registery).catch((e)=>{console.log(`Couldn't register commands bcuz: ${e}`)});
 	process.on("unhandledRejection", async (error)=>{
 		console.log(error)
-		await client.channels.fetch(require("./config.json").mainServer.channels.modlogs).then((channel)=>{
+		await client.channels.fetch(client.config.mainServer.channels.testing_zone).then((channel)=>{
         channel.send({content: `${client.config.eval.whitelist.map(x=>`<@${x}>`).join(", ")}`, embeds: [new Discord.MessageEmbed().setTitle("Error Caught!").setColor("#420420").setDescription(`**Error:** \`${error.message}\`\n\n**Stack:** \`${`${error.stack}`.slice(0, 2500)}\``)]})
 		})
 	});
 	setInterval(async () => {
-		await client.user.setPresence({ activities: [{ name: 'paint dry', type: 'WATCHING'}], status: 'dnd' });
+		await client.user.setPresence({ activities: [{ name: 'you play FS22', type: 'WATCHING'}], status: 'dnd' });
 	}, 60000);
 	console.log("\x1b[36m", `Bot active as ${client.user.tag}.`);
 
 	setInterval(async () => {
-		client.FSstatsLoop(client, client.tokens.ps, '739308099709567024', '778848112588095559', '978784250532859934')
-		client.FSstatsLoop(client, client.tokens.pg, '739308099709567024', '778848112588095559', '977786524986900510')
-		client.FSstatsLoop(client, client.tokens.rf, '739308099709567024', '778848112588095559', '977786595807748136')
+		client.FSstatsLoop(client, client.tokens.ps, '763846290466799638', '891791005098053682', '979896262595850250')
+		client.FSstatsLoop(client, client.tokens.pg, '763846290466799638', '729823615096324166', '979902302863364116')
+		// client.FSstatsLoop(client, client.tokens.rf, '739308099709567024', '778848112588095559', '977786595807748136')
 	}, 15000);
 
 	const eventFiles = fs.readdirSync('./events').filter(file => file.endsWith('.js'));

@@ -9,7 +9,7 @@ module.exports = {
         if (!client.config.botSwitches.logs) return;
         if (oldMsg.partial) return;
         if (newMsg.partial) return;
-        if (client.bannedWords._content.some(word => newMsg.content.toLowerCase().includes(word)) && newMsg.guild.id === client.config.mainServer.id && newMsg.channel.id !== client.config.mainServer.channels.modchat) newMsg.delete();
+        if (client.bannedWords._content.some(word => newMsg.content.toLowerCase().includes(word)) && newMsg.guild.id === client.config.mainServer.id) newMsg.delete();
         if (newMsg.content === oldMsg.content) return;
         if (oldMsg.author.bot) return;
         if (oldMsg.guild.id !== client.config.mainServer.id) return;

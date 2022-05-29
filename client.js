@@ -27,6 +27,7 @@ class YClient extends Client {
         this.punishments = new database("./databases/punishments.json", "array");
         this.FMstaff = new database("./databases/FMstaff.json", "array");
         this.TFstaff = new database("./databases/TFstaff.json", "array");
+        this.votes = new database("./databases/suggestvotes.json", "array");
         this.repeatedMessages = {};
         this.repeatedMessagesContent = new database("./databases/repeatedMessagesContent.json", "array");
     }
@@ -38,6 +39,7 @@ class YClient extends Client {
         this.punishments.initLoad();
         this.FMstaff.initLoad();
         this.TFstaff.initLoad();
+        this.votes.initLoad();
         this.repeatedMessagesContent.initLoad();
         const commandFiles = fs.readdirSync("./commands").filter(file => file.endsWith(".js"));
         for (const file of commandFiles) {

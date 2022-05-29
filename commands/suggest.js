@@ -17,6 +17,5 @@ module.exports = {
             .setColor(client.config.embedColor)
             await interaction.reply({embeds: [embed], components: [new MessageActionRow().addComponents(new MessageButton().setStyle("SUCCESS").setEmoji("✅").setCustomId("suggestion-upvote").setLabel("1"), new MessageButton().setStyle("DANGER").setEmoji("❌").setCustomId("suggestion-decline").setLabel("1"))]});
     },
-    data: new SlashCommandBuilder().setName("suggest").setDescription("Create a suggestion.").addStringOption((opt)=>opt.setName("suggestion").setDescription("Your suggestion.").setRequired(true)),
-    disabled: true
+    data: new SlashCommandBuilder().setName("suggest").setDescription("Create a suggestion.").addStringOption((opt)=>opt.setName("suggestion").setDescription("Your suggestion.").setRequired(true))
 }; 

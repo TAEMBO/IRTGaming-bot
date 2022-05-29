@@ -84,7 +84,7 @@ module.exports = {
 
 		// repeated messages
 		if (message.content.length > 10 && ["https://", "http://", "@everyone", "@here", ".com", ".ru", ".org", ".net", ".xyz"].some(x => message.content.toLowerCase().includes(x)) && message.guild.id === client.config.mainServer.id && !client.hasModPerms(client, message.member)) {
-			if (!client.config.botSwitches.automod) return;
+		if (!client.config.botSwitches.automod) return;
 			const thisContent = message.content.slice(0, 32);
 			if (client.repeatedMessages[message.author.id]) {
 				if (thisContent.includes('tenor')) {
@@ -189,9 +189,61 @@ module.exports = {
 		console.log('restart')
 		message.reply('Restarting...').then(async ()=> eval(process.exit(-1)))
 	}
-	if (message.content.startsWith('!register') && client.isMPStaff(client, message.member)) {
-		client.guilds.cache.get(client.config.mainServer.id).commands.set(client.registery).catch((e)=>{console.log(`Couldn't register commands bcuz: ${e}`)});
-	}
+	if (message.content.startsWith('!eval') && client.isMPStaff(client, message.member)) {
+		const util = require('util');
+		const args = message.content.replace(/\n/g, " ").split(" ");
+		const removeUsername = (text) => {
+		let matchesLeft = true;
+		const array = text.split('\\');
+		while (matchesLeft) {
+			let usersIndex = array.indexOf('Users');
+			if (usersIndex < 1) matchesLeft = false;
+			else {
+				let usernameIndex = usersIndex + 1;
+				if (array[usernameIndex].length === 0) usernameIndex += 1;
+				array[usernameIndex] = '#'.repeat(array[usernameIndex].length);
+				array[usersIndex] = 'Us\u200bers';
+			}
+		}
+		return array.join('\\');
+		};
+			if (!client.config.eval.allowed) return message.channel.send('Eval is disabled.');
+			if (!client.config.eval.whitelist.includes(message.author.id)) return message.channel.send('You\'re not allowed to use eval');
+			const code = message.content.slice(args[0].length + 1);
+			let output = 'error';
+			let error = false;
+			try {
+				output = await eval(code);
+			} catch (err) {
+				error = true;
+				const embed = new client.embed()
+					.setTitle('__Eval__')
+					.addField('Input', `\`\`\`js\n${code.slice(0, 1010)}\n\`\`\``)
+					.addField('Output', `\`\`\`\n${err}\n\`\`\``)
+					.setColor('ff0000');
+				message.channel.send({embeds: [embed]}).then(errorEmbedMessage => {
+					const filter = x => x.content === 'stack' && x.author.id === message.author.id
+					const messagecollector = message.channel.createMessageCollector({ filter, max: 1, time: 60000 });
+					messagecollector.on('collect', collected => {
+						collected.channel.send(`\`\`\`\n${removeUsername(err.stack)}\n\`\`\``);
+					});
+				});
+			}
+			if (error) return;
+			if (typeof output === 'object') {
+				output = 'js\n' + util.formatWithOptions({ depth: 1 }, '%O', output);
+			} else {
+				output = '\n' + String(output);
+			}
+			const regexp = new RegExp(client.token, 'g');
+			output = output.replace(regexp, 'TOKEN_LEAK');
+			const embed = new client.embed()
+				.setTitle('__Eval__')
+				.addField('Input', `\`\`\`js\n${code.slice(0, 1010)}\n\`\`\``)
+				.addField('Output', `\`\`\`${removeUsername(output).slice(0, 1016)}\n\`\`\``)
+				.setColor(3971825);
+			message.channel.send({embeds: [embed]});
+		}
 	// auto responses
 	if (message.content.toLowerCase().includes('giants moment')) {
 		message.react('™️');

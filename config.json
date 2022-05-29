@@ -6,15 +6,14 @@
 	"botSwitches": {
 		"fpb": true,
 		"commands": true,
-		"automod": true,
+		"automod": false,
 		"logs": true,
 		"registerCommands": true
 	},
 	"eval": {
 		"allowed": true,
 		"whitelist": [
-            "615761944154210305",
-			"485793265568841728"
+            "615761944154210305"
 		]
 	},
 	"mainServer": {
@@ -63,6 +62,7 @@
 			"dfblue": "740515510726426645",
 			"dforange": "740515701420458034",
 			"dfyellow": "740515788255002734",
+			"dfpurple": "740514422023258132",
 			"rfmanager": "960295414429540362",
 			"rfmember": "741104037918670941",
 			"rfpink": "",

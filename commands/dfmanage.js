@@ -18,6 +18,7 @@ module.exports = {
             Role = client.config.mainServer.roles.dfyellow;
         }
         if(member.roles.cache.has(Role)){
+            if (interaction.member.roles.cache.has(client.config.mainServer.roles.dffarmowner) && !interaction.member.roles.cache.has(client.config.mainServer.roles.dfmanager) && !interaction.member.roles.cache.has(Role)) return interaction.reply('You cannot remove users from a farm you do not own.')
             const msg = await interaction.reply({embeds: [new client.embed().setDescription(`This user already has the <@&${Role}> role, do you want to remove it from them?`).setColor(client.config.embedColor)], fetchReply: true, components: [new MessageActionRow().addComponents(new MessageButton().setCustomId(`Yes`).setStyle("SUCCESS").setLabel("Confirm"), new MessageButton().setCustomId(`No`).setStyle("DANGER").setLabel("Cancel"))]});
             const filter = (i) => ["Yes", "No"].includes(i.customId) && i.user.id === interaction.user.id;
             const collector = interaction.channel.createMessageComponentCollector({filter, max: 1, time: 30000});
@@ -32,6 +33,7 @@ module.exports = {
                 }
             });
         } else {
+            if (interaction.member.roles.cache.has(client.config.mainServer.roles.dffarmowner) && !interaction.member.roles.cache.has(client.config.mainServer.roles.dfmanager) && !interaction.member.roles.cache.has(Role)) return interaction.reply('You cannot add users to a farm you do not own.')
             member.roles.add(Role);
             member.roles.add(client.config.mainServer.roles.dfmember);
             interaction.reply({embeds: [new client.embed().setDescription(`<@${member.user.id}> has been given the <@&${client.config.mainServer.roles.dfmember}> and <@&${Role}> roles.`).setColor(client.config.embedColor)]});

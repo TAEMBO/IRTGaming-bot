@@ -20,7 +20,7 @@ module.exports = {
                 .setImage('https://cdn-longterm.mee6.xyz/plugins/commands/images/552565546089054218/a0857b5fec15fd24c8f2b5583e631f180d9b02919dfa8e935c44b49f91381d49.jpeg')
                 .setColor(client.config.embedColor)]})
         } else if (subCmd === 'appeal') {
-            interaction.reply({embeds: [new client.embed().setDescription('To appeal a ban on a server, go to <#739620161811775550> to create a ticket. Within the ticket, type `!appeal`.').setColor(client.config.embedColor)]})
+            interaction.reply({embeds: [new client.embed().setDescription('To appeal a ban on a server, go to <#825046442300145744> to create a ticket. Within the ticket, type `!appeal`.').setColor(client.config.embedColor)]})
         } else if (subCmd === 'trusted') {
             interaction.reply({embeds: [new client.embed()
                 .setDescription(`Within our servers, you may see a farm that has a password on it with someone possibly in it. Unless the password to the farm is posted in its respective channel for the server, it's safe to assume that the farm is for <@&${client.config.mainServer.roles.trustedfarmer}>s and higher. This is done to prevent trolls from using equipment maliciously. If you're wondering on how to get <@&${client.config.mainServer.roles.trustedfarmer}>, you need to be active and helpful on the servers for an extended period of time.\n> Please note that the green farm with our Discord invite should never have a password set, it is the main farm that everyone should use`).setColor(client.config.embedColor)]})

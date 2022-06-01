@@ -152,8 +152,8 @@ class YClient extends Client {
         } catch (err) {
             console.log(err)
         }
-        if (await serverName.data.slots.used !== 0) {
-            await totalCount.push(serverName.data.slots.used)
+        if (serverName.data.slots.used !== 0) {
+            totalCount.push(serverName.data.slots.used)
             const playerInfo = [];
             await serverName.data.slots.players.forEach(player => {
                 if (player.name === undefined) return;

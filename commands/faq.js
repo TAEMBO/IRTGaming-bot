@@ -26,6 +26,16 @@ module.exports = {
                 .setDescription(`Within our servers, you may see a farm that has a password on it with someone possibly in it. Unless the password to the farm is posted in its respective channel for the server, it's safe to assume that the farm is for <@&${client.config.mainServer.roles.trustedfarmer}>s and higher. This is done to prevent trolls from using equipment maliciously. If you're wondering on how to get <@&${client.config.mainServer.roles.trustedfarmer}>, you need to be active and helpful on the servers for an extended period of time.\n> Please note that the green farm with our Discord invite should never have a password set, it is the main farm that everyone should use`).setColor(client.config.embedColor)]})
         } else if (subCmd === 'filters') {
             interaction.reply('https://cdn.discordapp.com/attachments/830916009107652630/978795707681079376/unknown.png')
+        } else if (subCmd === 'todo') {
+            const embed = new client.embed()
+                .setTitle('To-do')
+                .setColor(client.config.embedColor)
+                .addFields(
+                    {name: 'Public Silage', value: `> For <#${client.config.mainServer.channels.fs22_silage}>, things you can do on the server is: \n- Harvest corn\n- Cut grass in any area that has grown grass\n- Pick up cut grass\n- Run silage from the bunkers to the Animal Dealer north of field 7\n- Tidy up the yard`},
+                    {name: 'Public Grain', value: `> For <#${client.config.mainServer.channels.fs22_grain}>, things you can do on the server is: \n- Harvest crops on fields\n- Run grain trailers from the fields being harvested to sellpoints like Straig Lager or Supermarket\n- Tidy up the yard`}
+                )
+            .setFooter({text: 'Note that not every task listed might be available to do at the time, so do your due dilligence to see what needs doing'})
+            interaction.reply({embeds: [embed]})
         } else if (subCmd === 'pf') {
             interaction.reply({embeds: [new client.embed()
                 .setDescription('To apply for membership on one of our private servers, please see <#948338676587450408> for Realistic Farm, or <#960980858007859250> for Discord Farm.').setColor(client.config.embedColor)]})
@@ -52,6 +62,10 @@ module.exports = {
     .addSubcommand((optt)=>optt
         .setName("trusted")
         .setDescription("FAQ: Using TF equipment")
+    )
+    .addSubcommand((optt)=>optt
+        .setName("todo")
+        .setDescription("FAQ: What to do on the servers")
     )
     .addSubcommand((optt)=>optt
         .setName("filters")

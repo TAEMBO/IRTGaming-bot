@@ -152,7 +152,6 @@ class YClient extends Client {
         } catch (err) {
             console.log(err)
         }
-        if (!serverName) return;
         if (serverName.data.slots.used !== 0) {
             totalCount.push(serverName.data.slots.used)
             const playerInfo = [];

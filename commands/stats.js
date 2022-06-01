@@ -47,9 +47,9 @@ module.exports = {
                 if (RF) {
                     await client.FSstatsAll(client, RF, embed, totalCount)
                 }
-                
+
                 let sum;
-                if (!totalCount?.length) {
+                if (totalCount.length === 0) {
                     sum = 0;
                 } else {
                     sum = totalCount.reduce(function (previousValue, currentValue) {

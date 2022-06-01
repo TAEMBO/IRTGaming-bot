@@ -148,7 +148,7 @@ class YClient extends Client {
     }
     async FSstatsAll (client, serverURL, serverName, embed, totalCount) {
         try {
-            serverName = await axios.get(serverURL, {timeout: 2000});
+            serverName = await axios.get(serverURL, {timeout: 500});
         } catch (err) {
             console.log(err)
         }

@@ -146,13 +146,7 @@ class YClient extends Client {
         embed.setFooter({text: `In-game time: ${('0' + Math.floor((FSserver.data.server.dayTime/3600/1000))).slice(-2)}:${('0' + Math.floor((FSserver.data.server.dayTime/60/1000)%60)).slice(-2)} | Version: ${FSserver.data.server.version} | Map: ${FSserver.data.server.mapName}`});
 		channel_embed.messages.fetch(Message).then((msg)=>{ msg.edit({embeds: [embed]})})
     }
-    async FSstatsAll (client, serverURL, serverName, embed, totalCount) {
-        try {
-            serverName = await axios.get(serverURL, {timeout: 500});
-        } catch (err) {
-            console.log(err)
-        }
-        if (!serverName) return;
+    async FSstatsAll (client, serverName, embed, totalCount) {
         if (serverName.data.slots.used !== 0) {
             totalCount.push(serverName.data.slots.used)
             const playerInfo = [];

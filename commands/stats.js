@@ -47,9 +47,17 @@ module.exports = {
                 if (RF) {
                     await client.FSstatsAll(client, RF, embed, totalCount)
                 }
-                let sum = totalCount.reduce(function (previousValue, currentValue) {
-                    return previousValue + currentValue;
-                });
+                
+                let sum;
+                if (!totalCount?.length) {
+                    sum = 0;
+                } else {
+                    sum = totalCount.reduce(function (previousValue, currentValue) {
+                        return previousValue + currentValue;
+                    });
+                }
+
+                console.log(sum)
                 embed.setDescription(`**${sum}** total players online across all servers.`)
                 interaction.reply({embeds: [embed]})
         } else if (subCmd === 'ps') {

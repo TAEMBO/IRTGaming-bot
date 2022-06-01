@@ -10,43 +10,17 @@ module.exports = {
             let PG;
             let DF;
             let RF;
-            try {
-                PS = await axios.get(client.tokens.ps, {timeout: 500});
-            } catch (err) {
-                console.log(err)
-            }
-
-            try {
-                PG = await axios.get(client.tokens.pg, {timeout: 500});
-            } catch (err) {
-                console.log(err)
-            }
-            try {
-                DF = await axios.get(client.tokens.df, {timeout: 500});
-            } catch (err) {
-                console.log(err)
-            }
-            try {
-                RF = await axios.get(client.tokens.rf, {timeout: 500});
-            } catch (err) {
-                console.log(err)
-            }
             const totalCount = [];
             const embed = new client.embed()
                 .setColor(client.config.embedColor)
                 .setTitle('All Servers')
-                if (PS) {
-                    await client.FSstatsAll(client, PS, embed, totalCount)
-                } 
-                if (PG) {
-                    await client.FSstatsAll(client, PG, embed, totalCount)
-                }
-                if (DF) {
-                    await client.FSstatsAll(client, DF, embed, totalCount)
-                }
-                if (RF) {
-                    await client.FSstatsAll(client, RF, embed, totalCount)
-                }
+                client.FSstatsAll(client, client.tokens.ps, PS, embed, totalCount)
+
+                client.FSstatsAll(client, client.tokens.pg, PG, embed, totalCount)
+
+                client.FSstatsAll(client, client.tokens.df, DF, embed, totalCount)
+
+                client.FSstatsAll(client, client.tokens.rf, RF, embed, totalCount)
 
                 let sum;
                 if (totalCount.length === 0) {
@@ -56,8 +30,7 @@ module.exports = {
                         return previousValue + currentValue;
                     });
                 }
-
-                console.log(sum)
+                
                 embed.setDescription(`**${sum}** total players online across all servers.`)
                 interaction.reply({embeds: [embed]})
         } else if (subCmd === 'ps') {
@@ -90,7 +63,7 @@ module.exports = {
         .setDescription("Server stats for Discord Farm")
     )
     .addSubcommand((optt)=>optt
-    .setName("rf")
-    .setDescription("Server stats for Realistic Farm")
+        .setName("rf")
+        .setDescription("Server stats for Realistic Farm")
     )
 };

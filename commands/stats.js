@@ -13,23 +13,23 @@ module.exports = {
             
             const msg = await interaction.reply({content: 'Loading <a:IRT_loading:660661301353381898>', fetchReply: true})
             try {
-                PS = await axios.get(client.tokens.ps, {timeout: 500});
+                PS = await axios.get(client.tokens.ps, {timeout: 1000});
             } catch (err) {
                 console.log(err)
             }
 
             try {
-                PG = await axios.get(client.tokens.pg, {timeout: 500});
+                PG = await axios.get(client.tokens.pg, {timeout: 1000});
             } catch (err) {
                 console.log(err)
             }
             try {
-                DF = await axios.get(client.tokens.df, {timeout: 500});
+                DF = await axios.get(client.tokens.df, {timeout: 1000});
             } catch (err) {
                 console.log(err)
             }
             try {
-                RF = await axios.get(client.tokens.rf, {timeout: 500});
+                RF = await axios.get(client.tokens.rf, {timeout: 1000});
             } catch (err) {
                 console.log(err)
             }

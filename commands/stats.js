@@ -10,6 +10,8 @@ module.exports = {
             let PG;
             let DF;
             let RF;
+            
+            const msg = await interaction.reply({embeds: [new client.embed().setTitle('Loading <a:IRT_loading:660661301353381898>').setColor(client.config.embedColor)]})
             try {
                 PS = await axios.get(client.tokens.ps, {timeout: 500});
             } catch (err) {
@@ -59,7 +61,7 @@ module.exports = {
 
                 console.log(sum)
                 embed.setDescription(`**${sum}** total players online across all servers.`)
-                interaction.reply({embeds: [embed]})
+                msg.edit({embeds: [embed]})
         } else if (subCmd === 'ps') {
             client.FSstats(client, interaction, client.tokens.ps);
         } else if (subCmd === 'pg') {

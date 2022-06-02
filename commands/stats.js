@@ -36,7 +36,6 @@ module.exports = {
             const totalCount = [];
             const embed = new client.embed()
                 .setColor(client.config.embedColor)
-                .setTitle('All Servers')
                 if (PS) {
                     await client.FSstatsAll(client, PS, embed, totalCount)
                 } 
@@ -60,7 +59,7 @@ module.exports = {
                 }
 
                 console.log(sum)
-                embed.setDescription(`**${sum}** total players online across all servers.`)
+                embed.setTitle(`All Servers: ${sum} online`)
                 msg.edit({content: null, embeds: [embed]})
         } else if (subCmd === 'ps') {
             client.FSstats(client, interaction, client.tokens.ps);

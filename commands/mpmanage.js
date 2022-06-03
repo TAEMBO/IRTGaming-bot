@@ -5,7 +5,7 @@ module.exports = {
 	run: async (client, interaction) => {
         if(!interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager)) return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mpmanager}> role to use this command.`, allowedMentions: {roles: false}})
         const member = interaction.options.getMember("member");
-        const owner = await interaction.guild.members.fetch('615761944154210305');
+        const owner = await interaction.guild.members.fetch(interaction.guild.ownerId);
         const options = interaction.options.getString("role");
         let Role;
 

@@ -5,7 +5,7 @@ module.exports = {
 	run: async (client, interaction) => {
         if(!interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager)) return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mpmanager}> role to use this command.`, allowedMentions: {roles: false}})
         const member = interaction.options.getMember("member");
-        const owner = interaction.guild.members.fetch('615761944154210305');
+        const owner = await interaction.guild.members.fetch('615761944154210305');
         const options = interaction.options.getString("role");
         let Role;
 
@@ -25,7 +25,7 @@ module.exports = {
                     member.roles.remove(Role);
                     member.roles.remove(client.config.mainServer.roles.mpstaff);
                     int.update({embeds: [new client.embed().setDescription(`<@${member.user.id}> has been removed from <@&${Role}>.`).setColor(client.config.embedColor)], components: []})
-                    owner.send(`**${interaction.user.tag}** has demoted **${member.user.tag}** from **${interaction.guild.roles.cache.get(Role).name}**`)
+                    await owner.send(`**${interaction.user.tag}** has demoted **${member.user.tag}** from **${interaction.guild.roles.cache.get(Role).name}**`)
                 } else if(int.customId === "No"){
                     int.update({embeds: [new client.embed().setDescription(`Command canceled`).setColor(client.config.embedColor)], components: []});
                 }
@@ -35,7 +35,7 @@ module.exports = {
             if (options === 'fm' || 'pa') {
                 member.roles.add(client.config.mainServer.roles.mpstaff)
             }
-            owner.send(`**${interaction.user.tag}** has promoted **${member.user.tag}** to **${interaction.guild.roles.cache.get(Role).name}**`)
+            await owner.send(`**${interaction.user.tag}** has promoted **${member.user.tag}** to **${interaction.guild.roles.cache.get(Role).name}**`)
             interaction.reply({embeds: [new client.embed().setDescription(`<@${member.user.id}> has been given <@&${Role}>.`).setColor(client.config.embedColor)]});
         }
 	},

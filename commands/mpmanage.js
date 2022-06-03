@@ -32,7 +32,7 @@ module.exports = {
             });
         } else {
             member.roles.add(Role);
-            if (options === 'fm' || 'pa') {
+            if (Role !== client.config.mainServer.roles.trustedfarmer) {
                 member.roles.add(client.config.mainServer.roles.mpstaff)
             }
             await owner.send(`**${interaction.user.tag}** has promoted **${member.user.tag}** to **${interaction.guild.roles.cache.get(Role).name}**`)

@@ -24,8 +24,8 @@ client.on("ready", async () => {
 	console.log("\x1b[36m", `Bot active as ${client.user.tag}.`);
 
 	setInterval(async () => {
-		client.FSstatsLoop(client, client.tokens.ps, '763846290466799638', '891791005098053682', '980240981922291752')
-		client.FSstatsLoop(client, client.tokens.pg, '763846290466799638', '729823615096324166', '980241004718329856')
+		client.FSstatsLoop(client, client.tokens.ps, '763846290466799638', '891791005098053682', '980240981922291752', '807427336827699222', 'Public Silage')
+		client.FSstatsLoop(client, client.tokens.pg, '763846290466799638', '729823615096324166', '980241004718329856', '731590816186761286', 'Public Grain')
 		// client.FSstatsLoop(client, client.tokens.rf, '739308099709567024', '778848112588095559', '977786595807748136')
 	}, 15000);
 

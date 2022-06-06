@@ -135,7 +135,8 @@ class YClient extends Client {
 			channel_log.send(`\`${player.name}\` | \`${FSserver.data.server.name}\` | <t:${Math.round(new Date() / 1000)}>`)
 		}
         })
-        client.channels.resolve(VC).edit({name: `${FSserver.data.slots.capacity === 0 ? `🔴` : '🟢'} ${VCName} ${FSserver.data.slots.used}/${FSserver.data.slots.capacity}`})
+        client.channels.resolve(VC).edit({name: `${VCName}`})
+        console.log('a')
         embed.setAuthor({name: `${FSserver.data.slots.used}/${FSserver.data.slots.capacity}`})
         embed.setTitle(FSserver.data.server.name)
 		if (FSserver.data.slots.used === FSserver.data.slots.capacity) {

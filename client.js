@@ -117,7 +117,6 @@ class YClient extends Client {
         const axios = require("axios");
         const channel_embed = client.channels.resolve(Channel);
         const channel_log = client.channels.resolve(adminLogChannel);
-        const channel_voice = client.channels.resolve(VC);
 		const embed = new client.embed()
         const playerInfo = [];
         let FSserver;
@@ -136,6 +135,7 @@ class YClient extends Client {
 			channel_log.send(`\`${player.name}\` | \`${FSserver.data.server.name}\` | <t:${Math.round(new Date() / 1000)}>`)
 		}
         })
+        client.channels.resolve(VC).edit({name: `${FSserver.data.slots.capacity === 0 ? `🔴` : '🟢'} ${VCName} ${FSserver.data.slots.used}/${FSserver.data.slots.capacity}`})
         embed.setAuthor({name: `${FSserver.data.slots.used}/${FSserver.data.slots.capacity}`})
         embed.setTitle(FSserver.data.server.name)
 		if (FSserver.data.slots.used === FSserver.data.slots.capacity) {
@@ -146,9 +146,6 @@ class YClient extends Client {
         embed.setDescription(`${FSserver.data.slots.used === 0 ? 'No players online' : playerInfo.join("\n")}`);
         embed.setFooter({text: `In-game time: ${('0' + Math.floor((FSserver.data.server.dayTime/3600/1000))).slice(-2)}:${('0' + Math.floor((FSserver.data.server.dayTime/60/1000)%60)).slice(-2)} | Version: ${FSserver.data.server.version} | Map: ${FSserver.data.server.mapName}`});
 		channel_embed.messages.fetch(Message).then((msg)=>{ msg.edit({embeds: [embed]})})
-        console.log('a')
-        channel_voice.edit({name: `${FSserver.data.slots.capacity === 0 ? `🔴` : '🟢'} ${VCName} ${FSserver.data.slots.used}/${FSserver.data.slots.capacity}`})
-        console.log('b')
     }
     async FSstatsAll (client, serverName, embed, totalCount) {
         if (serverName.data.slots.used !== 0) {

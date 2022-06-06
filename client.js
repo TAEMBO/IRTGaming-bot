@@ -113,10 +113,10 @@ class YClient extends Client {
         embed.setFooter({text: `In-game time: ${('0' + Math.floor((FSserver.data.server.dayTime/3600/1000))).slice(-2)}:${('0' + Math.floor((FSserver.data.server.dayTime/60/1000)%60)).slice(-2)} | Version: ${FSserver.data.server.version} | Map: ${FSserver.data.server.mapName}`});
 		interaction.reply({embeds: [embed]})
     }
-    async FSstatsLoop(client, serverName, adminLogChannel, Channel, Message) {
+    async FSstatsLoop(client, serverName, adminLogChannel, Channel, Message, VC, VCName) {
         const axios = require("axios");
-        const channel_embed = client.channels.cache.get(Channel);
-        const channel_log = client.channels.cache.get(adminLogChannel)
+        const channel_embed = client.channels.resolve(Channel);
+        const channel_log = client.channels.resolve(adminLogChannel);
 		const embed = new client.embed()
         const playerInfo = [];
         let FSserver;
@@ -135,6 +135,8 @@ class YClient extends Client {
 			channel_log.send(`\`${player.name}\` | \`${FSserver.data.server.name}\` | <t:${Math.round(new Date() / 1000)}>`)
 		}
         })
+        client.channels.resolve(VC).edit({name: `${VCName}`})
+        console.log('a')
         embed.setAuthor({name: `${FSserver.data.slots.used}/${FSserver.data.slots.capacity}`})
         embed.setTitle(FSserver.data.server.name)
 		if (FSserver.data.slots.used === FSserver.data.slots.capacity) {

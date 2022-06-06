@@ -49,8 +49,8 @@ module.exports = {
         }
 	},
     data: new SlashCommandBuilder()
-    .setName("df")
-    .setDescription("Manage DF members")
+    .setName("mf")
+    .setDescription("Manage MF members")
     .addUserOption((opt)=>opt
         .setName("member")
         .setDescription("The member to add or remove the role from")

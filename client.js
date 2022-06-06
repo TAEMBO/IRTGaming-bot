@@ -146,7 +146,9 @@ class YClient extends Client {
         embed.setDescription(`${FSserver.data.slots.used === 0 ? 'No players online' : playerInfo.join("\n")}`);
         embed.setFooter({text: `In-game time: ${('0' + Math.floor((FSserver.data.server.dayTime/3600/1000))).slice(-2)}:${('0' + Math.floor((FSserver.data.server.dayTime/60/1000)%60)).slice(-2)} | Version: ${FSserver.data.server.version} | Map: ${FSserver.data.server.mapName}`});
 		channel_embed.messages.fetch(Message).then((msg)=>{ msg.edit({embeds: [embed]})})
+        console.log('a')
         channel_voice.edit({name: `${FSserver.data.slots.capacity === 0 ? `🔴` : '🟢'} ${VCName} ${FSserver.data.slots.used}/${FSserver.data.slots.capacity}`})
+        console.log('b')
     }
     async FSstatsAll (client, serverName, embed, totalCount) {
         if (serverName.data.slots.used !== 0) {

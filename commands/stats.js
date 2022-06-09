@@ -80,6 +80,7 @@ module.exports = {
         } else if (subCmd === 'mf') {
             interaction.reply({content: 'Disabled', ephemeral: true});
             // client.FSstats(client, interaction, client.tokens.mf);
+        }
     },
     data: new SlashCommandBuilder()
     .setName("stats")

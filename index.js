@@ -19,7 +19,7 @@ client.on("ready", async () => {
 		})
 	});
 	setInterval(async () => {
-		await client.user.setPresence({ activities: [{ name: 'you play FS22', type: 'WATCHING'}], status: 'dnd' });
+		await client.user.setPresence({status: 'invisible' });
 	}, 60000);
 	console.log("\x1b[36m", `Bot active as ${client.user.tag}.`);
 

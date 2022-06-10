@@ -5,7 +5,6 @@ module.exports = {
         if (!client.config.eval.whitelist.includes(interaction.user.id)) return interaction.reply({content: `You're not allowed to use this command.`})
         const msg = await interaction.reply({content: "Pulling from repo...", allowedMentions: {repliedUser: false}, fetchReply: true});
         require("child_process").exec("git pull")
-        msg.edit({content: "Pulled from repo"});
 
         const options = interaction.options.getString('options');
 
@@ -14,6 +13,7 @@ module.exports = {
             msg.edit({content: "Restarting..."}).then(async ()=> eval(process.exit(-1)));
             return
           case 'u':
+            msg.edit({content: "Pulled from repo"});
             return;
         }
       },

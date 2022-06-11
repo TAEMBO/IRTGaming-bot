@@ -191,7 +191,7 @@ class YClient extends Client {
         if (data.cancels) embed.addFields({name: '🔹 Overwrites', value: `This case overwrites Case #${cancels.id} \`${cancels.reason}\``});
     
         // send embed in modlog channel
-        client.channels.cache.get(client.config.mainServer.channels.caselogs).send({embeds: [embed]});
+        client.channels.cache.get(client.config.mainServer.channels.staffreports).send({embeds: [embed]});
     };
     async punish(client, interaction, type) {
         if (!client.hasModPerms(client, interaction.member)) return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mod}> role to use this command.`, ephemeral: true, allowedMentions: {roles: false}});

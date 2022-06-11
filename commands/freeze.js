@@ -4,7 +4,7 @@ module.exports = {
 	run: async (client, interaction) => {
 		if (interaction.member.roles.cache.has(client.config.mainServer.roles.mod)) {
             // credits to Skippy for this
-            const role = interaction.guild.roles.everyone;
+            const role = client.config.mainServer.id;
             const perms = role.permissions.toArray()
 
             const newPerms = perms.filter((perm) => perm !== 'SEND_MESSAGES');

@@ -9,7 +9,6 @@ module.exports = {
             let PS;
             let PG;
             let DF;
-            let RF;
             let MF;
             
             const msg = await interaction.reply({content: 'Loading <a:IRT_loading:660661301353381898>', fetchReply: true})
@@ -29,15 +28,10 @@ module.exports = {
                 console.log(err)
             }
             try {
-                RF = await axios.get(client.tokens.rf, {timeout: 1000});
-            } catch (err) {
-                console.log(err)
-            }
-            /*try {
                 MF = await axios.get(client.tokens.mf, {timeout: 1000});
             } catch (err) {
                 console.log(err)
-            }*/
+            }
             const totalCount = [];
             const embed = new client.embed()
                 .setColor(client.config.embedColor)
@@ -50,12 +44,9 @@ module.exports = {
                 if (DF) {
                     await client.FSstatsAll(client, DF, embed, totalCount)
                 }
-                if (RF) {
-                    await client.FSstatsAll(client, RF, embed, totalCount)
-                }
-                /*if (MF) {
+                if (MF) {
                     await client.FSstatsAll(client, MF, embed, totalCount)
-                }*/
+                }
 
                 let sum;
                 if (totalCount.length === 0) {
@@ -75,11 +66,8 @@ module.exports = {
             client.FSstats(client, interaction, client.tokens.pg);
         } else if (subCmd === 'df') {
             client.FSstats(client, interaction, client.tokens.df);
-        } else if (subCmd === 'rf') {
-            client.FSstats(client, interaction, client.tokens.rf);
         } else if (subCmd === 'mf') {
-            interaction.reply({content: 'Disabled', ephemeral: true});
-            // client.FSstats(client, interaction, client.tokens.mf);
+            client.FSstats(client, interaction, client.tokens.mf);
         }
     },
     data: new SlashCommandBuilder()
@@ -98,15 +86,11 @@ module.exports = {
         .setDescription("Server stats for Public Grain")
     )
     .addSubcommand((optt)=>optt
-        .setName("df")
-        .setDescription("Server stats for Discord Farm")
-    )
-    .addSubcommand((optt)=>optt
-        .setName("rf")
-        .setDescription("Server stats for Realistic Farm")
-    )
-    .addSubcommand((optt)=>optt
         .setName("mf")
         .setDescription("Server stats for Multi Farm")
     )
+    .addSubcommand((optt)=>optt
+        .setName("df")
+        .setDescription("Server stats for Discord Farm")
+)
 };

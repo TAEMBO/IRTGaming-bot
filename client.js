@@ -115,8 +115,6 @@ class YClient extends Client {
     }
     async FSstatsLoop(client, serverName, Channel, Message) {
         const axios = require("axios");
-        const channel_embed = client.channels.resolve(Channel);
-        const channel_log = client.channels.resolve(client.config.mainServer.channels.fslogs);
 	const BLACKLIST = ["Bernie", "RedbaD"]
 		const embed = new client.embed()
         const playerInfo = [];
@@ -126,14 +124,14 @@ class YClient extends Client {
         } catch (err) {
             embed.setTitle('Server not responding');
             embed.setColor(client.config.embedColorRed);
-            channel_embed.messages.fetch(Message).then((msg)=>{ msg.edit({embeds: [embed]})});
+            client.channels.resolve(Channel).messages.fetch(Message).then((msg)=>{ msg.edit({embeds: [embed]})});
             return;
         }
         await FSserver.data.slots.players.forEach(player => {
         if (player.name === undefined) return;
         playerInfo.push(`\`${player.name}\` ${(player.isAdmin ? ' :detective:' : '')}${(client.FMstaff._content.includes(player.name) ? ':farmer:' : '')}${(client.TFstaff._content.includes(player.name) ? ':angel:' : '')} **|** ${('0' + Math.floor(player.uptime/60)).slice(-2)}:${('0' + (player.uptime % 60)).slice(-2)}`);
 		if (player.isAdmin && (!BLACKLIST.includes(player.name) || !client.FMstaff._content.includes(player.name))) {
-			channel_log.send(`\`${player.name}\` | \`${FSserver.data.server.name}\` | <t:${Math.round(new Date() / 1000)}>`)
+			client.channels.resolve(client.config.mainServer.channels.fslogs).send(`\`${player.name}\` | \`${FSserver.data.server.name}\` | <t:${Math.round(new Date() / 1000)}>`)
 		}
         })
         embed.setAuthor({name: `${FSserver.data.slots.used}/${FSserver.data.slots.capacity}`})

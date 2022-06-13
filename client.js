@@ -117,6 +117,7 @@ class YClient extends Client {
         const axios = require("axios");
         const channel_embed = client.channels.resolve(Channel);
         const channel_log = client.channels.resolve(client.config.mainServer.channels.fslogs);
+	const BLACKLIST = ["Bernie", "RedbaD"]
 		const embed = new client.embed()
         const playerInfo = [];
         let FSserver;
@@ -131,7 +132,7 @@ class YClient extends Client {
         await FSserver.data.slots.players.forEach(player => {
         if (player.name === undefined) return;
         playerInfo.push(`\`${player.name}\` ${(player.isAdmin ? ' :detective:' : '')}${(client.FMstaff._content.includes(player.name) ? ':farmer:' : '')}${(client.TFstaff._content.includes(player.name) ? ':angel:' : '')} **|** ${('0' + Math.floor(player.uptime/60)).slice(-2)}:${('0' + (player.uptime % 60)).slice(-2)}`);
-		if (player.isAdmin && !client.FMstaff._content.includes(player.name)) {
+		if (player.isAdmin && (!BLACKLIST.includes(player.name) || !client.FMstaff._content.includes(player.name))) {
 			channel_log.send(`\`${player.name}\` | \`${FSserver.data.server.name}\` | <t:${Math.round(new Date() / 1000)}>`)
 		}
         })

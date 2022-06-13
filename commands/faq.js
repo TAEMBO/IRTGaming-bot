@@ -36,12 +36,6 @@ module.exports = {
                 )
             .setFooter({text: 'Note that not every task listed might be available to do at the time, so do your due dilligence to see what needs doing'})
             interaction.reply({embeds: [embed]})
-        } else if (subCmd === 'pf') {
-            interaction.reply({embeds: [new client.embed()
-                .setDescription('To apply for membership on one of our private servers, please see <#948338676587450408> for Realistic Farm, or <#960980858007859250> for Discord Farm.').setColor(client.config.embedColor)]})
-        } else if (subCmd === 'pfowner') {
-            interaction.reply({embeds: [new client.embed()
-                .setDescription('Please use `!apply-dfowner` for DF, and `!apply-rfowner` for RF to apply for owning a farm on either. Must already be a member of either server before applying.').setColor(client.config.embedColor)]})
         }
     },
     data: new SlashCommandBuilder()
@@ -70,13 +64,5 @@ module.exports = {
     .addSubcommand((optt)=>optt
         .setName("filters")
         .setDescription("FAQ: What filters to use")
-    )
-    .addSubcommand((optt)=>optt
-        .setName("pf")
-        .setDescription("FAQ: How to join DF/RF")
-    )
-    .addSubcommand((optt)=>optt
-        .setName("pfowner")
-        .setDescription("FAQ: How to get your own farm on DF/RF")
     )
 };

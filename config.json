@@ -29,18 +29,6 @@
 			"mod",
 			"helper"
 		],
-		"DFRoles": [
-			"dfgreen",
-			"dfblue",
-			"dforange",
-			"dfyellow"
-		],
-		"RFRoles": [
-			"rfpink",
-			"rfgreen",
-			"rfdarkblue",
-			"rforange"
-		],
 		"roles": {
 			"owner": "552565775639248896",
 			"admin": "972276292953194547",
@@ -75,14 +63,6 @@
 			"dforange": "740515701420458034",
 			"dfyellow": "740515788255002734",
 			"dfpurple": "740514422023258132",
-			"rfmanager": "960295414429540362",
-			"rfmember": "741104037918670941",
-			"rfpink": "867815808776536074",
-			"rfpurple": "867816505532874794",
-			"rflightblue": "858823244613812266",
-			"rfdarkblue": "867816845524467742",
-			"rforange": "849605408787660830",
-			"rfred": "867816136060698635",
 			"subscriber": "552615844790796288",
 			"levels": {
 				"one": {

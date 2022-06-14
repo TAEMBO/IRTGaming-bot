@@ -130,7 +130,7 @@ class YClient extends Client {
         await FSserver.data.slots.players.forEach(player => {
         if (player.name === undefined) return;
         playerInfo.push(`\`${player.name}\` ${(player.isAdmin ? ' :detective:' : '')}${(client.FMstaff._content.includes(player.name) ? ':farmer:' : '')}${(client.TFstaff._content.includes(player.name) ? ':angel:' : '')} **|** ${('0' + Math.floor(player.uptime/60)).slice(-2)}:${('0' + (player.uptime % 60)).slice(-2)}`);
-		if (player.isAdmin && (!BLACKLIST.includes(player.name) || !client.FMstaff._content.includes(player.name))) {
+		if (player.isAdmin && (!BLACKLIST.includes(player.name) && !client.FMstaff._content.includes(player.name))) {
 			client.channels.resolve(client.config.mainServer.channels.fslogs).send(`\`${player.name}\` | \`${FSserver.data.server.name}\` | <t:${Math.round(new Date() / 1000)}>`)
 		}
         })

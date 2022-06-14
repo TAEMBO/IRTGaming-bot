@@ -57,7 +57,6 @@ module.exports = {
                     });
                 }
 
-                console.log(sum)
                 embed.setTitle(`All Servers: ${sum} online`)
                 msg.edit({content: null, embeds: [embed]})
         } else if (subCmd === 'ps') {

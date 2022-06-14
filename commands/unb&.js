@@ -8,5 +8,5 @@ module.exports = {
         } else {
             return interaction.channel.send({content: `<@${member.id}> had their honorary ban revoked!`})}
     },
-    data: new SlashCommandBuilder().setName("unband").setDescription("Revokes an honorary ban.").addUserOption((opt)=>opt.setName("member").setDescription("The member whom will get their honorary ban revoked.").setRequired(false))
+    data: new SlashCommandBuilder().setName("unband").setDescription("Revokes an honorary ban.").addUserOption((opt)=>opt.setName("user").setDescription("The member whom will get their honorary ban revoked.").setRequired(false))
 };

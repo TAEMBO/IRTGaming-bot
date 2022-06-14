@@ -14,8 +14,8 @@ module.exports = {
 		const subCmd = interaction.options.getSubcommand();
 		if (subCmd === "stats") {
 
-        // days since nov 28, 2021 when userlevels was created
-            const timeActive = Math.floor((Date.now() - 1638138120305) / 1000 / 60 / 60 / 24);
+        // days since May 28, 2022 when userlevels was created
+            const timeActive = Math.floor((Date.now() - 1653863220000) / 1000 / 60 / 60 / 24);
 			
 			const data = dailyMsgs.map((x, i, a) => {
 				const yesterday = a[i - 1] || [];

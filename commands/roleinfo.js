@@ -5,7 +5,7 @@ module.exports = {
 		const role = interaction.options.getRole("role");
 		const keyPermissions = ['ADMINISTRATOR', 'KICK_MEMBERS', 'BAN_MEMBERS', 'MANAGE_CHANNELS', 'MANAGE_GUILD', 'VIEW_AUDIT_LOG', 'MANAGE_MESSAGES', 'MENTION_EVERYONE', 'USE_EXTERNAL_EMOJIS', 'MANAGE_ROLES', 'MANAGE_EMOJIS_AND_STICKERS', 'MODERATE_MEMBERS'];
 		const permissions = role.permissions.toArray();
-		const Role = role.members.map(e=>`<@${e.user.id}>`).join("\n") || "None";
+		const Role = role.members.map(e=>`**${e.user.tag}**`).join("\n") || "None";
 		const embed = new client.embed()
 			.setTitle('Role Info: ' + role.name)
 			.addFields(

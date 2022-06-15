@@ -29,6 +29,11 @@ client.on("ready", async () => {
 		client.FSstatsLoop(client, client.tokens.mf, '982143077554720768', '985586585707900928')
 	}, 15000);
 
+	setInterval(async () => {
+		client.FSwatchList(client, client.tokens.ps)
+		client.FSwatchList(client, client.tokens.pg)
+	}, 300000)
+
 	const eventFiles = fs.readdirSync('./events').filter(file => file.endsWith('.js'));
     eventFiles.forEach((file)=>{
     const event = require(`./events/${file}`);

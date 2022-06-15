@@ -27,6 +27,7 @@ class YClient extends Client {
         this.punishments = new database("./databases/punishments.json", "array");
         this.FMstaff = new database("./databases/FMstaff.json", "array");
         this.TFstaff = new database("./databases/TFstaff.json", "array");
+        this.watchList = new database("./databases/watchList.json", "array");
         this.votes = new database("./databases/suggestvotes.json", "array");
         this.repeatedMessages = {};
         this.repeatedMessagesContent = new database("./databases/repeatedMessagesContent.json", "array");
@@ -39,6 +40,7 @@ class YClient extends Client {
         this.punishments.initLoad();
         this.FMstaff.initLoad();
         this.TFstaff.initLoad();
+        this.watchList.initLoad();
         this.votes.initLoad();
         this.repeatedMessagesContent.initLoad();
         const commandFiles = fs.readdirSync("./commands").filter(file => file.endsWith(".js"));
@@ -157,6 +159,22 @@ class YClient extends Client {
                 {name: `${serverName.data.server.name} - ${serverName.data.slots.used}/${serverName.data.slots.capacity} - ${('0' + Math.floor((serverName.data.server.dayTime/3600/1000))).slice(-2)}:${('0' + Math.floor((serverName.data.server.dayTime/60/1000)%60)).slice(-2)}`, value: `${playerInfo.join("\n")}`}
             )
         }
+    }
+    async FSwatchList (client, serverName) {
+            const axios = require("axios");
+            let FSserver;
+
+            try {
+                FSserver = await axios.get(serverName, {timeout: 2000});
+            } catch (err) {
+                return console.log(err);
+            }
+            await FSserver.data.slots.players.forEach(player => {
+            if (player.name === undefined) return;
+            if (client.watchList._content.includes(player.name)) {
+                client.channels.resolve(client.config.mainServer.channels.playercheck).send(`**WATCHLIST**: \`${player.name}\` | \`${FSserver.data.server.name}\` | <t:${Math.round(new Date() / 1000)}>`)
+            }
+            })
     }
     removeCustomValue(array, value){
         for(let i = 0; i < array.length; i++){

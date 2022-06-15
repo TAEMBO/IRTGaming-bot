@@ -5,7 +5,7 @@ module.exports = {
         if (!client.isMPStaff(client, interaction.member)) return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mpstaff}> role to use this command`, allowedMentions: {roles: false}});
 
         const name = interaction.options.getString("username");
-        client.FMstaff.addData(name).forceSave();
+        client.watchList.addData(name).forceSave();
         interaction.reply({content: `Successfully added \`${name}\``})
     },
     data: new SlashCommandBuilder()

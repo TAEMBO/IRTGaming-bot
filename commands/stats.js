@@ -8,7 +8,6 @@ module.exports = {
         if (subCmd === 'all') {
             let PS;
             let PG;
-            let DF;
             let MF;
             
             const msg = await interaction.reply({content: 'Loading <a:IRT_loading:660661301353381898>', fetchReply: true})
@@ -19,11 +18,6 @@ module.exports = {
             }
             try {
                 PG = await axios.get(client.tokens.pg, {timeout: 1000});
-            } catch (err) {
-                console.log(err)
-            }
-            try {
-                DF = await axios.get(client.tokens.df, {timeout: 1000});
             } catch (err) {
                 console.log(err)
             }
@@ -40,9 +34,6 @@ module.exports = {
                 } 
                 if (PG) {
                     await client.FSstatsAll(client, PG, embed, totalCount)
-                }
-                if (DF) {
-                    await client.FSstatsAll(client, DF, embed, totalCount)
                 }
                 if (MF) {
                     await client.FSstatsAll(client, MF, embed, totalCount)
@@ -63,8 +54,6 @@ module.exports = {
             client.FSstats(client, interaction, client.tokens.ps);
         } else if (subCmd === 'pg') {
             client.FSstats(client, interaction, client.tokens.pg);
-        } else if (subCmd === 'df') {
-            client.FSstats(client, interaction, client.tokens.df);
         } else if (subCmd === 'mf') {
             client.FSstats(client, interaction, client.tokens.mf);
         }
@@ -88,8 +77,4 @@ module.exports = {
         .setName("mf")
         .setDescription("Server stats for Multi Farm")
     )
-    .addSubcommand((optt)=>optt
-        .setName("df")
-        .setDescription("Server stats for Discord Farm")
-)
 };

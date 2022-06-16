@@ -10,7 +10,7 @@ module.exports = {
             let PG;
             let MF;
             
-            const msg = await interaction.reply({content: 'Loading <a:IRT_loading:660661301353381898>', fetchReply: true})
+            // const msg = await interaction.reply({content: 'Loading <a:IRT_loading:660661301353381898>', fetchReply: true})
             try {
                 PS = await axios.get(client.tokens.ps, {timeout: 1000});
             } catch (err) {
@@ -49,7 +49,8 @@ module.exports = {
                 }
 
                 embed.setTitle(`All Servers: ${sum} online`)
-                msg.edit({content: null, embeds: [embed]})
+                //msg.edit({content: null, embeds: [embed]})
+                interaction.reply({embeds: [embed]})
         } else if (subCmd === 'ps') {
             client.FSstats(client, interaction, client.tokens.ps);
         } else if (subCmd === 'pg') {

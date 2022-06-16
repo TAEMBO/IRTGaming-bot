@@ -210,11 +210,13 @@ class YClient extends Client {
         client.channels.cache.get(client.config.mainServer.channels.staffreports).send({embeds: [embed]});
     };
     async punish(client, interaction, type) {
-        if (!client.hasModPerms(client, interaction.member)) return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mod}> role to use this command.`, ephemeral: true, allowedMentions: {roles: false}});
-        if (type !== ('warn' || 'mute') && interaction.member.roles.cache.has(client.config.mainServer.roles.helper)) return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mod}> role to use this command.`, ephemeral: true, allowedMentions: {roles: false}});
+        if (!client.hasModPerms(client, interaction.member)) return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mod}> role to use this command.`, allowedMentions: {roles: false}});
+        if (type !== ('warn' || 'mute') && interaction.member.roles.cache.has(client.config.mainServer.roles.helper)) return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mod}> role to use this command.`, allowedMentions: {roles: false}});
         const member = interaction.options.getMember("member");
         const time = interaction.options.getString("time");
         const reason = interaction.options.getString("reason") ?? "None";
+	if (interaction.user.id === member.id) return interaction.reply(`You cannot ${type} yourself.`)
+	if (client.hasModPerms(client, member)) return interaction.reply(`You cannot ${type} another staff member.`)
         const result = await client.punishments.addPunishment(type, member, { time, reason, interaction }, interaction.user.id);
         if(typeof result !== String){
             interaction.reply({embeds: [result]});

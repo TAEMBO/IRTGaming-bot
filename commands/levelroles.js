@@ -93,8 +93,8 @@ module.exports = {
 			ctx.setLineDash([]);
 
 			// draw points
-			ctx.strokeStyle = client.config.embedColor;
-			ctx.fillStyle = client.config.embedColor;
+			ctx.strokeStyle = '#06860a';
+			ctx.fillStyle = '#06860a';
 			ctx.lineWidth = 3;
 
 

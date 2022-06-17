@@ -18,6 +18,7 @@
 	},
 	"mainServer": {
 		"id":"552565546089054218",
+		"LRSreset": 1653776820000,
 		"MPStaffRoles": [
 			"mpmanager",
 			"mpadmin",

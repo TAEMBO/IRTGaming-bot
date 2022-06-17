@@ -137,7 +137,7 @@ module.exports = {
 			ctx.fillText('0 msgs/day', lowx, lowy);
 
 			// 30d
-			ctx.fillText('30d ago', lastMonthStart, graphOrigin[1] - (textSize / 3));
+			ctx.fillText('15d ago', lastMonthStart, graphOrigin[1] - (textSize / 3));
 
 			// time ->
 			const tx = graphOrigin[0] + (textSize / 2);

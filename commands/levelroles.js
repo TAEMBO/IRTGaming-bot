@@ -20,7 +20,7 @@ module.exports = {
 			const data = dailyMsgs.map((x, i, a) => {
 				const yesterday = a[i - 1] || [];
 				return x[1] - (yesterday[1] || x[1]);
-			}).slice(1).slice(-60);
+			}).slice(1).slice(-30);
 
 			// handle negative days
 			data.forEach((change, i) => {
@@ -82,10 +82,10 @@ module.exports = {
 				previousY = [y, i * chosen_interval[0]];
 			}
 
-			// 30d mark
+			// 15d mark
 			ctx.setLineDash([8, 16]);
 			ctx.beginPath();
-			const lastMonthStart = graphOrigin[0] + (nodeWidth * (data.length - 30));
+			const lastMonthStart = graphOrigin[0] + (nodeWidth * (data.length - 15));
 			ctx.lineTo(lastMonthStart, graphOrigin[1]);
 			ctx.lineTo(lastMonthStart, graphOrigin[1] + graphSize[1]);
 			ctx.stroke();
@@ -93,8 +93,8 @@ module.exports = {
 			ctx.setLineDash([]);
 
 			// draw points
-			ctx.strokeStyle = '#5865F2';
-			ctx.fillStyle = '#5865F2';
+			ctx.strokeStyle = client.config.embedColor;
+			ctx.fillStyle = client.config.embedColor;
 			ctx.lineWidth = 3;
 
 
@@ -146,23 +146,13 @@ module.exports = {
 
 			const embed = new client.embed()
 				.setTitle('Level Roles: Stats')
-				.setDescription(`Level Roles was created ${timeActive} days ago. Since then, a total of ${messageCountsTotal.toLocaleString('en-US')} messages have been recorded in this server.`)
-				.addFields({name: 'Top Users by Messages Sent', value: Object.entries(client.userLevels._content).sort((a, b) => b[1] - a[1]).slice(0, 5).map((x, i) => `\`${i + 1}.\` <@${x[0]}>: ${x[1].toLocaleString('en-US')}`).join('\n') + `\n\Messages per day in ${client.guilds.cache.get(client.config.mainServer.id).name}:`})
+				.setDescription(`Level Roles was reset **${timeActive}** days ago. Since then, a total of **${messageCountsTotal.toLocaleString('en-US')}** messages have been recorded in this server.`)
+				.addFields({name: 'Top Users by Messages Sent', value: Object.entries(client.userLevels._content).sort((a, b) => b[1] - a[1]).slice(0, 10).map((x, i) => `\`${i + 1}.\` <@${x[0]}>: ${x[1].toLocaleString('en-US')}`).join('\n') + `\n\Messages per day in ${client.guilds.cache.get(client.config.mainServer.id).name}:`})
 				.setImage('attachment://dailymsgs.png')
 				.setColor(client.config.embedColor)
 			const yeahok = new d.MessageAttachment(img.toBuffer(), "dailymsgs.png")
 			interaction.reply({embeds: [embed], files: [yeahok], allowedMentions: { repliedUser: false }});
 			return;
-		} else if (subCmd ==='perks') {
-
-			const embed = new client.embed()
-				.setTitle('Level Roles: Perks')
-				.setDescription(`<@&${client.config.mainServer.roles.levels.three.id}> - Use External Sticker permissions\n<@&${client.config.mainServer.roles.levels.five.id}> - Permission to create public & private threads\n<@&${client.config.mainServer.roles.levels.seven.id}> - Use bot commands anywhere\n<@&${client.config.mainServer.roles.levels.nine.id}> - See all channels in <#931762419171201024>\n<@&${client.config.mainServer.roles.levels.ten.id}> - Hoisted\n<@&${client.config.mainServer.roles.levels.eleven.id}> - Hoisted\n<@&${client.config.mainServer.roles.levels.twelve.id}> - Hoisted\n<@&${client.config.mainServer.roles.levels.thirteen.id}> - Hoisted\n<@&${client.config.mainServer.roles.levels.fourteen.id}> - Hoisted\n<@&${client.config.mainServer.roles.levels.fifteen.id}> - Hoisted`)
-				.setFooter({text: 'If a level role is not listed here, that means it comes with no perks.'})
-				.setColor(client.config.embedColor)
-			interaction.reply({embeds: [embed], allowedMentions: { repliedUser: false }});
-			return;
-
 		} else if (subCmd === "nerd_stats") {
 			
 			// amount of users in messageCounts
@@ -323,30 +313,27 @@ module.exports = {
 				}
 			})(index);
 			
-			embed0.setFooter({text: `You're ${index ? index + suffix : 'last'} in a descending list of all users, ordered by their Level Roles interaction count.`});
+			embed0.setFooter({text: `You're ${index ? index + suffix : 'last'} in a descending list of all users, ordered by their Level Roles message count.`});
 		}
 	
 		embed0.setDescription(messageContents.join('\n\n'))
-		interaction.reply({embeds: [embed0], allowedMentions: { repliedUser: false }}); // compile interaction and send
+		interaction.reply({embeds: [embed0]}); // compile interaction and send
 	 }
 	},
 	data: new SlashCommandBuilder()
 	.setName("rank")
 	.setDescription("View your, another user, or stats about ranking")
 	.addSubcommand((optt)=>optt
-	.setName("view")
-	.setDescription("View your or another user's ranking information")
-	.addUserOption((opt)=>opt
-	.setName("member")
-	.setDescription("Views a members ranking statistics.")
-	.setRequired(false)))
+		.setName("view")
+		.setDescription("View your or another user's ranking information")
+		.addUserOption((opt)=>opt
+			.setName("member")
+			.setDescription("Views a members ranking statistics.")
+			.setRequired(false)))
 	.addSubcommand((optt)=>optt
-	.setName("stats")
-	.setDescription("Views ranking statistics."))
+		.setName("stats")
+		.setDescription("Views ranking statistics."))
 	.addSubcommand((optt)=>optt
-	.setName("perks")
-	.setDescription("Views ranking perks."))
-	.addSubcommand((optt)=>optt
-	.setName("nerd_stats").setDescription("Views more formal statistics."))
-
+		.setName("nerd_stats")
+		.setDescription("Views more formal statistics."))
 };

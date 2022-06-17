@@ -19,7 +19,7 @@ client.on("ready", async () => {
 		})
 	});
 	setInterval(async () => {
-		await client.user.setPresence({status: 'invisible' });
+		await client.user.setPresence({activities: [{name: '#mf-hiring-board', type: 'WATCHING'}], status: 'idle'});
 	}, 60000);
 	console.log("\x1b[36m", `Bot active as ${client.user.tag}.`);
 

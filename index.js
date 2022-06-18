@@ -23,6 +23,7 @@ client.on("ready", async () => {
 	}, 60000);
 	console.log("\x1b[36m", `Bot active as ${client.user.tag}.`);
 
+	// Farming Simulator 22 stats loops
 	setInterval(async () => {
 		client.FSstatsLoop(client, client.tokens.ps, '891791005098053682', '980240981922291752')
 		client.FSstatsLoop(client, client.tokens.pg, '729823615096324166', '980241004718329856')
@@ -33,6 +34,16 @@ client.on("ready", async () => {
 		client.FSwatchList(client, client.tokens.ps)
 		client.FSwatchList(client, client.tokens.pg)
 	}, 300000)
+
+	setInterval(async () => {
+		client.FSjoinLog(client, client.tokens.ps)
+		client.FSjoinLog(client, client.tokens.pg)
+		client.FSjoinLog(client, client.tokens.mf)
+
+		client.FSleaveLog(client, client.tokens.ps)
+		client.FSleaveLog(client, client.tokens.pg)
+		client.FSleaveLog(client, client.tokens.mf)
+	}, 60000)
 
 	const eventFiles = fs.readdirSync('./events').filter(file => file.endsWith('.js'));
     eventFiles.forEach((file)=>{

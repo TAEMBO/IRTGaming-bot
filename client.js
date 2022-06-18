@@ -176,6 +176,84 @@ class YClient extends Client {
             }
             })
     }
+    async FSjoinLog (client, serverName) {
+        const axios = require("axios");
+        const oldData = [];
+        const newData = [];
+        let oldServerData;
+        let newServerData;
+
+        try {
+            oldServerData = await axios.get(serverName, {timeout: 5000});
+        } catch (err) {
+            return console.log(err);
+        }
+        await oldServerData.data.slots.players.forEach(player => {
+            if (player.name === undefined) return;
+            oldData.push(player.name);
+            })
+            console.log(`old ${JSON.stringify(oldData)}`);
+
+        setTimeout( async () => {
+
+            try {
+                newServerData = await axios.get(serverName, {timeout: 5000});
+            } catch (err) {
+                return console.log(err);
+            }
+            await newServerData.data.slots.players.forEach(player => {
+                if (player.name === undefined) return;
+                newData.push(player.name);
+                })
+                console.log(`new ${JSON.stringify(newData)}`);
+
+                const missingElements = newData.filter(element => !oldData.includes(element));
+                for (const missingElement of missingElements) {
+                // missingElement was present in arr1 but not in arr2
+                client.channels.resolve(client.config.mainServer.channels.fslogs).send({embeds: [new client.embed().setTitle(`${missingElement} joined ${newServerData.data.server.name}`).setColor(client.config.embedColorGreen)]})
+                }
+            
+        }, 55000);
+    }
+    async FSleaveLog (client, serverName) {
+        const axios = require("axios");
+        const oldData = [];
+        const newData = [];
+        let oldServerData;
+        let newServerData;
+
+        try {
+            oldServerData = await axios.get(serverName, {timeout: 5000});
+        } catch (err) {
+            return console.log(err);
+        }
+        await oldServerData.data.slots.players.forEach(player => {
+            if (player.name === undefined) return;
+            oldData.push(player.name);
+            })
+            console.log(`old ${JSON.stringify(oldData)}`);
+
+        setTimeout( async () => {
+
+            try {
+                newServerData = await axios.get(serverName, {timeout: 5000});
+            } catch (err) {
+                return console.log(err);
+            }
+            await newServerData.data.slots.players.forEach(player => {
+                if (player.name === undefined) return;
+                newData.push(player.name);
+                })
+                console.log(`new ${JSON.stringify(newData)}`);
+
+                const missingElements = oldData.filter(element => !newData.includes(element));
+                for (const missingElement of missingElements) {
+                // missingElement was present in arr2 but not in arr1
+                client.channels.resolve(client.config.mainServer.channels.fslogs).send({embeds: [new client.embed().setTitle(`${missingElement} left ${newServerData.data.server.name}`).setColor(client.config.embedColorRed)]})
+                }
+            
+        }, 55000);
+    }
     removeCustomValue(array, value){
         for(let i = 0; i < array.length; i++){
             if(array[i].includes(value)){

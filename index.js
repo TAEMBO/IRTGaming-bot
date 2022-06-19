@@ -31,11 +31,6 @@ client.on("ready", async () => {
 	}, 15000);
 
 	setInterval(async () => {
-		client.FSwatchList(client, client.tokens.ps)
-		client.FSwatchList(client, client.tokens.pg)
-	}, 300000)
-
-	setInterval(async () => {
 		client.FSjoinLog(client, client.tokens.ps)
 		client.FSjoinLog(client, client.tokens.pg)
 		client.FSjoinLog(client, client.tokens.mf)

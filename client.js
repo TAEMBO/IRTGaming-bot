@@ -160,22 +160,6 @@ class YClient extends Client {
             )
         }
     }
-    async FSwatchList (client, serverName) {
-            const axios = require("axios");
-            let FSserver;
-
-            try {
-                FSserver = await axios.get(serverName, {timeout: 2000});
-            } catch (err) {
-                return console.log(err);
-            }
-            await FSserver.data.slots.players.forEach(player => {
-            if (player.name === undefined) return;
-            if (client.watchList._content.includes(player.name)) {
-                client.channels.resolve(client.config.mainServer.channels.playercheck).send(`**WATCHLIST**: \`${player.name}\` | \`${FSserver.data.server.name}\` | <t:${Math.round(new Date() / 1000)}>`)
-            }
-            })
-    }
     async FSjoinLog (client, serverName) {
         const axios = require("axios");
         const oldData = [];
@@ -209,8 +193,11 @@ class YClient extends Client {
 
                 const missingElements = newData.filter(element => !oldData.includes(element));
                 for (const missingElement of missingElements) {
+                    if (client.watchList._content.includes(missingElement)) {
+                        client.channels.resolve(client.config.mainServer.channels.watchlist).send(`**WATCHLIST**: \`${missingElement}\` joined __${newServerData.data.server.name}__ at <t:${Math.round(new Date() / 1000)}>`)
+                    }
                 // missingElement was present in arr1 but not in arr2
-                client.channels.resolve(client.config.mainServer.channels.fslogs).send({embeds: [new client.embed().setTitle(`${missingElement} joined ${newServerData.data.server.name}`).setColor(client.config.embedColorGreen)]})
+                client.channels.resolve(client.config.mainServer.channels.fslogs).send({embeds: [new client.embed().setDescription(`\`${missingElement}\` joined __${newServerData.data.server.name}__ at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorGreen)]})
                 }
             
         }, 55000);
@@ -231,7 +218,6 @@ class YClient extends Client {
             if (player.name === undefined) return;
             oldData.push(player.name);
             })
-            console.log(`old ${JSON.stringify(oldData)}`);
 
         setTimeout( async () => {
 
@@ -244,12 +230,14 @@ class YClient extends Client {
                 if (player.name === undefined) return;
                 newData.push(player.name);
                 })
-                console.log(`new ${JSON.stringify(newData)}`);
 
                 const missingElements = oldData.filter(element => !newData.includes(element));
                 for (const missingElement of missingElements) {
+                    if (client.watchList._content.includes(missingElement)) {
+                        client.channels.resolve(client.config.mainServer.channels.watchlist).send(`**WATCHLIST**: \`${missingElement}\` left __${newServerData.data.server.name}__ at <t:${Math.round(new Date() / 1000)}>`)
+                    }
                 // missingElement was present in arr2 but not in arr1
-                client.channels.resolve(client.config.mainServer.channels.fslogs).send({embeds: [new client.embed().setTitle(`${missingElement} left ${newServerData.data.server.name}`).setColor(client.config.embedColorRed)]})
+                client.channels.resolve(client.config.mainServer.channels.fslogs).send({embeds: [new client.embed().setDescription(`\`${missingElement}\` left ${newServerData.data.server.name} at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})
                 }
             
         }, 55000);

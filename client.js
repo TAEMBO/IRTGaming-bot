@@ -176,7 +176,6 @@ class YClient extends Client {
             if (player.name === undefined) return;
             oldData.push(player.name);
             })
-            console.log(`old ${JSON.stringify(oldData)}`);
 
         setTimeout( async () => {
 
@@ -189,7 +188,6 @@ class YClient extends Client {
                 if (player.name === undefined) return;
                 newData.push(player.name);
                 })
-                console.log(`new ${JSON.stringify(newData)}`);
 
                 const missingElements = newData.filter(element => !oldData.includes(element));
                 for (const missingElement of missingElements) {

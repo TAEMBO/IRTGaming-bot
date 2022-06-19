@@ -31,10 +31,10 @@ module.exports = {
 			const maxValueArr = maxValue.toString().split('');
 
 			const first_graph_top = Math.ceil(parseInt(maxValue) * 10 ** (-maxValueArr.length + 1)) * 10 ** (maxValueArr.length - 1);
-			// console.log({ first_graph_top });
+			console.log({ first_graph_top });
 
 			const second_graph_top = Math.ceil(parseInt(maxValue) * 10 ** (-maxValueArr.length + 2)) * 10 ** (maxValueArr.length - 2);
-			// console.log({ second_graph_top });
+			console.log({ second_graph_top });
 
 			const textSize = 32;
 

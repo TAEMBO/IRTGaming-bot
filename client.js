@@ -237,7 +237,7 @@ class YClient extends Client {
                         client.channels.resolve(client.config.mainServer.channels.watchlist).send(`**WATCHLIST**: \`${missingElement}\` left __${newServerData.data.server.name}__ at <t:${Math.round(new Date() / 1000)}>`)
                     }
                 // missingElement was present in arr2 but not in arr1
-                client.channels.resolve(client.config.mainServer.channels.fslogs).send({embeds: [new client.embed().setDescription(`\`${missingElement}\` left ${newServerData.data.server.name} at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})
+                client.channels.resolve(client.config.mainServer.channels.fslogs).send({embeds: [new client.embed().setDescription(`\`${missingElement}\` left __${newServerData.data.server.name}__ at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})
                 }
             
         }, 55000);

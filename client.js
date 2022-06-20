@@ -200,45 +200,54 @@ class YClient extends Client {
             
         }, 55000);
     }
-    async FSleaveLog (client, serverName) {
+    async FSJoinLeaveLog (client, serverName) {
         const axios = require("axios");
-        const oldData = [];
-        const newData = [];
+        const oldData = []; // Array for player names of first fetch
+        const newData = []; // Array for player names of second fetch
         let oldServerData;
         let newServerData;
 
         try {
-            oldServerData = await axios.get(serverName, {timeout: 5000});
+            oldServerData = await axios.get(serverName, {timeout: 5000}); // Fetch dedicated-server-stats.json
         } catch (err) {
-            return console.log(err);
+            return console.log(err); // Blame Red
         }
         await oldServerData.data.slots.players.forEach(player => {
             if (player.name === undefined) return;
-            oldData.push(player.name);
+            oldData.push(player.name); // Add player name to first array
             })
 
-        setTimeout( async () => {
+        setTimeout( async () => { // Fetch second time 5 seconds before it loops
 
             try {
-                newServerData = await axios.get(serverName, {timeout: 5000});
+                newServerData = await axios.get(serverName, {timeout: 5000}); // Fetch dedicated-server-stats.json
             } catch (err) {
-                return console.log(err);
+                return console.log(err); // Blame Red
             }
             await newServerData.data.slots.players.forEach(player => {
                 if (player.name === undefined) return;
-                newData.push(player.name);
+                newData.push(player.name); // Add player name to second array
                 })
 
-                const missingElements = oldData.filter(element => !newData.includes(element));
-                for (const missingElement of missingElements) {
-                    if (client.watchList._content.includes(missingElement)) {
-                        client.channels.resolve(client.config.mainServer.channels.watchlist).send(`**WATCHLIST**: \`${missingElement}\` left __${newServerData.data.server.name}__ at <t:${Math.round(new Date() / 1000)}>`)
-                    }
-                // missingElement was present in arr2 but not in arr1
-                client.channels.resolve(client.config.mainServer.channels.fslogs).send({embeds: [new client.embed().setDescription(`\`${missingElement}\` left __${newServerData.data.server.name}__ at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})
-                }
+            const missingElementsLeave = oldData.filter(element => !newData.includes(element)); // Filter names that were in the first fetch but not the second. Thanks to LebSter#0617 for this on The Coding Den Discord server
+            for (const missingElement of missingElementsLeave) {
+                if (client.watchList._content.includes(missingElement)) {
+                    client.channels.resolve(client.config.mainServer.channels.watchlist).send({embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${missingElement}\` left __${newServerData.data.server.name}__ at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorGreen)]})
+                } // Hopefully that person got banned
+            // missingElement was present in arr1 but not in arr2
+            client.channels.resolve(client.config.mainServer.channels.fslogs).send({embeds: [new client.embed().setDescription(`\`${missingElement}\` left __${newServerData.data.server.name}__ at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})
+            } // Player left the server, hurry up and join
+	    
+	    const missingElementsJoin = newData.filter(element => !oldData.includes(element)); // Filter names that were in the second fetch but not the first. Thanks to LebSter#0617 for this on The Coding Den Discord server
+            for (const missingElement of missingElementsJoin) {
+                if (client.watchList._content.includes(missingElement)) {
+                    client.channels.resolve(client.config.mainServer.channels.watchlist).send({embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${missingElement}\` joined __${newServerData.data.server.name}__ at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})
+                } // Oh no, go get em Toast
+            // missingElement was present in arr2 but not in arr1
+            client.channels.resolve(client.config.mainServer.channels.fslogs).send({embeds: [new client.embed().setDescription(`\`${missingElement}\` joined __${newServerData.data.server.name}__ at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorGreen)]})
+            } // Player joined the server, they beat you to it
             
-        }, 55000);
+        }, 55000); 
     }
     removeCustomValue(array, value){
         for(let i = 0; i < array.length; i++){

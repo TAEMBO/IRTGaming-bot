@@ -31,13 +31,9 @@ client.on("ready", async () => {
 	}, 15000);
 
 	setInterval(async () => {
-		client.FSjoinLog(client, client.tokens.ps)
-		client.FSjoinLog(client, client.tokens.pg)
-		client.FSjoinLog(client, client.tokens.mf)
-
-		client.FSleaveLog(client, client.tokens.ps)
-		client.FSleaveLog(client, client.tokens.pg)
-		client.FSleaveLog(client, client.tokens.mf)
+		client.FSJoinLeaveLog(client, client.tokens.ps)
+		client.FSJoinLeaveLog(client, client.tokens.pg)
+		client.FSJoinLeaveLog(client, client.tokens.mf)
 	}, 60000)
 
 	const eventFiles = fs.readdirSync('./events').filter(file => file.endsWith('.js'));

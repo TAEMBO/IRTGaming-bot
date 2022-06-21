@@ -26,6 +26,8 @@ module.exports = {
             Role = client.config.mainServer.roles.mffarm8;
         } else if (options === '9') {
             Role = client.config.mainServer.roles.mffarm9;
+        } else if (options === '10') {
+            Role = client.config.mainServer.roles.mffarm10;
         }
         if(member.roles.cache.has(Role)){
             if (interaction.member.roles.cache.has(client.config.mainServer.roles.mffarmowner) && !interaction.member.roles.cache.has(client.config.mainServer.roles.mfmanager) && !interaction.member.roles.cache.has(Role)) return interaction.reply('You cannot remove users from a farm you do not own.')
@@ -68,6 +70,7 @@ module.exports = {
             {name: 'Farm 7', value: '7'},
             {name: 'Farm 8', value: '8'},
             {name: 'Farm 9', value: '9'},
+            {name: 'Farm 10', value: '10'}
         )
         .setRequired(true))
 };

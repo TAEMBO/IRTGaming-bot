@@ -1,8 +1,8 @@
 {
-	"embedColor": 427530,
-	"embedColorGreen": 5763719,
-	"embedColorRed": 15548997,
-	"embedColorYellow": 16705372,
+	"embedColor": "#06860a",
+	"embedColorGreen": "#57f287",
+	"embedColorRed": "#ed4245",
+	"embedColorYellow": "#fee75c",
 	"botSwitches": {
 		"fpb": true,
 		"commands": true,

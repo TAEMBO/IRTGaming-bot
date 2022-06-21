@@ -46,10 +46,10 @@ async function FSstats(client, interaction, serverName, DBName) {
     const maxValueArr = maxValue.toString().split('');
     
     const first_graph_top = 16;
-    console.log({ first_graph_top });
+    // console.log({ first_graph_top });
     
     const second_graph_top = 16;
-    console.log({ second_graph_top });
+    // console.log({ second_graph_top });
 
     const textSize = 32;
 
@@ -76,9 +76,9 @@ async function FSstats(client, interaction, serverName, DBName) {
             interval_candidates.push([interval, i, reference_number]);
         }
     }
-    console.log({ interval_candidates });
+    // console.log({ interval_candidates });
     const chosen_interval = interval_candidates.sort((a, b) => b[2] - a[2])[0];
-    console.log({ chosen_interval });
+    // console.log({ chosen_interval });
 
     let previousY;
 

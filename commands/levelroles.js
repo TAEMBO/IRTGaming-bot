@@ -15,7 +15,7 @@ module.exports = {
 		if (subCmd === "stats") {
 
         // days since May 28, 2022 when userlevels was created
-            const timeActive = Math.floor((Date.now() - 1653776820000) / 1000 / 60 / 60 / 24);
+            const timeActive = Math.floor((Date.now() - 1655929009244) / 1000 / 60 / 60 / 24);
 			
 			const data = dailyMsgs.map((x, i, a) => {
 				const yesterday = a[i - 1] || [];

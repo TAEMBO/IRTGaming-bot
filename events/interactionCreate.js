@@ -33,21 +33,16 @@ module.exports = {
                         const path = require("path");
                         const name = `${interaction.user.id}: ${interaction.message.id}`;
                         let arr = require('../databases/suggestvotes.json');
-                        console.log(`1 ${JSON.stringify(arr)}`)
             
                         arr = client.removeCustomValue(arr, name)
-                        console.log(`2 ${JSON.stringify(arr)}`)
                         fs.writeFileSync(path.resolve('./databases/suggestvotes.json'), JSON.stringify(arr))
                         client.votes._content = require("../databases/suggestvotes.json");
-                        console.log(`3 ${JSON.stringify(arr)}`)
                         const ee = parseInt(interaction.component.label) - 1;
                         if (interaction.customId === "suggestion-upvote") {
                             await UpdateButton(ee, downvotes, interaction.message, interaction.user.id)
                         } else if (interaction.customId === "suggestion-decline") {
                             await UpdateButton(upvotes, ee, interaction.message, interaction.user.id)
                         }
-                        console.log(`Successfully removed "${name}"`)
-                        console.log(`4 ${JSON.stringify(arr)}`)
                         int.update({embeds: [new client.embed().setDescription(`Vote removed!`).setColor(client.config.embedColor)], components: []})
                     } else if(int.customId === "No"){
                         int.update({embeds: [new client.embed().setDescription(`Command canceled!`).setColor(client.config.embedColor)], components: []});

@@ -24,9 +24,38 @@ module.exports = {
                 })
             })
             if(hasVoted){
-                interaction.reply({embeds: [new MessageEmbed().setDescription("You've already voted!").setColor(client.config.embedColorRed).setAuthor({name: interaction.user.tag, iconURL: interaction.user.displayAvatarURL({})})], ephemeral: true})
+                const msg = await interaction.reply({embeds: [new client.embed().setDescription(`You've already voted on this suggestion! Do you want to remove your vote?`).setColor(client.config.embedColor)], fetchReply: true, ephemeral: true, components: [new MessageActionRow().addComponents(new MessageButton().setCustomId(`Yes`).setStyle("SUCCESS").setLabel("Confirm"), new MessageButton().setCustomId(`No`).setStyle("DANGER").setLabel("Cancel"))]});
+                const filter = (i) => ["Yes", "No"].includes(i.customId) && i.user.id === interaction.user.id;
+                const collector = interaction.channel.createMessageComponentCollector({filter, max: 1, time: 30000});
+                collector.on("collect", async (int) => {
+                    if(int.customId === "Yes"){
+                        const fs = require('node:fs');
+                        const path = require("path");
+                        const name = `${interaction.user.id}: ${interaction.message.id}`;
+                        let arr = require('../databases/suggestvotes.json');
+                        console.log(`1 ${JSON.stringify(arr)}`)
+            
+                        arr = client.removeCustomValue(arr, name)
+                        console.log(`2 ${JSON.stringify(arr)}`)
+                        fs.writeFileSync(path.resolve('./databases/suggestvotes.json'), JSON.stringify(arr))
+                        client.votes._content = require("../databases/suggestvotes.json");
+                        console.log(`3 ${JSON.stringify(arr)}`)
+                        const ee = parseInt(interaction.component.label) - 1;
+                        if (interaction.customId === "suggestion-upvote") {
+                            await UpdateButton(ee, downvotes, interaction.message, interaction.user.id)
+                        } else if (interaction.customId === "suggestion-decline") {
+                            await UpdateButton(upvotes, ee, interaction.message, interaction.user.id)
+                        }
+                        console.log(`Successfully removed "${name}"`)
+                        console.log(`4 ${JSON.stringify(arr)}`)
+                        int.update({embeds: [new client.embed().setDescription(`Vote removed!`).setColor(client.config.embedColor)], components: []})
+                    } else if(int.customId === "No"){
+                        int.update({embeds: [new client.embed().setDescription(`Command canceled!`).setColor(client.config.embedColor)], components: []});
+                    }
+                });
             } else if(interaction.message.embeds[0].author.name === `${interaction.member.displayName} (${interaction.user.id})`){
-                interaction.reply({embeds: [new MessageEmbed().setDescription("You can't vote on your own suggestion!").setColor(client.config.embedColorRed).setAuthor({name: interaction.user.tag, iconURL: interaction.user.displayAvatarURL({})})], ephemeral: true})        } else if(interaction.customId === "suggestion-decline"){
+                interaction.reply({embeds: [new MessageEmbed().setDescription("You can't vote on your own suggestion!").setColor(client.config.embedColorRed).setAuthor({name: interaction.user.tag, iconURL: interaction.user.displayAvatarURL({})})], ephemeral: true})        
+            } else if(interaction.customId === "suggestion-decline"){
                 const ee = parseInt(interaction.component.label) + 1;
                 await UpdateButtons(upvotes, ee, interaction.message, interaction.user.id)
                 interaction.reply({embeds: [new MessageEmbed().setDescription("❌ Downvote recorded!").setColor(client.config.embedColorRed).setAuthor({name: interaction.user.tag, iconURL: interaction.user.displayAvatarURL({})})], ephemeral: true})
@@ -34,6 +63,10 @@ module.exports = {
                 const ee = parseInt(interaction.component.label) + 1;
                 await UpdateButtons(ee, downvotes, interaction.message, interaction.user.id)
                 interaction.reply({embeds: [new MessageEmbed().setDescription("✅ Upvote recorded!").setColor(client.config.embedColorGreen).setAuthor({name: interaction.user.tag, iconURL: interaction.user.displayAvatarURL({})})], ephemeral: true})
+            }
+
+            async function UpdateButton(upvotes, downvotes = Number, message, user){
+                message.edit({embeds: [message.embeds[0]], components: [new MessageActionRow().addComponents(new MessageButton().setStyle("SUCCESS").setEmoji("✅").setCustomId("suggestion-upvote").setLabel(`${upvotes}`), new MessageButton().setStyle("DANGER").setEmoji("❌").setCustomId("suggestion-decline").setLabel(`${downvotes}`))]});
             }
     
             async function UpdateButtons(upvotes, downvotes = Number, message, user){

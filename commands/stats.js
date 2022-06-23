@@ -115,6 +115,7 @@ async function FSstats(client, interaction, serverName, DBName) {
         return ((1 - (value / second_graph_top)) * graphSize[1]) + graphOrigin[1];
     }
     let lastCoords = [];
+    let gColor = client.config.embedColorGreen;
     data.forEach((val, i) => {
         ctx.beginPath();
         if (lastCoords.length > 0) ctx.moveTo(...lastCoords);
@@ -124,8 +125,13 @@ async function FSstats(client, interaction, serverName, DBName) {
         ctx.lineTo(x, y);
         lastCoords = [x, y];
         ctx.stroke();
-        ctx.strokeStyle = Color;
-        ctx.fillStyle = Color;
+        if (y === first_graph_top) {
+            gColor = client.config.embedColorRed;
+        } else if (y > 9) {
+            gColor = client.config.embedColorYellow;
+        }
+        ctx.strokeStyle = gColor;
+        ctx.fillStyle = gColor;
         ctx.closePath();
     
         // ball

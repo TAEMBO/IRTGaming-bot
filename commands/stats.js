@@ -139,10 +139,10 @@ async function FSstats(client, interaction, serverName, DBName) {
         ctx.closePath();
         console.log(`VAL: ${val}, NEXT: ${nextCoord} LAST: ${lastCoord}`)
         
-        if (val === lastCoord === nextCoord) {
+        if (val === lastCoord && val === nextCoord) {
             return;
         } else {
-            console.log(val === lastCoord === nextCoord)
+            console.log(val === lastCoord && val === nextCoord)
             console.log(`NEXT: ${nextCoord} VAL: ${val} LAST: ${lastCoord}`)
             // ball
             ctx.beginPath();
@@ -165,10 +165,10 @@ async function FSstats(client, interaction, serverName, DBName) {
     // lowest value
     const lowx = graphOrigin[0] + graphSize[0] + textSize;
     const lowy = graphOrigin[1] + graphSize[1] + (textSize / 3);
-    ctx.fillText('0 players/min', lowx, lowy);
+    ctx.fillText('0 players', lowx, lowy);
     
     // 30d
-    ctx.fillText('30min ago', lastMonthStart, graphOrigin[1] - (textSize / 3));
+    ctx.fillText('30 min ago', lastMonthStart, graphOrigin[1] - (textSize / 3));
     
     // time ->
     const tx = graphOrigin[0] + (textSize / 2);

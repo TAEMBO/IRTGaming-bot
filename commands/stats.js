@@ -21,7 +21,7 @@ async function FSstats(client, interaction, serverName, DBName) {
     const embed = new client.embed()
     const playerInfo = [];
     let FSserver;
-    let Color;
+    let Color = client.config.embedColorGreen;
 
     try {
         FSserver = await axios.get(serverName, {timeout: 2000});
@@ -33,7 +33,7 @@ async function FSstats(client, interaction, serverName, DBName) {
         Color = client.config.embedColorRed;
     } else if (FSserver.data.slots.used > 9) {
         Color = client.config.embedColorYellow;
-    } else Color = client.config.embedColorGreen
+    }
 
     const data = require(`../databases/${DBName}.json`).slice(-60)
 
@@ -108,8 +108,6 @@ async function FSstats(client, interaction, serverName, DBName) {
     ctx.setLineDash([]);
 
     // draw points
-    ctx.strokeStyle = Color;
-    ctx.fillStyle = Color;
     ctx.lineWidth = 3;
 
 
@@ -126,6 +124,8 @@ async function FSstats(client, interaction, serverName, DBName) {
         ctx.lineTo(x, y);
         lastCoords = [x, y];
         ctx.stroke();
+        ctx.strokeStyle = Color;
+        ctx.fillStyle = Color;
         ctx.closePath();
     
         // ball

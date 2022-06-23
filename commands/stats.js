@@ -142,6 +142,8 @@ async function FSstats(client, interaction, serverName, DBName) {
         if (val === lastCoord === nextCoord) {
             return;
         } else {
+            console.log(val === lastCoord === nextCoord)
+            console.log(`NEXT: ${nextCoord} VAL: ${val} LAST: ${lastCoord}`)
             // ball
             ctx.beginPath();
             ctx.arc(x, y, ctx.lineWidth * 1.2, 0, 2 * Math.PI)

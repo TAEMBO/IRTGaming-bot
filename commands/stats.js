@@ -137,6 +137,7 @@ async function FSstats(client, interaction, serverName, DBName) {
         ctx.strokeStyle = colorAtPlayercount(val);
         ctx.fillStyle = colorAtPlayercount(val);
         ctx.closePath();
+        console.log(`VAL: ${val}, NEXT: ${nextCoord} LAST: ${lastCoord}`)
         
         if (val === lastCoord === nextCoord) {
             return;

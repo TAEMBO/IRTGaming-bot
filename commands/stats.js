@@ -114,33 +114,39 @@ async function FSstats(client, interaction, serverName, DBName) {
     function getYCoordinate(value) {
         return ((1 - (value / second_graph_top)) * graphSize[1]) + graphOrigin[1];
     }
+    
+    function colorAtPlayercount(playercount) {
+        if (playercount === first_graph_top) {
+            return client.config.embedColorRed;
+        } else if (playercount > 9) {
+            return client.config.embedColorYellow;
+        } else {return client.config.embedColorGreen;}
+    }
     let lastCoords = [];
-    let gColor;
     data.forEach((val, i) => {
         ctx.beginPath();
         if (lastCoords.length > 0) ctx.moveTo(...lastCoords);
         if (val < 0) val = 0;
         const x = i * nodeWidth + graphOrigin[0];
         const y = getYCoordinate(val);
+        const nextCoord = data[i+1];
+        const lastCoord = data[i-1]
         ctx.lineTo(x, y);
         lastCoords = [x, y];
         ctx.stroke();
-        if (val === first_graph_top) {
-            gColor = client.config.embedColorRed;
-        } else if (val > 9) {
-            gColor = client.config.embedColorYellow;
+        ctx.strokeStyle = colorAtPlayercount(val);
+        ctx.fillStyle = colorAtPlayercount(val);
+        ctx.closePath();
+        
+        if (val === lastCoord === nextCoord) {
+            return;
         } else {
-            gColor = client.config.embedColorGreen;
+            // ball
+            ctx.beginPath();
+            ctx.arc(x, y, ctx.lineWidth * 1.2, 0, 2 * Math.PI)
+            ctx.closePath();
+            ctx.fill();
         }
-        ctx.strokeStyle = gColor;
-        ctx.fillStyle = gColor;
-        ctx.closePath();
-    
-        // ball
-        ctx.beginPath();
-        ctx.arc(x, y, ctx.lineWidth * 1.2, 0, 2 * Math.PI)
-        ctx.closePath();
-        ctx.fill();
     
     });
 

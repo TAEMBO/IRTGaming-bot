@@ -125,9 +125,9 @@ async function FSstats(client, interaction, serverName, DBName) {
         ctx.lineTo(x, y);
         lastCoords = [x, y];
         ctx.stroke();
-        if (y === first_graph_top) {
+        if (val === first_graph_top) {
             gColor = client.config.embedColorRed;
-        } else if (y > 9) {
+        } else if (val > 9) {
             gColor = client.config.embedColorYellow;
         }
         ctx.strokeStyle = gColor;

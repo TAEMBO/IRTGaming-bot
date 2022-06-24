@@ -248,13 +248,14 @@ module.exports = {
 	if (message.content.toLowerCase().includes('giants moment')) {
 		message.react('™️');
 	}
-	
 	if (message.content.toLowerCase().includes('nebs')) {
 		message.react(':IRT_RooCry:780220030297571389')
 	}
-
 	if (message.content.toLowerCase().includes('sync sim')) {
 		message.react(':IRT_SyncSim22:929440249577365525')
+	}
+	if (message.content.toLowerCase().includes('smoker')) {
+		message.react('🚭')
 	}
 }
 }

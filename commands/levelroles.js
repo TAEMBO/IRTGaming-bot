@@ -1,5 +1,7 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
-const d = require("discord.js")
+const d = require("discord.js");
+const { MessageButton, MessageActionRow } = require("discord.js");
+
 module.exports = {
 	run: async (client, interaction) => {
 

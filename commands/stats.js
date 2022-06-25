@@ -137,13 +137,10 @@ async function FSstats(client, interaction, serverName, DBName) {
         ctx.strokeStyle = colorAtPlayercount(val);
         ctx.fillStyle = colorAtPlayercount(val);
         ctx.closePath();
-        console.log(`VAL: ${val}, NEXT: ${nextCoord} LAST: ${lastCoord}`)
         
         if (val === lastCoord && val === nextCoord) {
             return;
         } else {
-            console.log(val === lastCoord && val === nextCoord)
-            console.log(`NEXT: ${nextCoord} VAL: ${val} LAST: ${lastCoord}`)
             // ball
             ctx.beginPath();
             ctx.arc(x, y, ctx.lineWidth * 1.2, 0, 2 * Math.PI)

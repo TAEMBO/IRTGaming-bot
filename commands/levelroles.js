@@ -56,12 +56,22 @@ module.exports = {
 		interaction.reply({content: `**${eligiblity.messages.toLocaleString('en-US')}** messages\n**${Math.floor(eligiblity.age).toLocaleString('en-US')}d** time on server${ranking ? ranking : ''}`}); // compile message and send
 	 } else if (subCmd === 'reset') {
 		if (interaction.user.id !== interaction.guild.ownerId && !client.config.eval.whitelist.includes(interaction.user.id)) return interaction.reply('You\'re not allowed to use this command.');
-		const fs = require('fs');
-		const path = require('path');
-		fs.writeFileSync(path.resolve('./databases/userLevels.json'), '{}');
-		client.userLevels._content = require('../databases/userLevels.json');
-		console.log('wiped ul')
-		interaction.reply('Successfully reset LRS data.')
+
+		const msg = await interaction.reply({content: 'Are you sure you want to reset all LRS data?', fetchReply: true, components: [new MessageActionRow().addComponents(new MessageButton().setCustomId(`Yes`).setStyle("SUCCESS").setLabel("Confirm"), new MessageButton().setCustomId(`No`).setStyle("DANGER").setLabel("Cancel"))]});
+		const filter = (i) => ["Yes", "No"].includes(i.customId) && i.user.id === interaction.user.id;
+		const collector = interaction.channel.createMessageComponentCollector({filter, max: 1, time: 30000});
+		collector.on("collect", async (int) => {
+			if(int.customId === "Yes"){
+				const fs = require('fs');
+				const path = require('path');
+				fs.writeFileSync(path.resolve('./databases/userLevels.json'), '{}');
+				client.userLevels._content = require('../databases/userLevels.json');
+				console.log('wiped ul')
+				int.update({content: ':white_check_mark: LRS data reset.', components: []})
+			} else if(int.customId === "No"){
+				int.update({content: ':x: Command canceled.', components: []});
+			}
+		});
 	 }
 	},
 	data: new SlashCommandBuilder()

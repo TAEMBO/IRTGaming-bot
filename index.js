@@ -19,22 +19,9 @@ client.on("ready", async () => {
 		})
 	});
 	setInterval(async () => {
-		await client.user.setPresence({activities: [{name: '#mf-hiring-board', type: 'WATCHING'}], status: 'idle'});
+		await client.user.setPresence({activities: [{name: '#mf-hiring-board', type: 'WATCHING'}], status: 'dnd'});
 	}, 60000);
 	console.log("\x1b[36m", `Bot active as ${client.user.tag}.`);
-
-	// Farming Simulator 22 stats loops
-	setInterval(async () => {
-		client.FSstatsLoop(client, client.tokens.ps, '891791005098053682', '980240981922291752')
-		client.FSstatsLoop(client, client.tokens.pg, '729823615096324166', '980241004718329856')
-		client.FSstatsLoop(client, client.tokens.mf, '982143077554720768', '985586585707900928')
-	}, 15000);
-
-	setInterval(async () => {
-		client.FSJoinLeaveLog(client, client.tokens.ps)
-		client.FSJoinLeaveLog(client, client.tokens.pg)
-		client.FSJoinLeaveLog(client, client.tokens.mf)
-	}, 60000)
 
 	const eventFiles = fs.readdirSync('./events').filter(file => file.endsWith('.js'));
     eventFiles.forEach((file)=>{
@@ -42,6 +29,30 @@ client.on("ready", async () => {
 	client.on(event.name, async (...args) => event.execute(client, ...args));
   }); 
 });
+
+// punishment event loop
+setInterval(() => {
+	const now = Date.now();
+	const lrsStart = 1655929009244;
+	client.punishments._content.filter(x => x.endTime <= now && !x.expired).forEach(async punishment => {
+		console.log(`${punishment.member}"s ${punishment.type} should expire now`);
+		const unpunishResult = await client.punishments.removePunishment(punishment.id, client.user.id, "Time\'s up!");
+		console.log(unpunishResult);
+	});
+}, 5000);
+
+// Farming Simulator 22 stats loops
+setInterval(async () => {
+	client.FSstatsLoop(client, client.tokens.ps, '891791005098053682', '980240981922291752')
+	client.FSstatsLoop(client, client.tokens.pg, '729823615096324166', '980241004718329856')
+	client.FSstatsLoop(client, client.tokens.mf, '982143077554720768', '985586585707900928')
+}, 15000);
+
+setInterval(async () => {
+	client.FSJoinLeaveLog(client, client.tokens.ps)
+	client.FSJoinLeaveLog(client, client.tokens.pg)
+	client.FSJoinLeaveLog(client, client.tokens.mf)
+}, 60000)
 
 // userLevels
 Object.assign(client.userLevels, {
@@ -291,26 +302,4 @@ Object.assign(client.punishments, {
 		}
 	}
 });
-
-// event loop, for punishments and daily msgs
-setInterval(() => {
-	const now = Date.now();
-	const lrsStart = 1655929009244;
-	client.punishments._content.filter(x => x.endTime <= now && !x.expired).forEach(async punishment => {
-		console.log(`${punishment.member}"s ${punishment.type} should expire now`);
-		const unpunishResult = await client.punishments.removePunishment(punishment.id, client.user.id, "Time\'s up!");
-		console.log(unpunishResult);
-	});
-	const formattedDate = Math.floor((now - lrsStart) / 1000 / 60 / 60 / 24);
-	const dailyMsgs = require("./databases/dailyMsgs.json");
-	if (!dailyMsgs.some(x => x[0] === formattedDate)) {
-		let total = Object.values(client.userLevels._content).reduce((a, b) => a + b, 0); // sum of all users
-		const yesterday = dailyMsgs.find(x => x[0] === formattedDate - 1);
-		if (total < yesterday) { // messages went down
-			total = yesterday;
-		}
-		dailyMsgs.push([formattedDate, total]);
-		fs.writeFileSync(__dirname + "/databases/dailyMsgs.json", JSON.stringify(dailyMsgs));
-	}
-}, 5000);
 

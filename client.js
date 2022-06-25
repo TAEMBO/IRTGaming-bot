@@ -18,6 +18,7 @@ class YClient extends Client {
         this.messageCollector = Discord.MessageCollector;
         this.messageattachment = Discord.MessageAttachment;
         this.memberCount_LastGuildFetchTimestamp = 0;
+        this.games = new Discord.Collection();
         this.commands = new Discord.Collection();
         this.registery = [];
         this.setMaxListeners(100)

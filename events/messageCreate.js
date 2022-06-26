@@ -149,10 +149,20 @@ module.exports = {
 			}
 		}
 
-		const BLACKLISTED_CHANNELS = [
+		const WHITELISTED_CHANNELS = [
+			'552565546093248512', //general
+			'552609312560644112', //game-chat
+			'553345291839864832', //community-ideas
+			'743129368238489601', //consumables-chat
+			'732369157617614938', //tech-talk
+			'855577815491280958', //counting
+			'708446663051837500', //trivia
+			'891791005098053682', //fs22-silage
+			'729823615096324166', //fs22-grain
+			'982143077554720768', //mf-public-chat
 		];
-		// if message was not sent in a blacklisted channel and this is the right server, count towards user level
-		if (!BLACKLISTED_CHANNELS.includes(message.channel.id) && message.guild.id === client.config.mainServer.id){ 
+		// if message was not sent in a whitelisted channel and this is the right server, count towards user level
+		if (WHITELISTED_CHANNELS.includes(message.channel.id) && message.guild.id === client.config.mainServer.id){ 
 			client.userLevels.incrementUser(message.author.id);
 			const eligiblity = await client.userLevels.getEligible(message.member);			
 			let nextRoleKey;

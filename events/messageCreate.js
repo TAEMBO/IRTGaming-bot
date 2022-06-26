@@ -1,3 +1,5 @@
+const { MessageSelectMenu } = require('discord.js');
+
 module.exports = {
     name: "messageCreate",
     tracker: false,
@@ -266,6 +268,11 @@ module.exports = {
 	}
 	if (message.content.toLowerCase().includes('smoker')) {
 		message.react('🚭')
+	}
+	if (message.content.toLowerCase().includes('no') && message.author.id === '345371418151878657') {
+		const curry = await interaction.guild.members.fetch('345371418151878657');
+		message.delete()
+		curry.send('no saying no')
 	}
 }
 }

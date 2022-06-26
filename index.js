@@ -54,6 +54,49 @@ setInterval(async () => {
 	client.FSJoinLeaveLog(client, client.tokens.mf)
 }, 60000)
 
+// tic tac toe statistics database
+Object.assign(client.tictactoeDb, {
+	// global stats
+	getTotalGames() {
+		return this._content.length;
+	},
+	getRecentGames(amount) {
+		return this._content.sort((a, b) => b.startTime - a.startTime).slice(0, amount - 1);
+	},
+	getAllPlayers() {
+		const players = {};
+		this._content.forEach(game => {
+			game.players.forEach(player => {
+				if (!players[player]) players[player] = { wins: 0, losses: 0, draws: 0, total: 0 };
+				players[player].total++;
+				if (game.draw) return players[player].draws++;
+				if (player === game.winner) {
+					return players[player].wins++;
+				} else {
+					return players[player].losses++;
+				}
+			});
+		});
+		return players;
+	},
+	getBestPlayers(amount) {
+		return Object.entries(this.getAllPlayers()).filter(x => x[1].total >= 10).sort((a, b) => b[1].wins / b[1].total - a[1].wins / a[1].total).slice(0, amount - 1);
+	},
+	getMostActivePlayers(amount) {
+		return Object.entries(this.getAllPlayers()).sort((a, b) => b[1].total - a[1].total).slice(0, amount - 1);
+	},
+	// player stats
+	getPlayerGames(player) {
+		return this._content.filter(x => x.players.includes(player));
+	},
+	getPlayerRecentGames(player, amount) {
+		return this._content.filter(x => x.players.includes(player)).sort((a, b) => b.startTime - a.startTime).slice(0, amount - 1);
+	},
+	calcWinPercentage(player) {
+		return ((player.wins / player.total) * 100).toFixed(2) + "%";
+	}
+});
+
 // userLevels
 Object.assign(client.userLevels, {
 	_requirements: client.config.mainServer.roles.levels,

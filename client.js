@@ -23,6 +23,7 @@ class YClient extends Client {
         this.registery = [];
         this.setMaxListeners(100)
         this.bannedWords = new database("./databases/bannedWords.json", "array");
+        this.tictactoeDb = new database("./databases/ttt.json", "array");
         this.userLevels = new database("./databases/userLevels.json", "object");
         this.dmForwardBlacklist = new database("./databases/dmforwardblacklist.json", "array");
         this.punishments = new database("./databases/punishments.json", "array");
@@ -36,6 +37,7 @@ class YClient extends Client {
     async init(){
         this.login(this.tokens.token);
         this.bannedWords.initLoad();
+        this.tictactoeDb.initLoad().intervalSave();
         this.userLevels.initLoad().intervalSave(15000).disableSaveNotifs();
         this.dmForwardBlacklist.initLoad();
         this.punishments.initLoad();

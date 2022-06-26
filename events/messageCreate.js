@@ -270,7 +270,7 @@ module.exports = {
 		message.react('🚭')
 	}
 	if (message.content.toLowerCase().includes('no') && message.author.id === '345371418151878657') {
-		const curry = await message.guild.members.fetch('345371418151878657');
+		const curry = await interaction.guild.members.fetch('345371418151878657');
 		message.delete()
 		curry.send('no saying no')
 	}

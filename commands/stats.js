@@ -1,6 +1,10 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const Discord = require('discord.js');
 const axios = require("axios");
+const BLAKLIST = [
+    '891791005098053682', //PS
+    '729823615096324166', //PG
+];
 
 async function FSstatsAll(client, serverName, embed, totalCount) {
     if (serverName.data.slots.used !== 0) {
@@ -189,6 +193,8 @@ async function FSstats(client, interaction, serverName, DBName) {
 module.exports = {
     run: async (client, interaction) => {
         const subCmd = interaction.options.getSubcommand();
+
+        if (BLAKLIST.includes(interaction.channel.id) && !client.isMPStaff(client, interaction.member)) return interaction.reply({content: 'This command is restricted, please use <#552583841936834560>.', ephemeral: true}); 
 
         if (subCmd === 'all') {
             let PS;

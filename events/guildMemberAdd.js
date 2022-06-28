@@ -36,7 +36,7 @@ module.exports = {
             .setTitle(`Welcome to ${member.guild.name} ${member.user.tag}!`)
             .setColor(client.config.embedColor)
             .setThumbnail(member.user.avatarURL({ format: 'png', dynamic: true, size: 2048}) || member.user.defaultAvatarURL)
-            .setDescription(`Please familiarize yourself with our <#552590507352653827> and head over to <#666239346239602688> to gain access to more channels & receive notification about community news.`)
+            .setDescription(`Please familiarize yourself with our <#552590507352653827> and head over to <#922631314195243080> to gain access to more channels & receive notification about community news.`)
             .addFields({name: 'Useful channels', value: `Our Gameservers: <#739100711073218611>\nReport Players: <#825046442300145744>\nCome chat with us!: <#552565546093248512>`})
             .setFooter({text: `${index}${suffix} member`})
             wchannel.send({content: `<@${member.user.id}>`, embeds: [embed]})

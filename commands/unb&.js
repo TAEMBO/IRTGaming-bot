@@ -1,7 +1,7 @@
 const {SlashCommandBuilder} = require("@discordjs/builders");
 module.exports = {
     run: (client, interaction) => {        
-        const member = interaction.options.getUser("member");
+        const member = interaction.options.getUser("user");
         interaction.reply({content: "ok", ephemeral: true})
         if(!member){
             return interaction.channel.send({content: `Your honorary ban has been revoked!`});

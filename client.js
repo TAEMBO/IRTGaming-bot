@@ -178,7 +178,7 @@ class YClient extends Client {
                     client.channels.resolve(client.config.mainServer.channels.watchlist).send({embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${missingElement}\` left __${newServerData.data.server.name}__ at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorGreen)]})
                 } // Hopefully that person got banned
             // missingElement was present in arr1 but not in arr2
-            client.channels.resolve(client.config.mainServer.channels.fslogs).send({embeds: [new client.embed().setDescription(`\`${missingElement}\` left __${newServerData.data.server.name}__ at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})
+            client.channels.resolve(client.config.mainServer.channels.fslogs).send({embeds: [new client.embed().setDescription(`\`${missingElement}\` ${(client.FMstaff._content.includes(missingElement) ? ':farmer:' : '')}${(client.TFstaff._content.includes(missingElement) ? ':angel:' : '')} left __${newServerData.data.server.name}__ at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})
             } // Player left the server, hurry up and join
 	    
 	    const missingElementsJoin = newData.filter(element => !oldData.includes(element)); // Filter names that were in the second fetch but not the first. Thanks to LebSter#0617 for this on The Coding Den Discord server
@@ -187,7 +187,7 @@ class YClient extends Client {
                     client.channels.resolve(client.config.mainServer.channels.watchlist).send({embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${missingElement}\` joined __${newServerData.data.server.name}__ at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})
                 } // Oh no, go get em Toast
             // missingElement was present in arr2 but not in arr1
-            client.channels.resolve(client.config.mainServer.channels.fslogs).send({embeds: [new client.embed().setDescription(`\`${missingElement}\` joined __${newServerData.data.server.name}__ at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorGreen)]})
+            client.channels.resolve(client.config.mainServer.channels.fslogs).send({embeds: [new client.embed().setDescription(`\`${missingElement}\` ${(client.FMstaff._content.includes(missingElement) ? ':farmer:' : '')}${(client.TFstaff._content.includes(missingElement) ? ':angel:' : '')} joined __${newServerData.data.server.name}__ at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorGreen)]})
             } // Player joined the server, they beat you to it
             
         }, 55000); 

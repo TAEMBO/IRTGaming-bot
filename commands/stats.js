@@ -39,7 +39,7 @@ async function FSstats(client, interaction, serverName, DBName) {
         Color = client.config.embedColorYellow;
     }
 
-    const data = require(`../databases/${DBName}.json`).slice(-60)
+    const data = require(`../databases/${DBName}.json`).slice(-120)
 
     // handle negative days
     data.forEach((change, i) => {
@@ -104,7 +104,7 @@ async function FSstats(client, interaction, serverName, DBName) {
     // 30d mark
     ctx.setLineDash([8, 16]);
     ctx.beginPath();
-    const lastMonthStart = graphOrigin[0] + (nodeWidth * (data.length - 30));
+    const lastMonthStart = graphOrigin[0] + (nodeWidth * (data.length - 60));
     ctx.lineTo(lastMonthStart, graphOrigin[1]);
     ctx.lineTo(lastMonthStart, graphOrigin[1] + graphSize[1]);
     ctx.stroke();

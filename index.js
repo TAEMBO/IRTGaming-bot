@@ -49,10 +49,10 @@ setInterval(async () => {
 }, 15000);
 
 setInterval(async () => {
-	client.FSJoinLeaveLog(client, client.tokens.ps)
-	client.FSJoinLeaveLog(client, client.tokens.pg)
-	client.FSJoinLeaveLog(client, client.tokens.mf)
-}, 60000)
+	client.FSLeaveJoinLog(client, client.tokens.ps)
+	client.FSLeaveJoinLog(client, client.tokens.pg)
+	client.FSLeaveJoinLog(client, client.tokens.mf)
+}, 30000)
 
 // tic tac toe statistics database
 Object.assign(client.tictactoeDb, {

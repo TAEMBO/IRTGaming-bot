@@ -194,7 +194,7 @@ module.exports = {
     run: async (client, interaction) => {
         const subCmd = interaction.options.getSubcommand();
 
-        if (BLAKLIST.includes(interaction.channel.id) && !client.isMPStaff(client, interaction.member)) return interaction.reply({content: 'This command has restrictions set, please try again in the <#552583841936834560> channel.', ephemeral: true}); 
+        if (BLAKLIST.includes(interaction.channel.id) && !client.isMPStaff(client, interaction.member)) return interaction.reply({content: 'This command has [restrictions](https://discord.com/channels/552565546089054218/891791005098053682/991799952084828170) set, please use <#552583841936834560> for `/stats` commands.', ephemeral: true}); 
 
         if (subCmd === 'all') {
             let PS;

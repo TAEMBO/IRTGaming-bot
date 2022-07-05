@@ -155,7 +155,7 @@ class YClient extends Client {
         if (FSserver.data.server.name.includes('Silage')) {
             PSdata.push(FSserver.data.slots.used);  
             fs.writeFileSync(__dirname + "/databases/PSPlayerData.json", JSON.stringify(PSdata));
-            console.log(`\nPushed ${FSserver.data.slots.used} to PS`)
+            // console.log(`\nPushed ${FSserver.data.slots.used} to PS`)
 
             client.FSCacheNewPS = [];
             await FSserver.data.slots.players.forEach(player => {
@@ -163,25 +163,25 @@ class YClient extends Client {
                 client.FSCacheNewPS.push(player.name); // Add player name to first array
             })
 
-            console.log(`PS NEW ${client.FSCacheNewPS}`)
+            // console.log(`PS NEW ${client.FSCacheNewPS}`)
             const missingElementsLeave = client.FSCacheOldPS.filter(element => !client.FSCacheNewPS.includes(element)); // Filter names that were in the first fetch but not the second. Thanks to LebSter#0617 for this on The Coding Den Discord server
             for (const missingElement of missingElementsLeave) {
                 if (client.watchList._content.includes(missingElement)) {
-                    client.channels.resolve(client.config.mainServer.channels.watchlist).send({embeds: [new client.embed().setTitle('WATCHLIST - NEW FUNCTION').setDescription(`\`${missingElement}\` left **PS** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorGreen)]})
+                    client.channels.resolve(client.config.mainServer.channels.watchlist).send({embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${missingElement}\` left **PS** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorGreen)]})
                 } // Hopefully that person got banned
             // missingElement was present in arr1 but not in arr2
-            client.channels.resolve(client.config.mainServer.channels.fslogs).send({embeds: [new client.embed().setTitle('NEW FUNCTION').setDescription(`\`${missingElement}\` ${(client.FMstaff._content.includes(missingElement) ? ':farmer:' : '')}${(client.TFstaff._content.includes(missingElement) ? ':angel:' : '')} left **PS** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})
+            client.channels.resolve(client.config.mainServer.channels.fslogs).send({embeds: [new client.embed().setDescription(`\`${missingElement}\` ${(client.FMstaff._content.includes(missingElement) ? ':farmer:' : '')}${(client.TFstaff._content.includes(missingElement) ? ':angel:' : '')} left **PS** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})
             } // Player left the server, hurry up and join
             
             const missingElementsJoin = client.FSCacheNewPS.filter(element => !client.FSCacheOldPS.includes(element)); // Filter names that were in the second fetch but not the first. Thanks to LebSter#0617 for this on The Coding Den Discord server
             for (const missingElement of missingElementsJoin) {
                 if (client.watchList._content.includes(missingElement)) {
-                    client.channels.resolve(client.config.mainServer.channels.watchlist).send({embeds: [new client.embed().setTitle('WATCHLIST - NEW FUNCTION').setDescription(`\`${missingElement}\` joined **PS** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})
+                    client.channels.resolve(client.config.mainServer.channels.watchlist).send({embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${missingElement}\` joined **PS** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})
                 } // Oh no, go get em Toast
             // missingElement was present in arr2 but not in arr1
-            client.channels.resolve(client.config.mainServer.channels.fslogs).send({embeds: [new client.embed().setTitle('NEW FUNCTION').setDescription(`\`${missingElement}\` ${(client.FMstaff._content.includes(missingElement) ? ':farmer:' : '')}${(client.TFstaff._content.includes(missingElement) ? ':angel:' : '')} joined **PS** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorGreen)]})
+            client.channels.resolve(client.config.mainServer.channels.fslogs).send({embeds: [new client.embed().setDescription(`\`${missingElement}\` ${(client.FMstaff._content.includes(missingElement) ? ':farmer:' : '')}${(client.TFstaff._content.includes(missingElement) ? ':angel:' : '')} joined **PS** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorGreen)]})
             } // Player joined the server, they beat you to it
-            console.log(`PS OLD ${client.FSCacheOldPS}`)
+            // console.log(`PS OLD ${client.FSCacheOldPS}`)
         
             client.FSCacheOldPS = [];
             await FSserver.data.slots.players.forEach(player => {
@@ -192,7 +192,7 @@ class YClient extends Client {
         } else if (FSserver.data.server.name.includes('Grain')) {
             PGdata.push(FSserver.data.slots.used);
             fs.writeFileSync(__dirname + "/databases/PGPlayerData.json", JSON.stringify(PGdata));
-            console.log(`\nPushed ${FSserver.data.slots.used} to PG`)
+            // console.log(`\nPushed ${FSserver.data.slots.used} to PG`)
 
             client.FSCacheNewPG = [];
             await FSserver.data.slots.players.forEach(player => {
@@ -200,25 +200,25 @@ class YClient extends Client {
                 client.FSCacheNewPG.push(player.name); // Add player name to first array
             })
 
-            console.log(`PG NEW ${client.FSCacheNewPG}`)
+            // console.log(`PG NEW ${client.FSCacheNewPG}`)
             const missingElementsLeave = client.FSCacheOldPG.filter(element => !client.FSCacheNewPG.includes(element)); // Filter names that were in the first fetch but not the second. Thanks to LebSter#0617 for this on The Coding Den Discord server
             for (const missingElement of missingElementsLeave) {
                 if (client.watchList._content.includes(missingElement)) {
-                    client.channels.resolve(client.config.mainServer.channels.watchlist).send({embeds: [new client.embed().setTitle('WATCHLIST - NEW FUNCTION').setDescription(`\`${missingElement}\` left **PG** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorGreen)]})
+                    client.channels.resolve(client.config.mainServer.channels.watchlist).send({embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${missingElement}\` left **PG** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorGreen)]})
                 } // Hopefully that person got banned
             // missingElement was present in arr1 but not in arr2
-            client.channels.resolve(client.config.mainServer.channels.fslogs).send({embeds: [new client.embed().setTitle('NEW FUNCTION').setDescription(`\`${missingElement}\` ${(client.FMstaff._content.includes(missingElement) ? ':farmer:' : '')}${(client.TFstaff._content.includes(missingElement) ? ':angel:' : '')} left **PG** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})
+            client.channels.resolve(client.config.mainServer.channels.fslogs).send({embeds: [new client.embed().setDescription(`\`${missingElement}\` ${(client.FMstaff._content.includes(missingElement) ? ':farmer:' : '')}${(client.TFstaff._content.includes(missingElement) ? ':angel:' : '')} left **PG** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})
             } // Player left the server, hurry up and join
             
             const missingElementsJoin = client.FSCacheNewPG.filter(element => !client.FSCacheOldPG.includes(element)); // Filter names that were in the second fetch but not the first. Thanks to LebSter#0617 for this on The Coding Den Discord server
             for (const missingElement of missingElementsJoin) {
                 if (client.watchList._content.includes(missingElement)) {
-                    client.channels.resolve(client.config.mainServer.channels.watchlist).send({embeds: [new client.embed().setTitle('WATCHLIST - NEW FUNCTION').setDescription(`\`${missingElement}\` joined **PG** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})
+                    client.channels.resolve(client.config.mainServer.channels.watchlist).send({embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${missingElement}\` joined **PG** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})
                 } // Oh no, go get em Toast
             // missingElement was present in arr2 but not in arr1
-            client.channels.resolve(client.config.mainServer.channels.fslogs).send({embeds: [new client.embed().setTitle('NEW FUNCTION').setDescription(`\`${missingElement}\` ${(client.FMstaff._content.includes(missingElement) ? ':farmer:' : '')}${(client.TFstaff._content.includes(missingElement) ? ':angel:' : '')} joined **PG** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorGreen)]})
+            client.channels.resolve(client.config.mainServer.channels.fslogs).send({embeds: [new client.embed().setDescription(`\`${missingElement}\` ${(client.FMstaff._content.includes(missingElement) ? ':farmer:' : '')}${(client.TFstaff._content.includes(missingElement) ? ':angel:' : '')} joined **PG** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorGreen)]})
             } // Player joined the server, they beat you to it
-            console.log(`PG OLD ${client.FSCacheOldPG}`)
+            // console.log(`PG OLD ${client.FSCacheOldPG}`)
         
             client.FSCacheOldPG = [];
             await FSserver.data.slots.players.forEach(player => {
@@ -229,7 +229,7 @@ class YClient extends Client {
         } else if (FSserver.data.server.name.includes('Multi')) {
             MFdata.push(FSserver.data.slots.used);
             fs.writeFileSync(__dirname + "/databases/MFPlayerData.json", JSON.stringify(MFdata));
-            console.log(`\nPushed ${FSserver.data.slots.used} to MF`)
+            // console.log(`\nPushed ${FSserver.data.slots.used} to MF`)
 
             client.FSCacheNewMF = [];
             await FSserver.data.slots.players.forEach(player => {
@@ -237,19 +237,19 @@ class YClient extends Client {
                 client.FSCacheNewMF.push(player.name); // Add player name to first array
             })
 
-            console.log(`MF NEW ${client.FSCacheNewMF}`)
+            // console.log(`MF NEW ${client.FSCacheNewMF}`)
             const missingElementsLeave = client.FSCacheOldMF.filter(element => !client.FSCacheNewMF.includes(element)); // Filter names that were in the first fetch but not the second. Thanks to LebSter#0617 for this on The Coding Den Discord server
             for (const missingElement of missingElementsLeave) {
             // missingElement was present in arr1 but not in arr2
-            client.channels.resolve(client.config.mainServer.channels.fslogs).send({embeds: [new client.embed().setTitle('NEW FUNCTION').setDescription(`\`${missingElement}\` ${(client.FMstaff._content.includes(missingElement) ? ':farmer:' : '')}${(client.TFstaff._content.includes(missingElement) ? ':angel:' : '')} left **MF** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})
+            client.channels.resolve(client.config.mainServer.channels.fslogs).send({embeds: [new client.embed().setDescription(`\`${missingElement}\` ${(client.FMstaff._content.includes(missingElement) ? ':farmer:' : '')}${(client.TFstaff._content.includes(missingElement) ? ':angel:' : '')} left **MF** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})
             } // Player left the server, hurry up and join
             
             const missingElementsJoin = client.FSCacheNewMF.filter(element => !client.FSCacheOldMF.includes(element)); // Filter names that were in the second fetch but not the first. Thanks to LebSter#0617 for this on The Coding Den Discord server
             for (const missingElement of missingElementsJoin) {
             // missingElement was present in arr2 but not in arr1
-            client.channels.resolve(client.config.mainServer.channels.fslogs).send({embeds: [new client.embed().setTitle('NEW FUNCTION').setDescription(`\`${missingElement}\` ${(client.FMstaff._content.includes(missingElement) ? ':farmer:' : '')}${(client.TFstaff._content.includes(missingElement) ? ':angel:' : '')} joined **MF** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorGreen)]})
+            client.channels.resolve(client.config.mainServer.channels.fslogs).send({embeds: [new client.embed().setDescription(`\`${missingElement}\` ${(client.FMstaff._content.includes(missingElement) ? ':farmer:' : '')}${(client.TFstaff._content.includes(missingElement) ? ':angel:' : '')} joined **MF** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorGreen)]})
             } // Player joined the server, they beat you to it
-            console.log(`MF OLD ${client.FSCacheOldMF}`)
+            // console.log(`MF OLD ${client.FSCacheOldMF}`)
         
             client.FSCacheOldMF = [];
             await FSserver.data.slots.players.forEach(player => {

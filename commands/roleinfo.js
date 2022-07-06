@@ -7,10 +7,10 @@ module.exports = {
 		const permissions = role.permissions.toArray();
 		const Role = role.members.map(e=>`**${e.user.tag}**`).join("\n") || "None";
 		const embed = new client.embed()
-			.setTitle('Role Info: ' + role.name)
+			.setTitle(`Role Info: ${role.name}`)
 			.addFields(
-			{name: '🔹 Id', value: `\`${role.id}\` `},
-			{name: '🔹 Color', value: `\`${role.hexColor}\` `},
+			{name: '🔹 Id', value: `\`${role.id}\`‏`},
+			{name: '🔹 Color', value: `\`${role.hexColor}\`‏`},
 			{name: '🔹 Creation Date', value: `<t:${Math.round(new Date(role.createdTimestamp) / 1000)}>\n<t:${Math.round(new Date(role.createdTimestamp) / 1000)}:R> `},
 			{name: '🔹 Misc', value: `Hoist: \`${role.hoist}\`\nMentionable: \`${role.mentionable}\`\nPosition: \`${role.position}\` from bottom\nMembers: \`${role.members.size}\`\n${role.members.size < 11 ? Role : ''}`},
 			{name: '🔹 Key Permissions', value: (permissions.includes('ADMINISTRATOR') ? ['ADMINISTRATOR'] : permissions.filter(x => keyPermissions.includes(x))).map(x => {    return x.split('_').map((y, i) => i === 0 ? y[0] + y.slice(1).toLowerCase() : y.toLowerCase()).join(' ')}).join(', ') || ''})

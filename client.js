@@ -103,7 +103,6 @@ class YClient extends Client {
 
     async FSstatsLoop(client, serverName, Channel, Message) {
         const axios = require("axios");
-	    const BLACKLIST = ["Bernie", "RedbaD", "SpongeBoi69", "Kazmerev"]
 		const embed = new client.embed()
         const playerInfo = [];
         let FSserver;
@@ -120,7 +119,6 @@ class YClient extends Client {
         playerInfo.push(`\`${player.name}\` ${(player.isAdmin ? ' :detective:' : '')}${(client.FMstaff._content.includes(player.name) ? ':farmer:' : '')}${(client.TFstaff._content.includes(player.name) ? ':angel:' : '')} **|** ${('0' + Math.floor(player.uptime/60)).slice(-2)}:${('0' + (player.uptime % 60)).slice(-2)}`);
         })
         embed.setAuthor({name: `${FSserver.data.slots.used}/${FSserver.data.slots.capacity}`})
-        embed.setTitle(FSserver.data.server.name)
 		if (FSserver.data.slots.used === FSserver.data.slots.capacity) {
 			embed.setColor(client.config.embedColorRed)
 		} else if (FSserver.data.slots.used > 9) {

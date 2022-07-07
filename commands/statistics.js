@@ -17,7 +17,7 @@ module.exports = {
 			.setTitle('Statistics: Command Usage')
 			.setDescription(`List of commands that have been used in this session, ordered by amount of uses. Table contains command name and amount of uses.\nTotal amount of commands used in this session: ${client.commands.filter(x => x.uses).map(x => x.uses).reduce((a, b) => a + b, 0)}`)
 			.setColor(client.config.embedColor)
-			.setFooter({text: `Uptime: ${client.formatTime(client.uptime, 2, { commas: true, longNames: true })} Discord.js ${version}`})
+			.setFooter({text: `Uptime: ${client.formatTime(client.uptime, 2, { commas: true, longNames: true })} - Discord.js ${version}`})
 		if (rows.join('').length > 1024) {
 			let fieldValue = '';
 			rows.forEach(row => {

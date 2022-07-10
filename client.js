@@ -107,7 +107,7 @@ class YClient extends Client {
         const playerInfo = [];
         let FSserver;
         try {
-            FSserver = await axios.get(serverName, {timeout: 2000});
+            FSserver = await axios.get(serverName, {timeout: 5000});
         } catch (err) {
             embed.setTitle('Server not responding');
             embed.setColor(client.config.embedColorRed);

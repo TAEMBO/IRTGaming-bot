@@ -250,5 +250,8 @@ module.exports = {
 	if (message.content.toLowerCase().includes('smoker')) {
 		message.react('🚭')
 	}
+	if (message.content.toLowerCase().includes("forgor")) {
+		message.react("💀")
+	}
 }
 }

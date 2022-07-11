@@ -14,7 +14,7 @@ module.exports = {
                     {name: 'In a hurry to report?', value: `Go to <#${client.config.mainServer.channels.fs22_silage}> or <#${client.config.mainServer.channels.fs22_grain}> and type:\n\n<@&${client.config.mainServer.roles.mpstaff}> **(**troll's name**) (**what they're doing**) (**picture or video if possible**)**`},
                     {name: 'Want the full gist?', value: `While playing on the public servers, you may come across the odd player misbehaving and messing things up. If you do, please report them in <#${client.config.mainServer.channels.fs22_silage}> or <#${client.config.mainServer.channels.fs22_grain}> along with a short description of what they're doing and tag <@&${client.config.mainServer.roles.mpstaff}>.`},
                     {name: 'Notes', value: `> When reporting a player, please include a name or screenshot/video including the name. Staff can't help if they don't know who to look out for.\n\n> Please do not tag individual staff members unless they are already on the server. If they're not on the server and possibly not available, then it will take longer for an online staff member to handle it.`})
-                .setImage('https://cdn-longterm.mee6.xyz/plugins/commands/images/552565546089054218/a0857b5fec15fd24c8f2b5583e631f180d9b02919dfa8e935c44b49f91381d49.jpeg')
+                .setImage('https://media.discordapp.net/attachments/979863373439184966/996178337984675961/unknown.png')
                 .setColor(client.config.embedColor)]})
         } else if (subCmd === 'appeal') {
             interaction.reply({embeds: [new client.embed().setDescription('To appeal a ban on a server, go to <#825046442300145744> to create a ticket. Within the ticket, type `!appeal`.').setColor(client.config.embedColor)]})

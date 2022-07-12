@@ -28,7 +28,10 @@ module.exports = {
             Role = client.config.mainServer.roles.mffarm9;
         } else if (options === '10') {
             Role = client.config.mainServer.roles.mffarm10;
+        } else if (options === '11') {
+            Role = client.config.mainServer.roles.mffarm11;
         }
+
         if(member.roles.cache.has(Role)){
             if (interaction.member.roles.cache.has(client.config.mainServer.roles.mffarmowner) && !interaction.member.roles.cache.has(client.config.mainServer.roles.mfmanager) && !interaction.member.roles.cache.has(Role)) return interaction.reply('You cannot remove users from a farm you do not own.')
             const msg = await interaction.reply({embeds: [new client.embed().setDescription(`This user already has the <@&${Role}> role, do you want to remove it from them?`).setColor(client.config.embedColor)], fetchReply: true, components: [new MessageActionRow().addComponents(new MessageButton().setCustomId(`Yes`).setStyle("SUCCESS").setLabel("Confirm"), new MessageButton().setCustomId(`No`).setStyle("DANGER").setLabel("Cancel"))]});
@@ -71,6 +74,7 @@ module.exports = {
             {name: 'Farm 8', value: '8'},
             {name: 'Farm 9', value: '9'},
             {name: 'Farm 10', value: '10'}
+            {name: 'Farm 11', value: '11'}
         )
         .setRequired(true))
 };

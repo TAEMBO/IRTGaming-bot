@@ -11,6 +11,8 @@ module.exports = {
         if (client.dmForwardBlacklist._content.includes(message.author.id) || message.author.bot) return;
         if (client.games.some(x => x === message.author.tag)) return;
         const channel = client.channels.cache.get(client.config.mainServer.channels.testing_zone);
+		const irt = client.guilds.cache.get(client.config.mainServer.id);
+        const guildMemberObject = await irt?.members.cache.get(message.author.id);
         const embed = new client.embed()
             .setTitle('Forwarded DM Message')
             .setDescription(`<@${message.author.id}>`)

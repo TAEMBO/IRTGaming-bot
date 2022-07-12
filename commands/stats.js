@@ -192,9 +192,9 @@ async function FSstats(client, interaction, serverName, DBName) {
 
 module.exports = {
     run: async (client, interaction) => {
-        const subCmd = interaction.options.getSubcommand();
-
+        if (!client.config.botSwitches.stats) return interaction.reply({content: '`/stats` commands are currently disabled.', ephemeral: true});
         if (BLAKLIST.includes(interaction.channel.id) && !client.isMPStaff(client, interaction.member)) return interaction.reply({content: 'This command has [restrictions](https://discord.com/channels/552565546089054218/891791005098053682/991799952084828170) set, please use <#552583841936834560> for `/stats` commands.', ephemeral: true}); 
+        const subCmd = interaction.options.getSubcommand();
 
         if (subCmd === 'all') {
             let PS;

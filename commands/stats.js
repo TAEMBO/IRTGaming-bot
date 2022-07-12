@@ -205,17 +205,17 @@ module.exports = {
             try {
                 PS = await axios.get(client.tokens.ps, {timeout: 1000});
             } catch (err) {
-                console.log(err)
+                console.log(`stats all; PS failed`)
             }
             try {
                 PG = await axios.get(client.tokens.pg, {timeout: 1000});
             } catch (err) {
-                console.log(err)
+                console.log(`stats all; PG failed`)
             }
             try {
                 MF = await axios.get(client.tokens.mf, {timeout: 1000});
             } catch (err) {
-                console.log(err)
+                console.log(`stats all; MF failed`)
             }
             const totalCount = [];
             const embed = new client.embed()

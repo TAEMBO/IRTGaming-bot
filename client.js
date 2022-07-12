@@ -112,6 +112,7 @@ class YClient extends Client {
             embed.setTitle('Server not responding');
             embed.setColor(client.config.embedColorRed);
             client.channels.resolve(Channel).messages.fetch(Message).then((msg)=>{ msg.edit({embeds: [embed]})});
+            console.log(`stats loop; ${serverName} failed`)
             return;
         }
         await FSserver.data.slots.players.forEach(player => {
@@ -140,7 +141,7 @@ class YClient extends Client {
         try {
             FSserver = await axios.get(serverName, {timeout: 5000}); // Fetch dedicated-server-stats.json
         } catch (err) {
-            return console.log(err); // Blame Red
+            return console.log(`stats leaveJoin; ${serverName} failed`); // Blame Red
         }
     
         await FSserver.data.slots.players.forEach(player => {

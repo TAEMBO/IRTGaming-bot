@@ -32,10 +32,10 @@ module.exports = {
     }
 	if (!message.guild) return;
 	
-	// judge-your-build-event message filter; only allow messages that contain an image
-	// if (message.channel.id === '925500847390097461' && message.attachments.size<1 && !message.author.bot) {
-	//  	message.delete();
-	// }
+	/* judge-your-build-event message filter; only allow messages that contain an image
+	 if (message.channel.id === '925500847390097461' && message.attachments.size<1 && !message.author.bot) {
+	  	message.delete();
+	 } */
 
 	// handle banned words
 	if (client.config.botSwitches.automod && client.bannedWords._content.some(word => message.content.toLowerCase().includes(word)) && !client.hasModPerms(client, message.member) && message.guild.id === client.config.mainServer.id)

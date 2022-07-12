@@ -4,7 +4,6 @@
 	"embedColorRed": "#ed4245",
 	"embedColorYellow": "#ffbd06",
 	"botSwitches": {
-		"fpb": true,
 		"commands": true,
 		"automod": false,
 		"logs": true,

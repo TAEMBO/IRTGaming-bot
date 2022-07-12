@@ -73,7 +73,7 @@ module.exports = {
             {name: 'Farm 7', value: '7'},
             {name: 'Farm 8', value: '8'},
             {name: 'Farm 9', value: '9'},
-            {name: 'Farm 10', value: '10'}
+            {name: 'Farm 10', value: '10'},
             {name: 'Farm 11', value: '11'}
         )
         .setRequired(true))

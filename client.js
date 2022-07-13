@@ -147,7 +147,7 @@ class YClient extends Client {
         await FSserver.data.slots.players.forEach(player => {
             if (player.isAdmin && (!BLACKLIST.includes(player.name) && !client.FMstaff._content.includes(player.name))) {
                 // If user isn't staff or exempt from being logged in as admin, log them, the server name, and the time because that's sus
-                client.channels.resolve(client.config.mainServer.channels.fslogs).send(`**ADMIN LOGIN**\n\`${player.name}\` | \`${FSserver.data.server.name}\` | <t:${Math.round(new Date() / 1000)}>`)
+                client.channels.resolve(client.config.mainServer.channels.fslogs).send({embeds: [new client.embed().setTitle('ADMIN LOGIN').setDescription(`\`${player.name}\` login into \`${FSserver.data.server.name.replace('! IRTGaming|24/7 ', '')}\` at <t:${Math.round(new Date() / 1000)}>`).setColor('#ff4d00')]})
             }
             })
 

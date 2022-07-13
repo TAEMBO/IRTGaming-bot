@@ -61,73 +61,53 @@ module.exports = {
 		}).catch(() => console.log("failed to collect \"y\" from staff"));
 	}
 
-		function onTimeout() {
-			delete client.repeatedMessages[message.author.id];
-		}
+	function onTimeout() {
+		delete client.repeatedMessages[message.author.id];
+	}
 
-		// repeated messages
-		if (client.bannedWords._content.some(x => message.content.toLowerCase().includes(x)) && !client.hasModPerms(client, message.member) && client.config.botSwitches.automod) {
-			const thisContent = message.content.slice(0, 32);
-			if (client.repeatedMessages[message.author.id]) {
-				// add this message to the list
-				client.repeatedMessages[message.author.id].set(message.createdTimestamp, { cont: thisContent, ch: message.channel.id });
+	// repeated messages
+	if (client.bannedWords._content.some(x => message.content.toLowerCase().includes(x)) && !client.hasModPerms(client, message.member) && client.config.botSwitches.automod) {
+		const thisContent = message.content.slice(0, 32);
+		message.delete();
+		message.channel.send('That word is banned here.').then(x => setTimeout(() => x.delete(), 5000));
+		if (client.repeatedMessages[message.author.id]) {
+			// add this message to the list
+			client.repeatedMessages[message.author.id].set(message.createdTimestamp, { cont: thisContent, ch: message.channel.id });
 
-				// reset timeout
-				clearTimeout(client.repeatedMessages[message.author.id].to);
-				client.repeatedMessages[message.author.id].to = setTimeout(onTimeout, 30000);
 
-				// this is the time in which 3 messages have to be sent, in milliseconds
-				const threshold = 30000;
+			// reset timeout
+			clearTimeout(client.repeatedMessages[message.author.id].to);
+			client.repeatedMessages[message.author.id].to = setTimeout(onTimeout, 30000);
 
-				// message mustve been sent after (now - threshold), so purge those that were sent earlier
-				client.repeatedMessages[message.author.id] = client.repeatedMessages[message.author.id].filter((x, i) => i >= Date.now() - threshold)
+			// this is the time in which 3 messages have to be sent, in milliseconds
+			const threshold = 30000;
 
-				// if user has sent the same message 2 times in the last threshold milliseconds, change their nickname
+			// message mustve been sent after (now - threshold), so purge those that were sent earlier
+			client.repeatedMessages[message.author.id] = client.repeatedMessages[message.author.id].filter((x, i) => i >= Date.now() - threshold)
 
-				if (client.repeatedMessages[message.author.id]?.find(x => {
-					return client.repeatedMessages[message.author.id].filter(y => y.cont === x.cont).size === 1;
-				})) {
-					message.delete();
-					message.channel.send("That word is banned here.").then(x => setTimeout(() => x.delete(), 5000));
-				}
+			// if user has sent the same message 2 times in the last threshold milliseconds, change their nickname
 
-				if (client.repeatedMessages[message.author.id]?.find(x => {
-					return client.repeatedMessages[message.author.id].filter(y => y.cont === x.cont).size === 2;
-				})) {
-					message.delete();
-					message.channel.send("That word is banned here.").then(x => setTimeout(() => x.delete(), 5000));
-				}
+			// a spammed message is one that has been sent at least 4 times in the last threshold milliseconds
+			const spammedMessage = client.repeatedMessages[message.author.id]?.find(x => {
+				return client.repeatedMessages[message.author.id].filter(y => y.cont === x.cont).size >= 4;
+			});
 
-				if (client.repeatedMessages[message.author.id]?.find(x => {
-					return client.repeatedMessages[message.author.id].filter(y => y.cont === x.cont).size === 3;
-				})) {
-					message.delete();
-					message.channel.send("That word is banned here.").then(x => setTimeout(() => x.delete(), 5000));
-				}
+			// if a spammed message exists;
+			if (spammedMessage) {
+				// softban
+				const softbanResult = await client.punishments.addPunishment("mute", message.member, { reason: "Automod; banned words", time: '30m' }, client.user.id);
 
-				// a spammed message is one that has been sent at least 4 times in the last threshold milliseconds
-				const spammedMessage = client.repeatedMessages[message.author.id]?.find(x => {
-					return client.repeatedMessages[message.author.id].filter(y => y.cont === x.cont).size >= 4;
-				});
-
-				// if a spammed message exists;
-				if (spammedMessage) {
-					// softban
-					const softbanResult = await client.punishments.addPunishment("mute", message.member, { reason: "Automod; banned words" }, client.user.id);
-
-					client.repeatedMessagesContent.addData(message.content.split(' ')).forceSave();
-
-					// and clear their list of long messages
-					delete client.repeatedMessages[message.author.id];
-				}
-			} else {
-				client.repeatedMessages[message.author.id] = new client.collection();
-				client.repeatedMessages[message.author.id].set(message.createdTimestamp, { cont: message.content.slice(0, 32), ch: message.channel.id });
-
-				// auto delete after 1 minute
-				client.repeatedMessages[message.author.id].to = setTimeout(onTimeout, 60000);
+				// and clear their list of long messages
+				delete client.repeatedMessages[message.author.id];
 			}
+		} else {
+			client.repeatedMessages[message.author.id] = new client.collection();
+			client.repeatedMessages[message.author.id].set(message.createdTimestamp, { cont: message.content.slice(0, 32), ch: message.channel.id });
+
+			// auto delete after 1 minute
+			client.repeatedMessages[message.author.id].to = setTimeout(onTimeout, 60000);
 		}
+	}
 
 		const WHITELISTED_CHANNELS = [
 			'552565546093248512', //general

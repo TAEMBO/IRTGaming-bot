@@ -32,6 +32,8 @@ module.exports = {
                 )
             .setFooter({text: 'Note that not every task listed might be available to do at the time, so do your due dilligence to see what needs doing'})
             interaction.reply({embeds: [embed]})
+        } else if (subCmd === 'equipment') {
+            interaction.reply('Buying more equipment on our servers will sometimes have a negative impact. Every piece of equipment takes up a certain amount of slots. We need to maintain an acceptable amount of slots in order to keep our server accessible to console players. More vehicles and implements also contribute to the file sizes of the servers causing more server lag.')
         }
     },
     data: new SlashCommandBuilder()
@@ -61,4 +63,8 @@ module.exports = {
         .setName("filters")
         .setDescription("FAQ: What filters to use")
     )
+    .addSubcommand((optt)=>optt
+        .setName("equipment")
+        .setDescription("FAQ: Buying equipment")
+)
 };

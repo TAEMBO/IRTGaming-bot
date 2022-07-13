@@ -358,7 +358,7 @@ class YClient extends Client {
     };
     async unPunish(client, interaction) {
         if (!client.hasModPerms(client, interaction.member)) return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mod}> role to use this command.`, ephemeral: true, allowedMentions: {roles: false}});
-        const punishment = client.punishments._content.find(x => x.id === `${interaction.options.getInteger("case_id")}`);
+        const punishment = client.punishments._content.find(x => x.id === interaction.options.getInteger("case_id"));
         if (!punishment) return interaction.reply({content: "that isn't a valid case ID.", ephemeral: true});
         if (punishment.type !== 'warn' && interaction.member.roles.cache.has(client.config.mainServer.roles.helper)) return interaction.reply({content: 'Helpers can only remove warnings.', ephemeral: true, allowedMentions: {roles: false}});
         const reason = interaction.options.getString("reason") ?? "None";

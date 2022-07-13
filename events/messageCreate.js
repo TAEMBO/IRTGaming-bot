@@ -37,9 +37,10 @@ module.exports = {
 	  	message.delete();
 	 } */
 
-	// handle banned words
+	/* handle banned words
 	if (client.config.botSwitches.automod && client.bannedWords._content.some(word => message.content.toLowerCase().includes(word)) && !client.hasModPerms(client, message.member) && message.guild.id === client.config.mainServer.id)
 		return message.delete() && message.channel.send("That word is banned here.").then(x => setTimeout(() => x.delete(), 5000));
+	*/
 
 
 	// useless staff ping mute

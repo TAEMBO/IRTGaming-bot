@@ -60,62 +60,62 @@ const quantities = {
 		},
 		{
 			name: 'US Dollar :flag_us:',
-			value: 0.90,
+			value: 1,
 			short: ['USD', '$'],
 		},
 		{
 			name: 'pound sterling :flag_gb:',
-			value: 1.20,
+			value: 1.18,
 			short: ['GBP', '£']
 		},
 		{
 			name: 'Turkish Lira :flag_tr:',
-			value: 0.064,
+			value: 0.057,
 			short: ['TRY', 'TL', '₺']
 		},
 		{
 			name: 'Russian Ruble :flag_ru:',
-			value: 0.009,
+			value: 0.017,
 			short: ['RUB', '₽']
 		},
 		{
 			name: 'Canadian Dollar :flag_ca:',
-			value: 0.70,
+			value: 0.76,
 			short: ['CAD']
 		},
 		{
 			name: 'Australian Dollar :flag_au:',
-			value: 0.64,
+			value: 0.67,
 			short: ['AUD']
 		},
 		{
 			name: 'Japanese Yen :flag_jp:',
-			value: 0.0078,
+			value: 0.0072,
 			short: ['JPY', '¥', 'yen', 'jy']
 		},
 		{
 			name: 'New Zealand Dollar :flag_nz:',
-			value: 0.60,
+			value: 0.61,
 			short: ['NZD']
 		},
 		{
 			name: 'Indonesian Rupiah :flag_id:',
-			value: 0.000062,
+			value: 0.000066,
 			short: ['IDR', 'Rp']
 		},
 		{
 			name: 'Chinese Yuan Renminbi :flag_cn:',
-			value: 0.14,
+			value: 0.15,
 			short: ['CN¥', 'CNY', 'RMB', '元']
 		},
 		{
 			name: 'Swedish krona :flag_se:',
-			value: 0.097,
+			value: 0.094,
 			short: ['SEK', 'kr']
 		},
 		{
 			name: 'Norwegian krone :flag_no:',
-			value: 0.094,
+			value: 0.098,
 			short: ['NOK']
 		},
 		{
@@ -125,22 +125,22 @@ const quantities = {
 		},
 		{
 			name: 'Icelandic króna :flag_is:',
-			value: 0.0071,
+			value: 0.0072,
 			short: ['ISK']
 		},
 		{
 			name: 'Czech koruna :flag_cz:',
-			value: 0.04,
+			value: 0.041,
 			short: ['CZK', 'Kč']
 		},
 		{
 			name: 'Swiss franc :flag_sw:',
-			value: 0.97,
+			value: 1.01,
 			short: ['CFH', 'fr']
 		},
 		{
 			name: 'Ukrainian hryvnia :flag_ua:',
-			value: 0.03,
+			value: 0.034,
 			short: ['UAH', '₴', 'грн']
 		},
 		{
@@ -150,12 +150,12 @@ const quantities = {
 		},
 		{
 			name: 'United Arab Emirates dirham :flag_ae:',
-			value: 0.24,
+			value: 0.27,
 			short: ['AED', 'د.إ']
 		},
 		{
 			name: 'Sri Lankan Rupee :flag_lk:',
-			value: 0.0044,
+			value: 0.0028,
 			short: ['LKR', 'රු', 'ரூ']
 		},
 		{

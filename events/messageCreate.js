@@ -66,8 +66,11 @@ module.exports = {
 	}
 
 	// repeated messages
-	if (client.bannedWords._content.some(x => message.content.toLowerCase().includes(x)) && !client.hasModPerms(client, message.member) && client.config.botSwitches.automod) {
+
+	const rparg = message.content.toLowerCase().split(' ');
+	if (client.bannedWords._content.some(x => rparg.includes(x)) && !client.hasModPerms(client, message.member) && client.config.botSwitches.automod) {
 		const thisContent = message.content.slice(0, 32);
+		console.log(thisContent);
 		message.delete();
 		message.channel.send('That word is banned here.').then(x => setTimeout(() => x.delete(), 5000));
 		if (client.repeatedMessages[message.author.id]) {

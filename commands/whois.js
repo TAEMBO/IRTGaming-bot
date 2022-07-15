@@ -18,7 +18,7 @@ module.exports = {
 			.setImage(member.user.bannerURL({ format: 'png', dynamic: true, size: 1024}))
 			if (member.premiumSinceTimestamp !== null) {
 				embed.addFields(
-					{name: '🔹 Server Boosting Since', value: `<t:${Math.round(new Date(member.premiumSinceTimestamp) / 1000)}>\n<t:${Math.round(new Date(member.premiumSinceTimestamp) / 1000)}:R`}
+					{name: '🔹 Server Boosting Since', value: `<t:${Math.round(new Date(member.premiumSinceTimestamp) / 1000)}>\n<t:${Math.round(new Date(member.premiumSinceTimestamp) / 1000)}:R>`}
 				)}
 		interaction.reply({embeds: [embed]});
 	},

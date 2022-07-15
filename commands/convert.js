@@ -402,11 +402,9 @@ module.exports = {
 		} else if (subCmd === 'convert') {
 			const conversion = interaction.options.getString("conversion");
 			const args = conversion.replace(/\n/g, " ").split(' ');
-			console.log(`args "${args}"`)
 			if (!conversion.includes('>') && !conversion.includes('to')) return interaction.reply('There needs to be a greater-than sign (\`>\`) or the word "to" in your message, after the starters and before the target unit.');
 			// lets define the > or to, that theyre using
 			const usedSeparator = conversion.includes('>') ? '>' : 'to';
-			console.log(`usedSeparator ${usedSeparator}`)
 			const starters = args.slice(0, args.indexOf(args.find(x => x.includes(usedSeparator)))).join(' ').split(',').map(starter => {
 				starter = starter.trim();
 
@@ -445,7 +443,6 @@ module.exports = {
 				}
 			});
 			if (!starters || starters.length === 0) return interaction.reply('You must convert _something._ Your message has 0 starters.');
-			console.log(starters)
 
 			const target = (() => {
 				const targetPortion = args.slice(args.indexOf(args.find(x => x.includes(usedSeparator)))).join(' ').slice(usedSeparator.length).trim();
@@ -494,7 +491,6 @@ module.exports = {
 			// get absolute value: sum of all starters (starter amount * starter unit value)
 			let absolute;
 			if (starters[0].unit.evalRequired) {
-				console.log(`e ${starters}`)
 				absolute = starters.map(starter => {
 					let x = starter.amount;
 					return eval(starter.unit.toBase);
@@ -506,7 +502,6 @@ module.exports = {
 			// multiply absolute by the value of the target unit		
 			let amountInTarget;
 			if (starters[0].unit.evalRequired) {
-				console.log('e')
 				let x = absolute;
 				amountInTarget = eval(target.unit.toSelf);
 			} else {

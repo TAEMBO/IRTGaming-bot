@@ -9,8 +9,6 @@ module.exports = {
             const channel = client.channels.resolve('849993619267911680');
             const pic = interaction.options.getAttachment('image');
 
-            console.log('e')
-            console.log(pic)
             channel.send({content: `<@${interaction.user.id}> (${interaction.user.tag}) <@&${client.config.mainServer.roles.subscriber}> role verification`, files: [pic], allowedMentions: {roles: false}})
             interaction.reply({content: `Verification sent, please wait for someone to verify your subscription. You will then receive the <@&${client.config.mainServer.roles.subscriber}> role.`, ephemeral: true})
         } else if (subCmd === 'accept') {

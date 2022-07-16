@@ -235,5 +235,8 @@ module.exports = {
 	if (message.content.toLowerCase().includes("forgor")) {
 		message.react("💀")
 	}
+	if (message.author.id === '769710040596217897' && message.channel.id === '552565546093248512' && message.content.toLowerCase().startsWith('night all')) {
+		message.channel.send(`<@${message.author.id}>`)
+	}
 }
 }

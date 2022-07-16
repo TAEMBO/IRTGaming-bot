@@ -5,10 +5,10 @@
 	"embedColorYellow": "#ffbd06",
 	"botSwitches": {
 		"commands": true,
-		"automod": true,
-		"logs": false,
-		"registerCommands": false,
-		"stats": false
+		"automod": false,
+		"logs": true,
+		"registerCommands": true,
+		"stats": true
 	},
 	"eval": {
 		"allowed": true,
@@ -17,7 +17,7 @@
 		]
 	},
 	"mainServer": {
-		"id":"739308099709567021",
+		"id":"552565546089054218",
 		"LRSreset": 1653776820000,
 		"MPStaffRoles": [
 			"mpmanager",
@@ -31,18 +31,18 @@
 			"helper"
 		],
 		"roles": {
-			"owner": "848006884458758154",
-			"admin": "848006884458758154",
-			"mod": "848006884458758154",
-			"helper": "848006884458758154",
-			"mpmanager": "848006884458758154",
-			"mpadmin": "848006884458758154",
-			"mppublicadmin": "848006884458758154",
-			"mpfarmmanager": "848006884458758154",
-			"trustedfarmer": "848006884458758154",
-			"mpstaff": "848006884458758154",
-			"mpmanagement": "848006884458758154",
-			"loa": "848006884458758154",
+			"owner": "552565775639248896",
+			"admin": "972276292953194547",
+			"mod": "552566951608844288",
+			"helper": "824711356124102656",
+			"mpmanager": "677138618195771423",
+			"mpadmin": "676367589861097492",
+			"mppublicadmin": "822072825241927761",
+			"mpfarmmanager": "687256342846636039",
+			"trustedfarmer": "718552257565687959",
+			"mpstaff": "691059204479516703",
+			"mpmanagement": "859075240894398504",
+			"loa": "741792349423665152",
 			"mfmanager": "984314733152854027",
 			"mffarmowner": "983442747681820702",
 			"mfmember": "983442080502276096",
@@ -161,17 +161,17 @@
 			}
 		},
 		"channels": {
-			"modlogs": "778848112588095559",
-			"botcommands": "778848112588095559",
-			"fs22_silage": "778848112588095559",
-			"fs22_grain": "778848112588095559",
-			"welcome": "778848112588095559",
-			"testing_zone": "778848112588095559",
-			"suggestions": "778848112588095559",
-			"staffreports": "778848112588095559",
-			"fslogs": "778848112588095559",
-			"playercheck": "778848112588095559",
-			"watchlist": "778848112588095559"
+			"modlogs": "552613560744673295",
+			"botcommands": "552583841936834560",
+			"fs22_silage": "891791005098053682",
+			"fs22_grain": "729823615096324166",
+			"welcome": "552568157139763270",
+			"testing_zone": "979863373439184966",
+			"suggestions": "553345291839864832",
+			"staffreports": "863839725139918849",
+			"fslogs": "763846290466799638",
+			"playercheck": "733828561215029268",
+			"watchlist": "714971005558456391"
 		}
 	}
 }

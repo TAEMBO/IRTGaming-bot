@@ -92,7 +92,7 @@ module.exports = {
 
 			// a spammed message is one that has been sent at least 4 times in the last threshold milliseconds
 			const spammedMessage = client.repeatedMessages[message.author.id]?.find(x => {
-				return client.repeatedMessages[message.author.id].size >= 4;
+				return client.repeatedMessages[message.author.id].filter(y => y.cont === x.cont).size >= 4;
 			});
 
 			// if a spammed message exists;

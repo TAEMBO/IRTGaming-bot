@@ -154,10 +154,8 @@ module.exports = {
 			}
 		}
 	// handle discord invite links
-	if (message.content.includes("discord.gg/") && !client.hasModPerms(client, message.member) && !client.isMPStaff(client, message.member) && message.guild.id === client.config.mainServer.id) {
-		if (!client.config.botSwitches.automod) return;
-		message.delete()
-		client.punishments.addPunishment("warn", message.member, { reason: "Discord advertisement" }, client.user.id)
+	if (message.content.includes("discord.gg/") && !client.hasModPerms(client, message.member) && !client.isMPStaff(client, message.member) && client.config.botSwitches.automod) {
+		message.delete();
 		message.channel.send("No advertising other Discord servers.").then(x => setTimeout(() => x.delete(), 10000))
 	}
 	if (message.content.startsWith("!restart") && client.config.eval.whitelist.includes(message.author.id)) {

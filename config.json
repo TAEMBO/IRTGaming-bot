@@ -5,7 +5,7 @@
 	"embedColorYellow": "#ffbd06",
 	"botSwitches": {
 		"commands": true,
-		"automod": false,
+		"automod": true,
 		"logs": true,
 		"registerCommands": true,
 		"stats": true

@@ -70,13 +70,11 @@ module.exports = {
 	const rparg = message.content.toLowerCase().split(' ');
 	if (client.bannedWords._content.some(x => rparg.includes(x)) && !client.hasModPerms(client, message.member) && client.config.botSwitches.automod) {
 		const thisContent = message.content.slice(0, 32);
-		console.log(thisContent);
 		message.delete();
 		message.channel.send('That word is banned here.').then(x => setTimeout(() => x.delete(), 5000));
 		if (client.repeatedMessages[message.author.id]) {
 			// add this message to the list
 			client.repeatedMessages[message.author.id].set(message.createdTimestamp, { cont: thisContent, ch: message.channel.id });
-
 
 			// reset timeout
 			clearTimeout(client.repeatedMessages[message.author.id].to);
@@ -87,8 +85,6 @@ module.exports = {
 
 			// message mustve been sent after (now - threshold), so purge those that were sent earlier
 			client.repeatedMessages[message.author.id] = client.repeatedMessages[message.author.id].filter((x, i) => i >= Date.now() - threshold)
-
-			// if user has sent the same message 2 times in the last threshold milliseconds, change their nickname
 
 			// a spammed message is one that has been sent at least 4 times in the last threshold milliseconds
 			const spammedMessage = client.repeatedMessages[message.author.id]?.find(x => {

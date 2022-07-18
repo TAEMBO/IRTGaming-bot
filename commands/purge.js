@@ -2,10 +2,10 @@ const { SlashCommandBuilder } = require("@discordjs/builders");
 
 module.exports = {
 	run: async (client, interaction) => {
+		if (!client.hasModPerms(client, interaction.member)) return client.yOuNeEdMoD(client, interaction);
 		const amount = interaction.options.getInteger("amount");
+		if (amount > 100) return interaction.reply({content: 'You can only delete 100 messages at once, this is a Discord API limitation.', ephemeral: true});
 		const user = interaction.options.getUser("user");
-		if (!client.hasModPerms(client, interaction.member)) return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mod}> role to use this command.`, allowedMentions: {roles: false}});
-		if (amount > 100) return interaction.reply({content: 'You can only delete 100 messages at once. This is a Discord API limitation.', allowedMentions: { repliedUser: false }});
 
         let messagesArray = [];
 
@@ -23,8 +23,18 @@ module.exports = {
 			});
 		}
 
-		await interaction.reply(`Successfully deleted ${amount} messages.`);
+			await interaction.reply({content: `Successfully deleted ${amount} messages.`, ephemeral: true});
 
 	},
-	data: new SlashCommandBuilder().setName("purge").setDescription("Purges messages in a channel.").addIntegerOption((opt)=>opt.setName("amount").setDescription("The amount of messages to purge.").setRequired(true)).addUserOption((opt)=>opt.setName("user").setDescription("The user to purge messages from.").setRequired(false))
+	data: new SlashCommandBuilder()
+		.setName("purge")
+		.setDescription("Purges messages in a channel.")
+		.addIntegerOption((opt)=>opt
+			.setName("amount")
+			.setDescription("The amount of messages to purge.")
+			.setRequired(true))
+		.addUserOption((opt)=>opt
+			.setName("user")
+			.setDescription("The user to purge messages from.")
+			.setRequired(false))
 };

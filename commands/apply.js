@@ -7,5 +7,7 @@ module.exports = {
         interaction.reply({content: 'https://forms.gle/JivS14vJgcJCKigq7', ephemeral: true})
         channel.send(`<@${interaction.user.id}> (${interaction.user.tag}) opened an MP Staff application at <t:${Math.round(Date.now() / 1000)}>\nForm: <https://forms.gle/JivS14vJgcJCKigq7>`)
     },
-    data: new SlashCommandBuilder().setName("apply").setDescription("Apply for MP Staff")
+    data: new SlashCommandBuilder()
+        .setName("apply")
+        .setDescription("Apply for MP Staff")
 };

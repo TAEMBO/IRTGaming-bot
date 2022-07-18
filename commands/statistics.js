@@ -4,7 +4,7 @@ module.exports = {
 	run: (client, interaction) => {
 		const colunms = ['Command Name', 'Count'];
 		const includedCommands = client.commands.filter(x => x.uses).sort((a, b) => b.uses - a.uses);
-		if (includedCommands.size === 0) return interaction.reply({content: `No commands have been used yet.\nUptime: ${client.formatTime(client.uptime, 2, { commas: true, longNames: true })}`, allowedMentions: {repliedUser: false}}); 
+		if (includedCommands.size === 0) return interaction.reply(`No commands have been used yet.\nUptime: ${client.formatTime(client.uptime, 2, { commas: true, longNames: true })}`); 
 		const nameLength = Math.max(...includedCommands.map(x => x.data.name.length), colunms[0].length) + 2;
 		const amountLength = Math.max(...includedCommands.map(x => x.uses.toString().length), colunms[1].length) + 1;
 		const rows = [`${colunms[0] + ' '.repeat(nameLength - colunms[0].length)}|${' '.repeat(amountLength - colunms[1].length) + colunms[1]}\n`, '-'.repeat(nameLength) + '-'.repeat(amountLength) + '\n'];
@@ -32,7 +32,7 @@ module.exports = {
 		} else {
 			embed.addFields({name: '\u200b', value: `\`\`\`\n${rows.join('')}\`\`\``});
 		}
-		interaction.reply({embeds: [embed], allowedMentions: { repliedUser: false }});
+		interaction.reply({embeds: [embed]});
 	},
 	data: new SlashCommandBuilder().setName("statistics").setDescription("See a list of commands ordered by usage.")
 };

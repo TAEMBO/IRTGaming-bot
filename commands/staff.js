@@ -1,4 +1,3 @@
-const { Client, interaction, MessageEmbed, ClientVoiceManager } = require("discord.js");
 const {SlashCommandBuilder} = require("@discordjs/builders");
 module.exports = {
     run: async (client, interaction) => {
@@ -18,7 +17,7 @@ module.exports = {
             const mp_fm = await staff.mp_farmmanager.members.map(e=>`<@${e.user.id}>`).join("\n") || "None";
             const mp_tf = await staff.mp_trustedfarmer.members.filter(x=>!client.isMPStaff(client, x)).map(e=>`<@${e.user.id}>`).join("\n") || "None";
      
-            const embed = new MessageEmbed()
+            const embed = new client.embed()
                 .setTitle('__MP Staff Members__')
                 .setDescription(`<@&${client.config.mainServer.roles.mpmanager}>\n${mp_m}\n\n<@&${client.config.mainServer.roles.mpadmin}>\n${mp_a}\n\n<@&${client.config.mainServer.roles.mppublicadmin}>\n${mp_pa}\n\n<@&${client.config.mainServer.roles.mpfarmmanager}>\n${mp_fm}\n\n__**Trusted Farmers**__\n<@&${client.config.mainServer.roles.trustedfarmer}>\n${mp_tf}`)
                 .setColor(client.config.embedColor)
@@ -41,11 +40,11 @@ module.exports = {
             const mod = await staff.moderator.members.filter(x=>!x.roles.cache.has(client.config.mainServer.roles.helper)).map(e=>`<@${e.user.id}>`).join("\n") || "None";
             const helper = await staff.helper.members.map(e=>`<@${e.user.id}>`).join("\n") || "None";
      
-            const embed = new MessageEmbed()
+            const embed = new client.embed()
                 .setTitle('__Discord Staff Members__')
                 .setDescription(`<@&${client.config.mainServer.roles.mod}>\n${mod}\n\n<@&${client.config.mainServer.roles.helper}>\n${helper}`)
                 .setColor(client.config.embedColor)
-            interaction.reply({embeds: [embed], allowedMentions: { repliedUser: false }});
+            interaction.reply({embeds: [embed]});
         }
     },
     data: new SlashCommandBuilder()
@@ -53,14 +52,11 @@ module.exports = {
     .setDescription("Staff member information")
     .addSubcommand((optt)=>optt
             .setName("mp")
-            .setDescription("Shows all MP Staff members within Discord")
-        )
-        .addSubcommand((optt)=>optt
+            .setDescription("Shows all MP Staff members within Discord"))
+    .addSubcommand((optt)=>optt
             .setName("fs")
-            .setDescription("Shows all MP Staff usernames within FS")
-        )
-        .addSubcommand((optt)=>optt
+            .setDescription("Shows all MP Staff usernames within FS"))
+    .addSubcommand((optt)=>optt
             .setName("discord")
-            .setDescription("Shows all Discord staff members")
-        )
+            .setDescription("Shows all Discord staff members"))
 };

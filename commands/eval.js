@@ -17,8 +17,8 @@ const removeUsername = (text) => {
 };
 module.exports = {
 	run: async (client, interaction) => {
-		if (!client.config.eval.allowed) return interaction.reply({content: 'Eval is disabled.', allowedMentions: { repliedUser: false }});
-		if (!client.config.eval.whitelist.includes(interaction.user.id)) return interaction.reply({content: `You're not allowed to use eval.`, allowedMentions: {roles: false}});
+		if (!client.config.eval.allowed) return interaction.reply('Eval is disabled.');
+		if (!client.config.eval.whitelist.includes(interaction.user.id)) return interaction.reply(`You're not allowed to use eval.`);
 		const code = interaction.options.getString("code")
 		let output = 'error';
 		let error = false;
@@ -30,7 +30,7 @@ module.exports = {
 				.setTitle('__Eval__')
 				.addFields({name: 'Input', value: `\`\`\`js\n${code.slice(0, 1010)}\n\`\`\``}, {name: 'Output', value: `\`\`\`\n${err}\n\`\`\``})
 				.setColor('ff0000');
-			interaction.reply({embeds: [embed], allowedMentions: { repliedUser: false }}).catch((e)=>interaction.channel.send({embeds: [embed]})).then(errorEmbedMessage => {
+			interaction.reply({embeds: [embed]}).catch((e)=>interaction.channel.send({embeds: [embed]})).then(errorEmbedMessage => {
 				const filter = x => x.content === 'stack' && x.author.id === interaction.user.id
 				const messagecollector = interaction.channel.createMessageCollector({ filter, max: 1, time: 60000 });
 				messagecollector.on('collect', collected => {
@@ -50,7 +50,13 @@ module.exports = {
 			.setTitle('__Eval__')
 			.addFields({name: 'Input', value:`\`\`\`js\n${code.slice(0, 1010)}\n\`\`\``}, {name: 'Output', value: `\`\`\`${removeUsername(output).slice(0, 1016)}\n\`\`\``})
 			.setColor(client.config.embedColor);
-		interaction.reply({embeds: [embed], allowedMentions: { repliedUser: false }}).catch((e)=>interaction.channel.send({embeds: [embed]}));
+		interaction.reply({embeds: [embed]}).catch((e)=>interaction.channel.send({embeds: [embed]}));
 	},
-	data: new SlashCommandBuilder().setName("eval").setDescription("Evaluates some code!").addStringOption((opt)=>opt.setName("code").setDescription("The code to eval!").setRequired(true))
+	data: new SlashCommandBuilder()
+		.setName("eval")
+		.setDescription("Evaluates some code!")
+		.addStringOption((opt)=>opt
+			.setName("code")
+			.setDescription("The code to eval!")
+			.setRequired(true))
 };

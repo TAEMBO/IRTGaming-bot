@@ -1,9 +1,5 @@
-const {MessageEmbed} = require("discord.js");
 module.exports = {
     name: "messageDeleteBulk",
-    giveaway: false,
-    tracker: false,
-    frs: false,
     execute: async (client, messages) => {
         console.log("messages" + messages)
         const channel = await client.channels.fetch(client.config.mainServer.channels.modlogs);
@@ -12,9 +8,9 @@ module.exports = {
          messages.forEach((e)=>{
              text += `${e.author.tag}: ${e.content}\n`;
          });
-         const embed = new MessageEmbed()
-         .setDescription(`\`\`\`${text}\`\`\``.slice(0, 3900))
+         const embed = new client.embed()
          .setTitle(`${messages.size} Messages Were Deleted.`)
+         .setDescription(`\`\`\`${text}\`\`\``.slice(0, 3900))
          .addFields({name: 'Channel', value: `<#${messages.first().channel.id}>`})
          .setColor(client.config.embedColor)
          .setTimestamp(Date.now())

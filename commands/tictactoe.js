@@ -241,5 +241,24 @@ module.exports = {
 		});
 	}
 	},
-	data: new SlashCommandBuilder().setName("tictactoe").setDescription("Play the famous Tic Tac Toe with a partner, or view the leaderboard.").addSubcommand((optt)=>optt.setName("leaderboard").setDescription("View the tic tac toe leaderboard.")).addSubcommand((optt)=>optt.setName("stats").setDescription("View your or another users tic tac toe statistics.").addUserOption((opt)=>opt.setName("member").setDescription("The member's stats you woould like to view.").setRequired(false))).addSubcommand((optt)=>optt.setName("start").setDescription("Start's a game of tic tac toe.").addUserOption((opt)=>opt.setName("member").setDescription("Challenge someone!").setRequired(false)))
+	data: new SlashCommandBuilder()
+		.setName("tictactoe")
+		.setDescription("Play the famous Tic Tac Toe with a partner, or view the leaderboard.")
+		.addSubcommand((optt)=>optt
+			.setName("leaderboard")
+			.setDescription("View the tic tac toe leaderboard."))
+		.addSubcommand((optt)=>optt
+			.setName("stats")
+			.setDescription("View your or another users tic tac toe statistics.")
+			.addUserOption((opt)=>opt
+				.setName("member")
+				.setDescription("The member's stats you woould like to view.")
+				.setRequired(false)))
+		.addSubcommand((optt)=>optt
+			.setName("start")
+			.setDescription("Start's a game of tic tac toe.")
+			.addUserOption((opt)=>opt
+				.setName("member")
+				.setDescription("Challenge someone!")
+				.setRequired(false)))
 };

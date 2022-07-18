@@ -10,9 +10,11 @@ module.exports = {
             await role.edit({ permissions: perms });
             interaction.reply('Unfroze server')     
             
-         } else {
-            interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mod}> role to use this command`, allowedMentions: {roles: false}})
+        } else {
+            client.yOuNeEdMoD(client, interaction);
         }
     },
-    data: new SlashCommandBuilder().setName("unfreeze").setDescription("Unlock the server for causals.")
+    data: new SlashCommandBuilder()
+        .setName("unfreeze")
+        .setDescription("Unlock the server for causals.")
 };

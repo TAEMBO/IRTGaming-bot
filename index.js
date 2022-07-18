@@ -15,7 +15,7 @@ client.on("ready", async () => {
 	process.on("unhandledRejection", async (error)=>{
 		console.log(error)
 		await client.channels.fetch(client.config.mainServer.channels.testing_zone).then((channel)=>{
-        channel.send({content: `${client.config.eval.whitelist.map(x=>`<@${x}>`).join(", ")}`, embeds: [new Discord.MessageEmbed().setTitle("Error Caught!").setColor("#420420").setDescription(`**Error:** \`${error.message}\`\n\n**Stack:** \`${`${error.stack}`.slice(0, 2500)}\``)]})
+        channel.send({content: `${client.config.eval.whitelist.map(x=>`<@${x}>`).join(", ")}`, embeds: [new client.embed().setTitle("Error Caught!").setColor("#420420").setDescription(`**Error:** \`${error.message}\`\n\n**Stack:** \`${`${error.stack}`.slice(0, 2500)}\``)]})
 		})
 	});
 	setInterval(async () => {
@@ -32,10 +32,8 @@ client.on("ready", async () => {
 
 // punishment event loop
 setInterval(() => {
-	const now = Date.now();
-	const lrsStart = 1655929009244;
 	client.punishments._content.filter(x => x.endTime <= now && !x.expired).forEach(async punishment => {
-		console.log(`${punishment.member}"s ${punishment.type} should expire now`);
+		console.log(`${punishment.member}\'s ${punishment.type} should expire now`);
 		const unpunishResult = await client.punishments.removePunishment(punishment.id, client.user.id, "Time\'s up!");
 		console.log(unpunishResult);
 	});
@@ -263,7 +261,7 @@ Object.assign(client.punishments, {
 					client.makeModlogEntry(muteData, client);
 					this.addData(muteData);
 					this.forceSave();
-					return new client.embed()
+					const embedm = new client.embed()
 						.setTitle(`Case #${muteData.id}: Mute`)
 						.setDescription(`${member.user.tag}\n<@${member.user.id}>\n(\`${member.user.id}\`)`)
 						.addFields(
@@ -275,7 +273,7 @@ Object.assign(client.punishments, {
 								})} (${timeInMillis}ms)`
 							})
 						.setColor(client.config.embedColor)
-						.setThumbnail('https://cdn.discordapp.com/attachments/858068843570003998/942295666137370715/muted.png')
+						if (moderator !== '795443537356521502') {return embedm};
 				}
 			case "warn":
 				const warnData = { type, id: this.createId(), member: member.user.id, moderator, time: now };
@@ -292,7 +290,6 @@ Object.assign(client.punishments, {
 					.setDescription(`${member.user.tag}\n<@${member.user.id}>\n(\`${member.user.id}\`)`)
 					.addFields({name: 'Reason', value: `\`${reason || "unspecified"}\``})
 					.setColor(client.config.embedColor)
-					.setThumbnail('https://media.discordapp.net/attachments/858068843570003998/935651851494363136/c472i6ozwl561_remastered.jpg')
 					if (moderator !== '795443537356521502') {return embedw};
 				}
 		}

@@ -16,7 +16,13 @@ module.exports = {
 			{name: '🔹 Key Permissions', value: (permissions.includes('ADMINISTRATOR') ? ['ADMINISTRATOR'] : permissions.filter(x => keyPermissions.includes(x))).map(x => {    return x.split('_').map((y, i) => i === 0 ? y[0] + y.slice(1).toLowerCase() : y.toLowerCase()).join(' ')}).join(', ') || 'None'})
 			.setColor(role.color || '#fefefe')
 			.setThumbnail(role?.iconURL())
-		interaction.reply({embeds: [embed], allowedMentions: { repliedUser: false }});
+		interaction.reply({embeds: [embed]});
 	},
-	data: new SlashCommandBuilder().setName("roleinfo").setDescription("Get's information about a role.").addRoleOption((opt)=>opt.setName("role").setDescription("The role to get information on.").setRequired(true))
+	data: new SlashCommandBuilder()
+		.setName("roleinfo")
+		.setDescription("Get's information about a role.")
+		.addRoleOption((opt)=>opt
+			.setName("role")
+			.setDescription("The role to get information on.")
+			.setRequired(true))
 }

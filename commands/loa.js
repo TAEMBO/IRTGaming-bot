@@ -15,5 +15,7 @@ module.exports = {
             interaction.reply({content: 'LOA status removed', ephemeral: true});
         }
 	},
-	data: new SlashCommandBuilder().setName("loa").setDescription("Set yourself as LOA")
+	data: new SlashCommandBuilder()
+        .setName("loa")
+        .setDescription("Set yourself as LOA")
 };

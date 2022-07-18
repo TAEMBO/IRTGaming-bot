@@ -1,14 +1,9 @@
 module.exports = {
     name: "messageDelete",
-    giveaway: false,
-    tracker: false,
-    frs: false,
     execute: async (client, msg) => {
         const channel = await client.channels.fetch(client.config.mainServer.channels.modlogs);
         if (!client.config.botSwitches.logs) return;
         if (msg.partial) return;
-        if (msg.author.bot) return;
-        if (msg.guild?.id !== client.config.mainServer.id) return;
         const embed = new client.embed()
             .setTitle("Message Deleted!")
             .setDescription(`<@${msg.author.id}>\nContent:\n\`\`\`\n${msg.content}\n\`\`\`\nChannel: <#${msg.channel.id}>`)

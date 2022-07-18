@@ -4,7 +4,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 module.exports = {
 	run: async (client, interaction) => {
-		if (!client.hasModPerms(client, interaction.member)) return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mod}> role to use this command.`, allowedMentions: {roles: false}});
+		if (!client.hasModPerms(client, interaction.member)) return client.yOuNeEdMod(client, interaction);
 		const subCmd = interaction.options.getSubcommand();
 		if(subCmd === "update") {
 			const caseid = interaction.options.getInteger('case_id');
@@ -48,7 +48,7 @@ module.exports = {
 			}
 			if (punishment.expired) embed.addFields({name: '🔹 Expired', value: `This case has been overwritten by Case #${cancelledBy.id} for reason \`${cancelledBy.reason}\``})
 			if (punishment.cancels) embed.addFields({name: '🔹 Overwrites', value: `This case overwrites Case #${cancels.id} \`${cancels.reason}\``})
-			interaction.reply({embeds: [embed], allowedMentions: { repliedUser: false }});
+			interaction.reply({embeds: [embed]});
 		} else {
 			// if caseid is a user id, show their punishments, sorted by most recent
 			const userId = interaction.options.getUser("user").id;
@@ -60,7 +60,7 @@ module.exports = {
 			});
 
 			// if case id is not a punishment or a user, failed
-			if (!userPunishments || userPunishments.length === 0) return interaction.reply({content: 'No punishments found with that Case # or user ID', allowedMentions: { repliedUser: false }});
+			if (!userPunishments || userPunishments.length === 0) return interaction.reply('No punishments found with that Case # or user ID');
 
 			const pageNumber = interaction.options.getInteger("page") ?? 1;
 			const embed = new client.embed()
@@ -69,8 +69,39 @@ module.exports = {
 				.setFooter({text: `${userPunishments.length} total punishments. Viewing page ${pageNumber} out of ${Math.ceil(userPunishments.length / 25)}.`})
 				.setColor(client.config.embedColor)
 			embed.addFields(userPunishments.slice((pageNumber - 1) * 25, pageNumber * 25));
-			return interaction.reply({embeds: [embed], allowedMentions: { repliedUser: false }});
+			return interaction.reply({embeds: [embed]});
 		}
 	},
-	data: new SlashCommandBuilder().setName("case").setDescription("Views a member's cases, or a single case ID.").addSubcommand((optt)=>optt.setName("view").setDescription("Views a single case ID").addIntegerOption((opt)=>opt.setName("id").setDescription("The ID of the case.").setRequired(true))).addSubcommand((optt)=>optt.setName("member").setDescription("Views all a members cases").addUserOption((opt)=>opt.setName("user").setDescription("The user whomm's punishments you want to view.").setRequired(true)).addIntegerOption((opt)=>opt.setName("page").setDescription("The page number.").setRequired(false))).addSubcommand((optt)=>optt.setName("update").setDescription("Updates a cases reason.").addIntegerOption((opt)=>opt.setName("case_id").setDescription("The ID Of The Case To Update.").setRequired(true)).addStringOption((opt)=>opt.setName("reason").setDescription("The New Reason For The Case.").setRequired(true)))
+	data: new SlashCommandBuilder()
+		.setName("case")
+		.setDescription("Views a member's cases, or a single case ID.")
+		.addSubcommand((optt)=>optt
+			.setName("view")
+			.setDescription("Views a single case ID")
+			.addIntegerOption((opt)=>opt
+				.setName("id")
+				.setDescription("The ID of the case.")
+				.setRequired(true)))
+		.addSubcommand((optt)=>optt
+			.setName("member")
+			.setDescription("Views all a members cases")
+			.addUserOption((opt)=>opt
+				.setName("user")
+				.setDescription("The user whomm's punishments you want to view.")
+				.setRequired(true))
+			.addIntegerOption((opt)=>opt
+				.setName("page")
+				.setDescription("The page number.")
+				.setRequired(false)))
+		.addSubcommand((optt)=>optt
+			.setName("update")
+			.setDescription("Updates a cases reason.")
+			.addIntegerOption((opt)=>opt
+				.setName("case_id")
+				.setDescription("The ID Of The Case To Update.")
+				.setRequired(true))
+			.addStringOption((opt)=>opt
+				.setName("reason")
+				.setDescription("The New Reason For The Case.")
+				.setRequired(true)))
 };

@@ -59,7 +59,6 @@ class YClient extends Client {
 	        this.commands.set(command.data.name, command);
 	        this.registery.push(command.data.toJSON())
            }
-           this.commands.get("ping").spammers = new this.collection();
     }
     formatPunishmentType(punishment, client, cancels) {
         if (punishment.type === 'removeOtherPunishment') {
@@ -100,6 +99,9 @@ class YClient extends Client {
     isMPStaff(client, guildMember) {
         return this.config.mainServer.MPStaffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
     };
+    yOuNeEdMoD(client, interaction) {
+        return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mod}> role to use this command`, allowedMentions: {roles: false}});
+    }
 
     async FSstatsLoop(client, serverName, Channel, Message) {
         const axios = require("axios");
@@ -141,7 +143,7 @@ class YClient extends Client {
         try {
             FSserver = await axios.get(serverName, {timeout: 5000}); // Fetch dedicated-server-stats.json
         } catch (err) {
-            return console.log(`stats leaveJoin fai; ${serverName}`); // Blame Red
+            return console.log(`stats leaveJoin failed; ${serverName}`); // Blame Red
         }
     
         await FSserver.data.slots.players.forEach(player => {
@@ -342,25 +344,21 @@ class YClient extends Client {
         client.channels.cache.get(client.config.mainServer.channels.staffreports).send({embeds: [embed]});
     };
     async punish(client, interaction, type) {
-        if (!client.hasModPerms(client, interaction.member)) return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mod}> role to use this command.`, allowedMentions: {roles: false}});
-        if (type !== ('warn' || 'mute') && interaction.member.roles.cache.has(client.config.mainServer.roles.helper)) return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mod}> role to use this command.`, allowedMentions: {roles: false}});
+        if (!client.hasModPerms(client, interaction.member)) return client.yOuNeEdMoD(client, interaction);
+        if (type !== ('warn' || 'mute') && interaction.member.roles.cache.has(client.config.mainServer.roles.helper)) return client.yOuNeEdMoD(client, interaction);
         const member = interaction.options.getMember("member");
         const time = interaction.options.getString("time");
         const reason = interaction.options.getString("reason") ?? "None";
 	if (interaction.user.id === member.id) return interaction.reply(`You cannot ${type} yourself.`)
 	if (client.hasModPerms(client, member)) return interaction.reply(`You cannot ${type} another staff member.`)
         const result = await client.punishments.addPunishment(type, member, { time, reason, interaction }, interaction.user.id);
-        if(typeof result !== String){
-            interaction.reply({embeds: [result]});
-        } else {
-            interaction.reply({content: `${result}`})
-        }
+        (typeof result === String ? interaction.reply({content: `${result}`}) : interaction.reply({embeds: [result]}))
     };
     async unPunish(client, interaction) {
-        if (!client.hasModPerms(client, interaction.member)) return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mod}> role to use this command.`, ephemeral: true, allowedMentions: {roles: false}});
+        if (!client.hasModPerms(client, interaction.member)) return client.yOuNeEdMoD(client, interaction);
         const punishment = client.punishments._content.find(x => x.id === interaction.options.getInteger("case_id"));
         if (!punishment) return interaction.reply({content: "that isn't a valid case ID.", ephemeral: true});
-        if (punishment.type !== 'warn' && interaction.member.roles.cache.has(client.config.mainServer.roles.helper)) return interaction.reply({content: 'Helpers can only remove warnings.', ephemeral: true, allowedMentions: {roles: false}});
+        if (punishment.type !== ('warn' || 'mute') && interaction.member.roles.cache.has(client.config.mainServer.roles.helper)) return client.yOuNeEdMoD(client, interaction);
         const reason = interaction.options.getString("reason") ?? "None";
         const unpunishResult = await client.punishments.removePunishment(punishment.id, interaction.user.id, reason);
         interaction.reply(unpunishResult);

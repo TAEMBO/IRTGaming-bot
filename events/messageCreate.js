@@ -1,14 +1,13 @@
+const { ClientVoiceManager } = require('discord.js');
+
 module.exports = {
     name: "messageCreate",
-    tracker: false,
-    giveaway: false,
-	frs: false,
     execute: async (client, message) => {
     if (!client.config.botSwitches.commands && !client.config.eval.whitelist.includes(message.author.id)) return; // bot is being run in dev mode and a non eval whitelisted user sent a message. ignore the message.
 	if (message.partial) return;
 	if (message.author.bot) return;
 	if (message.channel.type === "DM") {
-        if (client.dmForwardBlacklist._content.includes(message.author.id) || message.author.bot) return;
+        if (client.dmForwardBlacklist._content.includes(message.author.id)) return;
         if (client.games.some(x => x === message.author.tag)) return;
         const channel = client.channels.cache.get(client.config.mainServer.channels.testing_zone);
 		const irt = client.guilds.cache.get(client.config.mainServer.id);
@@ -65,22 +64,29 @@ module.exports = {
 		delete client.repeatedMessages[message.author.id];
 	}
 
-	// repeated messages
+	// repeated messages; banned words
+	const rparr = message.content.toLowerCase().split(' ');
+	const Whitelist = [
+		'688803177184886794', //farm-manager-chat
+		'906960370919436338', //mp-action-log
+		'830916009107652630', //public-admin-chat
+		'690549465559597127', //mp-ban-list
+		'677146047868436480', //mp-admin-chat
+		'828982825734504448', //mp-server-managers-chat
+	];
 
-	const rparg = message.content.toLowerCase().split(' ');
-	if (client.bannedWords._content.some(x => rparg.includes(x)) && !client.hasModPerms(client, message.member) && client.config.botSwitches.automod) {
-		const thisContent = message.content.slice(0, 32);
+	if (client.bannedWords._content.some(x => rparr.includes(x)) && !client.hasModPerms(client, message.member) && !Whitelist.includes(message.channel.id) && client.config.botSwitches.automod) {
 		message.delete();
 		message.channel.send('That word is banned here.').then(x => setTimeout(() => x.delete(), 5000));
 		if (client.repeatedMessages[message.author.id]) {
 			// add this message to the list
-			client.repeatedMessages[message.author.id].set(message.createdTimestamp, { cont: thisContent, ch: message.channel.id });
+			client.repeatedMessages[message.author.id].set(message.createdTimestamp, { cont: 0, ch: message.channel.id });
 
 			// reset timeout
 			clearTimeout(client.repeatedMessages[message.author.id].to);
 			client.repeatedMessages[message.author.id].to = setTimeout(onTimeout, 30000);
 
-			// this is the time in which 3 messages have to be sent, in milliseconds
+			// this is the time in which 4 messages have to be sent, in milliseconds
 			const threshold = 30000;
 
 			// message mustve been sent after (now - threshold), so purge those that were sent earlier
@@ -88,77 +94,88 @@ module.exports = {
 
 			// a spammed message is one that has been sent at least 4 times in the last threshold milliseconds
 			const spammedMessage = client.repeatedMessages[message.author.id]?.find(x => {
-				return client.repeatedMessages[message.author.id].size >= 4;
+				return client.repeatedMessages[message.author.id].filter(y => x.cont === y.cont).size >= 4;
 			});
 
 			// if a spammed message exists;
 			if (spammedMessage) {
-				// softban
-				const softbanResult = await client.punishments.addPunishment("mute", message.member, { reason: "Automod; banned words", time: '30m' }, client.user.id);
+				// mute
+				const muteResult = await client.punishments.addPunishment("mute", message.member, { reason: "Automod; banned words", time: '30m' }, client.user.id);
 
 				// and clear their list of long messages
 				delete client.repeatedMessages[message.author.id];
 			}
 		} else {
 			client.repeatedMessages[message.author.id] = new client.collection();
-			client.repeatedMessages[message.author.id].set(message.createdTimestamp, { cont: message.content.slice(0, 32), ch: message.channel.id });
+			client.repeatedMessages[message.author.id].set(message.createdTimestamp, { cont: 0, ch: message.channel.id });
+
+			// auto delete after 30 seconds
+			client.repeatedMessages[message.author.id].to = setTimeout(onTimeout, 30000);
+		}
+	}
+
+	// repeated messages; Discord advertisement
+	if (message.content.includes("discord.gg/") && !client.hasModPerms(client, message.member) && !client.isMPStaff(client, message.member) && client.config.botSwitches.automod) {
+		message.delete();
+		message.channel.send("No advertising other Discord servers.").then(x => setTimeout(() => x.delete(), 10000))
+		if (client.repeatedMessages[message.author.id]) {
+			// add this message to the list
+			client.repeatedMessages[message.author.id].set(message.createdTimestamp, { cont: 1, ch: message.channel.id });
+
+			// reset timeout
+			clearTimeout(client.repeatedMessages[message.author.id].to);
+			client.repeatedMessages[message.author.id].to = setTimeout(onTimeout, 60000);
+
+			// this is the time in which 2 messages have to be sent, in milliseconds
+			const threshold = 60000;
+
+			// message mustve been sent after (now - threshold), so purge those that were sent earlier
+			client.repeatedMessages[message.author.id] = client.repeatedMessages[message.author.id].filter((x, i) => i >= Date.now() - threshold)
+
+			// a spammed message is one that has been sent at least 2 times in the last threshold milliseconds
+			const spammedMessage = client.repeatedMessages[message.author.id]?.find(x => {
+				return client.repeatedMessages[message.author.id].filter(y => x.cont === y.cont).size >= 2;
+			});
+
+			// if a spammed message exists;
+			if (spammedMessage) {
+				// mute
+				const muteResult = await client.punishments.addPunishment("mute", message.member, { reason: "Automod; Discord advertisement", time: '1h' }, client.user.id);
+
+				// and clear their list of long messages
+				delete client.repeatedMessages[message.author.id];
+			}
+		} else {
+			client.repeatedMessages[message.author.id] = new client.collection();
+			client.repeatedMessages[message.author.id].set(message.createdTimestamp, { cont: 1, ch: message.channel.id });
 
 			// auto delete after 1 minute
 			client.repeatedMessages[message.author.id].to = setTimeout(onTimeout, 60000);
 		}
 	}
 
-		const WHITELISTED_CHANNELS = [
-			'552565546093248512', //general
-			'552609312560644112', //game-chat
-			'553345291839864832', //community-ideas
-			'743129368238489601', //consumables-chat
-			'732369157617614938', //tech-talk
-			'552587653304942594', //pictures
-			'558777821846044676', //memes
-			'855577815491280958', //counting
-			'708446663051837500', //trivia
-			'891791005098053682', //fs22-silage
-			'729823615096324166', //fs22-grain
-			'982143077554720768', //mf-public-chat
+	const WHITELISTED_CHANNELS = [
+		'552565546093248512', //general
+		'552609312560644112', //game-chat
+		'553345291839864832', //community-ideas
+		'743129368238489601', //consumables-chat
+		'732369157617614938', //tech-talk
+		'552587653304942594', //pictures
+		'558777821846044676', //memes
+		'855577815491280958', //counting
+		'708446663051837500', //trivia
+		'891791005098053682', //fs22-silage
+		'729823615096324166', //fs22-grain
+		'982143077554720768', //mf-public-chat
 		];
-		// if message was not sent in a whitelisted channel and this is the right server, count towards user level
-		if (WHITELISTED_CHANNELS.includes(message.channel.id) && message.guild.id === client.config.mainServer.id){ 
-			client.userLevels.incrementUser(message.author.id);
-			const eligiblity = await client.userLevels.getEligible(message.member);			
-			let nextRoleKey;
-			//const roleArray = [];
-			//client.config.mainServer.roles.levels.forEach((e)=>{roleArray.push(e.id)});
-			Object.values(client.config.mainServer.roles.levels).map(x=>x.id).forEach(async (role)=>{
-				if(message.member.roles.cache.has(role)){
-					nextRoleKey = parseInt(`${message.guild.roles.cache.get(role).name}`.toLowerCase().replace("level ", ""));
-				}
-			});
-			if(nextRoleKey){
-			// eligibility information about the next level role
-			const nextRoleReq = eligiblity.roles[nextRoleKey ? nextRoleKey : 0];
-			const lastRoleReq = nextRoleKey ? eligiblity.roles[nextRoleKey - 1] : null;
+	// if message was sent in a whitelisted channel, count towards user level
+	if (WHITELISTED_CHANNELS.includes(message.channel.id)) {client.userLevels.incrementUser(message.author.id)};
 	
-			// next <Role> in level roles that user is going to get 
-			const nextRole = nextRoleReq ? nextRoleReq.role.id : undefined;
-			const lastRole = lastRoleReq ? lastRoleReq.role.id : undefined;
-			if(nextRoleReq.eligible){
-			message.member.roles.add(nextRole);
-			message.member.roles.remove(lastRole);
-			// client.channels.cache.get(client.config.mainServer.channels.botcommands).send({content: `<@${message.author.id}> has received the <@&${nextRole}> role.`, allowedMentions: {roles: false}});
-			}
-			}
-		}
-	// handle discord invite links
-	if (message.content.includes("discord.gg/") && !client.hasModPerms(client, message.member) && !client.isMPStaff(client, message.member) && client.config.botSwitches.automod) {
-		message.delete();
-		message.channel.send("No advertising other Discord servers.").then(x => setTimeout(() => x.delete(), 10000))
-	}
-	if (message.content.startsWith("!restart") && client.config.eval.whitelist.includes(message.author.id)) {
+	if (message.content.startsWith("!restart") && message.author.roles.cache.has(client.config.mainServer.roles.mpadmin)) {
 		console.log('restart')
 		message.reply('Restarting...').then(async ()=> eval(process.exit(-1)))
 	}
-	if (message.content.startsWith('!eval') && client.isMPStaff(client, message.member)) {
+	if (message.content.startsWith('!eval') && message.author.roles.cache.has(client.config.mainServer.roles.mpadmin) && client.config.eval.allowed) {
 		const util = require('util');
 		const args = message.content.replace(/\n/g, " ").split(" ");
 		const removeUsername = (text) => {
@@ -176,8 +193,6 @@ module.exports = {
 		}
 		return array.join('\\');
 		};
-			if (!client.config.eval.allowed) return message.channel.send('Eval is disabled.');
-			if (!client.config.eval.whitelist.includes(message.author.id)) return message.channel.send('You\'re not allowed to use eval');
 			const code = message.content.slice(args[0].length + 1);
 			let output = 'error';
 			let error = false;
@@ -210,8 +225,9 @@ module.exports = {
 				.setTitle('__Eval__')
 				.addField('Input', `\`\`\`js\n${code.slice(0, 1010)}\n\`\`\``)
 				.addField('Output', `\`\`\`${removeUsername(output).slice(0, 1016)}\n\`\`\``)
-				.setColor(3971825);
+				.setColor(client.config.embedColor);
 			message.channel.send({embeds: [embed]});
+			console.log(`!eval used by ${message.author.tag}`)
 		}
 	// auto responses
 	if (message.content.toLowerCase().includes('giants moment')) {

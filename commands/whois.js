@@ -22,5 +22,11 @@ module.exports = {
 				)}
 		interaction.reply({embeds: [embed]});
 	},
-	data: new SlashCommandBuilder().setName("whois").setDescription("Gets info on a user.").addUserOption((opt)=>opt.setName("member").setDescription("The member to get info on.").setRequired(true))
+	data: new SlashCommandBuilder()
+		.setName("whois")
+		.setDescription("Gets info on a user.")
+		.addUserOption((opt)=>opt
+			.setName("member")
+			.setDescription("The member to get info on.")
+			.setRequired(false))
 };

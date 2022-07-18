@@ -12,7 +12,7 @@ module.exports = {
             channel.send({content: `<@${interaction.user.id}> (${interaction.user.tag}) <@&${client.config.mainServer.roles.subscriber}> role verification`, files: [pic], allowedMentions: {roles: false}})
             interaction.reply({content: `Verification sent, please wait for someone to verify your subscription. You will then receive the <@&${client.config.mainServer.roles.subscriber}> role.`, ephemeral: true})
         } else if (subCmd === 'accept') {
-            if (!client.hasModPerms(client, interaction.member)) return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mod}> role to use this command.`, allowedMentions: {roles: false}});
+            if (!client.hasModPerms(client, interaction.member)) return client.yOuNeEdMoD(client, interaction);
             const member = interaction.options.getMember("member");
 
             member.roles.add(client.config.mainServer.roles.subscriber)

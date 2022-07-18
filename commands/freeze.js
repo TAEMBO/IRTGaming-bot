@@ -12,8 +12,10 @@ module.exports = {
             interaction.reply('Froze server')
         
         } else {
-            interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mod}> role to use this command.`, allowedMentions: {roles: false}})
+            client.yOuNeEdMod(client, interaction);
         }
 	},
-    data: new SlashCommandBuilder().setName("freeze").setDescription("Lock the server for casuals")
+    data: new SlashCommandBuilder()
+        .setName("freeze")
+        .setDescription("Lock the server for casuals")
 };

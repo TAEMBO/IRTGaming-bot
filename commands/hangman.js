@@ -150,5 +150,11 @@ module.exports = {
 			ea.reply(`The word doesn\'t include that ${!textGuess ? 'letter' : 'piece of text'}.\nAn incorrect guess leads to the addition of things to the drawing. It now looks like this:\n\`\`\`\n${stages[fouls - 1].join('\n')}\n\`\`\`` + loseText);
 		}
 	},
-	data: new SlashCommandBuilder().setName("hangman").setDescription("Starts a game of hangman!").addStringOption((opt)=>opt.setName("word").setDescription("The word to users have to try and guess.").setRequired(true))
+	data: new SlashCommandBuilder()
+		.setName("hangman")
+		.setDescription("Starts a game of hangman!")
+		.addStringOption((opt)=>opt
+			.setName("word")
+			.setDescription("The word to users have to try and guess.")
+			.setRequired(true))
 };

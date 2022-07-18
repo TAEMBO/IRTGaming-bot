@@ -175,7 +175,7 @@ module.exports = {
 		console.log('restart')
 		message.reply('Restarting...').then(async ()=> eval(process.exit(-1)))
 	}
-	if (message.content.startsWith('!eval') && message.author.roles.cache.has(client.config.mainServer.roles.mpadmin) && client.config.eval.allowed) {
+	if (message.content.startsWith('!eval') && message.member.roles.cache.has(client.config.mainServer.roles.mpadmin) && client.config.eval.allowed) {
 		const util = require('util');
 		const args = message.content.replace(/\n/g, " ").split(" ");
 		const removeUsername = (text) => {

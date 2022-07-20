@@ -25,7 +25,13 @@ module.exports = {
 			if (member.premiumSinceTimestamp !== null) {
 				embed.addFields(
 					{name: '🔹 Server Boosting Since', value: `<t:${Math.round(new Date(member.premiumSinceTimestamp) / 1000)}>\n<t:${Math.round(new Date(member.premiumSinceTimestamp) / 1000)}:R>`}
-				)}
+				)
+			}
+			if (member.presence.status) {
+				embed.addFields(
+					{name: `🔹 Status: ${member.presence.status}`, value:`${member.presence.status === 'offline' ? 'N/A' : `Web: ${member.presence.clientStatus.web ? member.presence.clientStatus.web : 'offline'}\nMobile: ${member.presence.clientStatus.mobile ? member.presence.clientStatus.mobile : 'offline'}\nDesktop: ${member.presence.clientStatus.desktop ? member.presence.clientStatus.desktop : 'offline'}`}`}
+				)
+			}
 		interaction.reply({embeds: [embed]});
 	},
 	data: new SlashCommandBuilder()

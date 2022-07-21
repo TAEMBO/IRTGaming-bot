@@ -170,7 +170,7 @@ module.exports = {
 	// if message was sent in a whitelisted channel, count towards user level
 	if (WHITELISTED_CHANNELS.includes(message.channel.id)) {client.userLevels.incrementUser(message.author.id)};
 	
-	if (message.content.startsWith("!restart") && message.author.roles.cache.has(client.config.mainServer.roles.mpadmin)) {
+	if (message.content.startsWith("!restart") && message.member.roles.cache.has(client.config.mainServer.roles.mpadmin)) {
 		console.log('restart')
 		message.reply('Restarting...').then(async ()=> eval(process.exit(-1)))
 	}

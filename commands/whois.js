@@ -49,9 +49,8 @@ module.exports = {
 					}
 				interaction.reply({embeds: [embed0]});
 			case 'user':
-				const User = await client.users.fetch(interaction.options.getString("user"));
+				const User = await client.users.fetch(interaction.options.getString("user"), [force = true]).catch((e) => interaction.reply('A user with that ID could not be found.'));
 
-				if (!User) return interaction.reply('A user with that ID could not be found.');
 				const embed1 = new client.embed()
 					.setThumbnail(User.avatarURL({ format: 'png', dynamic: true, size: 2048}) || User.defaultAvatarURL)
 					.setTitle(`User info: ${User.tag}`)

@@ -6,6 +6,18 @@ function Status(client, activities) {
 }
 // ${member.presence.activities.forEach((s) => Status(client, s))}
 
+function convert(status) {
+switch (status) {
+case "offline":
+return "⚫";
+case "idle":
+return "🟡";
+case "dnd":
+return "🔴";
+case "online"
+return "🟢";
+}
+}
 module.exports = {
 	run: async (client, interaction, user) => {
 		const member = interaction.options.getMember("member") ?? interaction.member;
@@ -28,7 +40,7 @@ module.exports = {
 			}
 			if (member.presence) {
 				embed.addFields(
-					{name: `🔹 Status: ${member.presence.status}`, value:`${member.presence.status === 'offline' ? 'N/A' : `Web: ${member.presence.clientStatus.web ? member.presence.clientStatus.web : 'offline'}\nMobile: ${member.presence.clientStatus.mobile ? member.presence.clientStatus.mobile : 'offline'}\nDesktop: ${member.presence.clientStatus.desktop ? member.presence.clientStatus.desktop : 'offline'}`}`}
+					{name: `🔹 Status: ${member.presence.status}`, value:`${member.presence.status === 'offline' ? 'N/A' : `Web: ${member.presence.clientStatus.web ? convert(member.presence.clientStatus.web) : convert('offline')}\nMobile: ${member.presence.clientStatus.mobile ? convert(member.presence.clientStatus.mobile) : convert('offline')}\nDesktop: ${member.presence.clientStatus.desktop ? convert(member.presence.clientStatus.desktop) : convert('offline')}`}`}
 				)
 			}
 		interaction.reply({embeds: [embed]});

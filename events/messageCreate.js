@@ -171,64 +171,6 @@ module.exports = {
 	// if message was sent in a whitelisted channel, count towards user level
 	if (WHITELISTED_CHANNELS.includes(message.channel.id)) {client.userLevels.incrementUser(message.author.id)};
 	
-	if (message.content.startsWith("!restart") && message.author.roles.cache.has(client.config.mainServer.roles.mpadmin)) {
-		console.log('restart')
-		message.reply('Restarting...').then(async ()=> eval(process.exit(-1)))
-	}
-	if (message.content.startsWith('!eval') && message.member.roles.cache.has(client.config.mainServer.roles.mpadmin) && client.config.eval.allowed) {
-		const util = require('util');
-		const args = message.content.replace(/\n/g, " ").split(" ");
-		const removeUsername = (text) => {
-		let matchesLeft = true;
-		const array = text.split('\\');
-		while (matchesLeft) {
-			let usersIndex = array.indexOf('Users');
-			if (usersIndex < 1) matchesLeft = false;
-			else {
-				let usernameIndex = usersIndex + 1;
-				if (array[usernameIndex].length === 0) usernameIndex += 1;
-				array[usernameIndex] = '#'.repeat(array[usernameIndex].length);
-				array[usersIndex] = 'Us\u200bers';
-			}
-		}
-		return array.join('\\');
-		};
-			const code = message.content.slice(args[0].length + 1);
-			let output = 'error';
-			let error = false;
-			try {
-				output = await eval(code);
-			} catch (err) {
-				error = true;
-				const embed = new client.embed()
-					.setTitle('__Eval__')
-					.addField('Input', `\`\`\`js\n${code.slice(0, 1010)}\n\`\`\``)
-					.addField('Output', `\`\`\`\n${err}\n\`\`\``)
-					.setColor('ff0000');
-				message.channel.send({embeds: [embed]}).then(errorEmbedMessage => {
-					const filter = x => x.content === 'stack' && x.author.id === message.author.id
-					const messagecollector = message.channel.createMessageCollector({ filter, max: 1, time: 60000 });
-					messagecollector.on('collect', collected => {
-						collected.channel.send(`\`\`\`\n${removeUsername(err.stack)}\n\`\`\``);
-					});
-				});
-			}
-			if (error) return;
-			if (typeof output === 'object') {
-				output = 'js\n' + util.formatWithOptions({ depth: 1 }, '%O', output);
-			} else {
-				output = '\n' + String(output);
-			}
-			const regexp = new RegExp(client.token, 'g');
-			output = output.replace(regexp, 'TOKEN_LEAK');
-			const embed = new client.embed()
-				.setTitle('__Eval__')
-				.addField('Input', `\`\`\`js\n${code.slice(0, 1010)}\n\`\`\``)
-				.addField('Output', `\`\`\`${removeUsername(output).slice(0, 1016)}\n\`\`\``)
-				.setColor(client.config.embedColor);
-			message.channel.send({embeds: [embed]});
-			console.log(`!eval used by ${message.author.tag}`)
-		}
 	// auto responses
 	if (message.content.toLowerCase().includes('giants moment')) {
 		message.react('™️');

@@ -137,7 +137,7 @@ class YClient extends Client {
         const PGdata = require('./databases/PGPlayerData.json')
         const PSdata = require('./databases/PSPlayerData.json')
         const MFdata = require('./databases/MFPlayerData.json')
-        const BLACKLIST = ["Bernie", "RedbaD", "SpongeBoi69", "Kazmerev"]
+        const BLACKLIST = ["Bernie", "RedbaD", "SpongeBoi69", "Kazmerev", "Hungarian__0101"]
         let FSserver;
     
         try {

@@ -70,6 +70,7 @@ module.exports = {
 		'688803177184886794', //farm-manager-chat
 		'906960370919436338', //mp-action-log
 		'830916009107652630', //public-admin-chat
+		'733828561215029268', //player-check
 		'690549465559597127', //mp-ban-list
 		'677146047868436480', //mp-admin-chat
 		'828982825734504448', //mp-server-managers-chat

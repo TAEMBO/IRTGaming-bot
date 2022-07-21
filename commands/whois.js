@@ -6,6 +6,18 @@ function Status(client, activities) {
 }
 // ${member.presence.activities.forEach((s) => Status(client, s))}
 
+function convert(status) {
+switch (status) {
+case "offline":
+"⚫";
+case "idle":
+"🟡";
+case "dnd":
+"🔴";
+case "online":
+"🟢";
+}
+}
 module.exports = {
 	run: async (client, interaction, user) => {
 		const member = interaction.options.getMember("member") ?? interaction.member;

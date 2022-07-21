@@ -49,7 +49,9 @@ module.exports = {
 					}
 				interaction.reply({embeds: [embed0]});
 			case 'user':
-				const User = await client.users.fetch(interaction.options.getString("user"), [force = true]).catch((e) => interaction.reply('A user with that ID could not be found.'));
+				let error = false;
+				const User = await client.users.fetch(interaction.options.getString("user"), [force = true]).catch((e) => error = true);
+				if (error) return interaction.reply('A user with that ID could not be found');
 
 				const embed1 = new client.embed()
 					.setThumbnail(User.avatarURL({ format: 'png', dynamic: true, size: 2048}) || User.defaultAvatarURL)
@@ -59,7 +61,6 @@ module.exports = {
 					.addFields(
 					{name: '🔹 Account Creation Date', value: `<t:${Math.round(new Date(User.createdTimestamp) / 1000)}>\n<t:${Math.round(new Date(User.createdTimestamp) / 1000)}:R>`})
 					.setColor(client.config.embedColor)
-					.setImage(User.bannerURL({ format: 'png', dynamic: true, size: 1024}))
 				interaction.reply({embeds: [embed1]});
 		}
 	},

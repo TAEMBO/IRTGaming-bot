@@ -9,13 +9,13 @@ function Status(client, activities) {
 function convert(status) {
 switch (status) {
 case "offline":
-return "⚫";
+"⚫";
 case "idle":
-return "🟡";
+"🟡";
 case "dnd":
-return "🔴";
+"🔴";
 case "online"
-return "🟢";
+"🟢";
 }
 }
 module.exports = {

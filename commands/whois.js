@@ -38,12 +38,12 @@ module.exports = {
 					.setColor(member.displayColor || client.config.embedColor)
 					.setImage(member.user.bannerURL({ format: 'png', dynamic: true, size: 1024}))
 					if (member.premiumSinceTimestamp !== null) {
-						embed.addFields(
+						embed0.addFields(
 							{name: '🔹 Server Boosting Since', value: `<t:${Math.round(new Date(member.premiumSinceTimestamp) / 1000)}>\n<t:${Math.round(new Date(member.premiumSinceTimestamp) / 1000)}:R>`, inline: true}
 						)
 					}
 					if (member.presence) {
-						embed.addFields(
+						embed0.addFields(
 							{name: `🔹 Status: ${member.presence.status}`, value:`${member.presence.status === 'offline' ? 'N/A' : `Web: ${member.presence.clientStatus.web ? convert(member.presence.clientStatus.web) : convert('offline')}\nMobile: ${member.presence.clientStatus.mobile ? convert(member.presence.clientStatus.mobile) : convert('offline')}\nDesktop: ${member.presence.clientStatus.desktop ? convert(member.presence.clientStatus.desktop) : convert('offline')}`}`, inline: true}
 						)
 					}

@@ -213,7 +213,7 @@ module.exports = {
                 console.log(`stats all; PG failed`)
             }
             try {
-                MF = await axios.get(client.tokens.mf, {timeout: 1000});
+                MF = await axios.get(client.tokens.df, {timeout: 1000});
             } catch (err) {
                 console.log(`stats all; MF failed`)
             }
@@ -247,7 +247,7 @@ module.exports = {
         } else if (subCmd === 'pg') {
             FSstats(client, interaction, client.tokens.pg, 'PGPlayerData');
         } else if (subCmd === 'mf') {
-            FSstats(client, interaction, client.tokens.mf, 'MFPlayerData');
+            FSstats(client, interaction, client.tokens.df, 'MFPlayerData');
         }
     },
     data: new SlashCommandBuilder()

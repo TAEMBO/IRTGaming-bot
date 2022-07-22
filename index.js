@@ -45,7 +45,7 @@ if (client.config.botSwitches.stats) {
 	setInterval(async () => {
 		client.FSstatsLoop(client, client.tokens.ps, '891791005098053682', '980240981922291752')
 		client.FSstatsLoop(client, client.tokens.pg, '729823615096324166', '980241004718329856')
-		client.FSstatsLoop(client, client.tokens.df, '982143077554720768', '985586585707900928')
+		// client.FSstatsLoop(client, client.tokens.df, '982143077554720768', '985586585707900928')
 	}, 15000);
 
 	setInterval(async () => {

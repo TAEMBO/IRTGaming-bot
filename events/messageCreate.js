@@ -53,10 +53,11 @@ module.exports = {
 		message.channel.awaitMessages({ filter, max: 1, time: 60000, errors: ["time"]}).then(async collected => {
 			console.log("received \"y\" from staff member, indicating to mute someone");
 			try {
-				const muteResult = await client.punishments.addPunishment("mute", message.member, { time: "5m", reason: "Useless staff ping", message: message}, collected.first().author.id);
+				const muteResult = await client.punishments.addPunishment("mute", message.member, { time: "5m", reason: "Automod; staff ping misuse", message: message}, collected.first().author.id);
 			} catch (error) {
 				console.log("muting failed cuz", error);
 			}
+			collected.react('✅');
 		}).catch(() => console.log("failed to collect \"y\" from staff"));
 	}
 

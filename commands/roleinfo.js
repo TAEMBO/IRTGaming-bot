@@ -9,11 +9,11 @@ module.exports = {
 		const embed = new client.embed()
 			.setTitle(`Role Info: ${role.name}`)
 			.addFields(
-			{name: '🔹 ID', value: `\`${role.id}\``},
-			{name: '🔹 Color', value: `\`${role.hexColor}\``},
-			{name: '🔹 Creation Date', value: `<t:${Math.round(new Date(role.createdTimestamp) / 1000)}>\n<t:${Math.round(new Date(role.createdTimestamp) / 1000)}:R> `},
-			{name: '🔹 Misc', value: `Hoist: \`${role.hoist}\`\nMentionable: \`${role.mentionable}\`\nPosition: \`${role.position}\` from bottom\nMembers: \`${role.members.size}\`\n${role.members.size < 11 ? Role : ''}`},
-			{name: '🔹 Key Permissions', value: (permissions.includes('ADMINISTRATOR') ? ['ADMINISTRATOR'] : permissions.filter(x => keyPermissions.includes(x))).map(x => {    return x.split('_').map((y, i) => i === 0 ? y[0] + y.slice(1).toLowerCase() : y.toLowerCase()).join(' ')}).join(', ') || 'None'})
+			{name: '🔹 ID', value: `\`${role.id}\``, inline: true},
+			{name: '🔹 Color', value: `\`${role.hexColor}\``, inline: true},
+			{name: '🔹 Creation Date', value: `<t:${Math.round(new Date(role.createdTimestamp) / 1000)}>\n<t:${Math.round(new Date(role.createdTimestamp) / 1000)}:R> `, inline: true},
+			{name: '🔹 Misc', value: `Hoist: \`${role.hoist}\`\nMentionable: \`${role.mentionable}\`\nPosition: \`${role.position}\` from bottom\nMembers: \`${role.members.size}\`\n${role.members.size < 11 ? Role : ''}`, inline: true},
+			{name: '🔹 Key Permissions', value: (permissions.includes('ADMINISTRATOR') ? ['ADMINISTRATOR'] : permissions.filter(x => keyPermissions.includes(x))).map(x => {    return x.split('_').map((y, i) => i === 0 ? y[0] + y.slice(1).toLowerCase() : y.toLowerCase()).join(' ')}).join(', ') || 'None', inline: true})
 			.setColor(role.color || '#fefefe')
 			.setThumbnail(role?.iconURL())
 		interaction.reply({embeds: [embed]});

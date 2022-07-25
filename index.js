@@ -100,7 +100,6 @@ Object.assign(client.tictactoeDb, {
 
 // userLevels
 Object.assign(client.userLevels, {
-	_requirements: client.config.mainServer.roles.levels,
 	_milestone() {
 		const milestones = [10, 100, 1000, 50000, 69696, 100000, 200000, 300000, 400000, 420000, 500000]; // always keep the previously achived milestone in the array so the progress is correct. here you can stack as many future milestones as youd like
 		const total = Object.values(this._content || {}).reduce((a, b) => a + b, 0);
@@ -135,21 +134,7 @@ Object.assign(client.userLevels, {
 	getEligible(guildMember) {
 		const age = (Date.now() - guildMember.joinedTimestamp) / 1000 / 60 / 60 / 24;
 		const messages = this.getUser(guildMember.user.id);
-		const roles = Object.entries(this._requirements).map((x, key) => {
-			return {
-				role: {
-					level: key,
-					id: x[1].id,
-					has: guildMember.roles.cache.has(x[1].id)
-				},
-				requirements: {
-					age: x[1].age,
-					messages: x[1].messages
-				},
-				eligible: (age >= x[1].age) && (messages >= x[1].messages),
-			}
-		});
-		return { age, messages, roles };
+		return { age, messages };
 	},
 });
 

@@ -10,9 +10,17 @@ async function FSstatsAll(client, serverName, embed, totalCount) {
     if (serverName.data.slots.used !== 0) {
         totalCount.push(serverName.data.slots.used)
         const playerInfo = [];
+
         await serverName.data.slots.players.forEach(player => {
             if (player.name === undefined) return;
-            playerInfo.push(`\`${player.name}\` ${(player.isAdmin ? ' :detective:' : '')}${(client.FMstaff._content.includes(player.name) ? ':farmer:' : '')}${(client.TFstaff._content.includes(player.name) ? ':angel:' : '')} **|** ${('0' + Math.floor(player.uptime/60)).slice(-2)}:${('0' + (player.uptime % 60)).slice(-2)}`);
+
+            let wlPlayer = ''; // Tag for if player is on watchList
+            client.watchList._content.forEach((x) => {
+                if (x[0] === player.name) {
+                    wlPlayer = '⛔';
+                }
+            })
+            playerInfo.push(`\`${player.name}\` ${wlPlayer}${(player.isAdmin ? ' :detective:' : '')}${(client.FMstaff._content.includes(player.name) ? ':farmer:' : '')}${(client.TFstaff._content.includes(player.name) ? ':angel:' : '')} **|** ${('0' + Math.floor(player.uptime/60)).slice(-2)}:${('0' + (player.uptime % 60)).slice(-2)}`);
             })
         embed.addFields(
             {name: `${serverName.data.server.name} - ${serverName.data.slots.used}/${serverName.data.slots.capacity} - ${('0' + Math.floor((serverName.data.server.dayTime/3600/1000))).slice(-2)}:${('0' + Math.floor((serverName.data.server.dayTime/60/1000)%60)).slice(-2)}`, value: `${playerInfo.join("\n")}`}
@@ -177,8 +185,15 @@ async function FSstats(client, interaction, serverName, DBName) {
     ctx.fillText('time ->', tx, ty);
 
     await FSserver.data.slots.players.forEach(player => {
-    if (player.name === undefined) return;
-    playerInfo.push(`\`${player.name}\` ${(player.isAdmin ? ' :detective:' : '')}${(client.FMstaff._content.includes(player.name) ? ':farmer:' : '')}${(client.TFstaff._content.includes(player.name) ? ':angel:' : '')} **|** ${('0' + Math.floor(player.uptime/60)).slice(-2)}:${('0' + (player.uptime % 60)).slice(-2)}`);
+        if (player.name === undefined) return;
+
+        let wlPlayer = ''; // Tag for if player is on watchList
+        client.watchList._content.forEach((x) => {
+            if (x[0] === player.name) {
+                wlPlayer = '⛔';
+            }
+        })
+        playerInfo.push(`\`${player.name}\` ${wlPlayer}${(player.isAdmin ? ' :detective:' : '')}${(client.FMstaff._content.includes(player.name) ? ':farmer:' : '')}${(client.TFstaff._content.includes(player.name) ? ':angel:' : '')} **|** ${('0' + Math.floor(player.uptime/60)).slice(-2)}:${('0' + (player.uptime % 60)).slice(-2)}`);
     })
     const Image = new Discord.MessageAttachment(img.toBuffer(), "FSStats.png")
     embed.setAuthor({name: `${FSserver.data.slots.used}/${FSserver.data.slots.capacity}`})

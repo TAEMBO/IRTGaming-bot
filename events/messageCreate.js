@@ -1,5 +1,3 @@
-const { ClientVoiceManager } = require('discord.js');
-
 module.exports = {
     name: "messageCreate",
     execute: async (client, message) => {
@@ -27,7 +25,7 @@ module.exports = {
         if (messageAttachmentsText.length > 0) embed.addFields({name: 'Message Attachments', value: messageAttachmentsText.trim()});
         embed
             .addFields({name: 'Roles:', value: guildMemberObject.roles.cache.size > 1 ? guildMemberObject.roles.cache.filter(x => x.id !== client.config.mainServer.id).sort((a, b) => b.position - a.position).map(x => x).join(guildMemberObject.roles.cache.size > 4 ? ' ' : '\n').slice(0, 1024) : 'None'})
-        channel.send({content: client.config.eval.whitelist.map(x => `<@${x}>`).join(', '), embeds: [embed]});
+        channel.send({content: client.config.eval.whitelist.map(x => `<@${x}>`).join(' '), embeds: [embed]});
     }
 	if (!message.guild) return;
 	

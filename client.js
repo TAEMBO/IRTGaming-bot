@@ -105,7 +105,7 @@ class YClient extends Client {
         return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mod}> role to use this command`, allowedMentions: {roles: false}});
     }
 
-    async FSLeaveJoinLog(client, serverURL, Channel, Message, serverAcro) {
+    async FSLoop(client, serverURL, Channel, Message, serverAcro) {
         const axios = require("axios");
         const PGdata = require('./databases/PGPlayerData.json')
         const PSdata = require('./databases/PSPlayerData.json')

@@ -35,9 +35,9 @@ module.exports = {
                             fs.writeFileSync(path.resolve('./databases/suggestvotes.json'), JSON.stringify(arr))
                             client.votes._content = require("../databases/suggestvotes.json");
                             const ee = parseInt(interaction.component.label) - 1;
-                            if (interaction.customId === "suggestion-upvote") {
+                            if (interaction.customId === "suggestion-decline") {
                                 await UpdateButton(ee, downvotes, interaction.message, interaction.user.id)
-                            } else if (interaction.customId === "suggestion-decline") {
+                            } else if (interaction.customId === "suggestion-upvote") {
                                 await UpdateButton(upvotes, ee, interaction.message, interaction.user.id)
                             }
                             int.update({content: 'Vote removed!', components: []})

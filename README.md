@@ -1,5 +1,5 @@
 
-![banner](https://user-images.githubusercontent.com/79871802/181838778-7d08f0cd-7458-42b1-9ae1-f189e692acfd.png)
+![banner](https://images-ext-1.discordapp.net/external/wt5QNFDTrF5DHZTNdjCnt9Bmiv--6BhLVkuRdYXEwqQ/%3Fsize%3D2048/https/cdn.discordapp.com/avatars/485793265568841728/3d955ae8ed32bde1a81aa12b7efcd5a5.png?width=230&height=230)
 
 The 3rd generation single server discord bot developed and manained by TÆMBØ#5512 with who developed the majority of the bot annihilator#6516.
 
@@ -25,11 +25,8 @@ Here is the table with name and descriptions of every package in the bot, you ca
 | @discord.js/builders | The discord.js dependency to register slash commands.                            |
 | axios                | An HTTP client dependency.                                                       |
 | canvas               | An image utility for some bot commands.                                          |
-| discord-giveaways    | Some giveaway utility made for discord bots.                                     |
 | discord.js           | This is the core library of the bot, an HTTP wrapper for the discord API.        |
-| express              | This is some web socket utility for the free games and other bot functions.      |
-| frestuff             | This is a library wrapper for the free stuff API, you need an API key to use it. |
-| mongose              | This library is a MONGO.DB wrapper to run database commands via HTTP.            |
+| systeminformation    | A package used for retreiving host system technical information.                 |
 | ms                   | Some time conversion utility.                                                    |
 
 # Configuration
@@ -47,10 +44,10 @@ Since this bot is made for farming simulator, it has some server specified roles
 | eval.whitelist          | string[] | RoleID's array that contain people who's allowed to run eval               |
 | mainServer.id           | string   | The discord guild ID the bot will be on.                                   |
 | mainServer.LRSreset     | int      | The level roles reset in seconds.                                          |
-| mainServer.MPStaffRoles | string[] | Staff roles names for the discord server                                   |
-| mainServer.staffRoles   | string[] | Staff roles names for the Farming simulator game server                    |
-| roles                   | object   | The discord server roles IDs object, not added here, it would be too long  |
-| channels                | object   | The discord server channel IDs object, not added here, it would be too long|
+| mainServer.MPStaffRoles | string[] | MP Staff role names on the Discord server                                  |
+| mainServer.staffRoles   | string[] | Staff role names on the Discord server                                     |
+| roles                   | object   | The Discord server role IDs object, not added here, it would be too long   |
+| channels                | object   | The Discord server channel IDs object, not added here, it would be too long|
 
 The non specified objects are specified in the following codeblock for the JSON preview
 
@@ -137,12 +134,6 @@ This json doesn't support nullable values, so all should be filled, else the bot
 
 # Run the bot
 
-If you skipped to this part means you know what you are doing, it's still recommended you read the [configuration](https://github.com/TAEMBO/IRTGaming-bot/main/README.md?plain=35]) of the bot
+If you skipped to this part that means you know what you are doing, it's still recommended you read the [configuration](https://github.com/TAEMBO/IRTGaming-bot/main/README.md?plain=35]) of the bot
 
 To run the bot simply run the `RUN.bat` or run `node sharding.js` in any terminal
-
-# Disclaimer
-
-if you touch anything in the bot that destroys your server it is not my problem, so don't come to IRT server talking about it.
-
-the latest release may not be up to date to the repo at all

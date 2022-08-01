@@ -28,6 +28,9 @@ class YClient extends Client {
         this.FSCacheNewPS = [];
         this.FSCacheNewPG = [];
         this.FSCacheNewMF = [];
+        this.FSstatusPS;
+        this.FSstatusPG;
+        this.FSstatusMF;
         this.bannedWords = new database("./databases/bannedWords.json", "array");
         this.tictactoeDb = new database("./databases/ttt.json", "array");
         this.userLevels = new database("./databases/userLevels.json", "object");
@@ -127,6 +130,7 @@ class YClient extends Client {
         }
     
         await FSserver.data.slots.players.forEach(player => {
+            if (player.name === undefined) return;
             // Unknown admin login log
             if (player.isAdmin && (!Whitelist.includes(player.name) && !client.FMstaff._content.includes(player.name))) {
                 logChannel.send({embeds: [new client.embed().setTitle('ADMIN LOGIN').setDescription(`\`${player.name}\` login into **${FSserver.data.server.name.replace('! IRTGaming|24/7 ', '')}** at <t:${Math.round(new Date() / 1000)}>`).setColor('#ff4d00')]})
@@ -154,6 +158,18 @@ class YClient extends Client {
         if (serverAcro === 'PS') {
             PSdata.push(FSserver.data.slots.used);
             fs.writeFileSync(__dirname + "/databases/PSPlayerData.json", JSON.stringify(PSdata));
+
+            if (FSserver.data.server.name.length === 0) {
+                if (client.FSstatusPS === 1) {
+                    logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now offline`).setColor(client.config.embedColorRed)]})
+                }
+                client.FSstatusPS = 0;
+            } else {
+                if (client.FSstatusPS === 0) {
+                    logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now online`).setColor(client.config.embedColorGreen)]})
+                }
+                client.FSstatusPS = 1;
+            }
             
             client.FSCacheNewPS = [];
             await FSserver.data.slots.players.forEach(player => {
@@ -165,24 +181,29 @@ class YClient extends Client {
             const missingElementsLeave = client.FSCacheOldPS.filter(element => !client.FSCacheNewPS.includes(element)); // Filter names that were in the first fetch but not the second. Thanks to LebSter#0617 for this on The Coding Den Discord server
             for (const missingElement of missingElementsLeave) {
                 // watchList
+                let wlPlayer = '';
                 client.watchList._content.forEach((x) => {
                     if (x[0] === missingElement) {
-                        wlChannel.send({embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${missingElement}\` left **${serverAcro}** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorGreen)]})
+                        wlPlayer = '⛔';
+                        wlChannel.send({embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${missingElement}\` left **${serverAcro}** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})
                     } // Hopefully that person got banned
                 })
-                logChannel.send({embeds: [new client.embed().setDescription(`\`${missingElement}\` ${(client.FMstaff._content.includes(missingElement) ? ':farmer:' : '')}${(client.TFstaff._content.includes(missingElement) ? ':angel:' : '')} left **${serverAcro}** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})
+                logChannel.send({embeds: [new client.embed().setDescription(`\`${missingElement}\` ${wlPlayer}${(client.FMstaff._content.includes(missingElement) ? ':farmer:' : '')}${(client.TFstaff._content.includes(missingElement) ? ':angel:' : '')} left **${serverAcro}** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})
             }
             
             // Filter for players joining
             const missingElementsJoin = client.FSCacheNewPS.filter(element => !client.FSCacheOldPS.includes(element)); // Filter names that were in the second fetch but not the first. Thanks to LebSter#0617 for this on The Coding Den Discord server
             for (const missingElement of missingElementsJoin) {
+                // watchList
+                let wlPlayer = '';
                 client.watchList._content.forEach((x) => {
                     if (x[0] === missingElement) {
-                        wlChannel.send({embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${missingElement}\` joined **${serverAcro}** at <t:${Math.round(new Date() / 1000)}:t>`).setFooter({tex: `Reason: ${x[1]}`}).setColor(client.config.embedColorRed)]})
+                        wlPlayer = '⛔';
+                        wlChannel.send({embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${missingElement}\` joined **${serverAcro}** at <t:${Math.round(new Date() / 1000)}:t>`).setFooter({text: `Reason: ${x[1]}`}).setColor(client.config.embedColorGreen)]})
                     } // Oh no, go get em Toast
                 })
                 if (client.FSCacheOldPS.length !== 0) {
-                    logChannel.send({embeds: [new client.embed().setDescription(`\`${missingElement}\` ${(client.FMstaff._content.includes(missingElement) ? ':farmer:' : '')}${(client.TFstaff._content.includes(missingElement) ? ':angel:' : '')} joined **${serverAcro}** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorGreen)]})
+                    logChannel.send({embeds: [new client.embed().setDescription(`\`${missingElement}\` ${wlPlayer}${(client.FMstaff._content.includes(missingElement) ? ':farmer:' : '')}${(client.TFstaff._content.includes(missingElement) ? ':angel:' : '')} joined **${serverAcro}** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorGreen)]})
                 }
             } 
         
@@ -202,13 +223,25 @@ class YClient extends Client {
                 client.FSCacheNewPG.push(player.name);
             })
 
+            if (FSserver.data.server.name.length === 0) {
+                if (client.FSstatusPG === 1) {
+                    logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now offline`).setColor(client.config.embedColorRed)]})
+                }
+                client.FSstatusPG = 0;
+            } else {
+                if (client.FSstatusPG === 0) {
+                    logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now online`).setColor(client.config.embedColorGreen)]})
+                }
+                client.FSstatusPG = 1;
+            }
+
             // Filter for players leaving
             const missingElementsLeave = client.FSCacheOldPG.filter(element => !client.FSCacheNewPG.includes(element)); // Filter names that were in the first fetch but not the second. Thanks to LebSter#0617 for this on The Coding Den Discord server
             for (const missingElement of missingElementsLeave) {
                 // watchList
                 client.watchList._content.forEach((x) => {
                     if (x[0] === missingElement) {
-                        wlChannel.send({embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${missingElement}\` left **${serverAcro}** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorGreen)]})
+                        wlChannel.send({embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${missingElement}\` left **${serverAcro}** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})
                     } // Hopefully that person got banned
                 })
                 logChannel.send({embeds: [new client.embed().setDescription(`\`${missingElement}\` ${(client.FMstaff._content.includes(missingElement) ? ':farmer:' : '')}${(client.TFstaff._content.includes(missingElement) ? ':angel:' : '')} left **${serverAcro}** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})
@@ -219,7 +252,7 @@ class YClient extends Client {
             for (const missingElement of missingElementsJoin) {
                 client.watchList._content.forEach((x) => {
                     if (x[0] === missingElement) {
-                        wlChannel.send({embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${missingElement}\` joined **${serverAcro}** at <t:${Math.round(new Date() / 1000)}:t>`).setFooter({tex: `Reason: ${x[1]}`}).setColor(client.config.embedColorRed)]})
+                        wlChannel.send({embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${missingElement}\` joined **${serverAcro}** at <t:${Math.round(new Date() / 1000)}:t>`).setFooter({text: `Reason: ${x[1]}`}).setColor(client.config.embedColorGreen)]})
                     } // Oh no, go get em Toast
                 })
                 if (client.FSCacheOldPG.length !== 0) {
@@ -242,6 +275,18 @@ class YClient extends Client {
                 if (player.name === undefined) return;
                 client.FSCacheNewMF.push(player.name);
             })
+
+            if (FSserver.data.server.name.length === 0) {
+                if (client.FSstatusMF === 1) {
+                    logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now offline`).setColor(client.config.embedColorRed)]})
+                }
+                client.FSstatusMF = 0;
+            } else {
+                if (client.FSstatusMF === 0) {
+                    logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now online`).setColor(client.config.embedColorGreen)]})
+                }
+                client.FSstatusMF = 1;
+            }
 
             // Filter for players leaving
             const missingElementsLeave = client.FSCacheOldMF.filter(element => !client.FSCacheNewMF.includes(element)); // Filter names that were in the first fetch but not the second. Thanks to LebSter#0617 for this on The Coding Den Discord server

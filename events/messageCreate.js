@@ -28,6 +28,7 @@ module.exports = {
         channel.send({content: client.config.eval.whitelist.map(x => `<@${x}>`).join(' '), embeds: [embed]});
     }
 	if (!message.guild) return;
+	const msgarr = message.content.toLowerCase().split(' ');
 	
 	/* judge-your-build-event message filter; only allow messages that contain an image
 	 if (message.channel.id === '925500847390097461' && message.attachments.size<1 && !message.author.bot) {
@@ -39,23 +40,18 @@ module.exports = {
 		return message.delete() && message.channel.send("That word is banned here.").then(x => setTimeout(() => x.delete(), 5000));
 	*/
 
-
 	// useless staff ping mute
-	const punishableRoleMentions = [
-		client.config.mainServer.roles.helper,
-		client.config.mainServer.roles.mod
-	];
-	if (message.mentions.roles.some(mentionedRole => punishableRoleMentions.includes(mentionedRole.id))) {
+	if (message.mentions.roles.some(mentionedRole => mentionedRole.id === client.config.mainServer.roles.mpstaff)) {
 		console.log("user mentioned staff role");
-		const filter = x => client.hasModPerms(client, x.member) && x.content === "y";
+		const filter = x => client.isMPStaff(client, x.member) && x.content === "y";
 		message.channel.awaitMessages({ filter, max: 1, time: 60000, errors: ["time"]}).then(async collected => {
 			console.log("received \"y\" from staff member, indicating to mute someone");
 			try {
-				const muteResult = await client.punishments.addPunishment("mute", message.member, { time: "5m", reason: "Automod; staff ping misuse", message: message}, collected.first().author.id);
+				const muteResult = await client.punishments.addPunishment("mute", message.member, { time: "5m", reason: "Automod; misuse of staff ping", message: message}, collected.first().author.id);
 			} catch (error) {
 				console.log("muting failed cuz", error);
 			}
-			collected.react('✅');
+			collected.first().react('✅');
 		}).catch(() => console.log("failed to collect \"y\" from staff"));
 	}
 
@@ -64,7 +60,6 @@ module.exports = {
 	}
 
 	// repeated messages; banned words
-	const rparr = message.content.toLowerCase().split(' ');
 	const Whitelist = [
 		'688803177184886794', //farm-manager-chat
 		'906960370919436338', //mp-action-log
@@ -75,7 +70,7 @@ module.exports = {
 		'828982825734504448', //mp-server-managers-chat
 	];
 
-	if (client.bannedWords._content.some(x => rparr.includes(x)) && !client.hasModPerms(client, message.member) && !Whitelist.includes(message.channel.id) && client.config.botSwitches.automod) {
+	if (client.bannedWords._content.some(x => msgarr.includes(x)) && !client.hasModPerms(client, message.member) && !Whitelist.includes(message.channel.id) && client.config.botSwitches.automod) {
 		message.delete();
 		message.channel.send('That word is banned here.').then(x => setTimeout(() => x.delete(), 5000));
 		if (client.repeatedMessages[message.author.id]) {
@@ -185,6 +180,9 @@ module.exports = {
 	}
 	if (message.content.toLowerCase().includes("forgor")) {
 		message.react("💀")
+	}
+	if (msgarr.includes('69')) {
+		message.reply({content: 'Nice', allowedMentions: {repliedUser: false}})
 	}
 	if (message.author.id === '769710040596217897' && message.channel.id === '552565546093248512' && message.content.toLowerCase().startsWith('night all')) {
 		message.channel.send(`<@${message.author.id}>`)

@@ -5,9 +5,10 @@ module.exports = {
         if (!client.isMPStaff(client, interaction.member)) return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mpstaff}> role to use this command`, allowedMentions: {roles: false}});
         const name = interaction.options.getString('username');
         const reason = interaction.options.getString('reason') ?? 'N/A';
-
+        let e = false;
         client.watchList._content.forEach((s) => 
-            {if (s[0].includes(name)) return interaction.reply('That name is already exists on the watchList.')})
+            {if (s[0].includes(name)) e = true})
+        if (e) return interaction.reply('That name is already exists on the watchList.');
         client.watchList.addData([name, reason]).forceSave();
         interaction.reply({content: `Successfully added \`${name}\` with reason \`${reason}\`.`});
     },

@@ -6,8 +6,8 @@ module.exports = {
         const name = interaction.options.getString('username');
         const reason = interaction.options.getString('reason') ?? 'N/A';
 
-        if (client.watchList._content.forEach((s) => 
-            s[0].includes(name))) return interaction.reply('That name is already exists on the watchList.');
+        client.watchList._content.forEach((s) => 
+            {if (s[0].includes(name)) return interaction.reply('That name is already exists on the watchList.')})
         client.watchList.addData([name, reason]).forceSave();
         interaction.reply({content: `Successfully added \`${name}\` with reason \`${reason}\`.`});
     },

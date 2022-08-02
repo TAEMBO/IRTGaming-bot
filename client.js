@@ -161,12 +161,12 @@ class YClient extends Client {
 
             if (FSserver.data.server.name.length === 0) {
                 if (client.FSstatusPS === 1) {
-                    logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now offline`).setColor(client.config.embedColorRed)]})
+                    logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now offline`).setColor(client.config.embedColorYellow)]})
                 }
                 client.FSstatusPS = 0;
             } else {
                 if (client.FSstatusPS === 0) {
-                    logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now online`).setColor(client.config.embedColorGreen)]})
+                    logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now online`).setColor(client.config.embedColorYellow)]})
                 }
                 client.FSstatusPS = 1;
             }
@@ -225,12 +225,12 @@ class YClient extends Client {
 
             if (FSserver.data.server.name.length === 0) {
                 if (client.FSstatusPG === 1) {
-                    logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now offline`).setColor(client.config.embedColorRed)]})
+                    logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now offline`).setColor(client.config.embedColorYellow)]})
                 }
                 client.FSstatusPG = 0;
             } else {
                 if (client.FSstatusPG === 0) {
-                    logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now online`).setColor(client.config.embedColorGreen)]})
+                    logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now online`).setColor(client.config.embedColorYellow)]})
                 }
                 client.FSstatusPG = 1;
             }
@@ -278,12 +278,12 @@ class YClient extends Client {
 
             if (FSserver.data.server.name.length === 0) {
                 if (client.FSstatusMF === 1) {
-                    logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now offline`).setColor(client.config.embedColorRed)]})
+                    logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now offline`).setColor(client.config.embedColorYellow)]})
                 }
                 client.FSstatusMF = 0;
             } else {
                 if (client.FSstatusMF === 0) {
-                    logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now online`).setColor(client.config.embedColorGreen)]})
+                    logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now online`).setColor(client.config.embedColorYellow)]})
                 }
                 client.FSstatusMF = 1;
             }

@@ -27,7 +27,7 @@ module.exports = {
                 fs.writeFileSync(path.resolve('./databases/watchList.json'), JSON.stringify(arr))
                 client.watchList._content = client.watchList._content = client.watchList._content.filter((x) => x[0] !== name);
 
-                interaction.reply(`Successfully removed ${name} from watchList.`);
+                interaction.reply(`Successfully removed \`${name}\` from watchList.`);
             } else return interaction.reply('That name doesn\'t exist on watchList.');
         }
     },

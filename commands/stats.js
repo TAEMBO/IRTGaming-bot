@@ -63,21 +63,21 @@ async function FSstats(client, interaction, serverName, DBName) {
     const second_graph_top = 16;
     // console.log({ second_graph_top });
 
-    const textSize = 32;
+    const textSize = 40;
 
     const canvas = require('canvas');
     const fs = require('fs');
-    const img = canvas.createCanvas(950, 450);
+    const img = canvas.createCanvas(1500, 750);
     const ctx = img.getContext('2d');
 
-    const graphOrigin = [10, 50];
-    const graphSize = [700, 360];
+    const graphOrigin = [15, 65];
+    const graphSize = [1300, 630];
     const nodeWidth = graphSize[0] / (data.length - 1);
     ctx.fillStyle = '#36393f';
     ctx.fillRect(0, 0, img.width, img.height);
 
     // grey horizontal lines
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 5;
 
     let interval_candidates = [];
     for (let i = 4; i < 10; i++) {
@@ -120,7 +120,7 @@ async function FSstats(client, interaction, serverName, DBName) {
     ctx.setLineDash([]);
 
     // draw points
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 5;
 
 
     function getYCoordinate(value) {
@@ -149,10 +149,10 @@ async function FSstats(client, interaction, serverName, DBName) {
             grd.addColorStop(0, colorAtPlayercount(prvPC)); // prev color at the beginning
             grd.addColorStop(1, colorAtPlayercount(curPC)); // cur color at the end
             // special case: playercount rises or falls rapidly accross all colors (eg. straight from red to green)
-            if (curColor !== '#ffea00' /* yellow */ && prvColor !== '#ffea00') {
+            if (curColor !== client.config.embedColorYellow && prvColor !== client.config.embedColorYellow) {
                 const yellowY = getYCoordinate(10); // y coordinate at which line should be yellow
                 const stop = (yellowY - lastCoords[1]) / (y - lastCoords[1]); // between 0 and 1, where is yellowY between y and nextPointCoords[1] ?
-                grd.addColorStop(stop, '#ffea00'); // add a yellow stop to the gradient
+                grd.addColorStop(stop, client.config.embedColorYellow); // add a yellow stop to the gradient
             }
             ctx.strokeStyle = grd;
         } else {
@@ -160,7 +160,16 @@ async function FSstats(client, interaction, serverName, DBName) {
         }
         ctx.beginPath();
         if (lastCoords.length > 0) ctx.moveTo(...lastCoords);
-        ctx.lineTo(x, y);
+        // if the line being drawn is horizontal, make it go until it has to go down
+        if (y === lastCoords[1]) {
+            let newX = x;
+            for (let j = i + 1; j <= data.length; j++) {
+                if (data[j] === curPC) newX += nodeWidth; else break;
+            }
+            ctx.lineTo(newX, y);
+        } else {
+            ctx.lineTo(x, y);
+        }
         lastCoords = [x, y];
         ctx.stroke();
         ctx.closePath();
@@ -171,7 +180,7 @@ async function FSstats(client, interaction, serverName, DBName) {
             // ball
             ctx.fillStyle = colorAtPlayercount(curPC);
             ctx.beginPath();
-            ctx.arc(x, y, ctx.lineWidth * 1.2, 0, 2 * Math.PI)
+            ctx.arc(x, y, ctx.lineWidth * 1.3, 0, 2 * Math.PI)
             ctx.closePath();
             ctx.fill();
         }
@@ -182,17 +191,17 @@ async function FSstats(client, interaction, serverName, DBName) {
     ctx.fillStyle = 'white';
 
     // highest value
-    const maxx = graphOrigin[0] + graphSize[0] + textSize;
+    const maxx = graphOrigin[0] + graphSize[0] + textSize / 2;
     const maxy = previousY[0] + (textSize / 3);
     ctx.fillText(previousY[1].toLocaleString('en-US'), maxx, maxy);
     
     // lowest value
-    const lowx = graphOrigin[0] + graphSize[0] + textSize;
+    const lowx = graphOrigin[0] + graphSize[0] + textSize / 2;
     const lowy = graphOrigin[1] + graphSize[1] + (textSize / 3);
     ctx.fillText('0 players', lowx, lowy);
     
     // 30d
-    ctx.fillText('30 min ago', lastMonthStart, graphOrigin[1] - (textSize / 3));
+    ctx.fillText('30 min ago', lastMonthStart, graphOrigin[1] - (textSize / 2));
     
     // time ->
     const tx = graphOrigin[0] + (textSize / 2);

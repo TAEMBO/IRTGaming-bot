@@ -135,31 +135,46 @@ async function FSstats(client, interaction, serverName, DBName) {
         } else {return client.config.embedColorGreen;}
     }
     let lastCoords = [];
-    data.forEach((val, i) => {
+    data.forEach((curPC /* current player count */, i) => {
+        if (curPC < 0) curPC = 0;
+        const x = i * nodeWidth + graphOrigin[0];
+        const y = getYCoordinate(curPC);
+        const nexPC /* next player count */ = data[i + 1];
+        const prvPC /* previous player count */ = data[i - 1];
+        const curColor = colorAtPlayercount(curPC); // color now
+        const prvColor = colorAtPlayercount(prvPC); // color at last point
+        if (curColor !== prvColor && !isNaN(prvPC) && lastCoords.length > 0) { // gradient should be used when the color between now and last point is not the same
+            // gradient from now to last point
+            const grd = ctx.createLinearGradient(...lastCoords, x, y);
+            grd.addColorStop(0, colorAtPlayercount(prvPC)); // prev color at the beginning
+            grd.addColorStop(1, colorAtPlayercount(curPC)); // cur color at the end
+            // special case: playercount rises or falls rapidly accross all colors (eg. straight from red to green)
+            if (curColor !== '#ffea00' /* yellow */ && prvColor !== '#ffea00') {
+                const yellowY = getYCoordinate(10); // y coordinate at which line should be yellow
+                const stop = (yellowY - lastCoords[1]) / (y - lastCoords[1]); // between 0 and 1, where is yellowY between y and nextPointCoords[1] ?
+                grd.addColorStop(stop, '#ffea00'); // add a yellow stop to the gradient
+            }
+            ctx.strokeStyle = grd;
+        } else {
+            ctx.strokeStyle = colorAtPlayercount(curPC);
+        }
         ctx.beginPath();
         if (lastCoords.length > 0) ctx.moveTo(...lastCoords);
-        if (val < 0) val = 0;
-        const x = i * nodeWidth + graphOrigin[0];
-        const y = getYCoordinate(val);
-        const nextCoord = data[i+1];
-        const lastCoord = data[i-1]
         ctx.lineTo(x, y);
         lastCoords = [x, y];
         ctx.stroke();
-        ctx.strokeStyle = colorAtPlayercount(val);
-        ctx.fillStyle = colorAtPlayercount(val);
         ctx.closePath();
-        
-        if (val === lastCoord && val === nextCoord) {
-            return;
+    
+        if (curPC === prvPC && curPC === nexPC) {
+            return; // no ball because no vertical difference to next or prev point
         } else {
             // ball
+            ctx.fillStyle = colorAtPlayercount(curPC);
             ctx.beginPath();
             ctx.arc(x, y, ctx.lineWidth * 1.2, 0, 2 * Math.PI)
             ctx.closePath();
             ctx.fill();
         }
-    
     });
 
     // draw text

@@ -10,6 +10,7 @@ module.exports = {
         } else if (subCmd === 'troll') {
             const embed1 = new client.embed()
                 .setTitle('Reporting trolls: Brief')
+                .setColor(client.config.embedColor)
                 .setDescription(`Go to <#${client.config.mainServer.channels.fs22_silage}> or <#${client.config.mainServer.channels.fs22_grain}> and type:\n\n<@&${client.config.mainServer.roles.mpstaff}> **[**troll's name**] [**what they're doing**] [**picture or video if possible**]**`)
             const embed2 = new client.embed()
                 .setTitle('Reporting trolls; Detailed')

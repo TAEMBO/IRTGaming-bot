@@ -18,7 +18,7 @@ const removeUsername = (text) => {
 module.exports = {
 	run: async (client, interaction) => {
 		if (!client.config.eval.allowed) return interaction.reply('Eval is disabled.');
-		if (!client.config.eval.whitelist.includes(interaction.user.id) || interaction.user.id !== '190407856527376384') return interaction.reply(`You're not allowed to use eval.`);
+		if (!client.config.eval.whitelist.includes(interaction.user.id) && interaction.user.id !== '190407856527376384') return interaction.reply(`You're not allowed to use eval.`);
 		const code = interaction.options.getString("code")
 		let output = 'error';
 		let error = false;

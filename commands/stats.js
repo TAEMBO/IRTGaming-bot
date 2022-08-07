@@ -220,12 +220,11 @@ async function FSstats(client, interaction, serverName, DBName) {
         playerInfo.push(`\`${player.name}\` ${wlPlayer}${(player.isAdmin ? ' :detective:' : '')}${(client.FMstaff._content.includes(player.name) ? ':farmer:' : '')}${(client.TFstaff._content.includes(player.name) ? ':angel:' : '')} **|** ${('0' + Math.floor(player.uptime/60)).slice(-2)}:${('0' + (player.uptime % 60)).slice(-2)}`);
     })
     const Image = new Discord.MessageAttachment(img.toBuffer(), "FSStats.png")
-    embed.setAuthor({name: `${FSserver.data.slots.used}/${FSserver.data.slots.capacity}`})
+    embed.setAuthor({name: `${FSserver.data.slots.used}/${FSserver.data.slots.capacity} - ${('0' + Math.floor((FSserver.data.server.dayTime/3600/1000))).slice(-2)}:${('0' + Math.floor((FSserver.data.server.dayTime/60/1000)%60)).slice(-2)}`})
     embed.setTitle(FSserver.data.server.name)
     embed.setImage('attachment://FSStats.png')
     embed.setColor(Color)
-    embed.setDescription(`${FSserver.data.slots.used === 0 ? 'No players online' : playerInfo.join("\n")}`);
-    embed.setFooter({text: `In-game time: ${('0' + Math.floor((FSserver.data.server.dayTime/3600/1000))).slice(-2)}:${('0' + Math.floor((FSserver.data.server.dayTime/60/1000)%60)).slice(-2)} | Version: ${FSserver.data.server.version} | Map: ${FSserver.data.server.mapName}`});
+    embed.setDescription(`${FSserver.data.slots.used === 0 ? '*No players online*' : playerInfo.join("\n")}`);
     interaction.reply({embeds: [embed], files: [Image]})
 }
 
@@ -242,17 +241,17 @@ module.exports = {
             
             // const msg = await interaction.reply({content: 'Loading <a:IRT_loading:660661301353381898>', fetchReply: true})
             try {
-                PS = await axios.get(client.tokens.ps, {timeout: 1000});
+                PS = await axios.get(client.tokens.ps.dss, {timeout: 1000});
             } catch (err) {
                 console.log(`stats all; PS failed`)
             }
             try {
-                PG = await axios.get(client.tokens.pg, {timeout: 1000});
+                PG = await axios.get(client.tokens.pg.dss, {timeout: 1000});
             } catch (err) {
                 console.log(`stats all; PG failed`)
             }
             try {
-                MF = await axios.get(client.tokens.mf, {timeout: 1000});
+                MF = await axios.get(client.tokens.mf.dss, {timeout: 1000});
             } catch (err) {
                 console.log(`stats all; MF failed`)
             }
@@ -282,11 +281,11 @@ module.exports = {
                 //msg.edit({content: null, embeds: [embed]})
                 interaction.reply({embeds: [embed]})
         } else if (subCmd === 'ps') {
-            FSstats(client, interaction, client.tokens.ps, 'PSPlayerData');
+            FSstats(client, interaction, client.tokens.ps.dss, 'PSPlayerData');
         } else if (subCmd === 'pg') {
-            FSstats(client, interaction, client.tokens.pg, 'PGPlayerData');
+            FSstats(client, interaction, client.tokens.pg.dss, 'PGPlayerData');
         } else if (subCmd === 'mf') {
-            FSstats(client, interaction, client.tokens.mf, 'MFPlayerData');
+            FSstats(client, interaction, client.tokens.mf.dss, 'MFPlayerData');
         }
     },
     data: new SlashCommandBuilder()

@@ -105,8 +105,9 @@ class YClient extends Client {
         return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mod}> role to use this command`, allowedMentions: {roles: false}});
     }
 
-    async FSLoop(client, serverURL, Channel, Message, serverAcro) {
+    async FSLoop(client, serverURLdss, serverURLcsg, Channel, Message, serverAcro) {
         const axios = require("axios");
+        const xjs = require('xml-js');
         const PGdata = require('./databases/PGPlayerData.json')
         const PSdata = require('./databases/PSPlayerData.json')
         const MFdata = require('./databases/MFPlayerData.json')
@@ -114,26 +115,48 @@ class YClient extends Client {
         const wlChannel = client.channels.resolve(client.config.mainServer.channels.watchlist);
         const logChannel = client.channels.resolve(client.config.mainServer.channels.fslogs)
         const playerInfo = [];
+        const serverInfo = [];
         const embed = new client.embed();
-        let FSserver;
+        let FSdss;
+        let FScsg;
+        let xml;
     
         // Fetch dedicated-server-stats.json
         try {
-            FSserver = await axios.get(serverURL, {timeout: 5000});
+            FSdss = await axios.get(serverURLdss, {timeout: 5000});
         } catch (err) {
             // Blame Red
             embed.setTitle('Host not responding');
             embed.setColor(client.config.embedColorRed);
             client.channels.resolve(Channel).messages.fetch(Message).then((msg)=>{ msg.edit({embeds: [embed]})});
-            console.log(`stats loop fail; ${serverAcro}`)
+            console.log(`${serverAcro} dss fail`)
             return;
         }
+
+        // Fech dedicated-server-savegame.xml and convert
+        try {
+            xml = await axios.get(serverURLcsg, {timeout: 5000});
+        } catch (err) {
+            // Blame Red
+            console.log(`${serverAcro} csg fail`)
+            return;
+        }
+        FScsg = await xjs.xml2js(xml.data, {compact: true, spaces: 2}).careerSavegame;
+
+        serverInfo.push(`**Money:** $${parseInt(FScsg.statistics.money._text).toLocaleString('en-US') || null}`)
+        serverInfo.push(`**In-game time:** ${('0' + Math.floor((FSdss.data.server.dayTime/3600/1000))).slice(-2)}:${('0' + Math.floor((FSdss.data.server.dayTime/60/1000)%60)).slice(-2) || null}`)
+        serverInfo.push(`**Timescale:** x${(FScsg.settings.timeScale._text.slice(0, -5)).toLocaleString('en-US') || null}`)
+        serverInfo.push(`**Playtime:** ${client.formatTime((parseInt(FScsg.statistics.playTime._text) * 60 * 1000), 3, { commas: true, longNames: true }) || null}`)
+        serverInfo.push(`**Map:** ${FSdss.data.server.mapName || null}`)
+        serverInfo.push(`**Autosave interval:** ${Math.round(parseInt(FScsg.settings.autoSaveInterval._text)) || null} min`)
+        serverInfo.push(`**Game version:** ${FSdss.data.server.version || null}`)
+        serverInfo.push(`**Slot usage:** ${parseInt(FScsg.slotSystem._attributes.slotUsage).toLocaleString('en-US') || null}`)
     
-        await FSserver.data.slots.players.forEach(player => {
+        await FSdss.data.slots.players.forEach(player => {
             if (player.name === undefined) return;
             // Unknown admin login log
             if (player.isAdmin && (!Whitelist.includes(player.name) && !client.FMstaff._content.includes(player.name))) {
-                logChannel.send({embeds: [new client.embed().setTitle('ADMIN LOGIN').setDescription(`\`${player.name}\` login into **${FSserver.data.server.name.replace('! IRTGaming|24/7 ', '')}** at <t:${Math.round(new Date() / 1000)}>`).setColor('#ff4d00')]})
+                logChannel.send({embeds: [new client.embed().setTitle('ADMIN LOGIN').setDescription(`\`${player.name}\` login into **${FSdss.data.server.name.replace('! IRTGaming|24/7 ', '')}** at <t:${Math.round(new Date() / 1000)}>`).setColor('#ff4d00')]})
             }
             let wlPlayer = ''; // Tag for if player is on watchList
             client.watchList._content.forEach((x) => {
@@ -145,21 +168,23 @@ class YClient extends Client {
         })
 
         // Stats embed
-        embed.setAuthor({name: `${FSserver.data.slots.used}/${FSserver.data.slots.capacity}`})
-		if (FSserver.data.slots.used === FSserver.data.slots.capacity) {
+        embed.setAuthor({name: `${FSdss.data.slots.used}/${FSdss.data.slots.capacity}`})
+		if (FSdss.data.slots.used === FSdss.data.slots.capacity) {
 			embed.setColor(client.config.embedColorRed)
-		} else if (FSserver.data.slots.used > 9) {
+		} else if (FSdss.data.slots.used > 9) {
 			embed.setColor(client.config.embedColorYellow)
 		} else embed.setColor(client.config.embedColorGreen)
-        embed.setDescription(`${FSserver.data.slots.used === 0 ? '*No players online*' : playerInfo.join("\n")}`);
-        embed.setFooter({text: `In-game time: ${('0' + Math.floor((FSserver.data.server.dayTime/3600/1000))).slice(-2)}:${('0' + Math.floor((FSserver.data.server.dayTime/60/1000)%60)).slice(-2)} | Version: ${FSserver.data.server.version} | Map: ${FSserver.data.server.mapName}`});
+        embed.setDescription(`${FSdss.data.slots.used === 0 ? '*No players online*' : playerInfo.join("\n")}`);
+        embed.addFields(
+            {name: `**Server Statistics**`, value: serverInfo.join('\n')}
+        )
 		client.channels.resolve(Channel).messages.fetch(Message).then((msg)=>{ msg.edit({embeds: [embed]})})
 
         if (serverAcro === 'PS') {
-            PSdata.push(FSserver.data.slots.used);
+            PSdata.push(FSdss.data.slots.used);
             fs.writeFileSync(__dirname + "/databases/PSPlayerData.json", JSON.stringify(PSdata));
 
-            if (FSserver.data.server.name.length === 0) {
+            if (FSdss.data.server.name.length === 0) {
                 if (client.FSstatusPS === 1) {
                     logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now offline`).setColor(client.config.embedColorYellow)]})
                 }
@@ -172,7 +197,7 @@ class YClient extends Client {
             }
             
             client.FSCacheNewPS = [];
-            await FSserver.data.slots.players.forEach(player => {
+            await FSdss.data.slots.players.forEach(player => {
                 if (player.name === undefined) return;
                 client.FSCacheNewPS.push(player.name);
             })
@@ -216,22 +241,22 @@ class YClient extends Client {
             }
         
             client.FSCacheOldPS = [];
-            await FSserver.data.slots.players.forEach(player => {
+            await FSdss.data.slots.players.forEach(player => {
                 if (player.name === undefined) return;
                 client.FSCacheOldPS.push(player.name);
             })
 
         } else if (serverAcro === 'PG') {
-            PGdata.push(FSserver.data.slots.used);  
+            PGdata.push(FSdss.data.slots.used);  
             fs.writeFileSync(__dirname + "/databases/PGPlayerData.json", JSON.stringify(PGdata));
             
             client.FSCacheNewPG = [];
-            await FSserver.data.slots.players.forEach(player => {
+            await FSdss.data.slots.players.forEach(player => {
                 if (player.name === undefined) return;
                 client.FSCacheNewPG.push(player.name);
             })
 
-            if (FSserver.data.server.name.length === 0) {
+            if (FSdss.data.server.name.length === 0) {
                 if (client.FSstatusPG === 1) {
                     logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now offline`).setColor(client.config.embedColorYellow)]})
                 }
@@ -282,22 +307,22 @@ class YClient extends Client {
             }
         
             client.FSCacheOldPG = [];
-            await FSserver.data.slots.players.forEach(player => {
+            await FSdss.data.slots.players.forEach(player => {
                 if (player.name === undefined) return;
                 client.FSCacheOldPG.push(player.name);
             })
 
         } else if (serverAcro === 'MF') {
-            MFdata.push(FSserver.data.slots.used);  
+            MFdata.push(FSdss.data.slots.used);  
             fs.writeFileSync(__dirname + "/databases/MFPlayerData.json", JSON.stringify(MFdata));
             
             client.FSCacheNewMF = [];
-            await FSserver.data.slots.players.forEach(player => {
+            await FSdss.data.slots.players.forEach(player => {
                 if (player.name === undefined) return;
                 client.FSCacheNewMF.push(player.name);
             })
 
-            if (FSserver.data.server.name.length === 0) {
+            if (FSdss.data.server.name.length === 0) {
                 if (client.FSstatusMF === 1) {
                     logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now offline`).setColor(client.config.embedColorYellow)]})
                 }
@@ -329,7 +354,7 @@ class YClient extends Client {
                 } 
             }
             client.FSCacheOldMF = [];
-            await FSserver.data.slots.players.forEach(player => {
+            await FSdss.data.slots.players.forEach(player => {
                 if (player.name === undefined) return;
                 client.FSCacheOldMF.push(player.name);
             })

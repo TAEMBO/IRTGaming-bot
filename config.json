@@ -1,8 +1,8 @@
 {
 	"embedColor": "#06860a",
 	"embedColorGreen": "#57f287",
-	"embedColorRed": "#ed4245",
-	"embedColorYellow": "#ffbd06",
+	"embedColorRed": "#e62c3b",
+	"embedColorYellow": "#ffea00",
 	"botSwitches": {
 		"commands": true,
 		"automod": true,

@@ -15,7 +15,7 @@ module.exports = {
             .setDescription(suggestion)
             .setTimestamp(Date.now())
             .setColor(client.config.embedColor)
-            await interaction.reply({embeds: [embed], components: [new MessageActionRow().addComponents(new MessageButton().setStyle("SUCCESS").setEmoji("✅").setCustomId("suggestion-upvote").setLabel("1"), new MessageButton().setStyle("DANGER").setEmoji("❌").setCustomId("suggestion-decline").setLabel("1"))]});
+            await interaction.reply({embeds: [embed], components: [new MessageActionRow().addComponents(new MessageButton().setStyle("SUCCESS").setEmoji("✅").setCustomId("suggestion-upvote").setLabel("0"), new MessageButton().setStyle("DANGER").setEmoji("❌").setCustomId("suggestion-decline").setLabel("0"))]});
     },
     data: new SlashCommandBuilder()
         .setName("suggest")

@@ -19,7 +19,7 @@ client.on("ready", async () => {
 		})
 	});
 	setInterval(async () => {
-		await client.user.setPresence({activities: [{name: '#mf-hiring-board', type: 'WATCHING'}], status: 'idle'});
+		await client.user.setPresence({activities: [{name: '🅱️', type: 'WATCHING'}], status: 'dnd'});
 	}, 60000);
 	console.log("\x1b[36m", `Bot active as ${client.user.tag}.`);
 
@@ -43,15 +43,9 @@ setInterval(() => {
 // Farming Simulator 22 stats loops
 if (client.config.botSwitches.stats) {
 	setInterval(async () => {
-		client.FSstatsLoop(client, client.tokens.ps, '891791005098053682', '980240981922291752')
-		client.FSstatsLoop(client, client.tokens.pg, '729823615096324166', '980241004718329856')
-		client.FSstatsLoop(client, client.tokens.df, '982143077554720768', '985586585707900928')
-	}, 15000);
-
-	setInterval(async () => {
-		client.FSLeaveJoinLog(client, client.tokens.ps)
-		client.FSLeaveJoinLog(client, client.tokens.pg)
-		client.FSLeaveJoinLog(client, client.tokens.df)
+		client.FSLoop(client, client.tokens.ps, '891791005098053682', '980240981922291752', 'PS')
+		client.FSLoop(client, client.tokens.pg, '729823615096324166', '980241004718329856', 'PG')
+		client.FSLoop(client, client.tokens.mf, '982143077554720768', '985586585707900928', 'MF')
 	}, 30000)
 }
 

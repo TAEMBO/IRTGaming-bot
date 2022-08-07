@@ -10,9 +10,17 @@ async function FSstatsAll(client, serverName, embed, totalCount) {
     if (serverName.data.slots.used !== 0) {
         totalCount.push(serverName.data.slots.used)
         const playerInfo = [];
+
         await serverName.data.slots.players.forEach(player => {
             if (player.name === undefined) return;
-            playerInfo.push(`\`${player.name}\` ${(player.isAdmin ? ' :detective:' : '')}${(client.FMstaff._content.includes(player.name) ? ':farmer:' : '')}${(client.TFstaff._content.includes(player.name) ? ':angel:' : '')} **|** ${('0' + Math.floor(player.uptime/60)).slice(-2)}:${('0' + (player.uptime % 60)).slice(-2)}`);
+
+            let wlPlayer = ''; // Tag for if player is on watchList
+            client.watchList._content.forEach((x) => {
+                if (x[0] === player.name) {
+                    wlPlayer = '⛔';
+                }
+            })
+            playerInfo.push(`\`${player.name}\` ${wlPlayer}${(player.isAdmin ? ' :detective:' : '')}${(client.FMstaff._content.includes(player.name) ? ':farmer:' : '')}${(client.TFstaff._content.includes(player.name) ? ':angel:' : '')} **|** ${('0' + Math.floor(player.uptime/60)).slice(-2)}:${('0' + (player.uptime % 60)).slice(-2)}`);
             })
         embed.addFields(
             {name: `${serverName.data.server.name} - ${serverName.data.slots.used}/${serverName.data.slots.capacity} - ${('0' + Math.floor((serverName.data.server.dayTime/3600/1000))).slice(-2)}:${('0' + Math.floor((serverName.data.server.dayTime/60/1000)%60)).slice(-2)}`, value: `${playerInfo.join("\n")}`}
@@ -55,21 +63,21 @@ async function FSstats(client, interaction, serverName, DBName) {
     const second_graph_top = 16;
     // console.log({ second_graph_top });
 
-    const textSize = 32;
+    const textSize = 40;
 
     const canvas = require('canvas');
     const fs = require('fs');
-    const img = canvas.createCanvas(950, 450);
+    const img = canvas.createCanvas(1500, 750);
     const ctx = img.getContext('2d');
 
-    const graphOrigin = [10, 50];
-    const graphSize = [700, 360];
+    const graphOrigin = [15, 65];
+    const graphSize = [1300, 630];
     const nodeWidth = graphSize[0] / (data.length - 1);
     ctx.fillStyle = '#36393f';
     ctx.fillRect(0, 0, img.width, img.height);
 
     // grey horizontal lines
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 5;
 
     let interval_candidates = [];
     for (let i = 4; i < 10; i++) {
@@ -112,7 +120,7 @@ async function FSstats(client, interaction, serverName, DBName) {
     ctx.setLineDash([]);
 
     // draw points
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 5;
 
 
     function getYCoordinate(value) {
@@ -127,31 +135,55 @@ async function FSstats(client, interaction, serverName, DBName) {
         } else {return client.config.embedColorGreen;}
     }
     let lastCoords = [];
-    data.forEach((val, i) => {
+    data.forEach((curPC /* current player count */, i) => {
+        if (curPC < 0) curPC = 0;
+        const x = i * nodeWidth + graphOrigin[0];
+        const y = getYCoordinate(curPC);
+        const nexPC /* next player count */ = data[i + 1];
+        const prvPC /* previous player count */ = data[i - 1];
+        const curColor = colorAtPlayercount(curPC); // color now
+        const prvColor = colorAtPlayercount(prvPC); // color at last point
+        if (curColor !== prvColor && !isNaN(prvPC) && lastCoords.length > 0) { // gradient should be used when the color between now and last point is not the same
+            // gradient from now to last point
+            const grd = ctx.createLinearGradient(...lastCoords, x, y);
+            grd.addColorStop(0, colorAtPlayercount(prvPC)); // prev color at the beginning
+            grd.addColorStop(1, colorAtPlayercount(curPC)); // cur color at the end
+            // special case: playercount rises or falls rapidly accross all colors (eg. straight from red to green)
+            if (curColor !== client.config.embedColorYellow && prvColor !== client.config.embedColorYellow) {
+                const yellowY = getYCoordinate(10); // y coordinate at which line should be yellow
+                const stop = (yellowY - lastCoords[1]) / (y - lastCoords[1]); // between 0 and 1, where is yellowY between y and nextPointCoords[1] ?
+                grd.addColorStop(stop, client.config.embedColorYellow); // add a yellow stop to the gradient
+            }
+            ctx.strokeStyle = grd;
+        } else {
+            ctx.strokeStyle = colorAtPlayercount(curPC);
+        }
         ctx.beginPath();
         if (lastCoords.length > 0) ctx.moveTo(...lastCoords);
-        if (val < 0) val = 0;
-        const x = i * nodeWidth + graphOrigin[0];
-        const y = getYCoordinate(val);
-        const nextCoord = data[i+1];
-        const lastCoord = data[i-1]
-        ctx.lineTo(x, y);
+        // if the line being drawn is horizontal, make it go until it has to go down
+        if (y === lastCoords[1]) {
+            let newX = x;
+            for (let j = i + 1; j <= data.length; j++) {
+                if (data[j] === curPC) newX += nodeWidth; else break;
+            }
+            ctx.lineTo(newX, y);
+        } else {
+            ctx.lineTo(x, y);
+        }
         lastCoords = [x, y];
         ctx.stroke();
-        ctx.strokeStyle = colorAtPlayercount(val);
-        ctx.fillStyle = colorAtPlayercount(val);
         ctx.closePath();
-        
-        if (val === lastCoord && val === nextCoord) {
-            return;
+    
+        if (curPC === prvPC && curPC === nexPC) {
+            return; // no ball because no vertical difference to next or prev point
         } else {
             // ball
+            ctx.fillStyle = colorAtPlayercount(curPC);
             ctx.beginPath();
-            ctx.arc(x, y, ctx.lineWidth * 1.2, 0, 2 * Math.PI)
+            ctx.arc(x, y, ctx.lineWidth * 1.3, 0, 2 * Math.PI)
             ctx.closePath();
             ctx.fill();
         }
-    
     });
 
     // draw text
@@ -159,17 +191,17 @@ async function FSstats(client, interaction, serverName, DBName) {
     ctx.fillStyle = 'white';
 
     // highest value
-    const maxx = graphOrigin[0] + graphSize[0] + textSize;
+    const maxx = graphOrigin[0] + graphSize[0] + textSize / 2;
     const maxy = previousY[0] + (textSize / 3);
     ctx.fillText(previousY[1].toLocaleString('en-US'), maxx, maxy);
     
     // lowest value
-    const lowx = graphOrigin[0] + graphSize[0] + textSize;
+    const lowx = graphOrigin[0] + graphSize[0] + textSize / 2;
     const lowy = graphOrigin[1] + graphSize[1] + (textSize / 3);
     ctx.fillText('0 players', lowx, lowy);
     
     // 30d
-    ctx.fillText('30 min ago', lastMonthStart, graphOrigin[1] - (textSize / 3));
+    ctx.fillText('30 min ago', lastMonthStart, graphOrigin[1] - (textSize / 2));
     
     // time ->
     const tx = graphOrigin[0] + (textSize / 2);
@@ -177,8 +209,15 @@ async function FSstats(client, interaction, serverName, DBName) {
     ctx.fillText('time ->', tx, ty);
 
     await FSserver.data.slots.players.forEach(player => {
-    if (player.name === undefined) return;
-    playerInfo.push(`\`${player.name}\` ${(player.isAdmin ? ' :detective:' : '')}${(client.FMstaff._content.includes(player.name) ? ':farmer:' : '')}${(client.TFstaff._content.includes(player.name) ? ':angel:' : '')} **|** ${('0' + Math.floor(player.uptime/60)).slice(-2)}:${('0' + (player.uptime % 60)).slice(-2)}`);
+        if (player.name === undefined) return;
+
+        let wlPlayer = ''; // Tag for if player is on watchList
+        client.watchList._content.forEach((x) => {
+            if (x[0] === player.name) {
+                wlPlayer = '⛔';
+            }
+        })
+        playerInfo.push(`\`${player.name}\` ${wlPlayer}${(player.isAdmin ? ' :detective:' : '')}${(client.FMstaff._content.includes(player.name) ? ':farmer:' : '')}${(client.TFstaff._content.includes(player.name) ? ':angel:' : '')} **|** ${('0' + Math.floor(player.uptime/60)).slice(-2)}:${('0' + (player.uptime % 60)).slice(-2)}`);
     })
     const Image = new Discord.MessageAttachment(img.toBuffer(), "FSStats.png")
     embed.setAuthor({name: `${FSserver.data.slots.used}/${FSserver.data.slots.capacity}`})
@@ -213,7 +252,7 @@ module.exports = {
                 console.log(`stats all; PG failed`)
             }
             try {
-                MF = await axios.get(client.tokens.df, {timeout: 1000});
+                MF = await axios.get(client.tokens.mf, {timeout: 1000});
             } catch (err) {
                 console.log(`stats all; MF failed`)
             }
@@ -247,7 +286,7 @@ module.exports = {
         } else if (subCmd === 'pg') {
             FSstats(client, interaction, client.tokens.pg, 'PGPlayerData');
         } else if (subCmd === 'mf') {
-            FSstats(client, interaction, client.tokens.df, 'MFPlayerData');
+            FSstats(client, interaction, client.tokens.mf, 'MFPlayerData');
         }
     },
     data: new SlashCommandBuilder()

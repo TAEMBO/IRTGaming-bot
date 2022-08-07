@@ -7,8 +7,8 @@ module.exports = {
 		}
 		client.games.set(interaction.channel.id, interaction.user.tag);
 		await interaction.reply({content: `Game started!`, ephemeral: true});
-		const ea = await interaction.followUp({content: `A hangman game has started!\nAnyone can guess letters or the full word by doing \`guess [letter or word]\``, fetchReply: true});
 		const word = interaction.options.getString("word");
+		const ea = await interaction.followUp({content: `A hangman game has been started by *${interaction.user.tag}*!\nAnyone can guess letters or the full word by doing \`guess [letter or word]\`\nThe word is:\n\`\`\`\n${hideWord()}\n\`\`\``, fetchReply: true});
 		const guessedWordsIndices = [];
 		const guesses = [];
 		let fouls = 0;
@@ -20,6 +20,9 @@ module.exports = {
 			if (!hiddenLetters) {
 				winText = `\nThe whole word has been revealed. The hangman game ends. The word was:\n\`\`\`\n${word}\n\`\`\``;
 				client.games.delete(interaction.channel.id);
+				guessCollector.stop();
+				clearInterval(interval);
+
 			}
 			ea.reply(`A part of the word has been revealed. This what the word looks like now:\n\`\`\`\n${hideWordResult}\n\`\`\`` + winText);
 		}
@@ -74,9 +77,9 @@ module.exports = {
 
 		const interval = setInterval(() => {
 			if (Date.now() > latestActivity + 5 * 60 * 1000 && client.games.has(interaction.channel.id)) {
-				guessCollector.stop();
-				client.games.delete(interaction.channel.id);
 				interaction.channel.send('The hangman game has ended due to inactivity.');
+				client.games.delete(interaction.channel.id);
+				guessCollector.stop();
 				clearInterval(interval);
 			}
 		}, 5000);

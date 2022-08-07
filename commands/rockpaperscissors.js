@@ -42,7 +42,7 @@ module.exports = {
         } else {
             let firstMove = rpsChannels[interaction.channel.id];
             if (interaction.user.id === firstMove.firstPlayer.id) {
-                await interaction.reply({content: "You can't play with yourself."});
+                await interaction.reply({content: "You can't play with yourself.", ephemeral: true});
             } else {
                 await interaction.deferReply();
                 let winner = null;

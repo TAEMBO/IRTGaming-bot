@@ -15,8 +15,8 @@ class RpsInstance{
 
     async timeOut(client, message){
         setTimeout(async () => {
-            if(rpsChannels.hasOwnProperty(message.channel.id)){
-                await this.message.edit({embeds: [], content: "This game was cancelled due to timeout."});
+            if (rpsChannels.hasOwnProperty(message.channel.id)) {
+                await this.message.edit({embeds: [], content: "This rock paper scissors game has ended due to inactivity."});
                 delete rpsChannels[message.channel.id];
                 client.games.delete(message.channel.id);
             }

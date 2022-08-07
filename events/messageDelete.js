@@ -4,6 +4,7 @@ module.exports = {
         const channel = await client.channels.fetch(client.config.mainServer.channels.modlogs);
         if (!client.config.botSwitches.logs) return;
         if (msg.partial) return;
+        if (msg.author.bot) return;
         const embed = new client.embed()
             .setTitle("Message Deleted!")
             .setDescription(`<@${msg.author.id}>\nContent:\n\`\`\`\n${msg.content}\n\`\`\`\nChannel: <#${msg.channel.id}>`)

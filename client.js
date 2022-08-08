@@ -118,7 +118,7 @@ class YClient extends Client {
         const serverInfo = [];
         const embed = new client.embed();
         let FSdss;
-        let FScsg;
+        let FScsg = undefined;
         let xml;
     
         // Fetch dedicated-server-stats.json

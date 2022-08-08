@@ -143,7 +143,7 @@ class YClient extends Client {
         }
         FScsg = await xjs.xml2js(xml.data, {compact: true, spaces: 2}).careerSavegame;
 
-        serverInfo.push(`**Money:** $${parseInt(FScsg.statistics.money._text).toLocaleString('en-US') ?? null}`)
+        serverInfo.push(`**Money:** $${parseInt(FScsg.statistics.money._text ?? null).toLocaleString('en-US')}`)
         serverInfo.push(`**In-game time:** ${('0' + Math.floor((FSdss.data.server.dayTime/3600/1000))).slice(-2)}:${('0' + Math.floor((FSdss.data.server.dayTime/60/1000)%60)).slice(-2) ?? null}`)
         serverInfo.push(`**Timescale:** x${(FScsg.settings.timeScale._text.slice(0, -5)).toLocaleString('en-US') ?? null}`)
         serverInfo.push(`**Playtime:** ${client.formatTime((parseInt(FScsg.statistics.playTime._text) * 60 * 1000), 3, { commas: true, longNames: true }) ?? null}`)

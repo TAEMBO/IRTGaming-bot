@@ -207,6 +207,10 @@ async function FSstats(client, interaction, serverName, DBName) {
     const tx = graphOrigin[0] + (textSize / 2);
     const ty = graphOrigin[1] + graphSize[1] + (textSize);
     ctx.fillText('time ->', tx, ty);
+    
+    // canvas.loadImage('./databases/dss.jpg').then((image) => {
+    //     ctx.drawImage(image, 0, 0)
+    //   })
 
     await FSserver.data.slots.players.forEach(player => {
         if (player.name === undefined) return;

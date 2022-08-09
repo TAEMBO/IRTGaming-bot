@@ -22,6 +22,7 @@ class YClient extends Client {
         this.registery = [];
         this.setMaxListeners(100)
         this.FSCache;
+        this.statsGraph = -120;
         this.FSCacheOldPS = [];
         this.FSCacheOldPG = [];
         this.FSCacheOldMF = [];

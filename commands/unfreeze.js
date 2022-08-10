@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require("@discordjs/builders");
+const {SlashCommandBuilder} = require('discord.js');
 module.exports = {
     run: async (client, interaction) => {
         if (interaction.member.roles.cache.has(client.config.mainServer.roles.mod)) {

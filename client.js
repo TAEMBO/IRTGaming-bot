@@ -1,21 +1,21 @@
-const {Client} = require("discord.js");
+const { Client, GatewayIntentBits, Partials } = require("discord.js");
 const Discord = require("discord.js");
 const fs = require("node:fs");
 const database = require("./database");
 class YClient extends Client {
     constructor(options){
         super({
-            intents: Object.keys(Discord.Intents.FLAGS),
-            partials: ["MESSAGE", "REACTION", "CHANNEL"],
+            intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildBans, GatewayIntentBits.GuildInvites, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessages, GatewayIntentBits.MessageContent],
+            partials: [Partials.Channel, Partials.Message, Partials.Reaction],
             disableEveryone: true
         })
         this.invites = new Map();
         this.config = require("./config.json");
         this.tokens = require("./tokens.json");
-        this.embed = Discord.MessageEmbed;
+        this.embed = Discord.EmbedBuilder;
         this.collection = Discord.Collection;
         this.messageCollector = Discord.MessageCollector;
-        this.messageattachment = Discord.MessageAttachment;
+        this.attachmentbuilder = Discord.AttachmentBuilder;
         this.memberCount_LastGuildFetchTimestamp = 0;
         this.games = new Discord.Collection();
         this.commands = new Discord.Collection();

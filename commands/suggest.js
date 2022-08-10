@@ -1,5 +1,4 @@
- const { MessageActionRow, MessageButton } = require("discord.js");
-const {SlashCommandBuilder} = require("@discordjs/builders");
+const {SlashCommandBuilder, ActionRowBuilder, ButtonBuilder} = require('discord.js');
 module.exports = {
     run: async (client, interaction) => {
         const suggestion = interaction.options.getString("suggestion");
@@ -15,7 +14,7 @@ module.exports = {
             .setDescription(suggestion)
             .setTimestamp(Date.now())
             .setColor(client.config.embedColor)
-            await interaction.reply({embeds: [embed], components: [new MessageActionRow().addComponents(new MessageButton().setStyle("SUCCESS").setEmoji("✅").setCustomId("suggestion-upvote").setLabel("0"), new MessageButton().setStyle("DANGER").setEmoji("❌").setCustomId("suggestion-decline").setLabel("0"))]});
+            await interaction.reply({embeds: [embed], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setStyle("Success").setEmoji("✅").setCustomId("suggestion-upvote").setLabel("0"), new ButtonBuilder().setStyle("Danger").setEmoji("❌").setCustomId("suggestion-decline").setLabel("0"))]});
     },
     data: new SlashCommandBuilder()
         .setName("suggest")

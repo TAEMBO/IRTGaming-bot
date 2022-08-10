@@ -1,4 +1,4 @@
-const {MessageActionRow, MessageButton} = require("discord.js");
+const {ActionRowBuilder, ButtonBuilder} = require("discord.js");
 module.exports = {
     name: "messageUpdate",
     execute: async (client, oldMsg, newMsg) => {
@@ -14,6 +14,6 @@ module.exports = {
             .setAuthor({name: `Author: ${oldMsg.author.tag} (${oldMsg.author.id})`, iconURL: `${oldMsg.author.displayAvatarURL()}`})
             .setColor(client.config.embedColor)
             .setTimestamp(Date.now())
-        client.channels.resolve(client.config.mainServer.channels.modlogs).send({embeds: [embed], components: [new MessageActionRow().addComponents(new MessageButton().setStyle("LINK").setURL(`${oldMsg.url}`).setLabel("Jump to message"))]})
+        client.channels.resolve(client.config.mainServer.channels.modlogs).send({embeds: [embed], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setStyle("Link").setURL(`${oldMsg.url}`).setLabel("Jump to message"))]})
     }
 }

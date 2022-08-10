@@ -1,12 +1,11 @@
-const { SlashCommandBuilder } = require("@discordjs/builders");
-const {MessageActionRow, MessageButton} = require("discord.js");
+const {SlashCommandBuilder, ActionRowBuilder, ButtonBuilder} = require('discord.js');
 
 module.exports = { 
     run: async (client, interaction) => {
         const subCmd = interaction.options.getSubcommand();
 
         if (subCmd === 'staff') {
-            interaction.reply({components: [new MessageActionRow().addComponents(new MessageButton().setStyle("LINK").setURL(`https://canary.discord.com/channels/552565546089054218/852483521859551232/866257346513862687`).setLabel("Apply for MP Staff"))]})
+            interaction.reply({components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setStyle("Link").setURL(`https://canary.discord.com/channels/552565546089054218/852483521859551232/866257346513862687`).setLabel("Apply for MP Staff"))]})
         } else if (subCmd === 'troll') {
             const embed1 = new client.embed()
                 .setTitle('Reporting trolls: Brief')

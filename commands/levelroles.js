@@ -1,6 +1,4 @@
-const { SlashCommandBuilder } = require("@discordjs/builders");
-const d = require("discord.js");
-const { MessageButton, MessageActionRow } = require("discord.js");
+const {SlashCommandBuilder, ActionRowBuilder, ButtonBuilder} = require('discord.js');
 
 module.exports = {
 	run: async (client, interaction) => {
@@ -59,7 +57,7 @@ module.exports = {
 	 } else if (subCmd === 'reset') {
 		if (interaction.user.id !== interaction.guild.ownerId && !client.config.eval.whitelist.includes(interaction.user.id)) return interaction.reply('You\'re not allowed to use this command.');
 
-		const msg = await interaction.reply({content: 'Are you sure you want to reset all LRS data?', fetchReply: true, components: [new MessageActionRow().addComponents(new MessageButton().setCustomId(`Yes`).setStyle("SUCCESS").setLabel("Confirm"), new MessageButton().setCustomId(`No`).setStyle("DANGER").setLabel("Cancel"))]});
+		const msg = await interaction.reply({content: 'Are you sure you want to reset all LRS data?', fetchReply: true, components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`Yes`).setStyle("Success").setLabel("Confirm"), new ButtonBuilder().setCustomId(`No`).setStyle("Danger").setLabel("Cancel"))]});
 		const filter = (i) => ["Yes", "No"].includes(i.customId) && i.user.id === interaction.user.id;
 		const collector = interaction.channel.createMessageComponentCollector({filter, max: 1, time: 30000});
 		collector.on("collect", async (int) => {

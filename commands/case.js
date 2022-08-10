@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require("@discordjs/builders");
+const {SlashCommandBuilder} = require('discord.js');
 const casesJson = require("../databases/punishments.json");
 const fs = require("node:fs");
 const path = require("node:path");

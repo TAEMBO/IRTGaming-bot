@@ -1,4 +1,4 @@
-const {SlashCommandBuilder} = require("@discordjs/builders");
+const {SlashCommandBuilder} = require('discord.js');
 module.exports = {
     run: async (client, interaction) => {
         const subCmd = interaction.options.getSubcommand();

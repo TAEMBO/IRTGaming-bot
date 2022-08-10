@@ -1,5 +1,4 @@
-const { SlashCommandBuilder } = require("@discordjs/builders");
-const { MessageAttachment } = require("discord.js");
+const {SlashCommandBuilder} = require('discord.js');
 
 module.exports = {
     run: async (client, interaction) => {

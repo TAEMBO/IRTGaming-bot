@@ -1,4 +1,4 @@
-const { MessageActionRow, MessageButton } = require("discord.js");
+const {ActionRowBuilder, ButtonBuilder} = require("discord.js");
 
 module.exports = {
     name: "interactionCreate",
@@ -21,7 +21,7 @@ module.exports = {
                     })
                 })
                 if (hasVoted) {
-                    const msg = await interaction.reply({content: 'You\'ve already voted on this suggestion! Do you want to remove your vote?', fetchReply: true, ephemeral: true, components: [new MessageActionRow().addComponents(new MessageButton().setCustomId(`Yes`).setStyle("SUCCESS").setLabel("Confirm"), new MessageButton().setCustomId(`No`).setStyle("DANGER").setLabel("Cancel"))]});
+                    const msg = await interaction.reply({content: 'You\'ve already voted on this suggestion! Do you want to remove your vote?', fetchReply: true, ephemeral: true, components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`Yes`).setStyle("Success").setLabel("Confirm"), new ButtonBuilder().setCustomId(`No`).setStyle("Danger").setLabel("Cancel"))]});
                     const filter = (i) => ["Yes", "No"].includes(i.customId) && i.user.id === interaction.user.id;
                     const collector = interaction.channel.createMessageComponentCollector({filter, max: 1, time: 30000});
                     collector.on("collect", async (int) => {
@@ -58,11 +58,11 @@ module.exports = {
                 }
 
                 async function UpdateButton(upvotes, downvotes = Number, message, user){
-                    message.edit({embeds: [message.embeds[0]], components: [new MessageActionRow().addComponents(new MessageButton().setStyle("SUCCESS").setEmoji("✅").setCustomId("suggestion-upvote").setLabel(`${upvotes}`), new MessageButton().setStyle("DANGER").setEmoji("❌").setCustomId("suggestion-decline").setLabel(`${downvotes}`))]});
+                    message.edit({embeds: [message.embeds[0]], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setStyle("Success").setEmoji("✅").setCustomId("suggestion-upvote").setLabel(`${upvotes}`), new ButtonBuilder().setStyle("Danger").setEmoji("❌").setCustomId("suggestion-decline").setLabel(`${downvotes}`))]});
                 }
     
                 async function UpdateButtons(upvotes, downvotes = Number, message, user){
-                    message.edit({embeds: [message.embeds[0]], components: [new MessageActionRow().addComponents(new MessageButton().setStyle("SUCCESS").setEmoji("✅").setCustomId("suggestion-upvote").setLabel(`${upvotes}`), new MessageButton().setStyle("DANGER").setEmoji("❌").setCustomId("suggestion-decline").setLabel(`${downvotes}`))]});
+                    message.edit({embeds: [message.embeds[0]], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setStyle("Success").setEmoji("✅").setCustomId("suggestion-upvote").setLabel(`${upvotes}`), new ButtonBuilder().setStyle("Danger").setEmoji("❌").setCustomId("suggestion-decline").setLabel(`${downvotes}`))]});
                     await client.votes.addData(`${user}: ${message.id}`).forceSave();
                 }
             }

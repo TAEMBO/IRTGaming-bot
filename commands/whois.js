@@ -1,5 +1,4 @@
-const { SlashCommandBuilder } = require("@discordjs/builders");
-const { User } = require("discord.js");
+const {SlashCommandBuilder} = require('discord.js');
 const Off = false;
 function Status(client, activities) {
 	`__**Status:**__\n`

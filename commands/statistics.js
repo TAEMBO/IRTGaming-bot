@@ -1,7 +1,8 @@
-const { SlashCommandBuilder } = require("@discordjs/builders");
+const {SlashCommandBuilder} = require('discord.js');
 const {version} = require('discord.js');
 const si = require('systeminformation');
 const os = require('node:os');
+const messageCreate = require('../events/messageCreate');
 module.exports = {
 	run: async (client, interaction) => {
 		const subCmd = interaction.options.getSubcommand();
@@ -50,7 +51,7 @@ module.exports = {
 					{name: 'System', value: `CPU: ${cpu.manufacturer} ${cpu.brand}\nRAM: ${Math.floor(ram.total / 1024 / 1000000)}GB\nGPU: ${gpu.controllers[0].model}\nUptime: ${client.formatTime((os.uptime*1000), 2, { commas: true, longNames: true })}`}
 				)
 				.setColor(client.config.embedColor)
-				msg.edit({content: null, embeds: [embed]})
+			msg.edit({content: null, embeds: [embed]})
 		}
 	},
 	data: new SlashCommandBuilder()

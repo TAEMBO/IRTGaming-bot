@@ -1,4 +1,4 @@
-const {SlashCommandBuilder} = require("@discordjs/builders");
+const {SlashCommandBuilder} = require('discord.js');
 module.exports = {
   run: (client, interaction) => {
     if (!client.config.eval.whitelist.includes(interaction.user.id)) return interaction.reply(`You're not allowed to use this command.`);

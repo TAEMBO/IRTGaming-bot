@@ -1,4 +1,4 @@
-const {SlashCommandBuilder} = require("@discordjs/builders")
+const {SlashCommandBuilder} = require('discord.js')
 module.exports = {
 	run: (client, interaction) => {
 		client.punish(client, interaction, 'kick');

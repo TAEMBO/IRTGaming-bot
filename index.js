@@ -19,7 +19,8 @@ client.on("ready", async () => {
 		})
 	});
 	setInterval(async () => {
-		await client.user.setPresence({activities: [{name: '🅱️', type: 'WATCHING'}], status: 'dnd'});
+		await client.user.setPresence({activities: [{name: '🅱️', type: 5}], status: 'dnd'});
+		// Playing: 0 & 1, Listening: 2, Watching: 3, N/A: 4, Competing in: 5
 	}, 60000);
 	console.log("\x1b[36m", `Bot active as ${client.user.tag}.`);
 

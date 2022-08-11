@@ -3,6 +3,7 @@ const {ActionRowBuilder, ButtonBuilder} = require("discord.js");
 module.exports = {
     name: "interactionCreate",
     execute: async (client, interaction) => {
+        let voted = '';
         if (interaction.isButton()) {
             const sugges = ["suggestion-decline", "suggestion-upvote"]
             if (sugges.includes(interaction.customId)) {
@@ -21,7 +22,9 @@ module.exports = {
                     })
                 })
                 if (hasVoted) {
+                    if (voted === interaction.user.id) return interaction.deferUpdate();
                     const msg = await interaction.reply({content: 'You\'ve already voted on this suggestion! Do you want to remove your vote?', fetchReply: true, ephemeral: true, components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`Yes`).setStyle("Success").setLabel("Confirm"), new ButtonBuilder().setCustomId(`No`).setStyle("Danger").setLabel("Cancel"))]});
+                    voted = interaction.user.id;
                     const filter = (i) => ["Yes", "No"].includes(i.customId) && i.user.id === interaction.user.id;
                     const collector = interaction.channel.createMessageComponentCollector({filter, max: 1, time: 30000});
                     collector.on("collect", async (int) => {

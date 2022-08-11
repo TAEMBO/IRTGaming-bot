@@ -44,8 +44,10 @@ module.exports = {
                                 await UpdateButton(upvotes, ee, interaction.message, interaction.user.id)
                             }
                             int.update({content: 'Vote removed!', components: []})
+                            voted = '';
                         } else if (int.customId === "No") {
                             int.update({content: 'Command canceled!', components: []});
+                            voted = '';
                         }
                     });
                 } else if (interaction.message.embeds[0].author.name.includes(interaction.user.id)) {

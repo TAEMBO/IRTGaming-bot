@@ -159,6 +159,11 @@ const quantities = {
 			short: ['LKR', 'රු', 'ரூ']
 		},
 		{
+			name: 'Hungarian Forint :flag_hu:',
+			value: 0.0025,
+			short: ['HUF']
+		},
+		{
 			name: 'Among Us ඞ:red_square:',
 			value: NaN,
 			short: ['SUS']

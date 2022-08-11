@@ -3,7 +3,6 @@ const {ActionRowBuilder, ButtonBuilder} = require("discord.js");
 module.exports = {
     name: "interactionCreate",
     execute: async (client, interaction) => {
-        let voted = '';
         if (interaction.isButton()) {
             const sugges = ["suggestion-decline", "suggestion-upvote"]
             if (sugges.includes(interaction.customId)) {
@@ -22,11 +21,17 @@ module.exports = {
                     })
                 })
                 if (hasVoted) {
-                    if (voted === interaction.user.id) return interaction.deferUpdate();
+                    console.log(interaction.user.id + 'h' + client.voted)
+                    if (client.voted === interaction.user.id) {
+                        interaction.deferUpdate();
+                        console.log(`a ${client.voted}`);
+                        return;
+                    }
                     const msg = await interaction.reply({content: 'You\'ve already voted on this suggestion! Do you want to remove your vote?', fetchReply: true, ephemeral: true, components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`Yes`).setStyle("Success").setLabel("Confirm"), new ButtonBuilder().setCustomId(`No`).setStyle("Danger").setLabel("Cancel"))]});
-                    voted = interaction.user.id;
+                    client.voted = interaction.user.id;
+                    console.log(client.voted)
                     const filter = (i) => ["Yes", "No"].includes(i.customId) && i.user.id === interaction.user.id;
-                    const collector = interaction.channel.createMessageComponentCollector({filter, max: 1, time: 30000});
+                    const collector = interaction.channel.createMessageComponentCollector({filter, max: 1, time: 30000, errors: ['time']});
                     collector.on("collect", async (int) => {
                         if(int.customId === "Yes"){
                             const fs = require('node:fs');
@@ -44,12 +49,14 @@ module.exports = {
                                 await UpdateButton(upvotes, ee, interaction.message, interaction.user.id)
                             }
                             int.update({content: 'Vote removed!', components: []})
-                            voted = '';
+                            client.voted = undefined;
+                            console.log(`v: '${client.voted}"`)
                         } else if (int.customId === "No") {
                             int.update({content: 'Command canceled!', components: []});
-                            voted = '';
+                            client.voted = undefined;
+                            console.log(`v: '${client.voted}"`)
                         }
-                    });
+                    }).catch((err) => client.voted = undefined);
                 } else if (interaction.message.embeds[0].author.name.includes(interaction.user.id)) {
                     interaction.reply({content: 'You can\'t vote on your own suggestion!', ephemeral: true})        
                 } else if (interaction.customId === "suggestion-decline"){

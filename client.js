@@ -21,7 +21,7 @@ class YClient extends Client {
         this.commands = new Discord.Collection();
         this.registery = [];
         this.setMaxListeners(100)
-        this.FSCache;
+        this.voted;
         this.statsGraph = -120;
         this.FSCacheOldPS = [];
         this.FSCacheOldPG = [];

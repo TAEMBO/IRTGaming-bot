@@ -43,7 +43,6 @@ Since this bot is made for farming simulator, it has some server specified roles
 | eval.allowed            | bool     | A JavaScript evaluation utility switch to enable or disable the command    |
 | eval.whitelist          | string[] | RoleID's array that contain people who's allowed to run eval               |
 | mainServer.id           | string   | The discord guild ID the bot will be on.                                   |
-| mainServer.LRSreset     | int      | The level roles reset in seconds.                                          |
 | mainServer.MPStaffRoles | string[] | MP Staff role names on the Discord server                                  |
 | mainServer.staffRoles   | string[] | Staff role names on the Discord server                                     |
 | roles                   | object   | The Discord server role IDs object, not added here, it would be too long   |
@@ -70,7 +69,6 @@ The non specified objects are specified in the following codeblock for the JSON 
 	},
 	"mainServer": {
 		"id":"0",
-		"LRSreset": 0,
 		"MPStaffRoles": [
 			"mpmanager",
 			"mpadmin",

@@ -12,7 +12,7 @@ module.exports = {
 		if (subCmd === "stats") {
 			const embed = new client.embed()
 				.setTitle('Level Roles: Stats')
-				.setDescription(`Since the last reset, a total of **${messageCountsTotal.toLocaleString('en-US')}** messages have been recorded in this server.`)
+				.setDescription(`Since the beginning of the month, a total of **${messageCountsTotal.toLocaleString('en-US')}** messages have been recorded in this server.`)
 				.addFields({name: 'Top users by messages sent:', value: Object.entries(client.userLevels._content).sort((a, b) => b[1] - a[1]).slice(0, 10).map((x, i) => `\`${i + 1}.\` <@${x[0]}>: ${x[1].toLocaleString('en-US')}`).join('\n')})
 				.setColor(client.config.embedColor)
 			interaction.reply({embeds: [embed]});

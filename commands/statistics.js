@@ -47,8 +47,8 @@ module.exports = {
 			const embed = new client.embed()
 				.setTitle('Statistics: Host info')
 				.addFields(
-					{name: 'Node.js', value: `RAM: ${(Math.round (process.memoryUsage().heapTotal / 1000)) / 1000}MB**/**${(Math.round(ram.available / 1000000)) / 1000}GB\nVersion: ${process.version}\nDiscord.js version: v${version}\nUptime: ${client.formatTime(client.uptime, 2, { commas: true, longNames: true })}`},
-					{name: 'System', value: `CPU: ${cpu.manufacturer} ${cpu.brand}\nRAM: ${Math.floor(ram.total / 1024 / 1000000)}GB\nGPU: ${gpu.controllers[0].model}\nUptime: ${client.formatTime((os.uptime*1000), 2, { commas: true, longNames: true })}`}
+					{name: 'Node.js', value: `**RAM:** ${(Math.round (process.memoryUsage().heapTotal / 1000)) / 1000}MB**/**${(Math.round(ram.available / 1000000)) / 1000}GB\n**Version:** ${process.version}\n**Discord.js version:** v${version}\n**Uptime:** ${client.formatTime(client.uptime, 2, { commas: true, longNames: true })}`},
+					{name: 'System', value: `**CPU:** ${cpu.manufacturer} ${cpu.brand}\n**RAM:** ${Math.floor(ram.total / 1024 / 1000000)}GB\n**GPU:** ${gpu.controllers[0].model}\n**Uptime:** ${client.formatTime((os.uptime*1000), 2, { commas: true, longNames: true })}`}
 				)
 				.setColor(client.config.embedColor)
 				.setFooter({text: `Load time: ${Date.now() - msg.createdTimestamp}ms`})

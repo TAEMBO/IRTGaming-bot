@@ -51,6 +51,7 @@ module.exports = {
 					{name: 'System', value: `CPU: ${cpu.manufacturer} ${cpu.brand}\nRAM: ${Math.floor(ram.total / 1024 / 1000000)}GB\nGPU: ${gpu.controllers[0].model}\nUptime: ${client.formatTime((os.uptime*1000), 2, { commas: true, longNames: true })}`}
 				)
 				.setColor(client.config.embedColor)
+				.setFooter({text: `Load time: ${Date.now() - msg.createdTimestamp}ms`})
 			msg.edit({content: null, embeds: [embed]})
 		}
 	},

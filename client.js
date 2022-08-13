@@ -113,6 +113,7 @@ class YClient extends Client {
         const PSdata = require('./databases/PSPlayerData.json')
         const MFdata = require('./databases/MFPlayerData.json')
         const Whitelist = ["Bernie", "RedbaD", "SpongeBoi69", "Kazmerev", "Hungarian__0101", "Bacon", "Sersha", "Helper B", "777Stupid"]
+        const wlPing = ["263724396672188417", "769710040596217897", "642735886953611265"];
         const wlChannel = client.channels.resolve(client.config.mainServer.channels.watchlist);
         const logChannel = client.channels.resolve(client.config.mainServer.channels.fslogs)
         const playerInfo = [];
@@ -145,13 +146,13 @@ class YClient extends Client {
         FScsg = await xjs.xml2js(xml.data, {compact: true, spaces: 2}).careerSavegame;
 
         setTimeout(() => {
-            serverInfo.push(`**Money:** $${parseInt(FScsg === undefined ? null : FScsg.statistics.money._text).toLocaleString('en-US')}`)
+            serverInfo.push(`**Money:** $${FScsg === undefined ? null : parseInt(FScsg.statistics.money._text).toLocaleString('en-US')}`)
             serverInfo.push(`**In-game time:** ${('0' + Math.floor((FSdss.data.server.dayTime/3600/1000))).slice(-2)}:${('0' + Math.floor((FSdss.data.server.dayTime/60/1000)%60)).slice(-2) ?? null}`)
-            serverInfo.push(`**Timescale:** x${FScsg === undefined ? null : (FScsg.settings.timeScale._text.slice(0, -5)).toLocaleString('en-US')}`)
+            serverInfo.push(`**Timescale:** ${FScsg === undefined ? null : (FScsg.settings.timeScale._text.slice(0, -5)).toLocaleString('en-US')}x`)
             serverInfo.push(`**Playtime:** ${FScsg === undefined ? null : client.formatTime((parseInt(FScsg.statistics.playTime._text) * 60 * 1000), 3, { commas: true, longNames: true })}`)
-            serverInfo.push(`**Map:** ${FSdss.data.server.mapName || null}`)
+            serverInfo.push(`**Map:** ${FSdss.data.server.mapName ?? null}`)
             serverInfo.push(`**Autosave interval:** ${FScsg === undefined ? null : Math.round(parseInt(FScsg.settings.autoSaveInterval._text))} min`)
-            serverInfo.push(`**Game version:** ${FSdss.data.server.version || null}`)
+            serverInfo.push(`**Game version:** ${FSdss.data.server.version ?? null}`)
             serverInfo.push(`**Slot usage:** ${FScsg === undefined ? null : parseInt(FScsg.slotSystem._attributes.slotUsage).toLocaleString('en-US')}`)
         }, 500)
     
@@ -184,6 +185,8 @@ class YClient extends Client {
             )
             client.channels.resolve(Channel).messages.fetch(Message).then((msg)=>{ msg.edit({embeds: [embed]})})
         }, 1000)
+
+        // ${client.config.eval.whitelist.map(x=>`<@${x}>`).join(" ")}
 
         if (serverAcro === 'PS') {
             PSdata.push(FSdss.data.slots.used);
@@ -226,7 +229,7 @@ class YClient extends Client {
                         // watchList
                         client.watchList._content.forEach((x) => {
                             if (x[0] === q) {
-                                wlChannel.send({embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${x[0]}\` joined **${serverAcro}** at <t:${Math.round(new Date() / 1000)}:t>`).setFooter({text: `Reason: ${x[1]}`}).setColor(client.config.embedColorGreen)]})
+                                wlChannel.send({content: `${wlPing.map(x=>`<@${x}>`).join(" ")}`, embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${x[0]}\` joined **${serverAcro}** at <t:${Math.round(new Date() / 1000)}:t>`).setFooter({text: `Reason: ${x[1]}`}).setColor(client.config.embedColorGreen)]})
                             } // Oh no, go get em Toast
                         })
                         logChannel.send({embeds: [new client.embed().setDescription(`\`${q}\` ${(client.FMstaff._content.includes(q) ? ':farmer:' : '')}${(client.TFstaff._content.includes(q) ? ':angel:' : '')} joined **${serverAcro}** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorGreen)]})
@@ -292,7 +295,7 @@ class YClient extends Client {
                         // watchList
                         client.watchList._content.forEach((x) => {
                             if (x[0] === q) {
-                                wlChannel.send({embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${x[0]}\` joined **${serverAcro}** at <t:${Math.round(new Date() / 1000)}:t>`).setFooter({text: `Reason: ${x[1]}`}).setColor(client.config.embedColorGreen)]})
+                                wlChannel.send({content: `${wlPing.map(x=>`<@${x}>`).join(" ")}`, embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${x[0]}\` joined **${serverAcro}** at <t:${Math.round(new Date() / 1000)}:t>`).setFooter({text: `Reason: ${x[1]}`}).setColor(client.config.embedColorGreen)]})
                             } // Oh no, go get em Toast
                         })
                         logChannel.send({embeds: [new client.embed().setDescription(`\`${q}\` ${(client.FMstaff._content.includes(q) ? ':farmer:' : '')}${(client.TFstaff._content.includes(q) ? ':angel:' : '')} joined **${serverAcro}** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorGreen)]})

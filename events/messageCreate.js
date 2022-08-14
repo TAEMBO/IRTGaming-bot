@@ -182,7 +182,7 @@ module.exports = {
 		message.react("💀")
 	}
 	if (msgarr.includes('69')) {
-		message.reply({content: 'Nice', allowedMentions: {repliedUser: false}})
+		message.react(':IRT_Noice:611558357643558974')
 	}
 	if (message.author.id === '769710040596217897' && message.channel.id === '552565546093248512' && message.content.toLowerCase().startsWith('night all')) {
 		message.channel.send(`<@${message.author.id}>`)

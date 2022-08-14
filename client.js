@@ -112,7 +112,7 @@ class YClient extends Client {
         const PGdata = require('./databases/PGPlayerData.json')
         const PSdata = require('./databases/PSPlayerData.json')
         const MFdata = require('./databases/MFPlayerData.json')
-        const Whitelist = ["Bernie", "RedbaD", "SpongeBoi69", "Kazmerev", "Hungarian__0101", "Bacon", "Sersha", "Helper B", "777Stupid"]
+        const Whitelist = ["Bernie", "RedbaD", "SpongeBoi69", "Kazmerev", "Hungarian__0101", "Bacon", "Sersha", "Helper B", "777Stupid", "Andyk1978", "Andrewk1978", "OmgxBeckyx"]
         const wlPing = ["263724396672188417", "769710040596217897", "642735886953611265"];
         const wlChannel = client.channels.resolve(client.config.mainServer.channels.watchlist);
         const logChannel = client.channels.resolve(client.config.mainServer.channels.fslogs)

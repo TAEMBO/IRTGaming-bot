@@ -56,7 +56,8 @@ module.exports = {
                             client.voted = undefined;
                             console.log(`v: '${client.voted}"`)
                         }
-                    }).catch((err) => client.voted = undefined);
+                    })
+                    collector.on('end', c => client.voted = undefined);
                 } else if (interaction.message.embeds[0].author.name.includes(interaction.user.id)) {
                     interaction.reply({content: 'You can\'t vote on your own suggestion!', ephemeral: true})        
                 } else if (interaction.customId === "suggestion-decline"){

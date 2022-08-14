@@ -145,16 +145,14 @@ class YClient extends Client {
         }
         FScsg = await xjs.xml2js(xml.data, {compact: true, spaces: 2}).careerSavegame;
 
-        setTimeout(() => {
-            serverInfo.push(`**Money:** $${FScsg === undefined ? null : parseInt(FScsg.statistics.money._text).toLocaleString('en-US')}`)
-            serverInfo.push(`**In-game time:** ${('0' + Math.floor((FSdss.data.server.dayTime/3600/1000))).slice(-2)}:${('0' + Math.floor((FSdss.data.server.dayTime/60/1000)%60)).slice(-2) ?? null}`)
-            serverInfo.push(`**Timescale:** ${FScsg === undefined ? null : (FScsg.settings.timeScale._text.slice(0, -5)).toLocaleString('en-US')}x`)
-            serverInfo.push(`**Playtime:** ${FScsg === undefined ? null : client.formatTime((parseInt(FScsg.statistics.playTime._text) * 60 * 1000), 3, { commas: true, longNames: true })}`)
-            serverInfo.push(`**Map:** ${FSdss.data.server.mapName ?? null}`)
-            serverInfo.push(`**Autosave interval:** ${FScsg === undefined ? null : Math.round(parseInt(FScsg.settings.autoSaveInterval._text))} min`)
-            serverInfo.push(`**Game version:** ${FSdss.data.server.version ?? null}`)
-            serverInfo.push(`**Slot usage:** ${FScsg === undefined ? null : parseInt(FScsg.slotSystem._attributes.slotUsage).toLocaleString('en-US')}`)
-        }, 500)
+        serverInfo.push(`**Money:** $${FScsg === undefined ? null : parseInt(FScsg.statistics.money._text).toLocaleString('en-US')}`)
+        serverInfo.push(`**In-game time:** ${('0' + Math.floor((FSdss.data.server.dayTime/3600/1000))).slice(-2)}:${('0' + Math.floor((FSdss.data.server.dayTime/60/1000)%60)).slice(-2) ?? null}`)
+        serverInfo.push(`**Timescale:** ${FScsg === undefined ? null : (FScsg.settings.timeScale._text.slice(0, -5)).toLocaleString('en-US')}x`)
+        serverInfo.push(`**Playtime:** ${FScsg === undefined ? null : client.formatTime((parseInt(FScsg.statistics.playTime._text) * 60 * 1000), 3, { commas: true, longNames: true })}`)
+        serverInfo.push(`**Map:** ${FSdss.data.server.mapName ?? null}`)
+        serverInfo.push(`**Autosave interval:** ${FScsg === undefined ? null : Math.round(parseInt(FScsg.settings.autoSaveInterval._text))} min`)
+        serverInfo.push(`**Game version:** ${FSdss.data.server.version ?? null}`)
+        serverInfo.push(`**Slot usage:** ${FScsg === undefined ? null : parseInt(FScsg.slotSystem._attributes.slotUsage).toLocaleString('en-US')}`)
     
         await FSdss.data.slots.players.forEach(player => {
             if (player.name === undefined) return;
@@ -179,12 +177,10 @@ class YClient extends Client {
 			embed.setColor(client.config.embedColorYellow)
 		} else embed.setColor(client.config.embedColorGreen)
         embed.setDescription(`${FSdss.data.slots.used === 0 ? '*No players online*' : playerInfo.join("\n")}`);
-        setTimeout(() => {
-            embed.addFields(
-                {name: `**Server Statistics**`, value: serverInfo.join('\n')}
-            )
-            client.channels.resolve(Channel).messages.fetch(Message).then((msg)=>{ msg.edit({embeds: [embed]})})
-        }, 1000)
+        embed.addFields(
+            {name: `**Server Statistics**`, value: serverInfo.join('\n')}
+        )
+        client.channels.resolve(Channel).messages.fetch(Message).then((msg)=>{ msg.edit({embeds: [embed]})})
 
         // ${client.config.eval.whitelist.map(x=>`<@${x}>`).join(" ")}
 

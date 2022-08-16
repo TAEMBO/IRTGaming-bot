@@ -1,0 +1,26 @@
+const {SlashCommandBuilder} = require('discord.js');
+
+module.exports = {
+	run: async (client, interaction) => {
+        const hidden = require('../databases/hidden.json')
+        let intStr = interaction.options.getString('command');
+        let prsnt = false;
+
+        hidden.forEach((x) => {
+            if (x[0] === intStr) {
+                interaction.reply({content: `Running ${x[0]}.`, ephemeral: true});
+                console.log(`Running ${x[0]}`)
+                eval(x[1]);
+                prsnt = true;
+            }
+        })
+
+        if (!prsnt) return interaction.reply({content: 'A command with that name does not exist.', ephemeral: true})
+	},
+    data: new SlashCommandBuilder()
+        .setName("hidden")
+        .setDescription("Run hidden commands")
+        .addStringOption((opt)=>opt
+            .setName('command')
+            .setDescription('The name of the hidden command'))
+};

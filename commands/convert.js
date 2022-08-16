@@ -65,7 +65,7 @@ const quantities = {
 		},
 		{
 			name: 'pound sterling :flag_gb:',
-			value: 1.20,
+			value: 1.19,
 			short: ['GBP', '£']
 		},
 		{
@@ -80,37 +80,37 @@ const quantities = {
 		},
 		{
 			name: 'Canadian Dollar :flag_ca:',
-			value: 0.76,
+			value: 0.77,
 			short: ['CAD']
 		},
 		{
 			name: 'Australian Dollar :flag_au:',
-			value: 0.68,
+			value: 0.69,
 			short: ['AUD']
 		},
 		{
 			name: 'Japanese Yen :flag_jp:',
-			value: 0.0074,
+			value: 0.0073,
 			short: ['JPY', '¥', 'yen', 'jy']
 		},
 		{
 			name: 'New Zealand Dollar :flag_nz:',
-			value: 0.61,
+			value: 0.62,
 			short: ['NZD']
 		},
 		{
 			name: 'Indonesian Rupiah :flag_id:',
-			value: 0.000066,
+			value: 0.000067,
 			short: ['IDR', 'Rp']
 		},
 		{
 			name: 'Chinese Yuan Renminbi :flag_cn:',
-			value: 0.15,
+			value: 0.14,
 			short: ['CN¥', 'CNY', 'RMB', '元']
 		},
 		{
 			name: 'Swedish krona :flag_se:',
-			value: 0.096,
+			value: 0.095,
 			short: ['SEK', 'kr']
 		},
 		{
@@ -125,7 +125,7 @@ const quantities = {
 		},
 		{
 			name: 'Icelandic króna :flag_is:',
-			value: 0.0072,
+			value: 0.0071,
 			short: ['ISK']
 		},
 		{
@@ -135,12 +135,12 @@ const quantities = {
 		},
 		{
 			name: 'Swiss franc :flag_sw:',
-			value: 1.03,
+			value: 1.04,
 			short: ['CFH', 'fr']
 		},
 		{
 			name: 'Ukrainian hryvnia :flag_ua:',
-			value: 0.026,
+			value: 0.027,
 			short: ['UAH', '₴', 'грн']
 		},
 		{
@@ -221,6 +221,11 @@ const quantities = {
 			name: 'millilitre',
 			value: 0.000001,
 			short: ['ml', 'milliliter']
+		},
+		{
+			name: 'US gallon',
+			value: 0.00378541,
+			short: ['gal']
 		}
 	],
 	temperature: [

@@ -22,5 +22,6 @@ module.exports = {
         .setDescription("Run hidden commands")
         .addStringOption((opt)=>opt
             .setName('command')
-            .setDescription('The name of the hidden command'))
+            .setDescription('The name of the hidden command')
+            .setRequired(true))
 };

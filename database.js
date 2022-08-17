@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const moment = require('moment');
 class Database {
 	constructor(dir, dataType) {
 		this._dataType = dataType;
@@ -36,7 +37,7 @@ class Database {
 		const newJson = JSON.stringify(db._content);
 		if (oldJson !== newJson || force) {
 			fs.writeFileSync(db._path, newJson);
-			if (this._saveNotifs) console.log(this._path + ' Database Saved');
+			if (this._saveNotifs) console.log(`[${moment().format('HH:mm:ss')}] ` + this._path + ' Database Saved');
 		}
 		return db;
 	}

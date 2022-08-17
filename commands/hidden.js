@@ -9,8 +9,7 @@ module.exports = {
         hidden.forEach(async (x) => {
             if (x[0] === intStr) {
                 console.log(`Running ${x[0]}`);
-                await interaction.reply({content: `Running ${x[0]}.`, ephemeral: true});
-                eval(async () => x[1]);
+                interaction.reply({content: `Running ${x[0]}.`, ephemeral: true}).then(() => eval(x[1]))
                 prsnt = true;
             }
         })

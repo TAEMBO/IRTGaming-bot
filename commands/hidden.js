@@ -6,7 +6,7 @@ module.exports = {
         let intStr = interaction.options.getString('command');
         let prsnt = false;
 
-        hidden.forEach((x) => {
+        hidden.forEach(async (x) => {
             if (x[0] === intStr) {
                 console.log(`Running ${x[0]}`);
                 await interaction.reply({content: `Running ${x[0]}.`, ephemeral: true});

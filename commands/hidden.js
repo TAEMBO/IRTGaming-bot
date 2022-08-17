@@ -8,14 +8,14 @@ module.exports = {
 
         hidden.forEach((x) => {
             if (x[0] === intStr) {
-                interaction.reply({content: `Running ${x[0]}.`, ephemeral: true});
-                console.log(`Running ${x[0]}`)
+                console.log(`Running ${x[0]}`);
+                await interaction.reply({content: `Running ${x[0]}.`, ephemeral: true});
                 eval(x[1]);
                 prsnt = true;
             }
         })
 
-        if (!prsnt) return interaction.reply({content: 'A command with that name does not exist.', ephemeral: true})
+        if (!prsnt) return interaction.reply({content: 'A command with that name does not exist.', ephemeral: true});
 	},
     data: new SlashCommandBuilder()
         .setName("hidden")

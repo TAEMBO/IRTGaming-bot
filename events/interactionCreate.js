@@ -85,7 +85,7 @@ module.exports = {
             if (!client.config.botSwitches.commands && !client.config.eval.whitelist.includes(interaction.user.id)) return interaction.reply({content: 'Commands are currently disabled.', ephemeral: true});
             if (commandFile) {
                 if (commandFile.disabled) return interaction.reply({content: 'This command is disabled.', ephemeral: true});
-                console.log(`[${moment().format('h:mm:ss')}] ${interaction.user.tag} used /${interaction.commandName} in ${interaction.channel.name}`);
+                console.log(`[${moment().format('HH:mm:ss')}] ${interaction.user.tag} used /${interaction.commandName} in ${interaction.channel.name}`);
                 try {
                     commandFile.run(client, interaction);
                     commandFile.uses ? commandFile.uses++ : commandFile.uses = 1;

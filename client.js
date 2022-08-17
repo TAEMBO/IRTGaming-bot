@@ -1,6 +1,7 @@
 const { Client, GatewayIntentBits, Partials } = require("discord.js");
 const Discord = require("discord.js");
 const fs = require("node:fs");
+const moment = require('moment');
 const database = require("./database");
 class YClient extends Client {
     constructor(options){
@@ -131,7 +132,7 @@ class YClient extends Client {
             embed.setTitle('Host not responding');
             embed.setColor(client.config.embedColorRed);
             client.channels.resolve(Channel).messages.fetch(Message).then((msg)=>{ msg.edit({embeds: [embed]})});
-            console.log(`${serverAcro} dss fail`)
+            console.log(`[${moment().format('h:mm:ss')}] ${serverAcro} dss fail`)
             return;
         }
 
@@ -140,7 +141,7 @@ class YClient extends Client {
             xml = await axios.get(serverURLcsg, {timeout: 5000});
         } catch (err) {
             // Blame Red
-            console.log(`${serverAcro} csg fail`)
+            console.log(`[${moment().format('h:mm:ss')}] ${serverAcro} csg fail`)
             return;
         }
         FScsg = await xjs.xml2js(xml.data, {compact: true, spaces: 2}).careerSavegame;

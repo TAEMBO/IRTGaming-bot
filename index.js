@@ -10,25 +10,27 @@ console.log(client.config.botSwitches)
 client.on("ready", async () => {
 	client.guilds.cache.forEach(async (e)=>{await e.members.fetch();});
 	await client.channels.fetch(client.config.mainServer.channels.testing_zone).then((channel)=>{channel.send(`:warning: Bot restarted :warning:\n${client.config.eval.whitelist.map(x => `<@${x}>`).join(' ')}`)});
-	setInterval(()=>{client.guilds.cache.get(client.config.mainServer.id).invites.fetch().then((invs)=>{invs.forEach(async(inv)=>{client.invites.set(inv.code, {uses: inv.uses, creator: inv.inviter.id})})})}, 500000)
-	if(client.config.botSwitches.registerCommands) client.guilds.cache.get(client.config.mainServer.id).commands.set(client.registery).catch((e)=>{console.log(`Couldn't register commands bcuz: ${e}`)});
-	process.on("unhandledRejection", async (error)=>{
-		console.log(error)
-		await client.channels.fetch(client.config.mainServer.channels.testing_zone).then((channel)=>{
-        channel.send({content: `${client.config.eval.whitelist.map(x=>`<@${x}>`).join(", ")}`, embeds: [new client.embed().setTitle("Error Caught!").setColor("#420420").setDescription(`**Error:** \`${error.message}\`\n\n**Stack:** \`${`${error.stack}`.slice(0, 2500)}\``)]})
+	setInterval(()=>{
+		client.guilds.cache.get(client.config.mainServer.id).invites.fetch().then((invs)=>{
+			invs.forEach(async(inv)=>{
+				client.invites.set(inv.code, {uses: inv.uses, creator: inv.inviter.id})
+			})
 		})
-	});
+	}, 500000)
+	if (client.config.botSwitches.registerCommands) client.guilds.cache.get(client.config.mainServer.id).commands.set(client.registery).catch((e)=>{console.log(`Couldn't register commands bcuz: ${e}`)});
+
 	setInterval(async () => {
 		await client.user.setPresence({activities: [{name: '🅱️', type: 5}], status: 'dnd'});
 		// Playing: 0 & 1, Listening: 2, Watching: 3, N/A: 4, Competing in: 5
 	}, 60000);
 	console.log("\x1b[36m", `Bot active as ${client.user.tag}.`);
 
+	// event handler
 	const eventFiles = fs.readdirSync('./events').filter(file => file.endsWith('.js'));
     eventFiles.forEach((file)=>{
-    const event = require(`./events/${file}`);
-	client.on(event.name, async (...args) => event.execute(client, ...args));
-  }); 
+    	const event = require(`./events/${file}`);
+	    client.on(event.name, async (...args) => event.execute(client, ...args));
+    }); 
 });
 
 // error handlers

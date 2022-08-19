@@ -31,6 +31,16 @@ client.on("ready", async () => {
   }); 
 });
 
+// error handlers
+process.on("unhandledRejection", async (error)=>{
+	console.log(error)
+	client.channels.resolve(client.config.mainServer.channels.testing_zone).send({content: `${client.config.eval.whitelist.map(x=>`<@${x}>`).join(", ")}`, embeds: [new client.embed().setTitle("Error Caught!").setColor("#420420").setDescription(`**Error:** \`${error.message}\`\n\n**Stack:** \`${`${error.stack}`.slice(0, 2500)}\``)]})
+});
+client.on("error", async (error) =>{
+	console.log(error)
+	client.channels.resolve(client.config.mainServer.channels.testing_zone).send({content: `${client.config.eval.whitelist.map(x=>`<@${x}>`).join(", ")}`, embeds: [new client.embed().setTitle("Error Caught!").setColor("#420420").setDescription(`**Error:** \`${error.message}\`\n\n**Stack:** \`${`${error.stack}`.slice(0, 2500)}\``)]})
+})
+
 // punishment event loop
 setInterval(() => {
 	const now = Date.now();

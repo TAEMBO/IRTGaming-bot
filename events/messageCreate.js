@@ -1,10 +1,11 @@
+const {ChannelType} = require('discord.js')
 module.exports = {
     name: "messageCreate",
     execute: async (client, message) => {
     if (!client.config.botSwitches.commands && !client.config.eval.whitelist.includes(message.author.id)) return; // bot is being run in dev mode and a non eval whitelisted user sent a message. ignore the message.
 	if (message.partial) return;
 	if (message.author.bot) return;
-	if (message.channel.type === "DM") {
+	if (message.channel.type === ChannelType.DM) {
         if (client.dmForwardBlacklist._content.includes(message.author.id)) return;
         if (client.games.some(x => x === message.author.tag)) return;
         const channel = client.channels.cache.get(client.config.mainServer.channels.testing_zone);
@@ -25,7 +26,7 @@ module.exports = {
         if (messageAttachmentsText.length > 0) embed.addFields({name: 'Message Attachments', value: messageAttachmentsText.trim()});
         embed
             .addFields({name: 'Roles:', value: guildMemberObject.roles.cache.size > 1 ? guildMemberObject.roles.cache.filter(x => x.id !== client.config.mainServer.id).sort((a, b) => b.position - a.position).map(x => x).join(guildMemberObject.roles.cache.size > 4 ? ' ' : '\n').slice(0, 1024) : 'None'})
-        channel.send({content: client.config.eval.whitelist.map(x => `<@${x}>`).join(' '), embeds: [embed]});
+        channel.send({content: `DM Forward ${client.config.eval.whitelist.map(x => `<@${x}>`).join(' ')}`, embeds: [embed]});
     }
 	if (!message.guild) return;
 	const msgarr = message.content.toLowerCase().split(' ');

@@ -11,9 +11,9 @@ module.exports = {
             let e = false;
             client.watchList._content.forEach((s) => 
                 {if (s[0].includes(name)) e = true})
-            if (e) return interaction.reply('That name is already exists on the watchList.');
+            if (e) return interaction.reply('That name already exists on watchList');
             client.watchList.addData([name, reason]).forceSave();
-            interaction.reply({content: `Successfully added \`${name}\` with reason \`${reason}\`.`});
+            interaction.reply({content: `Successfully added \`${name}\` with reason \`${reason}\``});
         } else if (subCmd === 'remove') {
             let e = false;
             const name = interaction.options.getString('username');
@@ -27,13 +27,13 @@ module.exports = {
                 fs.writeFileSync(path.resolve('./databases/watchList.json'), JSON.stringify(arr))
                 client.watchList._content = client.watchList._content.filter((x) => x[0] !== name);
 
-                interaction.reply(`Successfully removed \`${name}\` from watchList.`);
-            } else return interaction.reply('That name doesn\'t exist on watchList.');
+                interaction.reply(`Successfully removed \`${name}\` from watchList`);
+            } else return interaction.reply('That name doesn\'t exist on watchList');
         }
     },
     data: new SlashCommandBuilder()
         .setName("watch")
-        .setDescription("Watch for someone")
+        .setDescription("Manage watchList names")
         .addSubcommand((optt)=>optt
             .setName('add')
             .setDescription('add a player to watchList')

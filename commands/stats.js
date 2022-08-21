@@ -224,7 +224,7 @@ async function FSstats(client, interaction, serverName, DBName) {
     })
     const Image = new AttachmentBuilder(img.toBuffer(), {name: "FSStats.png"})
     embed.setAuthor({name: `${FSserver.data.slots.used}/${FSserver.data.slots.capacity} - ${('0' + Math.floor((FSserver.data.server.dayTime/3600/1000))).slice(-2)}:${('0' + Math.floor((FSserver.data.server.dayTime/60/1000)%60)).slice(-2)}`})
-    embed.setTitle(FSserver.data.server.name)
+    embed.setTitle(FSserver.data.server.name + '\u200b')
     embed.setImage('attachment://FSStats.png')
     embed.setColor(Color)
     embed.setDescription(`${FSserver.data.slots.used === 0 ? '*No players online*' : playerInfo.join("\n")}`);

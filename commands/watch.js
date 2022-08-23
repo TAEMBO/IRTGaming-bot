@@ -7,7 +7,7 @@ module.exports = {
 
         if (subCmd === 'add') {
             const name = interaction.options.getString('username');
-            const reason = interaction.options.getString('reason') ?? 'N/A';
+            const reason = interaction.options.getString('reason');
             let e = false;
             client.watchList._content.forEach((s) => 
                 {if (s[0].includes(name)) e = true})
@@ -44,7 +44,7 @@ module.exports = {
             .addStringOption((opt)=>opt
                 .setName('reason')
                 .setDescription('The reason for adding the player')
-                .setRequired(false)))
+                .setRequired(true)))
         .addSubcommand((optt)=>optt
             .setName('remove')
             .setDescription('remove a player from watchList')

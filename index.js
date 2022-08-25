@@ -3,6 +3,7 @@ const YClient = require("./client");
 const client = new YClient();
 client.init();
 const fs = require("fs");
+const path = require('path');
 
 console.log(client.config.botSwitches)
 
@@ -30,7 +31,7 @@ client.on("ready", async () => {
     eventFiles.forEach((file)=>{
     	const event = require(`./events/${file}`);
 	    client.on(event.name, async (...args) => event.execute(client, ...args));
-    }); 
+    });
 });
 
 // error handlers
@@ -61,6 +62,25 @@ if (client.config.botSwitches.stats) {
 		client.FSLoop(client, client.tokens.mf.dss, client.tokens.mf.csg, '982143077554720768', '985586585707900928', 'MF')
 	}, 30000)
 }
+
+// reminder loop
+const p = path.join(__dirname, './databases/reminders.json');
+let remindEmbed = new client.embed()
+	.setTitle('Reminder')
+	.setColor(client.config.embedColor);
+setInterval(async () => {
+	let db = require(p);
+	const filterLambda = x => x.when < Math.floor(Date.now() / 1000);
+	const filter = db.filter(x => filterLambda(x));
+	for(let i = 0; i < filter.length; i++){
+		remindEmbed = remindEmbed
+			.setDescription(`\n\`\`\`${filter[i].what}\`\`\``);
+		await (await client.users.fetch(filter[i].who)).send({embeds: [remindEmbed]});
+		db.splice(db.findIndex(x => filterLambda(x)), 1);
+		fs.writeFileSync(p, db.length !== 0 ? JSON.stringify(db, null, 2) : '[]');
+	}
+	db = null;
+}, 5000)
 
 // tic tac toe statistics database
 Object.assign(client.tictactoeDb, {

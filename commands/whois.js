@@ -39,17 +39,35 @@ module.exports = {
 				
 				if (member.presence && !member.user.bot) {
 					embed0.addFields(
-						{name: `🔹 Status: ${member.presence.status}`, value:`${member.presence.status === 'offline' ? 'N/A' : `Web: ${member.presence.clientStatus.web ? convert(member.presence.clientStatus.web) : convert('offline')}\nMobile: ${member.presence.clientStatus.mobile ? convert(member.presence.clientStatus.mobile) : convert('offline')}\nDesktop: ${member.presence.clientStatus.desktop ? convert(member.presence.clientStatus.desktop) : convert('offline')}`}`, inline: true}
+						{name: `🔹 Status: ${member.presence.status}`, value: `${member.presence.status === 'offline' ? 'N/A' : `Web: ${member.presence.clientStatus.web ? convert(member.presence.clientStatus.web) : convert('offline')}\nMobile: ${member.presence.clientStatus.mobile ? convert(member.presence.clientStatus.mobile) : convert('offline')}\nDesktop: ${member.presence.clientStatus.desktop ? convert(member.presence.clientStatus.desktop) : convert('offline')}`}`, inline: true}
 					)
 					embedArray.push(embed0);
 					member.presence.activities.map((x) => {
-						embedArray.push(
-							new client.embed()
-								.setTitle(x.name)
-								.setColor(x.name === 'Spotify' ? '#1DB954' : '#ffffff')
-								.setDescription(`\u200b**Started:** <t:${Math.round(x.createdTimestamp/1000)}:R>${x.details == null ? '' : '\n**Details:** ' + x.details}${x.state == null ? '' : '\n**State:** ' + x.state}${x.assets ? '\n**Large text: **' + x?.assets?.largeText : ''}`)
-								.setThumbnail(`https://i.scdn.co/image/${x.assets ?x?.assets?.largeImage.replace('spotify:', '') : null}`)
-						)
+						if (x.type == 2) {
+							embedArray.push(
+								new client.embed()
+									.setTitle(x.name)
+									.setColor('#1DB954')
+									.addFields(
+										{name: x.details, value: `By: ${x.state}\nOn: ${x.assets.largeText}\nStarted listening <t:${Math.round(x.createdTimestamp/1000)}:R>`}
+									)
+									.setThumbnail(`https://i.scdn.co/image/${x.assets.largeImage.replace('spotify:', '')}`)
+							)
+						} else if (x.type == 4) {
+							embedArray.push(
+								new client.embed()
+									.setTitle(x.name)
+									.setColor('#ffffff')
+									.setDescription(`${x.emoji == null ? '' : `**Emoji name:** ${x.emoji.name}\n**Text:** `}${x.state}`)
+							)
+						} else {
+							embedArray.push(
+								new client.embed()
+									.setTitle(x.name)
+									.setColor('#ffffff')
+									.setDescription(`\u200b${x.details == null ? '' : '\n**Details:** ' + x.details}${x.state == null ? '' : '\n**State:** ' + x.state}${x.assets ? '\n**Large text:** ' + x?.assets?.largeText : ''}\n**Started:** <t:${Math.round(x.createdTimestamp/1000)}:R>`)
+							)
+						}
 					})
 				} else {embedArray.push(embed0)}
 			interaction.reply({embeds: embedArray});

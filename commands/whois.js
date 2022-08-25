@@ -65,7 +65,7 @@ module.exports = {
 								new client.embed()
 									.setTitle(x.name)
 									.setColor('#ffffff')
-									.setDescription(`\u200b${x.details == null ? '' : '**Details:** ' + x.details}${x.state == null ? '' : '\n**State:** ' + x.state}${x.assets ? '\n**Large text:** ' + x?.assets?.largeText : ''}\n**Started:** <t:${Math.round(x.createdTimestamp/1000)}:R>`)
+									.setDescription(`\u200b**Started:** <t:${Math.round(x.createdTimestamp/1000)}:R>${x.details == null ? '' : '\n**Details:** ' + x.details}${x.state == null ? '' : '\n**State:** ' + x.state}${x.assets ? '\n**Large text:** ' + x?.assets?.largeText : ''}`)
 							)
 						}
 					})

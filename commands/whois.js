@@ -1,9 +1,4 @@
 const {SlashCommandBuilder} = require('discord.js');
-const Off = false;
-function Status(client, activities) {
-	`__**Status:**__\n`
-}
-// ${member.presence.activities.forEach((s) => Status(client, s))}
 
 function convert(status) {
 	switch (status) {
@@ -24,6 +19,7 @@ module.exports = {
 		if (subCmd === 'member') {
 			const member = interaction.options.getMember("member");
 			await member.user.fetch();
+			const embedArray = [];
 			const embed0 = new client.embed()
 				.setThumbnail(member.user.avatarURL({ format: 'png', dynamic: true, size: 2048}) || member.user.defaultAvatarURL)
 				.setTitle(`Member info: ${member.user.tag}`)
@@ -40,12 +36,23 @@ module.exports = {
 						{name: '🔹 Server Boosting Since', value: `<t:${Math.round(new Date(member.premiumSinceTimestamp) / 1000)}>\n<t:${Math.round(new Date(member.premiumSinceTimestamp) / 1000)}:R>`, inline: true}
 					)
 				}
+				
 				if (member.presence) {
 					embed0.addFields(
 						{name: `🔹 Status: ${member.presence.status}`, value:`${member.presence.status === 'offline' ? 'N/A' : `Web: ${member.presence.clientStatus.web ? convert(member.presence.clientStatus.web) : convert('offline')}\nMobile: ${member.presence.clientStatus.mobile ? convert(member.presence.clientStatus.mobile) : convert('offline')}\nDesktop: ${member.presence.clientStatus.desktop ? convert(member.presence.clientStatus.desktop) : convert('offline')}`}`, inline: true}
 					)
-				}
-			interaction.reply({embeds: [embed0]});
+					embedArray.push(embed0);
+					member.presence.activities.map((x) => {
+						embedArray.push(
+							new client.embed()
+								.setTitle(x.name)
+								.setColor(x.name === 'Spotify' ? '#1DB954' : '#ffffff')
+								.setDescription(`\u200b**Started:** <t:${Math.round(x.createdTimestamp/1000)}:R>${x.details == null ? '' : '\n**Details:** ' + x.details}${x.state == null ? '' : '\n**State:** ' + x.state}${x.assets ? '\n**Large text: **' + x?.assets?.largeText : ''}`)
+								.setThumbnail(`https://i.scdn.co/image/${x.assets ?x?.assets?.largeImage.replace('spotify:', '') : null}`)
+						)
+					})
+				} else {embedArray.push(embed0)}
+			interaction.reply({embeds: embedArray});
 		} else if (subCmd === 'user') {
 			let error = false;
 			const User = await client.users.fetch(interaction.options.getString("user"), [force = true]).catch((e) => error = true);

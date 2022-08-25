@@ -69,6 +69,7 @@ module.exports = {
 		'690549465559597127', //mp-ban-list
 		'677146047868436480', //mp-admin-chat
 		'828982825734504448', //mp-server-managers-chat
+'986969325112033330', // mf-serverlog
 	];
 
 	if (client.bannedWords._content.some(x => msgarr.includes(x)) && !client.hasModPerms(client, message.member) && !Whitelist.includes(message.channel.id) && client.config.botSwitches.automod) {

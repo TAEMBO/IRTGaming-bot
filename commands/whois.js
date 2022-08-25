@@ -22,7 +22,7 @@ module.exports = {
 			const embedArray = [];
 			const embed0 = new client.embed()
 				.setThumbnail(member.user.avatarURL({ format: 'png', dynamic: true, size: 2048}) || member.user.defaultAvatarURL)
-				.setTitle(`Member info: ${member.user.tag}`)
+				.setTitle(`${member.user.bot ? `Bot` : 'Member'} info: ${member.user.tag}`)
 				.setURL(`https://discord.com/users/${member.user.id}`)
 				.setDescription(`<@${member.user.id}>\n\`${member.user.id}\`${member.user.id === interaction.guild.ownerId ? '\n__**Server Owner**__ 👑' : ''}`)
 				.addFields(
@@ -60,7 +60,7 @@ module.exports = {
 
 			const embed1 = new client.embed()
 				.setThumbnail(User.avatarURL({ format: 'png', dynamic: true, size: 2048}) || User.defaultAvatarURL)
-				.setTitle(`User info: ${User.tag}`)
+				.setTitle(`${User.bot ? 'Bot' : 'User'} info: ${User.tag}`)
 				.setURL(`https://discord.com/users/${User.id}`)
 				.setDescription(`<@${User.id}>\n\`${User.id}\``)
 				.addFields(

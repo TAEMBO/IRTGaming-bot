@@ -22,7 +22,7 @@ module.exports = {
 		const subCmd = interaction.options.getSubcommand();
 
 		if (subCmd === 'member') {
-			const member = interaction.options.getMember("member");
+			const member = interaction.options.getMember("member") ?? interaction.member;
 			await member.user.fetch();
 			const embed0 = new client.embed()
 				.setThumbnail(member.user.avatarURL({ format: 'png', dynamic: true, size: 2048}) || member.user.defaultAvatarURL)
@@ -71,7 +71,7 @@ module.exports = {
 			.addUserOption((opt)=>opt
 				.setName("member")
 				.setDescription("The member to get info on.")
-				.setRequired(true)))
+				.setRequired(false)))
 		.addSubcommand((optt)=>optt
 			.setName('user')
 			.setDescription('Get info on a user')

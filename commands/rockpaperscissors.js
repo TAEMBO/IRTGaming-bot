@@ -31,7 +31,7 @@ module.exports = {
         if(!rpsChannels.hasOwnProperty(interaction.channel.id) && !client.games.has(interaction.channel.id)){
             client.games.set(interaction.channel.id, interaction.user.tag);
             await interaction.deferReply();
-            const embed = new MessageEmbed()
+            const embed = new client.embed()
                 .setTitle("Rps game started")
                 .setDescription(`To play with <@${interaction.user.id}> run the command again.`)
                 .setFooter({text: "You have 60 seconds to reply with another interaction."});
@@ -49,7 +49,7 @@ module.exports = {
                 if(move === 'scissors') if(firstMove.firstMove === 'rock') winner = firstMove.firstPlayer; else winner = interaction.user;
                 if(move === 'paper') if(firstMove.firstMove === 'scissors') winner = firstMove.firstPlayer; else winner = interaction.user;
                 if(move === firstMove.firstMove) winner = null;
-                const embed = new MessageEmbed()
+                const embed = new client.embed()
                     .setTitle("Rps game ended")
                     .setDescription(`Both players sent their move.\n**${firstMove.firstPlayer.tag}:** ${firstMove.firstMove}\n**${interaction.user.tag}:** ${move}`)
                     .setFooter({text: `This game has ended, ${winner !== null ? `${winner.tag} won.` : `it's a tie.`}`});

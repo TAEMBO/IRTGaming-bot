@@ -2,7 +2,7 @@ const {SlashCommandBuilder, ButtonBuilder, ActionRowBuilder} = require("discord.
 
 module.exports = {
 	run: async (client, interaction) => {
-        if(!interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager) && !interaction.member.roles.cache.has(client.config.mainServer.roles.dfmanager) && !interaction.member.roles.cache.has(client.config.mainServer.roles.mffarmowner)) return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mpmanager}> role to use this command.`, allowedMentions: {roles: false}})
+        if(!interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager) && !interaction.member.roles.cache.has(client.config.mainServer.roles.mfmanager) && !interaction.member.roles.cache.has(client.config.mainServer.roles.mffarmowner)) return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mpmanager}> role to use this command.`, allowedMentions: {roles: false}})
         const member = interaction.options.getMember("member");
         const options = interaction.options.getString("role");
         let Role;

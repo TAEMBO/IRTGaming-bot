@@ -5,7 +5,7 @@ module.exports = {
          if (!client.config.botSwitches.logs) return;
          let text = "";
          messages.forEach((e)=>{
-             text += `${e.author.tag}: ${e.content}\n`;
+             text += `${e.author.username}: ${e.content}\n`;
          });
          const embed = new client.embed()
          .setTitle(`${messages.size} Messages Were Deleted.`)

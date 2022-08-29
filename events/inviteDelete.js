@@ -1,5 +1,5 @@
 module.exports = {
-    name: "inviteCreate",
+    name: "inviteDelete",
     execute: async (client, invite) =>{
         client.invites.delete(invite.code)
     }

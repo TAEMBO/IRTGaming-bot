@@ -27,15 +27,15 @@ module.exports = {
 				let fieldValue = '';
 				rows.forEach(row => {
 					if (fieldValue.length + row.length > 1024) {
-						embed.addFields({name: '\u200b', value: `\`\`\`\n${fieldValue}\`\`\``});
+						embed0.addFields({name: '\u200b', value: `\`\`\`\n${fieldValue}\`\`\``});
 						fieldValue = row;
 					} else {
 						fieldValue += row
 					}
 				});
-				embed.addFields({name: '\u200b', value: `\`\`\`\n${fieldValue}\`\`\``});
+				embed0.addFields({name: '\u200b', value: `\`\`\`\n${fieldValue}\`\`\``});
 			} else {
-				embed.addFields({name: '\u200b', value: `\`\`\`\n${rows.join('')}\`\`\``});
+				embed0.addFields({name: '\u200b', value: `\`\`\`\n${rows.join('')}\`\`\``});
 			}
 			const embed1 = new client.embed()
 				.setTitle('Statistics: Host info')

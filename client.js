@@ -8,7 +8,8 @@ class YClient extends Client {
         super({
             intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildBans, GatewayIntentBits.GuildInvites, GatewayIntentBits.GuildPresences, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessages, GatewayIntentBits.MessageContent],
             partials: [Partials.Channel, Partials.Message, Partials.Reaction],
-            disableEveryone: true
+            disableEveryone: true,
+            ws: {properties: {browser: "Discord iOS"}}
         })
         this.invites = new Map();
         this.config = require("./config.json");

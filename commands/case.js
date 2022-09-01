@@ -4,7 +4,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 module.exports = {
 	run: async (client, interaction) => {
-		if (!client.hasModPerms(client, interaction.member)) return client.yOuNeEdMod(client, interaction);
+		if (!client.hasModPerms(client, interaction.member)) return client.yOuNeEdMoD(client, interaction);
 		const subCmd = interaction.options.getSubcommand();
 		if(subCmd === "update") {
 			const caseid = interaction.options.getInteger('case_id');

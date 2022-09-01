@@ -151,7 +151,6 @@ class YClient extends Client {
             error = true;
             console.log(`[${moment().format('HH:mm:ss')}] ${serverAcro} csg fail`)
         }
-        FScsg = await xjs.xml2js(xml.data, {compact: true, spaces: 2}).careerSavegame;
 
         if (error) {
             embed.setTitle('Host not responding');
@@ -160,6 +159,8 @@ class YClient extends Client {
             return;
             // Blame Red
         }
+	    
+	FScsg = await xjs.xml2js(xml.data, {compact: true, spaces: 2}).careerSavegame;
 
         serverInfo.push(`**Money:** $${FScsg === undefined ? null : parseInt(FScsg.statistics.money._text).toLocaleString('en-US')}`)
         serverInfo.push(`**In-game time:** ${('0' + Math.floor((FSdss.data.server.dayTime/3600/1000))).slice(-2)}:${('0' + Math.floor((FSdss.data.server.dayTime/60/1000)%60)).slice(-2) ?? null}`)

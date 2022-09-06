@@ -214,7 +214,7 @@ Object.assign(client.punishments, {
 				const guild = member.guild;
 				const softbanData = { type, id: this.createId(), member: member.user.id, moderator, time: now };
 				const dm2 = await member.send(`You've been softbanned from ${member.guild.name} for reason \`${reason || "unspecified"}\` (Case #${softbanData.id})`).catch(err => setTimeout(() => interaction.channel.send(`Failed to DM <@${member.user.id}>.`), 500));
-				const softbanResult = await member.ban({ days: 7, reason: `${reason || "unspecified"} | Case #${softbanData.id}` }).catch(err => err.message);
+				const softbanResult = await member.ban({ deleteMessageDays: 7, reason: `${reason || "unspecified"} | Case #${softbanData.id}` }).catch(err => err.message);
 				if (typeof softbanResult === "string") {
 					dm2.delete();
 					return `Softan was unsuccessful: ${softbanResult}`;

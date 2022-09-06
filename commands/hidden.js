@@ -15,7 +15,11 @@ module.exports = {
         })
 
 	console.log(`Attempted ${intStr}`);
-        if (!prsnt) return interaction.reply({content: 'A command with that name does not exist.', ephemeral: true});
+        if (!prsnt) {
+		console.log(`Attempted ${intStr}`);
+		interaction.reply({content: 'A command with that name does not exist.', ephemeral: true});
+		return;
+	}
 	},
     data: new SlashCommandBuilder()
         .setName("hidden")

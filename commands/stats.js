@@ -46,7 +46,7 @@ async function FSstats(client, interaction, serverName, DBName) {
         Color = client.config.embedColorYellow;
     }
 
-    const data = require(`../databases/${DBName}.json`).slice(client.statsGraph)
+    const data = require(`../databases/${DBName}.json`).slice(client.FSCache.statsGraph)
 
     // handle negative days
     data.forEach((change, i) => {

@@ -24,16 +24,7 @@ class YClient extends Client {
         this.registery = [];
         this.setMaxListeners(100)
         this.voted;
-        this.statsGraph = -120;
-        this.FSCacheOldPS = [];
-        this.FSCacheOldPG = [];
-        this.FSCacheOldMF = [];
-        this.FSCacheNewPS = [];
-        this.FSCacheNewPG = [];
-        this.FSCacheNewMF = [];
-        this.FSstatusPS;
-        this.FSstatusPG;
-        this.FSstatusMF;
+	this.FSCache = {'statsGraph': -120, 'ps': {'new': [], 'old': [], 'status': undefined}, 'pg': {'new': [], 'old': [], 'status': undefined}, 'mf': {'new': [], 'old': [], 'status': undefined}};
         this.bannedWords = new database("./databases/bannedWords.json", "array");
         this.tictactoeDb = new database("./databases/ttt.json", "array");
         this.userLevels = new database("./databases/userLevels.json", "object");
@@ -249,31 +240,31 @@ class YClient extends Client {
             fs.writeFileSync(__dirname + "/databases/PSPlayerData.json", JSON.stringify(PSdata));
 
             if (FSdss.data.server.name.length === 0) {
-                if (client.FSstatusPS === 1) {
+                if (client.FSCache.ps.status === 1) {
                     logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now offline`).setColor(client.config.embedColorYellow)]})
                 }
-                client.FSstatusPS = 0;
+                client.FSCache.ps.status = 0;
             } else {
-                if (client.FSstatusPS === 0) {
+                if (client.FSCache.ps.status === 0) {
                     logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now online`).setColor(client.config.embedColorYellow)]})
                 }
-                client.FSstatusPS = 1;
+                client.FSCache.ps.status = 1;
             }
             
-            client.FSCacheNewPS = [];
+            client.FSCache.ps.new = [];
             await FSdss.data.slots.players.forEach(player => {
                 if (player.name === undefined) return;
-                client.FSCacheNewPS.push([player.name, player.isAdmin]);
+                client.FSCache.ps.new.push([player.name, player.isAdmin]);
             })
 
-            adminCheck(client, this.FSCacheNewPS, this.FSCacheOldPS, serverAcro, Whitelist)
+            adminCheck(client, this.FSCache.ps.new, this.FSCache.ps.old, serverAcro, Whitelist)
 
-            log(client, this.FSCacheNewPS, this.FSCacheOldPS, serverAcro)
+            log(client, this.FSCache.ps.new, this.FSCache.ps.new, serverAcro)
         
-            client.FSCacheOldPS = [];
+            client.FSCache.ps.old = [];
             await FSdss.data.slots.players.forEach(player => {
                 if (player.name === undefined) return;
-                client.FSCacheOldPS.push([player.name, player.isAdmin]);
+                client.FSCache.ps.new.push([player.name, player.isAdmin]);
             })
 
         } else if (serverAcro === 'PG') {
@@ -281,31 +272,31 @@ class YClient extends Client {
             fs.writeFileSync(__dirname + "/databases/PGPlayerData.json", JSON.stringify(PGdata));
 
             if (FSdss.data.server.name.length === 0) {
-                if (client.FSstatusPG === 1) {
+                if (client.FSCache.pg.status === 1) {
                     logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now offline`).setColor(client.config.embedColorYellow)]})
                 }
-                client.FSstatusPG = 0;
+                client.FSCache.pg.status = 0;
             } else {
-                if (client.FSstatusPG === 0) {
+                if (client.FSCache.pg.status === 0) {
                     logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now online`).setColor(client.config.embedColorYellow)]})
                 }
-                client.FSstatusPG = 1;
+                client.FSCache.pg.status = 1;
             }
 
-            client.FSCacheNewPG = [];
+            client.FSCache.pg.new = [];
             await FSdss.data.slots.players.forEach(player => {
                 if (player.name === undefined) return;
-                client.FSCacheNewPG.push([player.name, player.isAdmin]);
+                client.FSCache.pg.new.push([player.name, player.isAdmin]);
             })
 
-            adminCheck(client, this.FSCacheNewPG, this.FSCacheOldPG, serverAcro, Whitelist)
+            adminCheck(client, this.FSCache.pg.new, this.FSCache.pg.old, serverAcro, Whitelist)
 
-            log(client, this.FSCacheNewPG, this.FSCacheOldPG, serverAcro)
+            log(client, this.FSCache.pg.new, this.FSCache.pg.old, serverAcro)
         
-            client.FSCacheOldPG = [];
+            client.FSCache.pg.old = [];
             await FSdss.data.slots.players.forEach(player => {
                 if (player.name === undefined) return;
-                client.FSCacheOldPG.push([player.name, player.isAdmin]);
+                client.FSCache.pg.old.push([player.name, player.isAdmin]);
             })
 
         } else if (serverAcro === 'MF') {
@@ -313,29 +304,29 @@ class YClient extends Client {
             fs.writeFileSync(__dirname + "/databases/MFPlayerData.json", JSON.stringify(MFdata));
 
             if (FSdss.data.server.name.length === 0) {
-                if (client.FSstatusMF === 1) {
+                if (client.FSCache.mf.status === 1) {
                     logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now offline`).setColor(client.config.embedColorYellow)]})
                 }
-                client.FSstatusMF = 0;
+                client.FSCache.mf.status = 0;
             } else {
-                if (client.FSstatusMF === 0) {
+                if (client.FSCache.mf.status === 0) {
                     logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now online`).setColor(client.config.embedColorYellow)]})
                 }
-                client.FSstatusMF = 1;
+                client.FSCache.mf.status = 1;
             }
 
-            client.FSCacheNewMF = [];
+            client.FSCache.mf.new = [];
             await FSdss.data.slots.players.forEach(player => {
                 if (player.name === undefined) return;
-                client.FSCacheNewMF.push([player.name, player.isAdmin]);
+                client.FSCache.mf.new.push([player.name, player.isAdmin]);
             })
             
-            log(client, this.FSCacheNewMF, this.FSCacheOldMF, serverAcro, false)
+            log(client, this.FSCache.mf.new, this.FSCache.mf.old, serverAcro, false)
         
-            client.FSCacheOldMF = [];
+            client.FSCache.mf.old = [];
             await FSdss.data.slots.players.forEach(player => {
                 if (player.name === undefined) return;
-                client.FSCacheOldMF.push([player.name, player.isAdmin]);
+                client.FSCache.mf.old.push([player.name, player.isAdmin]);
             })
         }
     }

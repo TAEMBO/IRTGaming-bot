@@ -259,7 +259,7 @@ class YClient extends Client {
 
             adminCheck(client, this.FSCache.ps.new, this.FSCache.ps.old, serverAcro, Whitelist)
 
-            log(client, this.FSCache.ps.new, this.FSCache.ps.new, serverAcro)
+            log(client, this.FSCache.ps.new, this.FSCache.ps.old, serverAcro)
         
             client.FSCache.ps.old = [];
             await FSdss.data.slots.players.forEach(player => {

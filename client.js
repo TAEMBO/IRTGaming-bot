@@ -264,7 +264,7 @@ class YClient extends Client {
             client.FSCache.ps.old = [];
             await FSdss.data.slots.players.forEach(player => {
                 if (player.name === undefined) return;
-                client.FSCache.ps.new.push([player.name, player.isAdmin]);
+                client.FSCache.ps.old.push([player.name, player.isAdmin]);
             })
 
         } else if (serverAcro === 'PG') {

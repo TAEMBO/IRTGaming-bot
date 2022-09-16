@@ -5,8 +5,8 @@
 	"embedColorYellow": "#ffea00",
 	"botSwitches": {
 		"commands": true,
-		"automod": false,
-		"logs": false,
+		"automod": true,
+		"logs": true,
 		"registerCommands": true,
 		"stats": true
 	},
@@ -17,7 +17,7 @@
 		]
 	},
 	"mainServer": {
-		"id":"739308099709567021",
+		"id":"552565546089054218",
 		"MPStaffRoles": [
 			"mpmanager",
 			"mpadmin",
@@ -59,17 +59,17 @@
 			"subscriber": "552615844790796288"
 		},
 		"channels": {
-			"modlogs": "778848112588095559",
-			"botcommands": "778848112588095559",
-			"fs22_silage": "778848112588095559",
-			"fs22_grain": "778848112588095559",
-			"welcome": "778848112588095559",
-			"testing_zone": "778848112588095559",
-			"suggestions": "778848112588095559",
-			"staffreports": "778848112588095559",
-			"fslogs": "778848112588095559",
-			"playercheck": "778848112588095559",
-			"watchlist": "778848112588095559"
+			"modlogs": "552613560744673295",
+			"botcommands": "552583841936834560",
+			"fs22_silage": "891791005098053682",
+			"fs22_grain": "729823615096324166",
+			"welcome": "552568157139763270",
+			"testing_zone": "979863373439184966",
+			"suggestions": "553345291839864832",
+			"staffreports": "863839725139918849",
+			"fslogs": "763846290466799638",
+			"playercheck": "733828561215029268",
+			"watchlist": "714971005558456391"
 		}
 	}
 }

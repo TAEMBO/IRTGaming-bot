@@ -35,7 +35,8 @@ module.exports = {
 			} else {
 				embed.addFields({name: '\u200b', value: `\`\`\`\n${rows.join('')}\`\`\``});
 			}
-			embed.addFields({name: 'Statistics: Host info', value: `> __**Node.js**__\n**RAM:** ${(Math.round (process.memoryUsage().heapTotal / 1000)) / 1000}MB**/**${(Math.round(ram.available / 1000000)) / 1000}GB\n**Version:** ${process.version}\n**Discord.js version:** v${version}\n**Uptime:** ${client.formatTime(client.uptime, 2, { commas: true, longNames: true })}\n> __**System**__\n**CPU:** ${cpu.manufacturer} ${cpu.brand}\n**RAM:** ${Math.floor(ram.total / 1024 / 1000000)}GB\n**Uptime:** ${client.formatTime((os.uptime*1000), 2, { commas: true, longNames: true })}`})
+			embed.addFields({name: 'Statistics: Host info', value: `> __**Node.js**__\n**RAM:** ${(Math.round (process.memoryUsage().heapTotal / 1000)) / 1000}MB**/**${(Math.round(ram.available / 1000000)) / 1000}GB\n**Version:** ${process.version}\n**Discord.js version:** v${version}\n**Uptime:** ${client.formatTime(client.uptime, 2, { commas: true, longNames: true })}\n> __**System**__\n**CPU:** ${cpu.manufacturer} ${cpu.brand}\n**RAM:** ${Math.floor(ram.total / 1024 / 1000000)}GB\n**Uptime:** ${client.formatTime((os.uptime*1000), 2, { commas: true, longNames: true })}`})\
+			embed.setFooter({text: `Load time: ${Date.now() - msg.createdTimestamp}ms`})
 			msg.edit({content: null, embeds: [embed]})
 	},
 	data: new SlashCommandBuilder()

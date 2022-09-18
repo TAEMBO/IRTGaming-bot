@@ -3,7 +3,7 @@ module.exports = {
     name: "messageUpdate",
     execute: async (client, oldMsg, newMsg) => {
         if (!client.config.botSwitches.logs) return;
-        if (oldMsg.author.bot) return;
+        if (oldMsg?.author.bot) return;
         if (oldMsg.partial) return;
         if (newMsg.partial) return;
         const msgarr = newMsg.content.toLowerCase().split(' ');

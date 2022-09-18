@@ -52,9 +52,6 @@ async function FSstats(client, interaction, serverName, DBName) {
     data.forEach((change, i) => {
         if (change < 0) data[i] = data[i - 1] || data[i + 1] || 0;
     });
-
-    const maxValue = Math.max(...data);
-    const maxValueArr = maxValue.toString().split('');
     
     const first_graph_top = 16;
     // console.log({ first_graph_top });

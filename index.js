@@ -10,7 +10,7 @@ console.log(client.config.botSwitches)
 // global properties
 client.on("ready", async () => {
 	client.guilds.cache.forEach(async (e)=>{await e.members.fetch();});
-	await client.channels.fetch(client.config.mainServer.channels.testing_zone).then((channel)=>{channel.send(`:warning: Bot restarted :warning:\n${client.config.eval.whitelist.map(x => `<@${x}>`).join(' ')}`)});
+	client.channels.resolve(client.config.mainServer.channels.testing_zone).send(`:warning: Bot restarted :warning:\n${client.config.eval.whitelist.map(x => `<@${x}>`).join(' ')}`)
 	setInterval(()=>{
 		client.guilds.cache.get(client.config.mainServer.id).invites.fetch().then((invs)=>{
 			invs.forEach(async(inv)=>{

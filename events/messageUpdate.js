@@ -7,7 +7,7 @@ module.exports = {
         if (oldMsg.partial) return;
         if (newMsg.partial) return;
         const msgarr = newMsg.content.toLowerCase().split(' ');
-        if (client.bannedWords._content.some(word => msgarr.includes(word))) newMsg.delete();
+        if (client.bannedWords._content.some(word => msgarr.includes(word)) && (!client.isMPStaff(client, message.member) || !client.hasModPerms(client, message.member))) newMsg.delete();
         if (newMsg.content === oldMsg.content) return;
         const embed = new client.embed()
             .setTitle("Message Edited!")

@@ -24,7 +24,7 @@ module.exports = {
         } else if (subCmd === 'blue') {
             interaction.reply('To access the blue farm on Public Grain to use seeders, [see here](https://discord.com/channels/552565546089054218/729823615096324166/980241004718329856) and look for a line marked "**Blue farm password**".')
         } else if (subCmd === 'filters') {
-            interaction.reply('Please note that our servers may "ghost" and not show up until you\'ve refreshed your MP menu some times.\nhttps://cdn.discordapp.com/attachments/830916009107652630/978795707681079376/unknown.png')
+            interaction.reply({embeds: [new client.embed().setColor(client.config.embedColor).setTitle('Please note that our servers may "ghost" and not show up until you\'ve refreshed your MP menu some times.').setImage('https://cdn.discordapp.com/attachments/830916009107652630/978795707681079376/unknown.png')]})
         } else if (subCmd === 'todo') {
             const embed = new client.embed()
                 .setTitle('To-do')

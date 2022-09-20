@@ -51,7 +51,7 @@ const p = path.join(__dirname, './databases/reminders.json');
 let remindEmbed = new client.embed()
 	.setTitle('Reminder')
 	.setColor(client.config.embedColor);
-setInterval(() => {
+setInterval(async () => {
 	let db = require(p);
 	const filterLambda = x => x.when < Math.floor(Date.now() / 1000);
 	const filter = db.filter(x => filterLambda(x));

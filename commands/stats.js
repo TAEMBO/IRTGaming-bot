@@ -1,18 +1,12 @@
 const {SlashCommandBuilder, AttachmentBuilder} = require('discord.js');
 const axios = require("axios");
-const BLAKLIST = [
-    '891791005098053682', //PS
-    '729823615096324166', //PG
-];
 
 async function FSstatsAll(client, serverName, embed, totalCount) {
     if (serverName.data.slots.used !== 0) {
         totalCount.push(serverName.data.slots.used)
         const playerInfo = [];
 
-        await serverName.data.slots.players.forEach(player => {
-            if (player.name === undefined) return;
-
+        await serverName.data.slots.players.filter((x)=> x.isUsed !== false).forEach(player => {
             let wlPlayer = ''; // Tag for if player is on watchList
             client.watchList._content.forEach((x) => {
                 if (x[0] === player.name) {
@@ -208,9 +202,7 @@ async function FSstats(client, interaction, serverName, DBName) {
     //     ctx.drawImage(image, 0, 0)
     //   })
 
-    await FSserver.data.slots.players.forEach(player => {
-        if (player.name === undefined) return;
-
+    await FSserver.data.slots.players.filter((x)=> x.isUsed !== false).forEach(player => {
         let wlPlayer = ''; // Tag for if player is on watchList
         client.watchList._content.forEach((x) => {
             if (x[0] === player.name) {
@@ -231,7 +223,7 @@ async function FSstats(client, interaction, serverName, DBName) {
 module.exports = {
     run: async (client, interaction) => {
         if (!client.config.botSwitches.stats) return interaction.reply({content: '`/stats` commands are currently disabled.', ephemeral: true});
-        if (BLAKLIST.includes(interaction.channel.id) && !client.isMPStaff(client, interaction.member)) return interaction.reply({content: 'This command has [restrictions](https://discord.com/channels/552565546089054218/891791005098053682/991799952084828170) set, please use <#552583841936834560> for `/stats` commands.', ephemeral: true}); 
+        if (['891791005098053682', '729823615096324166'].includes(interaction.channel.id) && !client.isMPStaff(client, interaction.member)) return interaction.reply({content: 'This command has [restrictions](https://discord.com/channels/552565546089054218/891791005098053682/991799952084828170) set, please use <#552583841936834560> for `/stats` commands.', ephemeral: true}); 
         const subCmd = interaction.options.getSubcommand();
 
         if (subCmd === 'all') {

@@ -7,7 +7,6 @@ module.exports = {
     run: async (client, interaction) => {
         const whatToRemind = await interaction.options.getString("what");
         const whenToRemind = ms(await interaction.options.getString("when"));
-        console.log(whenToRemind)
         if(whenToRemind == null){
             const incorrectTimeFormatEmbed = new client.embed()
                 .setTitle('Incorrect timestamp.')

@@ -30,16 +30,13 @@ module.exports = {
       },
       data: new SlashCommandBuilder()
         .setName("remind")
-        .setDescription("remind main command")
-        .addSubcommand(optt => optt
-            .setName("me")
-            .setDescription("me sub command")
-            .addStringOption(opt => opt
-                .setName("what")
-                .setDescription("What should i remind you?")
-                .setRequired(true))
-            .addStringOption(opt => opt
-                .setName("when")
-                .setDescription("When i should remind you that?")
-                .setRequired(true)))
+        .setDescription("Set a reminder for something")
+        .addStringOption(opt => opt
+            .setName("what")
+            .setDescription("The reminder itself")
+            .setRequired(true))
+        .addStringOption(opt => opt
+            .setName("when")
+            .setDescription("When to remind, do \"help\" to see format")
+            .setRequired(true))
 };

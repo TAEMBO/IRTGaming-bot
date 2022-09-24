@@ -1,8 +1,8 @@
 module.exports = {
     name: "messageDelete",
     execute: async (client, msg) => {
-        const channel = await client.channels.fetch(client.config.mainServer.channels.modlogs);
         if (!client.config.botSwitches.logs) return;
+        const channel = client.channels.resolve(client.config.mainServer.channels.modlogs);
         if (msg.partial) return;
         if (msg.author.bot) return;
         const embed = new client.embed()

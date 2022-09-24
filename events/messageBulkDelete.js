@@ -1,7 +1,7 @@
 module.exports = {
     name: "messageDeleteBulk",
     execute: async (client, messages) => {
-        const channel = await client.channels.fetch(client.config.mainServer.channels.modlogs);
+        const channel = client.channels.resolve(client.config.mainServer.channels.modlogs);
          if (!client.config.botSwitches.logs) return;
          let text = "";
          messages.forEach((e)=>{

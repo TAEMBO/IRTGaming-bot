@@ -1,6 +1,7 @@
 module.exports = {
     name: "voiceStateUpdate",
     execute: async (client, oldState, newState) => {
+        if (!client.config.botSwitches.logs) return;
         const channel = client.channels.resolve(client.config.mainServer.channels.modlogs);
         const embed = new client.embed().setTimestamp().setDescription(`<@${newState.member.user.id}>\n\`${newState.member.user.id}\``);
         embed.setThumbnail(newState.member.user.avatarURL({ format: 'png', dynamic: true, size: 2048}) || newState.member.user.defaultAvatarURL)

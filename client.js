@@ -120,7 +120,6 @@ class YClient extends Client {
         function log(client, ArrayNew, ArrayOld, Acro, watchList = true) {
             // Filter for players leaving
             const missingElementsLeave = ArrayOld.filter(x => !ArrayNew.some(y => y.name === x.name)); // Filter names that were in the first fetch but not the second. Thanks to LebSter#0617 for this on The Coding Den Discord server
-            console.log(missingElementsLeave)
             for (const x of missingElementsLeave) {
                 if (watchList) {
                     client.watchList._content.forEach(y => {

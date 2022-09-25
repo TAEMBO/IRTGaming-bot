@@ -75,9 +75,9 @@ setInterval(async () => {
 // Farming Simulator 22 stats loops
 if (client.config.botSwitches.stats) {
 	setInterval(async () => {
-		client.FSLoop(client, client.tokens.test.dss, client.tokens.test.csg, '778848112588095559', '1023348987937435699', 'PS')
-		//client.FSLoop(client, client.tokens.pg.dss, client.tokens.pg.csg, '729823615096324166', '980241004718329856', 'PG')
-		//client.FSLoop(client, client.tokens.mf.dss, client.tokens.mf.csg, '982143077554720768', '985586585707900928', 'MF')
+		client.FSLoop(client, ps.dss, client.tokens.ps.csg, '891791005098053682', '980240981922291752', 'PS')
+		client.FSLoop(client, client.tokens.pg.dss, client.tokens.pg.csg, '729823615096324166', '980241004718329856', 'PG')
+		client.FSLoop(client, client.tokens.mf.dss, client.tokens.mf.csg, '982143077554720768', '985586585707900928', 'MF')
 	}, 30000)
 }
 

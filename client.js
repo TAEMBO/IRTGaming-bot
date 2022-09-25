@@ -133,7 +133,7 @@ class YClient extends Client {
                         
             // Filter for players joining
             let playerObj;
-            if (ArrayOld.length == 0 && client.uptime > 31000) {
+            if (ArrayOld.length == 0 && client.uptime > 33000) {
                 playerObj = ArrayNew;
             } else if (ArrayOld.length != 0) {
                 playerObj = ArrayNew.filter(y => !ArrayOld.some(z => z.name === y.name));
@@ -219,71 +219,27 @@ class YClient extends Client {
                 ].join('\n')
             })
         client.channels.resolve(Channel).messages.fetch(Message).then((msg)=>{ msg.edit({embeds: [embed]})})
-        
-        switch (serverAcro) {
-            case 'PS': // Public Silage
-                if (FSdss.data.server.name.length === 0) {
-                    if (client.FSCache.ps.status === 1) {
-                        logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now offline`).setColor(client.config.embedColorYellow)]})
-                    }
-                    client.FSCache.ps.status = 0;
-                } else {
-                    if (client.FSCache.ps.status === 0) {
-                        logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now online`).setColor(client.config.embedColorYellow)]})
-                    }
-                    client.FSCache.ps.status = 1;
-                }
-    
-                client.FSCache.ps.new = await FSdss.data.slots.players.filter(x => x.isUsed !== false);
-    
-                adminCheck(client, this.FSCache.ps.new, this.FSCache.ps.old, serverAcro, Whitelist);
-                log(client, this.FSCache.ps.new, this.FSCache.ps.old, serverAcro);
-                dataPoint(serverAcro, FSdss.data.slots.used);
-    
-                client.FSCache.ps.old = await FSdss.data.slots.players.filter(x => x.isUsed !== false);
-                break;
-            case 'PG': // Public Grain
-                if (FSdss.data.server.name.length === 0) {
-                    if (client.FSCache.pg.status === 1) {
-                        logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now offline`).setColor(client.config.embedColorYellow)]})
-                    }
-                    client.FSCache.pg.status = 0;
-                } else {
-                    if (client.FSCache.pg.status === 0) {
-                        logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now online`).setColor(client.config.embedColorYellow)]})
-                    }
-                    client.FSCache.pg.status = 1;
-                }
-    
-                client.FSCache.pg.new = await FSdss.data.slots.players.filter(x => x.isUsed !== false);
-    
-                adminCheck(client, this.FSCache.pg.new, this.FSCache.pg.old, serverAcro, Whitelist);
-                log(client, this.FSCache.pg.new, this.FSCache.pg.old, serverAcro);
-                dataPoint(serverAcro, FSdss.data.slots.used);
-            
-                client.FSCache.pg.old = await FSdss.data.slots.players.filter(x => x.isUsed !== false);
-                break;
-            case 'MF': // Multi Farm
-                if (FSdss.data.server.name.length === 0) {
-                    if (client.FSCache.mf.status === 1) {
-                        logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now offline`).setColor(client.config.embedColorYellow)]})
-                    }
-                    client.FSCache.mf.status = 0;
-                } else {
-                    if (client.FSCache.mf.status === 0) {
-                        logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now online`).setColor(client.config.embedColorYellow)]})
-                    }
-                    client.FSCache.mf.status = 1;
-                }
-    
-                client.FSCache.mf.new = await FSdss.data.slots.players.filter(x => x.isUsed !== false);
-                
-                log(client, this.FSCache.mf.new, this.FSCache.mf.old, serverAcro, false);
-                dataPoint(serverAcro, FSdss.data.slots.used);
-            
-                client.FSCache.mf.old = await FSdss.data.slots.players.filter(x => x.isUsed !== false);
-                break;
+
+        // Logs
+        if (FSdss.data.server.name.length === 0) {
+            if (client.FSCache[serverAcro.toLowerCase()].status === 1) {
+                logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now offline`).setColor(client.config.embedColorYellow)]})
+            }
+            client.FSCache[serverAcro.toLowerCase()].status = 0;
+        } else {
+            if (client.FSCache[serverAcro.toLowerCase()].status === 0) {
+                logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now online`).setColor(client.config.embedColorYellow)]})
+            }
+            client.FSCache[serverAcro.toLowerCase()].status = 1;
         }
+
+        client.FSCache[serverAcro.toLowerCase()].new = await FSdss.data.slots.players.filter(x => x.isUsed !== false);
+
+        adminCheck(client, this.FSCache[serverAcro.toLowerCase()].new, this.FSCache[serverAcro.toLowerCase()].old, serverAcro, Whitelist);
+        log(client, this.FSCache[serverAcro.toLowerCase()].new, this.FSCache[serverAcro.toLowerCase()].old, serverAcro);
+        dataPoint(serverAcro, FSdss.data.slots.used);
+
+        client.FSCache[serverAcro.toLowerCase()].old = await FSdss.data.slots.players.filter(x => x.isUsed !== false);
     }
 
     alignText(text, length, alignment, emptyChar = ' ') {

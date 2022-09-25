@@ -157,7 +157,7 @@ class YClient extends Client {
         const axios = require("axios");
         const xjs = require('xml-js');
         const Whitelist = ["SpongeBoi69", "Kazmerev", "Hungarian__0101", "Sersha", "Helper B", "777Stupid", "Andyk1978", "Andrewk1978", "OmgxBeckyx"]
-        const wlPing = ["642735886953611265"];
+        const wlPing = ["263724396672188417", "769710040596217897", "642735886953611265"];
         const wlChannel = client.channels.resolve(client.config.mainServer.channels.watchlist);
         const logChannel = client.channels.resolve(client.config.mainServer.channels.fslogs)
         const playerInfo = [];

@@ -231,7 +231,7 @@ class YClient extends Client {
 
         client.FSCache[serverAcro.toLowerCase()].new = await FSdss.data.slots.players.filter(x => x.isUsed !== false);
 
-        adminCheck(client, this.FSCache[serverAcro.toLowerCase()].new, this.FSCache[serverAcro.toLowerCase()].old, serverAcro, Whitelist);
+        if (serverAcro != 'MF') {adminCheck(client, this.FSCache[serverAcro.toLowerCase()].new, this.FSCache[serverAcro.toLowerCase()].old, serverAcro, Whitelist)};
         log(client, this.FSCache[serverAcro.toLowerCase()].new, this.FSCache[serverAcro.toLowerCase()].old, serverAcro);
         dataPoint(serverAcro, FSdss.data.slots.used);
 

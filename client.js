@@ -121,13 +121,11 @@ class YClient extends Client {
             // Filter for players leaving
             const missingElementsLeave = ArrayOld.filter(x => !ArrayNew.some(y => y.name === x.name)); // Filter names that were in the first fetch but not the second. Thanks to LebSter#0617 for this on The Coding Den Discord server
             for (const x of missingElementsLeave) {
-                if (watchList) {
-                    client.watchList._content.forEach(y => {
-                        if (y[0] === x.name) {
-                            wlChannel.send({embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${y[0]}\` left **${Acro}** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})
-                        } // Hopefully that person got banned
-                    })
-                }
+                client.watchList._content.forEach(y => {
+                    if (y[0] === x.name && watchList) {
+                        wlChannel.send({embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${y[0]}\` left **${Acro}** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})
+                    } // Hopefully that person got banned
+                })
                 logChannel.send({embeds: [new client.embed().setDescription(`\`${x.name}\` ${(!x.isAdmin ? '' : ':detective:')}${(client.FMstaff._content.includes(x.name) ? ':farmer:' : '')}${(client.TFstaff._content.includes(x.name) ? ':angel:' : '')} left **${Acro}** at <t:${Math.round(new Date() / 1000)}:t>`).setFooter({text: `Playtime: ${(Math.floor(x.uptime/60))}:${('0' + (x.uptime % 60)).slice(-2)}`}).setColor(client.config.embedColorRed)]})
             }
                         
@@ -141,13 +139,11 @@ class YClient extends Client {
 
             if (playerObj != undefined) {
                 playerObj.forEach(x => {
-                    if (watchList) {
-                        client.watchList._content.forEach(y => {
-                            if (y[0] === x.name) {
-                                wlChannel.send({content: `${wlPing.map(x=>`<@${x}>`).join(" ")}`, embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${y[0]}\` joined **${Acro}** at <t:${Math.round(new Date() / 1000)}:t>`).setFooter({text: `Reason: ${y[1]}`}).setColor(client.config.embedColorGreen)]})
-                            } // Oh no, go get em Toast
-                        })
-                    }
+                    client.watchList._content.forEach(y => {
+                        if (y[0] === x.name && watchList) {
+                            wlChannel.send({content: `${wlPing.map(x=>`<@${x}>`).join(" ")}`, embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${y[0]}\` joined **${Acro}** at <t:${Math.round(new Date() / 1000)}:t>`).setFooter({text: `Reason: ${y[1]}`}).setColor(client.config.embedColorGreen)]})
+                        } // Oh no, go get em Toast
+                    })
                     logChannel.send({embeds: [new client.embed().setDescription(`\`${x.name}\` ${(client.FMstaff._content.includes(x.name) ? ':farmer:' : '')}${(client.TFstaff._content.includes(x.name) ? ':angel:' : '')} joined **${Acro}** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorGreen)]})
                 })
             }

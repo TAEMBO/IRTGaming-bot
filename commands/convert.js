@@ -265,7 +265,7 @@ const quantities = {
 		{
 			name: 'minute',
 			value: 60,
-			short: ['m', 'min']
+			short: ['min', 'm']
 		},
 		{
 			name: 'hour',

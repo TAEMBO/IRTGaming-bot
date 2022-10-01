@@ -24,6 +24,7 @@ class YClient extends Client {
         this.registery = [];
         this.setMaxListeners(100)
         this.voted;
+        this.repeatedMessages = {};
         this.FSCache = {'statsGraph': -120, 'ps': {'new': [], 'old': [], 'status': undefined}, 'pg': {'new': [], 'old': [], 'status': undefined}, 'mf': {'new': [], 'old': [], 'status': undefined}};
         this.bannedWords = new database("./databases/bannedWords.json", "array");
         this.tictactoeDb = new database("./databases/ttt.json", "array");
@@ -34,8 +35,7 @@ class YClient extends Client {
         this.TFstaff = new database("./databases/TFstaff.json", "array");
         this.watchList = new database("./databases/watchList.json", "array");
         this.votes = new database("./databases/suggestvotes.json", "array");
-        this.repeatedMessages = {};
-        this.repeatedMessagesContent = new database("./databases/repeatedMessagesContent.json", "array");
+        this.playerTimes = new database("./databases/playerTimes.json", "array");
     }
     async init(){
         this.login(this.tokens.token);
@@ -48,7 +48,7 @@ class YClient extends Client {
         this.TFstaff.initLoad();
         this.watchList.initLoad();
         this.votes.initLoad();
-        this.repeatedMessagesContent.initLoad();
+        this.playerTimes.initLoad();
         const commandFiles = fs.readdirSync("./commands").filter(file => file.endsWith(".js"));
         for (const file of commandFiles) {
 	        const command = require(`./commands/${file}`);
@@ -121,6 +121,7 @@ class YClient extends Client {
             // Filter for players leaving
             const missingElementsLeave = ArrayOld.filter(x => !ArrayNew.some(y => y.name === x.name)); // Filter names that were in the first fetch but not the second. Thanks to LebSter#0617 for this on The Coding Den Discord server
             for (const x of missingElementsLeave) {
+                client.playerTimes.addPlayerTime(x.name, x.uptime).forceSave();
                 client.watchList._content.forEach(y => {
                     if (y[0] === x.name && watchList) {
                         wlChannel.send({embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${y[0]}\` left **${Acro}** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})

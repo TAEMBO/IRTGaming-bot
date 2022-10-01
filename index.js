@@ -164,6 +164,21 @@ Object.assign(client.userLevels, {
 	},
 });
 
+// playerTimes
+Object.assign(client.playerTimes, {
+    addPlayerTime(playerName, time) {
+        const amount = this._content[playerName];
+        console.log(amount)
+        console.log(time)
+        if (amount) this._content[playerName] = amount + time;
+        else this._content[playerName] = time;
+        return this;
+    },
+    getPlayer(playerName) {
+        return this._content[playerName] || 0;
+    }
+});
+
 // punishments
 Object.assign(client.punishments, {
 	createId() {

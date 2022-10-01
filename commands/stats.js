@@ -278,6 +278,12 @@ module.exports = {
             FSstats(client, interaction, client.tokens.pg.dss, 'PGPlayerData');
         } else if (subCmd === 'mf') {
             FSstats(client, interaction, client.tokens.mf.dss, 'MFPlayerData');
+        } else if (subCmd === 'playertimes') {
+            const embed = new client.embed()
+                .setDescription(`Top 10 players with the most time spent on IRTGaming FS22 servers since __October 1st, 2022.__`)
+                .addFields({name: '\u200b', value: Object.entries(client.playerTimes._content).sort((a, b) => b[1] - a[1]).slice(0, 10).map((x, i) => `**${i + 1}.** \`${x[0]}\`: ${client.formatTime((x[1]*60*1000), 3, { commas: true, longNames: false })}`).join('\n')})
+                .setColor(client.config.embedColor)
+            interaction.reply({embeds: [embed]});
         }
     },
     data: new SlashCommandBuilder()
@@ -289,14 +295,18 @@ module.exports = {
     )
     .addSubcommand((optt)=>optt
         .setName("ps")
-        .setDescription("Server stats for Public Silage")
+        .setDescription("Public Silage server stats")
     )
     .addSubcommand((optt)=>optt
         .setName("pg")
-        .setDescription("Server stats for Public Grain")
+        .setDescription("Public Grain server stats")
     )
     .addSubcommand((optt)=>optt
         .setName("mf")
-        .setDescription("Server stats for Multi Farm")
+        .setDescription("Multi Farm server stats")
+    )
+    .addSubcommand((optt)=>optt
+        .setName("playertimes")
+        .setDescription("Player time data")
     )
 };

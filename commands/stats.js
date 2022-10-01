@@ -280,7 +280,7 @@ module.exports = {
             FSstats(client, interaction, client.tokens.mf.dss, 'MFPlayerData');
         } else if (subCmd === 'playertimes') {
             const embed = new client.embed()
-                .setDescription(`Top 10 players with the most time spent on IRTGaming FS22 servers since __October 1st, 2022.__`)
+                .setDescription(`Top 10 players with the most time spent on IRTGaming FS22 servers since <t:1664645628>`)
                 .addFields({name: '\u200b', value: Object.entries(client.playerTimes._content).sort((a, b) => b[1] - a[1]).slice(0, 10).map((x, i) => `**${i + 1}.** \`${x[0]}\`: ${client.formatTime((x[1]*60*1000), 3, { commas: true, longNames: false })}`).join('\n')})
                 .setColor(client.config.embedColor)
             interaction.reply({embeds: [embed]});

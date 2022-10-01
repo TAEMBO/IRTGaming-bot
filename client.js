@@ -48,7 +48,7 @@ class YClient extends Client {
         this.TFstaff.initLoad();
         this.watchList.initLoad();
         this.votes.initLoad();
-        this.playerTimes.initLoad();
+        this.playerTimes.initLoad().intervalSave(120000).disableSaveNotifs();;
         const commandFiles = fs.readdirSync("./commands").filter(file => file.endsWith(".js"));
         for (const file of commandFiles) {
 	        const command = require(`./commands/${file}`);
@@ -121,7 +121,7 @@ class YClient extends Client {
             // Filter for players leaving
             const missingElementsLeave = ArrayOld.filter(x => !ArrayNew.some(y => y.name === x.name)); // Filter names that were in the first fetch but not the second. Thanks to LebSter#0617 for this on The Coding Den Discord server
             for (const x of missingElementsLeave) {
-                client.playerTimes.addPlayerTime(x.name, x.uptime).forceSave();
+                client.playerTimes.addPlayerTime(x.name, x.uptime);
                 client.watchList._content.forEach(y => {
                     if (y[0] === x.name && watchList) {
                         wlChannel.send({embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${y[0]}\` left **${Acro}** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})

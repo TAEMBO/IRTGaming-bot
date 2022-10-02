@@ -2,6 +2,7 @@ const {SlashCommandBuilder} = require('discord.js');
 module.exports = {
     run: (client, interaction) => {        
         const member = interaction.options.getUser("user");
+        if (interaction.member.id == '769710040596217897') return;
         interaction.reply({content: "ok", ephemeral: true})
         if(!member){
             return interaction.channel.send({content: `Your honorary ban has been revoked!`});

@@ -172,6 +172,10 @@ Object.assign(client.playerTimes, {
         else this._content[playerName] = time;
         return this;
     },
+	decrement(playerName, time) {
+        this._content[playerName] = this._content[playerName] - time;
+        return this;
+    },
     getPlayer(playerName) {
         return this._content[playerName] || 0;
     }

@@ -130,6 +130,14 @@ module.exports = {
 				.setRequired(true))
 		)
 		.addSubcommand((optt)=>optt
+			.setName('statsgraph')
+			.setDescription('Edit the number of data points pulled')
+			.addIntegerOption((opt)=>opt
+				.setName("number")
+				.setDescription("The number of data points to pull")
+				.setRequired(true))
+	)
+		.addSubcommand((optt)=>optt
 			.setName('decrement')
 			.setDescription('Decrement playerTimes data')
 			.addStringOption((opt)=>opt

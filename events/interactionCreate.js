@@ -82,7 +82,7 @@ module.exports = {
             }
         } else if (interaction.isCommand()) {
             const commandFile = client.commands.get(interaction.commandName);
-            if (!client.config.botSwitches.commands && !client.config.eval.whitelist.includes(interaction.user.id)) return interaction.reply({content: 'Commands are currently disabled.', ephemeral: true});
+            if (!client.config.botSwitches.commands && !client.config.devWhitelist.includes(interaction.user.id)) return interaction.reply({content: 'Commands are currently disabled.', ephemeral: true});
             if (commandFile) {
                 if (commandFile.disabled) return interaction.reply({content: 'This command is disabled.', ephemeral: true});
                 console.log(`[${moment().format('HH:mm:ss')}] ${interaction.user.tag} used /${interaction.commandName} in ${interaction.channel.name}`);

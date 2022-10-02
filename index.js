@@ -10,7 +10,7 @@ console.log(client.config.botSwitches)
 // global properties
 client.on("ready", async () => {
 	client.guilds.cache.forEach(async (e)=>{await e.members.fetch();});
-	client.channels.resolve(client.config.mainServer.channels.testing_zone).send(`:warning: Bot restarted :warning:\n${client.config.eval.whitelist.map(x => `<@${x}>`).join(' ')}`)
+	client.channels.resolve(client.config.mainServer.channels.testing_zone).send(`:warning: Bot restarted :warning:\n<@${client.config.devWhitelist[0]}>`)
 	setInterval(()=>{
 		client.guilds.cache.get(client.config.mainServer.id).invites.fetch().then((invs)=>{
 			invs.forEach(async(inv)=>{
@@ -38,12 +38,12 @@ client.on("ready", async () => {
 process.on("unhandledRejection", async (error)=>{
 	console.log(error)
 	console.log('\x1b[36m', '');
-	client.channels.resolve(client.config.mainServer.channels.testing_zone).send({content: `${client.config.eval.whitelist.map(x=>`<@${x}>`).join(", ")}`, embeds: [new client.embed().setTitle("Error Caught!").setColor("#420420").setDescription(`**Error:** \`${error.message}\`\n\n**Stack:** \`${`${error.stack}`.slice(0, 2500)}\``)]})
+	client.channels.resolve(client.config.mainServer.channels.testing_zone).send({content: `<@${client.config.devWhitelist[0]}>`, embeds: [new client.embed().setTitle("Error Caught!").setColor("#420420").setDescription(`**Error:** \`${error.message}\`\n\n**Stack:** \`${`${error.stack}`.slice(0, 2500)}\``)]})
 });
 client.on("error", async (error) =>{
 	console.log(error)
 	console.log('\x1b[36m', '');
-	client.channels.resolve(client.config.mainServer.channels.testing_zone).send({content: `${client.config.eval.whitelist.map(x=>`<@${x}>`).join(", ")}`, embeds: [new client.embed().setTitle("Error Caught!").setColor("#420420").setDescription(`**Error:** \`${error.message}\`\n\n**Stack:** \`${`${error.stack}`.slice(0, 2500)}\``)]})
+	client.channels.resolve(client.config.mainServer.channels.testing_zone).send({content: `<@${client.config.devWhitelist[0]}>`, embeds: [new client.embed().setTitle("Error Caught!").setColor("#420420").setDescription(`**Error:** \`${error.message}\`\n\n**Stack:** \`${`${error.stack}`.slice(0, 2500)}\``)]})
 })
 
 // reminder and punishment event loops

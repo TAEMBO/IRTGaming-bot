@@ -55,7 +55,7 @@ module.exports = {
 		embed0.setDescription(`**${eligiblity.messages.toLocaleString('en-US')}** messages\n**${Math.floor(eligiblity.age).toLocaleString('en-US')}d** time on server`)
 		interaction.reply({content: `**${eligiblity.messages.toLocaleString('en-US')}** messages\n**${Math.floor(eligiblity.age).toLocaleString('en-US')}d** time on server${ranking ? ranking : ''}`}); // compile message and send
 	 } else if (subCmd === 'reset') {
-		if (interaction.user.id !== interaction.guild.ownerId && !client.config.eval.whitelist.includes(interaction.user.id)) return interaction.reply('You\'re not allowed to use this command.');
+		if (!client.config.devWhitelist.includes(interaction.user.id)) return interaction.reply('You\'re not allowed to use this command.');
 
 		const msg = await interaction.reply({content: 'Are you sure you want to reset all LRS data?', fetchReply: true, components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`Yes`).setStyle("Success").setLabel("Confirm"), new ButtonBuilder().setCustomId(`No`).setStyle("Danger").setLabel("Cancel"))]});
 		const filter = (i) => ["Yes", "No"].includes(i.customId) && i.user.id === interaction.user.id;

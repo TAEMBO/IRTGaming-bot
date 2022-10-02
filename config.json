@@ -10,12 +10,11 @@
 		"registerCommands": true,
 		"stats": true
 	},
-	"eval": {
-		"allowed": true,
-		"whitelist": [
-            "615761944154210305"
-		]
-	},
+	"devWhitelist": [
+		"615761944154210305",
+		"190407856527376384",
+		"485793265568841728"
+	],
 	"mainServer": {
 		"id":"552565546089054218",
 		"MPStaffRoles": [

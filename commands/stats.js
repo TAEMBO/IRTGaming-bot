@@ -289,7 +289,7 @@ module.exports = {
             } else {
                 const time = client.playerTimes.getPlayer(player);
                 let result;
-                if (time = 0) {
+                if (time == 0) {
                     result = `has no logged play time.`;
                 } else {
                     result = `'s total time: ${client.formatTime((time*60*1000, 3, { commas: true, longNames: false }))}`;

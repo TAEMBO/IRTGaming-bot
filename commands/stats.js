@@ -282,7 +282,20 @@ module.exports = {
             const embed = new client.embed()
                 .setDescription(`Top 20 players with the most time spent on IRTGaming FS22 servers since <t:1664645628>\n\n${Object.entries(client.playerTimes._content).sort((a, b) => b[1] - a[1]).slice(0, 20).map((x, i) => `**${i + 1}.** \`${x[0]}\`${(client.FMstaff._content.includes(x[0]) ? ':farmer:' : '')}${(client.TFstaff._content.includes(x[0]) ? ':angel:' : '')}: ${client.formatTime((x[1]*60*1000), 3, { commas: true, longNames: false })}`).join('\n')}`)
                 .setColor(client.config.embedColor)
-            interaction.reply({embeds: [embed]});
+            const player = interaction.options.getString('name');
+            
+            if (!player) {
+                interaction.reply({embeds: [embed]});
+            } else {
+                const time = client.playerTimes.getPlayer(player);
+                let result;
+                if (time = 0) {
+                    result = `has no logged play time.`;
+                } else {
+                    result = `'s total time: ${client.formatTime((time*60*1000, 3, { commas: true, longNames: false }))}`;
+                }
+                interaction.reply(`\`${player}\`${result}`)
+            }
         }
     },
     data: new SlashCommandBuilder()
@@ -307,5 +320,9 @@ module.exports = {
     .addSubcommand((optt)=>optt
         .setName("playertimes")
         .setDescription("Player time data")
+        .addStringOption((opt)=>opt
+            .setName("name")
+            .setDescription("Fetch total time for a player")
+            .setRequired(false))
     )
 };

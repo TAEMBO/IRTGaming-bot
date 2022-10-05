@@ -65,11 +65,13 @@ module.exports = {
 		'688803177184886794', //farm-manager-chat
 		'906960370919436338', //mp-action-log
 		'830916009107652630', //public-admin-chat
-		'733828561215029268', //player-check
+		'733828561215029268', //mp-staff-commands
 		'690549465559597127', //mp-ban-list
 		'677146047868436480', //mp-admin-chat
-		'828982825734504448', //mp-server-managers-chat
-'986969325112033330', // mf-serverlog
+		'828982825734504448', //mf-manager-chat
+        '986969325112033330', //mf-serverlog
+		'968265015595532348', //mp-manager-chat
+		'979863373439184966', //war crimes
 	];
 
 	if (client.bannedWords._content.some(x => msgarr.includes(x)) && !client.hasModPerms(client, message.member) && !Whitelist.includes(message.channel.id) && client.config.botSwitches.automod) {

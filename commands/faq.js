@@ -2,11 +2,11 @@ const {SlashCommandBuilder, ActionRowBuilder, ButtonBuilder} = require('discord.
 
 module.exports = { 
     run: async (client, interaction) => {
-        const subCmd = interaction.options.getSubcommand();
+        const options = interaction.options.getString('questions');
 
-        if (subCmd === 'staff') {
+        if (options === 'staff') {
             interaction.reply({components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setStyle("Link").setURL(`https://canary.discord.com/channels/552565546089054218/852483521859551232/866257346513862687`).setLabel("Apply for MP Staff"))]})
-        } else if (subCmd === 'troll') {
+        } else if (options === 'troll') {
             const embed1 = new client.embed()
                 .setTitle('Reporting trolls: Brief')
                 .setColor(client.config.embedColor)
@@ -19,13 +19,13 @@ module.exports = {
                 .setImage('https://media.discordapp.net/attachments/979863373439184966/996178337984675961/unknown.png')
                 .setColor(client.config.embedColor)
             interaction.reply({embeds: [embed1, embed2]})
-        } else if (subCmd === 'appeal') {
+        } else if (options === 'appeal') {
             interaction.reply({embeds: [new client.embed().setDescription('To appeal a ban on a server, go to <#825046442300145744> to create a ticket. Within the ticket, type `!appeal`.').setColor(client.config.embedColor)]})
-        } else if (subCmd === 'blue') {
+        } else if (options === 'blue') {
             interaction.reply('To access the blue farm on Public Grain to use seeders, [see here](https://discord.com/channels/552565546089054218/729823615096324166/980241004718329856) and look for a line marked "**Blue farm password**".')
-        } else if (subCmd === 'filters') {
+        } else if (options === 'filters') {
             interaction.reply({embeds: [new client.embed().setColor(client.config.embedColor).setTitle('Please note that our servers may "ghost" and not show up until you\'ve refreshed your MP menu some times.').setImage('https://cdn.discordapp.com/attachments/830916009107652630/978795707681079376/unknown.png')]})
-        } else if (subCmd === 'todo') {
+        } else if (options === 'todo') {
             const embed = new client.embed()
                 .setTitle('To-do')
                 .setColor(client.config.embedColor)
@@ -35,39 +35,23 @@ module.exports = {
                 )
             .setFooter({text: 'Note that not every task listed might be available to do at the time, so do your due dilligence to see what needs doing'})
             interaction.reply({embeds: [embed]})
-        } else if (subCmd === 'equipment') {
+        } else if (options === 'equipment') {
             interaction.reply('Buying more equipment on our servers will sometimes have a negative impact. Every piece of equipment takes up a certain amount of slots. We need to maintain an acceptable amount of slots in order to keep our server accessible to console players. More vehicles and implements also contribute to the file sizes of the servers causing more server lag.')
         }
     },
     data: new SlashCommandBuilder()
     .setName("faq")
     .setDescription("Frequently asked questions")
-    .addSubcommand((optt)=>optt
-        .setName("staff")
-        .setDescription("FAQ: Applying for MP Staff")
-    )
-    .addSubcommand((optt)=>optt
-        .setName("troll")
-        .setDescription("FAQ: How to report trolls")
-    )
-    .addSubcommand((optt)=>optt
-        .setName("appeal")
-        .setDescription("FAQ: How to appeal a ban on a server")
-    )
-    .addSubcommand((optt)=>optt
-        .setName("blue")
-        .setDescription("FAQ: Blue farm on PG")
-    )
-    .addSubcommand((optt)=>optt
-        .setName("todo")
-        .setDescription("FAQ: What to do on the servers")
-    )
-    .addSubcommand((optt)=>optt
-        .setName("filters")
-        .setDescription("FAQ: What filters to use")
-    )
-    .addSubcommand((optt)=>optt
-        .setName("equipment")
-        .setDescription("FAQ: Buying equipment")
-)
+    .addStringOption((opt)=>opt
+      .setName('questions')
+      .setDescription('FAQ')
+      .addChoices(
+        {name: 'Applying for MP Staff', value: 'staff'},
+        {name: 'Reporting trolls', value: 'troll'},
+        {name: 'MP ban appeal', value: 'appeal'},
+        {name: 'Blue farm on PG', value: 'blue'},
+        {name: 'To do on MP servers', value: 'blue'},
+        {name: 'MP filters to join', value: 'filters'},
+        {name: 'Buying equipment', value: 'equipment'})
+      .setRequired(true))
 };

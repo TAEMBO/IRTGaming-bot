@@ -4,32 +4,7 @@ module.exports = {
 	run: async (client, interaction) => {
         if(!interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager) && !interaction.member.roles.cache.has(client.config.mainServer.roles.mfmanager) && !interaction.member.roles.cache.has(client.config.mainServer.roles.mffarmowner)) return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mpmanager}> role to use this command.`, allowedMentions: {roles: false}})
         const member = interaction.options.getMember("member");
-        const options = interaction.options.getString("role");
-        let Role;
-
-        if (options === '1') {
-            Role = client.config.mainServer.roles.mffarm1;
-        } else if (options === '2') {
-            Role = client.config.mainServer.roles.mffarm2;
-        } else if (options === '3') {
-            Role = client.config.mainServer.roles.mffarm3;
-        } else if (options === '4') {
-            Role = client.config.mainServer.roles.mffarm4;
-        } else if (options === '5') {
-            Role = client.config.mainServer.roles.mffarm5;
-        } else if (options === '6') {
-            Role = client.config.mainServer.roles.mffarm6;
-        } else if (options === '7') {
-            Role = client.config.mainServer.roles.mffarm7;
-        } else if (options === '8') {
-            Role = client.config.mainServer.roles.mffarm8;
-        } else if (options === '9') {
-            Role = client.config.mainServer.roles.mffarm9;
-        } else if (options === '10') {
-            Role = client.config.mainServer.roles.mffarm10;
-        } else if (options === '11') {
-            Role = client.config.mainServer.roles.mffarm11;
-        }
+        const Role = client.config.mainServer.roles[interaction.options.getString("role")];
 
         if(member.roles.cache.has(Role)){
             if (interaction.member.roles.cache.has(client.config.mainServer.roles.mffarmowner) && !interaction.member.roles.cache.has(client.config.mainServer.roles.mfmanager) && !interaction.member.roles.cache.has(Role)) return interaction.reply('You cannot remove users from a farm you do not own.')
@@ -63,17 +38,17 @@ module.exports = {
         .setName("role")
         .setDescription("the role to add or remove")
         .addChoices(
-            {name: 'Farm 1', value: '1'},
-            {name: 'Farm 2', value: '2'},
-            {name: 'Farm 3', value: '3'},
-            {name: 'Farm 4', value: '4'},
-            {name: 'Farm 5', value: '5'},
-            {name: 'Farm 6', value: '6'},
-            {name: 'Farm 7', value: '7'},
-            {name: 'Farm 8', value: '8'},
-            {name: 'Farm 9', value: '9'},
-            {name: 'Farm 10', value: '10'},
-            {name: 'Farm 11', value: '11'}
+            {name: 'Farm 1', value: 'mffarm1'},
+            {name: 'Farm 2', value: 'mffarm2'},
+            {name: 'Farm 3', value: 'mffarm3'},
+            {name: 'Farm 4', value: 'mffarm4'},
+            {name: 'Farm 5', value: 'mffarm5'},
+            {name: 'Farm 6', value: 'mffarm6'},
+            {name: 'Farm 7', value: 'mffarm7'},
+            {name: 'Farm 8', value: 'mffarm8'},
+            {name: 'Farm 9', value: 'mffarm9'},
+            {name: 'Farm 10', value: 'mffarm10'},
+            {name: 'Farm 11', value: 'mffarm11'}
         )
         .setRequired(true))
 };

@@ -5,7 +5,8 @@ client.init();
 const fs = require("fs");
 const path = require('path');
 
-console.log(client.config.botSwitches)
+console.log(client.config.botSwitches);
+console.log(client.config.devWhitelist);
 
 // global properties
 client.on("ready", async () => {
@@ -44,7 +45,10 @@ client.on("error", async (error) =>{
 	console.log(error)
 	console.log('\x1b[36m', '');
 	client.channels.resolve(client.config.mainServer.channels.testing_zone).send({content: `<@${client.config.devWhitelist[0]}>`, embeds: [new client.embed().setTitle("Error Caught!").setColor("#420420").setDescription(`**Error:** \`${error.message}\`\n\n**Stack:** \`${`${error.stack}`.slice(0, 2500)}\``)]})
-})
+});
+process.on('exit', (code) => {
+	console.log(`About to exit with code: ${code}`);
+});
 
 // reminder and punishment event loops
 const p = path.join(__dirname, './databases/reminders.json');

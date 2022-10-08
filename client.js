@@ -149,6 +149,16 @@ class YClient extends Client {
                 })
             }
         }
+        function seasons(season) {
+            switch(season) {
+                case '1':
+                    return 'Yes';
+                case '2':
+                    return 'No';
+                case '3':
+                    return 'Paused';
+            }
+        }
 
         const axios = require("axios");
         const xjs = require('xml-js');
@@ -210,6 +220,7 @@ class YClient extends Client {
                 `**Timescale:** ${FScsg === undefined ? null : (FScsg.settings.timeScale._text.slice(0, -5)).toLocaleString('en-US')}x`,
                 `**Playtime:** ${FScsg === undefined ? null : client.formatTime((parseInt(FScsg.statistics.playTime._text) * 60 * 1000), 3, { commas: true, longNames: true })}`,
                 `**Map:** ${FSdss.data.server.mapName ?? null}`,
+                `**Seasonal growth:** ${seasons(FScsg.settings.growthMode._text)}`,
                 `**Autosave interval:** ${FScsg === undefined ? null : Math.round(parseInt(FScsg.settings.autoSaveInterval._text))} min`,
                 `**Game version:** ${FSdss.data.server.version ?? null}`,
                 `**Slot usage:** ${FScsg === undefined ? null : parseInt(FScsg.slotSystem._attributes.slotUsage).toLocaleString('en-US')}`

@@ -109,10 +109,8 @@ class YClient extends Client {
         function adminCheck(client, ArrayNew, ArrayOld, Acro, Whitelist) {
             ArrayNew.filter(x => {
                 !ArrayOld.some((y)=> {
-                    if (y.name === x.name && !y.isAdmin && x.isAdmin) {
-                        if (!Whitelist.includes(x.name) && !client.FMstaff._content.includes(x.name)) {
-                            client.channels.resolve('830916009107652630').send({embeds: [new client.embed().setTitle('UNKNOWN ADMIN LOGIN').setDescription(`\`${x.name}\` on **${Acro}** at <t:${Math.round(new Date() / 1000)}>`).setColor('#ff4d00')]})
-                        }
+                    if (y.name === x.name && !y.isAdmin && x.isAdmin && !Whitelist.includes(x.name) && !client.FMstaff._content.includes(x.name)) {
+                        client.channels.resolve('830916009107652630').send({embeds: [new client.embed().setTitle('UNKNOWN ADMIN LOGIN').setDescription(`\`${x.name}\` on **${Acro}** at <t:${Math.round(new Date() / 1000)}>`).setColor('#ff4d00')]})
                     }
                 })
             });

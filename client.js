@@ -185,9 +185,9 @@ class YClient extends Client {
             console.log(`[${moment().format('HH:mm:ss')}] ${serverAcro} csg fail`)
         }
 
-        try { // Convert dedicated-server-savegame.xml
-            FScsg = await xjs.xml2js(xml.data, {compact: true, spaces: 2}).careerSavegame;
-        } catch (err) {
+        FScsg = await xjs.xml2js(xml.data, {compact: true, spaces: 2}).careerSavegame; // Convert dedicated-server-savegame.xml
+
+        if (FScsg == undefined) {
             error = true;
             console.log(`[${moment().format('HH:mm:ss')}] ${serverAcro} csg convert fail`)
         }

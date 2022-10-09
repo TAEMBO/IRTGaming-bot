@@ -233,17 +233,17 @@ module.exports = {
             let MF;
             
             try {
-                PS = await axios.get(client.tokens.ps.dss, {timeout: 1000});
+                PS = await axios.get(client.tokens.ps.dss, {timeout: 3000});
             } catch (err) {
                 console.log(`stats all; PS failed`)
             }
             try {
-                PG = await axios.get(client.tokens.pg.dss, {timeout: 1000});
+                PG = await axios.get(client.tokens.pg.dss, {timeout: 3000});
             } catch (err) {
                 console.log(`stats all; PG failed`)
             }
             try {
-                MF = await axios.get(client.tokens.mf.dss, {timeout: 1000});
+                MF = await axios.get(client.tokens.mf.dss, {timeout: 3000});
             } catch (err) {
                 console.log(`stats all; MF failed`)
             }

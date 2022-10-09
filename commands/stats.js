@@ -227,11 +227,11 @@ module.exports = {
         const subCmd = interaction.options.getSubcommand();
 
         if (subCmd === 'all') {
+            interaction.deferReply()
             let PS;
             let PG;
             let MF;
             
-            // const msg = await interaction.reply({content: 'Loading <a:IRT_loading:660661301353381898>', fetchReply: true})
             try {
                 PS = await axios.get(client.tokens.ps.dss, {timeout: 1000});
             } catch (err) {
@@ -270,8 +270,7 @@ module.exports = {
                 }
 
                 embed.setTitle(`All Servers: ${sum} online`)
-                //msg.edit({content: null, embeds: [embed]})
-                interaction.reply({embeds: [embed]})
+                interaction.editReply({embeds: [embed]});
         } else if (subCmd === 'ps') {
             FSstats(client, interaction, client.tokens.ps.dss, 'PSPlayerData');
         } else if (subCmd === 'pg') {

@@ -14,10 +14,20 @@ function convert(status) {
 }
 module.exports = {
 	run: async (client, interaction, user) => {
-		const subCmd = interaction.options.getSubcommand();
+		const member = interaction.options.getMember("member");
+		if (member == null) {
+			const user = interaction.options.getUser('member');
 
-		if (subCmd === 'member') {
-			const member = interaction.options.getMember("member");
+			const embed = new client.embed()
+				.setThumbnail(user.avatarURL({ format: 'png', dynamic: true, size: 2048}) || user.defaultAvatarURL)
+				.setTitle(`${user.bot ? 'Bot' : 'User'} info: ${user.tag}`)
+				.setURL(`https://discord.com/users/${user.id}`)
+				.setDescription(`<@${user.id}>\n\`${user.id}\``)
+				.addFields(
+					{name: '🔹 Account Creation Date', value: `<t:${Math.round(user.createdTimestamp / 1000)}>\n<t:${Math.round(user.createdTimestamp / 1000)}:R>`})
+				.setColor(client.config.embedColor)
+			interaction.reply({embeds: [embed]});
+		} else {
 			await member.user.fetch();
 			const embedArray = [];
 			const embed0 = new client.embed()
@@ -71,37 +81,13 @@ module.exports = {
 					})
 				} else {embedArray.push(embed0)}
 			interaction.reply({embeds: embedArray});
-		} else if (subCmd === 'user') {
-			let error = false;
-			const User = await client.users.fetch(interaction.options.getString("user"), [force = true]).catch((e) => error = true);
-			if (error) return interaction.reply('A user with that ID could not be found');
-
-			const embed1 = new client.embed()
-				.setThumbnail(User.avatarURL({ format: 'png', dynamic: true, size: 2048}) || User.defaultAvatarURL)
-				.setTitle(`${User.bot ? 'Bot' : 'User'} info: ${User.tag}`)
-				.setURL(`https://discord.com/users/${User.id}`)
-				.setDescription(`<@${User.id}>\n\`${User.id}\``)
-				.addFields(
-				{name: '🔹 Account Creation Date', value: `<t:${Math.round(new Date(User.createdTimestamp) / 1000)}>\n<t:${Math.round(new Date(User.createdTimestamp) / 1000)}:R>`})
-				.setColor(client.config.embedColor)
-			interaction.reply({embeds: [embed1]});
 		}
 	},
 	data: new SlashCommandBuilder()
 		.setName("whois")
 		.setDescription("Get info on a member or user.")
-		.addSubcommand((optt)=>optt
-			.setName('member')
-			.setDescription('Get info on a member.')
-			.addUserOption((opt)=>opt
-				.setName("member")
-				.setDescription("The member to get info on.")
-				.setRequired(true)))
-		.addSubcommand((optt)=>optt
-			.setName('user')
-			.setDescription('Get info on a user')
-			.addStringOption((opt)=>opt
-				.setName("user")
-				.setDescription("The ID of the user.")
-				.setRequired(true)))
+		.addUserOption((opt)=>opt
+			.setName("member")
+			.setDescription("The member or user to get info on.")
+			.setRequired(true))
 };

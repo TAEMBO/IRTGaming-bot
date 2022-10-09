@@ -187,14 +187,19 @@ class YClient extends Client {
             console.log(`[${moment().format('HH:mm:ss')}] ${serverAcro} csg fail`)
         }
 
+        try { // Convert dedicated-server-savegame.xml
+            FScsg = await xjs.xml2js(xml.data, {compact: true, spaces: 2}).careerSavegame;
+        } catch (err) {
+            error = true;
+            console.log(`[${moment().format('HH:mm:ss')}] ${serverAcro} csg convert fail`)
+        }
+
         if (error) { // Blame Red
             embed.setTitle('Host not responding');
             embed.setColor(client.config.embedColorRed);
             client.channels.resolve(Channel).messages.fetch(Message).then((msg)=>{ msg.edit({embeds: [embed]})});
             return;
         }
-
-        FScsg = await xjs.xml2js(xml.data, {compact: true, spaces: 2}).careerSavegame; // Convert dedicated-server-savegame.xml
     
         await FSdss.data.slots.players.filter((x)=> x.isUsed !== false).forEach(player => {
             let wlPlayer = ''; // Tag for if player is on watchList
@@ -215,15 +220,15 @@ class YClient extends Client {
 		} else embed.setColor(client.config.embedColorGreen)
         embed.setDescription(`${FSdss.data.slots.used === 0 ? '*No players online*' : playerInfo.join("\n")}`);
         embed.addFields({name: `**Server Statistics**`, value: [
-                `**Money:** $${FScsg === undefined ? null : parseInt(FScsg.statistics.money._text).toLocaleString('en-US')}`,
+                `**Money:** $${parseInt(FScsg.statistics.money._text).toLocaleString('en-US')}`,
                 `**In-game time:** ${('0' + Math.floor((FSdss.data.server.dayTime/3600/1000))).slice(-2)}:${('0' + Math.floor((FSdss.data.server.dayTime/60/1000)%60)).slice(-2) ?? null}`,
-                `**Timescale:** ${FScsg === undefined ? null : (FScsg.settings.timeScale._text.slice(0, -5)).toLocaleString('en-US')}x`,
-                `**Playtime:** ${FScsg === undefined ? null : client.formatTime((parseInt(FScsg.statistics.playTime._text) * 60 * 1000), 3, { commas: true, longNames: true })}`,
+                `**Timescale:** ${(FScsg.settings.timeScale._text.slice(0, -5)).toLocaleString('en-US')}x`,
+                `**Playtime:** ${client.formatTime((parseInt(FScsg.statistics.playTime._text) * 60 * 1000), 3, { commas: true, longNames: true })}`,
                 `**Map:** ${FSdss.data.server.mapName ?? null}`,
                 `**Seasonal growth:** ${seasons(FScsg.settings.growthMode._text)}`,
-                `**Autosave interval:** ${FScsg === undefined ? null : Math.round(parseInt(FScsg.settings.autoSaveInterval._text))} min`,
+                `**Autosave interval:** ${Math.round(parseInt(FScsg.settings.autoSaveInterval._text))} min`,
                 `**Game version:** ${FSdss.data.server.version ?? null}`,
-                `**Slot usage:** ${FScsg === undefined ? null : parseInt(FScsg.slotSystem._attributes.slotUsage).toLocaleString('en-US')}`
+                `**Slot usage:** ${parseInt(FScsg.slotSystem._attributes.slotUsage).toLocaleString('en-US')}`
                 ].join('\n')
             })
         client.channels.resolve(Channel).messages.fetch(Message).then((msg)=>{ msg.edit({embeds: [embed]})})

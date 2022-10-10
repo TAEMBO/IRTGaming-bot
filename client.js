@@ -169,7 +169,7 @@ class YClient extends Client {
         let error;
         let FSdss;
         let FScsg = undefined;
-        let xml;
+        //let xml;
     
         try { // Fetch dedicated-server-stats.json
             FSdss = await axios.get(serverURLdss, {timeout: 5000});
@@ -179,13 +179,13 @@ class YClient extends Client {
         }
 
         try { // Fetch dedicated-server-savegame.xml
-            xml = await axios.get(serverURLcsg, {timeout: 5000});
+            await axios.get(serverURLcsg, {timeout: 5000}).then((xml) => { // convert
+                FScsg = xjs.xml2js(xml.data, {compact: true, spaces: 2}).careerSavegame;
+            });
         } catch (err) {
             error = true;
             console.log(`[${moment().format('HH:mm:ss')}] ${serverAcro} csg fail`)
         }
-
-        FScsg = await xjs.xml2js(xml.data, {compact: true, spaces: 2}).careerSavegame; // Convert dedicated-server-savegame.xml
 
         if (FScsg == undefined) {
             error = true;

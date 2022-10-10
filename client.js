@@ -169,7 +169,6 @@ class YClient extends Client {
         let error;
         let FSdss;
         let FScsg = undefined;
-        //let xml;
     
         try { // Fetch dedicated-server-stats.json
             FSdss = await axios.get(serverURLdss, {timeout: 5000});

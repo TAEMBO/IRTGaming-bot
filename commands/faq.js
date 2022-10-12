@@ -50,7 +50,7 @@ module.exports = {
         {name: 'Reporting trolls', value: 'troll'},
         {name: 'MP ban appeal', value: 'appeal'},
         {name: 'Blue farm on PG', value: 'blue'},
-        {name: 'To do on MP servers', value: 'blue'},
+        {name: 'To do on MP servers', value: 'todo'},
         {name: 'MP filters to join', value: 'filters'},
         {name: 'Buying equipment', value: 'equipment'})
       .setRequired(true))

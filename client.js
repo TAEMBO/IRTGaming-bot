@@ -174,7 +174,7 @@ class YClient extends Client {
             FSdss = await axios.get(serverURLdss, {timeout: 5000});
         } catch (err) {
             error = true
-            console.log(`[${moment().format('HH:mm:ss')}] ${serverAcro} dss fail`)
+            console.log(`\x1b[36m[${moment().format('HH:mm:ss')}] \x1b[31m${serverAcro} dss fail`)
         }
 
         try { // Fetch dedicated-server-savegame.xml
@@ -183,12 +183,12 @@ class YClient extends Client {
             });
         } catch (err) {
             error = true;
-            console.log(`[${moment().format('HH:mm:ss')}] ${serverAcro} csg fail`)
+            console.log(`\x1b[36m[${moment().format('HH:mm:ss')}] \x1b[31m${serverAcro} csg fail`)
         }
 
         if (FScsg == undefined) {
             error = true;
-            console.log(`[${moment().format('HH:mm:ss')}] ${serverAcro} csg convert fail`)
+            console.log(`\x1b[36m[${moment().format('HH:mm:ss')}] \x1b[31m${serverAcro} csg convert fail`)
         }
 
         if (error) { // Blame Red

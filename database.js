@@ -46,7 +46,7 @@ class Database {
 		const newJson = JSON.stringify(db._content);
 		if (oldJson !== newJson || force) {
 			fs.writeFileSync(db._path, newJson);
-			if (this._saveNotifs) console.log(`[${moment().format('HH:mm:ss')}] ` + this._path + ' Database Saved');
+			if (this._saveNotifs) console.log(`\x1b[36m[${moment().format('HH:mm:ss')}] \x1b[32m` + this._path + ' Database Saved');
 		}
 		return db;
 	}

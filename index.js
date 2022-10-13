@@ -4,6 +4,7 @@ const client = new YClient();
 client.init();
 const fs = require("fs");
 const path = require('path');
+const moment = require('moment');
 
 console.log(client.config.botSwitches);
 console.log(client.config.devWhitelist);
@@ -25,7 +26,7 @@ client.on("ready", async () => {
 		await client.user.setPresence({activities: [{name: 'MF get restarted', type: 3}], status: 'online'});
 		// Playing: 0 & 1, Listening: 2, Watching: 3, N/A: 4, Competing in: 5
 	}, 60000);
-	console.log("\x1b[36m", `Bot active as ${client.user.tag}.`);
+	console.log(`\x1b[34m[${moment().format('HH:mm:ss')}] Bot active as ${client.user.tag}`);
 
 	// event handler
 	const eventFiles = fs.readdirSync('./events').filter(file => file.endsWith('.js'));
@@ -37,13 +38,11 @@ client.on("ready", async () => {
 
 // error handlers
 process.on("unhandledRejection", async (error)=>{
-	console.log(error)
-	console.log('\x1b[36m', '');
+	console.log('\x1b[31m', error)
 	client.channels.resolve(client.config.mainServer.channels.testing_zone).send({content: `<@${client.config.devWhitelist[0]}>`, embeds: [new client.embed().setTitle("Error Caught!").setColor("#420420").setDescription(`**Error:** \`${error.message}\`\n\n**Stack:** \`${`${error.stack}`.slice(0, 2500)}\``)]})
 });
 client.on("error", async (error) =>{
-	console.log(error)
-	console.log('\x1b[36m', '');
+	console.log('\x1b[31m', error)
 	client.channels.resolve(client.config.mainServer.channels.testing_zone).send({content: `<@${client.config.devWhitelist[0]}>`, embeds: [new client.embed().setTitle("Error Caught!").setColor("#420420").setDescription(`**Error:** \`${error.message}\`\n\n**Stack:** \`${`${error.stack}`.slice(0, 2500)}\``)]})
 });
 process.on('exit', (code) => {

@@ -4,21 +4,15 @@ module.exports = {
     run: async (client, interaction) => {
         if (!client.isMPStaff(client, interaction.member)) return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mpstaff}> role to use this command`, allowedMentions: {roles: false}});
         const subCmd = interaction.options.getSubcommand();
+        const name = interaction.options.getString("username");
 
         if (subCmd === "add") {
-            const name = interaction.options.getString("username");
+            if (client.TFstaff._content.includes(name)) return interaction.reply('That username already exists');
             client.TFstaff.addData(name).forceSave();
             interaction.reply({content: `Successfully added \`${name}\``})
         } else if (subCmd === "remove") {
-            const fs = require('node:fs');
-            const path = require("path");
-            const name = interaction.options.getString("username");
-            let arr = require('../databases/TFstaff.json');
-
-            arr = client.removeCustomValue(arr, name)
-            fs.writeFileSync(path.resolve('./databases/TFstaff.json'), JSON.stringify(arr))
-            client.TFstaff._content = require("../databases/TFstaff.json");
-    
+            if (!client.TFstaff._content.includes(name)) return interaction.reply('That username doesn\'t exist');
+            client.TFstaff.removeData(name, 0, undefined).forceSave();
             interaction.reply({content: `Successfully removed \`${name}\``})
         }
     },

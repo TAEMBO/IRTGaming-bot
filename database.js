@@ -17,9 +17,18 @@ class Database {
 		}
 		return this;
 	}
-	removeData(key) {
+	removeData(key, type, element) {
 		if (this._dataType === 'array') {
-			this._content.splice(key, 1);
+			switch (type) {
+				case 0:
+					this._content = this._content.filter(x => x != key);
+					break;
+				case 1:
+					this._content = this._content.filter(x => x[element] != key)
+					break;
+				default: 
+					return 'Type must be properly specified';
+			}
 		} else if (this._dataType === 'object') {
 			delete this._content[key];
 		}

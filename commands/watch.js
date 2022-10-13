@@ -19,14 +19,7 @@ module.exports = {
             const name = interaction.options.getString('username');
             client.watchList._content.some((x) => {if (x[0] === name) e = true;})
             if (e) {
-                const fs = require('node:fs');
-                const path = require("path");
-                let arr = require('../databases/watchList.json');
-
-                arr = client.watchList._content.filter((x) => x[0] !== name);
-                fs.writeFileSync(path.resolve('./databases/watchList.json'), JSON.stringify(arr))
-                client.watchList._content = client.watchList._content.filter((x) => x[0] !== name);
-
+                client.watchList.removeData(name, 1, 0).forceSave();
                 interaction.reply(`Successfully removed \`${name}\` from watchList`);
             } else return interaction.reply('That name doesn\'t exist on watchList');
         }

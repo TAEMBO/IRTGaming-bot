@@ -23,7 +23,7 @@ client.on("ready", async () => {
 	if (client.config.botSwitches.registerCommands) client.guilds.cache.get(client.config.mainServer.id).commands.set(client.registery).catch((e)=>{console.log(`Couldn't register commands bcuz: ${e}`)});
 
 	setInterval(async () => {
-		await client.user.setPresence({activities: [{name: 'MF get restarted', type: 3}], status: 'online'});
+		await client.user.setPresence({activities: [{name: 'the teacher', type: 2}], status: 'online'});
 		// Playing: 0 & 1, Listening: 2, Watching: 3, N/A: 4, Competing in: 5
 	}, 60000);
 	console.log(`\x1b[34m[${moment().format('HH:mm:ss')}] Bot active as ${client.user.tag}`);

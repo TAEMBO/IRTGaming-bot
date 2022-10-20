@@ -3,7 +3,7 @@ const {SlashCommandBuilder, ButtonBuilder, ActionRowBuilder} = require("discord.
 
 module.exports = {
 	run: async (client, interaction) => {
-        if (!interaction.member.roles.cache.has(client.config.mainServer.roles.mpstaff)) return client.youNeedRole(interaction, "mpstaff");
+        if (!client.isMPStaff(interaction.member)) return client.youNeedRole(interaction, "mpstaff");
         const subCmd = interaction.options.getSubcommand();
         const name = interaction.options.getString('name');
 

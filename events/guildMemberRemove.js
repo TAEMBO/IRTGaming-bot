@@ -14,7 +14,7 @@ module.exports = {
             {name: '🔹 Level Roles messages', value: `${await client.userLevels.getEligible(member).messages.toLocaleString('en-US')}`, inline: true})
             
             .setColor(client.config.embedColorRed)
-            .setTimestamp(Date.now())
+            .setTimestamp()
             .setThumbnail(member.user.displayAvatarURL({ format: 'png', dynamic: true, size: 2048}))
          client.channels.resolve(client.config.mainServer.channels.modlogs).send({embeds: [embed]});
          delete client.userLevels._content[member.user.id];

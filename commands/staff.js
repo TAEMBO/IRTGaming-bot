@@ -15,7 +15,7 @@ module.exports = {
             const mp_a = await staff.mp_admin.members.filter(x=>!x.roles.cache.has(client.config.mainServer.roles.mpmanager)).map(e=>`<@${e.user.id}>`).join("\n") || "None";
             const mp_pa = await staff.mp_publicadmin.members.map(e=>`<@${e.user.id}>`).join("\n") || "None";
             const mp_fm = await staff.mp_farmmanager.members.map(e=>`<@${e.user.id}>`).join("\n") || "None";
-            const mp_tf = await staff.mp_trustedfarmer.members.filter(x=>!client.isMPStaff(client, x)).map(e=>`<@${e.user.id}>`).join("\n") || "None";
+            const mp_tf = await staff.mp_trustedfarmer.members.filter(x=>!client.isMPStaff(x)).map(e=>`<@${e.user.id}>`).join("\n") || "None";
      
             const embed = new client.embed()
                 .setTitle('__MP Staff Members__')

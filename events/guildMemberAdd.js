@@ -39,7 +39,7 @@ module.exports = {
             {name: '🔹 Account Creation Date', value: `<t:${Math.round(new Date(member.user.createdTimestamp) / 1000)}>\n<t:${Math.round(new Date(member.user.createdTimestamp) / 1000)}:R>`},
             {name: '🔹Invite Data:', value: usedInvite ? `Invite: \`${usedInvite.code}\`\nCreated by: **${usedInvite.inviter.tag}**` : 'I couldn\'t find out how they joined!'})
             .setColor(client.config.embedColorGreen)
-            .setTimestamp(Date.now())
+            .setTimestamp()
             .setThumbnail(member.user.displayAvatarURL({ format: 'png', dynamic: true, size: 2048}))
          client.channels.resolve(client.config.mainServer.channels.modlogs).send({embeds: [embed1]})
  

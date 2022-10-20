@@ -5,13 +5,13 @@ module.exports = {
 	},
 	data: new SlashCommandBuilder()
 		.setName("kick")
-		.setDescription("Kicks a user from the server.")
+		.setDescription("Kick a member")
 		.addUserOption((opt)=>opt
 			.setName("member")
-			.setDescription("The user to kick from the server.")
+			.setDescription("The member to kick")
 			.setRequired(true))
-			.addStringOption((opt)=>opt
-				.setName("reason")
-				.setDescription("The reason for kicking the user.")
-				.setRequired(false))
+		.addStringOption((opt)=>opt
+			.setName("reason")
+			.setDescription("The reason for kicking the member")
+			.setRequired(false))
 };

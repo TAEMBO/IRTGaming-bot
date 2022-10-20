@@ -2,7 +2,7 @@ const {SlashCommandBuilder} = require('discord.js');
 
 module.exports = {
 	run: (client, interaction) => {
-        if (!client.isMPStaff(client, interaction.member)) return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mpstaff}> role to use this command`, allowedMentions: {roles: false}})
+        if (!client.isMPStaff(interaction.member)) return client.youNeedRole(interaction, "mpstaff");
         if (!interaction.member.roles.cache.has(client.config.mainServer.roles.loa)) {
             interaction.member.roles.add(client.config.mainServer.roles.loa);
             setTimeout(() => interaction.member.roles.remove(client.config.mainServer.roles.mpstaff), 500);

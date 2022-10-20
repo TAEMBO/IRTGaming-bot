@@ -11,7 +11,7 @@ module.exports = {
             interaction.reply('Unfroze server')     
             
         } else {
-            client.yOuNeEdMoD(client, interaction);
+            client.youNeedRole(interaction, "mod");
         }
     },
     data: new SlashCommandBuilder()

@@ -12,7 +12,7 @@ module.exports = {
             interaction.reply('Froze server')
         
         } else {
-            client.yOuNeEdMoD(client, interaction);
+            client.youNeedRole(interaction, "mod");
         }
 	},
     data: new SlashCommandBuilder()

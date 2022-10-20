@@ -1,4 +1,5 @@
-const {ChannelType} = require('discord.js')
+const {ChannelType} = require('discord.js');
+
 module.exports = {
     name: "messageCreate",
     execute: async (client, message) => {
@@ -17,7 +18,7 @@ module.exports = {
             .setAuthor({name: `${message.author.tag} (${message.author.id})`, iconURL: message.author.displayAvatarURL({ format: 'png', dynamic: true})})
             .setColor(client.config.embedColor)
             .addFields({name: 'Message Content', value: message.content.length > 1024 ? message.content.slice(1021) + '...' : message.content + '\u200b'})
-            .setTimestamp(Date.now());
+            .setTimestamp();
         let messageAttachmentsText = '';
         message.attachments.forEach(attachment => {
             if (!embed.image && ['png', 'jpg', 'webp', 'gif', 'jpeg'].some(x => attachment.name.endsWith(x))) embed.setImage(attachment.url);
@@ -37,23 +38,23 @@ module.exports = {
 	 } */
 
 	/* handle banned words
-	if (client.config.botSwitches.automod && client.bannedWords._content.some(word => message.content.toLowerCase().includes(word)) && !client.hasModPerms(client, message.member) && message.guild.id === client.config.mainServer.id)
+	if (client.config.botSwitches.automod && client.bannedWords._content.some(word => message.content.toLowerCase().includes(word)) && !client.hasModPerms(message.member) && message.guild.id === client.config.mainServer.id)
 		return message.delete() && message.channel.send("That word is banned here.").then(x => setTimeout(() => x.delete(), 5000));
 	*/
 
 	// useless staff ping mute
 	if (message.mentions.roles.some(mentionedRole => mentionedRole.id === client.config.mainServer.roles.mpstaff)) {
-		console.log("user mentioned staff role");
-		const filter = x => client.isMPStaff(client, x.member) && x.content === "y";
+		console.log(client.timeLog, `\x1b[33m${message.author.tag} mentioned staff role`);
+		const filter = x => client.isMPStaff(x.member) && x.content.toLowerCase() === "y";
 		message.channel.awaitMessages({ filter, max: 1, time: 60000, errors: ["time"]}).then(async collected => {
-			console.log("received \"y\" from staff member, indicating to mute someone");
+			console.log(client.timeLog, `\x1b[33mReceived "y" from ${collected.first().author.tag}, indicating to mute`);
 			try {
 				const muteResult = await client.punishments.addPunishment("mute", message.member, { time: "5m", reason: "Automod; misuse of staff ping", message: message}, collected.first().author.id);
 			} catch (error) {
-				console.log("muting failed cuz", error);
+				console.log(client.timeLog, `\x1b[31mMuting failed cuz:`, error);
 			}
 			collected.first().react('✅');
-		}).catch(() => console.log("failed to collect \"y\" from staff"));
+		}).catch(() => console.log(client.timeLog, `\x1b[33mFailed to collect "y" from staff`));
 	}
 
 	function onTimeout() {
@@ -74,7 +75,7 @@ module.exports = {
 		'979863373439184966', //war crimes
 	];
 
-	if (client.bannedWords._content.some(x => msgarr.includes(x)) && !client.hasModPerms(client, message.member) && !Whitelist.includes(message.channel.id) && client.config.botSwitches.automod) {
+	if (client.bannedWords._content.some(x => msgarr.includes(x)) && !client.hasModPerms(message.member) && !Whitelist.includes(message.channel.id) && client.config.botSwitches.automod) {
 		message.delete();
 		message.channel.send('That word is banned here.').then(x => setTimeout(() => x.delete(), 5000));
 		if (client.repeatedMessages[message.author.id]) {
@@ -114,7 +115,7 @@ module.exports = {
 	}
 
 	// repeated messages; Discord advertisement
-	if (message.content.includes("discord.gg/") && !client.hasModPerms(client, message.member) && !client.isMPStaff(client, message.member) && client.config.botSwitches.automod) {
+	if (message.content.includes("discord.gg/") && !client.hasModPerms(message.member) && !client.isMPStaff(message.member) && client.config.botSwitches.automod) {
 		message.delete();
 		message.channel.send("No advertising other Discord servers.").then(x => setTimeout(() => x.delete(), 10000))
 		if (client.repeatedMessages[message.author.id]) {
@@ -169,21 +170,25 @@ module.exports = {
 	// if message was sent in a whitelisted channel, count towards user level
 	if (WHITELISTED_CHANNELS.includes(message.channel.id)) {client.userLevels.incrementUser(message.author.id)};
 	
-	// auto responses
-	if (message.content.toLowerCase().includes('giants moment')) {
-		message.react('™️');
-	}
-	if (message.content.toLowerCase().includes('sync sim')) {
-		message.react(':IRT_SyncSim22:929440249577365525')
-	}
-	if (message.content.toLowerCase().includes('smoker')) {
-		message.react('🚭')
-	}
-	if (message.content.toLowerCase().includes("forgor")) {
-		message.react("💀")
-	}
-	if (msgarr.includes('69')) {
-		message.react(':IRT_Noice:611558357643558974')
+	if (client.config.botSwitches.autoResponses) { // auto responses
+		/*if (message.content.toLowerCase().includes('morning all') || message.content.toLowerCase().includes('morning everyone')) {
+			message.reply({content: `Morning ${message.member.displayName}!`, allowedMentions: {repliedUser: false}})
+		}*/
+		if (message.content.toLowerCase().includes('giants moment')) {
+			message.react('™️');
+		}
+		if (message.content.toLowerCase().includes('sync sim')) {
+			message.react(':IRT_SyncSim22:929440249577365525')
+		}
+		if (message.content.toLowerCase().includes('smoker')) {
+			message.react('🚭')
+		}
+		if (message.content.toLowerCase().includes("forgor")) {
+			message.react("💀")
+		}
+		if (msgarr.includes('69')) {
+			message.react(':IRT_Noice:611558357643558974')
+		}
 	}
 }
 }

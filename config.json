@@ -8,7 +8,8 @@
 		"automod": true,
 		"logs": true,
 		"registerCommands": true,
-		"stats": true
+		"stats": true,
+		"autoResponses": true
 	},
 	"devWhitelist": [
 		"615761944154210305",
@@ -54,7 +55,7 @@
 			"mffarm8": "983443081909125180",
 			"mffarm9": "983453130744295444",
 			"mffarm10": "988906862541955163",
-            "mffarm11": "990624191151738890",
+			"mffarm11": "990624191151738890",
 			"subscriber": "552615844790796288"
 		},
 		"channels": {

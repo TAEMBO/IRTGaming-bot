@@ -17,6 +17,6 @@ module.exports = {
         .setDescription("Honorary ban")
         .addUserOption((opt)=>opt
             .setName("user")
-            .setDescription(".")
+            .setDescription("It's an honor")
             .setRequired(false))
 };

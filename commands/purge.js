@@ -2,9 +2,9 @@ const {SlashCommandBuilder} = require('discord.js');
 
 module.exports = {
 	run: async (client, interaction) => {
-		if (!client.hasModPerms(client, interaction.member)) return client.yOuNeEdMoD(client, interaction);
+		if (!client.hasModPerms(interaction.member)) return client.youNeedRole(interaction, "mod");
 		const amount = interaction.options.getInteger("amount");
-		if (amount > 100) return interaction.reply({content: 'You can only delete 100 messages at once, this is a Discord API limitation.', ephemeral: true});
+		if (amount > 100) return interaction.reply({content: 'Discord\'s API limits purging up to 100 messages.', ephemeral: true});
 		const user = interaction.options.getUser("user");
 
         let messagesArray = [];

@@ -8,14 +8,14 @@ module.exports = {
 
         hidden.forEach(async (x) => {
             if (x[0] === intStr) {
-                console.log(`Running ${x[0]}`);
+                console.log(client.timeLog, `\x1b[33mRunning ${x[0]}`);
                 interaction.reply({content: `Running ${x[0]}.`, ephemeral: true}).then(() => eval(x[1]))
                 prsnt = true;
             }
         })
 
         if (!prsnt) {
-		    console.log(`Attempted ${intStr}`);
+		    console.log(client.timeLog, `\x1b[33mAttempted ${intStr}`);
 		    interaction.reply({content: 'A command with that name does not exist.', ephemeral: true});
 		    return;
 	    }

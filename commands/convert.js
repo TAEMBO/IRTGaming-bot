@@ -65,7 +65,7 @@ const quantities = {
 		},
 		{
 			name: 'pound sterling :flag_gb:',
-			value: 1.19,
+			value: 1.15,
 			short: ['GBP', '£']
 		},
 		{
@@ -75,32 +75,32 @@ const quantities = {
 		},
 		{
 			name: 'Russian Ruble :flag_ru:',
-			value: 0.016,
+			value: 0.017,
 			short: ['RUB', '₽']
 		},
 		{
 			name: 'Canadian Dollar :flag_ca:',
-			value: 0.77,
+			value: 0.74,
 			short: ['CAD']
 		},
 		{
 			name: 'Australian Dollar :flag_au:',
-			value: 0.69,
+			value: 0.64,
 			short: ['AUD']
 		},
 		{
 			name: 'Japanese Yen :flag_jp:',
-			value: 0.0073,
+			value: 0.0068,
 			short: ['JPY', '¥', 'yen', 'jy']
 		},
 		{
 			name: 'New Zealand Dollar :flag_nz:',
-			value: 0.62,
+			value: 0.58,
 			short: ['NZD']
 		},
 		{
 			name: 'Indonesian Rupiah :flag_id:',
-			value: 0.000067,
+			value: 0.000066,
 			short: ['IDR', 'Rp']
 		},
 		{
@@ -110,12 +110,12 @@ const quantities = {
 		},
 		{
 			name: 'Swedish krona :flag_se:',
-			value: 0.095,
+			value: 0.091,
 			short: ['SEK', 'kr']
 		},
 		{
 			name: 'Norwegian krone :flag_no:',
-			value: 0.10,
+			value: 0.096,
 			short: ['NOK']
 		},
 		{
@@ -135,12 +135,12 @@ const quantities = {
 		},
 		{
 			name: 'Swiss franc :flag_sw:',
-			value: 1.04,
+			value: 1.02,
 			short: ['CFH', 'fr']
 		},
 		{
 			name: 'Ukrainian hryvnia :flag_ua:',
-			value: 0.027,
+			value: 0.028,
 			short: ['UAH', '₴', 'грн']
 		},
 		{
@@ -150,17 +150,17 @@ const quantities = {
 		},
 		{
 			name: 'United Arab Emirates dirham :flag_ae:',
-			value: 0.27,
+			value: 0.28,
 			short: ['AED', 'د.إ']
 		},
 		{
 			name: 'Sri Lankan Rupee :flag_lk:',
-			value: 0.0027,
+			value: 0.0028,
 			short: ['LKR', 'රු', 'ரூ']
 		},
 		{
 			name: 'Hungarian Forint :flag_hu:',
-			value: 0.0025,
+			value: 0.0024,
 			short: ['HUF']
 		},
 		{

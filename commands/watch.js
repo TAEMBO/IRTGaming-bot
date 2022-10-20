@@ -2,7 +2,7 @@ const {SlashCommandBuilder} = require('discord.js');
 
 module.exports = { 
     run: async (client, interaction) => {
-        if (!client.isMPStaff(client, interaction.member)) return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mpstaff}> role to use this command`, allowedMentions: {roles: false}});
+        if (!client.isMPStaff(interaction.member)) return client.youNeedRole(interaction, "mpstaff");
         const subCmd = interaction.options.getSubcommand();
 
         if (subCmd === 'add') {

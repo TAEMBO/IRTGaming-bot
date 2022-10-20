@@ -4,7 +4,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 module.exports = {
 	run: async (client, interaction) => {
-		if (!client.hasModPerms(client, interaction.member)) return client.yOuNeEdMoD(client, interaction);
+		if (!client.hasModPerms(interaction.member)) return client.youNeedRole(interaction, "mod");
 		const subCmd = interaction.options.getSubcommand();
 		if(subCmd === "update") {
 			const caseid = interaction.options.getInteger('case_id');
@@ -20,11 +20,11 @@ module.exports = {
 	
 				await interaction.reply({embeds: [sucessEmbed] });
 			}catch(err){
-				console.log(err);
+				console.log(client.timeLog, '\x1b[31m' + err);
 				const errorEmbed = new client.embed()
 					.setColor('#ff0000')
 					.setTitle('Error')
-					.setDescription('An error occurred while updating the case, ask TÆMBØ to check the console  ');
+					.setDescription('An error occurred while updating the case, ask TÆMBØ to check the console');
 	
 				interaction.reply({embeds: [errorEmbed] });
 			}

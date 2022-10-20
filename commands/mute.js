@@ -1,20 +1,22 @@
-const {SlashCommandBuilder} = require('discord.js')
+const {SlashCommandBuilder} = require('discord.js');
+
 module.exports = {
 	run: (client, interaction) => {
 		client.punish(client, interaction, 'mute');
 	},
 	data: new SlashCommandBuilder()
 		.setName("mute")
-		.setDescription("Mutes a member.")
+		.setDescription("Mute a member")
 		.addUserOption((opt)=>opt
 			.setName("member")
 			.setDescription("The member to mute")
 			.setRequired(true))
 		.addStringOption((opt)=>opt
 			.setName("time")
-			.setDescription("The time for the mute."))
+			.setDescription("The time for the mute")
+			.setRequired(false))
 		.addStringOption((opt)=>opt
 			.setName("reason")
-			.setDescription("The reason for banning the member.")
+			.setDescription("The reason for muting the member")
 			.setRequired(false))
 };

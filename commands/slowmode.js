@@ -2,7 +2,7 @@ const {SlashCommandBuilder} = require('discord.js');
 
 module.exports = { 
 	run: (client, interaction) => {
-		if(!client.hasModPerms(client, interaction.member)) return client.yOuNeEdMoD(client, interaction);
+		if(!client.hasModPerms(interaction.member)) return client.youNeedRole(interaction, "mod");
         const time = interaction.options.getInteger("time");
         
         if(time > 21600) return interaction.reply('The slowmode limit is 6 hours (\`21600\` seconds).')

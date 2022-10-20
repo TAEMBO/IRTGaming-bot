@@ -12,7 +12,7 @@ module.exports = {
          .setDescription(`\`\`\`${text}\`\`\``.slice(0, 3900))
          .addFields({name: 'Channel', value: `<#${messages.first().channel.id}>`})
          .setColor(client.config.embedColor)
-         .setTimestamp(Date.now())
+         .setTimestamp()
          channel.send({embeds: [embed]})
         
     }

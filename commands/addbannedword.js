@@ -2,7 +2,7 @@ const {SlashCommandBuilder} = require('discord.js');
 
 module.exports = {
 	run: (client, interaction) => {
-		if (!client.hasModPerms(client, interaction.member) && !client.config.devWhitelist.includes(interaction.member.id)) return client.yOuNeEdMoD(client, interaction);
+		if (!client.hasModPerms(interaction.member) && !client.config.devWhitelist.includes(interaction.member.id)) return client.youNeedRole(interaction, "mod");
 		const word = interaction.options.getString("word")
 		if (client.bannedWords._content.includes(word)) return interaction.reply('That word is already added.')
 		client.bannedWords.addData(word).forceSave();
@@ -13,7 +13,7 @@ module.exports = {
 		.setDescription("Add a word to the bannedWords database")
 		.addStringOption((opt)=>opt
 			.setName("word")
-			.setDescription("The word you would like to add to the bannedWords database!")
+			.setDescription("The word to add")
 			.setRequired(true)
 		)
 };

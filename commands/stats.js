@@ -1,5 +1,4 @@
 const {SlashCommandBuilder, AttachmentBuilder} = require('discord.js');
-const axios = require("axios");
 
 async function FSstatsAll(client, serverName, embed, totalCount) {
     if (serverName.data.slots.used !== 0) {
@@ -29,7 +28,7 @@ async function FSstats(client, interaction, serverName, DBName) {
     let Color = client.config.embedColorGreen;
 
     try {
-        FSserver = await axios.get(serverName, {timeout: 2000});
+        FSserver = await client.axios.get(serverName, {timeout: 2000});
     } catch (err) {
         return interaction.reply('Server did not respond');
     }
@@ -223,7 +222,7 @@ async function FSstats(client, interaction, serverName, DBName) {
 module.exports = {
     run: async (client, interaction) => {
         if (!client.config.botSwitches.stats) return interaction.reply({content: '`/stats` commands are currently disabled.', ephemeral: true});
-        if (['891791005098053682', '729823615096324166'].includes(interaction.channel.id) && !client.isMPStaff(client, interaction.member)) return interaction.reply({content: 'This command has [restrictions](https://discord.com/channels/552565546089054218/891791005098053682/991799952084828170) set, please use <#552583841936834560> for `/stats` commands.', ephemeral: true}); 
+        if (['891791005098053682', '729823615096324166'].includes(interaction.channel.id) && !client.isMPStaff(interaction.member)) return interaction.reply({content: 'This command has [restrictions](https://discord.com/channels/552565546089054218/891791005098053682/991799952084828170) set, please use <#552583841936834560> for `/stats` commands.', ephemeral: true}); 
         const subCmd = interaction.options.getSubcommand();
 
         if (subCmd === 'all') {
@@ -233,19 +232,19 @@ module.exports = {
             let MF;
             
             try {
-                PS = await axios.get(client.tokens.ps.dss, {timeout: 3000});
+                PS = await client.axios.get(client.tokens.ps.dss, {timeout: 3000});
             } catch (err) {
-                console.log(`stats all; PS failed`)
+                console.log(`\x1b[31mstats all; PS failed`)
             }
             try {
-                PG = await axios.get(client.tokens.pg.dss, {timeout: 3000});
+                PG = await client.axios.get(client.tokens.pg.dss, {timeout: 3000});
             } catch (err) {
-                console.log(`stats all; PG failed`)
+                console.log(`\x1b[31mstats all; PG failed`)
             }
             try {
-                MF = await axios.get(client.tokens.mf.dss, {timeout: 3000});
+                MF = await client.axios.get(client.tokens.mf.dss, {timeout: 3000});
             } catch (err) {
-                console.log(`stats all; MF failed`)
+                console.log(`\x1b[31mstats all; MF failed`)
             }
             const totalCount = [];
             const embed = new client.embed()

@@ -14,6 +14,6 @@ module.exports = {
         .setDescription("Revokes an honorary ban.")
         .addUserOption((opt)=>opt
             .setName("user")
-            .setDescription("The member whom will get their honorary ban revoked.")
+            .setDescription("It's an honor")
             .setRequired(false))
 };

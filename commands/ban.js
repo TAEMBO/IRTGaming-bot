@@ -6,17 +6,17 @@ module.exports = {
 	},
     data: new SlashCommandBuilder()
 		.setName("ban")
-		.setDescription("Bans a user from the guild!")
+		.setDescription("Ban a member")
 		.addUserOption((opt)=>opt
 			.setName("member")
-			.setDescription("The member you would like to ban.")
+			.setDescription("The member to ban")
 			.setRequired(true))
 		.addStringOption((opt)=>opt
 			.setName("time")
-			.setDescription("The time for the ban.")
+			.setDescription("The time for the ban")
 			.setRequired(false))
 		.addStringOption((opt)=>opt
 			.setName("reason")
-			.setDescription("The reason for banning the user.")
+			.setDescription("The reason for banning the member")
 			.setRequired(false))
 };

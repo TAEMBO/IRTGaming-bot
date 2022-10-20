@@ -20,8 +20,8 @@ module.exports = {
         if(!fs.existsSync(dbPath)) fs.writeFileSync(dbPath, '[]');
         let db = require(dbPath);
         const remindEmbed = new client.embed()
-            .setTitle('Reminder set.')
-            .setDescription(`Reminder for\n\`\`\`${whatToRemind}\`\`\`\nset <t:${timeStampInMs}:R>.`)
+            .setTitle('Reminder set')
+            .setDescription(`\n\`\`\`${whatToRemind}\`\`\`\n<t:${timeStampInMs}:R>.`)
             .setColor(client.config.embedColor)
         await interaction.reply({embeds: [remindEmbed]})
         db.push({when: timeStampInMs, what: whatToRemind, who: interaction.user.id});

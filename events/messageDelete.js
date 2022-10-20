@@ -10,7 +10,7 @@ module.exports = {
             .setDescription(`<@${msg.author.id}>\nContent:\n\`\`\`\n${msg.content}\n\`\`\`\nChannel: <#${msg.channel.id}>`)
             .setAuthor({name: `Author: ${msg.author.tag} (${msg.author.id})`, iconURL: `${msg.author.displayAvatarURL()}`})
             .setColor(client.config.embedColorRed)
-            .setTimestamp(Date.now())
+            .setTimestamp()
             channel.send({embeds: [embed]})
         if (msg.attachments?.first()?.width && ['png', 'jpeg', 'jpg', 'gif'].some(x => msg.attachments.first().name.endsWith(x))) {
             channel.send({files: [msg.attachments?.first()]})

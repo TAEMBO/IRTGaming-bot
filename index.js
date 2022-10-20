@@ -69,9 +69,9 @@ setInterval(async () => {
 	
 	const now = Date.now();
 	client.punishments._content.filter(x => x.endTime <= now && !x.expired).forEach(async punishment => {
-		console.log(`${punishment.member}\'s ${punishment.type} should expire now`);
+		console.log(client.timeLog, '\x1b[32m' + `${punishment.member}\'s ${punishment.type} should expire now`);
 		const unpunishResult = await client.punishments.removePunishment(punishment.id, client.user.id, "Time\'s up!");
-		console.log(unpunishResult);
+		console.log(client.timeLog, '\x1b[32m' + unpunishResult);
 	});
 }, 5000);
 
@@ -274,7 +274,7 @@ Object.assign(client.punishments, {
 			case "mute":
 				const muteData = { type, id: this.createId(), member: member.user.id, moderator, time: now };
 				let muteResult;
-				if(client.hasModPerms(client, member)) return "Staff members cannot be muted."
+				if(client.hasModPerms(member)) return "Staff members cannot be muted."
 				const dm4 = await member.send(`You've been muted in ${member.guild.name} ${timeInMillis ? `for ${client.formatTime(timeInMillis, 4, { longNames: true, commas: true })} (${timeInMillis}ms)` : "forever"} for reason \`${reason || "unspecified"}\` (Case #${muteData.id})`).catch(err => setTimeout(() => interaction.channel.send('Failed to DM user.'), 500));
 				if(timeInMillis){
 				muteResult = await member.timeout(timeInMillis, `${reason || "unspecified"} | Case #${muteData.id}`).catch(err => err.message);

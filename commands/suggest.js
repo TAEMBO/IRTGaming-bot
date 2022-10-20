@@ -5,16 +5,16 @@ module.exports = {
         if (interaction.channel.id !== client.config.mainServer.channels.suggestions) {
             return interaction.reply({content: `This command only works in <#${client.config.mainServer.channels.suggestions}>`, ephemeral: true});
         }
-        if (suggestion.length > 2048) {
-            return interaction.reply({content: 'Your suggestion must be less than or equal to 2048 characters in length.', ephemeral: true})
-        }
         const embed = new client.embed()
             .setAuthor({name: `${interaction.member.displayName} (${interaction.user.id})`, iconURL: interaction.user.displayAvatarURL({ format: 'png', size: 128 })})
             .setTitle(`Community Idea:`)
             .setDescription(suggestion)
-            .setTimestamp(Date.now())
+            .setTimestamp()
             .setColor(client.config.embedColor)
-            await interaction.reply({embeds: [embed], components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setStyle("Success").setEmoji("✅").setCustomId("suggestion-upvote").setLabel("0"), new ButtonBuilder().setStyle("Danger").setEmoji("❌").setCustomId("suggestion-decline").setLabel("0"))]});
+            interaction.reply({embeds: [embed], fetchReply: true}).then((msg)=> {
+                msg.react('✅');
+                msg.react('❌');
+            });
     },
     data: new SlashCommandBuilder()
         .setName("suggest")

@@ -66,7 +66,6 @@ module.exports = {
 				const path = require('path');
 				fs.writeFileSync(path.resolve('./databases/userLevels.json'), '{}');
 				client.userLevels._content = require('../databases/userLevels.json');
-				console.log('wiped ul')
 				int.update({content: ':white_check_mark: LRS data reset.', components: []})
 			} else if(int.customId === "No"){
 				int.update({content: ':x: Command canceled.', components: []});

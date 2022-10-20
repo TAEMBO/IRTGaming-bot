@@ -14,16 +14,16 @@ class YClient extends Client {
         this.invites = new Map();
         this.config = require("./config.json");
         this.tokens = require("./tokens.json");
+        this.axios = require("axios");
         this.embed = Discord.EmbedBuilder;
         this.collection = Discord.Collection;
         this.messageCollector = Discord.MessageCollector;
         this.attachmentbuilder = Discord.AttachmentBuilder;
-        this.memberCount_LastGuildFetchTimestamp = 0;
         this.games = new Discord.Collection();
         this.commands = new Discord.Collection();
         this.registery = [];
         this.setMaxListeners(100)
-        this.voted;
+        this.timeLog = `\x1b[36m[${moment().format('HH:mm:ss')}]`;
         this.repeatedMessages = {};
         this.FSCache = {'statsGraph': -120, 'ps': {'new': [], 'old': [], 'status': undefined}, 'pg': {'new': [], 'old': [], 'status': undefined}, 'mf': {'new': [], 'old': [], 'status': undefined}};
         this.bannedWords = new database("./databases/bannedWords.json", "array");
@@ -34,21 +34,19 @@ class YClient extends Client {
         this.FMstaff = new database("./databases/FMstaff.json", "array");
         this.TFstaff = new database("./databases/TFstaff.json", "array");
         this.watchList = new database("./databases/watchList.json", "array");
-        this.votes = new database("./databases/suggestvotes.json", "array");
         this.playerTimes = new database("./databases/playerTimes.json", "array");
     }
     async init(){
         this.login(this.tokens.token);
         this.bannedWords.initLoad();
-        this.tictactoeDb.initLoad().intervalSave();
+        this.tictactoeDb.initLoad().intervalSave().disableSaveNotifs();
         this.userLevels.initLoad().intervalSave(15000).disableSaveNotifs();
         this.dmForwardBlacklist.initLoad();
         this.punishments.initLoad();
         this.FMstaff.initLoad();
         this.TFstaff.initLoad();
         this.watchList.initLoad();
-        this.votes.initLoad();
-        this.playerTimes.initLoad().intervalSave(120000).disableSaveNotifs();;
+        this.playerTimes.initLoad().disableSaveNotifs();
         const commandFiles = fs.readdirSync("./commands").filter(file => file.endsWith(".js"));
         for (const file of commandFiles) {
 	        const command = require(`./commands/${file}`);
@@ -89,18 +87,17 @@ class YClient extends Client {
         }
         return text.trim();
     };
-    hasModPerms(client, guildMember) {
+    hasModPerms(guildMember) {
         return this.config.mainServer.staffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
     };
-    isMPStaff(client, guildMember) {
+    isMPStaff(guildMember) {
         return this.config.mainServer.MPStaffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
     };
-    yOuNeEdMoD(client, interaction) {
-        return interaction.reply({content: `You need the <@&${client.config.mainServer.roles.mod}> role to use this command`, allowedMentions: {roles: false}});
+    youNeedRole(interaction, role) {
+        return interaction.reply({content: `You need the <@&${this.config.mainServer.roles[role]}> role to use this command`, allowedMentions: {roles: false}});
     }
 
     async FSLoop(client, serverURLdss, serverURLcsg, Channel, Message, serverAcro) {
-
         function dataPoint(Acro, slotUsage) {
             const DB = require(`./databases/${Acro}PlayerData.json`);
             DB.push(slotUsage);
@@ -119,7 +116,7 @@ class YClient extends Client {
             // Filter for players leaving
             const missingElementsLeave = ArrayOld.filter(x => !ArrayNew.some(y => y.name === x.name)); // Filter names that were in the first fetch but not the second. Thanks to LebSter#0617 for this on The Coding Den Discord server
             for (const x of missingElementsLeave) {
-                client.playerTimes.addPlayerTime(x.name, x.uptime);
+                client.playerTimes.addPlayerTime(x.name, x.uptime).forceSave();
                 client.watchList._content.forEach(y => {
                     if (y[0] === x.name && watchList) {
                         wlChannel.send({embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${y[0]}\` left **${Acro}** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorRed)]})
@@ -158,7 +155,6 @@ class YClient extends Client {
             }
         }
 
-        const axios = require("axios");
         const xjs = require('xml-js');
         const Whitelist = ["SpongeBoi69", "Kazmerev", "Hungarian__0101", "Sersha", "Helper B", "777Stupid", "Andyk1978", "Andrewk1978", "OmgxBeckyx"]
         const wlPing = ["263724396672188417", "769710040596217897", "642735886953611265"];
@@ -171,24 +167,24 @@ class YClient extends Client {
         let FScsg = undefined;
     
         try { // Fetch dedicated-server-stats.json
-            FSdss = await axios.get(serverURLdss, {timeout: 5000});
+            FSdss = await this.axios.get(serverURLdss, {timeout: 5000});
         } catch (err) {
             error = true
-            console.log(`\x1b[36m[${moment().format('HH:mm:ss')}] \x1b[31m${serverAcro} dss fail`)
+            console.log(this.timeLog, `\x1b[31m${serverAcro} dss fail`)
         }
 
         try { // Fetch dedicated-server-savegame.xml
-            await axios.get(serverURLcsg, {timeout: 5000}).then((xml) => { // convert
+            await this.axios.get(serverURLcsg, {timeout: 5000}).then((xml) => { // convert
                 FScsg = xjs.xml2js(xml.data, {compact: true, spaces: 2}).careerSavegame;
             });
         } catch (err) {
             error = true;
-            console.log(`\x1b[36m[${moment().format('HH:mm:ss')}] \x1b[31m${serverAcro} csg fail`)
+            console.log(this.timeLog, `\x1b[31m${serverAcro} csg fail`)
         }
 
         if (FScsg == undefined) {
             error = true;
-            console.log(`\x1b[36m[${moment().format('HH:mm:ss')}] \x1b[31m${serverAcro} csg convert fail`)
+            console.log(this.timeLog, `\x1b[31m${serverAcro} csg convert fail`)
         }
 
         if (error) { // Blame Red
@@ -250,8 +246,7 @@ class YClient extends Client {
         dataPoint(serverAcro, FSdss.data.slots.used);
 
         client.FSCache[serverAcro.toLowerCase()].old = await FSdss.data.slots.players.filter(x => x.isUsed !== false);
-    }
-
+    };
     alignText(text, length, alignment, emptyChar = ' ') {
         if (alignment === 'right') {
             text = emptyChar.repeat(length - text.length) + text;
@@ -297,15 +292,6 @@ class YClient extends Client {
     
         return rows.join('\n');
     }
-    removeCustomValue(array, value){
-        for(let i = 0; i < array.length; i++){
-            if(array[i].includes(value)){
-                array.splice(i, 1)
-                break;
-            }
-        }
-        return array;
-    };
     makeModlogEntry(data, client) {
         const cancels = data.cancels ? client.punishments._content.find(x => x.id === data.cancels) : null;
     
@@ -331,21 +317,21 @@ class YClient extends Client {
         client.channels.cache.get(client.config.mainServer.channels.staffreports).send({embeds: [embed]});
     };
     async punish(client, interaction, type) {
-        if (!client.hasModPerms(client, interaction.member)) return client.yOuNeEdMoD(client, interaction);
-        if (type !== ('warn' || 'mute') && interaction.member.roles.cache.has(client.config.mainServer.roles.helper)) return client.yOuNeEdMoD(client, interaction);
+        if (!client.hasModPerms(interaction.member)) return client.youNeedRole(interaction, "mod");
+        if (type !== ('warn' || 'mute') && interaction.member.roles.cache.has(client.config.mainServer.roles.helper)) return client.youNeedRole(interaction, "mod");
         const member = interaction.options.getMember("member");
         const time = interaction.options.getString("time");
         const reason = interaction.options.getString("reason") ?? "None";
 	if (interaction.user.id === member.id) return interaction.reply(`You cannot ${type} yourself.`)
-	if (client.hasModPerms(client, member)) return interaction.reply(`You cannot ${type} another staff member.`)
+	if (client.hasModPerms(member)) return interaction.reply(`You cannot ${type} another staff member.`)
         const result = await client.punishments.addPunishment(type, member, { time, reason, interaction }, interaction.user.id);
         (typeof result === String ? interaction.reply({content: `${result}`}) : interaction.reply({embeds: [result]}))
     };
     async unPunish(client, interaction) {
-        if (!client.hasModPerms(client, interaction.member)) return client.yOuNeEdMoD(client, interaction);
+        if (!client.hasModPerms(interaction.member)) return client.youNeedRole(interaction, "mod");
         const punishment = client.punishments._content.find(x => x.id === interaction.options.getInteger("case_id"));
         if (!punishment) return interaction.reply({content: "that isn't a valid case ID.", ephemeral: true});
-        if (punishment.type !== ('warn' || 'mute') && interaction.member.roles.cache.has(client.config.mainServer.roles.helper)) return client.yOuNeEdMoD(client, interaction);
+        if (punishment.type !== ('warn' || 'mute') && interaction.member.roles.cache.has(client.config.mainServer.roles.helper)) return client.youNeedRole(interaction, "mod");
         const reason = interaction.options.getString("reason") ?? "None";
         const unpunishResult = await client.punishments.removePunishment(punishment.id, interaction.user.id, reason);
         interaction.reply(unpunishResult);

@@ -4,10 +4,10 @@ const moment = require('moment');
 class Database {
 	constructor(dir, dataType) {
 		this._dataType = dataType;
-		this._content = dataType === 'array' ? [] : dataType === 'object' ? {} : undefined;
 		this._path = path.resolve(dir);
 		this._interval = undefined;
 		this._saveNotifs = true;
+		this._content = dataType === 'array' ? [] : dataType === 'object' ? {} : undefined;
 	}
 	addData(data, data1) {
 		if (this._dataType === 'array') {
@@ -35,9 +35,7 @@ class Database {
 		return this;
 	}
 	initLoad() {
-		const json = fs.readFileSync(this._path);
-		const array = JSON.parse(json);
-		this._content = array;
+		this._content = JSON.parse(fs.readFileSync(this._path));
 		console.log(this._path + ' Database Loaded');
 		return this;
 	}
@@ -45,8 +43,8 @@ class Database {
 		const oldJson = fs.readFileSync(db._path, { encoding: 'utf8' });
 		const newJson = JSON.stringify(db._content);
 		if (oldJson !== newJson || force) {
-			fs.writeFileSync(db._path, newJson);
-			if (this._saveNotifs) console.log(`\x1b[36m[${moment().format('HH:mm:ss')}] \x1b[32m` + this._path + ' Database Saved');
+			fs.writeFileSync(this._path, JSON.stringify(this._content, null, 2));
+			if (this._saveNotifs) console.log(`\x1b[36m[${moment().format('HH:mm:ss')}] \x1b[33m` + this._path + ' Database Saved');
 		}
 		return db;
 	}

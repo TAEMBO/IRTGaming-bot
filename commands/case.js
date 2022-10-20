@@ -20,7 +20,7 @@ module.exports = {
 	
 				await interaction.reply({embeds: [sucessEmbed] });
 			}catch(err){
-				console.log(client.timeLog, '\x1b[31m' + err);
+				console.log(`\x1b[36m[${client.moment().format('HH:mm:ss')}]`, '\x1b[31m' + err);
 				const errorEmbed = new client.embed()
 					.setColor('#ff0000')
 					.setTitle('Error')

@@ -69,9 +69,9 @@ setInterval(async () => {
 	
 	const now = Date.now();
 	client.punishments._content.filter(x => x.endTime <= now && !x.expired).forEach(async punishment => {
-		console.log(client.timeLog, '\x1b[32m' + `${punishment.member}\'s ${punishment.type} should expire now`);
+		console.log(`\x1b[36m[${client.moment().format('HH:mm:ss')}]`, '\x1b[32m' + `${punishment.member}\'s ${punishment.type} should expire now`);
 		const unpunishResult = await client.punishments.removePunishment(punishment.id, client.user.id, "Time\'s up!");
-		console.log(client.timeLog, '\x1b[32m' + unpunishResult);
+		console.log(`\x1b[36m[${client.moment().format('HH:mm:ss')}]`, '\x1b[32m' + unpunishResult);
 	});
 }, 5000);
 

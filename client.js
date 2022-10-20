@@ -1,7 +1,6 @@
 const { Client, GatewayIntentBits, Partials } = require("discord.js");
 const Discord = require("discord.js");
 const fs = require("node:fs");
-const moment = require('moment');
 const database = require("./database");
 class YClient extends Client {
     constructor(options){
@@ -15,6 +14,7 @@ class YClient extends Client {
         this.config = require("./config.json");
         this.tokens = require("./tokens.json");
         this.axios = require("axios");
+        this.moment = require('moment');
         this.embed = Discord.EmbedBuilder;
         this.collection = Discord.Collection;
         this.messageCollector = Discord.MessageCollector;
@@ -23,7 +23,6 @@ class YClient extends Client {
         this.commands = new Discord.Collection();
         this.registery = [];
         this.setMaxListeners(100)
-        this.timeLog = `\x1b[36m[${moment().format('HH:mm:ss')}]`;
         this.repeatedMessages = {};
         this.FSCache = {'statsGraph': -120, 'ps': {'new': [], 'old': [], 'status': undefined}, 'pg': {'new': [], 'old': [], 'status': undefined}, 'mf': {'new': [], 'old': [], 'status': undefined}};
         this.bannedWords = new database("./databases/bannedWords.json", "array");
@@ -170,7 +169,7 @@ class YClient extends Client {
             FSdss = await this.axios.get(serverURLdss, {timeout: 5000});
         } catch (err) {
             error = true
-            console.log(this.timeLog, `\x1b[31m${serverAcro} dss fail`)
+            console.log(`[${this.moment().format('HH:mm:ss')}]`, `\x1b[31m${serverAcro} dss fail`)
         }
 
         try { // Fetch dedicated-server-savegame.xml
@@ -179,12 +178,12 @@ class YClient extends Client {
             });
         } catch (err) {
             error = true;
-            console.log(this.timeLog, `\x1b[31m${serverAcro} csg fail`)
+            console.log(`[${this.moment().format('HH:mm:ss')}]`, `\x1b[31m${serverAcro} csg fail`)
         }
 
         if (FScsg == undefined) {
             error = true;
-            console.log(this.timeLog, `\x1b[31m${serverAcro} csg convert fail`)
+            console.log(`[${this.moment().format('HH:mm:ss')}]`, `\x1b[31m${serverAcro} csg convert fail`)
         }
 
         if (error) { // Blame Red

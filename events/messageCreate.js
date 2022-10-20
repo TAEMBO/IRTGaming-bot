@@ -44,17 +44,17 @@ module.exports = {
 
 	// useless staff ping mute
 	if (message.mentions.roles.some(mentionedRole => mentionedRole.id === client.config.mainServer.roles.mpstaff)) {
-		console.log(client.timeLog, `\x1b[33m${message.author.tag} mentioned staff role`);
+		console.log(`\x1b[36m[${client.moment().format('HH:mm:ss')}]`, `\x1b[33m${message.author.tag} mentioned staff role`);
 		const filter = x => client.isMPStaff(x.member) && x.content.toLowerCase() === "y";
 		message.channel.awaitMessages({ filter, max: 1, time: 60000, errors: ["time"]}).then(async collected => {
-			console.log(client.timeLog, `\x1b[33mReceived "y" from ${collected.first().author.tag}, indicating to mute`);
+			console.log(`\x1b[36m[${client.moment().format('HH:mm:ss')}]`, `\x1b[33mReceived "y" from ${collected.first().author.tag}, indicating to mute`);
 			try {
 				const muteResult = await client.punishments.addPunishment("mute", message.member, { time: "5m", reason: "Automod; misuse of staff ping", message: message}, collected.first().author.id);
 			} catch (error) {
-				console.log(client.timeLog, `\x1b[31mMuting failed cuz:`, error);
+				console.log(`\x1b[36m[${client.moment().format('HH:mm:ss')}]`, `\x1b[31mMuting failed cuz:`, error);
 			}
 			collected.first().react('✅');
-		}).catch(() => console.log(client.timeLog, `\x1b[33mFailed to collect "y" from staff`));
+		}).catch(() => console.log(`\x1b[36m[${client.moment().format('HH:mm:ss')}]`, `\x1b[33mFailed to collect "y" from staff`));
 	}
 
 	function onTimeout() {

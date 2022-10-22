@@ -24,7 +24,7 @@ class YClient extends Client {
         this.registery = [];
         this.setMaxListeners(100)
         this.repeatedMessages = {};
-        this.FSCache = {'statsGraph': -120, 'ps': {'new': [], 'old': [], 'status': undefined}, 'pg': {'new': [], 'old': [], 'status': undefined}, 'mf': {'new': [], 'old': [], 'status': undefined}};
+        this.FSCache = {'statsGraph': -120, 'ps': {'new': [], 'old': [], 'status': undefined}, 'pg': {'new': [], 'old': [], 'status': undefined}, 'mf': {'new': [], 'old': [], 'status': undefined}, 'gs': {'new': [], 'old': [], 'status': undefined}};
         this.bannedWords = new database("./databases/bannedWords.json", "array");
         this.tictactoeDb = new database("./databases/ttt.json", "array");
         this.userLevels = new database("./databases/userLevels.json", "object");

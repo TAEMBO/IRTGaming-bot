@@ -22,7 +22,7 @@ module.exports = {
             .setColor(client.config.embedColor)
             .setThumbnail(member.user.avatarURL({ format: 'png', dynamic: true, size: 2048}) || member.user.defaultAvatarURL)
             .setDescription(`Please familiarize yourself with our <#552590507352653827> and head over to <#922631314195243080> to gain access to more channels & receive notification about community news.`)
-            .addFields({name: 'Useful channels', value: `Our game servers: <#739100711073218611>\nReport players: <#825046442300145744>\nCome chat with us!: <#552565546093248512>`})
+            .addFields({name: 'Useful channels', value: `<:IRTDot:908818924286648350> Our game servers: <#739100711073218611>\n<:IRTDot:908818924286648350> Report players: <#825046442300145744>\n<:IRTDot:908818924286648350> Come chat with us!: <#552565546093248512>\n<:IRTDot:908818924286648350> Blue farm password: [see here](https://discord.com/channels/552565546089054218/729823615096324166/980241004718329856)`})
             .setFooter({text: `${index}${suffix} member`})
         client.channels.resolve(client.config.mainServer.channels.welcome).send({content: `<@${member.user.id}>`, embeds: [embed0]})
 

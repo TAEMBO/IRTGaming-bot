@@ -155,7 +155,7 @@ class YClient extends Client {
         }
 
         const xjs = require('xml-js');
-        const Whitelist = ["SpongeBoi69", "Kazmerev", "Hungarian__0101", "Sersha", "Helper B", "777Stupid", "Andyk1978", "Andrewk1978", "OmgxBeckyx"]
+        const Whitelist = ["SpongeBoi69", "Kazmerev", "Hungarian__0101", "Sersha", "Helper B", "777Stupid", "Andyk1978", "Andrewk1978", "OmgxBeckyx", "Stacey"]
         const wlPing = ["238248487593050113", "267270757539643402", "642735886953611265"];
         const wlChannel = client.channels.resolve(client.config.mainServer.channels.watchlist);
         const logChannel = client.channels.resolve(client.config.mainServer.channels.fslogs)

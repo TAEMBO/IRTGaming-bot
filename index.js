@@ -81,7 +81,7 @@ if (client.config.botSwitches.stats) {
 		client.FSLoop(client, client.tokens.ps.dss, client.tokens.ps.csg, '891791005098053682', '980240981922291752', 'PS')
 		client.FSLoop(client, client.tokens.pg.dss, client.tokens.pg.csg, '729823615096324166', '980241004718329856', 'PG')
 		client.FSLoop(client, client.tokens.mf.dss, client.tokens.mf.csg, '982143077554720768', '985586585707900928', 'MF')
-		client.FSLoop(client, client.tokens.test.dss, client.tokens.test.csg, '891791005098053682', '1033227323174035497', 'GS')
+		client.FSLoop(client, client.tokens.test.dss, client.tokens.test.csg, '1034212114212081714', '1034212496141201499', 'GS')
 	}, 30000)
 }
 

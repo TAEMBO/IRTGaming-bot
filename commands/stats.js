@@ -226,7 +226,7 @@ module.exports = {
         const subCmd = interaction.options.getSubcommand();
 
         if (subCmd === 'all') {
-            interaction.deferReply()
+            await interaction.deferReply()
             let PS;
             let PG;
             let MF;

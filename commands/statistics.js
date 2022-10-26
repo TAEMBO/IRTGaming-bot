@@ -3,7 +3,7 @@ const si = require('systeminformation');
 const os = require('node:os');
 module.exports = {
 	run: async (client, interaction) => {
-		interaction.deferReply();
+		await interaction.deferReply();
 		const cpu = await si.cpu();
 		const ram = await si.mem();
 		const colunms = ['Command Name', 'Count'];

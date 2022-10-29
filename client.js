@@ -146,11 +146,11 @@ class YClient extends Client {
         function seasons(season) {
             switch(season) {
                 case '1':
-                    return 'Yes';
+                    return 'Yes 🔴';
                 case '2':
                     return 'No';
                 case '3':
-                    return 'Paused';
+                    return 'Paused 🔴';
             }
         }
 

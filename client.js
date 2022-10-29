@@ -96,7 +96,7 @@ class YClient extends Client {
         return interaction.reply({content: `You need the <@&${this.config.mainServer.roles[role]}> role to use this command`, allowedMentions: {roles: false}});
     }
 
-    async FSLoop(client, serverURLdss, serverURLcsg, Channel, Message, serverAcro) {
+    async FSLoop(serverURLdss, serverURLcsg, Channel, Message, serverAcro) {
         function dataPoint(Acro, slotUsage) {
             const DB = require(`./databases/${Acro}PlayerData.json`);
             DB.push(slotUsage);
@@ -157,10 +157,10 @@ class YClient extends Client {
         const xjs = require('xml-js');
         const Whitelist = ["SpongeBoi69", "Kazmerev", "Hungarian__0101", "Sersha", "Helper B", "777Stupid", "Andyk1978", "Andrewk1978", "OmgxBeckyx", "Stacey"]
         const wlPing = ["238248487593050113", "267270757539643402", "642735886953611265"];
-        const wlChannel = client.channels.resolve(client.config.mainServer.channels.watchlist);
-        const logChannel = client.channels.resolve(client.config.mainServer.channels.fslogs)
+        const wlChannel = this.channels.resolve(this.config.mainServer.channels.watchlist);
+        const logChannel = this.channels.resolve(this.config.mainServer.channels.fslogs)
         const playerInfo = [];
-        const embed = new client.embed();
+        const embed = new this.embed();
         let error;
         let FSdss;
         let FScsg = undefined;
@@ -188,34 +188,34 @@ class YClient extends Client {
 
         if (error) { // Blame Red
             embed.setTitle('Host not responding');
-            embed.setColor(client.config.embedColorRed);
-            client.channels.resolve(Channel).messages.fetch(Message).then((msg)=>{ msg.edit({embeds: [embed]})});
+            embed.setColor(this.config.embedColorRed);
+            this.channels.resolve(Channel).messages.fetch(Message).then((msg)=>{ msg.edit({embeds: [embed]})});
             return;
         }
     
         await FSdss.data.slots.players.filter((x)=> x.isUsed !== false).forEach(player => {
             let wlPlayer = ''; // Tag for if player is on watchList
-            client.watchList._content.forEach((x) => {
+            this.watchList._content.forEach((x) => {
                 if (x[0] === player.name) {
                     wlPlayer = '⛔';
                 }
             })
-            playerInfo.push(`\`${player.name}\` ${wlPlayer}${(player.isAdmin ? ' :detective:' : '')}${(client.FMstaff._content.includes(player.name) ? ':farmer:' : '')}${(client.TFstaff._content.includes(player.name) ? ':angel:' : '')} **|** ${(Math.floor(player.uptime/60))}:${('0' + (player.uptime % 60)).slice(-2)}`);
+            playerInfo.push(`\`${player.name}\` ${wlPlayer}${(player.isAdmin ? ' :detective:' : '')}${(this.FMstaff._content.includes(player.name) ? ':farmer:' : '')}${(this.TFstaff._content.includes(player.name) ? ':angel:' : '')} **|** ${(Math.floor(player.uptime/60))}:${('0' + (player.uptime % 60)).slice(-2)}`);
         })
 
         // Stats embed
         embed.setAuthor({name: `${FSdss.data.slots.used}/${FSdss.data.slots.capacity}`})
 		if (FSdss.data.slots.used === FSdss.data.slots.capacity) {
-			embed.setColor(client.config.embedColorRed)
+			embed.setColor(this.config.embedColorRed)
 		} else if (FSdss.data.slots.used > 9) {
-			embed.setColor(client.config.embedColorYellow)
-		} else embed.setColor(client.config.embedColorGreen)
+			embed.setColor(this.config.embedColorYellow)
+		} else embed.setColor(this.config.embedColorGreen)
         embed.setDescription(`${FSdss.data.slots.used === 0 ? '*No players online*' : playerInfo.join("\n")}`);
         embed.addFields({name: `**Server Statistics**`, value: [
                 `**Money:** $${parseInt(FScsg.statistics.money._text).toLocaleString('en-US')}`,
                 `**In-game time:** ${('0' + Math.floor((FSdss.data.server.dayTime/3600/1000))).slice(-2)}:${('0' + Math.floor((FSdss.data.server.dayTime/60/1000)%60)).slice(-2) ?? null}`,
                 `**Timescale:** ${(FScsg.settings.timeScale._text.slice(0, -5)).toLocaleString('en-US')}x`,
-                `**Playtime:** ${client.formatTime((parseInt(FScsg.statistics.playTime._text) * 60 * 1000), 3, { commas: true, longNames: true })}`,
+                `**Playtime:** ${this.formatTime((parseInt(FScsg.statistics.playTime._text) * 60 * 1000), 3, { commas: true, longNames: true })}`,
                 `**Map:** ${FSdss.data.server.mapName ?? null}`,
                 `**Seasonal growth:** ${seasons(FScsg.settings.growthMode._text)}`,
                 `**Autosave interval:** ${Math.round(parseInt(FScsg.settings.autoSaveInterval._text))} min`,
@@ -223,28 +223,28 @@ class YClient extends Client {
                 `**Slot usage:** ${parseInt(FScsg.slotSystem._attributes.slotUsage).toLocaleString('en-US')}`
                 ].join('\n')
             })
-        client.channels.resolve(Channel).messages.fetch(Message).then((msg)=>{ msg.edit({embeds: [embed]})})
+        this.channels.resolve(Channel).messages.fetch(Message).then((msg)=>{ msg.edit({embeds: [embed]})})
 
         // Logs
         if (FSdss.data.server.name.length === 0) {
-            if (client.FSCache[serverAcro.toLowerCase()].status === 1) {
-                logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now offline`).setColor(client.config.embedColorYellow)]})
+            if (this.FSCache[serverAcro.toLowerCase()].status === 1) {
+                logChannel.send({embeds: [new this.embed().setTitle(`${serverAcro} now offline`).setColor(this.config.embedColorYellow)]})
             }
-            client.FSCache[serverAcro.toLowerCase()].status = 0;
+            this.FSCache[serverAcro.toLowerCase()].status = 0;
         } else {
-            if (client.FSCache[serverAcro.toLowerCase()].status === 0) {
-                logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now online`).setColor(client.config.embedColorYellow)]})
+            if (this.FSCache[serverAcro.toLowerCase()].status === 0) {
+                logChannel.send({embeds: [new this.embed().setTitle(`${serverAcro} now online`).setColor(this.config.embedColorYellow)]})
             }
-            client.FSCache[serverAcro.toLowerCase()].status = 1;
+            this.FSCache[serverAcro.toLowerCase()].status = 1;
         }
 
-        client.FSCache[serverAcro.toLowerCase()].new = await FSdss.data.slots.players.filter(x => x.isUsed !== false);
+        this.FSCache[serverAcro.toLowerCase()].new = await FSdss.data.slots.players.filter(x => x.isUsed !== false);
 
-        if (serverAcro != 'MF') {adminCheck(client, this.FSCache[serverAcro.toLowerCase()].new, this.FSCache[serverAcro.toLowerCase()].old, serverAcro, Whitelist)};
-        log(client, this.FSCache[serverAcro.toLowerCase()].new, this.FSCache[serverAcro.toLowerCase()].old, serverAcro);
+        if (serverAcro != 'MF') {adminCheck(this, this.FSCache[serverAcro.toLowerCase()].new, this.FSCache[serverAcro.toLowerCase()].old, serverAcro, Whitelist)};
+        log(this, this.FSCache[serverAcro.toLowerCase()].new, this.FSCache[serverAcro.toLowerCase()].old, serverAcro);
         dataPoint(serverAcro, FSdss.data.slots.used);
 
-        client.FSCache[serverAcro.toLowerCase()].old = await FSdss.data.slots.players.filter(x => x.isUsed !== false);
+        this.FSCache[serverAcro.toLowerCase()].old = await FSdss.data.slots.players.filter(x => x.isUsed !== false);
     };
     alignText(text, length, alignment, emptyChar = ' ') {
         if (alignment === 'right') {

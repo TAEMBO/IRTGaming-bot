@@ -18,7 +18,7 @@ class YClient extends Client {
         this.embed = Discord.EmbedBuilder;
         this.collection = Discord.Collection;
         this.messageCollector = Discord.MessageCollector;
-        this.attachmentbuilder = Discord.AttachmentBuilder;
+        this.attachmentBuilder = Discord.AttachmentBuilder;
         this.games = new Discord.Collection();
         this.commands = new Discord.Collection();
         this.registery = [];
@@ -193,7 +193,7 @@ class YClient extends Client {
             return;
         }
     
-        await FSdss.data.slots.players.filter((x)=> x.isUsed !== false).forEach(player => {
+        await FSdss.data.slots.players.filter((x)=>x.isUsed).forEach(player => {
             let wlPlayer = ''; // Tag for if player is on watchList
             this.watchList._content.forEach((x) => {
                 if (x[0] === player.name) {
@@ -238,13 +238,13 @@ class YClient extends Client {
             this.FSCache[serverAcro.toLowerCase()].status = 1;
         }
 
-        this.FSCache[serverAcro.toLowerCase()].new = await FSdss.data.slots.players.filter(x => x.isUsed !== false);
+        this.FSCache[serverAcro.toLowerCase()].new = await FSdss.data.slots.players.filter(x=>x.isUsed);
 
         if (serverAcro != 'MF') {adminCheck(this, this.FSCache[serverAcro.toLowerCase()].new, this.FSCache[serverAcro.toLowerCase()].old, serverAcro, Whitelist)};
         log(this, this.FSCache[serverAcro.toLowerCase()].new, this.FSCache[serverAcro.toLowerCase()].old, serverAcro);
         dataPoint(serverAcro, FSdss.data.slots.used);
 
-        this.FSCache[serverAcro.toLowerCase()].old = await FSdss.data.slots.players.filter(x => x.isUsed !== false);
+        this.FSCache[serverAcro.toLowerCase()].old = await FSdss.data.slots.players.filter(x=>x.isUsed);
     };
     alignText(text, length, alignment, emptyChar = ' ') {
         if (alignment === 'right') {

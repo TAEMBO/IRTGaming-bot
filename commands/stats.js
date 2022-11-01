@@ -1,11 +1,11 @@
-const {SlashCommandBuilder, AttachmentBuilder} = require('discord.js');
+const {SlashCommandBuilder} = require('discord.js');
 
 async function FSstatsAll(client, serverName, embed, totalCount) {
     if (serverName.data.slots.used !== 0) {
         totalCount.push(serverName.data.slots.used)
         const playerInfo = [];
 
-        await serverName.data.slots.players.filter((x)=> x.isUsed !== false).forEach(player => {
+        await serverName.data.slots.players.filter((x)=>x.isUsed).forEach(player => {
             let wlPlayer = ''; // Tag for if player is on watchList
             client.watchList._content.forEach((x) => {
                 if (x[0] === player.name) {
@@ -13,7 +13,7 @@ async function FSstatsAll(client, serverName, embed, totalCount) {
                 }
             })
             playerInfo.push(`\`${player.name}\` ${wlPlayer}${(player.isAdmin ? ' :detective:' : '')}${(client.FMstaff._content.includes(player.name) ? ':farmer:' : '')}${(client.TFstaff._content.includes(player.name) ? ':angel:' : '')} **|** ${(Math.floor(player.uptime/60))}:${('0' + (player.uptime % 60)).slice(-2)}`);
-            })
+        })
         embed.addFields(
             {name: `${serverName.data.server.name.replace('! IRTGaming|24/7 ', '')} - ${serverName.data.slots.used}/${serverName.data.slots.capacity} - ${('0' + Math.floor((serverName.data.server.dayTime/3600/1000))).slice(-2)}:${('0' + Math.floor((serverName.data.server.dayTime/60/1000)%60)).slice(-2)}`, value: `${playerInfo.join("\n")}`}
         )
@@ -47,15 +47,12 @@ async function FSstats(client, interaction, serverName, DBName) {
     });
     
     const first_graph_top = 16;
-    // console.log({ first_graph_top });
     
     const second_graph_top = 16;
-    // console.log({ second_graph_top });
 
     const textSize = 40;
 
     const canvas = require('canvas');
-    const fs = require('fs');
     const img = canvas.createCanvas(1500, 750);
     const ctx = img.getContext('2d');
 
@@ -77,9 +74,7 @@ async function FSstats(client, interaction, serverName, DBName) {
             interval_candidates.push([interval, i, reference_number]);
         }
     }
-    // console.log({ interval_candidates });
     const chosen_interval = interval_candidates.sort((a, b) => b[2] - a[2])[0];
-    // console.log({ chosen_interval });
 
     let previousY;
 
@@ -196,12 +191,8 @@ async function FSstats(client, interaction, serverName, DBName) {
     const tx = graphOrigin[0] + (textSize / 2);
     const ty = graphOrigin[1] + graphSize[1] + (textSize);
     ctx.fillText('time ->', tx, ty);
-    
-    // canvas.loadImage('./databases/dss.jpg').then((image) => {
-    //     ctx.drawImage(image, 0, 0)
-    //   })
 
-    await FSserver.data.slots.players.filter((x)=> x.isUsed !== false).forEach(player => {
+    await FSserver.data.slots.players.filter((x)=>x.isUsed).forEach(player => {
         let wlPlayer = ''; // Tag for if player is on watchList
         client.watchList._content.forEach((x) => {
             if (x[0] === player.name) {
@@ -210,12 +201,12 @@ async function FSstats(client, interaction, serverName, DBName) {
         })
         playerInfo.push(`\`${player.name}\` ${wlPlayer}${(player.isAdmin ? ' :detective:' : '')}${(client.FMstaff._content.includes(player.name) ? ':farmer:' : '')}${(client.TFstaff._content.includes(player.name) ? ':angel:' : '')} **|** ${(Math.floor(player.uptime/60))}:${('0' + (player.uptime % 60)).slice(-2)}`);
     })
-    const Image = new AttachmentBuilder(img.toBuffer(), {name: "FSStats.png"})
+    const Image = new client.attachmentBuilder(img.toBuffer(), {name: "FSStats.png"})
     embed.setAuthor({name: `${FSserver.data.slots.used}/${FSserver.data.slots.capacity} - ${('0' + Math.floor((FSserver.data.server.dayTime/3600/1000))).slice(-2)}:${('0' + Math.floor((FSserver.data.server.dayTime/60/1000)%60)).slice(-2)}`})
-     if (FSserver.data.server.name.length !== 0) {embed.setTitle(FSserver.data.server.name)}
+    if (FSserver.data.server.name.length !== 0) {embed.setTitle(FSserver.data.server.name)}
     embed.setImage('attachment://FSStats.png')
     embed.setColor(Color)
-    embed.setDescription(`${FSserver.data.slots.used === 0 ? '*No players online*' : playerInfo.join("\n")}`);
+    embed.setDescription(FSserver.data.slots.used === 0 ? '*No players online*' : playerInfo.join("\n"));
     interaction.reply({embeds: [embed], files: [Image]})
 }
 
@@ -227,58 +218,49 @@ module.exports = {
 
         if (subCmd === 'all') {
             await interaction.deferReply()
-            let PS;
-            let PG;
-            let MF;
-            let GS;
+            const embed = new client.embed().setColor(client.config.embedColor)
+            const totalCount = [];
+            let sum;
             
             try {
-                PS = await client.axios.get(client.tokens.ps.dss, {timeout: 3000});
+                await client.axios.get(client.tokens.ps.dss, {timeout: 3000}).then(async (x)=>{
+                    await FSstatsAll(client, x, embed, totalCount)
+                });
             } catch (err) {
                 console.log(`\x1b[31mstats all; PS failed`)
             }
             try {
-                PG = await client.axios.get(client.tokens.pg.dss, {timeout: 3000});
+                await client.axios.get(client.tokens.pg.dss, {timeout: 3000}).then(async (x)=>{
+                    await FSstatsAll(client, x, embed, totalCount)
+                });
             } catch (err) {
                 console.log(`\x1b[31mstats all; PG failed`)
             }
             try {
-                MF = await client.axios.get(client.tokens.mf.dss, {timeout: 3000});
+                await client.axios.get(client.tokens.mf.dss, {timeout: 3000}).then(async (x)=>{
+                    await FSstatsAll(client, x, embed, totalCount)
+                });
             } catch (err) {
                 console.log(`\x1b[31mstats all; MF failed`)
             }
             try {
-                GS = await client.axios.get(client.tokens.test.dss, {timeout: 3000});
+                await client.axios.get(client.tokens.test.dss, {timeout: 3000}).then(async (x)=>{
+                    await FSstatsAll(client, x, embed, totalCount)
+                });
             } catch (err) {
                 console.log(`\x1b[31mstats all; GS failed`)
             }
-            const totalCount = [];
-            const embed = new client.embed()
-                .setColor(client.config.embedColor)
-                if (PS) {
-                    await FSstatsAll(client, PS, embed, totalCount)
-                } 
-                if (PG) {
-                    await FSstatsAll(client, PG, embed, totalCount)
-                }
-                if (MF) {
-                    await FSstatsAll(client, MF, embed, totalCount)
-                }
-                if (GS) {
-                    await FSstatsAll(client, GS, embed, totalCount)
-                }
 
-                let sum;
-                if (totalCount.length === 0) {
-                    sum = 0;
-                } else {
-                    sum = totalCount.reduce(function (previousValue, currentValue) {
-                        return previousValue + currentValue;
-                    });
-                }
+            if (totalCount.length == 0) {
+                sum = 0;
+            } else {
+                sum = totalCount.reduce(function (previousValue, currentValue) {
+                     return previousValue + currentValue;
+                 });
+            }
 
-                embed.setTitle(`All Servers: ${sum} online`)
-                interaction.editReply({embeds: [embed]});
+            embed.setTitle(`All Servers: ${sum} online`)
+            interaction.editReply({embeds: [embed]});
         } else if (subCmd === 'ps') {
             FSstats(client, interaction, client.tokens.ps.dss, 'PSPlayerData');
         } else if (subCmd === 'pg') {

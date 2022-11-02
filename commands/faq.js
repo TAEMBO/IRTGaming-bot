@@ -29,7 +29,7 @@ module.exports = {
                 .setColor(client.config.embedColor)
                 .addFields(
                     {name: 'Public Silage', value: `> For <#${client.config.mainServer.channels.fs22_silage}>, things you can do on the server are: \n- Harvest corn\n- Replant fields with *corn*\n- Cut grass in any area that has grown grass\n- Pick up cut grass\n- Run silage from the bunkers to the Animal Dealer north of field 7\n- Tidy up the yard`},
-                    {name: 'Public Grain', value: `> For <#${client.config.mainServer.channels.fs22_grain}>, things you can do on the server are: \n- Harvest crops on fields\n- Replant fields with any crop __other than *oilseed radish* and *grass*__**(**on blue farm only**)**\n- Run grain trailers from the fields being harvested to sellpoints like Straig Lager or Supermarket\n- Tidy up the yard`}
+                    {name: 'Public Grain', value: `> For <#${client.config.mainServer.channels.fs22_grain}>, things you can do on the server are: \n- Harvest crops on fields\n- Bale straw to be later picked up and sold at Animal Dealer\n- Run grain trailers from the fields being harvested to sellpoints like Straig Lager or Supermarket\n- Tidy up the yard`}
                 )
             .setFooter({text: 'Note that not every task listed might be available to do at the time, so do your due dilligence to see what needs doing'})
             interaction.reply({embeds: [embed]})

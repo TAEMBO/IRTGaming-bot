@@ -161,9 +161,10 @@ class YClient extends Client {
         const logChannel = this.channels.resolve(this.config.mainServer.channels.fslogs)
         const playerInfo = [];
         const embed = new this.embed();
+	let justStarted = false;
         let error;
         let FSdss;
-        let FScsg = undefined;
+        let FScsg;
     
         try { // Fetch dedicated-server-stats.json
             FSdss = await this.axios.get(serverURLdss, {timeout: 5000});
@@ -234,17 +235,20 @@ class YClient extends Client {
         } else {
             if (this.FSCache[serverAcro.toLowerCase()].status === 0) {
                 logChannel.send({embeds: [new this.embed().setTitle(`${serverAcro} now online`).setColor(this.config.embedColorYellow)]})
+		justStarted = true;
             }
             this.FSCache[serverAcro.toLowerCase()].status = 1;
         }
 
-        this.FSCache[serverAcro.toLowerCase()].new = await FSdss.data.slots.players.filter(x=>x.isUsed);
+	if (!justStarted) {
+            this.FSCache[serverAcro.toLowerCase()].new = await FSdss.data.slots.players.filter(x=>x.isUsed);
 
-        if (serverAcro != 'MF') {adminCheck(this, this.FSCache[serverAcro.toLowerCase()].new, this.FSCache[serverAcro.toLowerCase()].old, serverAcro, Whitelist)};
-        log(this, this.FSCache[serverAcro.toLowerCase()].new, this.FSCache[serverAcro.toLowerCase()].old, serverAcro);
-        dataPoint(serverAcro, FSdss.data.slots.used);
+            if (serverAcro != 'MF') {adminCheck(this, this.FSCache[serverAcro.toLowerCase()].new, this.FSCache[serverAcro.toLowerCase()].old, serverAcro, Whitelist)};
+            log(this, this.FSCache[serverAcro.toLowerCase()].new, this.FSCache[serverAcro.toLowerCase()].old, serverAcro);
+            dataPoint(serverAcro, FSdss.data.slots.used);
 
-        this.FSCache[serverAcro.toLowerCase()].old = await FSdss.data.slots.players.filter(x=>x.isUsed);
+            this.FSCache[serverAcro.toLowerCase()].old = await FSdss.data.slots.players.filter(x=>x.isUsed);
+	}
     };
     alignText(text, length, alignment, emptyChar = ' ') {
         if (alignment === 'right') {

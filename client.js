@@ -15,6 +15,7 @@ class YClient extends Client {
         this.tokens = require("./tokens.json");
         this.axios = require("axios");
         this.moment = require('moment');
+        this.xjs = require('xml-js');
         this.embed = Discord.EmbedBuilder;
         this.collection = Discord.Collection;
         this.messageCollector = Discord.MessageCollector;
@@ -24,7 +25,12 @@ class YClient extends Client {
         this.registery = [];
         this.setMaxListeners(100)
         this.repeatedMessages = {};
-        this.FSCache = {'statsGraph': -120, 'ps': {'new': [], 'old': [], 'status': undefined}, 'pg': {'new': [], 'old': [], 'status': undefined}, 'mf': {'new': [], 'old': [], 'status': undefined}, 'gs': {'new': [], 'old': [], 'status': undefined}};
+        this.FSCache = {
+            statsGraph: -120, 
+            ps: {new: [], old: [], status: undefined}, 
+            pg: {new: [], old: [], status: undefined}, 
+            mf: {new: [], old: [], status: undefined}
+        };
         this.bannedWords = new database("./databases/bannedWords.json", "array");
         this.tictactoeDb = new database("./databases/ttt.json", "array");
         this.userLevels = new database("./databases/userLevels.json", "object");
@@ -154,14 +160,13 @@ class YClient extends Client {
             }
         }
 
-        const xjs = require('xml-js');
         const Whitelist = ["SpongeBoi69", "Kazmerev", "Hungarian__0101", "Sersha", "Helper B", "777Stupid", "Andyk1978", "Andrewk1978", "OmgxBeckyx", "Stacey"]
         const wlPing = ["238248487593050113", "267270757539643402", "642735886953611265"];
         const wlChannel = this.channels.resolve(this.config.mainServer.channels.watchlist);
         const logChannel = this.channels.resolve(this.config.mainServer.channels.fslogs)
         const playerInfo = [];
         const embed = new this.embed();
-	let justStarted = false;
+        let justStarted = false;
         let error;
         let FSdss;
         let FScsg;
@@ -175,7 +180,7 @@ class YClient extends Client {
 
         try { // Fetch dedicated-server-savegame.xml
             await this.axios.get(serverURLcsg, {timeout: 5000}).then((xml) => { // convert
-                FScsg = xjs.xml2js(xml.data, {compact: true, spaces: 2}).careerSavegame;
+                FScsg = this.xjs.xml2js(xml.data, {compact: true, spaces: 2}).careerSavegame;
             });
         } catch (err) {
             error = true;
@@ -235,12 +240,12 @@ class YClient extends Client {
         } else {
             if (this.FSCache[serverAcro.toLowerCase()].status === 0) {
                 logChannel.send({embeds: [new this.embed().setTitle(`${serverAcro} now online`).setColor(this.config.embedColorYellow)]})
-		justStarted = true;
+		        justStarted = true;
             }
             this.FSCache[serverAcro.toLowerCase()].status = 1;
         }
 
-	if (!justStarted) {
+        if (!justStarted) {
             this.FSCache[serverAcro.toLowerCase()].new = await FSdss.data.slots.players.filter(x=>x.isUsed);
 
             if (serverAcro != 'MF') {adminCheck(this, this.FSCache[serverAcro.toLowerCase()].new, this.FSCache[serverAcro.toLowerCase()].old, serverAcro, Whitelist)};
@@ -248,7 +253,7 @@ class YClient extends Client {
             dataPoint(serverAcro, FSdss.data.slots.used);
 
             this.FSCache[serverAcro.toLowerCase()].old = await FSdss.data.slots.players.filter(x=>x.isUsed);
-	}
+        }
     };
     alignText(text, length, alignment, emptyChar = ' ') {
         if (alignment === 'right') {

@@ -243,13 +243,6 @@ module.exports = {
             } catch (err) {
                 console.log(`\x1b[31mstats all; MF failed`)
             }
-            try {
-                await client.axios.get(client.tokens.test.dss, {timeout: 3000}).then(async (x)=>{
-                    await FSstatsAll(client, x, embed, totalCount)
-                });
-            } catch (err) {
-                console.log(`\x1b[31mstats all; GS failed`)
-            }
 
             if (totalCount.length == 0) {
                 sum = 0;
@@ -267,8 +260,6 @@ module.exports = {
             FSstats(client, interaction, client.tokens.pg.dss, 'PGPlayerData');
         } else if (subCmd === 'mf') {
             FSstats(client, interaction, client.tokens.mf.dss, 'MFPlayerData');
-        } else if (subCmd === 'gs') {
-            FSstats(client, interaction, client.tokens.test.dss, 'GSPlayerData');
         } else if (subCmd === 'playertimes') {
             const embed = new client.embed()
                 .setDescription(`Top 20 players with the most time spent on IRTGaming FS22 servers since\n<t:1664645628>\n\n${Object.entries(client.playerTimes._content).sort((a, b) => b[1] - a[1]).slice(0, 20).map((x, i) => `**${i + 1}.** \`${x[0]}\`${(client.FMstaff._content.includes(x[0]) ? ':farmer:' : '')}${(client.TFstaff._content.includes(x[0]) ? ':angel:' : '')}: ${client.formatTime((x[1]*60*1000), 3, { commas: true, longNames: false })}`).join('\n')}`)
@@ -307,10 +298,6 @@ module.exports = {
     .addSubcommand((optt)=>optt
         .setName("mf")
         .setDescription("Multi Farm server stats")
-    )
-    .addSubcommand((optt)=>optt
-        .setName("gs")
-        .setDescription("Grass Silage server stats")
     )
     .addSubcommand((optt)=>optt
         .setName("playertimes")

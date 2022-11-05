@@ -9,7 +9,8 @@
 		"logs": true,
 		"registerCommands": true,
 		"stats": true,
-		"autoResponses": true
+		"autoResponses": true,
+		"notifs": true
 	},
 	"devWhitelist": [
 		"615761944154210305",
@@ -69,7 +70,8 @@
 			"staffreports": "863839725139918849",
 			"fslogs": "763846290466799638",
 			"playercheck": "733828561215029268",
-			"watchlist": "714971005558456391"
+			"watchlist": "714971005558456391",
+			"vidsandstreams": "552588880168353833"
 		}
 	}
 }

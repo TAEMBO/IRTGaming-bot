@@ -31,6 +31,14 @@ class YClient extends Client {
             pg: {new: [], old: [], status: undefined}, 
             mf: {new: [], old: [], status: undefined}
         };
+        this.YTCache = {
+            'UCQ8k8yTDLITldfWYKDs3xFg': undefined,
+            'UCLIExdPYmEreJPKx_O1dtZg': undefined,
+            'UCguI73--UraJpso4NizXNzA': undefined,
+            'UCuNIKo9EMJZ_FdZfGnM9G1w': undefined,
+            'UCKXa-FhJpPrlRigIW1O0j8g': undefined,
+            'UCWYXg1sqtG9NalK5ZGt4ITA': undefined
+        };
         this.bannedWords = new database("./databases/bannedWords.json", "array");
         this.tictactoeDb = new database("./databases/ttt.json", "array");
         this.userLevels = new database("./databases/userLevels.json", "object");
@@ -255,6 +263,29 @@ class YClient extends Client {
             this.FSCache[serverAcro.toLowerCase()].old = await FSdss.data.slots.players.filter(x=>x.isUsed);
         }
     };
+    async YTLoop(YTChannelID, YTChannelName) {
+        let Data;
+        let error;
+
+        try {
+            await this.axios.get(`https://www.youtube.com/feeds/videos.xml?channel_id=${YTChannelID}`, {timeout: 5000}).then((xml) => {
+                Data = this.xjs.xml2js(xml.data, {compact: true, spaces: 2});
+            })
+        } catch (err) {
+            error = true;
+            console.log(`\x1b[36m[${this.moment().format('HH:mm:ss')}]`, `\x1b[31m${YTChannelName} YT fail`);
+        }
+
+        if (error) return;
+        if (this.YTCache[YTChannelID] == undefined) {
+            this.YTCache[YTChannelID] = Data.feed.entry[0]['yt:videoId']._text;
+            return;
+        }
+        if (Data.feed.entry[1]['yt:videoId']._text == this.YTCache[YTChannelID]) {
+            this.YTCache[YTChannelID] = Data.feed.entry[0]['yt:videoId']._text
+            this.channels.resolve(this.config.mainServer.channels.vidsandstreams).send(`**${YTChannelName}** just uploaded a new video!\n${Data.feed.entry[0].link._attributes.href}`)
+        }
+    }
     alignText(text, length, alignment, emptyChar = ' ') {
         if (alignment === 'right') {
             text = emptyChar.repeat(length - text.length) + text;

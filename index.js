@@ -84,6 +84,18 @@ if (client.config.botSwitches.stats) {
 	}, 30000)
 }
 
+// YouTube upload nofitcations loop
+if (client.config.botSwitches.notifs) {
+	setInterval(async () => {
+		client.YTLoop('UCQ8k8yTDLITldfWYKDs3xFg', 'Daggerwin');
+		client.YTLoop('UCLIExdPYmEreJPKx_O1dtZg', 'IRTGaming');
+		client.YTLoop('UCguI73--UraJpso4NizXNzA', 'Machinery Restorer');
+		client.YTLoop('UCuNIKo9EMJZ_FdZfGnM9G1w', 'Tom Pemberton Farm Life');
+		client.YTLoop('UCKXa-FhJpPrlRigIW1O0j8g', 'Alan McPhearson');
+		client.YTLoop('UCWYXg1sqtG9NalK5ZGt4ITA', 'Chainsaw100');
+	}, 300000)
+}
+
 // tic tac toe statistics database
 Object.assign(client.tictactoeDb, {
 	// global stats

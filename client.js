@@ -228,7 +228,7 @@ class YClient extends Client {
         embed.addFields({name: `**Server Statistics**`, value: [
                 `**Money:** $${parseInt(FScsg.statistics.money._text).toLocaleString('en-US')}`,
                 `**In-game time:** ${('0' + Math.floor((FSdss.data.server.dayTime/3600/1000))).slice(-2)}:${('0' + Math.floor((FSdss.data.server.dayTime/60/1000)%60)).slice(-2) ?? null}`,
-                `**Timescale:** ${(FScsg.settings.timeScale._text.slice(0, -5)).toLocaleString('en-US')}x`,
+                `**Timescale:** ${(FScsg.settings?.timeScale?._text?.slice(0, -5))?.toLocaleString('en-US') ?? null}x`,
                 `**Playtime:** ${this.formatTime((parseInt(FScsg.statistics.playTime._text) * 60 * 1000), 3, { commas: true, longNames: true })}`,
                 `**Map:** ${FSdss.data.server.mapName ?? null}`,
                 `**Seasonal growth:** ${seasons(FScsg.settings.growthMode._text)}`,

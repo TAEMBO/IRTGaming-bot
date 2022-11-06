@@ -160,7 +160,6 @@ Object.assign(client.userLevels, {
 
 		if (data) {
 			this._content[userid].messages++;
-			console.log(`Incremented1 ${userid}`);
 			if (data.messages >= this.algorithm(data.level+2)) {
 				while (data.messages > this.algorithm(data.level+1)) {
 					this._content[userid].level++;

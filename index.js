@@ -49,14 +49,16 @@ process.on('exit', (code) => {
 	console.log(`About to exit with code: ${code}`);
 });
 
-// reminder and punishment event loops
 const p = path.join(__dirname, './databases/reminders.json');
 let remindEmbed = new client.embed()
 	.setTitle('Reminder')
 	.setColor(client.config.embedColor);
+
+// reminder, dailyMsgs, and punishment event loops
 setInterval(async () => {
+	const now = Date.now();
 	let db = require(p);
-	const filterLambda = x => x.when < Math.floor(Date.now() / 1000);
+	const filterLambda = x => x.when < Math.floor(now / 1000);
 	const filter = db.filter(x => filterLambda(x));
 	for(let i = 0; i < filter.length; i++){
 		remindEmbed = remindEmbed
@@ -67,12 +69,24 @@ setInterval(async () => {
 	}
 	db = null;
 	
-	const now = Date.now();
 	client.punishments._content.filter(x => x.endTime <= now && !x.expired).forEach(async punishment => {
 		console.log(`\x1b[36m[${client.moment().format('HH:mm:ss')}]`, '\x1b[32m' + `${punishment.member}\'s ${punishment.type} should expire now`);
 		const unpunishResult = await client.punishments.removePunishment(punishment.id, client.user.id, "Time\'s up!");
 		console.log(`\x1b[36m[${client.moment().format('HH:mm:ss')}]`, '\x1b[32m' + unpunishResult);
 	});
+
+	const formattedDate = Math.floor((now - 1667768400000) / 1000 / 60 / 60 / 24);
+	const dailyMsgs = require("./databases/dailyMsgs.json");
+	if (!dailyMsgs.some(x => x[0] === formattedDate)) {
+		let total = Object.values(client.userLevels._content).reduce((a, b) => a + b, 0); // sum of all users
+		const yesterday = dailyMsgs.find(x => x[0] === formattedDate - 1);
+		if (total < yesterday) { // messages went down
+			total = yesterday;
+		}
+		dailyMsgs.push([formattedDate, total]);
+		fs.writeFileSync(__dirname + "/databases/dailyMsgs.json", JSON.stringify(dailyMsgs));
+		console.log(`\x1b[36m[${client.moment().format('HH:mm:ss')}] \x1b[33m`, `Pushed [${formattedDate}, ${total}] to dailyMsgs`)
+	}
 }, 5000);
 
 // Farming Simulator 22 stats loops
@@ -141,41 +155,28 @@ Object.assign(client.tictactoeDb, {
 
 // userLevels
 Object.assign(client.userLevels, {
-	_milestone() {
-		const milestones = [10, 100, 1000, 50000, 69696, 100000, 200000, 300000, 400000, 420000, 500000]; // always keep the previously achived milestone in the array so the progress is correct. here you can stack as many future milestones as youd like
-		const total = Object.values(this._content || {}).reduce((a, b) => a + b, 0);
-		const next = milestones.find(x => x >= total) || undefined;
-		const previous = milestones[milestones.indexOf(next) - 1] || 0;
-		return {
-			total,
-			next,
-			previous,
-			progress: (total - previous) / (next - previous)
-		}
-	},
 	incrementUser(userid) {
-		const amount = this._content[userid];
-		if (amount) this._content[userid]++;
-		else this._content[userid] = 1;
-		// milestone
-		const milestone = this._milestone();
-		if (milestone && milestone.total === this._milestone().next) {
-			const channel = client.channels.resolve("858073309920755773"); // #announcements
-			if (!channel) return console.log("tried to send milestone announcement but channel wasnt found");
-			channel.send(`:tada: Milestone reached! **${milestone.next.toLocaleString("en-US")}** messages have been sent in this server and recorded by Level Roles. :tada:`);
+		const data = this._content[userid];
+
+		if (data) {
+			this._content[userid].messages++;
+			console.log(`Incremented1 ${userid}`);
+			if (data.messages >= this.algorithm(data.level+2)) {
+				while (data.messages > this.algorithm(data.level+1)) {
+					this._content[userid].level++;
+					console.log(`${userid} EXTENDED LEVELUP ${this._content[userid].level}`)
+				}
+			} else if (data.messages >= this.algorithm(data.level+1)) {
+				this._content[userid].level++;
+				client.channels.resolve(client.config.mainServer.channels.testing_zone).send({content: `Well done <@${userid}>, you made it to **level ${data.level}**!`})
+				console.log(`${userid} leveled up to ${data.level}`)
+			}
+		} else  {
+			this._content[userid] = {messages: 1, level: 0};
 		}
-		return this;
 	},
-	getUser(userid) {
-		return this._content[userid] || 0;
-	},
-	hasUser(userid) {
-		return !!this._content[userid];
-	},
-	getEligible(guildMember) {
-		const age = (Date.now() - guildMember.joinedTimestamp) / 1000 / 60 / 60 / 24;
-		const messages = this.getUser(guildMember.user.id);
-		return { age, messages };
+	algorithm(level) {
+		return level*level*15;
 	},
 });
 

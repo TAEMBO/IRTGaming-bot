@@ -2,76 +2,188 @@ const {SlashCommandBuilder, ActionRowBuilder, ButtonBuilder} = require('discord.
 
 module.exports = {
 	run: async (client, interaction) => {
-
-		// messages sent by each user, unordered array
-		const messageCounts = Object.values(client.userLevels._content);
-
-		// total amount of messages sent
-		const messageCountsTotal = messageCounts.reduce((a, b) => a + b, 0);
 		const subCmd = interaction.options.getSubcommand();
+
 		if (subCmd === "stats") {
+			const messageCountsTotal = Object.values(client.userLevels._content).reduce((a, b) => a.messages + b.messages);
+			
+			/* const data = require('../databases/dailyMsgs.json').map((x, i, a) => {
+				const yesterday = a[i - 1] || [];
+				return x[1] - (yesterday[1] || x[1]);
+			}).slice(1).slice(-60);
+			
+			// handle negative days
+			data.forEach((change, i) => {
+				if (change < 0) data[i] = data[i - 1] || data[i + 1] || 0;
+			});
+			
+			const maxValue = Math.max(...data);
+			const maxValueArr = maxValue.toString().split('');
+			
+			const first_graph_top = Math.ceil(parseInt(maxValue) * 10 ** (-maxValueArr.length + 1)) * 10 ** (maxValueArr.length - 1);
+			// console.log({ first_graph_top });
+			
+			const second_graph_top = Math.ceil(parseInt(maxValue) * 10 ** (-maxValueArr.length + 2)) * 10 ** (maxValueArr.length - 2);
+			// console.log({ second_graph_top });
+			
+			const textSize = 32;
+			
+			const canvas = require('canvas');
+			const fs = require('fs');
+			const img = canvas.createCanvas(950, 450);
+			const ctx = img.getContext('2d');
+			
+			const graphOrigin = [10, 50];
+			const graphSize = [700, 360];
+			const nodeWidth = graphSize[0] / (data.length - 1);
+			ctx.fillStyle = '#36393f';
+			ctx.fillRect(0, 0, img.width, img.height);
+			
+			// grey horizontal lines
+			ctx.lineWidth = 3;
+			
+			let interval_candidates = [];
+			for (let i = 4; i < 10; i++) {
+				const interval = first_graph_top / i;
+				if (Number.isInteger(interval)) {
+					intervalString = interval.toString();
+					const reference_number = i * Math.max(intervalString.split('').filter(x => x === '0').length / intervalString.length, 0.3) * (['1', '2', '4', '5', '6', '8'].includes(intervalString[0]) ? 1.5 : 0.67)
+					interval_candidates.push([interval, i, reference_number]);
+				}
+			}
+			// console.log({ interval_candidates });
+			const chosen_interval = interval_candidates.sort((a, b) => b[2] - a[2])[0];
+			// console.log({ chosen_interval });
+			
+			let previousY;
+			
+			ctx.strokeStyle = '#202225';
+			for (let i = 0; i <= chosen_interval[1]; i++) {
+				const y = graphOrigin[1] + graphSize[1] - (i * (chosen_interval[0] / second_graph_top) * graphSize[1]);
+				if (y < graphOrigin[1]) continue;
+				const even = ((i + 1) % 2) === 0;
+				if (even) ctx.strokeStyle = '#2c2f33';
+				ctx.beginPath();
+				ctx.lineTo(graphOrigin[0], y);
+				ctx.lineTo(graphOrigin[0] + graphSize[0], y);
+				ctx.stroke();
+				ctx.closePath();
+				if (even) ctx.strokeStyle = '#202225';
+				previousY = [y, i * chosen_interval[0]];
+			}
+			
+			// 30d mark
+			ctx.setLineDash([8, 16]);
+			ctx.beginPath();
+			const lastMonthStart = graphOrigin[0] + (nodeWidth * (data.length - 30));
+			ctx.lineTo(lastMonthStart, graphOrigin[1]);
+			ctx.lineTo(lastMonthStart, graphOrigin[1] + graphSize[1]);
+			ctx.stroke();
+			ctx.closePath();
+			ctx.setLineDash([]);
+			
+			// draw points
+			ctx.strokeStyle = client.config.embedColor;
+			ctx.fillStyle = client.config.embedColor;
+			ctx.lineWidth = 3;
+			
+			
+			function getYCoordinate(value) {
+				return ((1 - (value / second_graph_top)) * graphSize[1]) + graphOrigin[1];
+			}
+			
+			let lastCoords = [];
+			data.forEach((val, i) => {
+				ctx.beginPath();
+				if (lastCoords) ctx.moveTo(...lastCoords);
+				if (val < 0) val = 0;
+				const x = i * nodeWidth + graphOrigin[0];
+				const y = getYCoordinate(val);
+				ctx.lineTo(x, y);
+				lastCoords = [x, y];
+				ctx.stroke();
+				ctx.closePath();
+
+				// ball
+				ctx.beginPath();
+				ctx.arc(x, y, ctx.lineWidth * 1.2, 0, 2 * Math.PI)
+				ctx.closePath();
+				ctx.fill();
+			});
+			
+			// draw text
+			ctx.font = '400 ' + textSize + 'px sans-serif';
+			ctx.fillStyle = 'white';
+			
+			// highest value
+			const maxx = graphOrigin[0] + graphSize[0] + textSize;
+			const maxy = previousY[0] + (textSize / 3);
+			ctx.fillText(previousY[1].toLocaleString('en-US'), maxx, maxy);
+			
+			// lowest value
+			const lowx = graphOrigin[0] + graphSize[0] + textSize;
+			const lowy = graphOrigin[1] + graphSize[1] + (textSize / 3);
+			ctx.fillText('0 msgs/day', lowx, lowy);
+			
+			// 30d
+			ctx.fillText('30d ago', lastMonthStart, graphOrigin[1] - (textSize / 3));
+			
+			// time ->
+			const tx = graphOrigin[0] + (textSize / 2);
+			const ty = graphOrigin[1] + graphSize[1] + (textSize);
+			ctx.fillText('time ->', tx, ty);
+			
+			const yeahok = new client.attachmentBuilder(img.toBuffer(), {name: "dailymsgs.png"}) */
 			const embed = new client.embed()
-				.setTitle('Level Roles: Stats')
-				.setDescription(`Since the beginning of the month, a total of **${messageCountsTotal.toLocaleString('en-US')}** messages have been recorded in this server.`)
-				.addFields({name: 'Top users by messages sent:', value: Object.entries(client.userLevels._content).sort((a, b) => b[1] - a[1]).slice(0, 10).map((x, i) => `\`${i + 1}.\` <@${x[0]}>: ${x[1].toLocaleString('en-US')}`).join('\n')})
+				.setTitle('Ranking leaderboard')
+				.setDescription(`A total of **${messageCountsTotal.toLocaleString('en-US')}** messages have been recorded in this server.`)
+				.addFields({name: 'Top users by messages sent:', value: Object.entries(client.userLevels._content).sort((a, b) => b[1] - a[1]).slice(0, 10).map((x, i) => `\`${i + 1}.\` <@${x[0]}>: ${x[1].messages.toLocaleString('en-US')}`).join('\n')})
+				//.setImage('attachment://dailymsgs.png')
 				.setColor(client.config.embedColor)
 			interaction.reply({embeds: [embed]});
 			return;
-		} else if(subCmd === "view"){
+		} else if (subCmd === "view") {
 
-		const embed0 = new client.embed()
-	    	.setColor(client.config.embedColor)
+			// fetch user or user interaction sender
+			const member = interaction.options.getMember("member") ?? interaction.member;
 
-		// fetch user or user interaction sender
-		const member = interaction.options.getMember("member") ?? interaction.member;
+			const embed = new client.embed().setColor(client.config.embedColor)
 
-		// information about users progress on level roles
-		const eligiblity = await client.userLevels.getEligible(member);
+			// information about users progress on level roles
+			const information = client.userLevels._content[member.user.id];
 		
-		const pronounBool = (you, they) => { // takes 2 words and chooses which to use based on if user did this command on themself
-			if (interaction.user.id === member.user.id) return you || true;
-			else return they || false;
-		};
-		
-		let ranking;
+			const pronounBool = (you, they) => { // takes 2 words and chooses which to use based on if user did this command on themself
+				if (interaction.user.id === member.user.id) return you || true;
+				else return they || false;
+			};
 
-		if (pronounBool()) {
-			const index = Object.entries(client.userLevels._content).sort((a, b) => b[1] - a[1]).map(x => x[0]).indexOf(interaction.user.id) + 1;
-			const suffix = ((index) => {
-				const numbers = index.toString().split('').reverse(); // eg. 1850 -> [0, 5, 8, 1]
-				if (numbers[1] === '1') { // this is some -teen
-					return 'th';
-				} else {
-					if (numbers[0] === '1') return 'st';
-					else if (numbers[0] === '2') return 'nd';
-					else if (numbers[0] === '3') return 'rd';
-					else return 'th';
-				}
-			})(index);
-			
-			ranking = `\n> You're ${index ? index + suffix : 'last'} in a descending list of all users, ordered by their Level Roles message count.`;
-		}
-	
-		embed0.setDescription(`**${eligiblity.messages.toLocaleString('en-US')}** messages\n**${Math.floor(eligiblity.age).toLocaleString('en-US')}d** time on server`)
-		interaction.reply({content: `**${eligiblity.messages.toLocaleString('en-US')}** messages\n**${Math.floor(eligiblity.age).toLocaleString('en-US')}d** time on server${ranking ? ranking : ''}`}); // compile message and send
-	 } else if (subCmd === 'reset') {
-		if (!client.config.devWhitelist.includes(interaction.user.id)) return interaction.reply('You\'re not allowed to use this command.');
-
-		const msg = await interaction.reply({content: 'Are you sure you want to reset all LRS data?', fetchReply: true, components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId(`Yes`).setStyle("Success").setLabel("Confirm"), new ButtonBuilder().setCustomId(`No`).setStyle("Danger").setLabel("Cancel"))]});
-		const filter = (i) => ["Yes", "No"].includes(i.customId) && i.user.id === interaction.user.id;
-		const collector = interaction.channel.createMessageComponentCollector({filter, max: 1, time: 30000});
-		collector.on("collect", async (int) => {
-			if(int.customId === "Yes"){
-				const fs = require('fs');
-				const path = require('path');
-				fs.writeFileSync(path.resolve('./databases/userLevels.json'), '{}');
-				client.userLevels._content = require('../databases/userLevels.json');
-				int.update({content: ':white_check_mark: LRS data reset.', components: []})
-			} else if(int.customId === "No"){
-				int.update({content: ':x: Command canceled.', components: []});
+			if (!information) {
+				return interaction.reply(`${pronounBool('You', 'They')} currently don't have a level, send some messages to level up.`)
 			}
-		});
-	 }
+		
+			if (pronounBool()) {
+				const index = Object.entries(client.userLevels._content).sort((a, b) => b[1] - a[1]).map(x => x[0]).indexOf(interaction.user.id) + 1;
+				const suffix = ((index) => {
+					const numbers = index.toString().split('').reverse(); // eg. 1850 -> [0, 5, 8, 1]
+					if (numbers[1] === '1') { // this is some -teen
+						return 'th';
+					} else {
+						if (numbers[0] === '1') return 'st';
+						else if (numbers[0] === '2') return 'nd';
+						else if (numbers[0] === '3') return 'rd';
+						else return 'th';
+					}
+				})(index);
+			
+				embed.setFooter({text: `You're ${index ? index + suffix : 'last'} in a descending list of all users, ordered by their message count.`});
+			}
+			const memberDifference = information.messages - client.userLevels.algorithm(information.level);
+			const levelDifference = client.userLevels.algorithm(information.level+1) - client.userLevels.algorithm(information.level);
+	
+			embed.setAuthor({name: `Ranking for ${member.user.tag}`, iconURL: `${member.displayAvatarURL()}`})
+			embed.setTitle(`${pronounBool('You\'re', 'They\'re')} **level ${information.level}** and ${pronounBool('your', 'their')} current progress is **${information.messages - client.userLevels.algorithm(information.level)}/${client.userLevels.algorithm(information.level+1) - client.userLevels.algorithm(information.level)} (${(memberDifference/levelDifference*100).toFixed(2)}%)** messages.`);
+			interaction.reply({embeds: [embed]}); // compile message and send
+	 	}
 	},
 	data: new SlashCommandBuilder()
 	.setName("rank")
@@ -82,11 +194,10 @@ module.exports = {
 		.addUserOption((opt)=>opt
 			.setName("member")
 			.setDescription("Member whose rank to view")
-			.setRequired(false)))
+			.setRequired(false))
+	)
 	.addSubcommand((optt)=>optt
 		.setName("stats")
-		.setDescription("View top 10 users."))
-	.addSubcommand((optt)=>optt
-		.setName("reset")
-		.setDescription("Reset all LRS data."))
+		.setDescription("View top 10 users.")
+	)
 };

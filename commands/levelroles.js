@@ -5,7 +5,7 @@ module.exports = {
 		const subCmd = interaction.options.getSubcommand();
 
 		if (subCmd === "stats") {
-			const messageCountsTotal = Object.values(client.userLevels._content).reduce((a, b) => a.messages + b.messages);
+			const messageCountsTotal = Object.values(client.userLevels._content).reduce((a, b) => a + b.messages, 0);
 			
 			/* const data = require('../databases/dailyMsgs.json').map((x, i, a) => {
 				const yesterday = a[i - 1] || [];

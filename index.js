@@ -212,7 +212,6 @@ Object.assign(client.punishments, {
 		}
 		switch (type) {
 			case "ban":
-
 				const banData = { type, id: this.createId(), member: member.id, moderator, time: now };
 				let dm1;
 				try {
@@ -221,7 +220,6 @@ Object.assign(client.punishments, {
 					setTimeout(() => interaction.channel.send('Failed to DM user.'), 500)
 				}
 				const banResult = await interaction.guild.bans.create(member.id, { reason: `${reason || "unspecified"} | Case #${banData.id}` }).catch(err => err.message);
-				console.log(typeof banResult);
 				if (typeof banResult === "string") {
 					dm1.delete();
 					return `Ban was unsuccessful: ${banResult}`;

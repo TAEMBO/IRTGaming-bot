@@ -78,7 +78,7 @@ setInterval(async () => {
 	const formattedDate = Math.floor((now - 1667768400000) / 1000 / 60 / 60 / 24);
 	const dailyMsgs = require("./databases/dailyMsgs.json");
 	if (!dailyMsgs.some(x => x[0] === formattedDate)) {
-		let total = Object.values(client.userLevels._content).reduce((a, b) => a + b, 0); // sum of all users
+		let total = Object.values(client.userLevels._content).reduce((a, b) => a + b.messages, 0); // sum of all users
 		const yesterday = dailyMsgs.find(x => x[0] === formattedDate - 1);
 		if (total < yesterday) { // messages went down
 			total = yesterday;

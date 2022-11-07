@@ -356,14 +356,21 @@ class YClient extends Client {
         client.channels.cache.get(client.config.mainServer.channels.staffreports).send({embeds: [embed]});
     };
     async punish(client, interaction, type) {
+        let result;
         if (!client.hasModPerms(interaction.member)) return client.youNeedRole(interaction, "mod");
         if (type !== ('warn' || 'mute') && interaction.member.roles.cache.has(client.config.mainServer.roles.helper)) return client.youNeedRole(interaction, "mod");
-        const member = interaction.options.getMember("member");
         const time = interaction.options.getString("time");
         const reason = interaction.options.getString("reason") ?? "None";
-	if (interaction.user.id === member.id) return interaction.reply(`You cannot ${type} yourself.`)
-	if (client.hasModPerms(member)) return interaction.reply(`You cannot ${type} another staff member.`)
-        const result = await client.punishments.addPunishment(type, member, { time, reason, interaction }, interaction.user.id);
+        if (type == 'ban') {
+            const user = interaction.options.getUser('member');
+            if (interaction.user.id == user.id) return interaction.reply(`You cannot ${type} yourself.`);
+            result = await client.punishments.addPunishment(type, user , { time, reason, interaction }, interaction.user.id);
+        } else {
+            const member = interaction.options.getMember("member");
+            if (interaction.user.id == member.id) return interaction.reply(`You cannot ${type} yourself.`)
+            if (client.hasModPerms(member)) return interaction.reply(`You cannot ${type} another staff member.`);
+            result = await client.punishments.addPunishment(type, member, { time, reason, interaction }, interaction.user.id);
+        }
         (typeof result === String ? interaction.reply({content: `${result}`}) : interaction.reply({embeds: [result]}))
     };
     async unPunish(client, interaction) {

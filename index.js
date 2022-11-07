@@ -212,9 +212,16 @@ Object.assign(client.punishments, {
 		}
 		switch (type) {
 			case "ban":
-				const banData = { type, id: this.createId(), member: member.user.id, moderator, time: now };
-				const dm1 = await member.send(`You've been banned from ${member.guild.name} ${timeInMillis ? `for ${client.formatTime(timeInMillis, 4, { longNames: true, commas: true })} (${timeInMillis}ms)` : "forever"} for reason \`${reason || "unspecified"}\` (Case #${banData.id})`).catch(err => setTimeout(() => interaction.channel.send('Failed to DM user.'), 500));
-				const banResult = await member.ban({ reason: `${reason || "unspecified"} | Case #${banData.id}` }).catch(err => err.message);
+
+				const banData = { type, id: this.createId(), member: member.id, moderator, time: now };
+				let dm1;
+				try {
+					dm1 = await member.send(`You've been banned from ${interaction.guild.name} ${timeInMillis ? `for ${client.formatTime(timeInMillis, 4, { longNames: true, commas: true })} (${timeInMillis}ms)` : "forever"} for reason \`${reason || "unspecified"}\` (Case #${banData.id})`)
+				} catch (err) {
+					setTimeout(() => interaction.channel.send('Failed to DM user.'), 500)
+				}
+				const banResult = await interaction.guild.bans.create(member.id, { reason: `${reason || "unspecified"} | Case #${banData.id}` }).catch(err => err.message);
+				console.log(typeof banResult);
 				if (typeof banResult === "string") {
 					dm1.delete();
 					return `Ban was unsuccessful: ${banResult}`;
@@ -229,7 +236,7 @@ Object.assign(client.punishments, {
 					this.forceSave();
 					return new client.embed()
 						.setTitle(`Case #${banData.id}: Ban`)
-						.setDescription(`${member.user.tag}\n<@${member.user.id}>\n(\`${member.user.id}\`)`)
+						.setDescription(`${member.tag}\n<@${member.id}>\n(\`${member.id}\`)`)
 						.addFields(
 							{name: 'Reason', value: `\`${reason || "unspecified"}\``},
 							{name: 'Duration',

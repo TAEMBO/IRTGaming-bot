@@ -37,7 +37,7 @@ module.exports = {
 						const filter = x => x.content === 'stack' && x.author.id === interaction.user.id
 						const messagecollector = interaction.channel.createMessageCollector({ filter, max: 1, time: 60000 });
 						messagecollector.on('collect', collected => {
-							collected.reply({content: `\`\`\`\n${removeUsername(err.stack)}\n\`\`\``, allowedMentions: { repliedUser: false }});
+							collected.reply(`\`\`\`\n${removeUsername(err.stack)}\n\`\`\``);
 						});
 					});
 				}

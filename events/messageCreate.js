@@ -158,7 +158,7 @@ module.exports = {
 	
 		if (client.config.botSwitches.autoResponses && !automodded) { // auto responses
 			/*if (message.content.toLowerCase().includes('morning all') || message.content.toLowerCase().includes('morning everyone')) {
-			message.reply({content: `Morning ${message.member.displayName}!`, allowedMentions: {repliedUser: false}})
+			message.reply(`Morning ${message.member.displayName}!`)
 			}*/
 			if (message.content.toLowerCase().includes('giants moment')) {
 				message.react('™️');

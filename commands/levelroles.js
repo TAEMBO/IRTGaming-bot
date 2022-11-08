@@ -162,7 +162,7 @@ module.exports = {
 			}
 		
 			if (pronounBool()) {
-				const index = Object.entries(client.userLevels._content).sort((a, b) => b[1] - a[1]).map(x => x[0]).indexOf(interaction.user.id) + 1;
+				const index = Object.entries(client.userLevels._content).sort((a, b) => b[1].messages - a[1].messages).map(x => x[0]).indexOf(interaction.user.id) + 1;
 				const suffix = ((index) => {
 					const numbers = index.toString().split('').reverse(); // eg. 1850 -> [0, 5, 8, 1]
 					if (numbers[1] === '1') { // this is some -teen

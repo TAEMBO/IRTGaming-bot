@@ -12,7 +12,7 @@ console.log(client.config.devWhitelist);
 // global properties
 client.on("ready", async () => {
 	client.guilds.cache.forEach(async (e)=>{await e.members.fetch();});
-	client.channels.resolve(client.config.mainServer.channels.testing_zone).send(`:warning: Bot restarted :warning:\n<@${client.config.devWhitelist[0]}>\n\`\`\`js\n${Object.entries(client.config.botSwitches).map((x)=> `${x[0]}: ${x[1]}`).join('\n')}\`\`\``)
+	client.channels.resolve(client.config.mainServer.channels.testing_zone).send({content: `:warning: Bot restarted :warning:\n<@${client.config.devWhitelist[0]}>\n\`\`\`js\n${Object.entries(client.config.botSwitches).map((x)=> `${x[0]}: ${x[1]}`).join('\n')}\`\`\``, allowedMentions: {roles: true}})
 	setInterval(()=>{
 		client.guilds.cache.get(client.config.mainServer.id).invites.fetch().then((invs)=>{
 			invs.forEach(async(inv)=>{
@@ -39,11 +39,11 @@ client.on("ready", async () => {
 // error handlers
 process.on("unhandledRejection", async (error)=>{
 	console.log('\x1b[31m', error)
-	client.channels.resolve(client.config.mainServer.channels.testing_zone).send({content: `<@${client.config.devWhitelist[0]}>`, embeds: [new client.embed().setTitle("Error Caught!").setColor("#420420").setDescription(`**Error:** \`${error.message}\`\n\n**Stack:** \`${`${error.stack}`.slice(0, 2500)}\``)]})
+	client.channels.resolve(client.config.mainServer.channels.testing_zone).send({content: `<@${client.config.devWhitelist[0]}>`, embeds: [new client.embed().setTitle("Error Caught!").setColor("#420420").setDescription(`**Error:** \`${error.message}\`\n\n**Stack:** \`${`${error.stack}`.slice(0, 2500)}\``)], allowedMentions: {roles: true}})
 });
 client.on("error", async (error) =>{
 	console.log('\x1b[31m', error)
-	client.channels.resolve(client.config.mainServer.channels.testing_zone).send({content: `<@${client.config.devWhitelist[0]}>`, embeds: [new client.embed().setTitle("Error Caught!").setColor("#420420").setDescription(`**Error:** \`${error.message}\`\n\n**Stack:** \`${`${error.stack}`.slice(0, 2500)}\``)]})
+	client.channels.resolve(client.config.mainServer.channels.testing_zone).send({content: `<@${client.config.devWhitelist[0]}>`, embeds: [new client.embed().setTitle("Error Caught!").setColor("#420420").setDescription(`**Error:** \`${error.message}\`\n\n**Stack:** \`${`${error.stack}`.slice(0, 2500)}\``)], allowedMentions: {roles: true}})
 });
 process.on('exit', (code) => {
 	console.log(`About to exit with code: ${code}`);
@@ -167,7 +167,7 @@ Object.assign(client.userLevels, {
 				}
 			} else if (data.messages >= this.algorithm(data.level+1)) {
 				this._content[userid].level++;
-				client.channels.resolve(client.config.mainServer.channels.testing_zone).send({content: `Well done <@${userid}>, you made it to **level ${data.level}**!`})
+				client.channels.resolve(client.config.mainServer.channels.testing_zone).send({content: `Well done <@${userid}>, you made it to **level ${data.level}**!`, allowedMentions: {roles: true}})
 			}
 		} else  {
 			this._content[userid] = {messages: 1, level: 0};

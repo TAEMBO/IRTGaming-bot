@@ -150,7 +150,7 @@ class YClient extends Client {
                 playerObj.forEach(x => {
                     client.watchList._content.forEach(y => {
                         if (y[0] === x.name && watchList) {
-                            wlChannel.send({content: `${wlPing.map(x=>`<@${x}>`).join(" ")}`, embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${y[0]}\` joined **${Acro}** at <t:${Math.round(new Date() / 1000)}:t>`).setFooter({text: `Reason: ${y[1]}`}).setColor(client.config.embedColorGreen)]})
+                            wlChannel.send({content: `${wlPing.map(x=>`<@${x}>`).join(" ")}`, embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${y[0]}\` joined **${Acro}** at <t:${Math.round(new Date() / 1000)}:t>`).setFooter({text: `Reason: ${y[1]}`}).setColor(client.config.embedColorGreen)], allowedMentions: {roles: true}})
                         } // Oh no, go get em Toast
                     })
                     logChannel.send({embeds: [new client.embed().setDescription(`\`${x.name}\` ${(client.FMstaff._content.includes(x.name) ? ':farmer:' : '')}${(client.TFstaff._content.includes(x.name) ? ':angel:' : '')} joined **${Acro}** at <t:${Math.round(new Date() / 1000)}:t>`).setColor(client.config.embedColorGreen)]})

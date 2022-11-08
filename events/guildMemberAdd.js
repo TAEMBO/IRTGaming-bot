@@ -24,7 +24,7 @@ module.exports = {
             .setDescription(`Please familiarize yourself with our <#552590507352653827> and head over to <#922631314195243080> to gain access to more channels & receive notification about community news.`)
             .addFields({name: 'Useful channels', value: `<:IRTDot:908818924286648350> Our game servers: <#739100711073218611>\n<:IRTDot:908818924286648350> Report players: <#825046442300145744>\n<:IRTDot:908818924286648350> Come chat with us!: <#552565546093248512>`})
             .setFooter({text: `${index}${suffix} member`})
-        client.channels.resolve(client.config.mainServer.channels.welcome).send({content: `<@${member.user.id}>`, embeds: [embed0], allowedMentions: {roles: true}})
+        client.channels.resolve(client.config.mainServer.channels.welcome).send({content: `<@${member.user.id}>`, embeds: [embed0]})
 
         if (!client.config.botSwitches.logs) return;
         const oldInvites = client.invites;

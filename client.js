@@ -7,7 +7,7 @@ class YClient extends Client {
         super({
             intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildBans, GatewayIntentBits.GuildInvites, GatewayIntentBits.GuildPresences, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildVoiceStates],
             partials: [Partials.Channel, Partials.Message, Partials.Reaction],
-            allowedMentions: {repliedUser: false, roles: false},
+            disableEveryone: true,
             ws: {properties: {browser: "Discord iOS"}}
         })
         this.invites = new Map();
@@ -107,7 +107,7 @@ class YClient extends Client {
         return this.config.mainServer.MPStaffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
     };
     youNeedRole(interaction, role) {
-        return interaction.reply(`You need the <@&${this.config.mainServer.roles[role]}> role to use this command`);
+        return interaction.reply({content: `You need the <@&${this.config.mainServer.roles[role]}> role to use this command`, allowedMentions: {roles: false}});
     }
 
     async FSLoop(serverURLdss, serverURLcsg, Channel, Message, serverAcro) {

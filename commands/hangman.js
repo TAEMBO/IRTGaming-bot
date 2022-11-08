@@ -66,7 +66,7 @@ module.exports = {
 			if(guessMessage.author.bot) return;
 			if(guessMessage.content.toLowerCase().startsWith('guess')){
 			const guess = guessMessage.content.slice(6).toLowerCase();
-			if (!guess || guess.length === 0) return guessMessage.reply('You\'re using the \`guess\` command wrong. Get good.');
+			if (!guess || guess.length === 0) return guessMessage.reply({content: 'You\'re using the \`guess\` command wrong. Get good.', allowedMentions: { repliedUser: false }});
 			if (guess.length > 1) {
 				guessWord(guess);
 			} else {

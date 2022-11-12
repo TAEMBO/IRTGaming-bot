@@ -161,27 +161,13 @@ module.exports = {
 				return interaction.reply(`${pronounBool('You', 'They')} currently don't have a level, send some messages to level up.`)
 			}
 		
-			if (pronounBool()) {
-				const index = Object.entries(client.userLevels._content).sort((a, b) => b[1].messages - a[1].messages).map(x => x[0]).indexOf(interaction.user.id) + 1;
-				const suffix = ((index) => {
-					const numbers = index.toString().split('').reverse(); // eg. 1850 -> [0, 5, 8, 1]
-					if (numbers[1] === '1') { // this is some -teen
-						return 'th';
-					} else {
-						if (numbers[0] === '1') return 'st';
-						else if (numbers[0] === '2') return 'nd';
-						else if (numbers[0] === '3') return 'rd';
-						else return 'th';
-					}
-				})(index);
-			
-				embed.setFooter({text: `You're ${index ? index + suffix : 'last'} in a descending list of all users, ordered by their message count.`});
-			}
+			const index = Object.entries(client.userLevels._content).sort((a, b) => b[1].messages - a[1].messages).map(x => x[0]).indexOf(interaction.user.id) + 1;
 			const memberDifference = information.messages - client.userLevels.algorithm(information.level);
 			const levelDifference = client.userLevels.algorithm(information.level+1) - client.userLevels.algorithm(information.level);
 	
-			embed.setAuthor({name: `Ranking for ${member.user.tag}`, iconURL: `${member.displayAvatarURL()}`})
-			embed.setTitle(`${pronounBool('You\'re', 'They\'re')} **level ${information.level}** and ${pronounBool('your', 'their')} current progress is **${information.messages - client.userLevels.algorithm(information.level)}/${client.userLevels.algorithm(information.level+1) - client.userLevels.algorithm(information.level)} (${(memberDifference/levelDifference*100).toFixed(2)}%)** messages.`);
+			embed.setThumbnail(member.user.avatarURL({ format: 'png', dynamic: true, size: 256}) || member.user.defaultAvatarURL)
+			embed.setAuthor({name: `Ranking for ${member.user.tag}`})
+			embed.setTitle(`Level: **${information.level}**\nRank: **${index ? '#' + index  : 'last'}**\nProgress: **${information.messages - client.userLevels.algorithm(information.level)}/${client.userLevels.algorithm(information.level+1) - client.userLevels.algorithm(information.level)} (${(memberDifference/levelDifference*100).toFixed(2)}%)**\nTotal: **${information.messages}**`);
 			interaction.reply({embeds: [embed]}); // compile message and send
 	 	}
 	},

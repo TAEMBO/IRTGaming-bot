@@ -170,8 +170,8 @@ module.exports = {
 			embed.setTitle(`Level: **${information.level}**\nRank: **${index ? '#' + index  : 'last'}**\nProgress: **${information.messages - client.userLevels.algorithm(information.level)}/${client.userLevels.algorithm(information.level+1) - client.userLevels.algorithm(information.level)} (${(memberDifference/levelDifference*100).toFixed(2)}%)**\nTotal: **${information.messages}**`);
 			interaction.reply({embeds: [embed]}); // compile message and send
 	 	} else if (subCmd == 'info') {
-			const embed = new client.embed().setColor(client.config.embedColor)
-				.setDescription('**Q** How do i progress?\n**A** This system is message-based, meaning each message you send progresses you\n\n**Q**What is going to happen to the <@757962216535359586> (MEE6) level system?\n**A** It will be replaced with this one.\n\n**Q** Can I transfer my progress from the MEE6 level system to this one?\n**A** Yes, message <@615761944154210305> (TÆMBØ#5512) with your request.\n\n**Q** Why is this change being done?\n**A** This bot is free for IRTGaming, MEE6 is not free for IRTGaming. I\'m sure you can figure out the rest.')
+			const embed = new client.embed().setColor(client.config.embedColor).setDescription('**Q** How do i progress?\n**A** This system is message-based, meaning each message you send progresses you\n\n**Q**What is going to happen to the <@757962216535359586> (MEE6) level system?\n**A** It will be replaced with this one.\n\n**Q** Can I transfer my progress from the MEE6 level system to this one?\n**A** Yes, message <@615761944154210305> (TÆMBØ#5512) with your request.\n\n**Q** Why is this change being done?\n**A** This bot is free for IRTGaming, MEE6 is not free for IRTGaming. I\'m sure you can figure out the rest.')
+			interaction.reply({embeds: [embed]})
 		}
 	},
 	data: new SlashCommandBuilder()

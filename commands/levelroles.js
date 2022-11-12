@@ -7,7 +7,7 @@ module.exports = {
 		if (subCmd === "stats") {
 			const messageCountsTotal = Object.values(client.userLevels._content).reduce((a, b) => a + b.messages, 0);
 			
-			/* const data = require('../databases/dailyMsgs.json').map((x, i, a) => {
+			const data = require('../databases/dailyMsgs.json').map((x, i, a) => {
 				const yesterday = a[i - 1] || [];
 				return x[1] - (yesterday[1] || x[1]);
 			}).slice(1).slice(-60);
@@ -133,14 +133,14 @@ module.exports = {
 			const ty = graphOrigin[1] + graphSize[1] + (textSize);
 			ctx.fillText('time ->', tx, ty);
 			
-			const yeahok = new client.attachmentBuilder(img.toBuffer(), {name: "dailymsgs.png"}) */
+			const yeahok = new client.attachmentBuilder(img.toBuffer(), {name: "dailymsgs.png"})
 			const embed = new client.embed()
 				.setTitle('Ranking leaderboard')
 				.setDescription(`A total of **${messageCountsTotal.toLocaleString('en-US')}** messages have been recorded in this server.`)
 				.addFields({name: 'Top users by messages sent:', value: Object.entries(client.userLevels._content).sort((a, b) => b[1].messages - a[1].messages).slice(0, 10).map((x, i) => `\`${i + 1}.\` <@${x[0]}>: ${x[1].messages.toLocaleString('en-US')}`).join('\n')})
-				//.setImage('attachment://dailymsgs.png')
+				.setImage('attachment://dailymsgs.png')
 				.setColor(client.config.embedColor)
-			interaction.reply({embeds: [embed]});
+			interaction.reply({embeds: [embed], files: [yeahok]});
 			return;
 		} else if (subCmd === "view") {
 

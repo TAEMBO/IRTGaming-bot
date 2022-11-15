@@ -99,7 +99,7 @@ module.exports = {
 				client.userLevels._content[member1.id].messages = newTotal;
 				data.forEach((x) => newData.push([x[0], (x[1] + (newTotal - oldTotal))]));
 				fs.writeFileSync(require('node:path').join(__dirname, '../databases/dailyMsgs.json'), JSON.stringify(newData));
-				interaction.reply(`\`${member1.id}\` set to \`${total}\``)
+				interaction.reply(`\`${member1.id}\` set to \`${newTotal}\``)
 				break;
 		}
 	},

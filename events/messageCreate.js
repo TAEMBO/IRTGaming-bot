@@ -157,9 +157,9 @@ module.exports = {
 		};
 	
 		if (client.config.botSwitches.autoResponses && !automodded) { // auto responses
-			/*if (message.content.toLowerCase().includes('morning all') || message.content.toLowerCase().includes('morning everyone')) {
+			if (message.content.toLowerCase().includes('morning all') || message.content.toLowerCase().includes('morning everyone') && message.channel.id == '552565546093248512') {
 			message.reply({content: `Morning ${message.member.displayName}!`, allowedMentions: {repliedUser: false}})
-			}*/
+			}
 			if (message.content.toLowerCase().includes('giants moment')) {
 				message.react('™️');
 			}

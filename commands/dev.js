@@ -1,5 +1,6 @@
 const {SlashCommandBuilder} = require('discord.js');
 const util = require('util');
+const fs = require('node:fs')
 const removeUsername = (text) => {
 	let matchesLeft = true;
 	const array = text.split('\\');
@@ -57,7 +58,7 @@ module.exports = {
 				break;
 			case 'role':
 				const role = interaction.options.getRole("role");
-				const member = interaction.options.getMember("member");
+				const member0 = interaction.options.getMember("member");
 				let err = false;
 
 				if (member.roles.cache.has(role.id)) {
@@ -87,6 +88,19 @@ module.exports = {
 				const msg = await interaction.reply({content: "Pulling from repo...", fetchReply: true});
 				require("child_process").exec("git pull");
 				setTimeout(()=> {msg.edit({content: 'Restarting...'}).then(()=> eval(process.exit(-1)))}, 1000)
+				break;
+			case 'increment':
+				const data = require('../databases/dailyMsgs.json');
+				const member1 = interaction.options.getMember('member');
+				const total = interaction.options.getInteger('total');
+				console.log(data);
+				const newData = [];
+
+				client.userLevels._content[member1.id].messages = total;
+				data.forEach((x) => newData.push([x[0], (x[1] + total)]));
+				fs.writeFileSync(require('node:path').join(__dirname, '../databases/dailyMsgs.json'), JSON.stringify(newData));
+				console.log(newData);
+				interaction.reply(`\`${member1.id}\` set to \`${total}\``)
 				break;
 		}
 	},
@@ -136,7 +150,7 @@ module.exports = {
 				.setName("number")
 				.setDescription("The number of data points to pull")
 				.setRequired(true))
-	)
+		)
 		.addSubcommand((optt)=>optt
 			.setName('decrement')
 			.setDescription('Decrement playerTimes data')
@@ -147,6 +161,18 @@ module.exports = {
 			.addIntegerOption((opt)=>opt
 				.setName("time")
 				.setDescription("The minutes to decrement")
+				.setRequired(true))
+		)
+		.addSubcommand((optt)=>optt
+		.setName('increment')
+		.setDescription('Increment ranking stats')
+			.addUserOption((opt)=>opt
+				.setName("member")
+				.setDescription("The member to increment")
+				.setRequired(true))
+			.addIntegerOption((opt)=>opt
+				.setName("total")
+				.setDescription("Their new message total")
 				.setRequired(true))
 		)
 };

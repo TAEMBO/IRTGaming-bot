@@ -161,7 +161,7 @@ module.exports = {
 				return interaction.reply(`${pronounBool('You', 'They')} currently don't have a level, send some messages to level up.`)
 			}
 		
-			const index = Object.entries(client.userLevels._content).sort((a, b) => b[1].messages - a[1].messages).map(x => x[0]).indexOf(interaction.user.id) + 1;
+			const index = Object.entries(client.userLevels._content).sort((a, b) => b[1].messages - a[1].messages).map(x => x[0]).indexOf(member.id) + 1;
 			const memberDifference = information.messages - client.userLevels.algorithm(information.level);
 			const levelDifference = client.userLevels.algorithm(information.level+1) - client.userLevels.algorithm(information.level);
 	

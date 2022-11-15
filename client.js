@@ -168,7 +168,7 @@ class YClient extends Client {
             }
         }
 
-        const Whitelist = ["SpongeBoi69", "Kazmerev", "Hungarian__0101", "Sersha", "Helper B", "777Stupid", "Andyk1978", "Andrewk1978", "OmgxBeckyx", "Stacey"]
+        const Whitelist = ["SpongeBoi69", "Kazmerev", "Hungarian__0101", "Sersha", "Helper B", "777Stupid", "Andyk1978", "Andrewk1978", "OmgxBeckyx", "Stacey", "Pickle"]
         const wlPing = ["238248487593050113", "267270757539643402", "642735886953611265"];
         const wlChannel = this.channels.resolve(this.config.mainServer.channels.watchlist);
         const logChannel = this.channels.resolve(this.config.mainServer.channels.fslogs)
@@ -180,14 +180,14 @@ class YClient extends Client {
         let FScsg;
     
         try { // Fetch dedicated-server-stats.json
-            FSdss = await this.axios.get(serverURLdss, {timeout: 5000});
+            FSdss = await this.axios.get(serverURLdss, {timeout: 10000});
         } catch (err) {
             error = true
             console.log(`\x1b[36m[${this.moment().format('HH:mm:ss')}]`, `\x1b[31m${serverAcro} dss fail`)
         }
 
         try { // Fetch dedicated-server-savegame.xml
-            await this.axios.get(serverURLcsg, {timeout: 5000}).then((xml) => { // convert
+            await this.axios.get(serverURLcsg, {timeout: 10000}).then((xml) => { // convert
                 FScsg = this.xjs.xml2js(xml.data, {compact: true, spaces: 2}).careerSavegame;
             });
         } catch (err) {

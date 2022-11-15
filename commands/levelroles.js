@@ -147,7 +147,7 @@ module.exports = {
 			// fetch user or user interaction sender
 			const member = interaction.options.getMember("member") ?? interaction.member;
 
-			const embed = new client.embed().setColor(client.config.embedColor)
+			const embed = new client.embed().setColor(member.displayColor)
 
 			// information about users progress on level roles
 			const information = client.userLevels._content[member.user.id];

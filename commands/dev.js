@@ -93,7 +93,7 @@ module.exports = {
 				const data = require('../databases/dailyMsgs.json');
 				const member1 = interaction.options.getMember('member');
 				const newTotal = interaction.options.getInteger('total');
-				const oldTotal = client.userLevel._content[member1.id].messages;
+				const oldTotal = client.userLevels._content[member1.id].messages;
 				const newData = [];
 
 				client.userLevels._content[member1.id].messages = newTotal;

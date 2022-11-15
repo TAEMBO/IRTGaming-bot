@@ -92,14 +92,13 @@ module.exports = {
 			case 'increment':
 				const data = require('../databases/dailyMsgs.json');
 				const member1 = interaction.options.getMember('member');
-				const total = interaction.options.getInteger('total');
-				console.log(data);
+				const newTotal = interaction.options.getInteger('total');
+				const oldTotal = client.userLevel._content[member1.id].messages;
 				const newData = [];
 
-				client.userLevels._content[member1.id].messages = total;
-				data.forEach((x) => newData.push([x[0], (x[1] + total)]));
+				client.userLevels._content[member1.id].messages = newTotal;
+				data.forEach((x) => newData.push([x[0], (x[1] + (newTotal - oldTotal))]));
 				fs.writeFileSync(require('node:path').join(__dirname, '../databases/dailyMsgs.json'), JSON.stringify(newData));
-				console.log(newData);
 				interaction.reply(`\`${member1.id}\` set to \`${total}\``)
 				break;
 		}

@@ -167,7 +167,7 @@ Object.assign(client.userLevels, {
 				}
 			} else if (data.messages >= this.algorithm(data.level+1)) {
 				this._content[userid].level++;
-				client.channels.resolve(client.config.mainServer.channels.testing_zone).send({content: `Well done <@${userid}>, you made it to **level ${data.level}**!`})
+				client.channels.resolve(client.config.mainServer.channels.botcommands).send({content: `Well done <@${userid}>, you made it to **level ${data.level}**!`})
 			}
 		} else  {
 			this._content[userid] = {messages: 1, level: 0};

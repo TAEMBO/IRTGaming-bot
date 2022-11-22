@@ -1,5 +1,4 @@
 @echo off
 cls
-color 4
-node sharding.js
+pm2 start index.ts -i 1 --name IRTBot
 pause

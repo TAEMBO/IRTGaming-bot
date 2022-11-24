@@ -39,21 +39,22 @@ client.on("ready", async () => {
 });
 
 // error handlers
-function logError(error: Error, notify: boolean) {
+function logError(error: Error) {
+	const notify = true;
 	console.log(error);
 	if (notify) (client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel).send({content: `<@${client.config.devWhitelist[0]}>`, embeds: [new client.embed().setTitle("Error Caught!").setColor("#420420").setDescription(`**Error:** \`${error.message}\`\n\n**Stack:** \`${`${error.stack}`.slice(0, 2500)}\``)]});
 }
 process.on('unhandledRejection', async (error: Error) => {
-	logError(error, true);
+	logError(error);
 });
 process.on('uncaughtException', async (error: Error) => {
-	logError(error, true);
+	logError(error);
 });
 process.on('error', async (error: Error) => {
-	logError(error, true);
+	logError(error);
 });
 client.on('error', async (error: Error) => {
-	logError(error, true);
+	logError(error);
 });
 
 const p = path.join(__dirname, './databases/reminders.json');

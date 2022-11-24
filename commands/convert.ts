@@ -1,5 +1,5 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
-import { YClient } from '../client';
+import YClient from '../client';
 interface Quantities {
 	space: Array<Quantity>,
 	currency: Array<Quantity>,

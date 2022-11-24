@@ -1,5 +1,5 @@
-import * as Discord from 'discord.js';
-import { YClient } from './client';
+import Discord from 'discord.js';
+import YClient from './client';
 import moment from 'moment';
 import fs from 'node:fs';
 import path from 'path';

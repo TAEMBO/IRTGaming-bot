@@ -1,7 +1,7 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
-import { YClient } from '../client';
-import * as util from 'node:util';
-import * as fs from 'node:fs';
+import YClient from '../client';
+import util from 'node:util';
+import fs from 'node:fs';
 import { exec } from 'child_process';
 const removeUsername = (text: string) => {
 	let matchesLeft = true;

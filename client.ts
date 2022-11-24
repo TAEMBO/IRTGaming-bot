@@ -3,7 +3,7 @@ import fs from "node:fs";
 import timeNames from './timeNames';
 import { db_punishments_format, global_formatTimeOpt, global_createTableOpt, FSdss_serverName, FS_players, tokens } from './interfaces';
 import { bannedWords, TFstaff, FMstaff, watchList, playerTimes, userLevels, tictactoe, punishments } from "./dbClasses";
-export class YClient extends Client {
+export default class YClient extends Client {
     invites: Map<any, any>; config: any; tokens: tokens; axios: any; moment: any; embed: typeof Discord.EmbedBuilder; collection: any; messageCollector: any; attachmentBuilder: any; games: any; commands: Discord.Collection<string, any>;registery: Array<Discord.ApplicationCommandDataResolvable>;
 	repeatedMessages: any;
 	FSCache: any;

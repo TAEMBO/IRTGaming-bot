@@ -1,5 +1,5 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
-import { YClient } from '../client';
+import YClient from '../client';
 import path from 'node:path';
 import fs from 'node:fs';
 const ms = require('ms');

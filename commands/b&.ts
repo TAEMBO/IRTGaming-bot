@@ -1,5 +1,5 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
-import { YClient } from '../client';
+import YClient from '../client';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
         const member = interaction.options.getUser("user") as Discord.User;

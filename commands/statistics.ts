@@ -1,5 +1,5 @@
 import Discord, { SlashCommandBuilder, version } from 'discord.js';
-import { YClient } from '../client';
+import YClient from '../client';
 import si from 'systeminformation';
 import os from 'node:os';
 export default {

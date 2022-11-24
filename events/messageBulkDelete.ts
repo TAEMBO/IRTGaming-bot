@@ -1,5 +1,5 @@
 import Discord, { Message, Snowflake } from 'discord.js';
-import { YClient } from '../client';
+import YClient from '../client';
 
 export default {
     name: "messageDeleteBulk",

@@ -1,5 +1,5 @@
 import Discord, { SlashCommandBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } from 'discord.js';
-import { YClient } from '../client';
+import YClient from '../client';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
         if(!interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager) && !interaction.member.roles.cache.has(client.config.mainServer.roles.mfmanager) && !interaction.member.roles.cache.has(client.config.mainServer.roles.mffarmowner)) return client.youNeedRole(interaction, "mffarmowner");

@@ -4,12 +4,7 @@ import YClient from "../client";
 export default {
     name: "messageUpdate",
     execute: async (client: YClient, oldMsg: Discord.Message, newMsg: Discord.Message) => {
-        if (!client.config.botSwitches.logs) return;
-        if (oldMsg.author == null) return;
-        if (oldMsg?.author.bot) return;
-        if (oldMsg.partial) return;
-        if (newMsg.partial) return;
-        if (!newMsg.member) return;
+        if (!client.config.botSwitches.logs || oldMsg.author.bot || oldMsg.partial || newMsg.partial || !newMsg.member || oldMsg.content.length == 0) return;
         const msgarr = newMsg.content.toLowerCase().split(' ');
         if (client.bannedWords._content.some((word: string) => msgarr.includes(word)) && (!client.isMPStaff(newMsg.member) && !client.hasModPerms(newMsg.member))) newMsg.delete();
         if (newMsg.content === oldMsg.content) return;

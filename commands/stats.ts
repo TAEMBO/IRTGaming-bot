@@ -216,6 +216,7 @@ export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
         if (['891791005098053682', '729823615096324166'].includes((interaction.channel as Discord.TextChannel).id) && !client.isMPStaff(interaction.member)) return interaction.reply({content: 'This command has [restrictions](https://discord.com/channels/552565546089054218/891791005098053682/991799952084828170) set, please use <#552583841936834560> for `/stats` commands.', ephemeral: true}); 
         const subCmd = interaction.options.getSubcommand();
+        let failedFooter: Array<string> = [];
 
         if (subCmd === 'all') {
             await interaction.deferReply()
@@ -229,20 +230,24 @@ export default {
                 });
             } catch (err) {
                 console.log(`stats all; PS failed`)
+                failedFooter.push('Failed to fetch PS');
+
             }
             try {
                 await client.axios.get(client.tokens.pg.dss, {timeout: 3000}).then(async (x: FSdss_serverName)=>{
                     await FSstatsAll(client, x, embed, totalCount)
                 });
             } catch (err) {
-                console.log(`stats all; PG failed`)
+                console.log(`stats all; PG failed`);
+                failedFooter.push('Failed to fetch PG');
             }
             try {
                 await client.axios.get(client.tokens.mf.dss, {timeout: 3000}).then(async (x: FSdss_serverName)=>{
                     await FSstatsAll(client, x, embed, totalCount)
                 });
             } catch (err) {
-                console.log(`stats all; MF failed`)
+                console.log(`stats all; MF failed`);
+                failedFooter.push('Failed to fetch MF');
             }
 
             if (totalCount.length == 0) {
@@ -252,6 +257,7 @@ export default {
                      return previousValue + currentValue;
                  });
             }
+            if (failedFooter.length != 0) { embed.setFooter({text: failedFooter.join(', ')}) }
 
             embed.setTitle(`All Servers: ${sum} online`)
             interaction.editReply({embeds: [embed]});

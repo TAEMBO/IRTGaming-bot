@@ -6,7 +6,7 @@ export default {
     execute: async (client: YClient, oldMember: Discord.GuildMember, newMember: Discord.GuildMember) => {
         if (oldMember.guild.id != client.config.mainServer.id) return;
         if (!client.config.botSwitches.logs) return;
-        const channel = client.channels.resolve(client.config.mainServer.channels.modlogs) as Discord.TextChannel
+        const channel = client.channels.resolve(client.config.mainServer.channels.botlogs) as Discord.TextChannel
 
         if (oldMember.nickname != newMember.nickname) {
             const embed = new client.embed().setColor(client.config.embedColor).setTitle(`Member Nickname Update: ${newMember.user.tag}`).setDescription(`<@${newMember.user.id}>\n\`${newMember.user.id}\``).setThumbnail(newMember.user.displayAvatarURL({ extension: 'png', size: 2048}))

@@ -43,7 +43,7 @@ export default {
             .setColor(client.config.embedColorGreen)
             .setTimestamp()
             .setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048}));
-         (client.channels.resolve(client.config.mainServer.channels.modlogs) as Discord.TextChannel).send({embeds: [embed1]})
+         (client.channels.resolve(client.config.mainServer.channels.botlogs) as Discord.TextChannel).send({embeds: [embed1]})
  
         
     }

@@ -6,7 +6,7 @@ export default {
     async execute(client: YClient, oldState: Discord.VoiceState, newState: Discord.VoiceState) {
         if (!newState.member) return;
         if (!client.config.botSwitches.logs) return;
-        const channel = client.channels.resolve(client.config.mainServer.channels.modlogs) as Discord.TextChannel;
+        const channel = client.channels.resolve(client.config.mainServer.channels.botlogs) as Discord.TextChannel;
         const embed = new client.embed().setTimestamp().setDescription(`<@${newState.member.user.id}>\n\`${newState.member.user.id}\``);
         embed.setThumbnail(newState.member.user.avatarURL({ extension: 'png', size: 2048}) || newState.member.user.defaultAvatarURL)
         if (oldState.channelId == null && newState.channelId != null) { // Joined VC

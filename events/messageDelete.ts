@@ -5,7 +5,7 @@ export default {
     name: "messageDelete",
     execute: async (client: YClient, msg: Discord.Message) => {
         if (!client.config.botSwitches.logs) return;
-        const channel = client.channels.resolve(client.config.mainServer.channels.modlogs) as Discord.TextChannel;
+        const channel = client.channels.resolve(client.config.mainServer.channels.botlogs) as Discord.TextChannel;
         if (msg.partial) return;
         if (msg.author.bot) return;
         const embed = new client.embed()

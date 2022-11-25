@@ -14,6 +14,6 @@ export default {
             .setAuthor({name: `Author: ${oldMsg.author.tag} (${oldMsg.author.id})`, iconURL: `${oldMsg.author.displayAvatarURL()}`})
             .setColor(client.config.embedColor)
             .setTimestamp();
-        (client.channels.resolve(client.config.mainServer.channels.modlogs) as Discord.TextChannel).send({embeds: [embed], components: [new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder().setStyle(5).setURL(`${oldMsg.url}`).setLabel("Jump to message"))]})
+        (client.channels.resolve(client.config.mainServer.channels.botlogs) as Discord.TextChannel).send({embeds: [embed], components: [new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder().setStyle(5).setURL(`${oldMsg.url}`).setLabel("Jump to message"))]})
     }
 }

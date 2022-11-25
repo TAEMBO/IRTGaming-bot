@@ -18,7 +18,7 @@ export default {
             embed.setColor(client.config.embedColorRed);
             embed.setTimestamp();
             embed.setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048}) as string);
-         (client.channels.resolve(client.config.mainServer.channels.modlogs) as Discord.TextChannel).send({embeds: [embed]});
+         (client.channels.resolve(client.config.mainServer.channels.botlogs) as Discord.TextChannel).send({embeds: [embed]});
          delete client.userLevels._content[member.user.id];
     }
 }

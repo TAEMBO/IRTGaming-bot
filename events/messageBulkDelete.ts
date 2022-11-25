@@ -4,7 +4,7 @@ import YClient from '../client';
 export default {
     name: "messageDeleteBulk",
     execute: async (client: YClient, messages: Discord.Collection<Snowflake, Message>) => {
-        const channel = client.channels.resolve(client.config.mainServer.channels.modlogs) as Discord.TextChannel;
+        const channel = client.channels.resolve(client.config.mainServer.channels.botlogs) as Discord.TextChannel;
          if (!client.config.botSwitches.logs) return;
          let msgArray: Array<string> = [];
          messages.forEach((e)=>{

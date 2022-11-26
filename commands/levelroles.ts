@@ -166,7 +166,7 @@ export default {
 			const memberDifference = information.messages - client.userLevels.algorithm(information.level);
 			const levelDifference = client.userLevels.algorithm(information.level+1) - client.userLevels.algorithm(information.level);
 	
-			embed.setThumbnail(member.user.avatarURL({ extension: 'png', size: 256}) || member.user.defaultAvatarURL)
+			embed.setThumbnail(member.user.avatarURL({ extension: 'png', size: 2048}) || member.user.defaultAvatarURL)
 			embed.setAuthor({name: `Ranking for ${member.user.tag}`})
 			embed.setTitle(`Level: **${information.level}**\nRank: **${index ? '#' + index  : 'last'}**\nProgress: **${information.messages - client.userLevels.algorithm(information.level)}/${client.userLevels.algorithm(information.level+1) - client.userLevels.algorithm(information.level)} (${(memberDifference/levelDifference*100).toFixed(2)}%)**\nTotal: **${information.messages}**`);
 			interaction.reply({embeds: [embed]}); // compile message and send

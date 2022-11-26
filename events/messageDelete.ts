@@ -3,20 +3,24 @@ import YClient from '../client';
 
 export default {
     name: "messageDelete",
-    execute: async (client: YClient, msg: Discord.Message) => {
-        if (!client.config.botSwitches.logs) return;
-        const channel = client.channels.resolve(client.config.mainServer.channels.botlogs) as Discord.TextChannel;
-        if (msg.partial) return;
-        if (msg.author.bot) return;
+    execute: async (client: YClient, message: Discord.Message) => {
+        if (!client.config.botSwitches.logs || message.partial || message.author.bot) return;
+        const logChannel = client.channels.resolve(client.config.mainServer.channels.botlogs) as Discord.TextChannel;
+        const attachments: Array<string> = [];
+
         const embed = new client.embed()
-            .setTitle("Message Deleted!")
-            .setDescription(`<@${msg.author.id}>\nContent:\n\`\`\`\n${msg.content}\n\`\`\`\nChannel: <#${msg.channel.id}>\nSent at: <t:${Math.round(msg.createdTimestamp / 1000)}>`)
-            .setAuthor({name: `Author: ${msg.author.tag} (${msg.author.id})`, iconURL: `${msg.author.displayAvatarURL()}`})
+            .setTitle(`Message Deleted: ${message.author.tag}`)
+            .setDescription(`<@${message.author.id}>\n\`${message.author.id}\``)
+            .setThumbnail(message.author.displayAvatarURL({ extension: 'png', size: 2048}) || message.author.defaultAvatarURL)
             .setColor(client.config.embedColorRed)
             .setTimestamp()
-            channel.send({embeds: [embed]})
-        if (msg.attachments?.first()?.width && ['png', 'jpeg', 'jpg', 'gif'].some(x => ((msg.attachments.first() as Discord.Attachment).name as string).endsWith(x))) {
-            channel.send({files: [msg.attachments?.first() as Discord.Attachment]})
-    }
+        if (message.content.length != 0) embed.addFields({name: '🔹 Content', value: `\`\`\`\n${message.content}\n\`\`\``});
+        embed.addFields(
+            {name: '🔹 Channel', value: `<#${message.channel.id}>`},
+            {name: '🔹 Sent At', value: `<t:${Math.round(message.createdTimestamp / 1000)}>\n<t:${Math.round(message.createdTimestamp / 1000)}:R>`}
+        )
+        message.attachments.forEach((x) => attachments.push(x.url));
+
+        logChannel.send({embeds: [embed], files: attachments});
    } 
   }

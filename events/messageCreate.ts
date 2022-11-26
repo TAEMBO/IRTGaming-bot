@@ -1,17 +1,16 @@
-import Discord, { ChannelType } from 'discord.js';
+import Discord from 'discord.js';
 import YClient from '../client';
 
 export default {
     name: "messageCreate",
     execute: async (client: YClient, message: Discord.Message) => {
-    	if (!client.config.botSwitches.commands && !client.config.devWhitelist.includes(message.author.id)) return; // bot is being run in dev mode and a non eval whitelisted user sent a message. ignore the message.
-		if (message.partial) return;
-		if (message.author.bot) return;
-		if (message.channel.type === ChannelType.DM) {
+    	if ((!client.config.botSwitches.commands && !client.config.devWhitelist.includes(message.author.id)) || message.partial || message.author.bot) return;
+		//   ^^^     Bot is set to ignore commands and non-dev sent a message, ignore the message.      ^^^
+
+		if (message.channel.type == 1) {
     	    if (client.games.some((x: string) => x === message.author.tag)) return;
     	    const channel = client.channels.cache.get(client.config.mainServer.channels.testing_zone) as Discord.TextChannel;
-			const irt = client.guilds.cache.get(client.config.mainServer.id);
-    	    const guildMemberObject = irt?.members.cache.get(message.author.id) as Discord.GuildMember;
+    	    const guildMemberObject = (client.guilds.cache.get(client.config.mainServer.id) as Discord.Guild).members.cache.get(message.author.id) as Discord.GuildMember;
     	    const embed = new client.embed()
     	        .setTitle('Forwarded DM Message')
     	        .setDescription(`<@${message.author.id}>`)

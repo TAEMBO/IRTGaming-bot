@@ -4,8 +4,9 @@ import YClient from '../client';
 export default {
     name: "guildMemberAdd",
     execute: async (client: YClient, member: Discord.GuildMember) => {
-        if (member.partial) return;
+        if (!client.config.botSwitches.logs || member.partial) return;
 
+        // Welcome message
         const index = member.guild.memberCount;
         const suffix = ((index) => {
             const numbers = index.toString().split('').reverse(); // eg. 1850 -> [0, 5, 8, 1]
@@ -19,7 +20,7 @@ export default {
             }
         })(index);
 
-        const embed0: Discord.EmbedBuilder = new client.embed()
+        const embed0 = new client.embed()
             .setTitle(`Welcome, ${member.user.tag}!`)
             .setColor(client.config.embedColor)
             .setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048}) || member.user.defaultAvatarURL)
@@ -28,22 +29,24 @@ export default {
             .setFooter({text: `${index}${suffix} member`});
         (client.channels.resolve(client.config.mainServer.channels.welcome) as Discord.TextChannel).send({content: `<@${member.user.id}>`, embeds: [embed0]})
 
-        if (!client.config.botSwitches.logs) return;
+        // Normal join log
+        const logChannel = client.channels.resolve(client.config.mainServer.channels.botlogs) as Discord.TextChannel;
         const oldInvites = client.invites;
         const newInvites = await member.guild.invites.fetch();
         const usedInvite = newInvites.find((inv: any) => oldInvites.get(inv.code)?.uses < inv.uses);
+
         newInvites.forEach((inv: any) => client.invites.set(inv.code, {uses: inv.uses, creator: inv.inviter.id}));
  
-         const embed1 = new client.embed()
+        const embed1 = new client.embed()
             .setTitle(`Member Joined: ${member.user.tag}`)
             .setDescription(`<@${member.user.id}>\n\`${member.user.id}\``)
             .addFields(
-            {name: '🔹 Account Creation Date', value: `<t:${Math.round(member.user.createdTimestamp / 1000)}>\n<t:${Math.round(member.user.createdTimestamp / 1000)}:R>`},
-            {name: '🔹Invite Data:', value: usedInvite ? `Invite: \`${usedInvite.code}\`\nCreated by: **${usedInvite.inviter?.tag}**` : 'I couldn\'t find out how they joined!'})
+                {name: '🔹 Account Creation Date', value: `<t:${Math.round(member.user.createdTimestamp / 1000)}>\n<t:${Math.round(member.user.createdTimestamp / 1000)}:R>`},
+                {name: '🔹 Invite Data', value: usedInvite ? `Invite: \`${usedInvite.code}\`\nCreated by: **${usedInvite.inviter?.tag}**` : 'No Data found'})
             .setColor(client.config.embedColorGreen)
             .setTimestamp()
             .setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048}));
-         (client.channels.resolve(client.config.mainServer.channels.botlogs) as Discord.TextChannel).send({embeds: [embed1]})
+        logChannel.send({embeds: [embed1]})
  
         
     }

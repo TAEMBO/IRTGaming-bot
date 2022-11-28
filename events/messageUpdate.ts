@@ -4,7 +4,9 @@ import YClient from "../client";
 export default {
     name: "messageUpdate",
     execute: async (client: YClient, oldMsg: Discord.Message, newMsg: Discord.Message) => {
-        if (!client.config.botSwitches.logs || oldMsg.author.bot || oldMsg.partial || newMsg.partial || !oldMsg.member || oldMsg.content.length == 0 || newMsg.content == oldMsg.content) return;
+        await oldMsg.fetch();
+        await newMsg.fetch();
+        if (!client.config.botSwitches.logs || newMsg.author.bot || oldMsg.partial || newMsg.partial || !oldMsg.member || oldMsg.content.length == 0 || newMsg.content == oldMsg.content) return;
         const logChannel = client.channels.resolve(client.config.mainServer.channels.botlogs) as Discord.TextChannel;
         const msgarr = newMsg.content.toLowerCase().split(' ');
 

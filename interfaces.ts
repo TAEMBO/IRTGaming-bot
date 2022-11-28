@@ -1,3 +1,4 @@
+import Discord from 'discord.js';
 export interface global_formatTimeOpt {
     longNames: boolean,
     commas: boolean
@@ -22,8 +23,7 @@ export interface db_tictactoe_tttGame {
 }
 export interface db_punishments_passthruOpt {
 	time?: string,
-	reason?: string,
-	interaction?: any
+	interaction?: Discord.ChatInputCommandInteraction<"cached">
 }
 export interface db_punishments_format {
     id: number;
@@ -32,7 +32,7 @@ export interface db_punishments_format {
     moderator: string;
     expired?: boolean;
     time: number;
-    reason?: string;
+    reason: string;
     endTime?: number;
     cancels?: number;
     duration?: number;

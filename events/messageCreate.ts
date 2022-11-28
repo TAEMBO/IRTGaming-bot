@@ -44,7 +44,7 @@ export default {
 			message.channel.awaitMessages({ filter, max: 1, time: 60000, errors: ["time"]}).then(async collected => {
 				console.log(`[${client.moment().format('HH:mm:ss')}]`, `Received "y" from ${(collected.first() as Discord.Message).author.tag}, indicating to mute`);
 				try {
-					const muteResult = await client.punishments.addPunishment("mute", message.member, { time: "5m", reason: "Automod; misuse of staff ping"}, (collected.first() as Discord.Message).author.id);
+					const muteResult = await client.punishments.addPunishment('mute', { time: '5m' }, (collected.first() as Discord.Message).author.id, 'Automod; Misuse of staff ping', message.author, message.member as Discord.GuildMember);
 				} catch (error) {
 					console.log(`[${client.moment().format('HH:mm:ss')}]`, `Muting failed cuz:`, error);
 				}
@@ -96,7 +96,7 @@ export default {
 				// if a spammed message exists;
 				if (spammedMessage) {
 					// mute
-					const muteResult = await client.punishments.addPunishment("mute", message.member, { reason: "Automod; banned words", time: '30m' }, (client.user as Discord.User).id);
+					const muteResult = await client.punishments.addPunishment('mute', { time: '30m' }, (client.user as Discord.User).id, 'Automod; Banned words', message.author, message.member as Discord.GuildMember);
 
 					// and clear their list of long messages
 					delete client.repeatedMessages[message.author.id];
@@ -137,7 +137,7 @@ export default {
 				// if a spammed message exists;
 				if (spammedMessage) {
 					// mute
-					const muteResult = await client.punishments.addPunishment("mute", message.member, { reason: "Automod; Discord advertisement", time: '1h' }, (client.user as Discord.User).id);
+					const muteResult = await client.punishments.addPunishment('mute', { time: '1h' }, (client.user as Discord.User).id, 'Automod; Discord advertisement', message.author, message.member as Discord.GuildMember);
 
 					// and clear their list of long messages
 					delete client.repeatedMessages[message.author.id];

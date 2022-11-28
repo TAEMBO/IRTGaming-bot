@@ -342,48 +342,19 @@ export default class YClient extends Client {
     
         return rows.join('\n');
     }
-    makeModlogEntry(data: db_punishments_format, client: YClient) {
-        const cancels = data.cancels ? client.punishments._content.find((x: db_punishments_format) => x.id === data.cancels) : null;
-    
-        // format data into embed
-        const embed = new this.embed()
-            .setTitle(`${this.formatPunishmentType(data, client, cancels)} | Case #${data.id}`)
-            .addFields(
-            {name: '🔹 User', value: `<@${data.member}> \`${data.member}\``, inline: true},
-            {name: '🔹 Moderator', value: `<@${data.moderator}> \`${data.moderator}\``, inline: true},
-            {name: '\u200b', value: '\u200b', inline: true},
-            {name: '🔹 Reason', value: `\`${data.reason || 'unspecified'}\``, inline: true})
-            .setColor(this.config.embedColor)
-            .setTimestamp(data.time)
-        if (data.duration) {
-            embed.addFields(
-            {name: '🔹 Duration', value: client.formatTime(data.duration, 100), inline: true},
-            {name: '\u200b', value: '\u200b', inline: true}
-            )
-        }
-        if (data.cancels) embed.addFields({name: '🔹 Overwrites', value: `This case overwrites Case #${cancels.id} \`${cancels.reason}\``});
-    
-        // send embed in modlog channel
-        (client.channels.cache.get(client.config.mainServer.channels.staffreports) as Discord.TextChannel).send({embeds: [embed]});
-    };
     async punish(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">, type: string) {
-        let result: any;
-        if (!client.hasModPerms(interaction.member as Discord.GuildMember)) return client.youNeedRole(interaction, "mod");
-        if (type !== ('warn' || 'mute') && (interaction.member as Discord.GuildMember).roles.cache.has(client.config.mainServer.roles.helper)) return client.youNeedRole(interaction, "mod");
-        const time = interaction.options.getString("time") as string;
-        const reason = interaction.options.getString("reason") ?? "None";
-        if (type == 'ban') {
-            const user = interaction.options.getUser('member') as Discord.User;
-            if (interaction.user.id == user.id) return interaction.reply(`You cannot ${type} yourself.`);
-            result = await client.punishments.addPunishment(type, user , { time, reason, interaction }, interaction.user.id);
-        } else {
-            const member = interaction.options.getMember("member") as Discord.GuildMember;
-            if (interaction.user.id == member.id) return interaction.reply(`You cannot ${type} yourself.`)
-            if (client.hasModPerms(member)) return interaction.reply(`You cannot ${type} another staff member.`);
-            result = await client.punishments.addPunishment(type, member, { time, reason, interaction }, interaction.user.id);
-        }
-        (typeof result == 'string' ? interaction.reply({content: `${result}`}) : interaction.reply({embeds: [result]}))
-    };
+        if ((!client.hasModPerms(interaction.member as Discord.GuildMember)) || (!['warn', 'mute'].includes(type) && (interaction.member as Discord.GuildMember).roles.cache.has(client.config.mainServer.roles.helper))) return client.youNeedRole(interaction, "mod");
+
+        const time = interaction.options.getString('time') as string;
+        const reason = interaction.options.getString('reason') ?? 'Unspecified';
+        const GuildMember = interaction.options.getMember('member') as Discord.GuildMember;
+        const User = interaction.options.getUser('member') as Discord.User;
+
+        if (interaction.user.id == User.id) return interaction.reply(`You cannot ${type} yourself.`);
+        if (!GuildMember && type != 'ban') return interaction.reply(`You cannot ${type} someone who is not in the server.`);
+
+        await client.punishments.addPunishment(type, { time, interaction }, interaction.user.id, reason, User, GuildMember);
+    }
     async unPunish(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
         if (!client.hasModPerms(interaction.member as Discord.GuildMember)) return client.youNeedRole(interaction, "mod");
         const punishment = client.punishments._content.find((x: db_punishments_format) => x.id === interaction.options.getInteger("case_id"));

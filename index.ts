@@ -40,8 +40,8 @@ client.on("ready", async () => {
 
 // error handlers
 function logError(error: Error) {
-	console.log(error);
-	if (client.config.botSwitches.errorNotify) (client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel).send({content: `<@${client.config.devWhitelist[0]}>`, embeds: [new client.embed().setTitle("Error Caught!").setColor("#420420").setDescription(`**Error:** \`${error.message}\`\n\n**Stack:** \`${`${error.stack}`.slice(0, 2500)}\``)]});
+	console.log(error);                    // vvv I'm well aware my internet is bad, I don't need my own bot to rub it in
+	if (client.config.botSwitches.errorNotify || !error.message.includes('getaddrinfo ENOTFOUND discord.com')) (client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel).send({content: `<@${client.config.devWhitelist[0]}>`, embeds: [new client.embed().setTitle("Error Caught!").setColor("#420420").setDescription(`**Error:** \`${error.message}\`\n\n**Stack:** \`${`${error.stack}`.slice(0, 2500)}\``)]});
 }
 process.on('unhandledRejection', async (error: Error) => {
 	logError(error);

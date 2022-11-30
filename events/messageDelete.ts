@@ -14,7 +14,7 @@ export default {
             .setThumbnail(message.author.displayAvatarURL({ extension: 'png', size: 2048}) || message.author.defaultAvatarURL)
             .setColor(client.config.embedColorRed)
             .setTimestamp()
-        if (message.content.length != 0) embed.addFields({name: '🔹 Content', value: `\`\`\`\n${message.content}\n\`\`\``});
+        if (message.content.length != 0) embed.addFields({name: '🔹 Content', value: `\`\`\`\n${message.content.slice(0, 1000)}\n\`\`\``});
         embed.addFields(
             {name: '🔹 Channel', value: `<#${message.channel.id}>`},
             {name: '🔹 Sent At', value: `<t:${Math.round(message.createdTimestamp / 1000)}>\n<t:${Math.round(message.createdTimestamp / 1000)}:R>`}

@@ -23,7 +23,6 @@ async function FSstatsAll(client: YClient, serverName: FSdss_serverName, embed: 
 }
 
 async function FSstats(client: YClient, interaction: Discord.CommandInteraction, serverName: string, DBName: string) {
-    interaction.deferReply();
 
     const embed = new client.embed()
     const playerInfo: Array<string> = [];
@@ -210,7 +209,7 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
     embed.setImage('attachment://FSStats.png')
     embed.setColor(Color)
     embed.setDescription(FSserver.data.slots.used === 0 ? '*No players online*' : playerInfo.join("\n"));
-    interaction.editReply({embeds: [embed], files: [Image]})
+    interaction.reply({embeds: [embed], files: [Image]}).catch(() => interaction.channel.send({embeds: [embed], files: [Image]}));
 }
 
 export default {

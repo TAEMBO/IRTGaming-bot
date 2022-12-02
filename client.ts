@@ -357,11 +357,12 @@ export default class YClient extends Client {
     }
     async unPunish(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
         if (!client.hasModPerms(interaction.member as Discord.GuildMember)) return client.youNeedRole(interaction, "mod");
+        
         const punishment = client.punishments._content.find((x: db_punishments_format) => x.id === interaction.options.getInteger("case_id"));
         if (!punishment) return interaction.reply({content: "that isn't a valid case ID.", ephemeral: true});
         if (punishment.type !== ('warn' || 'mute') && (interaction.member as Discord.GuildMember).roles.cache.has(client.config.mainServer.roles.helper)) return client.youNeedRole(interaction, "mod");
-        const reason = interaction.options.getString("reason") ?? "None";
-        const unpunishResult = await client.punishments.removePunishment(punishment.id, interaction.user.id, reason);
-        interaction.reply(unpunishResult);
+        const reason = interaction.options.getString("reason") ?? 'Unspecified';
+        
+        await client.punishments.removePunishment(punishment.id, interaction.user.id, reason, interaction);
     };
 }

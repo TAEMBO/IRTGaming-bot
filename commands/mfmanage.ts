@@ -13,8 +13,7 @@ export default {
             const collector = (interaction.channel as Discord.TextChannel).createMessageComponentCollector({filter, max: 1, time: 30000});
             collector.on("collect", async (int: Discord.MessageComponentInteraction) => {
                 if(int.customId === "Yes"){
-                    member.roles.remove(Role);
-                    member.roles.remove(client.config.mainServer.roles.mfmember);
+                    member.roles.remove([Role, client.config.mainServer.roles.mfmember]);
                     int.update({embeds: [new client.embed().setDescription(`<@${member.user.id}> has been removed from the <@&${client.config.mainServer.roles.mfmember}> and <@&${Role}> roles.`).setColor(client.config.embedColor)], components: []})
                 } else if(int.customId === "No"){
                     int.update({embeds: [new client.embed().setDescription(`Command canceled`).setColor(client.config.embedColor)], components: []});
@@ -22,8 +21,7 @@ export default {
             });
         } else {
             if (interaction.member.roles.cache.has(client.config.mainServer.roles.mffarmowner) && !interaction.member.roles.cache.has(client.config.mainServer.roles.mfmanager) && !interaction.member.roles.cache.has(Role)) return interaction.reply('You cannot add users to a farm you do not own.')
-            member.roles.add(Role);
-            member.roles.add(client.config.mainServer.roles.mfmember);
+            member.roles.add([Role, client.config.mainServer.roles.mfmember]);
             interaction.reply({embeds: [new client.embed().setDescription(`<@${member.user.id}> has been given the <@&${client.config.mainServer.roles.mfmember}> and <@&${Role}> roles.`).setColor(client.config.embedColor)]});
         }
 	},

@@ -9,9 +9,9 @@ export default {
         const attachments: Array<string> = [];
 
         const embed = new client.embed()
-            .setTitle(`Message Deleted: ${message.author.tag}`)
+            .setTitle('Message Deleted')
             .setDescription(`<@${message.author.id}>\n\`${message.author.id}\``)
-            .setThumbnail(message.author.displayAvatarURL({ extension: 'png', size: 2048}) || message.author.defaultAvatarURL)
+            .setAuthor({name: message.author.tag, iconURL: message.author.displayAvatarURL({ extension: 'png', size: 128}) || message.author.defaultAvatarURL})
             .setColor(client.config.embedColorRed)
             .setTimestamp()
         if (message.content.length != 0) embed.addFields({name: '🔹 Content', value: `\`\`\`\n${message.content.slice(0, 1000)}\n\`\`\``});

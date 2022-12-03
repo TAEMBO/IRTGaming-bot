@@ -13,14 +13,14 @@ export default {
         if (client.bannedWords._content.some((word: string) => msgarr.includes(word)) && (!client.isMPStaff(oldMsg.member) && !client.hasModPerms(oldMsg.member))) newMsg.delete();
 
         const embed = new client.embed()
-            .setTitle(`Message Edited: ${oldMsg.author.tag}`)
+            .setTitle('Message Edited')
             .setDescription(`<@${oldMsg.author.id}>\n\`${oldMsg.author.id}\``)
             .addFields(
-                {name: '🔹 Old Content', value: `\`\`\`\n${oldMsg.content}\n\`\`\``},
-                {name: '🔹 New Content', value: `\`\`\`\n${newMsg.content}\n\`\`\``},
+                {name: '🔹 Old Content', value: `\`\`\`\n${oldMsg.content.slice(0, 1000)}\n\`\`\``},
+                {name: '🔹 New Content', value: `\`\`\`\n${newMsg.content.slice(0, 1000)}\n\`\`\``},
                 {name: '🔹 Channel', value: `<#${oldMsg.channel.id}>`}
             )
-            .setThumbnail(oldMsg.author.displayAvatarURL({ extension: 'png', size: 2048}) || oldMsg.author.defaultAvatarURL)
+            .setAuthor({name: newMsg.author.tag, iconURL: newMsg.author.displayAvatarURL({ extension: 'png', size: 128}) || newMsg.author.defaultAvatarURL})
             .setColor(client.config.embedColor)
             .setTimestamp();
         logChannel.send({embeds: [embed], components: [new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder().setStyle(5).setURL(`${oldMsg.url}`).setLabel("Jump to message"))]})

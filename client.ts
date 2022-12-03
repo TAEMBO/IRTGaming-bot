@@ -353,6 +353,7 @@ export default class YClient extends Client {
         if (interaction.user.id == User.id) return interaction.reply(`You cannot ${type} yourself.`);
         if (!GuildMember && type != 'ban') return interaction.reply(`You cannot ${type} someone who is not in the server.`);
 
+        await interaction.deferReply();
         await client.punishments.addPunishment(type, { time, interaction }, interaction.user.id, reason, User, GuildMember);
     }
     async unPunish(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {

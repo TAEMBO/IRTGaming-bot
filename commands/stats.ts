@@ -225,7 +225,7 @@ export default {
             let sum;
             
             try {
-                await client.axios.get(client.tokens.ps.dss, {timeout: 3000}).then(async (x: FSdss_serverName)=>{
+                await client.axios.get(client.tokens.test.dss, {timeout: 3000}).then(async (x: FSdss_serverName)=>{
                     await FSstatsAll(client, x, embed, totalCount)
                 });
             } catch (err) {
@@ -262,7 +262,7 @@ export default {
             embed.setTitle(`All Servers: ${sum} online`)
             interaction.editReply({embeds: [embed]});
         } else if (subCmd === 'ps') {
-            FSstats(client, interaction, client.tokens.ps.dss, 'PSPlayerData');
+            FSstats(client, interaction, client.tokens.test.dss, 'PSPlayerData');
         } else if (subCmd === 'pg') {
             FSstats(client, interaction, client.tokens.pg.dss, 'PGPlayerData');
         } else if (subCmd === 'mf') {

@@ -1,7 +1,7 @@
 import Discord, { Client, GatewayIntentBits, Partials } from "discord.js";
 import fs from "node:fs";
 import timeNames from './timeNames';
-import { db_punishments_format, global_formatTimeOpt, global_createTableOpt, FSdss_serverName, FS_players, tokens } from './interfaces';
+import { db_punishments_format, global_formatTimeOpt, global_createTableOpt, FSdss_serverName, FS_players, tokens, FS_data, FS_careerSavegame } from './interfaces';
 import { bannedWords, TFstaff, FMstaff, watchList, playerTimes, userLevels, tictactoe, punishments } from "./dbClasses";
 export default class YClient extends Client {
     invites: Map<any, any>; config: any; tokens: tokens; axios: any; moment: any; embed: typeof Discord.EmbedBuilder; collection: any; messageCollector: any; attachmentBuilder: any; games: any; commands: Discord.Collection<string, any>;registery: Array<Discord.ApplicationCommandDataResolvable>;
@@ -123,26 +123,59 @@ export default class YClient extends Client {
             DB.push(slotUsage);
             fs.writeFileSync(__dirname + `/databases/${serverAcro}PlayerData.json`, JSON.stringify(DB));
         }
-        function adminCheck(client: YClient, ArrayNew: Array<FS_players>, ArrayOld: Array<FS_players>, Whitelist: Array<string>) {
+        function wlEmbed(client: YClient, playerName: string, joinLog: boolean, wlReason?: string) {
+            const embed = new client.embed()
+                .setTitle('WATCHLIST')
+                .setDescription(`\`${playerName}\` ${joinLog ? 'joined' : 'left'} **${serverAcro}** at <t:${now}:t>`)
+            if (joinLog) {
+                embed.setColor(client.config.embedColorGreen)
+                embed.setFooter({text: `Reason: ${wlReason}`})
+            } else {
+                embed.setColor(client.config.embedColorRed)
+            }
+
+            return embed;
+        }
+        function logEmbed(client: YClient, player: FS_players, joinLog: boolean) {
+            const playTimeHrs = Math.floor(player.uptime / 60);
+            const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
+            let decorators = player.isAdmin ? ':detective:' : ''; // Tag for if player is admin
+            decorators += client.FMstaff._content.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
+            decorators += client.TFstaff._content.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
+
+            const embed = new client.embed()
+                .setDescription(`\`${player.name}\`${decorators} ${joinLog ? 'joined': 'left'} **${serverAcro}** at <t:${now}:t>`)
+            if (joinLog) {
+                embed.setColor(client.config.embedColorGreen);
+            } else {
+                embed.setColor(client.config.embedColorRed)
+                embed.setFooter({text: `Playtime: ${playTimeHrs}:${playTimeMins}`})
+            }
+            return embed;
+
+        }
+        function adminCheck(client: YClient, ArrayNew: Array<FS_players>, ArrayOld: Array<FS_players>) {
             ArrayNew.filter((x: FS_players) => {
                 !ArrayOld.some((y: FS_players) => {
                     if (y.name === x.name && !y.isAdmin && x.isAdmin && !Whitelist.includes(x.name) && !client.FMstaff._content.includes(x.name)) {
-                        (client.channels.resolve('830916009107652630') as Discord.TextChannel).send({embeds: [new client.embed().setTitle('UNKNOWN ADMIN LOGIN').setDescription(`\`${x.name}\` on **${serverAcro}** at <t:${Math.round(Date.now() / 1000)}>`).setColor('#ff4d00')]})
+                        (client.channels.resolve('830916009107652630') as Discord.TextChannel).send({embeds: [
+                            new client.embed()
+                                .setTitle('UNKNOWN ADMIN LOGIN')
+                                .setDescription(`\`${x.name}\` on **${serverAcro}** at <t:${now}>`)
+                                .setColor('#ff4d00')]})
                     }
                 })
             });
         }
-        function log(client: YClient, ArrayNew: Array<FS_players>, ArrayOld: Array<FS_players>, watchList = true) {
+        function log(client: YClient, ArrayNew: Array<FS_players>, ArrayOld: Array<FS_players>) {
             // Filter for players leaving
             const missingElementsLeave = ArrayOld.filter((x: FS_players) => !ArrayNew.some((y: FS_players) => y.name === x.name)); // Filter names that were in the first fetch but not the second. Thanks to LebSter#0617 for this on The Coding Den Discord server
             for (const x of missingElementsLeave) {
-                client.playerTimes.addPlayerTime(x.name, x.uptime).forceSave();
-                client.watchList._content.forEach((y: Array<string>) => {
-                    if (y[0] === x.name && watchList) {
-                        wlChannel.send({embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${y[0]}\` left **${serverAcro}** at <t:${Math.round(Date.now() / 1000)}:t>`).setColor(client.config.embedColorRed)]})
-                    } // Hopefully that person got banned
-                })
-                logChannel.send({embeds: [new client.embed().setDescription(`\`${x.name}\` ${(!x.isAdmin ? '' : ':detective:')}${(client.FMstaff._content.includes(x.name) ? ':farmer:' : '')}${(client.TFstaff._content.includes(x.name) ? ':angel:' : '')} left **${serverAcro}** at <t:${Math.round(Date.now() / 1000)}:t>`).setFooter({text: `Playtime: ${(Math.floor(x.uptime/60))}:${('0' + (x.uptime % 60)).slice(-2)}`}).setColor(client.config.embedColorRed)]})
+                const inWl = client.watchList._content.find((y: Array<string>) => y[0] == x.name);
+                if (inWl) wlChannel.send({embeds: [wlEmbed(client, inWl[0], false)]}); // Hopefully that person got banned
+                
+                client.playerTimes.addPlayerTime(x.name, x.uptime).forceSave(); // Add playerTimes data
+                logChannel.send({embeds: [logEmbed(client, x, false)]})
             }
                         
             // Filter for players joining
@@ -150,17 +183,15 @@ export default class YClient extends Client {
             if (ArrayOld.length == 0 && (client.uptime as number) > 33000) {
                 playerObj = ArrayNew;
             } else if (ArrayOld.length != 0) {
-                playerObj = ArrayNew.filter((y: any) => !ArrayOld.some((z: any) => z.name === y.name));
+                playerObj = ArrayNew.filter((y: FS_players) => !ArrayOld.some((z: FS_players) => z.name === y.name));
             }
 
             if (playerObj != undefined) {
                 playerObj.forEach((x: FS_players) => {
-                    client.watchList._content.forEach((y: Array<string>) => {
-                        if (y[0] === x.name && watchList) {
-                            wlChannel.send({content: `${wlPing.map(x=>`<@${x}>`).join(" ")}`, embeds: [new client.embed().setTitle('WATCHLIST').setDescription(`\`${y[0]}\` joined **${serverAcro}** at <t:${Math.round(Date.now() / 1000)}:t>`).setFooter({text: `Reason: ${y[1]}`}).setColor(client.config.embedColorGreen)]})
-                        } // Oh no, go get em Toast
-                    })
-                    logChannel.send({embeds: [new client.embed().setDescription(`\`${x.name}\` ${(client.FMstaff._content.includes(x.name) ? ':farmer:' : '')}${(client.TFstaff._content.includes(x.name) ? ':angel:' : '')} joined **${serverAcro}** at <t:${Math.round(Date.now() / 1000)}:t>`).setColor(client.config.embedColorGreen)]})
+                    const inWl = client.watchList._content.find((y: Array<string>) => y[0] == x.name);
+                    if (inWl) wlChannel.send({content: `${wlPing.map(x=>`<@${x}>`).join(" ")}`, embeds: [wlEmbed(client, inWl[0], true, inWl[1])]}); // Oh no, go get em Toast
+
+                    logChannel.send({embeds: [logEmbed(client, x, true)]})
                 })
             }
         }
@@ -175,80 +206,99 @@ export default class YClient extends Client {
             }
         }
         function getData(client: YClient, URL: string) {
-            return client.axios.get(URL, {timeout: 5000}).catch((error: Error) => {return error});
+            return client.axios.get(URL, {timeout: 5000}).catch((error: Error) => error.message);
         }
 
         const Whitelist = require('./databases/adminWhitelist.json');
         const wlPing = ["238248487593050113", "267270757539643402", "642735886953611265"];
         const wlChannel = this.channels.resolve(this.config.mainServer.channels.watchlist) as Discord.TextChannel;
         const logChannel = this.channels.resolve(this.config.mainServer.channels.fslogs) as Discord.TextChannel;
+        const statsMsg = await (this.channels.resolve(Channel) as Discord.TextChannel).messages.fetch(Message);
         const xjs = require('xml-js');
+        const now = Math.round(Date.now() / 1000);
         const playerInfo: Array<string> = [];
-        const embed = new this.embed();
+        const statsEmbed = new this.embed();
+        const FSdss = {
+            data: {} as FS_data,
+            fetchResult: '' as string
+        };
+        const FScsg = {
+            data: {} as FS_careerSavegame,
+            fetchResult: '' as string
+        };
         let justStarted = false;
         let error;
-        let FSdss: any;
-        let FScsg: any;
 
         await Promise.all([getData(this, serverURLdss), getData(this, serverURLcsg)]).then(function (results) {
             if (results[0].status == 200) {
-                FSdss = results[0] as FSdss_serverName;
-            } else { FSdss = `${serverAcro} dss fail with status ${results[0].status}`};
+                FSdss.data = results[0].data as FS_data;
+            } else { FSdss.fetchResult = `${serverAcro} dss fail with status ${results[0].status || results[0]}`};
 
             if (results[1].status == 200) {
-                FScsg = xjs.xml2js(results[1].data, {compact: true, spaces: 2}).careerSavegame;
-            } else { FScsg = `${serverAcro} csg fail with status ${results[1].status}`};
+                FScsg.data = xjs.xml2js(results[1].data, {compact: true, spaces: 2}).careerSavegame as FS_careerSavegame;
+            } else { FScsg.fetchResult = `${serverAcro} csg fail with status ${results[1].status || results[1]}`};
         }).catch((error) => console.log(error))
 
-        if (typeof FSdss == 'string') {
+        if (FSdss.fetchResult.length != 0) {
             error = true;
-            console.log(`[${this.moment().format('HH:mm:ss')}]`, FSdss);
+            console.log(`[${this.moment().format('HH:mm:ss')}]`, FSdss.fetchResult);
         }
 
-        if (typeof FScsg == 'string') {
+        if (FScsg.fetchResult.length != 0) {
             error = true;
-            console.log(`[${this.moment().format('HH:mm:ss')}]`, FScsg);
+            console.log(`[${this.moment().format('HH:mm:ss')}]`, FScsg.fetchResult);
         }
 
         if (error) { // Blame Red
-            embed.setTitle('Host not responding');
-            embed.setColor(this.config.embedColorRed);
-            (this.channels.resolve(Channel) as Discord.TextChannel).messages.fetch(Message).then((msg: Discord.Message)=>{ msg.edit({embeds: [embed]})});
+            statsEmbed.setTitle('Host not responding').setColor(this.config.embedColorRed);
+            statsMsg.edit({embeds: [statsEmbed]})
             return;
         }
     
         FSdss.data.slots.players.filter((x: FS_players)=>x.isUsed).forEach((player: FS_players) => {
-            let wlPlayer = ''; // Tag for if player is on watchList
-            this.watchList._content.forEach((x: Array<string>) => {
-                if (x[0] == player.name) {
-                    wlPlayer = '⛔';
-                }
-            })
-            playerInfo.push(`\`${player.name}\` ${wlPlayer}${(player.isAdmin ? ' :detective:' : '')}${(this.FMstaff._content.includes(player.name) ? ':farmer:' : '')}${(this.TFstaff._content.includes(player.name) ? ':angel:' : '')} **|** ${(Math.floor(player.uptime/60))}:${('0' + (player.uptime % 60)).slice(-2)}`);
+            const playTimeHrs = Math.floor(player.uptime / 60);
+            const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
+            const inWl = this.watchList._content.find((y: Array<string>) => y[0] == player.name);
+            let decorators = player.isAdmin ? ':detective:' : ''; // Tag for if player is admin
+            decorators += this.FMstaff._content.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
+            decorators += this.TFstaff._content.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
+            decorators += inWl ? '⛔' : ''; // Tag for if player is on watchList
+
+            playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
         })
 
-        // Stats embed
-        embed.setAuthor({name: `${FSdss.data.slots.used}/${FSdss.data.slots.capacity}`})
-		if (FSdss.data.slots.used === FSdss.data.slots.capacity) {
-			embed.setColor(this.config.embedColorRed)
-		} else if (FSdss.data.slots.used > 9) {
-			embed.setColor(this.config.embedColorYellow)
-		} else embed.setColor(this.config.embedColorGreen)
-        embed.setDescription(`${FSdss?.data.slots.used === 0 ? '*No players online*' : playerInfo.join("\n")}`);
-        embed.addFields({name: `**Server Statistics**`, value: [
-                `**Money:** $${parseInt(FScsg?.statistics?.money._text).toLocaleString('en-US')}`,
-                `**In-game time:** ${('0' + Math.floor((FSdss.data.server.dayTime/3600/1000))).slice(-2)}:${('0' + Math.floor((FSdss.data.server.dayTime/60/1000)%60)).slice(-2) ?? null}`,
-                `**Timescale:** ${(FScsg.settings?.timeScale?._text?.slice(0, -5))?.toLocaleString('en-US') ?? null}x`,
-                `**Playtime:** ${this.formatTime((parseInt(FScsg.statistics.playTime._text) * 60 * 1000), 3, { commas: true, longNames: true })}`,
-                `**Map:** ${FSdss.data.server.mapName ?? null}`,
-                `**Seasonal growth:** ${seasons(FScsg.settings.growthMode._text)}`,
-                `**Autosave interval:** ${Math.round(parseInt(FScsg.settings.autoSaveInterval._text))} min`,
-                `**Game version:** ${FSdss.data.server.version ?? null}`,
-                `**Slot usage:** ${parseInt(FScsg?.slotSystem._attributes.slotUsage).toLocaleString('en-US')}`
-                ].join('\n')
-            });
-        (this.channels.resolve(Channel) as Discord.TextChannel).messages.fetch(Message).then((msg: Discord.Message)=>{ msg.edit({embeds: [embed]})})
+        // Data crunching for stats embed
+        const Money = parseInt(FScsg.data.statistics?.money?._text).toLocaleString('en-US') ?? null;
+        const IngameTimeHrs = Math.floor(FSdss.data.server?.dayTime / 3600 / 1000).toString().padStart(2, '0') ?? null;
+        const IngameTimeMins = Math.floor((FSdss.data.server?.dayTime / 60 / 1000) % 60).toString().padStart(2, '0') ?? null;
+        const Timescale = parseInt(parseInt(FScsg.data.settings?.timeScale?._text).toFixed(1)).toLocaleString('en-US') ?? null;
+        const playTimeHrs = (parseInt(FScsg.data.statistics?.playTime?._text) / 60).toFixed(2) ?? null;
+        const PlaytimeFormatted = this.formatTime((parseInt(FScsg.data.statistics?.playTime?._text) * 60 * 1000), 3, { commas: true, longNames: false }) ?? null;
+        const Seasons = seasons(FScsg.data.settings?.growthMode?._text) ?? null;
+        const AutosaveInterval = parseInt(FScsg.data.settings?.autoSaveInterval?._text).toFixed(0) ?? null;
+        const SlotUsage = parseInt(FScsg.data.slotSystem?._attributes?.slotUsage).toLocaleString('en-US') ?? null;
 
+        // Stats embed
+        statsEmbed.setAuthor({name: `${FSdss.data.slots.used}/${FSdss.data.slots.capacity}`})
+		if (FSdss.data.slots.used === FSdss.data.slots.capacity) {
+			statsEmbed.setColor(this.config.embedColorRed);
+		} else if (FSdss.data.slots.used > 9) {
+			statsEmbed.setColor(this.config.embedColorYellow);
+		} else statsEmbed.setColor(this.config.embedColorGreen);
+        statsEmbed.setDescription(`${FSdss.data.slots.used === 0 ? '*No players online*' : playerInfo.join("\n")}`);
+        statsEmbed.addFields({name: `**Server Statistics**`, value: [
+                `**Money:** $${Money}`,
+                `**In-game time:** ${IngameTimeHrs}:${IngameTimeMins}`,
+                `**Timescale:** ${Timescale}x`,
+                `**Playtime:** ${playTimeHrs}hrs (${PlaytimeFormatted})`,
+                `**Map:** ${FSdss.data.server.mapName}`,
+                `**Seasonal growth:** ${Seasons}`,
+                `**Autosave interval:** ${AutosaveInterval} min`,
+                `**Game version:** ${FSdss.data.server.version}`,
+                `**Slot usage:** ${SlotUsage}`
+        ].join('\n')});
+        statsMsg.edit({embeds: [statsEmbed]})
+        
         // Logs
         if (FSdss.data.server.name.length === 0) {
             if (this.FSCache[serverAcro.toLowerCase()].status === 1) {
@@ -266,7 +316,7 @@ export default class YClient extends Client {
         if (!justStarted) {
             this.FSCache[serverAcro.toLowerCase()].new = FSdss.data.slots.players.filter((x: FS_players) =>x.isUsed);
 
-            if (serverAcro != 'MF') {adminCheck(this, this.FSCache[serverAcro.toLowerCase()].new, this.FSCache[serverAcro.toLowerCase()].old, Whitelist)};
+            if (serverAcro != 'MF') {adminCheck(this, this.FSCache[serverAcro.toLowerCase()].new, this.FSCache[serverAcro.toLowerCase()].old)};
             log(this, this.FSCache[serverAcro.toLowerCase()].new, this.FSCache[serverAcro.toLowerCase()].old);
             dataPoint(FSdss.data.slots.used);
 
@@ -310,7 +360,6 @@ export default class YClient extends Client {
     }
     createTable(columnTitles: string[], rowsData: any, options: global_createTableOpt, client: YClient) {
         const rows: any = [];
-        // { columnAlign: [], columnSeparator: [], columnEmptyChar: [] }
         let { columnAlign = [], columnSeparator = [], columnEmptyChar = [] } = options;
         if (columnSeparator.length < 1) columnSeparator.push('|');
         columnSeparator = columnSeparator.map((x: string) => ` ${x} `);

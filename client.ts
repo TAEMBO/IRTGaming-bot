@@ -271,7 +271,7 @@ export default class YClient extends Client {
         const Money = parseInt(FScsg.data.statistics?.money?._text).toLocaleString('en-US') ?? null;
         const IngameTimeHrs = Math.floor(FSdss.data.server?.dayTime / 3600 / 1000).toString().padStart(2, '0') ?? null;
         const IngameTimeMins = Math.floor((FSdss.data.server?.dayTime / 60 / 1000) % 60).toString().padStart(2, '0') ?? null;
-        const Timescale = parseInt(parseInt(FScsg.data.settings?.timeScale?._text).toFixed(1)).toLocaleString('en-US') ?? null;
+        const Timescale = FScsg.data.settings?.timeScale?._text?.slice(0, -5) ?? null;
         const playTimeHrs = (parseInt(FScsg.data.statistics?.playTime?._text) / 60).toFixed(2) ?? null;
         const PlaytimeFormatted = this.formatTime((parseInt(FScsg.data.statistics?.playTime?._text) * 60 * 1000), 3, { commas: true, longNames: false }) ?? null;
         const Seasons = seasons(FScsg.data.settings?.growthMode?._text) ?? null;

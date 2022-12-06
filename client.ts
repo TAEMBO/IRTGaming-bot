@@ -68,7 +68,7 @@ export default class YClient extends Client {
         this.FMstaff.initLoad();
         this.TFstaff.initLoad();
         this.watchList.initLoad();
-        this.playerTimes.initLoad().disableSaveNotifs();
+        this.playerTimes.initLoad().intervalSave(15000).disableSaveNotifs();
         const commandFiles = fs.readdirSync("./commands").filter(file => file.endsWith(".ts"));
         for (const file of commandFiles) {
 	        const command = require(`./commands/${file}`);
@@ -174,7 +174,7 @@ export default class YClient extends Client {
                 const inWl = client.watchList._content.find((y: Array<string>) => y[0] == x.name);
                 if (inWl) wlChannel.send({embeds: [wlEmbed(client, inWl[0], false)]}); // Hopefully that person got banned
                 
-                client.playerTimes.addPlayerTime(x.name, x.uptime).forceSave(); // Add playerTimes data
+                client.playerTimes.addPlayerTime(x.name, x.uptime); // Add playerTimes data
                 logChannel.send({embeds: [logEmbed(client, x, false)]})
             }
                         

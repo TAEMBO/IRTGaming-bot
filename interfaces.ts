@@ -44,7 +44,6 @@ interface mainServer {
 interface mainServerRoles {
     [key: string]: string
     owner: string,
-    admin: string,
     mod: string,
     helper: string,
     mpmanager: string,

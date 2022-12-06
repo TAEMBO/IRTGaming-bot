@@ -1,4 +1,4 @@
-import Discord from 'discord.js';
+import Discord, { ColorResolvable } from 'discord.js';
 
 export interface tokens {
     token: string
@@ -10,6 +10,99 @@ export interface tokens {
 interface FSURLs {
     dss: string,
     csg: string
+}
+
+export interface config {
+    embedColor: ColorResolvable
+    embedColorGreen: ColorResolvable,
+    embedColorRed: ColorResolvable,
+    embedColorYellow: ColorResolvable
+    botSwitches: botSwitches,
+    devWhitelist: Array<string>,
+    mainServer: mainServer
+
+
+}
+interface botSwitches {
+    commands: boolean
+    automod: boolean,
+    logs: boolean
+    registerCommands: boolean,
+    stats: boolean,
+    autoResponses: boolean,
+    notifs: boolean,
+    errorNotify: boolean
+}
+interface mainServer {
+    id: string,
+    MPStaffRoles: Array<string>,
+    staffRoles: Array<string>
+    roles: mainServerRoles
+    channels: mainServerChannels
+
+}
+interface mainServerRoles {
+    [key: string]: string
+    owner: string,
+    admin: string,
+    mod: string,
+    helper: string,
+    mpmanager: string,
+    mpadmin: string,
+    mppublicadmin: string,
+    mpfarmmanager: string,
+    trustedfarmer: string,
+    mpstaff: string,
+    mpmanagement: string,
+    loa: string,
+    mfmanager: string,
+    mffarmowner: string,
+    mfmember: string,
+    mffarm1: string,
+    mffarm2: string,
+    mffarm3: string,
+    mffarm4: string,
+    mffarm5: string,
+    mffarm6: string,
+    mffarm7: string,
+    mffarm8: string,
+    mffarm9: string,
+    mffarm10: string,
+    mffarm11: string,
+    subscriber: string
+}
+interface mainServerChannels {
+    [key: string]: string
+    botlogs: string,
+    botcommands: string,
+    fs22_silage: string,
+    fs22_grain: string,
+    welcome: string,
+    testing_zone: string,
+    suggestions: string,
+    staffreports: string,
+    fslogs: string,
+    playercheck: string,
+    watchlist: string,
+    vidsandstreams: string
+}
+
+export interface FSCache {
+    [key: string]: any
+    statsGraph: number
+    ps: FSCacheServer
+    pg: FSCacheServer
+    mf: FSCacheServer
+
+}
+interface FSCacheServer {
+    new: Array<FS_players>, 
+    old: Array<FS_players>, 
+    status: undefined | number
+}
+
+export interface YTCache {
+    [key: string]: undefined | string
 }
 
 export interface global_formatTimeOpt {

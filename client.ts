@@ -1,13 +1,13 @@
 import Discord, { Client, GatewayIntentBits, Partials } from "discord.js";
 import fs from "node:fs";
 import timeNames from './timeNames';
-import { db_punishments_format, global_formatTimeOpt, global_createTableOpt, FSdss_serverName, FS_players, tokens, FS_data, FS_careerSavegame } from './interfaces';
+import { db_punishments_format, global_formatTimeOpt, global_createTableOpt, FSdss_serverName, FS_players, FS_data, FS_careerSavegame, tokens, config, FSCache, YTCache } from './interfaces';
 import { bannedWords, TFstaff, FMstaff, watchList, playerTimes, userLevels, tictactoe, punishments } from "./dbClasses";
 export default class YClient extends Client {
-    invites: Map<any, any>; config: any; tokens: tokens; axios: any; moment: any; embed: typeof Discord.EmbedBuilder; collection: any; messageCollector: any; attachmentBuilder: any; games: any; commands: Discord.Collection<string, any>;registery: Array<Discord.ApplicationCommandDataResolvable>;
+    invites: Map<any, any>; config: config; tokens: tokens; axios: any; moment: any; embed: typeof Discord.EmbedBuilder; collection: any; messageCollector: any; attachmentBuilder: any; games: Discord.Collection<string, any>; commands: Discord.Collection<string, any>;registery: Array<Discord.ApplicationCommandDataResolvable>;
 	repeatedMessages: any;
-	FSCache: any;
-	YTCache: any;
+	FSCache: FSCache;
+	YTCache: YTCache;
 	bannedWords: bannedWords;
     TFstaff: TFstaff;
     FMstaff: FMstaff;

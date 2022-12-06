@@ -12,17 +12,17 @@ console.log(client.config.devWhitelist);
 
 // global properties
 client.on("ready", async () => {
-	await (client.guilds.cache.get(client.config.mainServer.id) as Discord.Guild).members.fetch();
+	const guild = client.guilds.cache.get(client.config.mainServer.id) as Discord.Guild;
+	await guild.members.fetch();
 	(client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel).send(`:warning: Bot restarted :warning:\n<@${client.config.devWhitelist[0]}>\n\`\`\`js\n${Object.entries(client.config.botSwitches).map((x)=> `${x[0]}: ${x[1]}`).join('\n')}\`\`\``)
 	setInterval(()=>{
-		const guild = client.guilds.cache.get(client.config.mainServer.id) as Discord.Guild;
 		guild.invites.fetch().then((invs)=>{
 			invs.forEach(async(inv)=>{
 				client.invites.set(inv.code, {uses: inv.uses, creator: (inv.inviter as Discord.User).id})
 			})
 		})
 	}, 500000)
-	if (client.config.botSwitches.registerCommands) (client.guilds.cache.get(client.config.mainServer.id) as Discord.Guild).commands.set(client.registery).catch((e)=>{console.log(`Couldn't register commands bcuz: ${e}`)});
+	if (client.config.botSwitches.registerCommands) (guild).commands.set(client.registery).catch((e)=>{console.log(`Couldn't register commands bcuz: ${e}`)});
 
 	setInterval(async () => {
 		(client.user as Discord.ClientUser).setPresence({activities: [{name: 'No status?', type: 5}], status: 'online'});

@@ -5,6 +5,9 @@ export default {
     name: "guildMemberAdd",
     execute: async (client: YClient, member: Discord.GuildMember) => {
         if (!client.config.botSwitches.logs || member.partial) return;
+        
+        // Add Member role upon joining if mainServer is the IRTGaming server
+        if (client.config.mainServer.id == '552565546089054218') member.roles.add('552566408240693289');
 
         // Welcome message
         const index = member.guild.memberCount;

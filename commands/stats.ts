@@ -1,6 +1,6 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client';
-import { FSdss_serverName, FS_players} from '../interfaces'
+import { db_playerTimes_format, FSdss_serverName, FS_players} from '../interfaces'
 
 async function FSstatsAll(client: YClient, serverName: FSdss_serverName, embed: Discord.EmbedBuilder, totalCount: Array<number>) {
     if (serverName.data.slots.used !== 0) {
@@ -269,21 +269,27 @@ export default {
             FSstats(client, interaction, client.tokens.mf.dss, 'MFPlayerData');
         } else if (subCmd === 'playertimes') {
             const embed = new client.embed()
-                .setDescription(`Top 20 players with the most time spent on IRTGaming FS22 servers since\n<t:1664645628>\n\n${Object.entries(client.playerTimes._content).sort((a, b) => (b[1] as number) - (a[1] as number)).slice(0, 20).map((x, i) => `**${i + 1}.** \`${x[0]}\`${(client.FMstaff._content.includes(x[0]) ? ':farmer:' : '')}${(client.TFstaff._content.includes(x[0]) ? ':angel:' : '')}: ${client.formatTime(((x[1] as number)*60*1000), 3, { commas: true, longNames: false })}`).join('\n')}`)
+                .setDescription(`Top 20 players with the most time spent on IRTGaming FS22 servers since\n<t:1664645628>\n\n${Object.entries<db_playerTimes_format>(client.playerTimes._content).sort((a, b) => (b[1].time as number) - (a[1].time as number)).slice(0, 20).map((x, i) => `**${i + 1}.** \`${x[0]}\`${(client.FMstaff._content.includes(x[0]) ? ':farmer:' : '')}${(client.TFstaff._content.includes(x[0]) ? ':angel:' : '')}: ${client.formatTime(((x[1].time as number)*60*1000), 3, { commas: true, longNames: false })}`).join('\n')}`)
                 .setColor(client.config.embedColor)
             const player = interaction.options.getString('name');
             
             if (!player) {
                 interaction.reply({embeds: [embed]});
             } else {
-                const time = client.playerTimes.getPlayer(player);
-                let result;
-                if (time == 0) {
-                    result = ` has no logged play time.`;
+                const playerData = client.playerTimes.getPlayer(player);
+                let resultText;
+                let isTimestamp;
+                if (!playerData) {
+                    resultText = ` has no logged play time.`;
                 } else {
-                    result = `'s total time: **${client.formatTime(time*60*1000, 3, { commas: true, longNames: false })}**`;
+                    if (!playerData.lastOn) {
+                        isTimestamp = 'is unknown';
+                    } else {
+                        isTimestamp = `was <t:${playerData.lastOn}:R>`;
+                    }
+                    resultText = `'s total time is **${client.formatTime(playerData.time*60*1000, 3, { commas: true, longNames: false })}** and the last time they were on ${isTimestamp}.`;
                 }
-                interaction.reply(`\`${player}\`${result}`)
+                interaction.reply(`\`${player}\`${resultText}`)
             }
         }
     },

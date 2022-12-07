@@ -147,6 +147,10 @@ export interface db_userLevels_format {
     messages: number,
     level: number
 }
+export interface db_playerTimes_format {
+    time: number;
+    lastOn: number | null
+}
 
 export interface FSdss_serverName {
     data: FS_data

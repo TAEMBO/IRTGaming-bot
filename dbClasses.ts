@@ -1,5 +1,5 @@
 import YClient from './client';
-import { db_punishments_format, db_punishments_passthruOpt, db_tictactoe_tttGame, db_tictactoe_tttPlayer} from './interfaces'
+import { db_playerTimes_format, db_punishments_format, db_punishments_passthruOpt, db_tictactoe_tttGame, db_tictactoe_tttPlayer} from './interfaces'
 import Database from './database';
 import Discord from 'discord.js';
 
@@ -38,17 +38,22 @@ export class playerTimes extends Database {
         this.client = client;
     }
     addPlayerTime(playerName: string, time: number) {
-        const amount = this._content[playerName];
-        if (amount) this._content[playerName] = amount + time;
-        else this._content[playerName] = time;
+		const now = Math.round(Date.now() / 1000);
+        const playerData = this._content[playerName];
+        if (playerData) {
+			this._content[playerName].time = playerData.time + time;
+			this._content[playerName].lastOn = now;
+		} else {
+			this._content[playerName] = { time: time, lastOn: now };
+		}
         return this;
     }
 	decrement(playerName: string, time: number) {
-        this._content[playerName] = this._content[playerName] - time;
+        this._content[playerName].time = this._content[playerName].time - time;
         return this;
     }
-    getPlayer(playerName: string): number {
-        return this._content[playerName] || 0;
+    getPlayer(playerName: string): db_playerTimes_format | null {
+        return this._content[playerName] || null;
     }
 }
 export class userLevels extends Database {

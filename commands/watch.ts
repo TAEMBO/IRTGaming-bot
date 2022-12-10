@@ -4,24 +4,24 @@ export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
         if (!client.isMPStaff(interaction.member)) return client.youNeedRole(interaction, "mpstaff");
         const subCmd = interaction.options.getSubcommand();
+        const name = interaction.options.getString('username');
+        const reason = interaction.options.getString('reason');
+        const wlData = client.watchList._content.find((x: Array<string>) => x[0] == name);
 
         if (subCmd === 'add') {
-            const name = interaction.options.getString('username') as string;
-            const reason = interaction.options.getString('reason');
-            let e = false;
-            client.watchList._content.forEach((s: Array<string>) => 
-                {if (s[0].includes(name)) e = true})
-            if (e) return interaction.reply('That name already exists on watchList');
-            client.watchList.addData([name, reason]).forceSave();
-            interaction.reply({content: `Successfully added \`${name}\` with reason \`${reason}\``});
+            if (wlData) {
+                interaction.reply(`\`${wlData[0]}\` already exists on watchList for reason \`${wlData[1]}\``);
+            } else {
+                client.watchList.addData([name, reason]).forceSave();
+                interaction.reply({content: `Successfully added \`${name}\` with reason \`${reason}\``});
+            }
         } else if (subCmd === 'remove') {
-            let e = false;
-            const name = interaction.options.getString('username');
-            client.watchList._content.some((x: Array<string>) => {if (x[0] === name) e = true;})
-            if (e) {
+            if (wlData) {
                 client.watchList.removeData(name, 1, 0).forceSave();
                 interaction.reply(`Successfully removed \`${name}\` from watchList`);
-            } else return interaction.reply('That name doesn\'t exist on watchList');
+            } else {
+                interaction.reply(`\`${name}\` doesn't exist on watchList`);
+            }
         }
     },
     data: new SlashCommandBuilder()

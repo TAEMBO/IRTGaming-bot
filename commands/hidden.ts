@@ -2,23 +2,17 @@ import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
-        const hidden = require('../databases/hidden.json')
-        let intStr = interaction.options.getString('command');
-        let prsnt = false;
+        const hidden: Array<Array<string>> = require('../databases/hidden.json')
+        let command = interaction.options.getString('command');
+        const cmdExists = hidden.find((x) => x[0] == command);
 
-        hidden.forEach(async (x: string) => {
-            if (x[0] === intStr) {
-                console.log(`[${client.moment().format('HH:mm:ss')}]`, `Running "${x[0]}"`);
-                interaction.reply({content: `Running ${x[0]}.`, ephemeral: true}).then(() => eval(x[1]))
-                prsnt = true;
-            }
-        })
-
-        if (!prsnt) {
-		    console.log(`[${client.moment().format('HH:mm:ss')}]`, `Attempted "${intStr}"`);
-		    interaction.reply({content: 'A command with that name does not exist.', ephemeral: true});
-		    return;
-	    }
+        if (cmdExists) {
+            console.log(`[${client.moment().format('HH:mm:ss')}]`, `Running "${cmdExists[0]}"`);
+            interaction.reply({content: `Running ${cmdExists[0]}.`, ephemeral: true}).then(() => eval(cmdExists[1]));
+        } else {
+            console.log(`[${client.moment().format('HH:mm:ss')}]`, `Attempted "${command}"`);
+            interaction.reply({content: 'A command with that name does not exist.', ephemeral: true});
+        }
 	},
     data: new SlashCommandBuilder()
         .setName("hidden")

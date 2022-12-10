@@ -2,29 +2,38 @@ import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client';
 import { db_playerTimes_format, FSdss_serverName, FS_players} from '../interfaces'
 
-async function FSstatsAll(client: YClient, serverName: FSdss_serverName, embed: Discord.EmbedBuilder, totalCount: Array<number>) {
+async function FSstatsAll(client: YClient, serverURLdss: string, embed: Discord.EmbedBuilder, totalCount: Array<number>, failedFooter: Array<string>, serverAcro: string) {
+    let serverName;
+    try {
+        serverName = await client.axios.get(serverURLdss, {timeout: 3000}) as FSdss_serverName;
+    } catch (err) {
+        console.log(`stats all; ${serverAcro} failed`);
+        failedFooter.push(`Failed to fetch ${serverAcro}`);
+        return;
+    }
     if (serverName.data.slots.used !== 0) {
         totalCount.push(serverName.data.slots.used)
         const playerInfo: Array<string> = [];
 
-        await serverName.data.slots.players.filter((x: FS_players)=>x.isUsed).forEach((player: FS_players) => {
-            let wlPlayer = ''; // Tag for if player is on watchList
-            client.watchList._content.forEach((x: Array<string>) => {
-                if (x[0] === player.name) {
-                    wlPlayer = '⛔';
-                }
-            })
-            playerInfo.push(`\`${player.name}\` ${wlPlayer}${(player.isAdmin ? ' :detective:' : '')}${(client.FMstaff._content.includes(player.name) ? ':farmer:' : '')}${(client.TFstaff._content.includes(player.name) ? ':angel:' : '')} **|** ${(Math.floor(player.uptime/60))}:${('0' + (player.uptime % 60)).slice(-2)}`);
+        serverName.data.slots.players.filter((x: FS_players)=>x.isUsed).forEach((player: FS_players) => {
+            const playTimeHrs = Math.floor(player.uptime / 60);
+            const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
+            const inWl = client.watchList._content.find((y: Array<string>) => y[0] == player.name);
+            let decorators = player.isAdmin ? ':detective:' : ''; // Tag for if player is admin
+            decorators += client.FMstaff._content.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
+            decorators += client.TFstaff._content.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
+            decorators += inWl ? '⛔' : ''; // Tag for if player is on watchList
+
+            playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
         })
-        embed.addFields(
-            {name: `${serverName.data.server.name.replace('! ! IRTGaming| ', '')} - ${serverName.data.slots.used}/${serverName.data.slots.capacity} - ${('0' + Math.floor((serverName.data.server.dayTime/3600/1000))).slice(-2)}:${('0' + Math.floor((serverName.data.server.dayTime/60/1000)%60)).slice(-2)}`, value: `${playerInfo.join("\n")}`}
-        )
+        const serverSlots = `${serverName.data.slots.used}/${serverName.data.slots.capacity}`;
+        const serverTimeHrs = Math.floor(serverName.data.server.dayTime / 3600 / 1000).toString().padStart(2, '0');
+        const serverTimeMins = Math.floor((serverName.data.server.dayTime / 60 / 1000) % 60).toString().padStart(2, '0');
+        embed.addFields({name: `${serverName.data.server.name.replace('! ! IRTGaming|', '')} - ${serverSlots} - ${serverTimeHrs}:${serverTimeMins}`, value: `${playerInfo.join("\n")}`})
     }
 }
-
 async function FSstats(client: YClient, interaction: Discord.CommandInteraction, serverName: string, DBName: string) {
 
-    const embed = new client.embed()
     const playerInfo: Array<string> = [];
     let FSserver: FSdss_serverName;
     let Color = client.config.embedColorGreen;
@@ -49,11 +58,8 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
     });
     
     const first_graph_top = 16;
-    
     const second_graph_top = 16;
-
     const textSize = 40;
-
     const canvas = require('canvas');
     const img = canvas.createCanvas(1500, 750);
     const ctx = img.getContext('2d');
@@ -195,20 +201,26 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
     ctx.fillText('time ->', tx, ty);
 
     FSserver.data.slots.players.filter((x: FS_players) => x.isUsed).forEach((player: FS_players) => {
-        let wlPlayer = ''; // Tag for if player is on watchList
-        client.watchList._content.forEach((x: Array<string>) => {
-            if (x[0] === player.name) {
-                wlPlayer = '⛔';
-            }
-        })
-        playerInfo.push(`\`${player.name}\` ${wlPlayer}${(player.isAdmin ? ' :detective:' : '')}${(client.FMstaff._content.includes(player.name) ? ':farmer:' : '')}${(client.TFstaff._content.includes(player.name) ? ':angel:' : '')} **|** ${(Math.floor(player.uptime/60))}:${('0' + (player.uptime % 60)).slice(-2)}`);
+        const playTimeHrs = Math.floor(player.uptime / 60);
+        const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
+        const inWl = client.watchList._content.find((y: Array<string>) => y[0] == player.name);
+        let decorators = player.isAdmin ? ':detective:' : ''; // Tag for if player is admin
+        decorators += client.FMstaff._content.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
+        decorators += client.TFstaff._content.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
+        decorators += inWl ? '⛔' : ''; // Tag for if player is on watchList
+
+        playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
     })
-    const Image = new client.attachmentBuilder(img.toBuffer(), {name: "FSStats.png"})
-    embed.setAuthor({name: `${FSserver.data.slots.used}/${FSserver.data.slots.capacity} - ${('0' + Math.floor((FSserver.data.server.dayTime/3600/1000))).slice(-2)}:${('0' + Math.floor((FSserver.data.server.dayTime/60/1000)%60)).slice(-2)}`})
-    if (FSserver.data.server.name.length !== 0) {embed.setTitle(FSserver.data.server.name)}
-    embed.setImage('attachment://FSStats.png')
-    embed.setColor(Color)
-    embed.setDescription(FSserver.data.slots.used === 0 ? '*No players online*' : playerInfo.join("\n"));
+    const Image = new client.attachmentBuilder(img.toBuffer(), {name: "FSStats.png"});
+    const serverSlots = `${FSserver.data.slots.used}/${FSserver.data.slots.capacity}`;
+    const serverTimeHrs = Math.floor(FSserver.data.server.dayTime / 3600 / 1000).toString().padStart(2, '0');
+    const serverTimeMins = Math.floor((FSserver.data.server.dayTime / 60 / 1000) % 60).toString().padStart(2, '0');
+    const embed = new client.embed()
+        .setAuthor({name: `${serverSlots} - ${serverTimeHrs}:${serverTimeMins}`})
+        .setTitle(FSserver.data.server.name.length == 0 ? 'Offline' : FSserver.data.server.name)
+        .setDescription(FSserver.data.slots.used == 0 ? '*No players online*' : playerInfo.join("\n"))
+        .setImage('attachment://FSStats.png')
+        .setColor(Color)
     interaction.reply({embeds: [embed], files: [Image]}).catch(() => (interaction.channel as Discord.TextChannel).send({embeds: [embed], files: [Image]}));
 }
 
@@ -219,36 +231,16 @@ export default {
         let failedFooter: Array<string> = [];
 
         if (subCmd === 'all') {
-            await interaction.deferReply()
+            await interaction.deferReply();
             const embed = new client.embed().setColor(client.config.embedColor)
             const totalCount: Array<number> = [];
             let sum;
-            
-            try {
-                await client.axios.get(client.tokens.test.dss, {timeout: 3000}).then(async (x: FSdss_serverName)=>{
-                    await FSstatsAll(client, x, embed, totalCount)
-                });
-            } catch (err) {
-                console.log(`stats all; PS failed`)
-                failedFooter.push('Failed to fetch PS');
 
-            }
-            try {
-                await client.axios.get(client.tokens.pg.dss, {timeout: 3000}).then(async (x: FSdss_serverName)=>{
-                    await FSstatsAll(client, x, embed, totalCount)
-                });
-            } catch (err) {
-                console.log(`stats all; PG failed`);
-                failedFooter.push('Failed to fetch PG');
-            }
-            try {
-                await client.axios.get(client.tokens.mf.dss, {timeout: 3000}).then(async (x: FSdss_serverName)=>{
-                    await FSstatsAll(client, x, embed, totalCount)
-                });
-            } catch (err) {
-                console.log(`stats all; MF failed`);
-                failedFooter.push('Failed to fetch MF');
-            }
+            await Promise.all([
+                FSstatsAll(client, client.tokens.ps.dss, embed, totalCount, failedFooter, 'PS'),
+                FSstatsAll(client, client.tokens.pg.dss, embed, totalCount, failedFooter, 'PG'),
+                FSstatsAll(client, client.tokens.mf.dss, embed, totalCount, failedFooter, 'MF')
+            ]);
 
             if (totalCount.length == 0) {
                 sum = 0;
@@ -262,7 +254,7 @@ export default {
             embed.setTitle(`All Servers: ${sum} online`)
             interaction.editReply({embeds: [embed]});
         } else if (subCmd === 'ps') {
-            FSstats(client, interaction, client.tokens.test.dss, 'PSPlayerData');
+            FSstats(client, interaction, client.tokens.ps.dss, 'PSPlayerData');
         } else if (subCmd === 'pg') {
             FSstats(client, interaction, client.tokens.pg.dss, 'PGPlayerData');
         } else if (subCmd === 'mf') {

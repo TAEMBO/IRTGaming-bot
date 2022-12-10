@@ -22,7 +22,7 @@ client.on("ready", async () => {
 			})
 		})
 	}, 500000)
-	if (client.config.botSwitches.registerCommands) (guild).commands.set(client.registery).catch((e)=>{console.log(`Couldn't register commands bcuz: ${e}`)});
+	if (client.config.botSwitches.registerCommands) guild.commands.set(client.registery).catch((e)=>{console.log(`Couldn't register commands bcuz: ${e}`)});
 
 	setInterval(async () => {
 		(client.user as Discord.ClientUser).setPresence({activities: [{name: 'No status?', type: 5}], status: 'online'});
@@ -41,18 +41,18 @@ client.on("ready", async () => {
 // error handlers
 function logError(error: Error) {
 	console.log(error);                    // vvv I'm well aware my internet is bad, I don't need my own bot to rub it in
-	if (client.config.botSwitches.errorNotify && !error.message.includes('getaddrinfo ENOTFOUND discord.com')) (client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel).send({content: `<@${client.config.devWhitelist[0]}>`, embeds: [new client.embed().setTitle("Error Caught!").setColor("#420420").setDescription(`**Error:** \`${error.message}\`\n\n**Stack:** \`${`${error.stack}`.slice(0, 2500)}\``)]});
+	if (client.config.botSwitches.errorNotify && !['Request aborted', 'getaddrinfo ENOTFOUND discord.com'].includes(error.message)) (client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel).send({content: `<@${client.config.devWhitelist[0]}>`, embeds: [new client.embed().setTitle("Error Caught!").setColor("#420420").setDescription(`**Error:** \`${error.message}\`\n\n**Stack:** \`${`${error.stack}`.slice(0, 2500)}\``)]});
 }
-process.on('unhandledRejection', async (error: Error) => {
+process.on('unhandledRejection', (error: Error) => {
 	logError(error);
 });
-process.on('uncaughtException', async (error: Error) => {
+process.on('uncaughtException', (error: Error) => {
 	logError(error);
 });
-process.on('error', async (error: Error) => {
+process.on('error', (error: Error) => {
 	logError(error);
 });
-client.on('error', async (error: Error) => {
+client.on('error', (error: Error) => {
 	logError(error);
 });
 

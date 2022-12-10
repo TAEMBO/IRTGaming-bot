@@ -358,6 +358,14 @@ export default class YClient extends Client {
         }
         return text;
     }
+    formatBytes(bytes: number, decimals = 3) { // Credits to Toast for making this
+        if (bytes === 0) return '0 Bytes';
+        const k = 1000;
+        const dm = decimals < 0 ? 0 : decimals;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return (bytes / Math.pow(k, i)).toFixed(dm) + ' ' + sizes[i];
+      }
     createTable(columnTitles: string[], rowsData: any, options: global_createTableOpt, client: YClient) {
         const rows: any = [];
         let { columnAlign = [], columnSeparator = [], columnEmptyChar = [] } = options;

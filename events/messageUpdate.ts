@@ -6,7 +6,7 @@ export default {
     execute: async (client: YClient, oldMsg: Discord.Message, newMsg: Discord.Message) => {
         await oldMsg.fetch();
         await newMsg.fetch();
-        if (!client.config.botSwitches.logs || newMsg.author.bot || oldMsg.partial || newMsg.partial || !oldMsg.member || oldMsg.content.length == 0 || newMsg.content == oldMsg.content) return;
+        if (!client.config.botSwitches.logs || newMsg.author.bot || oldMsg.partial || newMsg.partial || !oldMsg.member || oldMsg.content.length == 0 || newMsg.content == oldMsg.content || newMsg.channel.id == '979863373439184966') return;
         const logChannel = client.channels.resolve(client.config.mainServer.channels.botlogs) as Discord.TextChannel;
         const msgarr = newMsg.content.toLowerCase().split(' ');
 

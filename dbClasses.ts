@@ -145,7 +145,7 @@ export class punishments extends Database {
         const embed = new this.client.embed()
             .setTitle(`${this.client.formatPunishmentType(data, this.client, cancels)} | Case #${data.id}`)
             .addFields(
-            	{name: '🔹 User', value: `<@${data.member}> \`${data.member}\``, inline: true},
+            	{name: '🔹 User', value: `${data.member.tag}\n<@${data.member.id}> \`${data.member}\``, inline: true},
             	{name: '🔹 Moderator', value: `<@${data.moderator}> \`${data.moderator}\``, inline: true},
             	{name: '\u200b', value: '\u200b', inline: true},
             	{name: '🔹 Reason', value: `\`${data.reason}\``, inline: true})
@@ -183,7 +183,7 @@ export class punishments extends Database {
 		const ms = require('ms');
 		const now = Date.now();
 		const guild = this.client.guilds.cache.get(this.client.config.mainServer.id) as Discord.Guild;
-		const punData: db_punishments_format = { type, id: this.createId(), member: User.id, reason, moderator, time: now }
+		const punData: db_punishments_format = { type, id: this.createId(), member: {tag: User.tag, id: User.id}, reason, moderator, time: now }
 		const ifOrFromBoolean = ['warn', 'mute'].includes(type) ? 'in' : 'from'; // Use 'in' if the punishment doesn't remove the member from the server, eg. kick, softban, ban
 		const auditLogReason = `${reason} | Case #${punData.id}`;
 		const embed = new this.client.embed()
@@ -203,7 +203,7 @@ export class punishments extends Database {
 		const durationText = timeInMillis ? ` for ${this.client.formatTime(timeInMillis, 4, { longNames: true, commas: true })}` : 'forever';
 
 		// Add field for duration if time is specified
-		if (time) embed.addFields({name: 'Duration', value: durationText})
+		if (time) embed.addFields({name: 'Duration', value: durationText});
 
 		if (GuildMember) {
 			try {
@@ -259,14 +259,14 @@ export class punishments extends Database {
 		const punishment: db_punishments_format = this._content.find((x: db_punishments_format) => x.id === caseId);
 		const guild = this.client.guilds.cache.get(this.client.config.mainServer.id) as Discord.Guild;
 		const auditLogReason = `${reason} | Case #${punishment.id}`;
-		const User = await this.client.users.fetch(punishment.member) as Discord.User;
-		const GuildMember = await guild.members.fetch(punishment.member).catch(() => undefined);
+		const User = await this.client.users.fetch(punishment.member.id) as Discord.User;
+		const GuildMember = await guild.members.fetch(punishment.member.id).catch(() => undefined);
 		
 		let removePunishmentData: db_punishments_format = { type: `un${punishment.type}`, id, cancels: punishment.id, member: punishment.member, reason, moderator, time: now };
 		let removePunishmentResult;
 
 		if (punishment.type == 'ban') {
-			removePunishmentResult = guild.bans.remove(punishment.member, auditLogReason).catch((err: Error) => err.message);
+			removePunishmentResult = guild.bans.remove(punishment.member.id, auditLogReason).catch((err: Error) => err.message);
 		} else if (punishment.type == 'mute') {
 
 			if (GuildMember) {

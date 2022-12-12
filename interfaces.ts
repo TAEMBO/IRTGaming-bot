@@ -134,7 +134,7 @@ export interface db_punishments_passthruOpt {
 export interface db_punishments_format {
     id: number;
     type: string;
-    member: string;
+    member: db_punishments_format_member;
     moderator: string;
     expired?: boolean;
     time: number;
@@ -142,6 +142,10 @@ export interface db_punishments_format {
     endTime?: number;
     cancels?: number;
     duration?: number;
+}
+export interface db_punishments_format_member {
+    tag: string
+    id: string
 }
 export interface db_userLevels_format {
     messages: number,

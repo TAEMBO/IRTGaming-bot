@@ -17,14 +17,14 @@ export default {
 
 		await interaction.reply({embeds: [embed] });
 		} else if (subCmd === "view") {
-			const punishment = client.punishments._content.find((x: db_punishments_format) => x.id === caseid);
+			const punishment: db_punishments_format = client.punishments._content.find((x: db_punishments_format) => x.id === caseid);
 			if(!punishment) return interaction.reply({content: "A case with that ID wasn't found!"});
 			const cancelledBy = punishment.expired ? client.punishments._content.find((x: db_punishments_format) => x.cancels === punishment.id) : null;
 			const cancels = punishment.cancels ? client.punishments._content.find((x: db_punishments_format) => x.id === punishment.cancels) : null;
 			const embed = new client.embed()
 				.setTitle(`${client.formatPunishmentType(punishment, client, cancels)} | Case #${punishment.id}`)
 				.addFields(
-				{name: '🔹 User', value: `<@${punishment.member}> \`${punishment.member}\``, inline: true},
+				{name: '🔹 User', value: `${punishment.member.tag}\n<@${punishment.member.id}> \`${punishment.member.id}\``, inline: true},
 				{name: '🔹 Moderator', value: `<@${punishment.moderator}> \`${punishment.moderator}\``, inline: true},
 				{name: '\u200b', value: '\u200b', inline: true},
 				{name: '🔹 Reason', value: `\`${punishment.reason || 'unspecified'}\``, inline: true})
@@ -41,7 +41,7 @@ export default {
 			const userId = (interaction.options.getUser("user") as Discord.User).id;
 			const punishment = client.punishments._content.find((x: db_punishments_format) => x.id === caseid);
 			const cancels = punishment.cancels ? client.punishments._content.find((x: db_punishments_format) => x.id === punishment.cancels) : null;
-			const userPunishments = client.punishments._content.filter((x: db_punishments_format) => x.member === userId).sort((a: db_punishments_format, b: db_punishments_format) => a.time - b.time).map((punishment: db_punishments_format) => {
+			const userPunishments = client.punishments._content.filter((x: db_punishments_format) => x.member.id === userId).sort((a: db_punishments_format, b: db_punishments_format) => a.time - b.time).map((punishment: db_punishments_format) => {
 				return {
 					name: `${client.formatPunishmentType(punishment, client, cancels)} | Case #${punishment.id}`,
 					value: `Reason: \`${punishment.reason}\`\n${punishment.duration ? `Duration: ${client.formatTime(punishment.duration, 3)}\n` : ''}Moderator: <@${punishment.moderator}>${punishment.expired ? `\nOverwritten by Case #${client.punishments._content.find((x: db_punishments_format) => x.cancels === punishment.id).id}` : ''}${punishment.cancels ? `\nOverwrites Case #${punishment.cancels}` : ''}`

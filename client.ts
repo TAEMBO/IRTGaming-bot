@@ -1,10 +1,11 @@
 import Discord, { Client, GatewayIntentBits, Partials } from "discord.js";
 import fs from "node:fs";
 import timeNames from './timeNames';
+import { AxiosStatic } from 'axios';
 import { db_punishments_format, global_formatTimeOpt, global_createTableOpt, FSdss_serverName, FS_players, FS_data, FS_careerSavegame, tokens, config, FSCache, YTCache } from './interfaces';
 import { bannedWords, TFstaff, FMstaff, watchList, playerTimes, userLevels, tictactoe, punishments } from "./dbClasses";
 export default class YClient extends Client {
-    invites: Map<any, any>; config: config; tokens: tokens; axios: any; moment: any; embed: typeof Discord.EmbedBuilder; collection: any; messageCollector: any; attachmentBuilder: any; games: Discord.Collection<string, any>; commands: Discord.Collection<string, any>;registery: Array<Discord.ApplicationCommandDataResolvable>;
+    invites: Map<any, any>; config: config; tokens: tokens; axios: AxiosStatic; moment: any; embed: typeof Discord.EmbedBuilder; collection: any; messageCollector: any; attachmentBuilder: any; games: Discord.Collection<string, any>; commands: Discord.Collection<string, any>;registery: Array<Discord.ApplicationCommandDataResolvable>;
 	repeatedMessages: any;
 	FSCache: FSCache;
 	YTCache: YTCache;
@@ -205,8 +206,8 @@ export default class YClient extends Client {
                     return 'Paused 🔴';
             }
         }
-        function getData(client: YClient, URL: string) {
-            return client.axios.get(URL, {timeout: 5000}).catch((error: Error) => error.message);
+        async function getData(client: YClient, URL: string) {
+            return await client.axios.get(URL, {timeout: 5000, headers: {'User-Agent': 'IRTBot/FSLoop'}}).catch((error: Error) => error.message);
         }
 
         const Whitelist = require('./databases/adminWhitelist.json');
@@ -230,25 +231,29 @@ export default class YClient extends Client {
         let error;
 
         await Promise.all([getData(this, serverURLdss), getData(this, serverURLcsg)]).then(function (results) {
-            if (results[0].status == 200) {
+            if (typeof results[0] == 'string') {
+                FSdss.fetchResult = `${serverAcro} dss fail, ${results[0]}`;
+            } else if (results[0].status != 200) {
+                FSdss.fetchResult = `${serverAcro} dss fail with status ${results[0].status}`;
+            } else {
                 FSdss.data = results[0].data as FS_data;
-            } else { FSdss.fetchResult = `${serverAcro} dss fail with status ${results[0].status || results[0]}`};
-
-            if (results[1].status == 200) {
+            }
+            if (typeof results[1] == 'string') {
+                FSdss.fetchResult = `${serverAcro} dss fail, ${results[1]}`;
+            } else if (results[1].status != 200) {
+                FSdss.fetchResult = `${serverAcro} dss fail with status ${results[1].status}`;
+            } else {
                 FScsg.data = xjs.xml2js(results[1].data, {compact: true, spaces: 2}).careerSavegame as FS_careerSavegame;
-            } else { FScsg.fetchResult = `${serverAcro} csg fail with status ${results[1].status || results[1]}`};
+            }
         }).catch((error) => console.log(error))
-
         if (FSdss.fetchResult.length != 0) {
             error = true;
             console.log(`[${this.moment().format('HH:mm:ss')}]`, FSdss.fetchResult);
         }
-
         if (FScsg.fetchResult.length != 0) {
             error = true;
             console.log(`[${this.moment().format('HH:mm:ss')}]`, FScsg.fetchResult);
         }
-
         if (error) { // Blame Red
             statsEmbed.setTitle('Host not responding').setColor(this.config.embedColorRed);
             statsMsg.edit({embeds: [statsEmbed]})

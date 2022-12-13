@@ -5,7 +5,7 @@ import { db_playerTimes_format, FSdss_serverName, FS_players} from '../interface
 async function FSstatsAll(client: YClient, serverURLdss: string, embed: Discord.EmbedBuilder, totalCount: Array<number>, failedFooter: Array<string>, serverAcro: string) {
     let serverName;
     try {
-        serverName = await client.axios.get(serverURLdss, {timeout: 3000}) as FSdss_serverName;
+        serverName = await client.axios.get(serverURLdss, {timeout: 3000, headers: {'User-Agent': 'IRTBot/statsAll'}}) as FSdss_serverName;
     } catch (err) {
         console.log(`stats all; ${serverAcro} failed`);
         failedFooter.push(`Failed to fetch ${serverAcro}`);
@@ -39,7 +39,7 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
     let Color = client.config.embedColorGreen;
 
     try {
-        FSserver = await client.axios.get(serverName, {timeout: 2000});
+        FSserver = await client.axios.get(serverName, {timeout: 2000, headers: {'User-Agent': 'IRTBot/stats'}});
     } catch (err) {
         return interaction.reply('Server did not respond');
     }

@@ -1,12 +1,8 @@
 import Discord, { SlashCommandBuilder, version } from 'discord.js';
 import YClient from '../client';
-import si from 'systeminformation';
 import os from 'node:os';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
-		await interaction.deferReply();
-		const cpu = await si.cpu();
-		const ram = await si.mem();
 		const colunms = ['Command Name', 'Count'];
 		const includedCommands = client.commands.filter(x => x.uses).sort((a, b) => b.uses - a.uses);
 		if (includedCommands.size === 0) return interaction.reply(`No commands have been used yet.\nUptime: ${client.formatTime(client.uptime as number, 2, { commas: true, longNames: true })}`); 
@@ -36,9 +32,21 @@ export default {
 		} else {
 			embed.addFields({name: '\u200b', value: `\`\`\`\n${rows.join('')}\`\`\``});
 		}
-		embed.addFields({name: 'Statistics: Host info', value: `> __**Node.js**__\n**RAM:** ${(Math.round (process.memoryUsage().heapTotal / 1000)) / 1000}MB**/**${(Math.round(ram.available / 1000000)) / 1000}GB\n**Version:** ${process.version}\n**Discord.js version:** v${version}\n**Uptime:** ${client.formatTime(client.uptime as number, 2, { commas: true, longNames: true })}\n> __**System**__\n**CPU:** ${cpu.manufacturer} ${cpu.brand}\n**RAM:** ${Math.floor(ram.total / 1024 / 1000000)}GB\n**Uptime:** ${client.formatTime((os.uptime() *1000), 2, { commas: true, longNames: true })}`})
+		embed.addFields(
+			{name: 'Node.js', value: [
+				`**RAM:** ${client.formatBytes(process.memoryUsage().heapTotal, 2, 1000)}**/**${client.formatBytes(os.freemem(), 2, 1024)}`,
+				`**Version:** ${process.version}`,
+				`**Discord.js version:** v${version}`,
+				`**Uptime:** ${client.formatTime(client.uptime as number, 2, { commas: true, longNames: true })}`
+			].join('\n')},
+			{name: 'System', value: [
+				`**CPU:** ${os.cpus()[0].model.trim()}`,
+				`**RAM:** ${client.formatBytes(os.totalmem(), 2, 1024)}`,
+				`**Uptime:** ${client.formatTime((os.uptime() *1000), 2, { commas: true, longNames: true })}`
+			].join('\n')}
+		)
 		embed.setFooter({text: `Load time: ${Date.now() - interaction.createdTimestamp}ms`})
-		interaction.editReply({embeds: [embed]})
+		interaction.reply({embeds: [embed]})
 	},
 	data: new SlashCommandBuilder()
 		.setName("statistics")

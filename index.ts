@@ -14,7 +14,7 @@ console.log(client.config.devWhitelist);
 client.on("ready", async () => {
 	const guild = client.guilds.cache.get(client.config.mainServer.id) as Discord.Guild;
 	await guild.members.fetch();
-	(client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel).send(`:warning: Bot restarted :warning:\n<@${client.config.devWhitelist[0]}>\n\`\`\`js\n${Object.entries(client.config.botSwitches).map((x)=> `${x[0]}: ${x[1]}`).join('\n')}\`\`\`\nhttps://canary.discord.com/channels/739308099709567021/778848112588095559/1051997230023847946`)
+	(client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel).send(`:warning: Bot restarted :warning:\n<@${client.config.devWhitelist[0]}>\n\`\`\`js\n${Object.entries(client.config.botSwitches).map((x)=> `${x[0]}: ${x[1]}`).join('\n')}\`\`\``)
 	setInterval(()=>{
 		guild.invites.fetch().then((invs)=>{
 			invs.forEach(async(inv)=>{
@@ -99,7 +99,7 @@ setInterval(async () => {
 // Farming Simulator 22 stats loops
 if (client.config.botSwitches.stats) {
 	setInterval(async () => {
-		client.FSLoop(client.tokens.test.dss, client.tokens.test.csg, '891791005098053682', '980240981922291752', 'PS')
+		client.FSLoop(client.tokens.ps.dss, client.tokens.ps.csg, '891791005098053682', '980240981922291752', 'PS')
 		client.FSLoop(client.tokens.pg.dss, client.tokens.pg.csg, '729823615096324166', '980241004718329856', 'PG')
 		client.FSLoop(client.tokens.mf.dss, client.tokens.mf.csg, '982143077554720768', '985586585707900928', 'MF')
 	}, 30000)

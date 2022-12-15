@@ -1,6 +1,7 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client';
 interface Quantities {
+	[key: string]: any,
 	space: Array<Quantity>,
 	currency: Array<Quantity>,
 	mass: Array<Quantity>,
@@ -413,7 +414,6 @@ export default {
 		if (subCmd === 'help') {
 			const wantedQuantity = Object.keys(quantities).find(x => x == (interaction.options.getString("type") as string));
 			if (wantedQuantity) {
-				//@ts-ignore
 				const units: Array<Quantity> = quantities[wantedQuantity];
 				
 				const embed = new client.embed()

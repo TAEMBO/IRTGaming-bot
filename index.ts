@@ -2,7 +2,7 @@ import Discord from 'discord.js';
 import YClient from './client';
 import moment from 'moment';
 import fs from 'node:fs';
-import path from 'path';
+import path from 'node:path';
 import { db_punishments_format, db_userLevels_format, Reminder } from './interfaces'
 const client = new YClient();
 client.init();
@@ -83,7 +83,7 @@ setInterval(async () => {
 	});
 
 	const formattedDate = Math.floor((now - 1667854800000) / 1000 / 60 / 60 / 24);
-	const dailyMsgs = require("./databases/dailyMsgs.json");
+	const dailyMsgs = JSON.parse(fs.readFileSync(__dirname + '/databases/dailyMsgs.json', {encoding: 'utf8'}));
 	if (!dailyMsgs.some((x: Array<number>) => x[0] === formattedDate)) {
 		let total = Object.values<db_userLevels_format>(client.userLevels._content).reduce((a, b) => a + b.messages, 0); // sum of all users
 		const yesterday = dailyMsgs.find((x: Array<number>) => x[0] === formattedDate - 1);

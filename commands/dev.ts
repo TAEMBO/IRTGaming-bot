@@ -2,6 +2,7 @@ import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client';
 import util from 'node:util';
 import fs from 'node:fs';
+import path from 'node:path';
 import { exec } from 'child_process';
 const removeUsername = (text: string) => {
 	let matchesLeft = true;
@@ -25,7 +26,7 @@ export default {
 
 		switch (subCmd) {
 			case 'eval':
-				const code = interaction.options.getString("code") as string;
+				const code = interaction.options.getString("code", true);
 				let output = 'error';
 				let error = false;
 				try {
@@ -74,7 +75,7 @@ export default {
 				interaction.reply({files: [`./databases/${file}.json`]}).catch((e) => interaction.reply(`\`${removeUsername(e.message)}\``))
 				break;
 			case 'statsgraph':
-				client.FSCache.statsGraph = -(interaction.options.getInteger('number') as number);
+				client.FSCache.statsGraph = -(interaction.options.getInteger('number', true));
 				interaction.reply(`Set to \`${client.FSCache.statsGraph}\``);
 				break;
 			case 'decrement':
@@ -99,17 +100,19 @@ export default {
 				})
 				break;
 			case 'increment':
-				const data = require('../databases/dailyMsgs.json');
+				const dailyMsgsPath = path.join(__dirname, '../databases/dailyMsgs.json');
+				const data = JSON.parse(fs.readFileSync(dailyMsgsPath, {encoding: 'utf8'}));
+				const data1 = require('../databases/dailyMsgs.json');
 				const member1 = interaction.options.getMember('member') as Discord.GuildMember;
-				const newTotal = interaction.options.getInteger('total') as number;
+				const newTotal = interaction.options.getInteger('total', true);
 				const oldTotal = client.userLevels._content[member1.id].messages;
+				if (newTotal < oldTotal) return interaction.reply('New total is smaller than old total');
 				const newData: Array<Array<number>> = [];
 
 				client.userLevels._content[member1.id].messages = newTotal;
 				data.forEach((x: Array<number>) => newData.push([x[0], (x[1] + (newTotal - oldTotal))]));
-				fs.writeFileSync(require('node:path').join(__dirname, '../databases/dailyMsgs.json'), JSON.stringify(newData));
+				fs.writeFileSync(dailyMsgsPath, JSON.stringify(newData));
 				await interaction.reply(`<@${member1.id}>'s new total set to \`${newTotal}\``);
-				interaction.followUp('Restarting...').then(() => exec('pm2 restart IRTBot'))
 				break;
 			case 'logs': 
 				interaction.reply({files: ['../../.pm2/logs/IRTBot-out-0.log']})

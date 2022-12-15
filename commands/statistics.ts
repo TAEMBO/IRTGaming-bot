@@ -45,8 +45,7 @@ export default {
 				`**Uptime:** ${client.formatTime((os.uptime() *1000), 2, { commas: true, longNames: true })}`
 			].join('\n')}
 		)
-		embed.setFooter({text: `Load time: ${Date.now() - interaction.createdTimestamp}ms`})
-		interaction.reply({embeds: [embed]})
+		interaction.reply({embeds: [embed], fetchReply: true}).then((msg) => msg.edit({embeds: [new client.embed(msg.embeds[0].data).setFooter({text: `Load time: ${msg.createdTimestamp - interaction.createdTimestamp}ms`})]}));
 	},
 	data: new SlashCommandBuilder()
 		.setName("statistics")

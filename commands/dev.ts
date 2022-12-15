@@ -89,6 +89,8 @@ export default {
 				break;
 			case 'update':
 				const msg = await interaction.reply({content: "Pulling from repo...", fetchReply: true});
+				client.userLevels.forceSave();
+				client.playerTimes.forceSave();
 				exec('git pull', (error, stdout) => {
 					if (error) {
 						msg.edit(`Pull failed:\n\`\`\`${error.message}\`\`\``);

@@ -104,7 +104,6 @@ export default {
 			case 'increment':
 				const dailyMsgsPath = path.join(__dirname, '../databases/dailyMsgs.json');
 				const data = JSON.parse(fs.readFileSync(dailyMsgsPath, {encoding: 'utf8'}));
-				const data1 = require('../databases/dailyMsgs.json');
 				const member1 = interaction.options.getMember('member') as Discord.GuildMember;
 				const newTotal = interaction.options.getInteger('total', true);
 				const oldTotal = client.userLevels._content[member1.id].messages;

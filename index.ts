@@ -25,7 +25,7 @@ client.on("ready", async () => {
 	if (client.config.botSwitches.registerCommands) guild.commands.set(client.registery).catch((e)=>{console.log(`Couldn't register commands bcuz: ${e}`)});
 
 	setInterval(async () => {
-		(client.user as Discord.ClientUser).setPresence({activities: [{name: 'No status?', type: 5}], status: 'online'});
+		(client.user as Discord.ClientUser).setPresence({activities: [{name: 'you open presents', type: 3}], status: 'online'});
 		// Playing: 0 & 1, Listening: 2, Watching: 3, N/A: 4, Competing in: 5
 	}, 60000);
 	console.log(`[${moment().format('HH:mm:ss')}] Bot active as ${(client.user as Discord.ClientUser).tag}`);

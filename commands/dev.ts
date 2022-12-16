@@ -85,6 +85,8 @@ export default {
 				interaction.reply(`Decremented \`${time}\` min from \`${player}\``)
 				break;
 			case 'restart':
+				client.userLevels.forceSave();
+				client.playerTimes.forceSave();
 				interaction.reply("Restarting...").then(async ()=> exec('pm2 restart IRTBot'));
 				break;
 			case 'update':

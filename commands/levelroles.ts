@@ -1,14 +1,17 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client';
-import { db_userLevels_format } from '../interfaces'
+import { db_userLevels_format } from '../interfaces';
+import path from 'node:path';
+import fs from 'node:fs';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
 		const subCmd = interaction.options.getSubcommand();
 
 		if (subCmd === "leaderboard") {
 			const messageCountsTotal = Object.values<db_userLevels_format>(client.userLevels._content).reduce((a, b) => a + b.messages, 0);
-			
-			const data = require('../databases/dailyMsgs.json').map((x: Array<number>, i: number, a: any) => {
+
+			const dailyMsgsPath = path.join(__dirname, '../databases/dailyMsgs.json');
+			const data = JSON.parse(fs.readFileSync(dailyMsgsPath, {encoding: 'utf8'})).map((x: Array<number>, i: number, a: any) => {
 				const yesterday = a[i - 1] || [];
 				return x[1] - (yesterday[1] || x[1]);
 			}).slice(1).slice(-60);
@@ -30,7 +33,6 @@ export default {
 			const textSize = 32;
 			
 			const canvas = require('canvas');
-			const fs = require('fs');
 			const img = canvas.createCanvas(950, 450);
 			const ctx = img.getContext('2d');
 			

@@ -81,7 +81,7 @@ const quantities: Quantities = {
 		},
 		{
 			name: 'US Dollar :flag_us:',
-			value: 0.98,
+			value: 0.94,
 			short: ['USD', '$'],
 		},
 		{
@@ -91,37 +91,37 @@ const quantities: Quantities = {
 		},
 		{
 			name: 'Turkish Lira :flag_tr:',
-			value: 0.055,
+			value: 0.051,
 			short: ['TRY', 'TL', '₺']
 		},
 		{
 			name: 'Russian Ruble :flag_ru:',
-			value: 0.017,
+			value: 0.015,
 			short: ['RUB', '₽']
 		},
 		{
 			name: 'Canadian Dollar :flag_ca:',
-			value: 0.74,
+			value: 0.69,
 			short: ['CAD']
 		},
 		{
 			name: 'Australian Dollar :flag_au:',
-			value: 0.64,
+			value: 0.63,
 			short: ['AUD']
 		},
 		{
 			name: 'Japanese Yen :flag_jp:',
-			value: 0.0068,
+			value: 0.0069,
 			short: ['JPY', '¥', 'yen', 'jy']
 		},
 		{
 			name: 'New Zealand Dollar :flag_nz:',
-			value: 0.58,
+			value: 0.60,
 			short: ['NZD']
 		},
 		{
 			name: 'Indonesian Rupiah :flag_id:',
-			value: 0.000066,
+			value: 0.000060,
 			short: ['IDR', 'Rp']
 		},
 		{
@@ -136,7 +136,7 @@ const quantities: Quantities = {
 		},
 		{
 			name: 'Norwegian krone :flag_no:',
-			value: 0.096,
+			value: 0.095,
 			short: ['NOK']
 		},
 		{
@@ -146,7 +146,7 @@ const quantities: Quantities = {
 		},
 		{
 			name: 'Icelandic króna :flag_is:',
-			value: 0.0071,
+			value: 0.0066,
 			short: ['ISK']
 		},
 		{
@@ -156,32 +156,32 @@ const quantities: Quantities = {
 		},
 		{
 			name: 'Swiss franc :flag_sw:',
-			value: 1.02,
+			value: 1.01,
 			short: ['CFH', 'fr']
 		},
 		{
 			name: 'Ukrainian hryvnia :flag_ua:',
-			value: 0.028,
+			value: 0.026,
 			short: ['UAH', '₴', 'грн']
 		},
 		{
 			name: 'Indian rupee :flag_in:',
-			value: 0.012,
+			value: 0.011,
 			short: ['INR', '₹']
 		},
 		{
 			name: 'United Arab Emirates dirham :flag_ae:',
-			value: 0.28,
+			value: 0.26,
 			short: ['AED', 'د.إ']
 		},
 		{
 			name: 'Sri Lankan Rupee :flag_lk:',
-			value: 0.0028,
+			value: 0.0026,
 			short: ['LKR', 'රු', 'ரூ']
 		},
 		{
 			name: 'Hungarian Forint :flag_hu:',
-			value: 0.0024,
+			value: 0.0025,
 			short: ['HUF']
 		},
 		{

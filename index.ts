@@ -91,8 +91,10 @@ setInterval(async () => {
 			total = yesterday;
 		}
 		dailyMsgs.push([formattedDate, total]);
-		fs.writeFileSync(__dirname + "/databases/dailyMsgs.json", JSON.stringify(dailyMsgs));
-		console.log(`[${client.moment().format('HH:mm:ss')}]`, `Pushed [${formattedDate}, ${total}] to dailyMsgs`)
+		fs.writeFileSync(__dirname + "/databases/dailyMsgs.json", JSON.stringify(dailyMsgs, null, 2));
+		console.log(`[${client.moment().format('HH:mm:ss')}]`, `Pushed [${formattedDate}, ${total}] to dailyMsgs`);
+		(client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel).send(`:warning: Pushed [${formattedDate}, ${total}] to </rank leaderboard:1042659197919178790>`);
+
 	}
 }, 5000);
 

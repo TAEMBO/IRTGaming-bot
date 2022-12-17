@@ -70,7 +70,12 @@ export default {
 						embedArray.push(new client.embed()
 							.setTitle(activity.name)
 							.setColor('#ffffff')
-							.setDescription(`\u200b**Started:** <t:${Math.round(activity.createdTimestamp/1000)}:R>${activity.details ? '' : '\n**Details:** ' + activity.details}${activity.state ? '' : '\n**State:** ' + activity.state}${activity.assets ? '\n**Large text:** ' + activity.assets.largeText : ''}`)
+							.setDescription([
+								`\u200b**Started:** <t:${Math.round(activity.createdTimestamp/1000)}:R>`,
+								activity.details ? '\n**Details:** ' + activity.details : '',
+								activity.state ? '\n**State:** ' + activity.state : '',
+								activity.assets ? '\n**Large text:** ' + activity.assets.largeText : ''
+							].join(''))
 						)
 					}
 				})

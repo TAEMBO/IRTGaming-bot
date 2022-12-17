@@ -1,18 +1,6 @@
 import Discord, { ColorResolvable } from 'discord.js';
 
-export interface tokens {
-    token: string
-    ps: FSURLs
-    pg: FSURLs
-    mf: FSURLs
-    test: FSURLs
-}
-interface FSURLs {
-    dss: string,
-    csg: string
-}
-
-export interface config {
+export interface Config {
     embedColor: ColorResolvable
     embedColorGreen: ColorResolvable,
     embedColorRed: ColorResolvable,
@@ -20,8 +8,6 @@ export interface config {
     botSwitches: botSwitches,
     devWhitelist: Array<string>,
     mainServer: mainServer
-
-
 }
 interface botSwitches {
     commands: boolean

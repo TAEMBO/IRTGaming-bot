@@ -1,42 +1,40 @@
 import Discord, { Client, GatewayIntentBits, Partials } from "discord.js";
 import fs from "node:fs";
+import axios from 'axios';
+import moment from 'moment';
+import config from './config.json';
+import tokens from './tokens.json';
 import timeNames from './timeNames';
-import { AxiosStatic } from 'axios';
-import { db_punishments_format, global_formatTimeOpt, global_createTableOpt, FSdss_serverName, FS_players, FS_data, FS_careerSavegame, tokens, config, FSCache, YTCache } from './interfaces';
+import { db_punishments_format, global_formatTimeOpt, global_createTableOpt, FS_players, FS_data, FS_careerSavegame, Config, FSCache, YTCache } from './interfaces';
 import { bannedWords, TFstaff, FMstaff, watchList, playerTimes, userLevels, tictactoe, punishments } from "./dbClasses";
 export default class YClient extends Client {
-    invites: Map<any, any>; config: config; tokens: tokens; axios: AxiosStatic; moment: any; embed: typeof Discord.EmbedBuilder; collection: any; messageCollector: any; attachmentBuilder: any; games: Discord.Collection<string, any>; commands: Discord.Collection<string, any>;registery: Array<Discord.ApplicationCommandDataResolvable>;
-	repeatedMessages: any;
-	FSCache: FSCache;
-	YTCache: YTCache;
-	bannedWords: bannedWords;
-    TFstaff: TFstaff;
-    FMstaff: FMstaff;
-    watchList: watchList;
-    playerTimes: playerTimes;
-    userLevels: userLevels;
-    tictactoe: tictactoe;
-	punishments: punishments
+    config: Config; tokens: typeof tokens; axios: typeof axios; moment: typeof moment; 
+    embed: typeof Discord.EmbedBuilder; collection: typeof Discord.Collection; messageCollector: typeof Discord.MessageCollector; attachmentBuilder: typeof Discord.AttachmentBuilder; 
+    games: Discord.Collection<string, any>; commands: Discord.Collection<string, any>;registery: Array<Discord.ApplicationCommandDataResolvable>;
+    repeatedMessages: any; FSCache: FSCache; YTCache: YTCache; invites: Map<any, any>; bannedNamesPS: Array<string>; bannedNamesPG: Array<string>;
+    bannedWords: bannedWords; TFstaff: TFstaff; FMstaff: FMstaff; watchList: watchList; playerTimes: playerTimes; userLevels: userLevels; tictactoe: tictactoe; punishments: punishments
     constructor() {
         super({
             intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildBans, GatewayIntentBits.GuildInvites, GatewayIntentBits.GuildPresences, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildVoiceStates],
             partials: [Partials.Channel, Partials.Message, Partials.Reaction],
             ws: {properties: {browser: "Discord iOS"}}
-        })
+        });
         this.invites = new Map();
-        this.config = require("./config.json");
-        this.tokens = require("./tokens.json");
-        this.axios = require("axios");
-        this.moment = require('moment');
+        this.tokens = tokens;
+        this.config = config as Config;
+        this.axios = axios;
+        this.moment = moment;
         this.embed = Discord.EmbedBuilder;
         this.collection = Discord.Collection;
         this.messageCollector = Discord.MessageCollector;
         this.attachmentBuilder = Discord.AttachmentBuilder;
-        this.games = new Discord.Collection();
-        this.commands = new Discord.Collection();
+        this.games = new this.collection();
+        this.commands = new this.collection();
         this.registery = [];
-        this.setMaxListeners(100)
+        this.setMaxListeners(100);
         this.repeatedMessages = {};
+        this.bannedNamesPS = [];
+        this.bannedNamesPG = [];
         this.FSCache = {
             statsGraph: -120, 
             ps: {new: [], old: [], status: undefined},

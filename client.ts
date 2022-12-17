@@ -118,7 +118,7 @@ export default class YClient extends Client {
     async FSLoop(serverURLdss: string, serverURLcsg: string, Channel: string, Message: string, serverAcro: string) {
         
         function dataPoint(slotUsage: number) {
-            const DB = require(`./databases/${serverAcro}PlayerData.json`);
+            const DB = JSON.parse(fs.readFileSync(__dirname + `/databases/${serverAcro}PlayerData.json`, {encoding: 'utf8'}));
             DB.push(slotUsage);
             fs.writeFileSync(__dirname + `/databases/${serverAcro}PlayerData.json`, JSON.stringify(DB));
         }
@@ -208,7 +208,7 @@ export default class YClient extends Client {
             return await client.axios.get(URL, {timeout: 5000, headers: {'User-Agent': 'IRTBot/FSLoop'}}).catch((error: Error) => error.message);
         }
 
-        const Whitelist = require('./databases/adminWhitelist.json');
+        const Whitelist = JSON.parse(fs.readFileSync(__dirname + '/databases/adminWhitelist.json', {encoding: 'utf8'}));
         const wlPing = ["238248487593050113", "267270757539643402", "642735886953611265"];
         const wlChannel = this.channels.resolve(this.config.mainServer.channels.watchlist) as Discord.TextChannel;
         const logChannel = this.channels.resolve(this.config.mainServer.channels.fslogs) as Discord.TextChannel;

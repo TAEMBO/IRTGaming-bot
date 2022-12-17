@@ -1,5 +1,7 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client';
+import fs from 'node:fs';
+import path from 'node:path';
 import { db_playerTimes_format, FSdss_serverName, FS_players} from '../interfaces'
 
 async function FSstatsAll(client: YClient, serverURLdss: string, embed: Discord.EmbedBuilder, totalCount: Array<number>, failedFooter: Array<string>, serverAcro: string) {
@@ -50,7 +52,7 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
         Color = client.config.embedColorYellow;
     }
 
-    const data = require(`../databases/${DBName}.json`).slice(client.FSCache.statsGraph)
+    const data = JSON.parse(fs.readFileSync(path.join(__dirname, `../databases/${DBName}.json`), {encoding: 'utf8'})).slice(client.FSCache.statsGraph);
 
     // handle negative days
     data.forEach((change: number, i: number) => {

@@ -64,7 +64,10 @@ export default {
 						embedArray.push(new client.embed()
 							.setTitle(activity.name)
 							.setColor('#ffffff')
-							.setDescription(`${activity.emoji == null ? '' : `**Emoji name:** ${activity.emoji.name}\n**Text:** `}${activity.state}`)
+							.setDescription([
+								activity.emoji ? `**Emoji name:** ${activity.emoji.name}`: '',
+								activity.state ? `\n**Text:** ${activity.state}`: ''
+							].join(''))
 						)
 					} else {
 						embedArray.push(new client.embed()

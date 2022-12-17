@@ -145,7 +145,7 @@ export class punishments extends Database {
         const embed = new this.client.embed()
             .setTitle(`${this.client.formatPunishmentType(data, this.client, cancels)} | Case #${data.id}`)
             .addFields(
-            	{name: '🔹 User', value: `${data.member.tag}\n<@${data.member.id}> \`${data.member}\``, inline: true},
+            	{name: '🔹 User', value: `${data.member.tag}\n<@${data.member.id}>\n\`${data.member.id}\``, inline: true},
             	{name: '🔹 Moderator', value: `<@${data.moderator}> \`${data.moderator}\``, inline: true},
             	{name: '\u200b', value: '\u200b', inline: true},
             	{name: '🔹 Reason', value: `\`${data.reason}\``, inline: true})

@@ -5,10 +5,10 @@ import moment from 'moment';
 import config from './config.json';
 import tokens from './tokens.json';
 import timeNames from './timeNames';
-import { db_punishments_format, global_formatTimeOpt, global_createTableOpt, FS_players, FS_data, FS_careerSavegame, Config, FSCache, YTCache } from './interfaces';
+import { db_punishments_format, global_formatTimeOpt, global_createTableOpt, FS_players, FS_data, FS_careerSavegame, Config, FSCache, YTCache, Tokens } from './interfaces';
 import { bannedWords, TFstaff, FMstaff, watchList, playerTimes, userLevels, tictactoe, punishments } from "./dbClasses";
 export default class YClient extends Client {
-    config: Config; tokens: typeof tokens; axios: typeof axios; moment: typeof moment; 
+    config: Config; tokens: Tokens; axios: typeof axios; moment: typeof moment; 
     embed: typeof Discord.EmbedBuilder; collection: typeof Discord.Collection; messageCollector: typeof Discord.MessageCollector; attachmentBuilder: typeof Discord.AttachmentBuilder; 
     games: Discord.Collection<string, any>; commands: Discord.Collection<string, any>;registery: Array<Discord.ApplicationCommandDataResolvable>;
     repeatedMessages: any; FSCache: FSCache; YTCache: YTCache; invites: Map<any, any>; bannedNamesPS: Array<string>; bannedNamesPG: Array<string>;
@@ -20,7 +20,7 @@ export default class YClient extends Client {
             ws: {properties: {browser: "Discord iOS"}}
         });
         this.invites = new Map();
-        this.tokens = tokens;
+        this.tokens = tokens as Tokens;
         this.config = config as Config;
         this.axios = axios;
         this.moment = moment;

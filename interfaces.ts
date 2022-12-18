@@ -1,5 +1,29 @@
 import Discord, { ColorResolvable } from 'discord.js';
 
+export interface Tokens {
+    [key: string]: string | FTPServers | FSURLs
+    token: string
+    ftp: FTPServers
+    ps: FSURLs
+    pg: FSURLs
+    mf: FSURLs
+    test: FSURLs
+}
+export interface FSURLs {
+    login: string,
+    dss: string,
+    csg: string
+}
+interface FTPServers {
+    ps: FTPLogins
+    pg: FTPLogins
+}
+interface FTPLogins {
+    host: string,
+    user: string,
+    password: string
+}
+
 export interface Config {
     embedColor: ColorResolvable
     embedColorGreen: ColorResolvable,
@@ -80,7 +104,7 @@ export interface FSCache {
     mf: FSCacheServer
 
 }
-interface FSCacheServer {
+export interface FSCacheServer {
     new: Array<FS_players>, 
     old: Array<FS_players>, 
     status: undefined | number

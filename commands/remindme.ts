@@ -2,11 +2,11 @@ import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client';
 import path from 'node:path';
 import fs from 'node:fs';
-const ms = require('ms');
+import ms from 'ms';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
         const whatToRemind = interaction.options.getString("what");
-        const whenToRemind = ms(interaction.options.getString("when"));
+        const whenToRemind = ms(interaction.options.getString("when", true));
         if(whenToRemind == null){
             const incorrectTimeFormatEmbed = new client.embed()
                 .setTitle('Incorrect timestamp.')

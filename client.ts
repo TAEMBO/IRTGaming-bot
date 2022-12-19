@@ -237,9 +237,9 @@ export default class YClient extends Client {
                 FSdss.data = results[0].data as FS_data;
             }
             if (typeof results[1] == 'string') {
-                FSdss.fetchResult = `${serverAcro} csg fail, ${results[1]}`;
+                FScsg.fetchResult = `${serverAcro} csg fail, ${results[1]}`;
             } else if (results[1].status != 200) {
-                FSdss.fetchResult = `${serverAcro} csg fail with status ${results[1].status}`;
+                FScsg.fetchResult = `${serverAcro} csg fail with status ${results[1].status}`;
             } else {
                 FScsg.data = xjs.xml2js(results[1].data, {compact: true, spaces: 2}).careerSavegame as FS_careerSavegame;
             }

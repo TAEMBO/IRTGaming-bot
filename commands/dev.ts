@@ -51,10 +51,9 @@ export default {
 				} else {
 					output = '\n' + String(output);
 				}
-				[client.token, client.tokens.ps.login, client.tokens.pg.login, client.tokens.mf.login].forEach((login) => {
-					const regexp = new RegExp(login as string, 'g');
-					output = output.replace(regexp, 'LOGIN_LEAK');
-				})
+				[client.token, client.tokens.ps.login, client.tokens.pg.login, client.tokens.mf.login, client.tokens.ftp.ps, client.tokens.ftp.pg].forEach((login) => {
+					output = output.replace(login as string, 'LOGIN_LEAK');
+				});
 				const embed = new client.embed()
 					.setTitle('__Eval__')
 					.addFields({name: 'Input', value:`\`\`\`js\n${code.slice(0, 1010)}\n\`\`\``}, {name: 'Output', value: `\`\`\`${removeUsername(output).slice(0, 1016)}\n\`\`\``})

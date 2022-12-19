@@ -51,7 +51,7 @@ export default {
 				} else {
 					output = '\n' + String(output);
 				}
-				[client.token, client.tokens.ps.login, client.tokens.pg.login, client.tokens.mf.login, client.tokens.ftp.ps.password, client.tokens.ftp.pg.password].forEach((login) => {
+				[client.token, client.tokens.ps.login, client.tokens.pg.login, client.tokens.mf.login, client.tokens.ftp.ps.password, client.tokens.ftp.pg.password, client.tokens.ftp.ps.user, client.tokens.ftp.pg.user].forEach((login) => {
 					output = output.replace(login as string, 'LOGIN_LEAK');
 				});
 				const embed = new client.embed()

@@ -1,6 +1,5 @@
 import Discord, { Client, GatewayIntentBits, Partials } from "discord.js";
 import fs from "node:fs";
-import axios from 'axios';
 import moment from 'moment';
 import config from './config.json';
 import tokens from './tokens.json';
@@ -8,7 +7,7 @@ import timeNames from './timeNames';
 import { db_punishments_format, global_formatTimeOpt, global_createTableOpt, FS_players, FS_data, FS_careerSavegame, Config, FSCache, YTCache, Tokens } from './interfaces';
 import { bannedWords, TFstaff, FMstaff, watchList, playerTimes, userLevels, tictactoe, punishments } from "./dbClasses";
 export default class YClient extends Client {
-    config: Config; tokens: Tokens; axios: typeof axios; moment: typeof moment; 
+    config: Config; tokens: Tokens; moment: typeof moment; 
     embed: typeof Discord.EmbedBuilder; collection: typeof Discord.Collection; messageCollector: typeof Discord.MessageCollector; attachmentBuilder: typeof Discord.AttachmentBuilder; 
     games: Discord.Collection<string, any>; commands: Discord.Collection<string, any>;registery: Array<Discord.ApplicationCommandDataResolvable>;
     repeatedMessages: any; FSCache: FSCache; YTCache: YTCache; invites: Map<any, any>; bannedNamesPS: Array<string>; bannedNamesPG: Array<string>;
@@ -22,7 +21,6 @@ export default class YClient extends Client {
         this.invites = new Map();
         this.tokens = tokens as Tokens;
         this.config = config as Config;
-        this.axios = axios;
         this.moment = moment;
         this.embed = Discord.EmbedBuilder;
         this.collection = Discord.Collection;
@@ -204,9 +202,6 @@ export default class YClient extends Client {
                     return 'Paused 🔴';
             }
         }
-        async function getData(client: YClient, URL: string) {
-            return await client.axios.get(URL, {timeout: 5000, headers: {'User-Agent': 'IRTBot/FSLoop'}}).catch((error: Error) => error.message);
-        }
 
         const Whitelist = JSON.parse(fs.readFileSync(__dirname + '/databases/adminWhitelist.json', {encoding: 'utf8'}));
         const wlPing = ["238248487593050113", "267270757539643402", "642735886953611265"];
@@ -217,48 +212,26 @@ export default class YClient extends Client {
         const now = Math.round(Date.now() / 1000);
         const playerInfo: Array<string> = [];
         const statsEmbed = new this.embed();
-        const FSdss = {
-            data: {} as FS_data,
-            fetchResult: '' as string
-        };
-        const FScsg = {
-            data: {} as FS_careerSavegame,
-            fetchResult: '' as string
-        };
         let justStarted = false;
-        let error;
 
-        await Promise.all([getData(this, serverURLdss), getData(this, serverURLcsg)]).then(function (results) {
-            if (typeof results[0] == 'string') {
-                FSdss.fetchResult = `${serverAcro} dss fail, ${results[0]}`;
-            } else if (results[0].status != 200) {
-                FSdss.fetchResult = `${serverAcro} dss fail with status ${results[0].status}`;
-            } else {
-                FSdss.data = results[0].data as FS_data;
-            }
-            if (typeof results[1] == 'string') {
-                FScsg.fetchResult = `${serverAcro} csg fail, ${results[1]}`;
-            } else if (results[1].status != 200) {
-                FScsg.fetchResult = `${serverAcro} csg fail with status ${results[1].status}`;
-            } else {
-                FScsg.data = xjs.xml2js(results[1].data, {compact: true, spaces: 2}).careerSavegame as FS_careerSavegame;
-            }
-        }).catch((error) => console.log(error))
-        if (FSdss.fetchResult.length != 0) {
-            error = true;
-            console.log(`[${this.moment().format('HH:mm:ss')}]`, FSdss.fetchResult);
-        }
-        if (FScsg.fetchResult.length != 0) {
-            error = true;
-            console.log(`[${this.moment().format('HH:mm:ss')}]`, FScsg.fetchResult);
-        }
-        if (error) { // Blame Red
+        let DSSFetch: Response | void = await fetch(serverURLdss, { signal: AbortSignal.timeout(5000) }).catch((err: Error) => {
+            console.log(`[${this.moment().format('HH:mm:ss')}]`, serverAcro + ' dss ' + err.message);
+        }); // Fetch dedicated-server-stats.json
+
+        let CSGFetch: Response | void = await fetch(serverURLcsg, { signal: AbortSignal.timeout(5000) }).catch((err: Error) => {
+            console.log(`[${this.moment().format('HH:mm:ss')}]`, serverAcro + ' csg ' + err.message);
+        }); // Fetch dedicated-server-savegame.html
+
+        if (DSSFetch == undefined || CSGFetch == undefined || CSGFetch.status == 204) { // Blame Red
+            if (CSGFetch?.status == 204) console.log(`[${this.moment().format('HH:mm:ss')}]`, serverAcro + ' csg empty content');
             statsEmbed.setTitle('Host not responding').setColor(this.config.embedColorRed);
-            statsMsg.edit({embeds: [statsEmbed]})
+            statsMsg.edit({embeds: [statsEmbed]});
             return;
-        }
+        } 
+        const FSdss = await DSSFetch.json() as FS_data;
+        const FScsg = xjs.xml2js(await CSGFetch.text(), {compact: true}).careerSavegame as FS_careerSavegame;
     
-        FSdss.data.slots.players.filter((x: FS_players)=>x.isUsed).forEach((player: FS_players) => {
+        FSdss.slots.players.filter((x)=>x.isUsed).forEach((player) => {
             const playTimeHrs = Math.floor(player.uptime / 60);
             const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
             const inWl = this.watchList._content.find((y: Array<string>) => y[0] == player.name);
@@ -271,76 +244,74 @@ export default class YClient extends Client {
         })
 
         // Data crunching for stats embed
-        const Money = parseInt(FScsg.data.statistics?.money?._text).toLocaleString('en-US') ?? null;
-        const IngameTimeHrs = Math.floor(FSdss.data.server?.dayTime / 3600 / 1000).toString().padStart(2, '0') ?? null;
-        const IngameTimeMins = Math.floor((FSdss.data.server?.dayTime / 60 / 1000) % 60).toString().padStart(2, '0') ?? null;
-        const Timescale = FScsg.data.settings?.timeScale?._text?.slice(0, -5) ?? null;
-        const playTimeHrs = (parseInt(FScsg.data.statistics?.playTime?._text) / 60).toFixed(2) ?? null;
-        const PlaytimeFormatted = this.formatTime((parseInt(FScsg.data.statistics?.playTime?._text) * 60 * 1000), 3, { commas: true, longNames: false }) ?? null;
-        const Seasons = seasons(FScsg.data.settings?.growthMode?._text) ?? null;
-        const AutosaveInterval = parseInt(FScsg.data.settings?.autoSaveInterval?._text).toFixed(0) ?? null;
-        const SlotUsage = parseInt(FScsg.data.slotSystem?._attributes?.slotUsage).toLocaleString('en-US') ?? null;
+        const Money = parseInt(FScsg.statistics?.money?._text).toLocaleString('en-US') ?? null;
+        const IngameTimeHrs = Math.floor(FSdss.server?.dayTime / 3600 / 1000).toString().padStart(2, '0') ?? null;
+        const IngameTimeMins = Math.floor((FSdss.server?.dayTime / 60 / 1000) % 60).toString().padStart(2, '0') ?? null;
+        const Timescale = FScsg.settings?.timeScale?._text?.slice(0, -5) ?? null;
+        const playTimeHrs = (parseInt(FScsg.statistics?.playTime?._text) / 60).toFixed(2) ?? null;
+        const PlaytimeFormatted = this.formatTime((parseInt(FScsg.statistics?.playTime?._text) * 60 * 1000), 3, { commas: true, longNames: false }) ?? null;
+        const Seasons = seasons(FScsg.settings?.growthMode?._text) ?? null;
+        const AutosaveInterval = parseInt(FScsg.settings?.autoSaveInterval?._text).toFixed(0) ?? null;
+        const SlotUsage = parseInt(FScsg.slotSystem?._attributes?.slotUsage).toLocaleString('en-US') ?? null;
 
         // Stats embed
-        statsEmbed.setAuthor({name: `${FSdss.data.slots.used}/${FSdss.data.slots.capacity}`})
-		if (FSdss.data.slots.used === FSdss.data.slots.capacity) {
+        statsEmbed.setAuthor({name: `${FSdss.slots.used}/${FSdss.slots.capacity}`});
+		if (FSdss.slots.used === FSdss.slots.capacity) {
 			statsEmbed.setColor(this.config.embedColorRed);
-		} else if (FSdss.data.slots.used > 9) {
+		} else if (FSdss.slots.used > 9) {
 			statsEmbed.setColor(this.config.embedColorYellow);
 		} else statsEmbed.setColor(this.config.embedColorGreen);
-        statsEmbed.setDescription(`${FSdss.data.slots.used === 0 ? '*No players online*' : playerInfo.join("\n")}`);
+        statsEmbed.setDescription(`${FSdss.slots.used === 0 ? '*No players online*' : playerInfo.join("\n")}`);
         statsEmbed.addFields({name: `**Server Statistics**`, value: [
-                `**Money:** $${Money}`,
-                `**In-game time:** ${IngameTimeHrs}:${IngameTimeMins}`,
-                `**Timescale:** ${Timescale}x`,
-                `**Playtime:** ${playTimeHrs}hrs (${PlaytimeFormatted})`,
-                `**Map:** ${FSdss.data.server.mapName}`,
-                `**Seasonal growth:** ${Seasons}`,
-                `**Autosave interval:** ${AutosaveInterval} min`,
-                `**Game version:** ${FSdss.data.server.version}`,
-                `**Slot usage:** ${SlotUsage}`
+            `**Money:** $${Money}`,
+            `**In-game time:** ${IngameTimeHrs}:${IngameTimeMins}`,
+            `**Timescale:** ${Timescale}x`,
+            `**Playtime:** ${playTimeHrs}hrs (${PlaytimeFormatted})`,
+            `**Map:** ${FSdss.server.mapName}`,
+            `**Seasonal growth:** ${Seasons}`,
+            `**Autosave interval:** ${AutosaveInterval} min`,
+            `**Game version:** ${FSdss.server.version}`,
+            `**Slot usage:** ${SlotUsage}`
         ].join('\n')});
-        statsMsg.edit({embeds: [statsEmbed]})
+        statsMsg.edit({embeds: [statsEmbed]});
         
         // Logs
-        if (FSdss.data.server.name.length === 0) {
+        if (FSdss.server.name.length === 0) {
             if (this.FSCache[serverAcro.toLowerCase()].status === 1) {
-                logChannel.send({embeds: [new this.embed().setTitle(`${serverAcro} now offline`).setColor(this.config.embedColorYellow)]})
+                logChannel.send({embeds: [new this.embed().setTitle(`${serverAcro} now offline`).setColor(this.config.embedColorYellow).setTimestamp()]});
             }
             this.FSCache[serverAcro.toLowerCase()].status = 0;
         } else {
             if (this.FSCache[serverAcro.toLowerCase()].status === 0) {
-                logChannel.send({embeds: [new this.embed().setTitle(`${serverAcro} now online`).setColor(this.config.embedColorYellow)]})
+                logChannel.send({embeds: [new this.embed().setTitle(`${serverAcro} now online`).setColor(this.config.embedColorYellow).setTimestamp()]});
 		        justStarted = true;
             }
             this.FSCache[serverAcro.toLowerCase()].status = 1;
         }
 
         if (!justStarted) {
-            this.FSCache[serverAcro.toLowerCase()].new = FSdss.data.slots.players.filter((x: FS_players) =>x.isUsed);
+            this.FSCache[serverAcro.toLowerCase()].new = FSdss.slots.players.filter((x) =>x.isUsed);
 
-            if (serverAcro != 'MF') {adminCheck(this, this.FSCache[serverAcro.toLowerCase()].new, this.FSCache[serverAcro.toLowerCase()].old)};
+            if (serverAcro != 'MF') adminCheck(this, this.FSCache[serverAcro.toLowerCase()].new, this.FSCache[serverAcro.toLowerCase()].old);
             log(this, this.FSCache[serverAcro.toLowerCase()].new, this.FSCache[serverAcro.toLowerCase()].old);
-            dataPoint(FSdss.data.slots.used);
+            dataPoint(FSdss.slots.used);
 
-            this.FSCache[serverAcro.toLowerCase()].old = FSdss.data.slots.players.filter((x: FS_players) =>x.isUsed);
+            this.FSCache[serverAcro.toLowerCase()].old = FSdss.slots.players.filter((x) =>x.isUsed);
         }
     };
     async YTLoop(YTChannelID: string, YTChannelName: string) {
         const xjs = require('xml-js');
         let Data: any;
-        let error;
 
         try {
-            await this.axios.get(`https://www.youtube.com/feeds/videos.xml?channel_id=${YTChannelID}`, {timeout: 5000}).then((xml: any) => {
-                Data = xjs.xml2js(xml.data, {compact: true, spaces: 2});
-            })
+            await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${YTChannelID}`, { signal: AbortSignal.timeout(5000) }).then(async (response) => {
+                Data = xjs.xml2js(await response.text(), {compact: true});
+            });
         } catch (err) {
-            error = true;
             console.log(`[${this.moment().format('HH:mm:ss')}]`, `${YTChannelName} YT fail`);
+            return;
         }
 
-        if (error) return;
         if (this.YTCache[YTChannelID] == undefined) {
             this.YTCache[YTChannelID] = Data.feed.entry[0]['yt:videoId']._text;
             return;

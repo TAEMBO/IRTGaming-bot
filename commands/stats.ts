@@ -2,22 +2,24 @@ import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client';
 import fs from 'node:fs';
 import path from 'node:path';
-import { db_playerTimes_format, FSdss_serverName, FS_players} from '../interfaces'
+import { db_playerTimes_format, FS_data} from '../interfaces'
 
 async function FSstatsAll(client: YClient, serverURLdss: string, embed: Discord.EmbedBuilder, totalCount: Array<number>, failedFooter: Array<string>, serverAcro: string) {
     let serverName;
     try {
-        serverName = await client.axios.get(serverURLdss, {timeout: 3000, headers: {'User-Agent': 'IRTBot/statsAll'}}) as FSdss_serverName;
+        serverName = await fetch(serverURLdss, { signal: AbortSignal.timeout(2000) });
     } catch (err) {
         console.log(`stats all; ${serverAcro} failed`);
         failedFooter.push(`Failed to fetch ${serverAcro}`);
         return;
     }
-    if (serverName.data.slots.used !== 0) {
-        totalCount.push(serverName.data.slots.used)
+
+    const DSSFetch = await serverName.json() as FS_data;
+    if (DSSFetch.slots.used !== 0) {
+        totalCount.push(DSSFetch.slots.used)
         const playerInfo: Array<string> = [];
 
-        serverName.data.slots.players.filter((x: FS_players)=>x.isUsed).forEach((player: FS_players) => {
+        DSSFetch.slots.players.filter((x)=>x.isUsed).forEach((player) => {
             const playTimeHrs = Math.floor(player.uptime / 60);
             const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
             const inWl = client.watchList._content.find((y: Array<string>) => y[0] == player.name);
@@ -28,27 +30,29 @@ async function FSstatsAll(client: YClient, serverURLdss: string, embed: Discord.
 
             playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
         })
-        const serverSlots = `${serverName.data.slots.used}/${serverName.data.slots.capacity}`;
-        const serverTimeHrs = Math.floor(serverName.data.server.dayTime / 3600 / 1000).toString().padStart(2, '0');
-        const serverTimeMins = Math.floor((serverName.data.server.dayTime / 60 / 1000) % 60).toString().padStart(2, '0');
-        embed.addFields({name: `${serverName.data.server.name.replace('! ! IRTGaming|', '')} - ${serverSlots} - ${serverTimeHrs}:${serverTimeMins}`, value: `${playerInfo.join("\n")}`})
+        const serverSlots = `${DSSFetch.slots.used}/${DSSFetch.slots.capacity}`;
+        const serverTimeHrs = Math.floor(DSSFetch.server.dayTime / 3600 / 1000).toString().padStart(2, '0');
+        const serverTimeMins = Math.floor((DSSFetch.server.dayTime / 60 / 1000) % 60).toString().padStart(2, '0');
+        embed.addFields({name: `${DSSFetch.server.name.replace('! ! IRTGaming|', '')} - ${serverSlots} - ${serverTimeHrs}:${serverTimeMins}`, value: `${playerInfo.join("\n")}`})
     }
 }
-async function FSstats(client: YClient, interaction: Discord.CommandInteraction, serverName: string, DBName: string) {
+async function FSstats(client: YClient, interaction: Discord.CommandInteraction, serverURLdss: string, DBName: string) {
 
     const playerInfo: Array<string> = [];
-    let FSserver: FSdss_serverName;
+    let FSFetch;
     let Color = client.config.embedColorGreen;
 
     try {
-        FSserver = await client.axios.get(serverName, {timeout: 2000, headers: {'User-Agent': 'IRTBot/stats'}});
+        FSFetch = await fetch(serverURLdss, { signal: AbortSignal.timeout(2000) });
     } catch (err) {
         return interaction.reply('Server did not respond');
     }
 
-    if (FSserver.data.slots.used === FSserver.data.slots.capacity) {
+    const FSserver = await FSFetch.json() as FS_data;
+
+    if (FSserver.slots.used === FSserver.slots.capacity) {
         Color = client.config.embedColorRed;
-    } else if (FSserver.data.slots.used > 9) {
+    } else if (FSserver.slots.used > 9) {
         Color = client.config.embedColorYellow;
     }
 
@@ -202,7 +206,7 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
     const ty = graphOrigin[1] + graphSize[1] + (textSize);
     ctx.fillText('time ->', tx, ty);
 
-    FSserver.data.slots.players.filter((x: FS_players) => x.isUsed).forEach((player: FS_players) => {
+    FSserver.slots.players.filter((x) => x.isUsed).forEach((player) => {
         const playTimeHrs = Math.floor(player.uptime / 60);
         const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
         const inWl = client.watchList._content.find((y: Array<string>) => y[0] == player.name);
@@ -214,13 +218,13 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
         playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
     })
     const Image = new client.attachmentBuilder(img.toBuffer(), {name: "FSStats.png"});
-    const serverSlots = `${FSserver.data.slots.used}/${FSserver.data.slots.capacity}`;
-    const serverTimeHrs = Math.floor(FSserver.data.server.dayTime / 3600 / 1000).toString().padStart(2, '0');
-    const serverTimeMins = Math.floor((FSserver.data.server.dayTime / 60 / 1000) % 60).toString().padStart(2, '0');
+    const serverSlots = `${FSserver.slots.used}/${FSserver.slots.capacity}`;
+    const serverTimeHrs = Math.floor(FSserver.server.dayTime / 3600 / 1000).toString().padStart(2, '0');
+    const serverTimeMins = Math.floor((FSserver.server.dayTime / 60 / 1000) % 60).toString().padStart(2, '0');
     const embed = new client.embed()
         .setAuthor({name: `${serverSlots} - ${serverTimeHrs}:${serverTimeMins}`})
-        .setTitle(FSserver.data.server.name.length == 0 ? 'Offline' : FSserver.data.server.name)
-        .setDescription(FSserver.data.slots.used == 0 ? '*No players online*' : playerInfo.join("\n"))
+        .setTitle(FSserver.server.name.length == 0 ? 'Offline' : FSserver.server.name)
+        .setDescription(FSserver.slots.used == 0 ? '*No players online*' : playerInfo.join("\n"))
         .setImage('attachment://FSStats.png')
         .setColor(Color)
     interaction.reply({embeds: [embed], files: [Image]}).catch(() => (interaction.channel as Discord.TextChannel).send({embeds: [embed], files: [Image]}));

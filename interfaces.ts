@@ -195,6 +195,9 @@ export interface FS_players {
     uptime: number,
     name: string
 }
+export interface FS_csg {
+    careerSavegame: FS_careerSavegame
+}
 
 export interface FS_careerSavegame {
     settings: FS_careerSavegame_settings

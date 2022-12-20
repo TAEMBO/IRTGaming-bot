@@ -223,7 +223,10 @@ export default class YClient extends Client {
         }); // Fetch dedicated-server-savegame.html
 
         if (DSSFetch == undefined || CSGFetch == undefined || CSGFetch.status == 204) { // Blame Red
-            if (CSGFetch?.status == 204) console.log(`[${this.moment().format('HH:mm:ss')}]`, serverAcro + ' csg empty content');
+            if (CSGFetch?.status == 204) {
+                statsEmbed.setImage('https://http.cat/204');
+                console.log(`[${this.moment().format('HH:mm:ss')}]`, serverAcro + ' csg empty content');
+            };
             statsEmbed.setTitle('Host not responding').setColor(this.config.embedColorRed);
             statsMsg.edit({embeds: [statsEmbed]});
             return;

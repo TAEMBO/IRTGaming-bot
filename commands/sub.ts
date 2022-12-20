@@ -6,7 +6,7 @@ export default {
         if (subCmd === 'verify') {
             const channel = client.channels.resolve('849993619267911680') as Discord.TextChannel;
             const pic = interaction.options.getAttachment('image') as Discord.Attachment;
-            channel.send({content: `<@${interaction.user.id}> (${interaction.user.tag}) <@&${client.config.mainServer.roles.subscriber}> role verification`, files: [pic]});
+            channel.send({content: `<@${interaction.user.id}> (${interaction.user.tag}) Subscriber role verification`, files: [pic]});
             interaction.reply({content: `Verification sent, please wait for someone to verify your subscription. You will then receive the <@&${client.config.mainServer.roles.subscriber}> role.`, ephemeral: true})
         } else if (subCmd === 'accept') {
             if (!client.hasModPerms(interaction.member)) return client.youNeedRole(interaction, "mod");

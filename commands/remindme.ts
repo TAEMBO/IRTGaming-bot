@@ -2,9 +2,9 @@ import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client';
 import path from 'node:path';
 import fs from 'node:fs';
-import ms from 'ms';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
+        const ms = require('ms');
         const whatToRemind = interaction.options.getString("what");
         const whenToRemind = ms(interaction.options.getString("when", true));
         if(whenToRemind == null){

@@ -56,25 +56,20 @@ client.on('error', (error: Error) => {
 	logError(error);
 });
 
-const p = path.join(__dirname, './databases/reminders.json');
-let remindEmbed = new client.embed()
-	.setTitle('Reminder')
-	.setColor(client.config.embedColor);
-
 // reminder, dailyMsgs, and punishment event loops
 setInterval(async () => {
 	const now = Date.now();
-	let db = require(p);
+	const p = path.join(__dirname, './databases/reminders.json');
+	const db = JSON.parse(fs.readFileSync(p, {encoding: 'utf8'}));
+	const remindEmbed = new client.embed().setTitle('Reminder').setColor(client.config.embedColor);
 	const filterLambda = (x: Reminder) => x.when < Math.floor(now / 1000);
 	const filter = db.filter((x: Reminder) => filterLambda(x));
 	for(let i = 0; i < filter.length; i++){
-		remindEmbed = remindEmbed
-			.setDescription(`\n\`\`\`${filter[i].what}\`\`\``);
+		remindEmbed.setDescription(`\n\`\`\`${filter[i].what}\`\`\``);
 		await (await client.users.fetch(filter[i].who)).send({embeds: [remindEmbed]});
 		db.splice(db.findIndex((x: Reminder) => filterLambda(x)), 1);
 		fs.writeFileSync(p, db.length !== 0 ? JSON.stringify(db, null, 2) : '[]');
 	}
-	db = null;
 	
 	client.punishments._content.filter((x: db_punishments_format) => (x?.endTime as number) <= now && !x.expired).forEach(async (punishment: db_punishments_format) => {
 		console.log(`[${client.moment().format('HH:mm:ss')}]`, `${punishment.member}\'s ${punishment.type} should expire now`);

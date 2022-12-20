@@ -37,7 +37,7 @@ export default {
                     setTimeout(async () => {
                         await browser.close();
                         interaction.editReply(`Dedi panel closed, result:\nServer: **${chosenServer.toUpperCase()}**\nAction: **${action}**\nTotal time taken: **${Date.now() - time}ms**`);
-                    }, 5000);
+                    }, 1000);
                 });
             });
 

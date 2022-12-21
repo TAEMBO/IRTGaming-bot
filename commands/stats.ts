@@ -125,13 +125,11 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
         return ((1 - (value / second_graph_top)) * graphSize[1]) + graphOrigin[1];
     }
     
-    function colorAtPlayercount(playercount: number) {
-        if (playercount === first_graph_top) {
-            return client.config.embedColorRed;
-        } else if (playercount > 9) {
-            return client.config.embedColorYellow;
-        } else {return client.config.embedColorGreen;}
-    }
+    const gradient = ctx.createLinearGradient(0, graphOrigin[1], 0, graphOrigin[1] + graphSize[1]);
+    gradient.addColorStop(1 / 16, client.config.embedColorRed);
+    gradient.addColorStop(5 / 16, client.config.embedColorYellow);
+    gradient.addColorStop(12 / 16, client.config.embedColorGreen);
+    
     let lastCoords: Array<number> = [];
     data.forEach((curPC: number /* current player count */, i: number) => {
         if (curPC < 0) curPC = 0;
@@ -139,23 +137,7 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
         const y = getYCoordinate(curPC);
         const nexPC /* next player count */ = data[i + 1];
         const prvPC /* previous player count */ = data[i - 1];
-        const curColor = colorAtPlayercount(curPC); // color now
-        const prvColor = colorAtPlayercount(prvPC); // color at last point
-        if (curColor !== prvColor && !isNaN(prvPC) && lastCoords.length > 0) { // gradient should be used when the color between now and last point is not the same
-            // gradient from now to last point
-            const grd = ctx.createLinearGradient(...lastCoords, x, y);
-            grd.addColorStop(0, colorAtPlayercount(prvPC)); // prev color at the beginning
-            grd.addColorStop(1, colorAtPlayercount(curPC)); // cur color at the end
-            // special case: playercount rises or falls rapidly accross all colors (eg. straight from red to green)
-            if (curColor !== client.config.embedColorYellow && prvColor !== client.config.embedColorYellow) {
-                const yellowY = getYCoordinate(10); // y coordinate at which line should be yellow
-                const stop = (yellowY - lastCoords[1]) / (y - lastCoords[1]); // between 0 and 1, where is yellowY between y and nextPointCoords[1] ?
-                grd.addColorStop(stop, client.config.embedColorYellow); // add a yellow stop to the gradient
-            }
-            ctx.strokeStyle = grd;
-        } else {
-            ctx.strokeStyle = colorAtPlayercount(curPC);
-        }
+        ctx.strokeStyle = gradient;
         ctx.beginPath();
         if (lastCoords.length > 0) ctx.moveTo(...lastCoords);
         // if the line being drawn is horizontal, make it go until it has to go down
@@ -176,7 +158,7 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
             return; // no ball because no vertical difference to next or prev point
         } else {
             // ball
-            ctx.fillStyle = colorAtPlayercount(curPC);
+            ctx.fillStyle = gradient;
             ctx.beginPath();
             ctx.arc(x, y, ctx.lineWidth * 1.3, 0, 2 * Math.PI)
             ctx.closePath();
@@ -190,9 +172,9 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
 
     // highest value
     const maxx = graphOrigin[0] + graphSize[0] + textSize / 2;
-    const maxy = previousY[0] + (textSize / 3);
-    ctx.fillText(previousY[1].toLocaleString('en-US'), maxx, maxy);
-    
+    const maxy = previousY.at(-2) + (textSize / 3);
+    ctx.fillText(previousY.at(-1).toLocaleString('en-US'), maxx, maxy);
+
     // lowest value
     const lowx = graphOrigin[0] + graphSize[0] + textSize / 2;
     const lowy = graphOrigin[1] + graphSize[1] + (textSize / 3);

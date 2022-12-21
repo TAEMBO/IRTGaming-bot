@@ -171,9 +171,11 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
     ctx.fillStyle = 'white';
 
     // highest value
-    const maxx = graphOrigin[0] + graphSize[0] + textSize / 2;
-    const maxy = previousY.at(-2) + (textSize / 3);
-    ctx.fillText(previousY.at(-1).toLocaleString('en-US'), maxx, maxy);
+    if (!isNaN(previousY.at(-2) as number)) {
+        const maxx = graphOrigin[0] + graphSize[0] + textSize / 2;
+        const maxy = (previousY.at(-2) as number) + (textSize / 3);
+        ctx.fillText((previousY.at(-1) as number).toLocaleString('en-US'), maxx, maxy);
+    }
 
     // lowest value
     const lowx = graphOrigin[0] + graphSize[0] + textSize / 2;

@@ -2,6 +2,7 @@ import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client';
 import fs from 'node:fs';
 import path from 'node:path';
+import canvas from 'canvas';
 import { db_playerTimes_format, FS_data} from '../interfaces'
 
 async function FSstatsAll(client: YClient, serverURLdss: string, embed: Discord.EmbedBuilder, totalCount: Array<number>, failedFooter: Array<string>, serverAcro: string) {
@@ -66,7 +67,6 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
     const first_graph_top = 16;
     const second_graph_top = 16;
     const textSize = 40;
-    const canvas = require('canvas');
     const img = canvas.createCanvas(1500, 750);
     const ctx = img.getContext('2d');
 
@@ -126,9 +126,9 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
     }
     
     const gradient = ctx.createLinearGradient(0, graphOrigin[1], 0, graphOrigin[1] + graphSize[1]);
-    gradient.addColorStop(1 / 16, client.config.embedColorRed);
-    gradient.addColorStop(5 / 16, client.config.embedColorYellow);
-    gradient.addColorStop(12 / 16, client.config.embedColorGreen);
+    gradient.addColorStop(1 / 16, client.config.embedColorRed as string);
+    gradient.addColorStop(5 / 16, client.config.embedColorYellow as string);
+    gradient.addColorStop(12 / 16, client.config.embedColorGreen as string);
     
     let lastCoords: Array<number> = [];
     data.forEach((curPC: number /* current player count */, i: number) => {
@@ -139,7 +139,7 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
         const prvPC /* previous player count */ = data[i - 1];
         ctx.strokeStyle = gradient;
         ctx.beginPath();
-        if (lastCoords.length > 0) ctx.moveTo(...lastCoords);
+        if (lastCoords.length > 0) ctx.moveTo(lastCoords[0], lastCoords[1]);
         // if the line being drawn is horizontal, make it go until it has to go down
         if (y === lastCoords[1]) {
             let newX = x;

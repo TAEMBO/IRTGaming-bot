@@ -35,9 +35,9 @@ export default class YClient extends Client {
         this.bannedNamesPG = [];
         this.FSCache = {
             statsGraph: -120, 
-            ps: {new: [], old: [], status: undefined},
-            pg: {new: [], old: [], status: undefined},
-            mf: {new: [], old: [], status: undefined}
+            ps: {new: [], old: [], status: undefined, lastAdmin: undefined},
+            pg: {new: [], old: [], status: undefined, lastAdmin: undefined},
+            mf: {new: [], old: [], status: undefined, lastAdmin: undefined}
         };
         this.YTCache = {
             'UCQ8k8yTDLITldfWYKDs3xFg': undefined,
@@ -298,6 +298,7 @@ export default class YClient extends Client {
             if (serverAcro != 'MF') adminCheck(this, this.FSCache[serverAcro.toLowerCase()].new, this.FSCache[serverAcro.toLowerCase()].old);
             log(this, this.FSCache[serverAcro.toLowerCase()].new, this.FSCache[serverAcro.toLowerCase()].old);
             dataPoint(FSdss.slots.used);
+            if (FSdss.slots.players.filter((x)=> x.isAdmin).length != 0) this.FSCache[serverAcro.toLowerCase()].lastAdmin = Date.now();
 
             this.FSCache[serverAcro.toLowerCase()].old = FSdss.slots.players.filter((x) =>x.isUsed);
         }

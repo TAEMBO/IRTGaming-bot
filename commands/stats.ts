@@ -37,7 +37,7 @@ async function FSstatsAll(client: YClient, serverURLdss: string, embed: Discord.
         embed.addFields({name: `${DSSFetch.server.name.replace('! ! IRTGaming|', '')} - ${serverSlots} - ${serverTimeHrs}:${serverTimeMins}`, value: `${playerInfo.join("\n")}`})
     }
 }
-async function FSstats(client: YClient, interaction: Discord.CommandInteraction, serverURLdss: string, DBName: string) {
+async function FSstats(client: YClient, interaction: Discord.CommandInteraction, serverURLdss: string, serverAcro: string) {
 
     const playerInfo: Array<string> = [];
     let FSFetch;
@@ -57,7 +57,7 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
         Color = client.config.embedColorYellow;
     }
 
-    const data = JSON.parse(fs.readFileSync(path.join(__dirname, `../databases/${DBName}.json`), {encoding: 'utf8'})).slice(client.FSCache.statsGraph);
+    const data = JSON.parse(fs.readFileSync(path.join(__dirname, `../databases/${serverAcro.toUpperCase()}PlayerData.json`), {encoding: 'utf8'})).slice(client.FSCache.statsGraph);
 
     // handle negative days
     data.forEach((change: number, i: number) => {
@@ -211,6 +211,8 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
         .setDescription(FSserver.slots.used == 0 ? '*No players online*' : playerInfo.join("\n"))
         .setImage('attachment://FSStats.png')
         .setColor(Color)
+    if (FSserver.slots.players.filter((x)=> x.isAdmin).length == 0 && client.FSCache[serverAcro].lastAdmin) embed.setTimestamp(client.FSCache[serverAcro].lastAdmin).setFooter({text: 'Admin last on'});
+
     interaction.reply({embeds: [embed], files: [Image]}).catch(() => (interaction.channel as Discord.TextChannel).send({embeds: [embed], files: [Image]}));
 }
 
@@ -222,7 +224,7 @@ export default {
 
         if (subCmd === 'all') {
             await interaction.deferReply();
-            const embed = new client.embed().setColor(client.config.embedColor)
+            const embed = new client.embed().setColor(client.config.embedColor);
             const totalCount: Array<number> = [];
             let sum;
 
@@ -244,11 +246,11 @@ export default {
             embed.setTitle(`All Servers: ${sum} online`)
             interaction.editReply({embeds: [embed]});
         } else if (subCmd === 'ps') {
-            FSstats(client, interaction, client.tokens.ps.dss, 'PSPlayerData');
+            FSstats(client, interaction, client.tokens.ps.dss, 'ps');
         } else if (subCmd === 'pg') {
-            FSstats(client, interaction, client.tokens.pg.dss, 'PGPlayerData');
+            FSstats(client, interaction, client.tokens.pg.dss, 'pg');
         } else if (subCmd === 'mf') {
-            FSstats(client, interaction, client.tokens.mf.dss, 'MFPlayerData');
+            FSstats(client, interaction, client.tokens.mf.dss, 'mf');
         } else if (subCmd === 'playertimes') {
             const embed = new client.embed()
                 .setDescription(`Top 20 players with the most time spent on IRTGaming FS22 servers since\n<t:1664645628>\n\n${Object.entries<db_playerTimes_format>(client.playerTimes._content).sort((a, b) => (b[1].time as number) - (a[1].time as number)).slice(0, 20).map((x, i) => `**${i + 1}.** \`${x[0]}\`${(client.FMstaff._content.includes(x[0]) ? ':farmer:' : '')}${(client.TFstaff._content.includes(x[0]) ? ':angel:' : '')}: ${client.formatTime(((x[1].time as number)*60*1000), 3, { commas: true, longNames: false })}`).join('\n')}`)

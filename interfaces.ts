@@ -108,6 +108,7 @@ export interface FSCacheServer {
     new: Array<FS_players>, 
     old: Array<FS_players>, 
     status: undefined | number
+    lastAdmin: undefined | number
 }
 
 export interface YTCache {

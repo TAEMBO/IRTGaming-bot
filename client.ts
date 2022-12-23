@@ -214,11 +214,11 @@ export default class YClient extends Client {
         const statsEmbed = new this.embed();
         let justStarted = false;
 
-        let DSSFetch: Response | void = await fetch(serverURLdss, { signal: AbortSignal.timeout(5000) }).catch((err: Error) => {
+        let DSSFetch: Response | void = await fetch(serverURLdss, { signal: AbortSignal.timeout(7000) }).catch((err: Error) => {
             console.log(`[${this.moment().format('HH:mm:ss')}]`, serverAcro + ' dss ' + err.message);
         }); // Fetch dedicated-server-stats.json
 
-        let CSGFetch: Response | void = await fetch(serverURLcsg, { signal: AbortSignal.timeout(5000) }).catch((err: Error) => {
+        let CSGFetch: Response | void = await fetch(serverURLcsg, { signal: AbortSignal.timeout(7000) }).catch((err: Error) => {
             console.log(`[${this.moment().format('HH:mm:ss')}]`, serverAcro + ' csg ' + err.message);
         }); // Fetch dedicated-server-savegame.html
 

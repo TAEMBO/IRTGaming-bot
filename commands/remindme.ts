@@ -5,28 +5,27 @@ import fs from 'node:fs';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
         const ms = require('ms');
-        const whatToRemind = interaction.options.getString("what");
+        const whatToRemind = interaction.options.getString("what", true);
         const whenToRemind = ms(interaction.options.getString("when", true));
-        if(whenToRemind == null){
+        if (whenToRemind == null) {
             const incorrectTimeFormatEmbed = new client.embed()
                 .setTitle('Incorrect timestamp.')
                 .addFields({name: 'Proper formatting', value: '```Seconds: 10s, 1sec, 10secs, 1second, 10seconds\nMinutes: 10m, 1min, 10mins, 1minute, 10minutes\nHours: 10h, 1hour, 10hours\nDays: 10d, 1day, 10days```'})
                 .setColor(client.config.embedColorRed);
-            await interaction.reply({embeds: [incorrectTimeFormatEmbed], ephemeral: true});
-            return;
-        }
+            return await interaction.reply({embeds: [incorrectTimeFormatEmbed], ephemeral: true});
+        };
         const timeStampInMs = Math.round((Date.now() + whenToRemind) / 1000);
         const dbPath = path.join(__dirname, '../databases/reminders.json');
-        if(!fs.existsSync(dbPath)) fs.writeFileSync(dbPath, '[]');
-        let db = require(dbPath);
+        const db = require(dbPath);
+        const reminder = {when: timeStampInMs, what: whatToRemind, who: interaction.user.id};
         const remindEmbed = new client.embed()
             .setTitle('Reminder set')
             .setDescription(`\n\`\`\`${whatToRemind}\`\`\`\n<t:${timeStampInMs}:R>.`)
             .setColor(client.config.embedColor)
-        await interaction.reply({embeds: [remindEmbed]})
-        db.push({when: timeStampInMs, what: whatToRemind, who: interaction.user.id});
+        db.push(reminder);
         fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
-        db = null;
+        console.log('REMINDER CREATE', reminder)
+        interaction.reply({embeds: [remindEmbed]});
       },
       data: new SlashCommandBuilder()
         .setName("remind")

@@ -63,10 +63,11 @@ setInterval(async () => {
 	const db = JSON.parse(fs.readFileSync(p, {encoding: 'utf8'}));
 	const remindEmbed = new client.embed().setTitle('Reminder').setColor(client.config.embedColor);
 	const filterLambda = (x: Reminder) => x.when < Math.floor(now / 1000);
-	const filter = db.filter((x: Reminder) => filterLambda(x));
+	const filter: Array<Reminder> = db.filter((x: Reminder) => filterLambda(x));
 	for(let i = 0; i < filter.length; i++){
 		remindEmbed.setDescription(`\n\`\`\`${filter[i].what}\`\`\``);
-		await (await client.users.fetch(filter[i].who)).send({embeds: [remindEmbed]});
+		await client.users.fetch(filter[i].who).then(User => User.send({embeds: [remindEmbed]}));
+		console.log('REMINDER EXECUTE', filter[i]);
 		db.splice(db.findIndex((x: Reminder) => filterLambda(x)), 1);
 		fs.writeFileSync(p, db.length !== 0 ? JSON.stringify(db, null, 2) : '[]');
 	}

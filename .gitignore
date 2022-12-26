@@ -4,53 +4,11 @@ package-lock.json
 
 .vscode/settings.json
 
-ttt.json
-
-memes.json
-
-specs.json
-
-starboard.json
-
-userLevels.json
-
-dmforwardblacklist.json
-
 tokens.json
 
-dailyMsgs.json
+databases
 
-punishments.json
-
-bannedWords.json
-
-giveaways.json
-
-repeatedMessagesContent.json
-
-.idea
-
-TFstaff.json
-
-FMstaff.json
-
-watchList.json
-
-hidden.json
-
-reminders.json
-
-PSPlayerData.json
-
-PGPlayerData.json
-
-MFPlayerData.json
-
-GSPlayerData.json
-
-playerTimes.json
-
-adminWhitelist.json
+ftpFiles
 
 gw.js
 

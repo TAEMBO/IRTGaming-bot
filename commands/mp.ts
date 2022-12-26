@@ -2,6 +2,8 @@
 import Discord, { SlashCommandBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle} from 'discord.js';
 import YClient from '../client';
 import puppeteer from 'puppeteer'; // Credits to Trolly for suggesting this package
+import FTPClient from 'ftp';
+import path from 'path';
 import { FSCacheServer, FSURLs } from 'interfaces';
 
 export default {
@@ -13,15 +15,15 @@ export default {
         if (subCmd == 'server') {
             if (!interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager)) return client.youNeedRole(interaction, 'mpmanager');
             await interaction.deferReply();
-            const chosenServer = interaction.options.getString('server', true);
-            const action = interaction.options.getString('action', true);
-            const serverSelector = `[name="${action}_server"]`;
+            const chosenServer = interaction.options.getString('server', true) as 'ps' | 'pg' | 'mf';
+            const chosenAction = interaction.options.getString('action', true) as 'start' | 'stop';
+            const serverSelector = `[name="${chosenAction}_server"]`;
             const time = Date.now();
             const browser = await puppeteer.launch();
             const page = await browser.newPage();
 
-            if ((client.FSCache[chosenServer] as FSCacheServer).status == 0 && action == 'stop') return interaction.editReply('Server is already offline');
-            if ((client.FSCache[chosenServer] as FSCacheServer).status == 1 && action == 'start') return interaction.editReply('Server is already online');
+            if ((client.FSCache[chosenServer] as FSCacheServer).status == 0 && chosenAction== 'stop') return interaction.editReply('Server is already offline');
+            if ((client.FSCache[chosenServer] as FSCacheServer).status == 1 && chosenAction == 'start') return interaction.editReply('Server is already online');
 
             try {
                 await page.goto((client.tokens[chosenServer] as FSURLs).login, { timeout: 120000 });
@@ -29,18 +31,42 @@ export default {
                 interaction.editReply(err.message);
                 return;
             }
-            await interaction.editReply(`Connected to dedi panel for **${chosenServer}** after **${Date.now() - time}ms**, attempting to **${action}** server...`);
+            await interaction.editReply(`Connected to dedi panel for **${chosenServer.toUpperCase()}** after **${Date.now() - time}ms**, attempting to **${chosenAction}** server...`);
+            const uptimeText = await page.evaluate(()=>(document.querySelector("span.monitorHead") as Element).textContent);
 
             page.waitForSelector(serverSelector).then(() => {
                 page.click(serverSelector).then(() => {
-                    interaction.editReply(`Successfully pressed **${action}** after **${Date.now() - time}ms**, closing dedi panel...`);
+                    interaction.editReply(`Successfully pressed **${chosenAction}** after **${Date.now() - time}ms**, closing dedi panel...`);
                     setTimeout(async () => {
                         await browser.close();
-                        interaction.editReply(`Dedi panel closed, result:\nServer: **${chosenServer.toUpperCase()}**\nAction: **${action}**\nTotal time taken: **${Date.now() - time}ms**`);
-                    }, 1000);
+                        interaction.editReply(`Dedi panel closed, result:\nServer: **${chosenServer.toUpperCase()}**\nAction: **${chosenAction}**\n${chosenAction == 'stop' ? `Uptime before stopping: **${uptimeText}**\n` : ''}Total time taken: **${Date.now() - time}ms**`);
+                    }, 2000);
+                });
+            });
+        } else if (subCmd == 'mop') {
+            if (!interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager)) return client.youNeedRole(interaction, 'mpmanager');
+            const chosenServer = interaction.options.getString('server', true) as 'ps' | 'pg';
+            const chosenAction = interaction.options.getString('action', true) as 'items.xml' | 'players.xml';
+            
+            if ((client.FSCache[chosenServer] as FSCacheServer).status == 1) return interaction.reply(`You cannot mop files from **${chosenServer.toUpperCase()}** while it is online`);
+            if (chosenServer != 'pg' && chosenAction == 'items.xml') return interaction.reply(`You can only mop **${chosenAction}** from **PG**`);
+            
+            await interaction.deferReply();
+            const FTPLogin = client.tokens.ftp[chosenServer];
+            const time = Date.now();
+            const FTP = new FTPClient();
+
+            FTP.on('ready', async function() {
+                await interaction.editReply(`Connected to FTP for **${chosenServer.toUpperCase()}** after **${Date.now() - time}ms**, attempting to replace file`);
+
+                FTP.put(path.join(__dirname, `../ftpFiles/${chosenAction}`), FTPLogin.path + `savegame2/${chosenAction}`, async function(err) {
+                    if (err) throw err;
+                    await interaction.editReply(`Successfully mopped **${chosenAction}** from **${chosenServer.toUpperCase()}** after **${Date.now() - time}ms**`);
+                    FTP.end();
                 });
             });
 
+            FTP.connect(FTPLogin);
         } else if (subCmd == 'roles') {
             if (!interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager)) return client.youNeedRole(interaction, "mpmanager");
             const member = interaction.options.getMember("member") as Discord.GuildMember;
@@ -99,7 +125,8 @@ export default {
                 {name: 'Public Grain', value: 'pg'},
                 {name: 'Multi Farm', value: 'mf'}
             )
-            .setRequired(true))
+            .setRequired(true)
+        )
         .addStringOption(x=>x
             .setName('action')
             .setDescription('Start or stop the given server')
@@ -107,14 +134,39 @@ export default {
                 {name: 'Start', value: 'start'},
                 {name: 'Stop', value: 'stop'}
             )
-            .setRequired(true)))
+            .setRequired(true)
+        )
+    )
+    .addSubcommand(x=>x
+        .setName('mop')
+        .setDescription('Mop a file from a given server')
+        .addStringOption(x=>x
+            .setName('server')
+            .setDescription('The server to manage')
+            .addChoices(
+                {name: 'Public Silage', value: 'ps'},
+                {name: 'Public Grain', value: 'pg'}
+            )
+            .setRequired(true)
+        )
+        .addStringOption(x=>x
+            .setName('action')
+            .setDescription('The action to perform on the given server')
+            .addChoices(
+                {name: 'Mop players.xml', value: 'players.xml'},
+                {name: 'Mop items.xml', value: 'items.xml'}
+            )
+            .setRequired(true)
+        )
+    )
     .addSubcommand(x=>x
         .setName('roles')
         .setDescription('Give or take MP Staff roles')
         .addUserOption(x=>x
             .setName("member")
             .setDescription("The member to add or remove the role from")
-            .setRequired(true))
+            .setRequired(true)
+        )
         .addStringOption(x=>x
             .setName("role")
             .setDescription("the role to add or remove")
@@ -123,19 +175,25 @@ export default {
                 {name: 'Farm Manager', value: 'mpfarmmanager'},
                 {name: 'Public Admin', value: 'mppublicadmin'}
             )
-            .setRequired(true)))
+            .setRequired(true)
+        )
+    )
     .addSubcommand(x=>x
         .setName('fm')
         .setDescription('Add or remove player names in FM list')
         .addStringOption(x=>x
             .setName('name')
             .setDescription('The player name to add or remove')
-            .setRequired(true)))
+            .setRequired(true)
+        )
+    )
     .addSubcommand(x=>x
         .setName('tf')
         .setDescription('Add or remove player names in TF list')
         .addStringOption(x=>x
             .setName('name')
             .setDescription('The player name to add or remove')
-            .setRequired(true)))
+            .setRequired(true)
+        )
+    )
 };

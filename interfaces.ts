@@ -15,13 +15,16 @@ export interface FSURLs {
     csg: string
 }
 interface FTPServers {
+    [key: string]: FTPLogins
     ps: FTPLogins
     pg: FTPLogins
+    test: FTPLogins
 }
 interface FTPLogins {
     host: string,
     user: string,
     password: string
+    path: string
 }
 
 export interface Config {

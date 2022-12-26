@@ -10,8 +10,10 @@
   "author": "TAEMBO",
   "license": "ISC",
   "dependencies": {
+    "@types/ftp": "^0.3.33",
     "canvas": "^2.10.2",
     "discord.js": "14.6.0",
+    "ftp": "0.3.10",
     "moment": "2.29.4",
     "ms": "^2.1.3",
     "pm2": "5.2.2",

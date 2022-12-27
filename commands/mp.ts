@@ -3,7 +3,6 @@ import Discord, { SlashCommandBuilder, ButtonBuilder, ActionRowBuilder, ButtonSt
 import YClient from '../client';
 import puppeteer from 'puppeteer'; // Credits to Trolly for suggesting this package
 import FTPClient from 'ftp';
-import path from 'path';
 import { FSCacheServer, FSURLs } from 'interfaces';
 
 export default {
@@ -65,12 +64,11 @@ export default {
             const FTP = new FTPClient();
 
             FTP.on('ready', async function() {
-                await interaction.editReply(`Connected to FTP for **${chosenServer.toUpperCase()}** after **${Date.now() - time}ms**, attempting to replace file`);
+                await interaction.editReply(`Connected to FTP for **${chosenServer.toUpperCase()}** after **${Date.now() - time}ms**, attempting to delete file`);
 
-                
-                FTP.put(path.join(__dirname, `../ftpFiles/${chosenAction}`), FTPLogin.path + `savegame2/${chosenAction}`, async function(err) {
+                FTP.delete(FTPLogin.path + `savegame1/${chosenAction}`, async function(err) {
                     if (err) throw err;
-                    await interaction.editReply(`Successfully mopped **${chosenAction}** from **${chosenServer.toUpperCase()}** after **${Date.now() - time}ms**`);
+                    await interaction.editReply(`Successfully deleted **${chosenAction}** from **${chosenServer.toUpperCase()}** after **${Date.now() - time}ms**`);
                     FTP.end();
                 });
             });

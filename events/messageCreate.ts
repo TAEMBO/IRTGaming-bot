@@ -180,17 +180,14 @@ export default {
 			'Don\'t fall out of bed!',
 			'Coffee\'s gonna be a little late this morning.',
 			'Tea\'s gonna be a little late this morning.',
-			'Or is this all a dream still...',
 			'Did you have a good dream?',
 			'<a:IRT_DogWave:716263418495238215>',
 			'<:IRT_GoodMorning:605524803008593920>',
 			'Here\'s some wheat to make some bread that\'s not stale <:IRT_Wheat:761356327708131329>',
 			'I have a movie this time! Sync Sim 22, a real good one.',
 			'Is it Friday yet?',
-			'Leggo my Eggo? <:IRT_LegoThink:590629971144474644>',
-			'I hope you have a good day today sweetie!',
 			'Did you sleep on the cold side of the pillow?',
-			'~~I have free Discord Nitro for you!~~',
+			'I have a sausage roll for you! <:IRT_Sausageroll:666726520701845534>',
 			''
 		];
 

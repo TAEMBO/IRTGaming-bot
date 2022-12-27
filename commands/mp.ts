@@ -32,14 +32,22 @@ export default {
                 return;
             }
             await interaction.editReply(`Connected to dedi panel for **${chosenServer.toUpperCase()}** after **${Date.now() - time}ms**, attempting to **${chosenAction}** server...`);
-            const uptimeText = await page.evaluate(()=>(document.querySelector("span.monitorHead") as Element).textContent);
+
+            let result = 'Dedi panel closed, result:\n';
+            result += `Server: **${chosenServer.toUpperCase()}**\n`;
+            result += `Action: **${chosenAction}**\n`;
+            if (chosenAction == 'stop') {
+                const uptimeText = await page.evaluate(()=>(document.querySelector("span.monitorHead") as Element).textContent);
+                result += `Uptime before stopping: **${uptimeText}**\n`;
+            };
+            result += `Total time taken: **${Date.now() - time}ms**`;
 
             page.waitForSelector(serverSelector).then(() => {
                 page.click(serverSelector).then(() => {
                     interaction.editReply(`Successfully pressed **${chosenAction}** after **${Date.now() - time}ms**, closing dedi panel...`);
                     setTimeout(async () => {
                         await browser.close();
-                        interaction.editReply(`Dedi panel closed, result:\nServer: **${chosenServer.toUpperCase()}**\nAction: **${chosenAction}**\n${chosenAction == 'stop' ? `Uptime before stopping: **${uptimeText}**\n` : ''}Total time taken: **${Date.now() - time}ms**`);
+                        interaction.editReply(result);
                     }, 2000);
                 });
             });
@@ -59,6 +67,7 @@ export default {
             FTP.on('ready', async function() {
                 await interaction.editReply(`Connected to FTP for **${chosenServer.toUpperCase()}** after **${Date.now() - time}ms**, attempting to replace file`);
 
+                
                 FTP.put(path.join(__dirname, `../ftpFiles/${chosenAction}`), FTPLogin.path + `savegame2/${chosenAction}`, async function(err) {
                     if (err) throw err;
                     await interaction.editReply(`Successfully mopped **${chosenAction}** from **${chosenServer.toUpperCase()}** after **${Date.now() - time}ms**`);

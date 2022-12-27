@@ -22,13 +22,17 @@ export default {
                 else return 'th';
             }
         })(index);
+        let usefulChannels = '<:IRTDot:908818924286648350> Our game servers: <#739100711073218611>\n';
+        usefulChannels += '<:IRTDot:908818924286648350> Report players: <#825046442300145744>\n';
+        usefulChannels += '<:IRTDot:908818924286648350> Come chat with us!: <#552565546093248512>\n';
+        usefulChannels += '<:IRTDot:908818924286648350> Come from our FS22 servers?: <#759874158610874458>'
 
         const embed0 = new client.embed()
             .setTitle(`Welcome, ${member.user.tag}!`)
             .setColor(client.config.embedColor)
             .setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048}) || member.user.defaultAvatarURL)
             .setDescription(`Please familiarize yourself with our <#552590507352653827> and head over to <#922631314195243080> to gain access to more channels & receive notification about community news.`)
-            .addFields({name: 'Useful channels', value: `<:IRTDot:908818924286648350> Our game servers: <#739100711073218611>\n<:IRTDot:908818924286648350> Report players: <#825046442300145744>\n<:IRTDot:908818924286648350> Come chat with us!: <#552565546093248512>`})
+            .addFields({name: 'Useful channels', value: usefulChannels})
             .setFooter({text: `${index}${suffix} member`});
         (client.channels.resolve(client.config.mainServer.channels.welcome) as Discord.TextChannel).send({content: `<@${member.user.id}>`, embeds: [embed0]})
 
@@ -45,7 +49,7 @@ export default {
             .setDescription(`<@${member.user.id}>\n\`${member.user.id}\``)
             .addFields(
                 {name: '🔹 Account Creation Date', value: `<t:${Math.round(member.user.createdTimestamp / 1000)}>\n<t:${Math.round(member.user.createdTimestamp / 1000)}:R>`},
-                {name: '🔹 Invite Data', value: usedInvite ? `Invite: \`${usedInvite.code}\`\nCreated by: **${usedInvite.inviter?.tag}**` : 'No Data found'})
+                {name: '🔹 Invite Data', value: usedInvite ? `Invite: \`${usedInvite.code}\`\nCreated by: **${usedInvite.inviter?.tag}**` : 'No data found'})
             .setColor(client.config.embedColorGreen)
             .setTimestamp()
             .setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048}));

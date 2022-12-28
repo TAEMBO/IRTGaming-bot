@@ -183,6 +183,7 @@ export default {
 			'Did you have a good dream?',
 			'<a:IRT_DogWave:716263418495238215>',
 			'<:IRT_GoodMorning:605524803008593920>',
+			'I hope you have a good day today sweetie!',
 			'Here\'s some wheat to make some bread that\'s not stale <:IRT_Wheat:761356327708131329>',
 			'I have a movie this time! Sync Sim 22, a real good one.',
 			'Is it Friday yet?',

@@ -1,9 +1,15 @@
 import Discord, { Client, GatewayIntentBits, Partials } from "discord.js";
 import fs from "node:fs";
 import moment from 'moment';
-import config from './config.json';
 import tokens from './tokens.json';
 import timeNames from './timeNames';
+let importConfig: Config
+try { 
+    importConfig = require('./test-config.json');
+    console.log('Using test-config');
+} catch(err) {
+    importConfig = require('./config.json');
+}
 import { db_punishments_format, global_formatTimeOpt, global_createTableOpt, FS_players, FS_data, FS_careerSavegame, Config, FSCache, YTCache, Tokens } from './interfaces';
 import { bannedWords, TFstaff, FMstaff, watchList, playerTimes, userLevels, tictactoe, punishments } from "./dbClasses";
 export default class YClient extends Client {
@@ -20,7 +26,7 @@ export default class YClient extends Client {
         });
         this.invites = new Map();
         this.tokens = tokens as Tokens;
-        this.config = config as Config;
+        this.config = importConfig;
         this.moment = moment;
         this.embed = Discord.EmbedBuilder;
         this.collection = Discord.Collection;

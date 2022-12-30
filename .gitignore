@@ -6,6 +6,8 @@ package-lock.json
 
 tokens.json
 
+test-config.json
+
 databases
 
 gw.js

@@ -32,6 +32,7 @@ export interface Config {
     embedColorGreen: ColorResolvable,
     embedColorRed: ColorResolvable,
     embedColorYellow: ColorResolvable
+    botPresence: Discord.PresenceData
     botSwitches: botSwitches,
     devWhitelist: Array<string>,
     mainServer: mainServer

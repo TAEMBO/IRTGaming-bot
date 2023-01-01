@@ -34,7 +34,7 @@ export class watchList extends Database {
 export class playerTimes extends Database {
     client: YClient;
     constructor(client: YClient) {
-        super('./databases/playerTimes.json', 'array')
+        super('./databases/playerTimes.json', 'object')
         this.client = client;
     }
     addPlayerTime(playerName: string, time: number) {

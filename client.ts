@@ -210,7 +210,7 @@ export default class YClient extends Client {
         }
 
         const Whitelist = JSON.parse(fs.readFileSync(__dirname + '/databases/adminWhitelist.json', {encoding: 'utf8'}));
-        const wlPing = ["238248487593050113", "267270757539643402", "642735886953611265"];
+        const wlPing = ["238248487593050113", "267270757539643402", "642735886953611265", "769710040596217897"];
         const wlChannel = this.channels.resolve(this.config.mainServer.channels.watchlist) as Discord.TextChannel;
         const logChannel = this.channels.resolve(this.config.mainServer.channels.fslogs) as Discord.TextChannel;
         const statsMsg = await (this.channels.resolve(Channel) as Discord.TextChannel).messages.fetch(Message);

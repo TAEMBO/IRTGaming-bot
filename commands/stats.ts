@@ -253,7 +253,7 @@ export default {
             FSstats(client, interaction, client.tokens.mf.dss, 'mf');
         } else if (subCmd === 'playertimes') {
             const embed = new client.embed()
-                .setDescription(`Top 20 players with the most time spent on IRTGaming FS22 servers since\n<t:1664645628>\n\n${Object.entries<db_playerTimes_format>(client.playerTimes._content).sort((a, b) => (b[1].time as number) - (a[1].time as number)).slice(0, 20).map((x, i) => `**${i + 1}.** \`${x[0]}\`${(client.FMstaff._content.includes(x[0]) ? ':farmer:' : '')}${(client.TFstaff._content.includes(x[0]) ? ':angel:' : '')}: ${client.formatTime(((x[1].time as number)*60*1000), 3, { commas: true, longNames: false })}`).join('\n')}`)
+                .setDescription(`Top 20 players with the most time spent on IRTGaming FS22 servers since\n<t:1672560000>\n\n${Object.entries<db_playerTimes_format>(client.playerTimes._content).sort((a, b) => (b[1].time as number) - (a[1].time as number)).slice(0, 20).map((x, i) => `**${i + 1}.** \`${x[0]}\`${(client.FMstaff._content.includes(x[0]) ? ':farmer:' : '')}${(client.TFstaff._content.includes(x[0]) ? ':angel:' : '')}: ${client.formatTime(((x[1].time as number)*60*1000), 3, { commas: true, longNames: false })}`).join('\n')}`)
                 .setColor(client.config.embedColor)
             const player = interaction.options.getString('name');
             

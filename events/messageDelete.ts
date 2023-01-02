@@ -2,8 +2,7 @@ import Discord from 'discord.js';
 import YClient from '../client';
 
 export default {
-    name: "messageDelete",
-    execute: async (client: YClient, message: Discord.Message) => {
+    async run(client: YClient, message: Discord.Message) {
         if (!client.config.botSwitches.logs || message.partial || message.author.bot || message.channel.id == '979863373439184966') return;
         const logChannel = client.channels.resolve(client.config.mainServer.channels.botlogs) as Discord.TextChannel;
 

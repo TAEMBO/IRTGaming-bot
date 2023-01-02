@@ -2,8 +2,7 @@ import Discord from 'discord.js';
 import YClient from '../client';
 
 export default {
-    name: "guildMemberAdd",
-    execute: async (client: YClient, member: Discord.GuildMember) => {
+    async run(client: YClient, member: Discord.GuildMember) {
         if (!client.config.botSwitches.logs || member.partial) return;
         
         // Add Member role upon joining if mainServer is the IRTGaming server

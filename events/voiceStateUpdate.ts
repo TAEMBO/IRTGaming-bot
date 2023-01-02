@@ -2,8 +2,7 @@ import Discord from "discord.js";
 import YClient from '../client';
 
 export default {
-    name: "voiceStateUpdate",
-    async execute(client: YClient, oldState: Discord.VoiceState, newState: Discord.VoiceState) {
+    async run(client: YClient, oldState: Discord.VoiceState, newState: Discord.VoiceState) {
         if (!client.config.botSwitches.logs || !newState.member) return;
 
         const channel = client.channels.resolve(client.config.mainServer.channels.botlogs) as Discord.TextChannel;

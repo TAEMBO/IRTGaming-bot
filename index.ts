@@ -30,11 +30,10 @@ client.on("ready", async () => {
 	}, 60000);
 	console.log(`[${moment().format('HH:mm:ss')}] Bot active as ${(client.user as Discord.ClientUser).tag}`);
 
-	// event handler
-	const eventFiles = fs.readdirSync('./events').filter((file: any) => file.endsWith('.ts'));
-    eventFiles.forEach((file: any)=>{
-    	const event = require(`./events/${file}`);
-	    client.on(event.default.name, async (...args) => event.default.execute(client, ...args));
+	// Event handler
+    fs.readdirSync('./events').forEach((file) => {
+    	const eventFile = require(`./events/${file}`);
+	    client.on(file.replace('.ts', ''), async (...args) => eventFile.default.run(client, ...args));
     });
 });
 

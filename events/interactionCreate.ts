@@ -2,8 +2,7 @@ import Discord from 'discord.js';
 import YClient from '../client';
 
 export default {
-    name: "interactionCreate",
-    execute: async (client: YClient, interaction: Discord.ChatInputCommandInteraction) => {
+    async run(client: YClient, interaction: Discord.ChatInputCommandInteraction) {
         if (!interaction.inGuild() || !interaction.inCachedGuild() || !interaction.channel) return;
         let subCmd;
         try {

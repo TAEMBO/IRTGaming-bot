@@ -2,8 +2,7 @@ import Discord from 'discord.js';
 import YClient from '../client';
 
 export default {
-    name: "messageCreate",
-    execute: async (client: YClient, message: Discord.Message) => {
+    async run(client: YClient, message: Discord.Message) {
     	if ((!client.config.botSwitches.commands && !client.config.devWhitelist.includes(message.author.id)) || message.partial || message.author.bot) return;
 		//   ^^^     Bot is set to ignore commands and non-dev sent a message, ignore the message.      ^^^
 

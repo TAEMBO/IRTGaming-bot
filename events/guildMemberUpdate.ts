@@ -2,8 +2,7 @@ import Discord from 'discord.js';
 import YClient from '../client';
 
 export default {
-    name: "guildMemberUpdate",
-    execute: async (client: YClient, oldMember: Discord.GuildMember, newMember: Discord.GuildMember) => {
+    async run(client: YClient, oldMember: Discord.GuildMember, newMember: Discord.GuildMember) {
         if (!client.config.botSwitches.logs) return;
 
         const logChannel = client.channels.resolve(client.config.mainServer.channels.botlogs) as Discord.TextChannel;

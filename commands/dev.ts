@@ -72,8 +72,8 @@ export default {
 				}
 				break;
 			case 'file':
-				const file = interaction.options.getString('file');
-				interaction.reply({files: [`./databases/${file}.json`]}).catch((e) => interaction.reply(`\`${removeUsername(e.message)}\``))
+				const file = interaction.options.getString('file', true);
+				interaction.reply({files: [`./databases/${file}.json`]}).catch((e: Error) => interaction.channel?.send(removeUsername(e.message)));
 				break;
 			case 'statsgraph':
 				client.FSCache.statsGraph = -(interaction.options.getInteger('number', true));

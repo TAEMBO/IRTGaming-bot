@@ -119,7 +119,7 @@ export default {
 				await interaction.reply(`<@${member1.id}>'s new total set to \`${newTotal}\``);
 				break;
 			case 'logs': 
-				interaction.reply({files: ['../../.pm2/logs/IRTBot-out-0.log']})
+				interaction.reply({files: ['../../.pm2/logs/IRTBot-out-0.log']}).catch((err: Error) => interaction.channel?.send(removeUsername(err.message)));
 		}
 	},
 	data: new SlashCommandBuilder()

@@ -16,7 +16,7 @@ export default {
         };
         const timeStampInMs = Math.round((Date.now() + whenToRemind) / 1000);
         const dbPath = path.join(__dirname, '../databases/reminders.json');
-        const db = fs.readFileSync(dbPath, {encoding: 'utf8'});
+        const db = JSON.parse(fs.readFileSync(dbPath, {encoding: 'utf8'}));
         const reminder = {when: timeStampInMs, what: whatToRemind, who: interaction.user.id};
         const remindEmbed = new client.embed()
             .setTitle('Reminder set')

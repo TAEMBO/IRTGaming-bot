@@ -84,51 +84,6 @@ export class userLevels extends Database {
 		return level*level*15;
 	}
 }
-export class tictactoe extends Database {
-    client: YClient;
-    constructor(client: YClient) {
-        super("./databases/ttt.json", "array");
-        this.client = client;
-    }
-    getTotalGames(): number {
-		return this._content.length;
-	}
-	getRecentGames(amount: number): Array<db_tictactoe_tttGame> {
-		return this._content.sort((a: db_tictactoe_tttGame, b: db_tictactoe_tttGame) => b.startTime - a.startTime).slice(0, amount - 1);
-	}
-	getAllPlayers() {
-		const players: any = {};
-		this._content.forEach((game: db_tictactoe_tttGame) => {
-			game.players.forEach((player: string) => {
-				if (!players[player]) players[player] = { wins: 0, losses: 0, draws: 0, total: 0 } as db_tictactoe_tttPlayer;
-				players[player].total++;
-				if (game.draw) return players[player].draws++;
-				if (player === game.winner) {
-					return players[player].wins++;
-				} else {
-					return players[player].losses++;
-				}
-			});
-		});
-		return players;
-	}
-	getBestPlayers(amount: number) {
-		return Object.entries<db_tictactoe_tttPlayer>(this.getAllPlayers()).filter((x) => x[1].total >= 10).sort((a, b) => b[1].wins / b[1].total - a[1].wins / a[1].total).slice(0, amount - 1);
-	}
-	getMostActivePlayers(amount: number) {
-		return Object.entries<db_tictactoe_tttPlayer>(this.getAllPlayers()).sort((a, b) => b[1].total - a[1].total).slice(0, amount - 1);
-	}
-	// player stats
-	getPlayerGames(player: string) {
-		return this._content.filter((x: db_tictactoe_tttGame) => x.players.includes(player));
-	}
-	getPlayerRecentGames(player: string, amount: number) {
-		return this._content.filter((x: db_tictactoe_tttGame) => x.players.includes(player)).sort((a: db_tictactoe_tttGame, b: db_tictactoe_tttGame) => b.startTime - a.startTime).slice(0, amount - 1);
-	}
-	calcWinPercentage(player: db_tictactoe_tttPlayer) {
-		return ((player.wins / player.total) * 100).toFixed(2) + "%";
-	}
-}
 export class punishments extends Database {
     client: YClient;
     constructor(client: YClient) {

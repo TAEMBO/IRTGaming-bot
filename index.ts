@@ -14,7 +14,7 @@ console.log(client.config.devWhitelist);
 client.on("ready", async () => {
 	const guild = client.guilds.cache.get(client.config.mainServer.id) as Discord.Guild;
 	await guild.members.fetch();
-	(client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel).send(`:warning: Bot restarted :warning:\n<@${client.config.devWhitelist[0]}>\n\`\`\`js\n${Object.entries(client.config.botSwitches).map((x)=> `${x[0]}: ${x[1]}`).join('\n')}\`\`\``)
+	(client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel).send(`:warning: Bot restarted :warning:\n<@${client.config.devWhitelist[0]}>\n\`\`\`json\n${Object.entries(client.config.botSwitches).map((x)=> `${x[0]}: ${x[1]}`).join('\n')}\`\`\``)
 	setInterval(()=>{
 		guild.invites.fetch().then((invs)=>{
 			invs.forEach(async(inv)=>{

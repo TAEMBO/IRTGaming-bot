@@ -11,13 +11,13 @@ try {
     importConfig = require('./config.json');
 }
 import { db_punishments_format, global_formatTimeOpt, global_createTableOpt, FS_players, FS_data, FS_careerSavegame, Config, FSCache, YTCache, Tokens } from './interfaces';
-import { bannedWords, TFstaff, FMstaff, watchList, playerTimes, userLevels, tictactoe, punishments } from "./dbClasses";
+import { bannedWords, TFstaff, FMstaff, watchList, playerTimes, userLevels, punishments } from "./dbClasses";
 export default class YClient extends Client {
     config: Config; tokens: Tokens; moment: typeof moment; 
     embed: typeof Discord.EmbedBuilder; collection: typeof Discord.Collection; messageCollector: typeof Discord.MessageCollector; attachmentBuilder: typeof Discord.AttachmentBuilder; 
     games: Discord.Collection<string, any>; commands: Discord.Collection<string, any>;registery: Array<Discord.ApplicationCommandDataResolvable>;
     repeatedMessages: any; FSCache: FSCache; YTCache: YTCache; invites: Map<any, any>; bannedNamesPS: Array<string>; bannedNamesPG: Array<string>;
-    bannedWords: bannedWords; TFstaff: TFstaff; FMstaff: FMstaff; watchList: watchList; playerTimes: playerTimes; userLevels: userLevels; tictactoe: tictactoe; punishments: punishments
+    bannedWords: bannedWords; TFstaff: TFstaff; FMstaff: FMstaff; watchList: watchList; playerTimes: playerTimes; userLevels: userLevels; punishments: punishments
     constructor() {
         super({
             intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildBans, GatewayIntentBits.GuildInvites, GatewayIntentBits.GuildPresences, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildVoiceStates],
@@ -59,13 +59,11 @@ export default class YClient extends Client {
         this.watchList = new watchList(this);
         this.playerTimes = new playerTimes(this);
         this.userLevels = new userLevels(this);
-        this.tictactoe = new tictactoe(this);
         this.punishments = new punishments(this);
     }
     async init() {
         this.login(this.tokens.token);
         this.bannedWords.initLoad();
-        this.tictactoe.initLoad().intervalSave().disableSaveNotifs();
         this.userLevels.initLoad().intervalSave(15000).disableSaveNotifs();
         this.punishments.initLoad();
         this.FMstaff.initLoad();

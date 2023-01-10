@@ -3,6 +3,7 @@ import YClient from './client';
 import moment from 'moment';
 import fs from 'node:fs';
 import path from 'node:path';
+import FSLoop from './FSLoop';
 import { db_punishments_format, db_userLevels_format, Reminder } from './interfaces'
 const client = new YClient();
 client.init();
@@ -96,10 +97,10 @@ setInterval(async () => {
 // Farming Simulator 22 stats loops
 if (client.config.botSwitches.stats) {
 	setInterval(async () => {
-		client.FSLoop(client.tokens.ps.dss, client.tokens.ps.csg, '891791005098053682', '980240981922291752', 'PS')
-		client.FSLoop(client.tokens.pg.dss, client.tokens.pg.csg, '729823615096324166', '980241004718329856', 'PG')
-		client.FSLoop(client.tokens.mf.dss, client.tokens.mf.csg, '982143077554720768', '985586585707900928', 'MF')
-	}, 30000)
+		FSLoop(client, client.tokens.ps.dss, client.tokens.ps.csg, '891791005098053682', '980240981922291752', 'PS');
+		FSLoop(client, client.tokens.pg.dss, client.tokens.pg.csg, '729823615096324166', '980241004718329856', 'PG');
+		FSLoop(client, client.tokens.mf.dss, client.tokens.mf.csg, '982143077554720768', '985586585707900928', 'MF');
+	}, 30000);
 }
 
 // YouTube upload nofitcations loop

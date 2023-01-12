@@ -1,5 +1,5 @@
 import YClient from './client';
-import { db_playerTimes_format, db_punishments_format, db_punishments_passthruOpt, db_tictactoe_tttGame, db_tictactoe_tttPlayer} from './interfaces'
+import { db_playerTimes_format, db_punishments_format, db_punishments_passthruOpt } from './interfaces'
 import Database from './database';
 import Discord from 'discord.js';
 

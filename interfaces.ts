@@ -129,19 +129,6 @@ export interface global_createTableOpt {
     columnEmptyChar?: any
 }
 
-export interface db_tictactoe_tttPlayer {
-    wins: number;
-    losses: number;
-    draws: number;
-    total: number;
-}
-export interface db_tictactoe_tttGame {
-    players: Array<string>;
-    winner: string;
-    startTime: number;
-    endTime: number;
-    draw?: boolean;
-}
 export interface db_punishments_passthruOpt {
 	time?: string,
 	interaction?: Discord.ChatInputCommandInteraction<"cached">

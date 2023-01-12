@@ -67,7 +67,7 @@ setInterval(async () => {
 	for(let i = 0; i < filter.length; i++){
 		remindEmbed.setDescription(`\n\`\`\`${filter[i].what}\`\`\``);
 		await client.users.fetch(filter[i].who).then(User => User.send({embeds: [remindEmbed]}));
-		console.log('REMINDER EXECUTE', filter[i]);
+		console.log(`[${client.moment().format('HH:mm:ss')}]`, 'REMINDER EXECUTE', filter[i]);
 		db.splice(db.findIndex((x: Reminder) => filterLambda(x)), 1);
 		fs.writeFileSync(p, db.length !== 0 ? JSON.stringify(db, null, 2) : '[]');
 	}

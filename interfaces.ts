@@ -262,3 +262,17 @@ export interface Reminder {
     what: string,
     who: string
 }
+
+export interface banFormat {
+    blockedUserIds: {
+        user: Array<user>
+    }
+}
+interface user {
+    _attributes: {
+        uniqueUserId: string,
+        platformUserId: string,
+        platformId: string,
+        displayName: string
+    }
+}

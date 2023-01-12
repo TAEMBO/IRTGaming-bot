@@ -69,7 +69,7 @@ export default class YClient extends Client {
         this.FMstaff.initLoad();
         this.TFstaff.initLoad();
         this.watchList.initLoad();
-        this.playerTimes.initLoad().intervalSave(15000).disableSaveNotifs();
+        this.playerTimes.initLoad().intervalSave().disableSaveNotifs();
         const commandFiles = fs.readdirSync("./commands").filter(file => file.endsWith(".ts"));
         for (const file of commandFiles) {
 	        const command = require(`./commands/${file}`);

@@ -219,7 +219,7 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
         if (['891791005098053682', '729823615096324166'].includes((interaction.channel as Discord.TextChannel).id) && !client.isMPStaff(interaction.member)) return interaction.reply({content: 'This command has [restrictions](https://discord.com/channels/552565546089054218/891791005098053682/991799952084828170) set, please use <#552583841936834560> for `/stats` commands.', ephemeral: true}); 
-        const subCmd = interaction.options.getSubcommand();
+        const subCmd = interaction.options.getSubcommand() as 'ps' | 'pg' | 'mf' | 'all';
         let failedFooter: Array<string> = [];
 
         if (subCmd === 'all') {
@@ -262,16 +262,10 @@ export default {
             } else {
                 const playerData = client.playerTimes.getPlayer(player);
                 let resultText;
-                let isTimestamp;
                 if (!playerData) {
                     resultText = ` has no logged play time.`;
                 } else {
-                    if (!playerData.lastOn) {
-                        isTimestamp = 'is unknown';
-                    } else {
-                        isTimestamp = `was <t:${playerData.lastOn}:R>`;
-                    }
-                    resultText = `'s total time is **${client.formatTime(playerData.time*60*1000, 3, { commas: true, longNames: false })}** and the last time they were on ${isTimestamp}.`;
+                    resultText = `'s total time is **${client.formatTime(playerData.time*60*1000, 3, { commas: true, longNames: false })}** and the last time they were on was <t:${playerData.lastOn}:R>.`;
                 }
                 interaction.reply(`\`${player}\`${resultText}`)
             }

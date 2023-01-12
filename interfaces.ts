@@ -155,7 +155,7 @@ export interface db_userLevels_format {
 }
 export interface db_playerTimes_format {
     time: number;
-    lastOn: number | null
+    lastOn: number
 }
 
 export interface FSdss_serverName {

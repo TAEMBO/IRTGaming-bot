@@ -34,7 +34,7 @@ client.on("ready", async () => {
 	// Event handler
     fs.readdirSync('./events').forEach((file) => {
     	const eventFile = require(`./events/${file}`);
-	    client.on(file.replace('.ts', ''), async (...args) => eventFile.default.run(client, ...args));
+	    client.on(file.replace('.ts', ''), async (...args) => eventFile.default(client, ...args));
     });
 });
 

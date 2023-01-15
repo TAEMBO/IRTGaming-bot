@@ -3,7 +3,7 @@ import YClient from '../client';
 import fs from 'node:fs';
 import path from 'node:path';
 import canvas from 'canvas';
-import { db_playerTimes_format, FS_data} from '../interfaces'
+import { db_playerTimes_format, FSURLs, FS_data} from '../interfaces'
 
 async function FSstatsAll(client: YClient, serverURLdss: string, embed: Discord.EmbedBuilder, totalCount: Array<number>, failedFooter: Array<string>, serverAcro: string) {
     let serverName;
@@ -219,7 +219,7 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
         if (['891791005098053682', '729823615096324166'].includes((interaction.channel as Discord.TextChannel).id) && !client.isMPStaff(interaction.member)) return interaction.reply({content: 'This command has [restrictions](https://discord.com/channels/552565546089054218/891791005098053682/991799952084828170) set, please use <#552583841936834560> for `/stats` commands.', ephemeral: true}); 
-        const subCmd = interaction.options.getSubcommand() as 'ps' | 'pg' | 'mf' | 'all';
+        const subCmd = interaction.options.getSubcommand() as 'ps' | 'pg' | 'all' | 'playertimes';
         let failedFooter: Array<string> = [];
 
         if (subCmd === 'all') {
@@ -231,7 +231,7 @@ export default {
             await Promise.all([
                 FSstatsAll(client, client.tokens.ps.dss, embed, totalCount, failedFooter, 'PS'),
                 FSstatsAll(client, client.tokens.pg.dss, embed, totalCount, failedFooter, 'PG'),
-                FSstatsAll(client, client.tokens.mf.dss, embed, totalCount, failedFooter, 'MF')
+                //FSstatsAll(client, client.tokens.mf.dss, embed, totalCount, failedFooter, 'MF')
             ]);
 
             if (totalCount.length == 0) {
@@ -241,24 +241,18 @@ export default {
                      return previousValue + currentValue;
                  });
             }
-            if (failedFooter.length != 0) { embed.setFooter({text: failedFooter.join(', ')}) }
+            if (failedFooter.length != 0) embed.setFooter({text: failedFooter.join(', ')});
 
-            embed.setTitle(`All Servers: ${sum} online`)
+            embed.setTitle(`All Servers: ${sum} online`);
             interaction.editReply({embeds: [embed]});
-        } else if (subCmd === 'ps') {
-            FSstats(client, interaction, client.tokens.ps.dss, 'ps');
-        } else if (subCmd === 'pg') {
-            FSstats(client, interaction, client.tokens.pg.dss, 'pg');
-        } else if (subCmd === 'mf') {
-            FSstats(client, interaction, client.tokens.mf.dss, 'mf');
         } else if (subCmd === 'playertimes') {
-            const embed = new client.embed()
-                .setDescription(`Top 20 players with the most time spent on IRTGaming FS22 servers since\n<t:1672560000>\n\n${Object.entries<db_playerTimes_format>(client.playerTimes._content).sort((a, b) => (b[1].time as number) - (a[1].time as number)).slice(0, 20).map((x, i) => `**${i + 1}.** \`${x[0]}\`${(client.FMstaff._content.includes(x[0]) ? ':farmer:' : '')}${(client.TFstaff._content.includes(x[0]) ? ':angel:' : '')}: ${client.formatTime(((x[1].time as number)*60*1000), 3, { commas: true, longNames: false })}`).join('\n')}`)
-                .setColor(client.config.embedColor)
             const player = interaction.options.getString('name');
             
             if (!player) {
-                interaction.reply({embeds: [embed]});
+                interaction.reply({embeds: [new client.embed()
+                    .setColor(client.config.embedColor)
+                    .setDescription(`Top 20 players with the most time spent on IRTGaming FS22 servers since\n<t:1672560000>\n\n${Object.entries<db_playerTimes_format>(client.playerTimes._content).sort((a, b) => (b[1].time as number) - (a[1].time as number)).slice(0, 20).map((x, i) => `**${i + 1}.** \`${x[0]}\`${(client.FMstaff._content.includes(x[0]) ? ':farmer:' : '')}${(client.TFstaff._content.includes(x[0]) ? ':angel:' : '')}: ${client.formatTime(((x[1].time as number)*60*1000), 3, { commas: true, longNames: false })}`).join('\n')}`)
+                ]});
             } else {
                 const playerData = client.playerTimes.getPlayer(player);
                 let resultText;
@@ -267,8 +261,10 @@ export default {
                 } else {
                     resultText = `'s total time is **${client.formatTime(playerData.time*60*1000, 3, { commas: true, longNames: false })}** and the last time they were on was <t:${playerData.lastOn}:R>.`;
                 }
-                interaction.reply(`\`${player}\`${resultText}`)
+                interaction.reply(`\`${player}\`${resultText}`);
             }
+        } else {
+            FSstats(client, interaction, (client.tokens[subCmd] as FSURLs).dss, subCmd);
         }
     },
     data: new SlashCommandBuilder()
@@ -286,10 +282,10 @@ export default {
         .setName("pg")
         .setDescription("Public Grain server stats")
     )
-    .addSubcommand((optt)=>optt
-        .setName("mf")
-        .setDescription("Multi Farm server stats")
-    )
+    //.addSubcommand((optt)=>optt
+    //    .setName("mf")
+    //    .setDescription("Multi Farm server stats")
+    //)
     .addSubcommand((optt)=>optt
         .setName("playertimes")
         .setDescription("Player time data")

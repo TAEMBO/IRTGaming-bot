@@ -1,15 +1,16 @@
 import Discord from 'discord.js';
 import YClient from '../client';
 
-export default async (client: YClient, interaction: Discord.ChatInputCommandInteraction) => {
+export default async (client: YClient, interaction: Discord.BaseInteraction) => {
     if (!interaction.inGuild() || !interaction.inCachedGuild() || !interaction.channel) return;
-    let subCmd;
-    try {
-        subCmd = interaction.options.getSubcommand();
-    } catch (err: any) {
-        subCmd = '';
-    }
-    if (interaction.isCommand()) {
+
+    if (interaction.isChatInputCommand()) {
+        let subCmd: string;
+        try {
+            subCmd = interaction.options.getSubcommand();
+        } catch (err) {
+            subCmd = '';
+        }
         const commandFile = client.commands.get(interaction.commandName);
         console.log(`[${client.moment().format('HH:mm:ss')}]`, `${interaction.user.tag} used /${interaction.commandName} ${subCmd} in #${interaction.channel.name}`);
         if (!client.config.botSwitches.commands && !client.config.devWhitelist.includes(interaction.user.id)) return interaction.reply('Commands are currently disabled.');
@@ -22,5 +23,7 @@ export default async (client: YClient, interaction: Discord.ChatInputCommandInte
                 return interaction.reply("An error occured while executing that command.");
             }
         }
+    } else if (interaction.isButton()) {
+        console.log(`Filler text, Button pressed at ${interaction.message.url}`);
     }
 }

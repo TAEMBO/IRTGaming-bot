@@ -4,57 +4,48 @@ import moment from 'moment';
 import fs from 'node:fs';
 import path from 'node:path';
 import FSLoop from './FSLoop';
-import { db_punishments_format, db_userLevels_format, Reminder } from './interfaces'
+import { db_punishments_format, db_userLevels_format, Reminder } from './interfaces';
 const client = new YClient();
 client.init();
 
 console.log(client.config.botSwitches);
 console.log(client.config.devWhitelist);
 
-// global properties
 client.on("ready", async () => {
-	const guild = client.guilds.cache.get(client.config.mainServer.id) as Discord.Guild;
+	const guild = await client.guilds.fetch(client.config.mainServer.id);
 	await guild.members.fetch();
-	(client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel).send(`:warning: Bot restarted :warning:\n<@${client.config.devWhitelist[0]}>\n\`\`\`json\n${Object.entries(client.config.botSwitches).map((x)=> `${x[0]}: ${x[1]}`).join('\n')}\`\`\``)
-	setInterval(()=>{
-		guild.invites.fetch().then((invs)=>{
-			invs.forEach(async(inv)=>{
-				client.invites.set(inv.code, {uses: inv.uses, creator: (inv.inviter as Discord.User).id})
-			})
-		})
-	}, 500000)
-	if (client.config.botSwitches.registerCommands) guild.commands.set(client.registery).catch((e)=>{console.log(`Couldn't register commands bcuz: ${e}`)});
+	const channel = client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel;
+	await channel.send(`:warning: Bot restarted :warning:\n<@${client.config.devWhitelist[0]}>\n\`\`\`json\n${Object.entries(client.config.botSwitches).map((x)=> `${x[0]}: ${x[1]}`).join('\n')}\`\`\``)
+	
+	setInterval(() => guild.invites.fetch().then((invs)=>{
+		invs.forEach((inv) => client.invites.set(inv.code, {uses: inv.uses, creator: inv.inviter?.id}));
+	}), 500000);
+	if (client.config.botSwitches.registerCommands) guild.commands.set(client.registery).catch((e)=>console.log(`Couldn't register commands bcuz: ${e}`));
 
-	setInterval(async () => {
-		(client.user as Discord.ClientUser).setPresence(client.config.botPresence);
-		// Playing: 0 & 1, Listening: 2, Watching: 3, N/A: 4, Competing in: 5
-	}, 60000);
-	console.log(`[${moment().format('HH:mm:ss')}] Bot active as ${(client.user as Discord.ClientUser).tag}`);
-
+	// Playing: 0 & 1, Listening: 2, Watching: 3, N/A: 4, Competing in: 5
+	setInterval(() => client.user?.setPresence(client.config.botPresence), 60000);
+	
 	// Event handler
     fs.readdirSync('./events').forEach((file) => {
     	const eventFile = require(`./events/${file}`);
 	    client.on(file.replace('.ts', ''), async (...args) => eventFile.default(client, ...args));
     });
+
+	console.log(`[${moment().format('HH:mm:ss')}]`, `Bot active as ${client.user?.tag}`);
 });
 
 // error handlers
 function logError(error: Error) {
 	console.log(error);                    // vvv I'm well aware my internet is bad, I don't need my own bot to rub it in
-	if (client.config.botSwitches.errorNotify && !['Request aborted', 'getaddrinfo ENOTFOUND discord.com'].includes(error.message)) (client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel).send({content: `<@${client.config.devWhitelist[0]}>`, embeds: [new client.embed().setTitle("Error Caught!").setColor("#420420").setDescription(`**Error:** \`${error.message}\`\n\n**Stack:** \`${`${error.stack}`.slice(0, 2500)}\``).setTimestamp()]});
+	if (client.config.botSwitches.errorNotify && !['Request aborted', 'getaddrinfo ENOTFOUND discord.com'].includes(error.message)) {
+		const channel = client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel;
+		channel.send({content: `<@${client.config.devWhitelist[0]}>`, embeds: [new client.embed().setTitle("Error Caught!").setColor("#420420").setDescription(`**Error:** \`${error.message}\`\n\n**Stack:** \`${`${error.stack}`.slice(0, 2500)}\``).setTimestamp()]});
+	}
 }
-process.on('unhandledRejection', (error: Error) => {
-	logError(error);
-});
-process.on('uncaughtException', (error: Error) => {
-	logError(error);
-});
-process.on('error', (error: Error) => {
-	logError(error);
-});
-client.on('error', (error: Error) => {
-	logError(error);
-});
+process.on('unhandledRejection', (error: Error) => logError(error));
+process.on('uncaughtException', (error: Error) => logError(error));
+process.on('error', (error: Error) => logError(error));
+client.on('error', (error: Error) => logError(error));
 
 // reminder, dailyMsgs, and punishment event loops
 setInterval(async () => {

@@ -3,7 +3,9 @@ import Discord, { SlashCommandBuilder, ButtonBuilder, ActionRowBuilder, ButtonSt
 import YClient from '../client';
 import puppeteer from 'puppeteer'; // Credits to Trolly for suggesting this package
 import FTPClient from 'ftp';
-import { FSCacheServer, FSURLs } from 'interfaces';
+import fs from 'node:fs';
+import xjs from 'xml-js';
+import { banFormat, FSCacheServer, FSURLs } from 'interfaces';
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
@@ -39,14 +41,13 @@ export default {
                 const uptimeText = await page.evaluate(()=>(document.querySelector("span.monitorHead") as Element).textContent);
                 result += `Uptime before stopping: **${uptimeText}**\n`;
             };
-            result += `Total time taken: **${Date.now() - time}ms**`;
 
             page.waitForSelector(serverSelector).then(() => {
                 page.click(serverSelector).then(() => {
                     interaction.editReply(`Successfully pressed **${chosenAction}** after **${Date.now() - time}ms**, closing dedi panel...`);
                     setTimeout(async () => {
                         await browser.close();
-                        interaction.editReply(result);
+                        interaction.editReply(result += `Total time taken: **${Date.now() - time}ms**`);
                     }, 2000);
                 });
             });
@@ -63,17 +64,77 @@ export default {
             const time = Date.now();
             const FTP = new FTPClient();
 
-            FTP.on('ready', async function() {
-                await interaction.editReply(`Connected to FTP for **${chosenServer.toUpperCase()}** after **${Date.now() - time}ms**, attempting to delete file`);
-
-                FTP.delete(FTPLogin.path + `savegame1/${chosenAction}`, async function(err) {
-                    if (err) throw err;
+            FTP.on('ready', async () => {
+                FTP.delete(FTPLogin.path + `savegame1/${chosenAction}`, async (err) => {
+                    if (err) return interaction.editReply(err.message);
                     await interaction.editReply(`Successfully deleted **${chosenAction}** from **${chosenServer.toUpperCase()}** after **${Date.now() - time}ms**`);
                     FTP.end();
                 });
             });
 
             FTP.connect(FTPLogin);
+        } else if (subCmd == 'bans') {
+            if (!interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager)) return client.youNeedRole(interaction, "mpmanager");
+
+            const chosenServer = interaction.options.getString('server', true) as 'ps' | 'pg';
+            const chosenAction = interaction.options.getString('action', true) as 'dl' | 'ul';
+
+            await interaction.deferReply();
+            const FTP = new FTPClient();
+
+            if (chosenAction == 'dl') {
+                if (chosenServer == 'pg') {
+                    FTP.connect(client.tokens.ftp.pg);
+                    FTP.on('ready', async () => {
+                        console.log('Connected to FTP for PG');
+                        FTP.get(client.tokens.ftp.pg.path + 'blockedUserIds.xml', async (err, stream) => {
+                            if (err) return interaction.editReply(err.message);
+                            console.log('Downloaded PG bans');
+                            stream.once('close', ()=>FTP.end());
+                            stream.pipe(fs.createWriteStream('./databases/blockedUserIds.xml'));
+    
+                            console.log(`Write via ${client.tokens.ftp.pg.path}`);
+                            interaction.editReply({files: ['./databases/blockedUserIds.xml']});
+                        });
+                    });
+                } else {
+                    interaction.editReply({files: ['../../Documents/My Games/FarmingSimulator2022/blockedUserIds.xml']});
+                }
+            } else {
+                let data: banFormat;
+                const banAttachment = interaction.options.getAttachment('bans');
+                if (!banAttachment) return interaction.editReply(`Canceled: A ban file must be supplied`);
+
+                const banData = await fetch(banAttachment.url).then((res) => res.text());
+                console.log(`Discord API; Downloaded ${banAttachment.name}`);
+                try {
+                    data = xjs.xml2js(banData, {compact: true}) as banFormat;
+                } catch (err) {
+                    return interaction.editReply(`Canceled: Improper file (not XML)`);
+                }
+
+                if (!data.blockedUserIds?.user[0]?._attributes?.displayName) return interaction.editReply(`Canceled: Improper file (data format)`);
+
+                if (chosenServer == 'pg') {
+                    FTP.connect(client.tokens.ftp.pg);
+                    FTP.on('ready', async () => {
+                        console.log('Connected to FTP for PG');
+                        FTP.put(banData, client.tokens.ftp.pg.path + 'blockedUserIds.xml', async (error) => {
+                            if (error) {
+                                interaction.editReply(error.message);
+                            } else {
+                                console.log('Uploaded PG bans');
+                                interaction.editReply('Successfully uploaded ban file for PG');
+                            }
+
+                        });
+                    });
+                } else {
+                    fs.writeFileSync(`../../Documents/My Games/FarmingSimulator2022/blockedUserIds.xml`, banData);
+                    interaction.editReply('Successfully uploaded ban file for PS');
+                }
+            }
+
         } else if (subCmd == 'roles') {
             if (!interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager)) return client.youNeedRole(interaction, "mpmanager");
             const member = interaction.options.getMember("member") as Discord.GuildMember;
@@ -165,6 +226,32 @@ export default {
             )
             .setRequired(true)
         )
+    )
+    .addSubcommand(x=>x
+        .setName('bans')
+        .setDescription('Manage ban lists for servers')
+        .addStringOption(x=>x
+            .setName('server')
+            .setDescription('The server to manage')
+            .addChoices(
+                {name: 'Public Silage', value: 'ps'},
+                {name: 'Public Grain', value: 'pg'}
+            )
+            .setRequired(true)
+        )
+        .addStringOption(x=>x
+            .setName('action')
+            .setDescription('To download or upload a ban file')
+            .addChoices(
+                {name: 'Download', value: 'dl'},
+                {name: 'Upload', value: 'ul'}
+            )
+            .setRequired(true)
+        )
+        .addAttachmentOption(x=>x
+            .setName('bans')
+            .setDescription('The ban file if uploading')
+            .setRequired(false))
     )
     .addSubcommand(x=>x
         .setName('roles')

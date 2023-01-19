@@ -94,7 +94,7 @@ export default {
                             stream.pipe(fs.createWriteStream('./databases/blockedUserIds.xml'));
     
                             console.log(`Write via ${client.tokens.ftp.pg.path}`);
-                            interaction.editReply({files: ['./databases/blockedUserIds.xml']});
+                            setTimeout(() => interaction.editReply({files: ['./databases/blockedUserIds.xml']}), 1000);
                         });
                     });
                 } else {

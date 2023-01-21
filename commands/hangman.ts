@@ -3,33 +3,33 @@ import YClient from '../client';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
 		const channel = interaction.channel as Discord.TextChannel;
-		if (client.games.has(channel.id)) {
-			return interaction.reply(`There is already an ongoing game in this channel created by ${client.games.get(channel.id)}`);
-		}
+		if (client.games.has(channel.id)) return interaction.reply(`There is already an ongoing game in this channel created by ${client.games.get(channel.id)}`);
+
 		client.games.set(channel.id, interaction.user.tag);
 		await interaction.reply({content: `Game started!`, ephemeral: true});
+
 		let hiddenLetters = true;
 		let fouls = 0;
 		let latestActivity = Date.now();
-		const word = interaction.options.getString("word") as string;
-		const ea = await interaction.followUp({content: `A hangman game has been started by *${interaction.user.tag}*!\nAnyone can guess letters or the full word by doing \`guess [letter or word]\`\nThe word is:\n\`\`\`\n${hideWord()}\n\`\`\``, fetchReply: true});
-		const guessedWordsIndices: Array<number>= [];
 		const guesses: Array<string> = [];
-		function wordUpdate() {
-			const hideWordResult = hideWord();
-			let winText = '';
+		const guessedWordsIndices: Array<number>= [];
+		const phrase = interaction.options.getString("phrase", true).toLowerCase();
+		const wordOrPhrase = phrase.includes(' ') ? 'phrase' : 'word';
+		const botMsg = await interaction.followUp({content: `A hangman game has been started by *${interaction.user.tag}*!\nAnyone can guess letters${phrase.includes(' ') ? ', a word, or the full phrase': ' or the full word'} by doing \`guess [letter${phrase.includes(' ') ? ', word, or phrase' : ' or word'}]\`\nThe ${wordOrPhrase} is:\n\`\`\`\n${hidePhrase()}\n\`\`\``, fetchReply: true});
+		function phraseUpdate() {
+			const hideWordResult = hidePhrase();
+			let text = `A part of the ${wordOrPhrase} has been revealed, this is what it looks like now:\n\`\`\`\n${hideWordResult}\n\`\`\``;
 			if (!hiddenLetters) {
-				winText = `\nThe whole word has been revealed. The hangman game ends. The word was:\n\`\`\`\n${word}\n\`\`\``;
+				text = `The whole ${wordOrPhrase} has been revealed! The hangman game ends with the ${wordOrPhrase} being:\n\`\`\`\n${phrase}\n\`\`\``;
 				client.games.delete(channel.id);
 				guessCollector.stop();
 				clearInterval(interval);
-
 			}
-			ea.reply(`A part of the word has been revealed. This what the word looks like now:\n\`\`\`\n${hideWordResult}\n\`\`\`` + winText);
+			botMsg.reply({content: text, allowedMentions: {repliedUser: false}});
 		}
-		function hideWord() {
+		function hidePhrase() {
 			hiddenLetters = false;
-			return word.split('').map((x, i) => {
+			return phrase.split('').map((x, i) => {
 				if (guesses.includes(x) || guessedWordsIndices.includes(i)) return x;
 				else if (x === ' ') return ' ';
 				else {
@@ -42,26 +42,26 @@ export default {
 			latestActivity = Date.now();
 			if (guesses.includes(letter)) return channel.send('That letter has been guessed already.');
 			guesses.push(letter);
-			if (!word.includes(letter)) {
+			if (!phrase.includes(letter)) {
 				fouls++;
-				checkFouls();
+				checkFouls(false);
 				return;
 			}
-			wordUpdate();
+			phraseUpdate();
 		}
 		function guessWord(text: string) {
 			latestActivity = Date.now();
-			if (!word.includes(text)) {
+			if (!phrase.includes(text)) {
 				fouls++;
 				checkFouls(true);
 				return;
 			}
-			const guessedTextStartIndex = word.indexOf(text);
+			const guessedTextStartIndex = phrase.indexOf(text);
 			const guessedTextCharIndices = Array.from(Array(text.length).keys());
 			guessedWordsIndices.push(...guessedTextCharIndices.map(x => x + guessedTextStartIndex));
-			wordUpdate();
+			phraseUpdate();
 		}
-		const guessCollector = (interaction.channel as Discord.TextChannel).createMessageCollector({max: 1});
+		const guessCollector = (interaction.channel as Discord.TextChannel).createMessageCollector();
 
 		guessCollector.on('collect', (guessMessage: Discord.Message) => {
 			if (guessMessage.author.bot) return;
@@ -81,15 +81,15 @@ export default {
 
 		const interval = setInterval(() => {
 			const channel = interaction.channel as Discord.TextChannel;
-			if (Date.now() > latestActivity + 5 * 60 * 1000 && client.games.has(channel.id)) {
-				channel.send('The hangman game has ended due to inactivity.');
+			if (Date.now() > latestActivity + 60000 && client.games.has(channel.id)) {
+				botMsg.reply({content: 'The hangman game has ended due to inactivity.', allowedMentions: {repliedUser: false}});
 				client.games.delete(channel.id);
 				guessCollector.stop();
 				clearInterval(interval);
 			}
 		}, 5000);
 
-		function checkFouls(textGuess?: any) {
+		function checkFouls(isWord: boolean) {
 			const stages = [
 				[
 					'      ',
@@ -150,19 +150,19 @@ export default {
 			];
 			let loseText = '';
 			if (fouls === 7) {
-				loseText = `\nThe poor fella got hung. You lost the game. The word was:\n\`\`\`\n${word}\n\`\`\``;
+				loseText = `\nThe poor fella got hung. You lost the game. The ${wordOrPhrase} was:\n\`\`\`\n${phrase}\n\`\`\``;
 				client.games.delete((interaction.channel as Discord.TextChannel).id);
 				guessCollector.stop();
 				clearInterval(interval);
 			}
-			ea.reply(`The word doesn\'t include that ${!textGuess ? 'letter' : 'piece of text'}.\nAn incorrect guess leads to the addition of things to the drawing. It now looks like this:\n\`\`\`\n${stages[fouls - 1].join('\n')}\n\`\`\`` + loseText);
+			botMsg.reply({content: `The ${wordOrPhrase} doesn\'t include that ${isWord ? 'piece of text' : 'letter'}.\nAn incorrect guess leads to the addition of things to the drawing. It now looks like this:\n\`\`\`\n${stages[fouls - 1].join('\n')}\n\`\`\`` + loseText, allowedMentions: {repliedUser: false}});
 		}
 	},
 	data: new SlashCommandBuilder()
 		.setName("hangman")
 		.setDescription("Starts a game of hangman!")
 		.addStringOption((opt)=>opt
-			.setName("word")
-			.setDescription("The word to users have to try and guess.")
+			.setName("phrase")
+			.setDescription("The word or phrase for members to guess")
 			.setRequired(true))
 };

@@ -32,7 +32,7 @@ export default {
                 interaction.editReply(err.message);
                 return;
             }
-            await interaction.editReply(`Connected to dedi panel for **${chosenServer.toUpperCase()}** after **${Date.now() - time}ms**, attempting to **${chosenAction}** server...`);
+            await interaction.editReply(`Connected to dedi panel for **${chosenServer.toUpperCase()}** after **${Date.now() - time}ms**...`);
 
             let result = 'Dedi panel closed, result:\n';
             result += `Server: **${chosenServer.toUpperCase()}**\n`;
@@ -44,7 +44,6 @@ export default {
 
             page.waitForSelector(serverSelector).then(() => {
                 page.click(serverSelector).then(() => {
-                    interaction.editReply(`Successfully pressed **${chosenAction}** after **${Date.now() - time}ms**, closing dedi panel...`);
                     setTimeout(async () => {
                         await browser.close();
                         interaction.editReply(result += `Total time taken: **${Date.now() - time}ms**`);

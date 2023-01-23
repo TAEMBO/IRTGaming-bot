@@ -37,8 +37,6 @@ export default class YClient extends Client {
         this.registery = [];
         this.setMaxListeners(100);
         this.repeatedMessages = {};
-        this.bannedNamesPS = [];
-        this.bannedNamesPG = [];
         this.FSCache = {
             statsGraph: -120, 
             ps: {new: [], old: [], status: undefined, lastAdmin: undefined},

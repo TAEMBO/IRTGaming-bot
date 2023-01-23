@@ -35,11 +35,17 @@ export default {
 		} else {
 			await member.user.fetch();
 			const embedArray: Array<EmbedBuilder> = [];
+			let titleText = 'Member';
+			if (member.user.bot) {
+				titleText = 'Bot';
+			} else if (member.user.id === interaction.guild.ownerId) {
+				titleText = ':crown: Server Owner';
+			}
 			const embed0 = new client.embed()
 				.setThumbnail(member.user.avatarURL({ extension: 'png', size: 2048}) || member.user.defaultAvatarURL)
-				.setTitle(`${member.user.bot ? `Bot` : 'Member'} info: ${member.user.tag}`)
+				.setTitle(`${titleText} info: ${member.user.tag}`)
 				.setURL(`https://discord.com/users/${member.user.id}`)
-				.setDescription(`<@${member.user.id}>\n\`${member.user.id}\`${member.user.id === interaction.guild.ownerId ? '\n__**Server Owner**__ 👑' : ''}`)
+				.setDescription(`<@${member.user.id}>\n\`${member.user.id}\``)
 				.addFields(
 					{name: '🔹 Account Creation Date', value: formatTime(member.user.createdTimestamp)},
 					{name: '🔹 Join Date', value: formatTime(member.joinedTimestamp as number)},

@@ -5,9 +5,9 @@
 	"embedColorYellow": "#ffea00",
 	"botPresence": {
 		"activities": [
-			{"name": "the new TFs and FM", "type": 3}
+			{"name": "the news", "type": 2}
 		],
-		"status": "online"
+		"status": "dnd"
 	},
 	"botSwitches": {
 		"commands": true,
@@ -23,6 +23,12 @@
 		"615761944154210305",
 		"190407856527376384",
 		"485793265568841728"
+	],
+	"watchListPings": [
+		"238248487593050113",
+		"267270757539643402",
+		"642735886953611265",
+		"769710040596217897"
 	],
 	"mainServer": {
 		"id":"552565546089054218",

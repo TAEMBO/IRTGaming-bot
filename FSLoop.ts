@@ -54,9 +54,9 @@ function adminCheck(client: YClient, ArrayNew: Array<FS_players>, ArrayOld: Arra
     });
 }
 
-function log(client: YClient, ArrayNew: Array<FS_players>, ArrayOld: Array<FS_players>, wlChannel: Discord.TextChannel, logChannel: Discord.TextChannel, serverAcro: string, now: number, wlPing: Array<string>) {
+function log(client: YClient, ArrayNew: Array<FS_players>, ArrayOld: Array<FS_players>, wlChannel: Discord.TextChannel, logChannel: Discord.TextChannel, serverAcro: string, now: number) {
     // Filter for players leaving
-    const missingElementsLeave = ArrayOld.filter((x: FS_players) => !ArrayNew.some((y: FS_players) => y.name === x.name)); // Filter names that were in the first fetch but not the second. Thanks to LebSter#0617 for this on The Coding Den Discord server
+    const missingElementsLeave = ArrayOld.filter(x => !ArrayNew.some(y => y.name === x.name)); // Filter names that were in the first fetch but not the second. Thanks to LebSter#0617 for this on The Coding Den Discord server
     for (const x of missingElementsLeave) {
         const inWl = client.watchList._content.find((y: Array<string>) => y[0] == x.name);
         if (inWl) wlChannel.send({embeds: [wlEmbed(client, inWl[0], false, serverAcro, now)]}); // Hopefully that person got banned
@@ -70,16 +70,16 @@ function log(client: YClient, ArrayNew: Array<FS_players>, ArrayOld: Array<FS_pl
     if (ArrayOld.length == 0 && (client.uptime as number) > 33000) {
         playerObj = ArrayNew;
     } else if (ArrayOld.length != 0) {
-        playerObj = ArrayNew.filter((y: FS_players) => !ArrayOld.some((z: FS_players) => z.name === y.name));
+        playerObj = ArrayNew.filter(y => !ArrayOld.some(z => z.name === y.name));
     }
-
-    if (playerObj != undefined) {
-        playerObj.forEach((x: FS_players) => {
-            const inWl = client.watchList._content.find((y: Array<string>) => y[0] == x.name);
-            if (inWl) wlChannel.send({content: `${wlPing.map(x=>`<@${x}>`).join(" ")}`, embeds: [wlEmbed(client, inWl[0], true, serverAcro, now, inWl[1])]}); // Oh no, go get em Toast
-            logChannel.send({embeds: [logEmbed(client, x, true, serverAcro, now)]});
-        })
-    }
+ 
+    if (playerObj) playerObj.forEach(x => {
+        const inWl = client.watchList._content.find((y: Array<string>) => y[0] == x.name);
+        const guild = client.guilds.cache.get(client.config.mainServer.id) as Discord.Guild;
+        const filterWLPings = client.config.watchListPings.filter((x) => !(guild.members.cache.get(x) as Discord.GuildMember).roles.cache.has(client.config.mainServer.roles.loa)).map(x=>`<@${x}>`).join(" ");
+        if (inWl) wlChannel.send({content: filterWLPings, embeds: [wlEmbed(client, inWl[0], true, serverAcro, now, inWl[1])]}); // Oh no, go get em Toast
+        logChannel.send({embeds: [logEmbed(client, x, true, serverAcro, now)]});
+    });
 }
 
 function seasons(season: string) {
@@ -94,7 +94,6 @@ function seasons(season: string) {
 }
 
 export default async (client: YClient, serverURLdss: string, serverURLcsg: string, Channel: string, Message: string, serverAcro: string) => {
-    const wlPing = ["238248487593050113", "267270757539643402", "642735886953611265", "769710040596217897"];
     const wlChannel = client.channels.resolve(client.config.mainServer.channels.watchlist) as Discord.TextChannel;
     const logChannel = client.channels.resolve(client.config.mainServer.channels.fslogs) as Discord.TextChannel;
     const statsMsg = await (client.channels.resolve(Channel) as Discord.TextChannel).messages.fetch(Message);
@@ -185,7 +184,7 @@ export default async (client: YClient, serverURLdss: string, serverURLcsg: strin
         client.FSCache[serverAcro.toLowerCase()].new = FSdss.slots.players.filter(x=>x.isUsed);
 
         if (serverAcro != 'MF') adminCheck(client, client.FSCache[serverAcro.toLowerCase()].new, client.FSCache[serverAcro.toLowerCase()].old, serverAcro, now);
-        log(client, client.FSCache[serverAcro.toLowerCase()].new, client.FSCache[serverAcro.toLowerCase()].old, wlChannel, logChannel, serverAcro, now, wlPing);
+        log(client, client.FSCache[serverAcro.toLowerCase()].new, client.FSCache[serverAcro.toLowerCase()].old, wlChannel, logChannel, serverAcro, now);
         dataPoint(FSdss.slots.used, serverAcro);
         if (FSdss.slots.players.filter((x)=> x.isAdmin).length > 0) client.FSCache[serverAcro.toLowerCase()].lastAdmin = Date.now();
 

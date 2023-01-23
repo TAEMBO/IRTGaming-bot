@@ -35,6 +35,7 @@ export interface Config {
     botPresence: Discord.PresenceData
     botSwitches: botSwitches,
     devWhitelist: Array<string>,
+    watchListPings: Array<string>,
     mainServer: mainServer
 }
 interface botSwitches {

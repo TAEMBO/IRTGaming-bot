@@ -81,47 +81,47 @@ const quantities: Quantities = {
 		},
 		{
 			name: 'US Dollar :flag_us:',
-			value: 0.94,
+			value: 0.92,
 			short: ['USD', '$'],
 		},
 		{
 			name: 'pound sterling :flag_gb:',
-			value: 1.15,
+			value: 1.14,
 			short: ['GBP', '£']
 		},
 		{
 			name: 'Turkish Lira :flag_tr:',
-			value: 0.051,
+			value: 0.049,
 			short: ['TRY', 'TL', '₺']
 		},
 		{
 			name: 'Russian Ruble :flag_ru:',
-			value: 0.015,
+			value: 0.013,
 			short: ['RUB', '₽']
 		},
 		{
 			name: 'Canadian Dollar :flag_ca:',
-			value: 0.69,
+			value: 0.68,
 			short: ['CAD']
 		},
 		{
 			name: 'Australian Dollar :flag_au:',
-			value: 0.63,
+			value: 0.65,
 			short: ['AUD']
 		},
 		{
 			name: 'Japanese Yen :flag_jp:',
-			value: 0.0069,
+			value: 0.0071,
 			short: ['JPY', '¥', 'yen', 'jy']
 		},
 		{
 			name: 'New Zealand Dollar :flag_nz:',
-			value: 0.60,
+			value: 0.59,
 			short: ['NZD']
 		},
 		{
 			name: 'Indonesian Rupiah :flag_id:',
-			value: 0.000060,
+			value: 0.000061,
 			short: ['IDR', 'Rp']
 		},
 		{
@@ -131,12 +131,12 @@ const quantities: Quantities = {
 		},
 		{
 			name: 'Swedish krona :flag_se:',
-			value: 0.091,
+			value: 0.090,
 			short: ['SEK', 'kr']
 		},
 		{
 			name: 'Norwegian krone :flag_no:',
-			value: 0.095,
+			value: 0.093,
 			short: ['NOK']
 		},
 		{
@@ -146,22 +146,22 @@ const quantities: Quantities = {
 		},
 		{
 			name: 'Icelandic króna :flag_is:',
-			value: 0.0066,
+			value: 0.0064,
 			short: ['ISK']
 		},
 		{
 			name: 'Czech koruna :flag_cz:',
-			value: 0.041,
+			value: 0.042,
 			short: ['CZK', 'Kč']
 		},
 		{
 			name: 'Swiss franc :flag_sw:',
-			value: 1.01,
+			value: 1.00,
 			short: ['CFH', 'fr']
 		},
 		{
 			name: 'Ukrainian hryvnia :flag_ua:',
-			value: 0.026,
+			value: 0.025,
 			short: ['UAH', '₴', 'грн']
 		},
 		{
@@ -171,17 +171,17 @@ const quantities: Quantities = {
 		},
 		{
 			name: 'United Arab Emirates dirham :flag_ae:',
-			value: 0.26,
+			value: 0.25,
 			short: ['AED', 'د.إ']
 		},
 		{
 			name: 'Sri Lankan Rupee :flag_lk:',
-			value: 0.0026,
+			value: 0.0025,
 			short: ['LKR', 'රු', 'ரூ']
 		},
 		{
 			name: 'Hungarian Forint :flag_hu:',
-			value: 0.0025,
+			value: 0.0026,
 			short: ['HUF']
 		},
 		{

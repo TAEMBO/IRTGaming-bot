@@ -120,6 +120,10 @@ export default {
 				break;
 			case 'logs': 
 				interaction.reply({files: ['../../.pm2/logs/IRTBot-out-0.log']}).catch((err: Error) => interaction.channel?.send(removeUsername(err.message)));
+				break;
+			case 'dz':
+				exec('start C:/WakeOnLAN/WakeOnLanC.exe -w -m Desktop');
+				interaction.reply('PC has committed iWoke:tm:');
 		}
 	},
 	data: new SlashCommandBuilder()
@@ -195,5 +199,9 @@ export default {
 		)
 		.addSubcommand((optt)=>optt
 			.setName('logs')
-			.setDescription('Retrieve output log'))
+			.setDescription('Retrieve output log')
+		)
+		.addSubcommand(x=>x
+			.setName('dz')
+			.setDescription('Wheezing Over Life'))
 };

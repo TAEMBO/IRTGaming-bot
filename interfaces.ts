@@ -124,11 +124,6 @@ export interface global_formatTimeOpt {
     longNames: boolean,
     commas: boolean
 }
-export interface global_createTableOpt {
-    columnAlign: Array<string>, 
-    columnSeparator: Array<string>, 
-    columnEmptyChar?: any
-}
 
 export interface db_punishments_passthruOpt {
 	time?: string,

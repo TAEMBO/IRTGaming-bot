@@ -10,7 +10,7 @@ try {
 } catch(err) {
     importConfig = require('./config.json');
 }
-import { db_punishments_format, global_formatTimeOpt, global_createTableOpt, Config, FSCache, YTCache, Tokens } from './interfaces';
+import { db_punishments_format, global_formatTimeOpt, Config, FSCache, YTCache, Tokens } from './interfaces';
 import { bannedWords, TFstaff, FMstaff, watchList, playerTimes, userLevels, punishments } from "./dbClasses";
 export default class YClient extends Client {
     config: Config; tokens: Tokens; moment: typeof moment; 
@@ -154,39 +154,6 @@ export default class YClient extends Client {
         const sizes = ['Bytes', 'KB', 'MB', 'GB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return (bytes / Math.pow(k, i)).toFixed(dm) + ' ' + sizes[i];
-    }
-    createTable(columnTitles: string[], rowsData: any, options: global_createTableOpt, client: YClient) {
-        const rows: any = [];
-        let { columnAlign = [], columnSeparator = [], columnEmptyChar = [] } = options;
-        if (columnSeparator.length < 1) columnSeparator.push('|');
-        columnSeparator = columnSeparator.map((x: string) => ` ${x} `);
-        // column widths
-        const columnWidths = columnTitles.map((title: any, i) => Math.max(title.length, ...rowsData.map((x: any)=> x[i].length)));
-        // first row
-        rows.push(columnTitles.map((title, i) => {
-            let text = client.alignText(title, columnWidths[i], columnAlign[i], columnEmptyChar[i]);
-            if (columnSeparator[i]) {
-                text += ' '.repeat(columnSeparator[i].length);
-            }
-            return text;
-        }).join(''));
-        // big line
-        rows.push('━'.repeat(rows[0].length));
-        // data
-        // remove unicode
-        rowsData.map((row: any) => {
-            return row.map((element: string) => {
-                return element.split('').map((char: string) => {
-                    if (char.charCodeAt(0) > 128) return '□';
-                }).join('');
-            });
-        });
-        rows.push(rowsData.map((row: any) => row.map((element: string, i: number) => {
-                return client.alignText(element, columnWidths[i], columnAlign[i], columnEmptyChar[i]) + (i === columnTitles.length - 1 ? '' : columnSeparator[i]);
-            }).join('')
-        ).join('\n'))
-    
-        return rows.join('\n');
     }
     async punish(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">, type: string) {
         if ((!client.hasModPerms(interaction.member as Discord.GuildMember)) || (!['warn', 'mute'].includes(type) && (interaction.member as Discord.GuildMember).roles.cache.has(client.config.mainServer.roles.helper))) return client.youNeedRole(interaction, "mod");

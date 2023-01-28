@@ -85,14 +85,14 @@ export default {
                 if (chosenServer == 'pg') {
                     FTP.connect(client.tokens.ftp.pg);
                     FTP.on('ready', async () => {
-                        console.log('Connected to FTP for PG');
+                        console.log(client.timeLog('\x1b[33m'), 'Connected to FTP for PG');
                         FTP.get(client.tokens.ftp.pg.path + 'blockedUserIds.xml', async (err, stream) => {
                             if (err) return interaction.editReply(err.message);
-                            console.log('Downloaded PG bans');
+                            console.log(client.timeLog('\x1b[33m'), 'Downloaded PG bans');
                             stream.once('close', ()=>FTP.end());
                             stream.pipe(fs.createWriteStream('./databases/blockedUserIds.xml'));
     
-                            console.log(`Write via ${client.tokens.ftp.pg.path}`);
+                            console.log(client.timeLog('\x1b[33m'), `Write via ${client.tokens.ftp.pg.path}`);
                             setTimeout(() => interaction.editReply({files: ['./databases/blockedUserIds.xml']}), 1000);
                         });
                     });
@@ -105,7 +105,7 @@ export default {
                 if (!banAttachment) return interaction.editReply(`Canceled: A ban file must be supplied`);
 
                 const banData = await fetch(banAttachment.url).then((res) => res.text());
-                console.log(`Discord API; Downloaded ${banAttachment.name}`);
+                console.log(client.timeLog('\x1b[33m'), `Discord API; Downloaded ${banAttachment.name}`);
                 try {
                     data = xjs.xml2js(banData, {compact: true}) as banFormat;
                 } catch (err) {
@@ -117,12 +117,12 @@ export default {
                 if (chosenServer == 'pg') {
                     FTP.connect(client.tokens.ftp.pg);
                     FTP.on('ready', async () => {
-                        console.log('Connected to FTP for PG');
+                        console.log(client.timeLog('\x1b[33m'), 'Connected to FTP for PG');
                         FTP.put(banData, client.tokens.ftp.pg.path + 'blockedUserIds.xml', async (error) => {
                             if (error) {
                                 interaction.editReply(error.message);
                             } else {
-                                console.log('Uploaded PG bans');
+                                console.log(client.timeLog('\x1b[33m'), 'Uploaded PG bans');
                                 interaction.editReply('Successfully uploaded ban file for PG');
                             }
 

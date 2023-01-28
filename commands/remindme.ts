@@ -24,7 +24,7 @@ export default {
             .setColor(client.config.embedColor)
         db.push(reminder);
         fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
-        console.log('REMINDER CREATE', reminder)
+        console.log(client.timeLog('\x1b[33m'), 'REMINDER CREATE', reminder)
         interaction.reply({embeds: [remindEmbed]});
       },
       data: new SlashCommandBuilder()

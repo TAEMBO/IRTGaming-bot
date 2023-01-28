@@ -61,7 +61,7 @@ function log(client: YClient, ArrayNew: Array<FS_players>, ArrayOld: Array<FS_pl
         const inWl = client.watchList._content.find((y: Array<string>) => y[0] == x.name);
         if (inWl) wlChannel.send({embeds: [wlEmbed(client, inWl[0], false, serverAcro, now)]}); // Hopefully that person got banned
         
-        client.playerTimes.addPlayerTime(x.name, x.uptime); // Add playerTimes data
+        if (x.uptime > 0) client.playerTimes.addPlayerTime(x.name, x.uptime); // Add playerTimes data
         logChannel.send({embeds: [logEmbed(client, x, false, serverAcro, now)]})
     }
                 
@@ -76,8 +76,10 @@ function log(client: YClient, ArrayNew: Array<FS_players>, ArrayOld: Array<FS_pl
     if (playerObj) playerObj.forEach(x => {
         const inWl = client.watchList._content.find((y: Array<string>) => y[0] == x.name);
         const guild = client.guilds.cache.get(client.config.mainServer.id) as Discord.Guild;
-        const filterWLPings = client.config.watchListPings.filter((x) => !(guild.members.cache.get(x) as Discord.GuildMember).roles.cache.has(client.config.mainServer.roles.loa)).map(x=>`<@${x}>`).join(" ");
-        if (inWl) wlChannel.send({content: filterWLPings, embeds: [wlEmbed(client, inWl[0], true, serverAcro, now, inWl[1])]}); // Oh no, go get em Toast
+        if (client.config.mainServer.id == '552565546089054218') {
+            const filterWLPings = client.config.watchListPings.filter((x) => !(guild.members.cache.get(x) as Discord.GuildMember).roles.cache.has(client.config.mainServer.roles.loa)).map(x=>`<@${x}>`).join(" ");
+            if (inWl) wlChannel.send({content: filterWLPings, embeds: [wlEmbed(client, inWl[0], true, serverAcro, now, inWl[1])]}); // Oh no, go get em Toast
+        }
         logChannel.send({embeds: [logEmbed(client, x, true, serverAcro, now)]});
     });
 }
@@ -104,17 +106,17 @@ export default async (client: YClient, serverURLdss: string, serverURLcsg: strin
     let justStarted = false;
 
     let DSSFetch: Response | void = await fetch(serverURLdss, { signal: AbortSignal.timeout(7000) }).catch((err: Error) => {
-        console.log(`[${client.moment().format('HH:mm:ss')}]`, serverAcro + ' dss ' + err.message);
+        console.log(client.timeLog('\x1b[31m'), `${serverAcro} dss ${err.message}`);
     }); // Fetch dedicated-server-stats.json
 
     let CSGFetch: Response | void = await fetch(serverURLcsg, { signal: AbortSignal.timeout(7000) }).catch((err: Error) => {
-        console.log(`[${client.moment().format('HH:mm:ss')}]`, serverAcro + ' csg ' + err.message);
+        console.log(client.timeLog('\x1b[31m'), `${serverAcro} csg ${err.message}`);
     }); // Fetch dedicated-server-savegame.html
 
     if (DSSFetch == undefined || CSGFetch == undefined || CSGFetch.status == 204) { // Blame Red
         if (CSGFetch?.status == 204) {
             statsEmbed.setImage('https://http.cat/204');
-            console.log(`[${client.moment().format('HH:mm:ss')}]`, serverAcro + ' csg empty content');
+            console.log(client.timeLog('\x1b[31m'), `${serverAcro} csg empty content`);
         };
         statsEmbed.setTitle('Host not responding').setColor(client.config.embedColorRed);
         statsMsg.edit({embeds: [statsEmbed]});

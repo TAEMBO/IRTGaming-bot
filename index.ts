@@ -12,26 +12,24 @@ console.log(client.config.botSwitches);
 console.log(client.config.devWhitelist);
 
 client.on("ready", async () => {
-	const guild = await client.guilds.fetch(client.config.mainServer.id);
-	await guild.members.fetch();
-	const channel = client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel;
-	await channel.send(`:warning: Bot restarted :warning:\n<@${client.config.devWhitelist[0]}>\n\`\`\`json\n${Object.entries(client.config.botSwitches).map((x)=> `${x[0]}: ${x[1]}`).join('\n')}\`\`\``)
-	
-	setInterval(() => guild.invites.fetch().then((invs)=>{
-		invs.forEach((inv) => client.invites.set(inv.code, {uses: inv.uses, creator: inv.inviter?.id}));
-	}), 500000);
-	if (client.config.botSwitches.registerCommands) guild.commands.set(client.registery).catch((e)=>console.log(`Couldn't register commands bcuz: ${e}`));
+	await client.guilds.fetch(client.config.mainServer.id).then(async guild => {
+		await guild.members.fetch();
+		setInterval(() => guild.invites.fetch().then(invs=> invs.forEach((inv) => client.invites.set(inv.code, {uses: inv.uses, creator: inv.inviter?.id}))), 500000);
+		if (client.config.botSwitches.registerCommands) guild.commands.set(client.registery).catch(e => console.log(`Couldn't register commands bcuz: ${e}`));
+	});
 
 	// Playing: 0 & 1, Listening: 2, Watching: 3, N/A: 4, Competing in: 5
 	setInterval(() => client.user?.setPresence(client.config.botPresence), 60000);
 	
 	// Event handler
-    fs.readdirSync('./events').forEach((file) => {
+    fs.readdirSync('./events').forEach(file => {
     	const eventFile = require(`./events/${file}`);
 	    client.on(file.replace('.ts', ''), async (...args) => eventFile.default(client, ...args));
     });
+	const channel = client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel;
+	await channel.send(`:warning: Bot restarted :warning:\n<@${client.config.devWhitelist[0]}>\n\`\`\`json\n${Object.entries(client.config.botSwitches).map((x)=> `${x[0]}: ${x[1]}`).join('\n')}\`\`\``);
 
-	console.log(`[${moment().format('HH:mm:ss')}]`, `Bot active as ${client.user?.tag}`);
+	console.log(client.timeLog('\x1b[34m'), `Bot active as ${client.user?.tag}`);
 });
 
 // error handlers
@@ -58,15 +56,15 @@ setInterval(async () => {
 	for(let i = 0; i < filter.length; i++){
 		remindEmbed.setDescription(`\n\`\`\`${filter[i].what}\`\`\``);
 		await client.users.fetch(filter[i].who).then(User => User.send({embeds: [remindEmbed]}));
-		console.log(`[${client.moment().format('HH:mm:ss')}]`, 'REMINDER EXECUTE', filter[i]);
+		console.log(client.timeLog('\x1b[33m'), 'REMINDER EXECUTE', filter[i]);
 		db.splice(db.findIndex((x: Reminder) => filterLambda(x)), 1);
 		fs.writeFileSync(p, db.length !== 0 ? JSON.stringify(db, null, 2) : '[]');
 	}
 	
 	client.punishments._content.filter((x: db_punishments_format) => (x?.endTime as number) <= now && !x.expired).forEach(async (punishment: db_punishments_format) => {
-		console.log(`[${client.moment().format('HH:mm:ss')}]`, `${punishment.member}\'s ${punishment.type} should expire now`);
+		console.log(client.timeLog('\x1b[33m'), `${punishment.member}\'s ${punishment.type} should expire now`);
 		const unpunishResult = await client.punishments.removePunishment(punishment.id, (client.user as Discord.ClientUser).id, "Time\'s up!");
-		console.log(`[${client.moment().format('HH:mm:ss')}]`, unpunishResult);
+		console.log(client.timeLog('\x1b[33m'), unpunishResult);
 	});
 
 	const formattedDate = Math.floor((now - 1667854800000) / 1000 / 60 / 60 / 24);
@@ -79,7 +77,7 @@ setInterval(async () => {
 		}
 		dailyMsgs.push([formattedDate, total]);
 		fs.writeFileSync(__dirname + "/databases/dailyMsgs.json", JSON.stringify(dailyMsgs, null, 2));
-		console.log(`[${client.moment().format('HH:mm:ss')}]`, `Pushed [${formattedDate}, ${total}] to dailyMsgs`);
+		console.log(client.timeLog('\x1b[36m'), `Pushed [${formattedDate}, ${total}] to dailyMsgs`);
 		(client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel).send(`:warning: Pushed [${formattedDate}, ${total}] to </rank leaderboard:1042659197919178790>`);
 
 	}

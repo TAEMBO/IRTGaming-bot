@@ -12,7 +12,7 @@ export default async (client: YClient, interaction: Discord.BaseInteraction) => 
             subCmd = '';
         }
         const commandFile = client.commands.get(interaction.commandName);
-        console.log(`[${client.moment().format('HH:mm:ss')}]`, `${interaction.user.tag} used /${interaction.commandName} ${subCmd} in #${interaction.channel.name}`);
+        console.log(client.timeLog('\x1b[37m'), `\x1b[32m${interaction.user.tag}\x1b[37m used \x1b[32m/${interaction.commandName} ${subCmd}\x1b[37m in \x1b[32m#${interaction.channel.name}`);
         if (!client.config.botSwitches.commands && !client.config.devWhitelist.includes(interaction.user.id)) return interaction.reply('Commands are currently disabled.');
         if (commandFile) {
             try {
@@ -24,6 +24,6 @@ export default async (client: YClient, interaction: Discord.BaseInteraction) => 
             }
         }
     } else if (interaction.isButton()) {
-        console.log(`Filler text, Button pressed at ${interaction.message.url}`);
+        console.log(client.timeLog('\x1b[33m'), `Filler text, Button pressed at ${interaction.message.url}`);
     }
 }

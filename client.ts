@@ -6,14 +6,14 @@ import timeNames from './timeNames';
 let importConfig: Config
 try { 
     importConfig = require('./test-config.json');
-    console.log('Using test-config');
+    console.log('\x1b[31mUsing test-config');
 } catch(err) {
     importConfig = require('./config.json');
 }
 import { db_punishments_format, global_formatTimeOpt, Config, FSCache, YTCache, Tokens } from './interfaces';
 import { bannedWords, TFstaff, FMstaff, watchList, playerTimes, userLevels, punishments } from "./dbClasses";
 export default class YClient extends Client {
-    config: Config; tokens: Tokens; moment: typeof moment; 
+    config: Config; tokens: Tokens;
     embed: typeof Discord.EmbedBuilder; collection: typeof Discord.Collection; messageCollector: typeof Discord.MessageCollector; attachmentBuilder: typeof Discord.AttachmentBuilder; 
     games: Discord.Collection<string, any>; commands: Discord.Collection<string, any>;registery: Array<Discord.ApplicationCommandDataResolvable>;
     repeatedMessages: any; FSCache: FSCache; YTCache: YTCache; invites: Map<any, any>;
@@ -27,7 +27,6 @@ export default class YClient extends Client {
         this.invites = new Map();
         this.tokens = tokens as Tokens;
         this.config = importConfig;
-        this.moment = moment;
         this.embed = Discord.EmbedBuilder;
         this.collection = Discord.Collection;
         this.messageCollector = Discord.MessageCollector;
@@ -114,6 +113,9 @@ export default class YClient extends Client {
     youNeedRole(interaction: Discord.CommandInteraction, role: string) {
         return interaction.reply(`You need the <@&${this.config.mainServer.roles[role]}> role to use this command`);
     }
+    timeLog(color: string) {
+        return color + `[${moment().format('HH:mm:ss')}]`;
+    }
     async YTLoop(YTChannelID: string, YTChannelName: string) {
         const xjs = require('xml-js');
         let Data: any;
@@ -123,7 +125,7 @@ export default class YClient extends Client {
                 Data = xjs.xml2js(await response.text(), {compact: true});
             });
         } catch (err) {
-            console.log(`[${this.moment().format('HH:mm:ss')}]`, `${YTChannelName} YT fail`);
+            console.log(this.timeLog('\x1b[31m'), `${YTChannelName} YT fail`);
             return;
         }
 

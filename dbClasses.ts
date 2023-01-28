@@ -6,35 +6,35 @@ import Discord from 'discord.js';
 export class bannedWords extends Database {
     client: YClient;
     constructor(client: YClient) {
-        super("./databases/bannedWords.json", "array");
+        super(client, "./databases/bannedWords.json", "array");
         this.client = client;
     }
 }
 export class TFstaff extends Database {
     client: YClient;
     constructor(client: YClient) {
-        super("./databases/TFstaff.json", "array");
+        super(client ,"./databases/TFstaff.json", "array");
         this.client = client;
     }
 }
 export class FMstaff extends Database {
     client: YClient;
     constructor(client: YClient) {
-        super("./databases/FMstaff.json", "array");
+        super(client, "./databases/FMstaff.json", "array");
         this.client = client;
     }
 }
 export class watchList extends Database {
     client: YClient;
     constructor(client: YClient) {
-        super("./databases/watchList.json", "array");
+        super(client, "./databases/watchList.json", "array");
         this.client = client;
     }
 }
 export class playerTimes extends Database {
     client: YClient;
     constructor(client: YClient) {
-        super('./databases/playerTimes.json', 'object')
+        super(client, "./databases/playerTimes.json", "object")
         this.client = client;
     }
     addPlayerTime(playerName: string, time: number) {
@@ -59,7 +59,7 @@ export class playerTimes extends Database {
 export class userLevels extends Database {
     client: YClient;
     constructor(client: YClient) {
-        super("./databases/userLevels.json", "object");
+        super(client, "./databases/userLevels.json", "object");
         this.client = client;
     }
     incrementUser(userid: string) {
@@ -87,7 +87,7 @@ export class userLevels extends Database {
 export class punishments extends Database {
     client: YClient;
     constructor(client: YClient) {
-        super('./databases/punishments.json', 'array');
+        super(client, "./databases/punishments.json", "array");
         this.client = client;
     }
     createId() {

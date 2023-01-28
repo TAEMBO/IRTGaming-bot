@@ -10,7 +10,7 @@ async function FSstatsAll(client: YClient, serverURLdss: string, embed: Discord.
     try {
         serverName = await fetch(serverURLdss, { signal: AbortSignal.timeout(2000) });
     } catch (err) {
-        console.log(`stats all; ${serverAcro} failed`);
+        console.log(client.timeLog('\x1b[31m'), `Stats all; ${serverAcro} failed`);
         failedFooter.push(`Failed to fetch ${serverAcro}`);
         return;
     }
@@ -46,6 +46,7 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
     try {
         FSFetch = await fetch(serverURLdss, { signal: AbortSignal.timeout(2000) });
     } catch (err) {
+        console.log(client.timeLog('\x1b[31m'), `Stats ${serverAcro.toUpperCase()} failed`);
         return interaction.reply('Server did not respond');
     }
 

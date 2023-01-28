@@ -1,18 +1,20 @@
 import path from 'node:path';
 import fs from 'node:fs';
-import moment from 'moment';
+import YClient from './client';
 export default class Database {
 	public _dataType: string;
 	public _path: string;
 	public _interval?: NodeJS.Timer;
 	public _saveNotifs: boolean;
 	public _content: any;
-	constructor(dir: string, dataType: string) {
+	public _client: YClient;
+	constructor(client: YClient, dir: string, dataType: string) {
 		this._dataType = dataType;
 		this._path = path.resolve(dir);
-		this._interval = undefined;
 		this._saveNotifs = true;
+		this._interval = undefined;
 		this._content = dataType === 'array' ? [] : {};
+		this._client = client;
 	}
 	addData(data: any, data1?: any) {
 		if (Array.isArray(this._content)) {
@@ -39,7 +41,7 @@ export default class Database {
 	}
 	initLoad() {
 		this._content = JSON.parse(fs.readFileSync(this._path, { encoding: 'utf8' }));
-		console.log(this._path.replace(__dirname, '') + ' Database Loaded');
+		console.log(`\x1b[32m${this._path.replace(__dirname, '')} Database Loaded`);
 		return this;
 	}
 	forceSave(db = this, force = false) {
@@ -47,7 +49,7 @@ export default class Database {
 		const newJson = JSON.stringify(db._content);
 		if (oldJson !== newJson || force) {
 			fs.writeFileSync(this._path, JSON.stringify(this._content, null, 2));
-			if (this._saveNotifs) console.log(`[${moment().format('HH:mm:ss')}] ` + this._path.replace(__dirname, '') + ' Database Saved');
+			if (this._saveNotifs) console.log(this._client.timeLog('\x1b[33m'), `${this._path.replace(__dirname, '')} Database Saved`);
 		}
 		return db;
 	}
@@ -61,7 +63,7 @@ export default class Database {
 	}
 	disableSaveNotifs() {
 		this._saveNotifs = false;
-		console.log(this._path.replace(__dirname, '') + ' "Database Saved" Notifications Disabled');
+		console.log(`\x1b[32m${this._path.replace(__dirname, '')} "Database Saved" Notifications Disabled`);
 		return this;
 	}
 }

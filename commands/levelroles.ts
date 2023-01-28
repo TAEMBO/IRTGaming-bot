@@ -3,6 +3,7 @@ import YClient from '../client';
 import { db_userLevels_format } from '../interfaces';
 import path from 'node:path';
 import fs from 'node:fs';
+import canvas from 'canvas';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
 		const subCmd = interaction.options.getSubcommand();
@@ -30,20 +31,19 @@ export default {
 			const second_graph_top = Math.ceil(maxValue * 10 ** (-maxValueArr.length + 2)) * 10 ** (maxValueArr.length - 2);
 			// console.log({ second_graph_top });
 			
-			const textSize = 32;
+			const textSize = 40;
 			
-			const canvas = require('canvas');
-			const img = canvas.createCanvas(950, 450);
+			const img = canvas.createCanvas(1500, 750);
 			const ctx = img.getContext('2d');
 			
-			const graphOrigin = [10, 50];
-			const graphSize = [700, 360];
+			const graphOrigin = [15, 65];
+			const graphSize = [1300, 630];
 			const nodeWidth = graphSize[0] / (data.length - 1);
 			ctx.fillStyle = '#36393f';
 			ctx.fillRect(0, 0, img.width, img.height);
 			
 			// grey horizontal lines
-			ctx.lineWidth = 3;
+			ctx.lineWidth = 5;
 			
 			let interval_candidates = [];
 			for (let i = 4; i < 10; i++) {
@@ -86,9 +86,9 @@ export default {
 			ctx.setLineDash([]);
 			
 			// draw points
-			ctx.strokeStyle = client.config.embedColor;
-			ctx.fillStyle = client.config.embedColor;
-			ctx.lineWidth = 3;
+			ctx.strokeStyle = client.config.embedColor as string;
+			ctx.fillStyle = client.config.embedColor as string;
+			ctx.lineWidth = 5;
 			
 			
 			function getYCoordinate(value: number) {
@@ -98,7 +98,7 @@ export default {
 			let lastCoords: Array<number> = [];
 			data.forEach((val: number, i: number) => {
 				ctx.beginPath();
-				if (lastCoords) ctx.moveTo(...lastCoords);
+				if (lastCoords) ctx.moveTo(lastCoords[0], lastCoords[1]);
 				if (val < 0) val = 0;
 				const x = i * nodeWidth + graphOrigin[0];
 				const y = getYCoordinate(val);
@@ -109,7 +109,7 @@ export default {
 
 				// ball
 				ctx.beginPath();
-				ctx.arc(x, y, ctx.lineWidth * 1.2, 0, 2 * Math.PI)
+				ctx.arc(x, y, ctx.lineWidth * 1.3, 0, 2 * Math.PI)
 				ctx.closePath();
 				ctx.fill();
 			});
@@ -126,7 +126,7 @@ export default {
 			// lowest value
 			const lowx = graphOrigin[0] + graphSize[0] + textSize;
 			const lowy = graphOrigin[1] + graphSize[1] + (textSize / 3);
-			ctx.fillText('0 msgs/day', lowx, lowy);
+			ctx.fillText('0 msgs', lowx, lowy);
 			
 			// 30d
 			ctx.fillText('30d ago', lastMonthStart, graphOrigin[1] - (textSize / 3));

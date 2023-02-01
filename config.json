@@ -5,9 +5,9 @@
 	"embedColorYellow": "#ffea00",
 	"botPresence": {
 		"activities": [
-			{"name": "the news", "type": 2}
+			{"name": "IRT's status", "type": 3}
 		],
-		"status": "dnd"
+		"status": "idle"
 	},
 	"botSwitches": {
 		"commands": true,

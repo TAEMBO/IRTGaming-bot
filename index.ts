@@ -19,7 +19,8 @@ client.on("ready", async () => {
 	});
 
 	// Playing: 0 & 1, Listening: 2, Watching: 3, N/A: 4, Competing in: 5
-	setInterval(() => client.user?.setPresence(client.config.botPresence), 60000);
+	client.user?.setPresence(client.config.botPresence);
+	setInterval(() => client.user?.setPresence(client.config.botPresence), 1800000);
 	
 	// Event handler
     fs.readdirSync('./events').forEach(file => {

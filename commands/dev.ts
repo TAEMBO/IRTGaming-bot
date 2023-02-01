@@ -144,6 +144,8 @@ export default {
 				if (type) currentActivities[0].type = type;
 				if (name) currentActivities[0].name = name;
 
+				client.user?.setPresence(client.config.botPresence);
+
 				interaction.reply([
 					'Presence updated:',
 					`Status: **${client.config.botPresence.status}**`,

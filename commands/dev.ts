@@ -19,6 +19,7 @@ const removeUsername = (text: string) => {
 	}
 	return array.join('\\');
 };
+
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
 		if (!client.config.devWhitelist.includes(interaction.user.id)) return interaction.reply(`You're not allowed to use dev commands.`);
@@ -124,6 +125,31 @@ export default {
 			case 'dz':
 				exec('start C:/WakeOnLAN/WakeOnLanC.exe -w -m Desktop');
 				interaction.reply('PC has committed iWoke:tm:');
+				break;
+			case 'presence':
+				function convertType(Type?: number) {
+					switch (Type) {
+						case 0: return 'Playing';
+						case 2: return 'Listening'
+						case 3: return 'Watching';
+						case 5: return 'Competing';
+					}
+				}
+				const status = interaction.options.getString('status') as Discord.PresenceStatusData | null;
+				const type = interaction.options.getInteger('type');
+				const name = interaction.options.getString('name');
+				const currentActivities = client.config.botPresence.activities as Discord.ActivitiesOptions[];
+
+				if (status) client.config.botPresence.status = status;
+				if (type) currentActivities[0].type = type;
+				if (name) currentActivities[0].name = name;
+
+				interaction.reply([
+					'Presence updated:',
+					`Status: **${client.config.botPresence.status}**`,
+					`Type: **${convertType(currentActivities[0].type)}**`,
+					`Name: **${currentActivities[0].name}**`
+				].join('\n'));
 		}
 	},
 	data: new SlashCommandBuilder()
@@ -203,5 +229,31 @@ export default {
 		)
 		.addSubcommand(x=>x
 			.setName('dz')
-			.setDescription('Wheezing Over Life'))
+			.setDescription('Wheezing Over Life')
+		)
+		.addSubcommand(x=>x
+			.setName('presence')
+			.setDescription('Update the bot\'s presence')
+			.addIntegerOption(x=>x
+				.setName('type')
+				.setDescription('The activity type to set')
+				.addChoices(
+					{name: 'Playing', value: Discord.ActivityType.Playing},
+					{name: 'Listening', value: Discord.ActivityType.Listening},
+					{name: 'Watching', value: Discord.ActivityType.Watching},
+					{name: 'Competing', value: Discord.ActivityType.Competing}
+				))
+			.addStringOption(x=>x
+				.setName('name')
+				.setDescription('The activity name to set'))
+			.addStringOption(x=>x
+				.setName('status')
+				.setDescription('The status to set')
+				.addChoices(
+					{name: 'Online', value: Discord.PresenceUpdateStatus.Online},
+					{name: 'Idle', value: Discord.PresenceUpdateStatus.Idle},
+					{name: 'DND', value: Discord.PresenceUpdateStatus.DoNotDisturb},
+					{name: 'Invisible', value: Discord.PresenceUpdateStatus.Invisible}
+				))
+		)
 };

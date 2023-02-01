@@ -37,10 +37,11 @@ export default class YClient extends Client {
         this.setMaxListeners(100);
         this.repeatedMessages = {};
         this.FSCache = {
-            statsGraph: -120, 
-            ps: {new: [], old: [], status: undefined, lastAdmin: undefined},
-            pg: {new: [], old: [], status: undefined, lastAdmin: undefined},
-            mf: {new: [], old: [], status: undefined, lastAdmin: undefined}
+            statsGraph: -120,
+            servers: {
+                ps: {players: [], status: undefined, lastAdmin: undefined},
+                pg: {players: [], status: undefined, lastAdmin: undefined},
+            }
         };
         this.YTCache = {
             'UCQ8k8yTDLITldfWYKDs3xFg': undefined,

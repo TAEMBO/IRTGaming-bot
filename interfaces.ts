@@ -1,9 +1,11 @@
 import Discord, { ColorResolvable } from 'discord.js';
 
 export interface Tokens {
-    [key: string]: string | FTPServers | FSURLs
     token: string
     ftp: FTPServers
+    fs: FSServers
+}
+interface FSServers {
     ps: FSURLs
     pg: FSURLs
     mf: FSURLs
@@ -104,15 +106,17 @@ interface mainServerChannels {
 export interface FSCache {
     [key: string]: any
     statsGraph: number
-    ps: FSCacheServer
-    pg: FSCacheServer
-    mf: FSCacheServer
+    servers: FSCacheservers
 
 }
+interface FSCacheservers {
+    [key: string]: FSCacheServer
+    ps: FSCacheServer
+    pg: FSCacheServer
+}
 export interface FSCacheServer {
-    new: Array<FS_players>, 
-    old: Array<FS_players>, 
-    status: undefined | number
+    players: Array<FS_player>,
+    status: undefined | "online" | "offline",
     lastAdmin: undefined | number
 }
 
@@ -175,9 +179,9 @@ export interface FS_server {
 export interface FS_slots {
     capacity: number,
     used: number,
-    players: Array<FS_players>
+    players: Array<FS_player>
 }
-export interface FS_players {
+export interface FS_player {
     isUsed: boolean,
     isAdmin: boolean,
     uptime: number,

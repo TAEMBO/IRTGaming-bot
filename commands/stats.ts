@@ -212,7 +212,7 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
         .setDescription(FSserver.slots.used == 0 ? '*No players online*' : playerInfo.join("\n"))
         .setImage('attachment://FSStats.png')
         .setColor(Color)
-    if (FSserver.slots.players.filter((x)=> x.isAdmin).length == 0 && client.FSCache[serverAcro].lastAdmin) embed.setTimestamp(client.FSCache[serverAcro].lastAdmin).setFooter({text: 'Admin last on'});
+    if (FSserver.slots.players.filter((x)=> x.isAdmin).length == 0 && client.FSCache.servers[serverAcro].lastAdmin) embed.setTimestamp(client.FSCache.servers[serverAcro].lastAdmin).setFooter({text: 'Admin last on'});
 
     interaction.reply({embeds: [embed], files: [Image]}).catch(() => (interaction.channel as Discord.TextChannel).send({embeds: [embed], files: [Image]}));
 }
@@ -230,8 +230,8 @@ export default {
             let sum;
 
             await Promise.all([
-                FSstatsAll(client, client.tokens.ps.dss, embed, totalCount, failedFooter, 'PS'),
-                FSstatsAll(client, client.tokens.pg.dss, embed, totalCount, failedFooter, 'PG'),
+                FSstatsAll(client, client.tokens.fs.ps.dss, embed, totalCount, failedFooter, 'PS'),
+                FSstatsAll(client, client.tokens.fs.pg.dss, embed, totalCount, failedFooter, 'PG'),
                 //FSstatsAll(client, client.tokens.mf.dss, embed, totalCount, failedFooter, 'MF')
             ]);
 
@@ -273,7 +273,7 @@ export default {
                 interaction.reply(`\`${player}\`${resultText}`);
             }
         } else {
-            FSstats(client, interaction, (client.tokens[subCmd] as FSURLs).dss, subCmd);
+            FSstats(client, interaction, client.tokens.fs[subCmd].dss, subCmd);
         }
     },
     data: new SlashCommandBuilder()

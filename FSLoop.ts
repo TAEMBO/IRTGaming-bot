@@ -1,6 +1,6 @@
 import Discord from "discord.js";
 import YClient from "./client";
-import { FS_careerSavegame, FS_data, FS_players } from "./interfaces";
+import { FS_careerSavegame, FS_data, FS_player } from "./interfaces";
 import fs from "node:fs";
 
 function dataPoint(slotUsage: number, serverAcro: string) {
@@ -21,7 +21,7 @@ function wlEmbed(client: YClient, playerName: string, joinLog: boolean, serverAc
     return embed;
 }
 
-function logEmbed(client: YClient, player: FS_players, joinLog: boolean, serverAcro: string, now: number) {
+function logEmbed(client: YClient, player: FS_player, joinLog: boolean, serverAcro: string, now: number) {
     const playTimeHrs = Math.floor(player.uptime / 60);
     const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
     let decorators = player.isAdmin ? ':detective:' : ''; // Tag for if player is admin
@@ -38,11 +38,11 @@ function logEmbed(client: YClient, player: FS_players, joinLog: boolean, serverA
 
 }
 
-function adminCheck(client: YClient, ArrayNew: Array<FS_players>, ArrayOld: Array<FS_players>, serverAcro: string, now: number) {
+function adminCheck(client: YClient, ArrayNew: Array<FS_player>, ArrayOld: Array<FS_player>, serverAcro: string, now: number) {
     const Whitelist = JSON.parse(fs.readFileSync(__dirname + '/databases/adminWhitelist.json', {encoding: 'utf8'}));
 
-    ArrayNew.filter((x: FS_players) => {
-        !ArrayOld.some((y: FS_players) => {
+    ArrayNew.filter(x => {
+        !ArrayOld.some(y => {
             if (y.name === x.name && !y.isAdmin && x.isAdmin && !Whitelist.includes(x.name) && !client.FMstaff._content.includes(x.name)) {
                 (client.channels.resolve('830916009107652630') as Discord.TextChannel).send({embeds: [
                     new client.embed()
@@ -54,7 +54,7 @@ function adminCheck(client: YClient, ArrayNew: Array<FS_players>, ArrayOld: Arra
     });
 }
 
-function log(client: YClient, ArrayNew: Array<FS_players>, ArrayOld: Array<FS_players>, wlChannel: Discord.TextChannel, logChannel: Discord.TextChannel, serverAcro: string, now: number) {
+function log(client: YClient, ArrayNew: Array<FS_player>, ArrayOld: Array<FS_player>, wlChannel: Discord.TextChannel, logChannel: Discord.TextChannel, serverAcro: string, now: number) {
     // Filter for players leaving
     const missingElementsLeave = ArrayOld.filter(x => !ArrayNew.some(y => y.name === x.name)); // Filter names that were in the first fetch but not the second. Thanks to LebSter#0617 for this on The Coding Den Discord server
     for (const x of missingElementsLeave) {
@@ -124,8 +124,9 @@ export default async (client: YClient, serverURLdss: string, serverURLcsg: strin
     } 
     const FSdss = await DSSFetch.json() as FS_data;
     const FScsg = xjs.xml2js(await CSGFetch.text(), {compact: true}).careerSavegame as FS_careerSavegame;
+    const Players = FSdss.slots.players.filter(x=>x.isUsed);
 
-    FSdss.slots.players.filter(x=>x.isUsed).forEach((player) => {
+    Players.forEach(player => {
         const playTimeHrs = Math.floor(player.uptime / 60);
         const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
         const inWl = client.watchList._content.find((y: Array<string>) => y[0] == player.name);
@@ -170,26 +171,24 @@ export default async (client: YClient, serverURLdss: string, serverURLcsg: strin
     
     // Logs
     if (FSdss.server.name.length === 0) {
-        if (client.FSCache[serverAcro.toLowerCase()].status === 1) {
+        if (client.FSCache.servers[serverAcro.toLowerCase()].status === 'online') {
             logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now offline`).setColor(client.config.embedColorYellow).setTimestamp()]});
         }
-        client.FSCache[serverAcro.toLowerCase()].status = 0;
+        client.FSCache.servers[serverAcro.toLowerCase()].status = 'offline';
     } else {
-        if (client.FSCache[serverAcro.toLowerCase()].status === 0) {
+        if (client.FSCache.servers[serverAcro.toLowerCase()].status === 'offline') {
             logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now online`).setColor(client.config.embedColorYellow).setTimestamp()]});
             justStarted = true;
         }
-        client.FSCache[serverAcro.toLowerCase()].status = 1;
+        client.FSCache.servers[serverAcro.toLowerCase()].status = 'online';
     }
 
     if (!justStarted) {
-        client.FSCache[serverAcro.toLowerCase()].new = FSdss.slots.players.filter(x=>x.isUsed);
-
-        if (serverAcro != 'MF') adminCheck(client, client.FSCache[serverAcro.toLowerCase()].new, client.FSCache[serverAcro.toLowerCase()].old, serverAcro, now);
-        log(client, client.FSCache[serverAcro.toLowerCase()].new, client.FSCache[serverAcro.toLowerCase()].old, wlChannel, logChannel, serverAcro, now);
+        adminCheck(client, Players, client.FSCache.servers[serverAcro.toLowerCase()].players, serverAcro, now);
+        log(client, Players, client.FSCache.servers[serverAcro.toLowerCase()].players, wlChannel, logChannel, serverAcro, now);
         dataPoint(FSdss.slots.used, serverAcro);
-        if (FSdss.slots.players.filter((x)=> x.isAdmin).length > 0) client.FSCache[serverAcro.toLowerCase()].lastAdmin = Date.now();
+        if (FSdss.slots.players.filter((x)=> x.isAdmin).length > 0) client.FSCache.servers[serverAcro.toLowerCase()].lastAdmin = Date.now();
 
-        client.FSCache[serverAcro.toLowerCase()].old = FSdss.slots.players.filter(x=>x.isUsed);
+        client.FSCache.servers[serverAcro.toLowerCase()].players = Players;
     }
 }

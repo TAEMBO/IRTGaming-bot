@@ -139,7 +139,7 @@ export class punishments extends Database {
 		const now = Date.now();
 		const guild = this.client.guilds.cache.get(this.client.config.mainServer.id) as Discord.Guild;
 		const punData: db_punishments_format = { type, id: this.createId(), member: {tag: User.tag, id: User.id}, reason, moderator, time: now }
-		const ifOrFromBoolean = ['warn', 'mute'].includes(type) ? 'in' : 'from'; // Use 'in' if the punishment doesn't remove the member from the server, eg. kick, softban, ban
+		const inOrFromBoolean = ['warn', 'mute'].includes(type) ? 'in' : 'from'; // Use 'in' if the punishment doesn't remove the member from the server, eg. kick, softban, ban
 		const auditLogReason = `${reason} | Case #${punData.id}`;
 		const embed = new this.client.embed()
 			.setColor(this.client.config.embedColor)
@@ -162,7 +162,7 @@ export class punishments extends Database {
 
 		if (GuildMember) {
 			try {
-				DM = await GuildMember.send(`You've been ${this.getTense(type)} ${ifOrFromBoolean} ${guild.name}${durationText} for reason \`${reason}\` (case #${punData.id})`);
+				DM = await GuildMember.send(`You've been ${this.getTense(type)} ${inOrFromBoolean} ${guild.name}${durationText} for reason \`${reason}\` (case #${punData.id})`);
 			} catch (err: any) {
 				embed.setFooter({text: 'Failed to DM member of punishment'});
 			}

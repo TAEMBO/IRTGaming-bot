@@ -155,14 +155,14 @@ export class punishments extends Database {
 		} else {
 			timeInMillis = time ? ms(time) : null;
 		}
-		const durationText = timeInMillis ? ` for ${this.client.formatTime(timeInMillis, 4, { longNames: true, commas: true })}` : 'forever';
+		const durationText = timeInMillis ? ` for ${this.client.formatTime(timeInMillis, 4, { longNames: true, commas: true })}` : '';
 
 		// Add field for duration if time is specified
 		if (time) embed.addFields({name: 'Duration', value: durationText});
 
 		if (GuildMember) {
 			try {
-				DM = await GuildMember.send(`You've been ${this.getTense(type)} ${ifOrFromBoolean} ${guild.name} ${durationText} for reason \`${reason}\` (case #${punData.id})`);
+				DM = await GuildMember.send(`You've been ${this.getTense(type)} ${ifOrFromBoolean} ${guild.name}${durationText} for reason \`${reason}\` (case #${punData.id})`);
 			} catch (err: any) {
 				embed.setFooter({text: 'Failed to DM member of punishment'});
 			}

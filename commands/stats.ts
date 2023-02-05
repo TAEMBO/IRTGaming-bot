@@ -8,7 +8,7 @@ import { db_playerTimes_format, FSURLs, FS_data} from '../interfaces'
 async function FSstatsAll(client: YClient, serverURLdss: string, embed: Discord.EmbedBuilder, totalCount: Array<number>, failedFooter: Array<string>, serverAcro: string) {
     let serverName;
     try {
-        serverName = await fetch(serverURLdss, { signal: AbortSignal.timeout(2000) });
+        serverName = await fetch(serverURLdss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': 'IRTBot/StatsAll' } });
     } catch (err) {
         console.log(client.timeLog('\x1b[31m'), `Stats all; ${serverAcro} failed`);
         failedFooter.push(`Failed to fetch ${serverAcro}`);
@@ -44,7 +44,7 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
     let Color = client.config.embedColorGreen;
 
     try {
-        FSFetch = await fetch(serverURLdss, { signal: AbortSignal.timeout(2000) });
+        FSFetch = await fetch(serverURLdss, { signal: AbortSignal.timeout(2000), headers: { 'User-Agent': 'IRTBot/Stats' } });
     } catch (err) {
         console.log(client.timeLog('\x1b[31m'), `Stats ${serverAcro.toUpperCase()} failed`);
         return interaction.reply('Server did not respond');

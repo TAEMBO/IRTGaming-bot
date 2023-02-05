@@ -105,11 +105,11 @@ export default async (client: YClient, serverURLdss: string, serverURLcsg: strin
     const statsEmbed = new client.embed();
     let justStarted = false;
 
-    let DSSFetch: Response | void = await fetch(serverURLdss, { signal: AbortSignal.timeout(7000) }).catch((err: Error) => {
+    const DSSFetch: void | Response = await fetch(serverURLdss, { signal: AbortSignal.timeout(7000), headers: { 'User-Agent': 'IRTBot/FSLoop' } }).catch((err: Error) => {
         console.log(client.timeLog('\x1b[31m'), `${serverAcro} dss ${err.message}`);
     }); // Fetch dedicated-server-stats.json
 
-    let CSGFetch: Response | void = await fetch(serverURLcsg, { signal: AbortSignal.timeout(7000) }).catch((err: Error) => {
+    const CSGFetch: void | Response = await fetch(serverURLcsg, { signal: AbortSignal.timeout(7000), headers: { 'User-Agent': 'IRTBot/FSLoop' } }).catch((err: Error) => {
         console.log(client.timeLog('\x1b[31m'), `${serverAcro} csg ${err.message}`);
     }); // Fetch dedicated-server-savegame.html
 

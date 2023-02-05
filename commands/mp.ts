@@ -163,18 +163,18 @@ export default {
         } else if (subCmd == 'fm') {
             if (client.FMstaff._content.includes(name)) {
                 client.FMstaff.removeData(name, 0, undefined).forceSave();
-                interaction.reply(`Player name already exists, successfully removed \`${name}\``);
+                interaction.reply(`Successfully removed \`${name}\``);
             } else {
                 client.FMstaff.addData(name).forceSave();
-                interaction.reply(`Player name doesn't exist, successfully added \`${name}\``);
+                interaction.reply(`Successfully added \`${name}\``);
             }
         } else if (subCmd == 'tf') {
             if (client.TFstaff._content.includes(name)) {
                 client.TFstaff.removeData(name, 0, undefined).forceSave();
-                interaction.reply(`Player name already exists, successfully removed \`${name}\``);
+                interaction.reply(`Successfully removed \`${name}\``);
             } else {
                 client.TFstaff.addData(name).forceSave();
-                interaction.reply(`Player name doesn't exist, successfully added \`${name}\``);
+                interaction.reply(`Successfully added \`${name}\``);
             }
         }
 	},

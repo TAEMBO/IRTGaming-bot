@@ -33,18 +33,18 @@ client.on("ready", async () => {
 	console.log(client.timeLog('\x1b[34m'), `Bot active as ${client.user?.tag}`);
 });
 
-// error handlers
-function logError(error: Error) {
-	console.log(error);                    // vvv I'm well aware my internet is bad, I don't need my own bot to rub it in
+// Error handler
+function logError(error: Error, from: string) {
+	console.log(client.timeLog('\x1b[31m'), error); // vvv I'm well aware my internet is bad, I don't need my own bot to rub it in
 	if (client.config.botSwitches.errorNotify && !['Request aborted', 'getaddrinfo ENOTFOUND discord.com'].includes(error.message)) {
 		const channel = client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel;
-		channel.send({content: `<@${client.config.devWhitelist[0]}>`, embeds: [new client.embed().setTitle("Error Caught!").setColor("#420420").setDescription(`**Error:** \`${error.message}\`\n\n**Stack:** \`${`${error.stack}`.slice(0, 2500)}\``).setTimestamp()]});
+		channel.send({content: `<@${client.config.devWhitelist[0]}>`, embeds: [new client.embed().setTitle("Error Caught!").setColor("#420420").setDescription(`**Error:** \`${error.message}\`\n\n**Stack:** \`${`${error.stack}`.slice(0, 2500)}\``).setTimestamp().setFooter({text: from})]});
 	}
 }
-process.on('unhandledRejection', (error: Error) => logError(error));
-process.on('uncaughtException', (error: Error) => logError(error));
-process.on('error', (error: Error) => logError(error));
-client.on('error', (error: Error) => logError(error));
+process.on('unhandledRejection', (error: Error) => logError(error, 'unhandledRejection'));
+process.on('uncaughtException', (error: Error) => logError(error, 'uncaughtException'));
+process.on('error', (error: Error) => logError(error, 'error'));
+client.on('error', (error: Error) => logError(error, 'client-error'));
 
 // reminder, dailyMsgs, and punishment event loops
 setInterval(async () => {

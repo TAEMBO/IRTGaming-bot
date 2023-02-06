@@ -14,9 +14,9 @@
 		"automod": true,
 		"logs": true,
 		"registerCommands": true,
-		"stats": true,
+		"FSLoop": true,
+		"YTLoop": true,
 		"autoResponses": true,
-		"notifs": true,
 		"errorNotify": true
 	},
 	"devWhitelist": [

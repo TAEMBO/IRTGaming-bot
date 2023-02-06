@@ -45,9 +45,9 @@ interface botSwitches {
     automod: boolean,
     logs: boolean
     registerCommands: boolean,
-    stats: boolean,
+    FSLoop: boolean,
+    YTLoop: boolean,
     autoResponses: boolean,
-    notifs: boolean,
     errorNotify: boolean
 }
 interface mainServer {

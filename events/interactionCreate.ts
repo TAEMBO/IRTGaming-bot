@@ -19,7 +19,7 @@ export default async (client: YClient, interaction: Discord.BaseInteraction) => 
             }
         }
     } else if (interaction.isButton()) {
-        if (interaction.customId.startsWith('reaction-')) {
+        if (interaction.customId.startsWith('reaction-') && client.config.botSwitches.buttonRoles) {
             const RoleID = interaction.customId.replace('reaction-', '');
 
             if (interaction.member.roles.cache.has(RoleID)) {

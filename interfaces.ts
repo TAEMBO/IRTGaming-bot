@@ -48,6 +48,7 @@ interface botSwitches {
     FSLoop: boolean,
     YTLoop: boolean,
     autoResponses: boolean,
+    buttonRoles: boolean,
     errorNotify: boolean
 }
 interface mainServer {

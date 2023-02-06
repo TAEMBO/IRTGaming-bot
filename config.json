@@ -17,6 +17,7 @@
 		"FSLoop": true,
 		"YTLoop": true,
 		"autoResponses": true,
+		"buttonRoles": true,
 		"errorNotify": true
 	},
 	"devWhitelist": [

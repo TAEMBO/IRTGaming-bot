@@ -46,7 +46,9 @@ export default {
                 page.click(serverSelector).then(() => {
                     setTimeout(async () => {
                         await browser.close();
-                        interaction.editReply(result += `Total time taken: **${Date.now() - time}ms**`);
+                        if (chosenServer == 'ps') {
+                            interaction.editReply({content: result += `Total time taken: **${Date.now() - time}ms**`, files: ['../../Documents/My Games/FarmingSimulator2022/log.txt']});
+                        } else interaction.editReply(result += `Total time taken: **${Date.now() - time}ms**`);
                     }, 2000);
                 });
             });

@@ -85,14 +85,11 @@ function log(client: YClient, ArrayNew: Array<FS_player>, ArrayOld: Array<FS_pla
 }
 
 function seasons(season: string) {
-    switch(season) {
-        case '1':
-            return 'Yes 🔴';
-        case '2':
-            return 'No';
-        case '3':
-            return 'Paused 🔴';
-    }
+    return {
+        '1': 'Yes 🔴',
+        '2': 'No',
+        '3':'Paused 🔴'
+    }[season];
 }
 
 export default async (client: YClient, serverURLdss: string, serverURLcsg: string, Channel: string, Message: string, serverAcro: string) => {

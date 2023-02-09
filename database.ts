@@ -24,16 +24,13 @@ export default class Database {
 		}
 		return this;
 	}
-	removeData(key: any, type: number, element: any) {
+	removeData(key: any, type: 0 | 1, element: any) {
 		if (this._dataType === 'array') {
-			switch (type) {
-				case 0:
-					this._content = this._content.filter((x: any) => x != key);
-					break;
-				case 1:
-					this._content = this._content.filter((x: any) => x[element] != key)
-					break;
-			}
+			const methods = {
+				0: () => this._content = this._content.filter((x: any) => x != key),
+				1: () => this._content = this._content.filter((x: any) => x[element] != key)
+			};
+			methods[type]();
 		} else if (this._dataType === 'object') {
 			delete this._content[key];
 		}

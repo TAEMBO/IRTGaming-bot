@@ -1,16 +1,13 @@
 import Discord, { Activity, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import YClient from '../client';
 
-function convertStatus(status?: string) {
+function convertStatus(status?: Discord.ClientPresenceStatus) {
 	if (status) {
-		switch (status) {
-			case "idle":
-				return "🟡";
-			case "dnd":
-				return "🔴";
-			case "online":
-				return "🟢";
-		}
+		return {
+			idle: "🟡",
+			dnd: "🔴",
+			online: "🟢"
+		}[status];
 	} else {
 		return '⚫';
 	}
@@ -20,7 +17,7 @@ function formatTime(timestamp: number) {
 }
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
-		const member = interaction.options.getMember("member") as Discord.GuildMember;
+		const member = interaction.options.getMember("member");
 		if (member == null) {
 			const user = interaction.options.getUser('member') as Discord.User;
 
@@ -58,7 +55,7 @@ export default {
 				const presenceStatus = member.presence.clientStatus as Discord.ClientPresenceStatusData;
 				embed0.addFields({name: `🔹 Status: ${member.presence.status}`, value: `${member.presence.status === 'offline' ? '\u200b' : `Web: ${convertStatus(presenceStatus.web)}\nMobile: ${convertStatus(presenceStatus.mobile)}\nDesktop: ${convertStatus(presenceStatus.desktop)}`}`, inline: true})
 				embedArray.push(embed0);
-				member.presence.activities.map((activity: Activity) => {
+				member.presence.activities.forEach(activity => {
 					if (activity.type == 2 && activity.details && activity.assets) {
 						embedArray.push(new client.embed()
 							.setAuthor({name: activity.name, iconURL: 'https://www.freepnglogos.com/uploads/spotify-logo-png/spotify-icon-marilyn-scott-0.png'})

@@ -118,20 +118,13 @@ export class punishments extends Database {
         (this.client.channels.cache.get(this.client.config.mainServer.channels.staffreports) as Discord.TextChannel).send({embeds: [embed]});
     };
 	getTense(type: string) { // Get past tense form of punishment type, grammar yes
-		switch (type) {
-			case 'ban':
-				return 'banned';
-			case 'softban':
-				return 'softbanned';
-			case 'kick':
-				return 'kicked';
-			case 'mute':
-				return 'muted';
-			case 'warn':
-				return 'warned';
-			default:
-				return type;
-		}
+		return {
+			ban: 'banned',
+			softban: 'softbanned',
+			kick: 'kicked',
+			mute: 'muted',
+			warn: 'warned'
+		}[type]
 	}
 	async addPunishment(type: string, options: db_punishments_passthruOpt, moderator: string, reason: string, User: Discord.User, GuildMember?: Discord.GuildMember) {
 		const { time, interaction } = options;

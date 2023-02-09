@@ -23,10 +23,8 @@ const removeUsername = (text: string) => {
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
 		if (!client.config.devWhitelist.includes(interaction.user.id)) return interaction.reply(`You're not allowed to use dev commands.`);
-		const subCmd = interaction.options.getSubcommand();
-
-		switch (subCmd) {
-			case 'eval':
+		({
+			eval: async () => {
 				const code = interaction.options.getString("code", true);
 				let output = 'error';
 				let error = false;
@@ -60,8 +58,8 @@ export default {
 					.addFields({name: 'Input', value:`\`\`\`js\n${code.slice(0, 1010)}\n\`\`\``}, {name: 'Output', value: `\`\`\`${removeUsername(output).slice(0, 1016)}\n\`\`\``})
 					.setColor(client.config.embedColor);
 				interaction.reply({embeds: [embed]}).catch(() => (interaction.channel as Discord.TextChannel).send({embeds: [embed]}));
-				break;
-			case 'role':
+			},
+			role: () => {
 				const role = interaction.options.getRole("role") as Discord.Role;
 				const member = interaction.options.getMember("member") as Discord.GuildMember;
 				let err = false;
@@ -71,27 +69,24 @@ export default {
 				} else {
 					member.roles.add(role.id).catch((e) => {interaction.reply(e.message); err = true}).then(()=> {if (!err) interaction.reply('Role added');});
 				}
-				break;
-			case 'file':
-				const file = interaction.options.getString('file', true);
-				interaction.reply({files: [`./databases/${file}.json`]}).catch((e: Error) => interaction.channel?.send(removeUsername(e.message)));
-				break;
-			case 'statsgraph':
+			},
+			file: () => interaction.reply({files: [`./databases/${interaction.options.getString('file', true)}.json`]}).catch((e: Error) => interaction.channel?.send(removeUsername(e.message))),
+			statsgraph: () => {
 				client.FSCache.statsGraph = -(interaction.options.getInteger('number', true));
 				interaction.reply(`Set to \`${client.FSCache.statsGraph}\``);
-				break;
-			case 'decrement':
-				const player = interaction.options.getString('player');
-				const time = interaction.options.getInteger('time');
-				client.playerTimes.decrement(player as string, time as number).forceSave();
-				interaction.reply(`Decremented \`${time}\` min from \`${player}\``)
-				break;
-			case 'restart':
+			},
+			decrement: () => {
+				const player = interaction.options.getString('player', true);
+				const time = interaction.options.getInteger('time', true);
+				client.playerTimes.decrement(player, time).forceSave();
+				interaction.reply(`Decremented \`${time}\` min from \`${player}\``);
+			},
+			restart: () => {
 				client.userLevels.forceSave();
 				client.playerTimes.forceSave();
 				interaction.reply("Restarting...").then(async ()=> exec('pm2 restart IRTBot'));
-				break;
-			case 'update':
+			},
+			update: async () => {
 				const msg = await interaction.reply({content: "Pulling from repo...", fetchReply: true});
 				client.userLevels.forceSave();
 				client.playerTimes.forceSave();
@@ -101,11 +96,11 @@ export default {
 					} else if (stdout.includes('Already up to date')) {
 						msg.edit(`Pull aborted:\nUp-to-date`);
 					} else {
-						setTimeout(() => { msg.edit('Restarting...').then(() => exec('pm2 restart IRTBot')) }, 2500);
+						setTimeout(() => msg.edit('Restarting...').then(() => exec('pm2 restart IRTBot')), 2500);
 					}
-				})
-				break;
-			case 'increment':
+				});
+			},
+			increment: () => {
 				const dailyMsgsPath = path.join(__dirname, '../databases/dailyMsgs.json');
 				const data = JSON.parse(fs.readFileSync(dailyMsgsPath, {encoding: 'utf8'}));
 				const member1 = interaction.options.getMember('member') as Discord.GuildMember;
@@ -117,23 +112,19 @@ export default {
 				client.userLevels._content[member1.id].messages = newTotal;
 				data.forEach((x: Array<number>) => newData.push([x[0], (x[1] + (newTotal - oldTotal))]));
 				fs.writeFileSync(dailyMsgsPath, JSON.stringify(newData));
-				await interaction.reply(`<@${member1.id}>'s new total set to \`${newTotal}\``);
-				break;
-			case 'logs': 
-				interaction.reply({files: ['../../.pm2/logs/IRTBot-out-0.log']}).catch((err: Error) => interaction.channel?.send(removeUsername(err.message)));
-				break;
-			case 'dz':
-				exec('start C:/WakeOnLAN/WakeOnLanC.exe -w -m Desktop');
-				interaction.reply('PC has committed iWoke:tm:');
-				break;
-			case 'presence':
+				interaction.reply(`<@${member1.id}>'s new total set to \`${newTotal}\``);
+			},
+			logs: () => interaction.reply({files: ['../../.pm2/logs/IRTBot-out-0.log']}).catch((err: Error) => interaction.channel?.send(removeUsername(err.message))),
+			dz: () => interaction.reply('PC has committed iWoke:tm:').then(() => exec('start C:/WakeOnLAN/WakeOnLanC.exe -w -m Desktop')),
+			presence: () => {
 				function convertType(Type?: number) {
-					switch (Type) {
-						case 0: return 'Playing';
-						case 2: return 'Listening'
-						case 3: return 'Watching';
-						case 5: return 'Competing';
-					}
+					return {
+						0: 'Playing',
+						2: 'Listening',
+						3: 'Watching',
+						5: 'Competing',
+						default: undefined
+					}[Type || 'default'];
 				}
 				const status = interaction.options.getString('status') as Discord.PresenceStatusData | null;
 				const type = interaction.options.getInteger('type');
@@ -152,7 +143,8 @@ export default {
 					`Type: **${convertType(currentActivities[0].type)}**`,
 					`Name: **${currentActivities[0].name}**`
 				].join('\n'));
-		}
+			}
+		} as any)[interaction.options.getSubcommand()]();
 	},
 	data: new SlashCommandBuilder()
 		.setName("dev")

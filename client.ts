@@ -68,12 +68,19 @@ export default class YClient extends Client {
         this.TFstaff.initLoad();
         this.watchList.initLoad();
         this.playerTimes.initLoad().intervalSave().disableSaveNotifs();
-        const commandFiles = fs.readdirSync("./commands").filter(file => file.endsWith(".ts"));
-        for (const file of commandFiles) {
-	        const command = require(`./commands/${file}`);
-	        this.commands.set(command.default.data.name, command);
-	        this.registery.push(command.default.data.toJSON())
-           }
+
+        // Command handler
+        fs.readdirSync("./commands").forEach(file => {
+            const commandFile = require(`./commands/${file}`);
+	        this.commands.set(commandFile.default.data.name, commandFile);
+	        this.registery.push(commandFile.default.data.toJSON());
+        });
+
+        // Event handler
+        fs.readdirSync('./events').forEach(file => {
+    	    const eventFile = require(`./events/${file}`);
+	        this.on(file.replace('.ts', ''), async (...args) => eventFile.default(this, ...args));
+        });
     }
     formatPunishmentType(punishment: db_punishments_format, client: YClient, cancels: db_punishments_format) {
         if (punishment.type === 'removeOtherPunishment') {

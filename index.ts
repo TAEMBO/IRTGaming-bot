@@ -1,6 +1,5 @@
 import Discord from 'discord.js';
 import YClient from './client';
-import moment from 'moment';
 import fs from 'node:fs';
 import path from 'node:path';
 import FSLoop from './FSLoop';
@@ -22,11 +21,6 @@ client.on("ready", async () => {
 	client.user?.setPresence(client.config.botPresence);
 	setInterval(() => client.user?.setPresence(client.config.botPresence), 1800000);
 	
-	// Event handler
-    fs.readdirSync('./events').forEach(file => {
-    	const eventFile = require(`./events/${file}`);
-	    client.on(file.replace('.ts', ''), async (...args) => eventFile.default(client, ...args));
-    });
 	const channel = client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel;
 	await channel.send(`:warning: Bot restarted :warning:\n<@${client.config.devWhitelist[0]}>\n\`\`\`json\n${Object.entries(client.config.botSwitches).map((x)=> `${x[0]}: ${x[1]}`).join('\n')}\`\`\``);
 

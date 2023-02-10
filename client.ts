@@ -2,7 +2,6 @@ import Discord, { Client, GatewayIntentBits, Partials } from "discord.js";
 import fs from "node:fs";
 import moment from 'moment';
 import tokens from './tokens.json';
-import timeNames from './timeNames';
 let importConfig: Config
 try { 
     importConfig = require('./test-config.json');
@@ -92,9 +91,17 @@ export default class YClient extends Client {
 
     formatTime(integer: number, accuracy = 1, options?: global_formatTimeOpt) {
         let achievedAccuracy = 0;
-        let text:any = '';
-        for (const timeName of timeNames){
-            if (achievedAccuracy < accuracy){
+        let text: any = '';
+        for (const timeName of [
+            { name: 'year',   length: 1000 * 60 * 60 * 24 * 365 },
+            { name: 'month',  length: 1000 * 60 * 60 * 24 * 30 },
+            { name: 'week',   length: 1000 * 60 * 60 * 24 * 7 },
+            { name: 'day',    length: 1000 * 60 * 60 * 24 },
+            { name: 'hour',   length: 1000 * 60 * 60 },
+            { name: 'minute', length: 1000 * 60 },
+            { name: 'second', length: 1000 }
+        ]) {
+            if (achievedAccuracy < accuracy) {
                 const fullTimelengths = Math.floor(integer/timeName.length);
                 if (fullTimelengths == 0) continue;
                 achievedAccuracy++;

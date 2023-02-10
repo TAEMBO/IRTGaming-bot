@@ -86,6 +86,7 @@ export class userLevels extends Database {
 }
 export class punishments extends Database {
     client: YClient;
+	
     constructor(client: YClient) {
         super(client, "./databases/punishments.json", "array");
         this.client = client;
@@ -93,26 +94,26 @@ export class punishments extends Database {
     createId() {
 		return Math.max(...this.client.punishments._content.map((x: db_punishments_format) => x.id), 0) + 1;
 	}
-	makeModlogEntry(data: db_punishments_format) {
-        const cancels = data.cancels ? this.client.punishments._content.find((x: db_punishments_format) => x.id === data.cancels) : null;
+	makeModlogEntry(punishment: db_punishments_format) {
+        const cancels = punishment.cancels ? this.client.punishments._content.find((x: db_punishments_format) => x.id === punishment.cancels) as db_punishments_format : null;
     
         // format data into embed
         const embed = new this.client.embed()
-            .setTitle(`${this.client.formatPunishmentType(data, this.client, cancels)} | Case #${data.id}`)
+            .setTitle(`${punishment.type[0].toUpperCase() + punishment.type.slice(1)} | Case #${punishment.id}`)
             .addFields(
-            	{name: '🔹 User', value: `${data.member.tag}\n<@${data.member.id}>\n\`${data.member.id}\``, inline: true},
-            	{name: '🔹 Moderator', value: `<@${data.moderator}> \`${data.moderator}\``, inline: true},
+            	{name: '🔹 User', value: `${punishment.member.tag}\n<@${punishment.member.id}>\n\`${punishment.member.id}\``, inline: true},
+            	{name: '🔹 Moderator', value: `<@${punishment.moderator}> \`${punishment.moderator}\``, inline: true},
             	{name: '\u200b', value: '\u200b', inline: true},
-            	{name: '🔹 Reason', value: `\`${data.reason}\``, inline: true})
+            	{name: '🔹 Reason', value: `\`${punishment.reason}\``, inline: true})
             .setColor(this.client.config.embedColor)
-            .setTimestamp(data.time)
-        if (data.duration) {
+            .setTimestamp(punishment.time)
+        if (punishment.duration) {
             embed.addFields(
-            	{name: '🔹 Duration', value: this.client.formatTime(data.duration, 100), inline: true},
+            	{name: '🔹 Duration', value: this.client.formatTime(punishment.duration, 100), inline: true},
             	{name: '\u200b', value: '\u200b', inline: true}
             )
         }
-        if (data.cancels) embed.addFields({name: '🔹 Overwrites', value: `This case overwrites Case #${cancels.id} \`${cancels.reason}\``});
+        if (punishment.cancels) embed.addFields({name: '🔹 Overwrites', value: `This case overwrites Case #${cancels?.id} \`${cancels?.reason}\``});
     
         // send embed in modlog channel
         (this.client.channels.cache.get(this.client.config.mainServer.channels.staffreports) as Discord.TextChannel).send({embeds: [embed]});

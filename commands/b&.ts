@@ -2,14 +2,9 @@ import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
-        const member = interaction.options.getUser("user") as Discord.User;
+        const user = interaction.options.getUser("user", true);
         interaction.reply({content: "ok", ephemeral: true});
-        if (!member) {
-            (interaction.channel as Discord.TextChannel).send('You received an honorary ban!')
-            return;
-        } else {
-            (interaction.channel as Discord.TextChannel).send(`<@${member.id}> has received an honorary ban!`)}
-        return;
+        interaction.channel?.send({content: `<@${user.id}> has received an honorary ban!`});
     },
     data: new SlashCommandBuilder()
         .setName("band")
@@ -17,5 +12,5 @@ export default {
         .addUserOption((opt)=>opt
             .setName("user")
             .setDescription("It's an honor")
-            .setRequired(false))
+            .setRequired(true))
 };

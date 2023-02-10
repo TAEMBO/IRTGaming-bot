@@ -1,65 +1,63 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client';
-import { db_punishments_format } from '../interfaces'
+import { db_punishments_format } from '../interfaces';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
 		if (!client.hasModPerms(interaction.member as Discord.GuildMember)) return client.youNeedRole(interaction, "mod");
-		const subCmd = interaction.options.getSubcommand();
+
 		const caseid = interaction.options.getInteger("id");
-		if(subCmd === "update") {
-			const reason = interaction.options.getString('reason');
-			client.punishments._content.find((x: db_punishments_format)=>x.id===caseid).reason = reason;
-			client.punishments.forceSave();
-			const embed = new client.embed()
-				.setColor('#00ff00')
-				.setTitle('Case updated')
-				.setDescription(`Case ${caseid} has been updated\nNew reason: ${reason}`);
+		const punishmentsDb = client.punishments._content as Array<db_punishments_format>;
 
-		await interaction.reply({embeds: [embed] });
-		} else if (subCmd === "view") {
-			const punishment: db_punishments_format = client.punishments._content.find((x: db_punishments_format) => x.id === caseid);
-			if(!punishment) return interaction.reply({content: "A case with that ID wasn't found!"});
-			const cancelledBy = punishment.expired ? client.punishments._content.find((x: db_punishments_format) => x.cancels === punishment.id) : null;
-			const cancels = punishment.cancels ? client.punishments._content.find((x: db_punishments_format) => x.id === punishment.cancels) : null;
-			const embed = new client.embed()
-				.setTitle(`${client.formatPunishmentType(punishment, client, cancels)} | Case #${punishment.id}`)
-				.addFields(
-				{name: '🔹 User', value: `${punishment.member.tag}\n<@${punishment.member.id}> \`${punishment.member.id}\``, inline: true},
-				{name: '🔹 Moderator', value: `<@${punishment.moderator}> \`${punishment.moderator}\``, inline: true},
-				{name: '\u200b', value: '\u200b', inline: true},
-				{name: '🔹 Reason', value: `\`${punishment.reason || 'unspecified'}\``, inline: true})
-				.setColor(client.config.embedColor)
-				.setTimestamp(punishment.time)
-			if (punishment.duration) {
-				embed.addFields({name: '🔹 Duration', value: client.formatTime(punishment.duration, 100), inline: true}, {name: '\u200b', value: '\u200b', inline: true})
+		({
+			view: () => {
+				const punishment = punishmentsDb.find(x => x.id === caseid);
+				if (!punishment) return interaction.reply('A case with that ID wasn\'t found!');
+				const cancelledBy = punishment.expired ? punishmentsDb.find(x => x.cancels === punishment.id) : null;
+				const cancels = punishment.cancels ? punishmentsDb.find(x => x.id === punishment.cancels) as db_punishments_format : null;
+				const embed = new client.embed()
+					.setTitle(`${punishment.type[0].toUpperCase() + punishment.type.slice(1)} | Case #${punishment.id}`)
+					.addFields(
+						{name: '🔹 User', value: `${punishment.member.tag}\n<@${punishment.member.id}> \`${punishment.member.id}\``, inline: true},
+						{name: '🔹 Moderator', value: `<@${punishment.moderator}> \`${punishment.moderator}\``, inline: true},
+						{name: '\u200b', value: '\u200b', inline: true},
+						{name: '🔹 Reason', value: `\`${punishment.reason || 'unspecified'}\``, inline: true})
+					.setColor(client.config.embedColor)
+					.setTimestamp(punishment.time);
+				if (punishment.duration) embed.addFields({name: '🔹 Duration', value: client.formatTime(punishment.duration, 100), inline: true}, {name: '\u200b', value: '\u200b', inline: true});
+				if (punishment.expired) embed.addFields({name: '🔹 Expired', value: `This case has been overwritten by Case #${cancelledBy?.id} for reason \`${cancelledBy?.reason}\``});
+				if (punishment.cancels) embed.addFields({name: '🔹 Overwrites', value: `This case overwrites Case #${cancels?.id} \`${cancels?.reason}\``});
+				interaction.reply({embeds: [embed]});
+			},
+			member: () => {
+				const user = interaction.options.getUser("user", true);
+				const userPunishments = punishmentsDb.filter(x => x.member.id === user.id).sort((a, b) => a.time - b.time).map(punishment => {
+					return {
+						name: `${punishment.type[0].toUpperCase() + punishment.type.slice(1)} | Case #${punishment.id}`,
+						value: [
+							`> Reason: \`${punishment.reason}\``,
+							punishment.duration ? `\n> Duration: ${client.formatTime(punishment.duration, 3)}` : '',
+							`\n> Moderator: <@${punishment.moderator}>`,
+							punishment.expired ? `\n> __Overwritten by Case #${punishmentsDb.find(x => x.cancels === punishment.id)?.id}__` : '',
+							punishment.cancels ? `\n> __Overwrites Case #${punishment.cancels}__` : ''].join('')
+					}
+				});
+				if (!userPunishments || userPunishments.length === 0) return interaction.reply('No punishments found with that user ID');
+				const pageNumber = interaction.options.getInteger("page") ?? 1;
+				interaction.reply({embeds: [new client.embed()
+					.setTitle(`Punishments for ${user.tag}`)
+					.setDescription(`<@${user.id}>\n\`${user.id}\``)
+					.setFooter({text: `${userPunishments.length} total punishments. Viewing page ${pageNumber} out of ${Math.ceil(userPunishments.length / 25)}.`})
+					.setColor(client.config.embedColor)
+					.addFields(userPunishments.slice((pageNumber - 1) * 25, pageNumber * 25))
+				]});
+			},
+			update: () => {
+				const reason = interaction.options.getString('reason', true);
+				(punishmentsDb.find(x=>x.id===caseid) as db_punishments_format).reason = reason;
+				client.punishments.forceSave();
+				interaction.reply({embeds: [new client.embed().setColor('#00ff00').setTitle('Case updated').setDescription(`Case ${caseid} has been updated\nNew reason: ${reason}`)]});
 			}
-			if (punishment.expired) embed.addFields({name: '🔹 Expired', value: `This case has been overwritten by Case #${cancelledBy.id} for reason \`${cancelledBy.reason}\``})
-			if (punishment.cancels) embed.addFields({name: '🔹 Overwrites', value: `This case overwrites Case #${cancels.id} \`${cancels.reason}\``})
-			interaction.reply({embeds: [embed]});
-		} else {
-			// if caseid is a user id, show their punishments, sorted by most recent
-			const userId = (interaction.options.getUser("user") as Discord.User).id;
-			const punishment = client.punishments._content.find((x: db_punishments_format) => x.id === caseid);
-			const cancels = punishment.cancels ? client.punishments._content.find((x: db_punishments_format) => x.id === punishment.cancels) : null;
-			const userPunishments = client.punishments._content.filter((x: db_punishments_format) => x.member.id === userId).sort((a: db_punishments_format, b: db_punishments_format) => a.time - b.time).map((punishment: db_punishments_format) => {
-				return {
-					name: `${client.formatPunishmentType(punishment, client, cancels)} | Case #${punishment.id}`,
-					value: `Reason: \`${punishment.reason}\`\n${punishment.duration ? `Duration: ${client.formatTime(punishment.duration, 3)}\n` : ''}Moderator: <@${punishment.moderator}>${punishment.expired ? `\nOverwritten by Case #${client.punishments._content.find((x: db_punishments_format) => x.cancels === punishment.id).id}` : ''}${punishment.cancels ? `\nOverwrites Case #${punishment.cancels}` : ''}`
-				}
-			});
-
-			// if case id is not a punishment or a user, failed
-			if (!userPunishments || userPunishments.length === 0) return interaction.reply('No punishments found with that Case # or user ID');
-
-			const pageNumber = interaction.options.getInteger("page") ?? 1;
-			const embed = new client.embed()
-				.setTitle(`Punishments given to ${userId}`)
-				.setDescription(`User: <@${userId}>`)
-				.setFooter({text: `${userPunishments.length} total punishments. Viewing page ${pageNumber} out of ${Math.ceil(userPunishments.length / 25)}.`})
-				.setColor(client.config.embedColor)
-			embed.addFields(userPunishments.slice((pageNumber - 1) * 25, pageNumber * 25));
-			return interaction.reply({embeds: [embed]});
-		}
+		} as any)[interaction.options.getSubcommand()]();
 	},
 	data: new SlashCommandBuilder()
 		.setName("case")

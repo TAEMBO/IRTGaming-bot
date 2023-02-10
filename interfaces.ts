@@ -1,4 +1,4 @@
-import Discord, { ColorResolvable } from 'discord.js';
+import Discord from 'discord.js';
 
 export interface Tokens {
     token: string
@@ -30,10 +30,10 @@ interface FTPLogins {
 }
 
 export interface Config {
-    embedColor: ColorResolvable
-    embedColorGreen: ColorResolvable,
-    embedColorRed: ColorResolvable,
-    embedColorYellow: ColorResolvable
+    embedColor: Discord.ColorResolvable
+    embedColorGreen: Discord.ColorResolvable,
+    embedColorRed: Discord.ColorResolvable,
+    embedColorYellow: Discord.ColorResolvable
     botPresence: Discord.PresenceData
     botSwitches: botSwitches,
     devWhitelist: Array<string>,

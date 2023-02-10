@@ -82,12 +82,14 @@ export default class YClient extends Client {
 	        this.on(file.replace('.ts', ''), async (...args) => eventFile.default(this, ...args));
         });
     }
-    formatPunishmentType(punishment: db_punishments_format, client: YClient, cancels: db_punishments_format) {
-        if (punishment.type === 'removeOtherPunishment') {
-            cancels ||= this.punishments._content.find((x: db_punishments_format) => x.id === punishment.cancels)
-            return cancels.type[0].toUpperCase() + cancels.type.slice(1) + ' Removed';
-        } else return punishment.type[0].toUpperCase() + punishment.type.slice(1);
-    }
+    hasModPerms = (guildMember: Discord.GuildMember) => this.config.mainServer.staffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
+
+    isMPStaff = (guildMember: Discord.GuildMember) => this.config.mainServer.MPStaffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
+
+    youNeedRole = (interaction: Discord.CommandInteraction, role: string) => interaction.reply(`You need the <@&${this.config.mainServer.roles[role]}> role to use this command`);
+
+    timeLog = (color: string) => color + `[${moment().format('HH:mm:ss')}]`;
+
     formatTime(integer: number, accuracy = 1, options?: global_formatTimeOpt) {
         let achievedAccuracy = 0;
         let text:any = '';
@@ -112,18 +114,6 @@ export default class YClient extends Client {
             }
         } return text.trim();
     }
-    hasModPerms(guildMember: Discord.GuildMember) {
-        return this.config.mainServer.staffRoles.map((x: string) => this.config.mainServer.roles[x]).some((x: string) => guildMember.roles.cache.has(x));
-    };
-    isMPStaff(guildMember: Discord.GuildMember) {
-        return this.config.mainServer.MPStaffRoles.map((x: string) => this.config.mainServer.roles[x]).some((x: string) => guildMember.roles.cache.has(x));
-    };
-    youNeedRole(interaction: Discord.CommandInteraction, role: string) {
-        return interaction.reply(`You need the <@&${this.config.mainServer.roles[role]}> role to use this command`);
-    }
-    timeLog(color: string) {
-        return color + `[${moment().format('HH:mm:ss')}]`;
-    }
     async YTLoop(YTChannelID: string, YTChannelName: string) {
         const xjs = require('xml-js');
         let Data: any;
@@ -145,17 +135,6 @@ export default class YClient extends Client {
             this.YTCache[YTChannelID] = Data.feed.entry[0]['yt:videoId']._text;
             (this.channels.resolve(this.config.mainServer.channels.vidsandstreams) as Discord.TextChannel).send(`**${YTChannelName}** just uploaded a new video!\n${Data.feed.entry[0].link._attributes.href}`)
         }
-    }
-    alignText(text: string, length: number, alignment: string, emptyChar = ' ') {
-        if (alignment === 'right') {
-            text = emptyChar.repeat(length - text.length) + text;
-        } else if (alignment === 'middle') {
-            const emptyCharsPerSide = (length - text.length) / 2;
-            text = emptyChar.repeat(Math.floor(emptyCharsPerSide)) + text + emptyChar.repeat(Math.floor(emptyCharsPerSide));
-        } else {
-            text = text + emptyChar.repeat(length - text.length);
-        }
-        return text;
     }
     formatBytes(bytes: number, decimals: number, bitsOrBytes: 1000 | 1024) { // Credits to Toast for making this
         if (bytes === 0) return '0 Bytes';

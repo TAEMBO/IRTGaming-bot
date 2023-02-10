@@ -410,8 +410,7 @@ function findUnit(unitNameQuery = '') {
 }
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
-		const subCmd = interaction.options.getSubcommand();
-		if (subCmd === 'help') {
+		if (interaction.options.getSubcommand() === 'help') {
 			const wantedQuantity = Object.keys(quantities).find(x => x == (interaction.options.getString("type") as string));
 			if (wantedQuantity) {
 				const units: Array<Quantity> = quantities[wantedQuantity];
@@ -431,7 +430,7 @@ export default {
 					{name: 'Examples', value: `An amount: "5", "1200300", "1.99"\nA unit: metre, kelvin, Euro\nA unit symbol: "fh", "cm^3", "$", "fl oz"\nAn argument: "180cm", "12.99€", "5km", "16fl oz"\nA target unit: ">km", ">c", ">m2"\nA complete conversion command: "\`/convert 5ft, 8in to cm\`", "\`/convert 300kelvin >celsius\`", "\`/convert 57mm, 3.3cm, 0.4m >cm\`", "\`/convert 2dl, 0.2l to fl oz\`"`},
 					{name: 'Fracton conversion', value: 'Use division in your commands to achieve something, for example velocity conversion. In fraction conversion, all the starters\' and the target\'s unit symbol must be a fraction. The syntax for a fraction is \`[unit symbol]["/" or "per"][unit symbol]\`. All of the numerators must be of the same quantity. Same for the denominators. You cannot mix fractions and non-fractions. Examples of Fraction Conversion:\n\`/convert 5m/s >km/h\`\n\`/convert 5 miles per hour, 1 meter per second to kilometers per hour\`'})
 			return interaction.reply({embeds: [embed]});
-		} else if (subCmd === 'convert') {
+		} else {
 			const conversion = interaction.options.getString("conversion") as string;
 			const args = conversion.replace(/\n/g, " ").split(' ') as  Array<string>;
 			if (!conversion.includes('>') && !conversion.includes('to')) return interaction.reply('There needs to be a greater-than sign (\`>\`) or the word "to" in your message, after the starters and before the target unit.');
@@ -553,7 +552,7 @@ export default {
                 )
 				.setColor(client.config.embedColor)
 			interaction.reply({embeds: [embed]});
-	}
+		}
 	},
 	data: new SlashCommandBuilder()
 		.setName("convert")

@@ -19,7 +19,7 @@ export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
 		const member = interaction.options.getMember("member");
 		if (member == null) {
-			const user = interaction.options.getUser('member') as Discord.User;
+			const user = interaction.options.getUser('member', true);
 
 			const embed = new client.embed()
 				.setThumbnail(user.avatarURL({ extension: 'png', size: 2048}) || user.defaultAvatarURL)

@@ -2,7 +2,7 @@ import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
-        if (interaction.channel?.parentId !== '803142061015957524' && !client.isMPStaff(interaction.member)) return interaction.reply({content: 'You cannot use this command here', ephemeral: true});
+        if (interaction.channel?.parentId !== '980947706736427019' && !client.isMPStaff(interaction.member)) return interaction.reply({content: 'You cannot use this command here', ephemeral: true});
 
         interaction.reply({embeds: [new client.embed()
             .setTitle('MP Support - Ban Appeal')

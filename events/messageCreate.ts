@@ -86,10 +86,9 @@ export default async (client: YClient, message: Discord.Message) => {
 	
 				// if a spammed message exists;
 				if (spammedMessage) {
-					// mute
-					const muteResult = await client.punishments.addPunishment('mute', { time: '30m' }, (client.user as Discord.User).id, 'Automod; Banned words', message.author, message.member as Discord.GuildMember);
+					await client.punishments.addPunishment('mute', { time: '30m' }, (client.user as Discord.User).id, 'Automod; Banned words', message.author, message.member as Discord.GuildMember);
 	
-					// and clear their list of long messages
+					// clear their list of long messages
 					delete client.repeatedMessages[message.author.id];
 				}
 			} else {
@@ -127,10 +126,9 @@ export default async (client: YClient, message: Discord.Message) => {
 	
 				// if a spammed message exists;
 				if (spammedMessage) {
-					// mute
-					const muteResult = await client.punishments.addPunishment('mute', { time: '1h' }, (client.user as Discord.User).id, 'Automod; Discord advertisement', message.author, message.member as Discord.GuildMember);
+					await client.punishments.addPunishment('mute', { time: '1h' }, (client.user as Discord.User).id, 'Automod; Discord advertisement', message.author, message.member as Discord.GuildMember);
 	
-					// and clear their list of long messages
+					// clear their list of long messages
 					delete client.repeatedMessages[message.author.id];
 				}
 			} else {
@@ -142,25 +140,12 @@ export default async (client: YClient, message: Discord.Message) => {
 			}
 		}
 	
-		// if message was sent in a whitelisted channel, count towards user level
-		if (message.channel.id != '557692151689904129' && !automodded) {
-			client.userLevels.incrementUser(message.author.id)
-		};
+		if (message.channel.id != '557692151689904129' && !automodded) client.userLevels.incrementUser(message.author.id);
 			
 		// Morning message system
-		const morningMsgs = [
-			'morning all',
-			'morning everyone',
-			'morning guys',
-			'morning people'
-		];
 		const person = message.member?.displayName;
-		const morningResponses1 = [
-			`Wakey wakey ${person}! `,
-			`Morning ${person}! `,
-			`Why good morning ${person}! `,
-			`Rise and shine ${person}! `
-		]
+		const morningMsgs = [ 'morning all', 'morning everyone', 'morning guys', 'morning people' ];
+		const morningResponses1 = [ `Wakey wakey ${person}! `, `Morning ${person}! `, `Why good morning ${person}! `, `Rise and shine ${person}! `, `Up and at 'em ${person}! `];
 		const morningResponses2 = [
 			'Here, take a pancake or two 🥞',
 			'Here, take a 🥔',
@@ -183,28 +168,22 @@ export default async (client: YClient, message: Discord.Message) => {
 			''
 		];
 	
-		if (client.config.botSwitches.autoResponses && !automodded) { // auto responses
-			if (morningMsgs.some((x) => msg.includes(x)) && message.channel.id == '552565546093248512') {
-				message.reply({content: `${morningResponses1[Math.floor(Math.random() * morningResponses1.length)]}${morningResponses2[Math.floor(Math.random() * morningResponses2.length)]}${message.author.id == '207828776262828034' ? ' https://tenor.com/view/alan-animal-prairie-dog-gif-13203931' : ''}`, allowedMentions: {repliedUser: false}})
-			}
-			if (msg.includes('giants moment')) {
-				message.react('™️');
-			}
-			if (msg.includes('sync sim')) {
-				message.react(':IRT_SyncSim22:929440249577365525')
-			}
-			if (msg.includes('smoker')) {
-				message.react('🚭')
-			}
-			if (msg.includes("forgor")) {
-				message.react("💀")
-			}
-			if (msgarr.includes('69')) {
-				message.react(':IRT_Noice:611558357643558974')
-			}
-			if (message.content.startsWith('!rank')) {
-				message.reply({content: 'Ranking has been moved to </rank view:1042659197919178790>', allowedMentions: {repliedUser: false}})
-			}
+		if (client.config.botSwitches.autoResponses && !automodded) { // Auto responses
+			if (morningMsgs.some(x => msg.includes(x)) && message.channel.id == '552565546093248512') message.reply({
+				content: morningResponses1[Math.floor(Math.random() * morningResponses1.length)] + morningResponses2[Math.floor(Math.random() * morningResponses2.length)], allowedMentions: {repliedUser: false}
+			});
+			
+			if (msg.includes('giants moment')) message.react('™️');
+			
+			if (msg.includes('sync sim')) message.react(':IRT_SyncSim22:929440249577365525');
+			
+			if (msg.includes('smoker')) message.react('🚭');
+			
+			if (msg.includes("forgor")) message.react("💀");
+			
+			if (msgarr.includes('69')) message.react(':IRT_Noice:611558357643558974');
+			
+			if (message.content.startsWith('!rank')) message.reply({content: 'Ranking has been moved to </rank view:1042659197919178790>', allowedMentions: {repliedUser: false}});
 		}
 	}
 }

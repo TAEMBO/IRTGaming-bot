@@ -91,9 +91,7 @@ export default {
 			ctx.lineWidth = 5;
 			
 			
-			function getYCoordinate(value: number) {
-				return ((1 - (value / second_graph_top)) * graphSize[1]) + graphOrigin[1];
-			}
+			const getYCoordinate = (value: number) => ((1 - (value / second_graph_top)) * graphSize[1]) + graphOrigin[1];
 			
 			let lastCoords: Array<number> = [];
 			data.forEach((val: number, i: number) => {
@@ -136,21 +134,19 @@ export default {
 			const ty = graphOrigin[1] + graphSize[1] + (textSize);
 			ctx.fillText('time ->', tx, ty);
 			
-			const yeahok = new client.attachmentBuilder(img.toBuffer(), {name: "dailymsgs.png"})
-			const embed = new client.embed()
-				.setTitle('Ranking leaderboard')
-				.setDescription(`A total of **${messageCountsTotal.toLocaleString('en-US')}** messages have been recorded in this server.`)
-				.addFields({name: 'Top users by messages sent:', value: Object.entries<db_userLevels_format>(client.userLevels._content).sort((a, b) => b[1].messages - a[1].messages).slice(0, 10).map((x, i) => `\`${i + 1}.\` <@${x[0]}>: ${x[1].messages.toLocaleString('en-US')}`).join('\n')})
-				.setImage('attachment://dailymsgs.png')
-				.setColor(client.config.embedColor)
-			interaction.reply({embeds: [embed], files: [yeahok]});
-			return;
+			interaction.reply({
+				files: [new client.attachmentBuilder(img.toBuffer(), {name: "dailymsgs.png"})],
+				embeds: [new client.embed()
+					.setTitle('Ranking leaderboard')
+					.setDescription(`A total of **${messageCountsTotal.toLocaleString('en-US')}** messages have been recorded in this server.`)
+					.addFields({name: 'Top users by messages sent:', value: Object.entries<db_userLevels_format>(client.userLevels._content).sort((a, b) => b[1].messages - a[1].messages).slice(0, 10).map((x, i) => `\`${i + 1}.\` <@${x[0]}>: ${x[1].messages.toLocaleString('en-US')}`).join('\n')})
+					.setImage('attachment://dailymsgs.png')
+					.setColor(client.config.embedColor)]
+			});
 		} else if (subCmd === "view") {
 
 			// fetch user or user interaction sender
-			const member = interaction.options.getMember("member") ?? interaction.member as Discord.GuildMember;
-
-			const embed = new client.embed().setColor(member.displayColor)
+			const member = interaction.options.getMember("member") ?? interaction.member;
 
 			// information about users progress on level roles
 			const information = client.userLevels._content[member.user.id];
@@ -160,21 +156,33 @@ export default {
 				else return they || false;
 			};
 
-			if (!information) {
-				return interaction.reply(`${pronounBool('You', 'They')} currently don't have a level, send some messages to level up.`)
-			}
+			if (!information) return interaction.reply(`${pronounBool('You', 'They')} currently don't have a level, send some messages to level up.`);
 		
 			const index = Object.entries<db_userLevels_format>(client.userLevels._content).sort((a, b) => b[1].messages - a[1].messages).map(x => x[0]).indexOf(member.id) + 1;
 			const memberDifference = information.messages - client.userLevels.algorithm(information.level);
 			const levelDifference = client.userLevels.algorithm(information.level+1) - client.userLevels.algorithm(information.level);
-	
-			embed.setThumbnail(member.user.avatarURL({ extension: 'png', size: 2048}) || member.user.defaultAvatarURL)
-			embed.setAuthor({name: `Ranking for ${member.user.tag}`})
-			embed.setTitle(`Level: **${information.level}**\nRank: **${index ? '#' + index  : 'last'}**\nProgress: **${information.messages - client.userLevels.algorithm(information.level)}/${client.userLevels.algorithm(information.level+1) - client.userLevels.algorithm(information.level)} (${(memberDifference/levelDifference*100).toFixed(2)}%)**\nTotal: **${information.messages}**`);
-			interaction.reply({embeds: [embed]}); // compile message and send
+
+			interaction.reply({embeds: [new client.embed()
+				.setTitle([
+					`Level: **${information.level}**`,
+					`Rank: **${index ? '#' + index  : 'last'}**`,
+					`Progress: **${memberDifference}/${levelDifference} (${(memberDifference/levelDifference*100).toFixed(2)}%)**`,
+					`Total: **${information.messages}**`
+				].join('\n'))
+				.setColor(client.config.embedColor)
+				.setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048}))
+				.setAuthor({name: `Ranking for ${member.user.tag}`})
+			]});
 	 	} else if (subCmd == 'info') {
-			const embed = new client.embed().setColor(client.config.embedColor).setDescription('**Q** How do I progress?\n**A** This system is message-based, meaning each message you send progresses you.\n\n**Q** What is going to happen to the <@757962216535359586> (MEE6) level system?\n**A** It will be replaced with this one.\n\n**Q** Can I transfer my progress from the MEE6 level system to this one?\n**A** Yes, message <@615761944154210305> (TÆMBØ#5512) with your request.\n\n**Q** Why is this change being done?\n**A** This bot is free for IRTGaming, MEE6 is not free for IRTGaming. I\'m sure you can figure out the rest.')
-			interaction.reply({embeds: [embed]})
+			interaction.reply({embeds: [new client.embed()
+				.setColor(client.config.embedColor)
+				.setDescription([
+					'**Q** How do I progress?\n**A** This system is message-based, meaning each message you send progresses you.',
+					'**Q** What is going to happen to the <@757962216535359586> (MEE6) level system?\n**A** It will be replaced with this one.',
+					'**Q** Can I transfer my progress from the MEE6 level system to this one?\n**A** Yes, message <@615761944154210305> (TÆMBØ#5512) with your request.',
+					'**Q** Why is this change being done?\n**A** This bot is free for IRTGaming, MEE6 is not free for IRTGaming. I\'m sure you can figure out the rest.'
+				].join('\n\n'))
+			]});
 		}
 	},
 	data: new SlashCommandBuilder()

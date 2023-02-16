@@ -264,6 +264,10 @@ export interface Reminder {
     who: string
 }
 
+export interface repeatedMessages {
+    [key: string]: { data: Discord.Collection<number, {cont: number, ch: string}>, timeout: NodeJS.Timeout }
+}
+
 export interface banFormat {
     blockedUserIds: {
         user: Array<user>

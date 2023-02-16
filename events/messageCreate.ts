@@ -63,80 +63,71 @@ export default async (client: YClient, message: Discord.Message) => {
 	
 		if (client.bannedWords._content.some((x: string) => msgarr.includes(x)) && !client.hasModPerms(message.member as Discord.GuildMember) && !Whitelist.includes(message.channel.id) && client.config.botSwitches.automod) {
 			automodded = true;
+			const threshold = 30000;
 			message.delete();
 			message.channel.send('That word is banned here.').then(x => setTimeout(() => x.delete(), 5000));
+
 			if (client.repeatedMessages[message.author.id]) {
 				// add this message to the list
-				client.repeatedMessages[message.author.id].set(message.createdTimestamp, { cont: 0, ch: message.channel.id });
+				client.repeatedMessages[message.author.id].data.set(message.createdTimestamp, { cont: 0, ch: message.channel.id });
 	
 				// reset timeout
-				clearTimeout(client.repeatedMessages[message.author.id].to);
-				client.repeatedMessages[message.author.id].to = setTimeout(onTimeout, 30000);
-	
-				// this is the time in which 4 messages have to be sent, in milliseconds
-				const threshold = 30000;
+				clearTimeout(client.repeatedMessages[message.author.id].timeout);
+				client.repeatedMessages[message.author.id].timeout = setTimeout(onTimeout, threshold);
 	
 				// message mustve been sent after (now - threshold), so purge those that were sent earlier
-				client.repeatedMessages[message.author.id] = client.repeatedMessages[message.author.id].filter((x: any, i: number) => i >= Date.now() - threshold)
+				client.repeatedMessages[message.author.id].data = client.repeatedMessages[message.author.id].data.filter((x, i) => i >= Date.now() - threshold)
 	
 				// a spammed message is one that has been sent at least 4 times in the last threshold milliseconds
-				const spammedMessage = client.repeatedMessages[message.author.id]?.find((x: any) => {
-					return client.repeatedMessages[message.author.id].filter((y: any) => x.cont === y.cont).size >= 4;
+				const spammedMessage = client.repeatedMessages[message.author.id].data.find(x => {
+					return client.repeatedMessages[message.author.id].data.filter(y => x.cont === y.cont).size >= 4;
 				});
 	
 				// if a spammed message exists;
 				if (spammedMessage) {
-					await client.punishments.addPunishment('mute', { time: '30m' }, (client.user as Discord.User).id, 'Automod; Banned words', message.author, message.member as Discord.GuildMember);
-	
-					// clear their list of long messages
 					delete client.repeatedMessages[message.author.id];
+					await client.punishments.addPunishment('mute', { time: '30m' }, (client.user as Discord.User).id, 'Automod; Banned words', message.author, message.member as Discord.GuildMember);
 				}
 			} else {
-				client.repeatedMessages[message.author.id] = new client.collection();
-				client.repeatedMessages[message.author.id].set(message.createdTimestamp, { cont: 0, ch: message.channel.id });
-	
-				// auto delete after 30 seconds
-				client.repeatedMessages[message.author.id].to = setTimeout(onTimeout, 30000);
+				client.repeatedMessages[message.author.id] = { data: new client.collection(), timeout: setTimeout(onTimeout, threshold) };
+				client.repeatedMessages[message.author.id].data.set(message.createdTimestamp, { cont: 0, ch: message.channel.id });
 			}
 		}
 	
 		// repeated messages; Discord advertisement
 		if (message.content.includes("discord.gg/") && !client.hasModPerms(message.member as Discord.GuildMember) && !client.isMPStaff(message.member as Discord.GuildMember) && client.config.botSwitches.automod) {
 			automodded = true;
+			const threshold = 60000;
 			message.delete();
-			message.channel.send("No advertising other Discord servers.").then(x => setTimeout(() => x.delete(), 10000))
+			message.channel.send("No advertising other Discord servers.").then(x => setTimeout(() => x.delete(), 10000));
+
 			if (client.repeatedMessages[message.author.id]) {
 				// add this message to the list
-				client.repeatedMessages[message.author.id].set(message.createdTimestamp, { cont: 1, ch: message.channel.id });
+				client.repeatedMessages[message.author.id].data.set(message.createdTimestamp, { cont: 1, ch: message.channel.id });
 	
 				// reset timeout
-				clearTimeout(client.repeatedMessages[message.author.id].to);
-				client.repeatedMessages[message.author.id].to = setTimeout(onTimeout, 60000);
-	
-				// this is the time in which 2 messages have to be sent, in milliseconds
-				const threshold = 60000;
+				clearTimeout(client.repeatedMessages[message.author.id].timeout);
+				client.repeatedMessages[message.author.id].timeout = setTimeout(onTimeout, threshold);
 	
 				// message mustve been sent after (now - threshold), so purge those that were sent earlier
-				client.repeatedMessages[message.author.id] = client.repeatedMessages[message.author.id].filter((x: any, i: number) => i >= Date.now() - threshold)
+				client.repeatedMessages[message.author.id].data = client.repeatedMessages[message.author.id].data.filter((x, i) => i >= Date.now() - threshold)
 	
 				// a spammed message is one that has been sent at least 2 times in the last threshold milliseconds
-				const spammedMessage = client.repeatedMessages[message.author.id]?.find((x: any) => {
-					return client.repeatedMessages[message.author.id].filter((y: any) => x.cont === y.cont).size >= 2;
+				const spammedMessage = client.repeatedMessages[message.author.id].data.find(x => {
+					return client.repeatedMessages[message.author.id].data.filter(y => x.cont === y.cont).size >= 2;
 				});
 	
 				// if a spammed message exists;
 				if (spammedMessage) {
-					await client.punishments.addPunishment('mute', { time: '1h' }, (client.user as Discord.User).id, 'Automod; Discord advertisement', message.author, message.member as Discord.GuildMember);
-	
-					// clear their list of long messages
 					delete client.repeatedMessages[message.author.id];
+					await client.punishments.addPunishment('mute', { time: '1h' }, (client.user as Discord.User).id, 'Automod; Discord advertisement', message.author, message.member as Discord.GuildMember);
 				}
 			} else {
-				client.repeatedMessages[message.author.id] = new client.collection();
-				client.repeatedMessages[message.author.id].set(message.createdTimestamp, { cont: 1, ch: message.channel.id });
+				client.repeatedMessages[message.author.id].data = new client.collection();
+				client.repeatedMessages[message.author.id].data.set(message.createdTimestamp, { cont: 1, ch: message.channel.id });
 	
 				// auto delete after 1 minute
-				client.repeatedMessages[message.author.id].to = setTimeout(onTimeout, 60000);
+				client.repeatedMessages[message.author.id].timeout = setTimeout(onTimeout, threshold);
 			}
 		}
 	

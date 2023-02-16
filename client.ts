@@ -9,13 +9,13 @@ try {
 } catch(err) {
     importConfig = require('./config.json');
 }
-import { db_punishments_format, global_formatTimeOpt, Config, FSCache, YTCache, Tokens } from './interfaces';
+import { global_formatTimeOpt, Config, FSCache, YTCache, Tokens, repeatedMessages } from './interfaces';
 import { bannedWords, TFstaff, FMstaff, watchList, playerTimes, userLevels, punishments } from "./dbClasses";
 export default class YClient extends Client {
     config: Config; tokens: Tokens;
     embed: typeof Discord.EmbedBuilder; collection: typeof Discord.Collection; messageCollector: typeof Discord.MessageCollector; attachmentBuilder: typeof Discord.AttachmentBuilder; 
     games: Discord.Collection<string, any>; commands: Discord.Collection<string, any>;registery: Array<Discord.ApplicationCommandDataResolvable>;
-    repeatedMessages: any; FSCache: FSCache; YTCache: YTCache; invites: Map<any, any>;
+    repeatedMessages: repeatedMessages; FSCache: FSCache; YTCache: YTCache; invites: Map<any, any>;
     bannedWords: bannedWords; TFstaff: TFstaff; FMstaff: FMstaff; watchList: watchList; playerTimes: playerTimes; userLevels: userLevels; punishments: punishments
     constructor() {
         super({

@@ -82,6 +82,7 @@ export default {
 								activity.state ? '\n**State:** ' + activity.state : '',
 								activity.assets?.largeText ? '\n**Large text:** ' + activity.assets.largeText : ''
 							].join(''))
+							.setThumbnail(activity.applicationId == '383226320970055681' || activity.applicationId == '732565262704050298' ? `https://cdn.discordapp.com/app-assets/${activity.applicationId}/${activity.assets?.largeImage}.png` : '')
 						)
 					}
 				})

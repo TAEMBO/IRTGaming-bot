@@ -22,7 +22,7 @@ export default {
 					interaction.reply({embeds: [embed]}).catch(() => interaction.channel?.send({embeds: [embed]})).then(x => {
 						const filter = (x: any) => x.content === 'stack' && x.author.id === interaction.user.id;
 						const messagecollector = interaction.channel?.createMessageCollector({ filter, max: 1, time: 60000 });
-						messagecollector.on('collect', msg => msg.reply({content: `\`\`\`\n${err.stack}\n\`\`\``, allowedMentions: { repliedUser: false }}));
+						messagecollector?.on('collect', msg => { msg.reply({content: `\`\`\`\n${err.stack}\n\`\`\``, allowedMentions: { repliedUser: false }}) });
 					});
 					return;
 				}

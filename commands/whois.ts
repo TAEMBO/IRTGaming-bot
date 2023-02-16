@@ -80,7 +80,7 @@ export default {
 								`\u200b**Started:** <t:${Math.round(activity.createdTimestamp/1000)}:R>`,
 								activity.details ? '\n**Details:** ' + activity.details : '',
 								activity.state ? '\n**State:** ' + activity.state : '',
-								activity.assets ? '\n**Large text:** ' + activity.assets.largeText : ''
+								activity.assets?.largeText ? '\n**Large text:** ' + activity.assets.largeText : ''
 							].join(''))
 						)
 					}

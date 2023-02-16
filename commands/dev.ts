@@ -4,21 +4,6 @@ import util from 'node:util';
 import fs from 'node:fs';
 import path from 'node:path';
 import { exec } from 'child_process';
-const removeUsername = (text: string) => {
-	let matchesLeft = true;
-	const array = text.split('\\');
-	while (matchesLeft) {
-		let usersIndex = array.indexOf('Users');
-		if (usersIndex < 1) matchesLeft = false;
-		else {
-			let usernameIndex = usersIndex + 1;
-			if (array[usernameIndex].length === 0) usernameIndex += 1;
-			array[usernameIndex] = '#'.repeat(array[usernameIndex].length);
-			array[usersIndex] = 'Us\u200bers';
-		}
-	}
-	return array.join('\\');
-};
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
@@ -27,40 +12,35 @@ export default {
 			eval: async () => {
 				const code = interaction.options.getString("code", true);
 				let output = 'error';
-				let error = false;
 				try {
 					output = await eval(code);
 				} catch (err: any) {
-					error = true;
 					const embed = new client.embed()
 						.setTitle('__Eval__')
 						.addFields({name: 'Input', value: `\`\`\`js\n${code.slice(0, 1010)}\n\`\`\``}, {name: 'Output', value: `\`\`\`\n${err}\n\`\`\``})
 						.setColor("#ff0000");
-					interaction.reply({embeds: [embed]}).catch(() => (interaction.channel as Discord.TextChannel).send({embeds: [embed]})).then(errorEmbedMessage => {
-						const filter = (x: any) => x.content === 'stack' && x.author.id === interaction.user.id
-						const messagecollector = (interaction.channel as Discord.TextChannel).createMessageCollector({ filter, max: 1, time: 60000 });
-						messagecollector.on('collect', collected => {
-							collected.reply({content: `\`\`\`\n${removeUsername(err.stack)}\n\`\`\``, allowedMentions: { repliedUser: false }});
-						});
+					interaction.reply({embeds: [embed]}).catch(() => interaction.channel?.send({embeds: [embed]})).then(x => {
+						const filter = (x: any) => x.content === 'stack' && x.author.id === interaction.user.id;
+						const messagecollector = interaction.channel?.createMessageCollector({ filter, max: 1, time: 60000 });
+						messagecollector.on('collect', msg => msg.reply({content: `\`\`\`\n${err.stack}\n\`\`\``, allowedMentions: { repliedUser: false }}));
 					});
+					return;
 				}
-				if (error) return;
 				if (typeof output === 'object') {
 					output = 'js\n' + util.formatWithOptions({ depth: 1 }, '%O', output);
-				} else {
-					output = '\n' + String(output);
-				}
+				} else output = '\n' + String(output);
+				
 				[client.token, client.tokens.fs.ps.login, client.tokens.fs.pg.login, client.tokens.fs.mf.login, client.tokens.ftp.ps.password, client.tokens.ftp.pg.password].forEach((login) => {
 					output = output.replace(login as string, 'LOGIN_LEAK');
 				});
 				const embed = new client.embed()
 					.setTitle('__Eval__')
-					.addFields({name: 'Input', value:`\`\`\`js\n${code.slice(0, 1010)}\n\`\`\``}, {name: 'Output', value: `\`\`\`${removeUsername(output).slice(0, 1016)}\n\`\`\``})
+					.addFields({name: 'Input', value:`\`\`\`js\n${code.slice(0, 1010)}\n\`\`\``}, {name: 'Output', value: `\`\`\`${output.slice(0, 1016)}\n\`\`\``})
 					.setColor(client.config.embedColor);
-				interaction.reply({embeds: [embed]}).catch(() => (interaction.channel as Discord.TextChannel).send({embeds: [embed]}));
+				interaction.reply({embeds: [embed]}).catch(() => interaction.channel?.send({embeds: [embed]}));
 			},
 			role: () => {
-				const role = interaction.options.getRole("role") as Discord.Role;
+				const role = interaction.options.getRole("role", true);
 				const member = interaction.options.getMember("member") as Discord.GuildMember;
 				let err = false;
 
@@ -70,7 +50,7 @@ export default {
 					member.roles.add(role.id).catch((e) => {interaction.reply(e.message); err = true}).then(()=> {if (!err) interaction.reply('Role added');});
 				}
 			},
-			file: () => interaction.reply({files: [`./databases/${interaction.options.getString('file', true)}.json`]}).catch((e: Error) => interaction.channel?.send(removeUsername(e.message))),
+			file: () => interaction.reply({files: [`./databases/${interaction.options.getString('file', true)}.json`]}).catch((e: Error) => interaction.channel?.send(e.message)),
 			statsgraph: () => {
 				client.FSCache.statsGraph = -(interaction.options.getInteger('number', true));
 				interaction.reply(`Set to \`${client.FSCache.statsGraph}\``);
@@ -84,7 +64,7 @@ export default {
 			restart: () => {
 				client.userLevels.forceSave();
 				client.playerTimes.forceSave();
-				interaction.reply("Restarting...").then(async ()=> exec('pm2 restart IRTBot'));
+				interaction.reply("Restarting...").then(() => exec('pm2 restart IRTBot'));
 			},
 			update: async () => {
 				const msg = await interaction.reply({content: "Pulling from repo...", fetchReply: true});
@@ -114,7 +94,7 @@ export default {
 				fs.writeFileSync(dailyMsgsPath, JSON.stringify(newData));
 				interaction.reply(`<@${member1.id}>'s new total set to \`${newTotal}\``);
 			},
-			logs: () => interaction.reply({files: ['../../.pm2/logs/IRTBot-out-0.log']}).catch((err: Error) => interaction.channel?.send(removeUsername(err.message))),
+			logs: () => interaction.reply({files: ['../../.pm2/logs/IRTBot-out-0.log']}).catch((err: Error) => interaction.channel?.send(err.message)),
 			dz: () => interaction.reply('PC has committed iWoke:tm:').then(() => exec('start C:/WakeOnLAN/WakeOnLanC.exe -w -m Desktop')),
 			presence: () => {
 				function convertType(Type?: number) {

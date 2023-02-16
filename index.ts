@@ -57,7 +57,7 @@ setInterval(async () => {
 	}
 	
 	client.punishments._content.filter((x: db_punishments_format) => (x?.endTime as number) <= now && !x.expired).forEach(async (punishment: db_punishments_format) => {
-		console.log(client.timeLog('\x1b[33m'), `${punishment.member}\'s ${punishment.type} should expire now`);
+		console.log(client.timeLog('\x1b[33m'), `${punishment.member.tag}\'s ${punishment.type} should expire now`);
 		const unpunishResult = await client.punishments.removePunishment(punishment.id, (client.user as Discord.ClientUser).id, "Time\'s up!");
 		console.log(client.timeLog('\x1b[33m'), unpunishResult);
 	});

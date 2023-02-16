@@ -250,7 +250,7 @@ export class punishments extends Database {
 					)
 				]})
 			} else {
-				return `Successfully ${this.getTense(removePunishmentData.type)}d ${User.tag} (${User.id}) for reason '${reason}'`;
+				return `Successfully un${this.getTense(removePunishmentData.type.replace('un', ''))} ${User.tag} (${User.id}) for reason '${reason}'`;
 			}
 
 		}

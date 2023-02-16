@@ -110,7 +110,7 @@ export default async (client: YClient, serverURLdss: string, serverURLcsg: strin
         console.log(client.timeLog('\x1b[31m'), `${serverAcro} csg ${err.message}`);
     }); // Fetch dedicated-server-savegame.html
 
-    if (DSSFetch == undefined || CSGFetch == undefined || CSGFetch.status == 204 || (await DSSFetch?.json()).slots == undefined) { // Blame Red
+    if (DSSFetch == undefined || CSGFetch == undefined || CSGFetch.status == 204) { // Blame Red
         if (CSGFetch?.status == 204) {
             statsEmbed.setImage('https://http.cat/204');
             console.log(client.timeLog('\x1b[31m'), `${serverAcro} csg empty content`);

@@ -58,7 +58,7 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
         Color = client.config.embedColorYellow;
     }
 
-    const data = JSON.parse(fs.readFileSync(path.join(__dirname, `../databases/${serverAcro.toUpperCase()}PlayerData.json`), {encoding: 'utf8'})).slice(client.FSCache.statsGraph);
+    const data = JSON.parse(fs.readFileSync(path.join(__dirname, `../databases/${serverAcro.toUpperCase()}PlayerData.json`), {encoding: 'utf8'})).slice(client.config.statsGraphSize);
 
     // handle negative days
     data.forEach((change: number, i: number) => {
@@ -212,7 +212,7 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
         .setDescription(FSserver.slots.used == 0 ? '*No players online*' : playerInfo.join("\n"))
         .setImage('attachment://FSStats.png')
         .setColor(Color)
-    if (FSserver.slots.players.filter((x)=> x.isAdmin).length == 0 && client.FSCache.servers[serverAcro].lastAdmin) embed.setTimestamp(client.FSCache.servers[serverAcro].lastAdmin).setFooter({text: 'Admin last on'});
+    if (FSserver.slots.players.filter((x)=> x.isAdmin).length == 0 && client.FSCache[serverAcro].lastAdmin) embed.setTimestamp(client.FSCache[serverAcro].lastAdmin).setFooter({text: 'Admin last on'});
 
     interaction.reply({embeds: [embed], files: [Image]}).catch(() => (interaction.channel as Discord.TextChannel).send({embeds: [embed], files: [Image]}));
 }
@@ -221,13 +221,12 @@ export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
         if (['891791005098053682', '729823615096324166'].includes((interaction.channel as Discord.TextChannel).id) && !client.isMPStaff(interaction.member)) return interaction.reply({content: 'This command has [restrictions](https://discord.com/channels/552565546089054218/891791005098053682/991799952084828170) set, please use <#552583841936834560> for `/stats` commands.', ephemeral: true}); 
         const subCmd = interaction.options.getSubcommand() as 'ps' | 'pg' | 'all' | 'playertimes';
-        let failedFooter: Array<string> = [];
 
         if (subCmd === 'all') {
             await interaction.deferReply();
             const embed = new client.embed().setColor(client.config.embedColor);
+            const failedFooter: Array<string> = [];
             const totalCount: Array<number> = [];
-            let sum;
 
             await Promise.all([
                 FSstatsAll(client, client.tokens.fs.ps.dss, embed, totalCount, failedFooter, 'PS'),
@@ -235,16 +234,9 @@ export default {
                 //FSstatsAll(client, client.tokens.mf.dss, embed, totalCount, failedFooter, 'MF')
             ]);
 
-            if (totalCount.length == 0) {
-                sum = 0;
-            } else {
-                sum = totalCount.reduce(function (previousValue, currentValue) {
-                     return previousValue + currentValue;
-                 });
-            }
             if (failedFooter.length != 0) embed.setFooter({text: failedFooter.join(', ')});
 
-            embed.setTitle(`All Servers: ${sum} online`);
+            embed.setTitle(`All Servers: ${totalCount.reduce((a, b) => a + b, 0)} online`);
             interaction.editReply({embeds: [embed]});
         } else if (subCmd === 'playertimes') {
             const player = interaction.options.getString('name');
@@ -265,42 +257,35 @@ export default {
             } else {
                 const playerData = client.playerTimes.getPlayer(player);
                 let resultText;
-                if (!playerData) {
-                    resultText = ` has no logged play time.`;
-                } else {
+
+                if (playerData) {
                     resultText = `'s total time is **${client.formatTime(playerData.time*60*1000, 3, { commas: true, longNames: false })}** and the last time they were on was <t:${playerData.lastOn}:R>.`;
-                }
+                } else resultText = ` has no logged play time.`;
+
                 interaction.reply(`\`${player}\`${resultText}`);
             }
-        } else {
-            FSstats(client, interaction, client.tokens.fs[subCmd].dss, subCmd);
-        }
+        } else FSstats(client, interaction, client.tokens.fs[subCmd].dss, subCmd);
     },
     data: new SlashCommandBuilder()
-    .setName("stats")
-    .setDescription("Gets info on an FS22 server")
-    .addSubcommand((optt)=>optt
-        .setName("all")
-        .setDescription("Server stats for all servers")
-    )
-    .addSubcommand((optt)=>optt
-        .setName("ps")
-        .setDescription("Public Silage server stats")
-    )
-    .addSubcommand((optt)=>optt
-        .setName("pg")
-        .setDescription("Public Grain server stats")
-    )
-    //.addSubcommand((optt)=>optt
-    //    .setName("mf")
-    //    .setDescription("Multi Farm server stats")
-    //)
-    .addSubcommand((optt)=>optt
-        .setName("playertimes")
-        .setDescription("Player time data")
-        .addStringOption((opt)=>opt
-            .setName("name")
-            .setDescription("Fetch total time for a player")
-            .setRequired(false))
-    )
+        .setName("stats")
+        .setDescription("Gets info on an FS22 server")
+        .addSubcommand((optt)=>optt
+            .setName("all")
+            .setDescription("Server stats for all servers"))
+        .addSubcommand((optt)=>optt
+            .setName("ps")
+            .setDescription("Public Silage server stats"))
+        .addSubcommand((optt)=>optt
+            .setName("pg")
+            .setDescription("Public Grain server stats"))
+        //.addSubcommand((optt)=>optt
+        //    .setName("mf")
+        //    .setDescription("Multi Farm server stats"))
+        .addSubcommand((optt)=>optt
+            .setName("playertimes")
+            .setDescription("Player time data")
+            .addStringOption((opt)=>opt
+                .setName("name")
+                .setDescription("Fetch total time for a player")
+                .setRequired(false)))
 };

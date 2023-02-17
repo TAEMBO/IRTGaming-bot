@@ -3,10 +3,12 @@ import YClient from '../client';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
 		if (!client.hasModPerms(interaction.member) && !client.config.devWhitelist.includes(interaction.member.id)) return client.youNeedRole(interaction, "mod");
-		const word = interaction.options.getString("word");
-		if (client.bannedWords._content.includes(word)) return interaction.reply('That word is already added.')
-		client.bannedWords.addData(word).forceSave();
-		interaction.reply(`Successfully added \`${word}\` to bannedWords list`);
+		const word = interaction.options.getString("word", true);
+
+		if (client.bannedWords._content.includes(word)) {
+			client.bannedWords.addData(word).forceSave();
+			interaction.reply(`Successfully added \`${word}\` to bannedWords list`);
+		} else interaction.reply('That word is already added');
 	},
 	data: new SlashCommandBuilder()
 		.setName("addbannedword")

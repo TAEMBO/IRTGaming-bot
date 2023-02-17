@@ -33,17 +33,18 @@ export interface Config {
     embedColor: Discord.ColorResolvable
     embedColorGreen: Discord.ColorResolvable,
     embedColorRed: Discord.ColorResolvable,
-    embedColorYellow: Discord.ColorResolvable
-    botPresence: Discord.PresenceData
+    embedColorYellow: Discord.ColorResolvable,
+    statsGraphSize: number,
+    botPresence: Discord.PresenceData,
     botSwitches: botSwitches,
     devWhitelist: Array<string>,
     watchListPings: Array<string>,
     mainServer: mainServer
 }
 interface botSwitches {
-    commands: boolean
+    commands: boolean,
     automod: boolean,
-    logs: boolean
+    logs: boolean,
     registerCommands: boolean,
     FSLoop: boolean,
     YTLoop: boolean,
@@ -54,13 +55,13 @@ interface botSwitches {
 interface mainServer {
     id: string,
     MPStaffRoles: Array<string>,
-    staffRoles: Array<string>
-    roles: mainServerRoles
+    staffRoles: Array<string>,
+    roles: mainServerRoles,
     channels: mainServerChannels
 
 }
 interface mainServerRoles {
-    [key: string]: string
+    [key: string]: string,
     owner: string,
     mod: string,
     helper: string,
@@ -89,7 +90,7 @@ interface mainServerRoles {
     subscriber: string
 }
 interface mainServerChannels {
-    [key: string]: string
+    [key: string]: string,
     botlogs: string,
     botcommands: string,
     fs22_silage: string,
@@ -105,16 +106,11 @@ interface mainServerChannels {
 }
 
 export interface FSCache {
-    [key: string]: any
-    statsGraph: number
-    servers: FSCacheservers
-
-}
-interface FSCacheservers {
-    [key: string]: FSCacheServer
-    ps: FSCacheServer
+    [key: string]: FSCacheServer,
+    ps: FSCacheServer,
     pg: FSCacheServer
 }
+
 export interface FSCacheServer {
     players: Array<FS_player>,
     status: undefined | "online" | "offline",

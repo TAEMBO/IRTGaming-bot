@@ -3,6 +3,7 @@
 	"embedColorGreen": "#57f287",
 	"embedColorRed": "#e62c3b",
 	"embedColorYellow": "#ffea00",
+	"statsGraphSize": -120,
 	"botPresence": {
 		"activities": [
 			{"name": "IRT's status", "type": 3}

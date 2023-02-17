@@ -12,9 +12,7 @@ export default {
 		interaction.channel?.messages.fetch({limit: amount}).then(async msgs => {
 			if (user) {
 				await interaction.channel?.bulkDelete(msgs.filter(x => x.author.id === user.id));
-			} else {
-				await interaction.channel?.bulkDelete(msgs);
-			}
+			} else await interaction.channel?.bulkDelete(msgs);
 			interaction.reply({content: `Successfully deleted ${user ? msgs.filter(x => x.author.id === user.id).size + ` messages from <@${user.id}>` : amount + ' messages'}.`, ephemeral: true});
 		});
 	},

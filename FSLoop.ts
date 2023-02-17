@@ -15,9 +15,8 @@ function wlEmbed(client: YClient, playerName: string, joinLog: boolean, serverAc
         .setDescription(`\`${playerName}\` ${joinLog ? 'joined' : 'left'} **${serverAcro}** at <t:${now}:t>`);
     if (joinLog) {
         embed.setColor(client.config.embedColorGreen).setFooter({text: `Reason: ${wlReason}`});
-    } else {
-        embed.setColor(client.config.embedColorRed);
-    }
+    } else embed.setColor(client.config.embedColorRed);
+
     return embed;
 }
 
@@ -31,11 +30,9 @@ function logEmbed(client: YClient, player: FS_player, joinLog: boolean, serverAc
 
     if (joinLog) {
         embed.setColor(client.config.embedColorGreen);
-    } else {
-        embed.setColor(client.config.embedColorRed).setFooter({text: `Playtime: ${playTimeHrs}:${playTimeMins}`});
-    }
-    return embed;
+    } else embed.setColor(client.config.embedColorRed).setFooter({text: `Playtime: ${playTimeHrs}:${playTimeMins}`});
 
+    return embed;
 }
 
 function adminCheck(client: YClient, ArrayNew: Array<FS_player>, ArrayOld: Array<FS_player>, serverAcro: string, now: number) {
@@ -168,24 +165,24 @@ export default async (client: YClient, serverURLdss: string, serverURLcsg: strin
     
     // Logs
     if (FSdss.server.name.length === 0) {
-        if (client.FSCache.servers[serverAcro.toLowerCase()].status === 'online') {
+        if (client.FSCache[serverAcro.toLowerCase()].status === 'online') {
             logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now offline`).setColor(client.config.embedColorYellow).setTimestamp()]});
         }
-        client.FSCache.servers[serverAcro.toLowerCase()].status = 'offline';
+        client.FSCache[serverAcro.toLowerCase()].status = 'offline';
     } else {
-        if (client.FSCache.servers[serverAcro.toLowerCase()].status === 'offline') {
+        if (client.FSCache[serverAcro.toLowerCase()].status === 'offline') {
             logChannel.send({embeds: [new client.embed().setTitle(`${serverAcro} now online`).setColor(client.config.embedColorYellow).setTimestamp()]});
             justStarted = true;
         }
-        client.FSCache.servers[serverAcro.toLowerCase()].status = 'online';
+        client.FSCache[serverAcro.toLowerCase()].status = 'online';
     }
 
     if (!justStarted) {
-        adminCheck(client, Players, client.FSCache.servers[serverAcro.toLowerCase()].players, serverAcro, now);
-        log(client, Players, client.FSCache.servers[serverAcro.toLowerCase()].players, wlChannel, logChannel, serverAcro, now);
+        adminCheck(client, Players, client.FSCache[serverAcro.toLowerCase()].players, serverAcro, now);
+        log(client, Players, client.FSCache[serverAcro.toLowerCase()].players, wlChannel, logChannel, serverAcro, now);
         dataPoint(FSdss.slots.used, serverAcro);
-        if (FSdss.slots.players.filter((x)=> x.isAdmin).length > 0) client.FSCache.servers[serverAcro.toLowerCase()].lastAdmin = Date.now();
+        if (FSdss.slots.players.filter(x=>x.isAdmin).length > 0) client.FSCache[serverAcro.toLowerCase()].lastAdmin = Date.now();
 
-        client.FSCache.servers[serverAcro.toLowerCase()].players = Players;
+        client.FSCache[serverAcro.toLowerCase()].players = Players;
     }
 }

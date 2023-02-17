@@ -24,14 +24,11 @@ export default {
 				if (fieldValue.length + row.length > 1024) {
 					embed.addFields({name: '\u200b', value: `\`\`\`\n${fieldValue}\`\`\``});
 					fieldValue = row;
-				} else {
-					fieldValue += row
-				}
+				} else fieldValue += row;
 			});
 			embed.addFields({name: '\u200b', value: `\`\`\`\n${fieldValue}\`\`\``});
-		} else {
-			embed.addFields({name: '\u200b', value: `\`\`\`\n${rows.join('')}\`\`\``});
-		}
+		} else embed.addFields({name: '\u200b', value: `\`\`\`\n${rows.join('')}\`\`\``});
+		
 		embed.addFields(
 			{name: 'Node.js', value: [
 				`**RAM:** ${client.formatBytes(process.memoryUsage().heapTotal, 2, 1000)}**/**${client.formatBytes(os.freemem(), 2, 1024)}`,

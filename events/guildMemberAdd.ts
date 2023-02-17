@@ -23,26 +23,25 @@ export default async (client: YClient, member: Discord.GuildMember) => {
     let usefulChannels = '<:IRTDot:908818924286648350> Our game servers: <#739100711073218611>\n';
     usefulChannels += '<:IRTDot:908818924286648350> Report players: <#825046442300145744>\n';
     usefulChannels += '<:IRTDot:908818924286648350> Come chat with us!: <#552565546093248512>\n';
-    usefulChannels += '<:IRTDot:908818924286648350> Come from our FS22 servers?: <#759874158610874458>'
+    usefulChannels += '<:IRTDot:908818924286648350> Come from our FS22 servers?: <#759874158610874458>';
 
-    const embed0 = new client.embed()
+    (client.channels.resolve(client.config.mainServer.channels.welcome) as Discord.TextChannel).send({content: `<@${member.user.id}>`, embeds: [new client.embed()
         .setTitle(`Welcome, ${member.user.tag}!`)
         .setColor(client.config.embedColor)
         .setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048}) || member.user.defaultAvatarURL)
         .setDescription(`Please familiarize yourself with our <#552590507352653827> and head over to <#922631314195243080> to gain access to more channels & receive notification about community news.`)
         .addFields({name: 'Useful channels', value: usefulChannels})
-        .setFooter({text: `${index}${suffix} member`});
-    (client.channels.resolve(client.config.mainServer.channels.welcome) as Discord.TextChannel).send({content: `<@${member.user.id}>`, embeds: [embed0]})
+        .setFooter({text: `${index}${suffix} member`}) 
+    ]});
 
-    // Normal join log
-    const logChannel = client.channels.resolve(client.config.mainServer.channels.botlogs) as Discord.TextChannel;
+    // Join log
     const oldInvites = client.invites;
     const newInvites = await member.guild.invites.fetch();
-    const usedInvite = newInvites.find((inv: any) => oldInvites.get(inv.code)?.uses < inv.uses);
+    const usedInvite = newInvites.find(inv => oldInvites.get(inv.code)?.uses < (inv.uses as number));
 
-    newInvites.forEach((inv: any) => client.invites.set(inv.code, {uses: inv.uses, creator: inv.inviter.id}));
+    newInvites.forEach(inv => client.invites.set(inv.code, {uses: inv.uses, creator: inv.inviter?.id}));
  
-    const embed1 = new client.embed()
+    (client.channels.resolve(client.config.mainServer.channels.botlogs) as Discord.TextChannel).send({embeds: [new client.embed()
         .setTitle(`Member Joined: ${member.user.tag}`)
         .setDescription(`<@${member.user.id}>\n\`${member.user.id}\``)
         .addFields(
@@ -50,6 +49,6 @@ export default async (client: YClient, member: Discord.GuildMember) => {
             {name: '🔹 Invite Data', value: usedInvite ? `Invite: \`${usedInvite.code}\`\nCreated by: **${usedInvite.inviter?.tag}**` : 'No data found'})
         .setColor(client.config.embedColorGreen)
         .setTimestamp()
-        .setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048}));
-    logChannel.send({embeds: [embed1]});
+        .setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048}))
+    ]});
 }

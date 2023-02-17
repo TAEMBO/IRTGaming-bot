@@ -52,7 +52,7 @@ export default {
 			},
 			file: () => interaction.reply({files: [`./databases/${interaction.options.getString('file', true)}.json`]}).catch((e: Error) => interaction.channel?.send(e.message)),
 			statsgraph: () => {
-				client.FSCache.statsGraph = -(interaction.options.getInteger('number', true));
+				client.config.statsGraphSize = -(interaction.options.getInteger('number', true));
 				interaction.reply(`Set to \`${client.FSCache.statsGraph}\``);
 			},
 			decrement: () => {

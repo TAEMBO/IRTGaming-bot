@@ -5,7 +5,7 @@ import puppeteer from 'puppeteer'; // Credits to Trolly for suggesting this pack
 import FTPClient from 'ftp';
 import fs from 'node:fs';
 import { xml2js } from 'xml-js';
-import { banFormat, farmFormat } from 'interfaces';
+import { banFormat, farmFormat } from '../interfaces';
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
@@ -23,8 +23,8 @@ export default {
                 const browser = await puppeteer.launch();
                 const page = await browser.newPage();
     
-                if (client.FSCache.servers[chosenServer].status == 'offline' && chosenAction == 'stop') return interaction.editReply('Server is already offline');
-                if (client.FSCache.servers[chosenServer].status == 'online' && chosenAction == 'start') return interaction.editReply('Server is already online');
+                if (client.FSCache[chosenServer].status == 'offline' && chosenAction == 'stop') return interaction.editReply('Server is already offline');
+                if (client.FSCache[chosenServer].status == 'online' && chosenAction == 'start') return interaction.editReply('Server is already online');
     
                 try {
                     await page.goto(client.tokens.fs[chosenServer].login, { timeout: 120000 });
@@ -57,7 +57,7 @@ export default {
                 const chosenServer = interaction.options.getString('server', true) as 'ps' | 'pg';
                 const chosenAction = interaction.options.getString('action', true) as 'items.xml' | 'players.xml';
                 
-                if (client.FSCache.servers[chosenServer].status == 'online') return interaction.reply(`You cannot mop files from **${chosenServer.toUpperCase()}** while it is online`);
+                if (client.FSCache[chosenServer].status == 'online') return interaction.reply(`You cannot mop files from **${chosenServer.toUpperCase()}** while it is online`);
                 if (chosenServer != 'pg' && chosenAction == 'items.xml') return interaction.reply(`You can only mop **${chosenAction}** from **PG**`);
                 
                 await interaction.deferReply();
@@ -151,7 +151,7 @@ export default {
                         interaction.editReply('```\n' + Object.entries(playerData._attributes).map(x => x[0].padEnd(18, ' ') + permIcon(x[1])).join('\n') + '```');
                     } else interaction.editReply('No green farm data found with that name');
                 }
-                if (chosenServer == 'pg') { 
+                if (chosenServer == 'pg') {
                     FTP.connect(client.tokens.ftp.pg);
                     FTP.on('ready', () => {
                         FTP.get(client.tokens.ftp.pg.path + 'savegame1/farms.xml', async (err, stream) => {

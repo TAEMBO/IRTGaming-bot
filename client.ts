@@ -2,6 +2,7 @@ import Discord, { Client, GatewayIntentBits, Partials } from "discord.js";
 import fs from "node:fs";
 import moment from 'moment';
 import tokens from './tokens.json';
+import { xml2js } from "xml-js";
 let importConfig: Config
 try { 
     importConfig = require('./test-config.json');
@@ -36,11 +37,8 @@ export default class YClient extends Client {
         this.setMaxListeners(100);
         this.repeatedMessages = {};
         this.FSCache = {
-            statsGraph: -120,
-            servers: {
-                ps: {players: [], status: undefined, lastAdmin: undefined},
-                pg: {players: [], status: undefined, lastAdmin: undefined},
-            }
+            ps: {players: [], status: undefined, lastAdmin: undefined},
+            pg: {players: [], status: undefined, lastAdmin: undefined},
         };
         this.YTCache = {
             'UCQ8k8yTDLITldfWYKDs3xFg': undefined,
@@ -68,17 +66,19 @@ export default class YClient extends Client {
         this.watchList.initLoad();
         this.playerTimes.initLoad().intervalSave().disableSaveNotifs();
 
+        // Event handler
+        fs.readdirSync('./events').forEach((file, index, arr) => {
+    	    const eventFile = require(`./events/${file}`);
+	        this.on(file.replace('.ts', ''), async (...args) => eventFile.default(this, ...args));
+            if (index == (arr.length - 1)) console.log(this.timeLog('\x1b[35m'), 'Event files compiled');
+        });
+
         // Command handler
-        fs.readdirSync("./commands").forEach(file => {
+        fs.readdirSync("./commands").forEach((file, index, arr) => {
             const commandFile = require(`./commands/${file}`);
 	        this.commands.set(commandFile.default.data.name, commandFile);
 	        this.registery.push(commandFile.default.data.toJSON());
-        });
-
-        // Event handler
-        fs.readdirSync('./events').forEach(file => {
-    	    const eventFile = require(`./events/${file}`);
-	        this.on(file.replace('.ts', ''), async (...args) => eventFile.default(this, ...args));
+            if (index == (arr.length - 1)) console.log(this.timeLog('\x1b[35m'), 'Command files compiled');
         });
     }
     hasModPerms = (guildMember: Discord.GuildMember) => this.config.mainServer.staffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
@@ -107,9 +107,7 @@ export default class YClient extends Client {
                 achievedAccuracy++;
                 text += fullTimelengths + (options?.longNames ? (' '+timeName.name+(fullTimelengths === 1 ? '' : 's')) : timeName.name.slice(0, timeName.name === 'month' ? 2 : 1)) + (options?.commas ? ', ' : ' ');
                 integer -= fullTimelengths*timeName.length;
-            } else {
-                break;
-            }
+            } else break;
         }
         if (text.length == 0) text = integer + (options?.longNames ? ' milliseconds' : 'ms') + (options?.commas ? ', ' : '');
         if (options?.commas){
@@ -119,15 +117,13 @@ export default class YClient extends Client {
                 text[text.lastIndexOf(',')] = ' and';
                 text = text.join('');
             }
-        } return text.trim();
+        } return text.trim() as string;
     }
     async YTLoop(YTChannelID: string, YTChannelName: string) {
-        const xjs = require('xml-js');
         let Data: any;
-
         try {
             await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${YTChannelID}`, { signal: AbortSignal.timeout(5000) }).then(async (response) => {
-                Data = xjs.xml2js(await response.text(), {compact: true});
+                Data = xml2js(await response.text(), {compact: true});
             });
         } catch (err) {
             console.log(this.timeLog('\x1b[31m'), `${YTChannelName} YT fail`);
@@ -152,12 +148,12 @@ export default class YClient extends Client {
         return (bytes / Math.pow(k, i)).toFixed(dm) + ' ' + sizes[i];
     }
     async punish(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">, type: string) {
-        if ((!client.hasModPerms(interaction.member as Discord.GuildMember)) || (!['warn', 'mute'].includes(type) && (interaction.member as Discord.GuildMember).roles.cache.has(client.config.mainServer.roles.helper))) return client.youNeedRole(interaction, "mod");
+        if ((!client.hasModPerms(interaction.member)) || (!['warn', 'mute'].includes(type) && interaction.member.roles.cache.has(client.config.mainServer.roles.helper))) return client.youNeedRole(interaction, "mod");
 
-        const time = interaction.options.getString('time') as string;
+        const time = interaction.options.getString('time') ?? undefined;
         const reason = interaction.options.getString('reason') ?? 'Unspecified';
-        const GuildMember = interaction.options.getMember('member') as Discord.GuildMember;
-        const User = interaction.options.getUser('member') as Discord.User;
+        const GuildMember = interaction.options.getMember('member') ?? undefined;
+        const User = interaction.options.getUser('member', true);
 
         if (interaction.user.id == User.id) return interaction.reply(`You cannot ${type} yourself.`);
         if (!GuildMember && type != 'ban') return interaction.reply(`You cannot ${type} someone who is not in the server.`);

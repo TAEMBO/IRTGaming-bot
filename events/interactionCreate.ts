@@ -19,7 +19,7 @@ export default async (client: YClient, interaction: Discord.BaseInteraction) => 
             }
         }
     } else if (interaction.isButton()) {
-        if (interaction.customId.startsWith('reaction-') && client.config.botSwitches.buttonRoles) {
+        if (interaction.customId.startsWith('reaction-') && client.config.botSwitches.buttonRoles) { // Button roles
             const RoleID = interaction.customId.replace('reaction-', '');
 
             if (interaction.member.roles.cache.has(RoleID)) {
@@ -31,7 +31,18 @@ export default async (client: YClient, interaction: Discord.BaseInteraction) => 
                 await interaction.reply({content: `You've been added to <@&${RoleID}>`, ephemeral: true});
                 console.log(client.timeLog('\x1b[35m'), `Added ${RoleID} to ${interaction.user.tag}`);
             }
+        } else if (interaction.customId.startsWith('sub-')) { // Subscriber role verification
+            const args = interaction.customId.replace('sub-', '').split('-');
 
-        } else console.log(client.timeLog('\x1b[35m'), `Filler text, alternate button pressed at ${interaction.message.url}`);
+            if (args[0] == 'yes') {
+                const member = interaction.guild.members.cache.get(args[1]);
+                member?.roles.add(client.config.mainServer.roles.subscriber);
+                interaction.reply('Accepted verification');
+                interaction.message.edit({components: []});
+            } else {
+                interaction.reply('Denied verification');
+                interaction.message.edit({components: []});  
+            }
+        } else console.log(client.timeLog('\x1b[35m'), `Alternate button pressed at ${interaction.message.url}`);
     }
 }

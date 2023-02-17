@@ -18,7 +18,7 @@ export default async (client: YClient, message: Discord.Message) => {
 				.setDescription(`<@${message.author.id}>`)
 				.setAuthor({name: `${message.author.tag} (${message.author.id})`, iconURL: message.author.displayAvatarURL({ extension: 'png'})})
 				.setColor(client.config.embedColor)
-				.addFields({name: 'Message Content', value: message.content.length > 1024 ? message.content.slice(1021) + '...' : message.content + '\u200b'})
+				.addFields({name: 'Message Content', value: message.content.length > 1024 ? message.content.slice(0, 1000) + '...' : message.content + '\u200b'})
 				.addFields({name: 'Roles:', value: guildMemberObject.roles.cache.size > 1 ? guildMemberObject.roles.cache.filter(x => x.id !== client.config.mainServer.id).sort((a, b) => b.position - a.position).map(x => x).join(guildMemberObject.roles.cache.size > 4 ? ' ' : '\n').slice(0, 1024) : 'None'})
 				.setTimestamp()]
 		});

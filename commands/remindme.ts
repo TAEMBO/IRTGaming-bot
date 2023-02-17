@@ -11,11 +11,11 @@ export default {
         
         if (reminderTime) {
             const timeStampInMs = Math.round((Date.now() + reminderTime) / 1000);
-            const remindersDb: Array<Reminder> = JSON.parse(fs.readFileSync('../databases/reminders.json', 'utf8'));
+            const remindersDb: Array<Reminder> = JSON.parse(fs.readFileSync('./databases/reminders.json', 'utf8'));
             const reminderObj = { when: timeStampInMs, what: reminderText, who: interaction.user.id };
 
             remindersDb.push(reminderObj);
-            fs.writeFileSync('../databases/reminders.json', JSON.stringify(remindersDb, null, 2));
+            fs.writeFileSync('./databases/reminders.json', JSON.stringify(remindersDb, null, 2));
 
             console.log(client.timeLog('\x1b[33m'), 'REMINDER CREATE', reminderObj);
             interaction.reply({embeds: [new client.embed()

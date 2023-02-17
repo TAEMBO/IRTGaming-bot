@@ -169,7 +169,7 @@ export default {
 					`Progress: **${memberDifference}/${levelDifference} (${(memberDifference/levelDifference*100).toFixed(2)}%)**`,
 					`Total: **${information.messages}**`
 				].join('\n'))
-				.setColor(client.config.embedColor)
+				.setColor(member.displayColor)
 				.setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048}))
 				.setAuthor({name: `Ranking for ${member.user.tag}`})
 			]});

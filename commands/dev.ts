@@ -53,7 +53,7 @@ export default {
 			file: () => interaction.reply({files: [`./databases/${interaction.options.getString('file', true)}.json`]}).catch((e: Error) => interaction.channel?.send(e.message)),
 			statsgraph: () => {
 				client.config.statsGraphSize = -(interaction.options.getInteger('number', true));
-				interaction.reply(`Set to \`${client.FSCache.statsGraph}\``);
+				interaction.reply(`Set to \`${client.config.statsGraphSize}\``);
 			},
 			decrement: () => {
 				const player = interaction.options.getString('player', true);

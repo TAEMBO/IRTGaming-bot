@@ -1,16 +1,17 @@
 
-import Discord, { SlashCommandBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle} from 'discord.js';
+import Discord, { SlashCommandBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, ReactionUserManager} from 'discord.js';
 import YClient from '../client';
 import puppeteer from 'puppeteer'; // Credits to Trolly for suggesting this package
 import FTPClient from 'ftp';
 import fs from 'node:fs';
-import xjs from 'xml-js';
-import { banFormat, FSCacheServer, FSURLs } from 'interfaces';
+import { xml2js } from 'xml-js';
+import { banFormat, farmFormat } from 'interfaces';
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
         if (!client.isMPStaff(interaction.member)) return client.youNeedRole(interaction, "mpstaff");
         const name = interaction.options.getString('name');
+        const FTP = new FTPClient();
         ({
             server: async () => {
                 if (!interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager)) return client.youNeedRole(interaction, 'mpmanager');
@@ -22,14 +23,13 @@ export default {
                 const browser = await puppeteer.launch();
                 const page = await browser.newPage();
     
-                if (client.FSCache.servers[chosenServer].status == 'offline' && chosenAction== 'stop') return interaction.editReply('Server is already offline');
+                if (client.FSCache.servers[chosenServer].status == 'offline' && chosenAction == 'stop') return interaction.editReply('Server is already offline');
                 if (client.FSCache.servers[chosenServer].status == 'online' && chosenAction == 'start') return interaction.editReply('Server is already online');
     
                 try {
                     await page.goto(client.tokens.fs[chosenServer].login, { timeout: 120000 });
                 } catch (err: any) {
-                    interaction.editReply(err.message);
-                    return;
+                    return interaction.editReply(err.message);
                 }
                 await interaction.editReply(`Connected to dedi panel for **${chosenServer.toUpperCase()}** after **${Date.now() - time}ms**...`);
     
@@ -63,7 +63,6 @@ export default {
                 await interaction.deferReply();
                 const FTPLogin = client.tokens.ftp[chosenServer];
                 const time = Date.now();
-                const FTP = new FTPClient();
     
                 FTP.on('ready', async () => {
                     FTP.delete(FTPLogin.path + `savegame1/${chosenAction}`, async (err) => {
@@ -82,7 +81,6 @@ export default {
                 const chosenAction = interaction.options.getString('action', true) as 'dl' | 'ul';
     
                 await interaction.deferReply();
-                const FTP = new FTPClient();
     
                 if (chosenAction == 'dl') {
                     if (chosenServer == 'pg') {
@@ -110,7 +108,7 @@ export default {
                     const banData = await fetch(banAttachment.url).then((res) => res.text());
                     console.log(client.timeLog('\x1b[33m'), `Discord API; Downloaded ${banAttachment.name}`);
                     try {
-                        data = xjs.xml2js(banData, {compact: true}) as banFormat;
+                        data = xml2js(banData, {compact: true}) as banFormat;
                     } catch (err) {
                         return interaction.editReply(`Canceled: Improper file (not XML)`);
                     }
@@ -128,7 +126,6 @@ export default {
                                     console.log(client.timeLog('\x1b[33m'), 'Uploaded PG bans');
                                     interaction.editReply('Successfully uploaded ban file for PG');
                                 }
-    
                             });
                         });
                     } else {
@@ -136,6 +133,34 @@ export default {
                         interaction.editReply('Successfully uploaded ban file for PS');
                     }
                 }
+            },
+            farm: async () => {
+                await interaction.deferReply();
+                const chosenServer = interaction.options.getString('server', true) as 'ps' | 'pg';
+                const name = interaction.options.getString('name', true);
+                function permIcon(perm: string) {
+                    if (perm == 'true') {
+                        return '✅';
+                    } else if (perm == 'false') {
+                        return '❌';
+                    } else return perm;
+                }
+                function checkPlayer(farmData: farmFormat) {
+                    const playerData = farmData.farms.farm[0].players.player.find(x => x._attributes.lastNickname == name);
+                    if (playerData) {
+                        interaction.editReply('```\n' + Object.entries(playerData._attributes).map(x => x[0].padEnd(18, ' ') + permIcon(x[1])).join('\n') + '```');
+                    } else interaction.editReply('No green farm data found with that name');
+                }
+                if (chosenServer == 'pg') { 
+                    FTP.connect(client.tokens.ftp.pg);
+                    FTP.on('ready', () => {
+                        FTP.get(client.tokens.ftp.pg.path + 'savegame1/farms.xml', async (err, stream) => {
+                            if (err) return interaction.editReply(err.message);
+                            checkPlayer(xml2js(await new Response(stream as any).text(), {compact: true}) as farmFormat);
+                            stream.once('close', ()=>FTP.end());
+                        });
+                    });
+                } else checkPlayer(xml2js(fs.readFileSync('../../Documents/My Games/FarmingSimulator2022/savegame1/farms.xml', 'utf8'), {compact: true}) as farmFormat);
             },
             roles: async () => {
                 if (!interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager)) return client.youNeedRole(interaction, "mpmanager");
@@ -185,114 +210,105 @@ export default {
         } as any)[interaction.options.getSubcommand()]();
 	},
     data: new SlashCommandBuilder()
-    .setName("mp")
-    .setDescription("Manage MP members")
-    .addSubcommand(x=>x
-        .setName('server')
-        .setDescription('Turn a given server on or off')
-        .addStringOption(x=>x
+        .setName("mp")
+        .setDescription("All things multiplayer-related")
+        .addSubcommand(x=>x
             .setName('server')
-            .setDescription('The server to manage')
-            .addChoices(
-                {name: 'Public Silage', value: 'ps'},
-                {name: 'Public Grain', value: 'pg'},
-                {name: 'Multi Farm', value: 'mf'}
-            )
-            .setRequired(true)
-        )
-        .addStringOption(x=>x
-            .setName('action')
-            .setDescription('Start or stop the given server')
-            .addChoices(
-                {name: 'Start', value: 'start'},
-                {name: 'Stop', value: 'stop'}
-            )
-            .setRequired(true)
-        )
-    )
-    .addSubcommand(x=>x
-        .setName('mop')
-        .setDescription('Mop a file from a given server')
-        .addStringOption(x=>x
-            .setName('server')
-            .setDescription('The server to manage')
-            .addChoices(
-                {name: 'Public Silage', value: 'ps'},
-                {name: 'Public Grain', value: 'pg'}
-            )
-            .setRequired(true)
-        )
-        .addStringOption(x=>x
-            .setName('action')
-            .setDescription('The action to perform on the given server')
-            .addChoices(
-                {name: 'Mop players.xml', value: 'players.xml'},
-                {name: 'Mop items.xml', value: 'items.xml'}
-            )
-            .setRequired(true)
-        )
-    )
-    .addSubcommand(x=>x
-        .setName('bans')
-        .setDescription('Manage ban lists for servers')
-        .addStringOption(x=>x
-            .setName('server')
-            .setDescription('The server to manage')
-            .addChoices(
-                {name: 'Public Silage', value: 'ps'},
-                {name: 'Public Grain', value: 'pg'}
-            )
-            .setRequired(true)
-        )
-        .addStringOption(x=>x
-            .setName('action')
-            .setDescription('To download or upload a ban file')
-            .addChoices(
-                {name: 'Download', value: 'dl'},
-                {name: 'Upload', value: 'ul'}
-            )
-            .setRequired(true)
-        )
-        .addAttachmentOption(x=>x
+            .setDescription('Turn a given server on or off')
+            .addStringOption(x=>x
+                .setName('server')
+                .setDescription('The server to manage')
+                .addChoices(
+                    {name: 'Public Silage', value: 'ps'},
+                    {name: 'Public Grain', value: 'pg'},
+                    {name: 'Multi Farm', value: 'mf'})
+                .setRequired(true))
+            .addStringOption(x=>x
+                .setName('action')
+                .setDescription('Start or stop the given server')
+                .addChoices(
+                    {name: 'Start', value: 'start'},
+                    {name: 'Stop', value: 'stop'})
+                .setRequired(true)))
+        .addSubcommand(x=>x
+            .setName('mop')
+            .setDescription('Mop a file from a given server')
+            .addStringOption(x=>x
+                .setName('server')
+                .setDescription('The server to manage')
+                .addChoices(
+                    {name: 'Public Silage', value: 'ps'},
+                    {name: 'Public Grain', value: 'pg'})
+                .setRequired(true))
+            .addStringOption(x=>x
+                .setName('action')
+                .setDescription('The action to perform on the given server')
+                .addChoices(
+                    {name: 'Mop players.xml', value: 'players.xml'},
+                    {name: 'Mop items.xml', value: 'items.xml'})
+                .setRequired(true)))
+        .addSubcommand(x=>x
             .setName('bans')
-            .setDescription('The ban file if uploading')
-            .setRequired(false))
-    )
-    .addSubcommand(x=>x
-        .setName('roles')
-        .setDescription('Give or take MP Staff roles')
-        .addUserOption(x=>x
-            .setName("member")
-            .setDescription("The member to add or remove the role from")
-            .setRequired(true)
-        )
-        .addStringOption(x=>x
-            .setName("role")
-            .setDescription("the role to add or remove")
-            .addChoices(
-                {name: 'Trusted Farmer', value: 'trustedfarmer'},
-                {name: 'Farm Manager', value: 'mpfarmmanager'},
-                {name: 'Public Admin', value: 'mppublicadmin'}
-            )
-            .setRequired(true)
-        )
-    )
-    .addSubcommand(x=>x
-        .setName('fm')
-        .setDescription('Add or remove player names in FM list')
-        .addStringOption(x=>x
-            .setName('name')
-            .setDescription('The player name to add or remove')
-            .setRequired(true)
-        )
-    )
-    .addSubcommand(x=>x
-        .setName('tf')
-        .setDescription('Add or remove player names in TF list')
-        .addStringOption(x=>x
-            .setName('name')
-            .setDescription('The player name to add or remove')
-            .setRequired(true)
-        )
-    )
+            .setDescription('Manage ban lists for servers')
+            .addStringOption(x=>x
+                .setName('server')
+                .setDescription('The server to manage')
+                .addChoices(
+                    {name: 'Public Silage', value: 'ps'},
+                    {name: 'Public Grain', value: 'pg'})
+                .setRequired(true))
+            .addStringOption(x=>x
+                .setName('action')
+                .setDescription('To download or upload a ban file')
+                .addChoices(
+                    {name: 'Download', value: 'dl'},
+                    {name: 'Upload', value: 'ul'})
+                .setRequired(true))
+            .addAttachmentOption(x=>x
+                .setName('bans')
+                .setDescription('The ban file if uploading')
+                .setRequired(false)))
+        .addSubcommand(x=>x
+            .setName('farm')
+            .setDescription('Fetch farm data for a player')
+            .addStringOption(x=>x
+                .setName('server')
+                .setDescription('The server to search on')
+                .addChoices(
+                    {name: 'Public Silage', value: 'ps'},
+                    {name: 'Public Grain', value: 'pg'})
+                .setRequired(true))
+            .addStringOption(x=>x
+                .setName('name')
+                .setDescription('The name of the player to search for')
+                .setRequired(true)))
+        .addSubcommand(x=>x
+            .setName('roles')
+            .setDescription('Give or take MP Staff roles')
+            .addUserOption(x=>x
+                .setName("member")
+                .setDescription("The member to add or remove the role from")
+                .setRequired(true))
+            .addStringOption(x=>x
+                .setName("role")
+                .setDescription("the role to add or remove")
+                .addChoices(
+                    {name: 'Trusted Farmer', value: 'trustedfarmer'},
+                    {name: 'Farm Manager', value: 'mpfarmmanager'},
+                    {name: 'Public Admin', value: 'mppublicadmin'})
+                .setRequired(true)))
+        .addSubcommand(x=>x
+            .setName('fm')
+            .setDescription('Add or remove player names in FM list')
+            .addStringOption(x=>x
+                .setName('name')
+                .setDescription('The player name to add or remove')
+                .setRequired(true)))
+        .addSubcommand(x=>x
+            .setName('tf')
+            .setDescription('Add or remove player names in TF list')
+            .addStringOption(x=>x
+                .setName('name')
+                .setDescription('The player name to add or remove')
+                .setRequired(true)))
 };

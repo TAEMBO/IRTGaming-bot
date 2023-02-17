@@ -281,3 +281,69 @@ interface user {
         displayName: string
     }
 }
+
+export interface farmFormat {
+    _declaration: {
+        _attributes: {
+            version: string,
+            encoding: string,
+            standalone: string
+        }
+    },
+    farms: {
+        farm: [
+            greenFarm,
+            staffFarm,
+            staffFarm
+        ]
+    }
+}
+interface greenFarm {
+    _attributes: {
+        farmId: "1" | "2" | "3" | "4" | "5" | "6",
+        name: string,
+        color: string,
+        loan: string,
+        money: string
+    },
+    players: {
+        player: Array<farmPlayer>
+    }
+}
+interface staffFarm {
+    _attributes: {
+        farmId: "1" | "2" | "3" | "4" | "5" | "6",
+        name: string,
+        color: string,
+        password: string
+        loan: string,
+        money: string
+    },
+    players?: {
+        player: Array<farmPlayer> | farmPlayer
+    }
+}
+interface farmPlayer {
+    _attributes: {
+        uniqueUserId: string,
+        farmManager: "false" | "true",
+        lastNickname: string,
+        timeLastConnected: string,
+        buyVehicle: "false" | "true",
+        sellVehicle: "false" | "true",
+        buyPlaceable: "false" | "true",
+        sellPlaceable: "false" | "true",
+        manageContracts: "false" | "true",
+        radeAnimals: "false" | "true",
+        createFields: "false" | "true",
+        landscaping: "false" | "true",
+        hireAssistant: "false" | "true",
+        resetVehicle: "false" | "true",
+        manageProductions: "false" | "true",
+        cutTrees: "false" | "true",
+        manageRights: "false" | "true",
+        transferMoney: "false" | "true",
+        updateFarm: "false" | "true",
+        manageContracting: "false" | "true"
+    }
+}

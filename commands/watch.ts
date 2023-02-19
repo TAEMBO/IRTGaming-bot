@@ -5,10 +5,10 @@ export default {
         if (!client.isMPStaff(interaction.member)) return client.youNeedRole(interaction, "mpstaff");
 
         const name = interaction.options.getString('username', true);
-        const reason = interaction.options.getString('reason', true);
         const wlData = (client.watchList._content as Array<Array<string>>).find(x => x[0] == name);
         ({
             add: () => {
+                const reason = interaction.options.getString('reason', true);
                 if (!wlData) {
                     client.watchList.addData([name, reason]).forceSave();
                     interaction.reply({content: `Successfully added \`${name}\` with reason \`${reason}\``});

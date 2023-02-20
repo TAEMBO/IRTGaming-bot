@@ -1,11 +1,10 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client';
-import path from 'node:path';
 import fs from 'node:fs';
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
-        const hidden: Array<Array<string>> = JSON.parse(fs.readFileSync(path.join(__dirname, '../databases/hidden.json'), 'utf8'));
+        const hidden: Array<Array<string>> = JSON.parse(fs.readFileSync('./databases/hidden.json', 'utf8'));
         const command = interaction.options.getString('command', true);
         const hiddenCmd = hidden.find(x => x[0] == command);
 

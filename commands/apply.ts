@@ -1,11 +1,11 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
-import { db_userLevels_format } from '../interfaces';
 import YClient from '../client';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
         const applicationLogs = client.channels.resolve('811341461223112714') as Discord.TextChannel;
+        const userData = await client.userLevels._content.findById(interaction.user.id);
         const eligibleTime = (Date.now() - (interaction.member.joinedTimestamp as number)) > 1209600000;
-        const eligibleMsgs = (client.userLevels._content[interaction.user.id] as db_userLevels_format).level > 3;
+        const eligibleMsgs = userData?.level ? userData.level > 3 : false;
         const deniedMsgs: Array<string> = [];
 
         if (!eligibleTime) deniedMsgs.push('be on the Discord server for at least two weeks');

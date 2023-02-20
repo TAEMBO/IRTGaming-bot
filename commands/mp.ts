@@ -190,20 +190,20 @@ export default {
                 }
             },
             fm: () => {
-                if (client.FMstaff._content.includes(name)) {
-                    client.FMstaff.removeData(name, 0, undefined).forceSave();
+                if (client.FMlist._content.includes(name as string)) {
+                    client.FMlist.removeData(name as string).forceSave();
                     interaction.reply(`Successfully removed \`${name}\``);
                 } else {
-                    client.FMstaff.addData(name).forceSave();
+                    client.FMlist.addData(name as string).forceSave();
                     interaction.reply(`Successfully added \`${name}\``);
                 }
             },
             tf: () => {
-                if (client.TFstaff._content.includes(name)) {
-                    client.TFstaff.removeData(name, 0, undefined).forceSave();
+                if (client.TFlist._content.includes(name as string)) {
+                    client.TFlist.removeData(name as string).forceSave();
                     interaction.reply(`Successfully removed \`${name}\``);
                 } else {
-                    client.TFstaff.addData(name).forceSave();
+                    client.TFlist.addData(name as string).forceSave();
                     interaction.reply(`Successfully added \`${name}\``);
                 }
             }

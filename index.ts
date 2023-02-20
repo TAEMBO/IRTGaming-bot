@@ -3,28 +3,28 @@ import YClient from './client';
 import fs from 'node:fs';
 import path from 'node:path';
 import FSLoop from './FSLoop';
-import { db_punishments_format, db_userLevels_format, Reminder } from './interfaces';
+import { Reminder } from './interfaces';
 const client = new YClient();
-client.init();
+client.init().then(() => {
+	console.log(client.config.botSwitches);
+	console.log(client.config.devWhitelist);
 
-console.log(client.config.botSwitches);
-console.log(client.config.devWhitelist);
+	client.on("ready", async () => {
+		await client.guilds.fetch(client.config.mainServer.id).then(async guild => {
+			await guild.members.fetch();
+			setInterval(() => guild.invites.fetch().then(invs=> invs.forEach((inv) => client.invites.set(inv.code, {uses: inv.uses, creator: inv.inviter?.id}))), 500000);
+			if (client.config.botSwitches.registerCommands) guild.commands.set(client.registery).catch(e => console.log(`Couldn't register commands bcuz: ${e}`));
+		});
 
-client.on("ready", async () => {
-	await client.guilds.fetch(client.config.mainServer.id).then(async guild => {
-		await guild.members.fetch();
-		setInterval(() => guild.invites.fetch().then(invs=> invs.forEach((inv) => client.invites.set(inv.code, {uses: inv.uses, creator: inv.inviter?.id}))), 500000);
-		if (client.config.botSwitches.registerCommands) guild.commands.set(client.registery).catch(e => console.log(`Couldn't register commands bcuz: ${e}`));
-	});
-
-	// Playing: 0 & 1, Listening: 2, Watching: 3, N/A: 4, Competing in: 5
-	client.user?.setPresence(client.config.botPresence);
-	setInterval(() => client.user?.setPresence(client.config.botPresence), 1800000);
+		// Playing: 0 & 1, Listening: 2, Watching: 3, N/A: 4, Competing in: 5
+		client.user?.setPresence(client.config.botPresence);
+		setInterval(() => client.user?.setPresence(client.config.botPresence), 1800000);
 	
-	const channel = client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel;
-	await channel.send(`:warning: Bot restarted :warning:\n<@${client.config.devWhitelist[0]}>\n\`\`\`json\n${Object.entries(client.config.botSwitches).map((x)=> `${x[0]}: ${x[1]}`).join('\n')}\`\`\``);
+		const channel = client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel;
+		await channel.send(`:warning: Bot restarted :warning:\n<@${client.config.devWhitelist[0]}>\n\`\`\`json\n${Object.entries(client.config.botSwitches).map((x)=> `${x[0]}: ${x[1]}`).join('\n')}\`\`\``);
 
-	console.log(client.timeLog('\x1b[34m'), `Bot active as ${client.user?.tag}`);
+		console.log(client.timeLog('\x1b[34m'), `Bot active as ${client.user?.tag}`);
+	});
 });
 
 // Error handler
@@ -55,17 +55,18 @@ setInterval(async () => {
 		db.splice(db.findIndex((x: Reminder) => filterLambda(x)), 1);
 		fs.writeFileSync(p, db.length !== 0 ? JSON.stringify(db, null, 2) : '[]');
 	}
-	
-	client.punishments._content.filter((x: db_punishments_format) => (x?.endTime as number) <= now && !x.expired).forEach(async (punishment: db_punishments_format) => {
+
+	const punishments = await client.punishments._content.find({});
+	punishments.filter(x => x.endTime && x.endTime <= now && !x.expired).forEach(async punishment => {
 		console.log(client.timeLog('\x1b[33m'), `${punishment.member.tag}\'s ${punishment.type} should expire now`);
-		const unpunishResult = await client.punishments.removePunishment(punishment.id, (client.user as Discord.ClientUser).id, "Time\'s up!");
+		const unpunishResult = await client.punishments.removePunishment(punishment._id, (client.user as Discord.ClientUser).id, "Time\'s up!");
 		console.log(client.timeLog('\x1b[33m'), unpunishResult);
 	});
 
 	const formattedDate = Math.floor((now - 1667854800000) / 1000 / 60 / 60 / 24);
 	const dailyMsgs = JSON.parse(fs.readFileSync(__dirname + '/databases/dailyMsgs.json', {encoding: 'utf8'}));
 	if (!dailyMsgs.some((x: Array<number>) => x[0] === formattedDate)) {
-		let total = Object.values<db_userLevels_format>(client.userLevels._content).reduce((a, b) => a + b.messages, 0); // sum of all users
+		let total = (await client.userLevels._content.find({})).reduce((a, b) => a + b.messages, 0); // sum of all users
 		const yesterday = dailyMsgs.find((x: Array<number>) => x[0] === formattedDate - 1);
 		if (total < yesterday) { // messages went down
 			total = yesterday;

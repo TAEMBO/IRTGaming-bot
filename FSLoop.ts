@@ -4,7 +4,7 @@ import { FS_careerSavegame, FS_data, FS_player } from "./interfaces";
 import fs from "node:fs";
 
 function dataPoint(slotUsage: number, serverAcro: string) {
-    const DB = JSON.parse(fs.readFileSync(__dirname + `/databases/${serverAcro}PlayerData.json`, {encoding: 'utf8'}));
+    const DB: Array<number> = JSON.parse(fs.readFileSync(__dirname + `/databases/${serverAcro}PlayerData.json`, {encoding: 'utf8'}));
     DB.push(slotUsage);
     fs.writeFileSync(__dirname + `/databases/${serverAcro}PlayerData.json`, JSON.stringify(DB));
 }
@@ -24,8 +24,8 @@ function logEmbed(client: YClient, player: FS_player, joinLog: boolean, serverAc
     const playTimeHrs = Math.floor(player.uptime / 60);
     const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
     let decorators = player.isAdmin ? ':detective:' : ''; // Tag for if player is admin
-    decorators += client.FMstaff._content.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
-    decorators += client.TFstaff._content.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
+    decorators += client.FMlist._content.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
+    decorators += client.TFlist._content.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
     const embed = new client.embed().setDescription(`\`${player.name}\`${decorators} ${joinLog ? 'joined': 'left'} **${serverAcro}** at <t:${now}:t>`);
 
     if (joinLog) {
@@ -36,11 +36,11 @@ function logEmbed(client: YClient, player: FS_player, joinLog: boolean, serverAc
 }
 
 function adminCheck(client: YClient, ArrayNew: Array<FS_player>, ArrayOld: Array<FS_player>, serverAcro: string, now: number) {
-    const Whitelist = JSON.parse(fs.readFileSync(__dirname + '/databases/adminWhitelist.json', {encoding: 'utf8'}));
+    const Whitelist: Array<string> = JSON.parse(fs.readFileSync(__dirname + '/databases/adminWhitelist.json', 'utf8'));
 
     ArrayNew.filter(x => {
         !ArrayOld.some(y => {
-            if (y.name === x.name && !y.isAdmin && x.isAdmin && !Whitelist.includes(x.name) && !client.FMstaff._content.includes(x.name)) {
+            if (y.name === x.name && !y.isAdmin && x.isAdmin && !Whitelist.includes(x.name) && !client.FMlist._content.includes(x.name)) {
                 (client.channels.resolve('830916009107652630') as Discord.TextChannel).send({embeds: [
                     new client.embed()
                         .setTitle('UNKNOWN ADMIN LOGIN')
@@ -51,15 +51,15 @@ function adminCheck(client: YClient, ArrayNew: Array<FS_player>, ArrayOld: Array
     });
 }
 
-function log(client: YClient, ArrayNew: Array<FS_player>, ArrayOld: Array<FS_player>, wlChannel: Discord.TextChannel, logChannel: Discord.TextChannel, serverAcro: string, now: number) {
+async function log(client: YClient, ArrayNew: Array<FS_player>, ArrayOld: Array<FS_player>, wlChannel: Discord.TextChannel, logChannel: Discord.TextChannel, serverAcro: string, now: number) {
     // Filter for players leaving
     const missingElementsLeave = ArrayOld.filter(x => !ArrayNew.some(y => y.name === x.name)); // Filter names that were in the first fetch but not the second. Thanks to LebSter#0617 for this on The Coding Den Discord server
     for (const x of missingElementsLeave) {
-        const inWl = client.watchList._content.find((y: Array<string>) => y[0] == x.name);
-        if (inWl) wlChannel.send({embeds: [wlEmbed(client, inWl[0], false, serverAcro, now)]}); // Hopefully that person got banned
+        const inWl = await client.watchList._content.findById(x.name);
+        if (inWl) wlChannel.send({embeds: [wlEmbed(client, inWl._id, false, serverAcro, now)]}); // Hopefully that person got banned
         
         if (x.uptime > 0) client.playerTimes.addPlayerTime(x.name, x.uptime); // Add playerTimes data
-        logChannel.send({embeds: [logEmbed(client, x, false, serverAcro, now)]})
+        logChannel.send({embeds: [logEmbed(client, x, false, serverAcro, now)]});
     }
                 
     // Filter for players joining
@@ -70,12 +70,12 @@ function log(client: YClient, ArrayNew: Array<FS_player>, ArrayOld: Array<FS_pla
         playerObj = ArrayNew.filter(y => !ArrayOld.some(z => z.name === y.name));
     }
  
-    if (playerObj) playerObj.forEach(x => {
-        const inWl = client.watchList._content.find((y: Array<string>) => y[0] == x.name);
+    if (playerObj) playerObj.forEach(async x => {
+        const inWl = await client.watchList._content.findById(x.name);
         const guild = client.guilds.cache.get(client.config.mainServer.id) as Discord.Guild;
         if (client.config.mainServer.id == '552565546089054218') {
             const filterWLPings = client.config.watchListPings.filter((x) => !(guild.members.cache.get(x) as Discord.GuildMember).roles.cache.has(client.config.mainServer.roles.loa)).map(x=>`<@${x}>`).join(" ");
-            if (inWl) wlChannel.send({content: filterWLPings, embeds: [wlEmbed(client, inWl[0], true, serverAcro, now, inWl[1])]}); // Oh no, go get em Toast
+            if (inWl) wlChannel.send({content: filterWLPings, embeds: [wlEmbed(client, inWl._id, true, serverAcro, now, inWl.reason)]}); // Oh no, go get em Toast
         }
         logChannel.send({embeds: [logEmbed(client, x, true, serverAcro, now)]});
     });
@@ -119,14 +119,15 @@ export default async (client: YClient, serverURLdss: string, serverURLcsg: strin
     const FSdss = await DSSFetch.json() as FS_data;
     const FScsg = xjs.xml2js(await CSGFetch.text(), {compact: true}).careerSavegame as FS_careerSavegame;
     const Players = FSdss.slots.players.filter(x=>x.isUsed);
+    const watchList = await client.watchList._content.find({});
 
-    Players.forEach(player => {
+    Players.forEach(async player => {
         const playTimeHrs = Math.floor(player.uptime / 60);
         const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
-        const inWl = client.watchList._content.find((y: Array<string>) => y[0] == player.name);
+        const inWl = watchList.some(x => x._id === player.name);
         let decorators = player.isAdmin ? ':detective:' : ''; // Tag for if player is admin
-        decorators += client.FMstaff._content.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
-        decorators += client.TFstaff._content.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
+        decorators += client.FMlist._content.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
+        decorators += client.TFlist._content.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
         decorators += inWl ? '⛔' : ''; // Tag for if player is on watchList
 
         playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);

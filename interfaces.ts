@@ -1,26 +1,25 @@
 import Discord from 'discord.js';
 
 export interface Tokens {
-    token: string
-    ftp: FTPServers
-    fs: FSServers
+    token: string,
+    mongoURL: string
+    ftp: {
+        [key: string]: FTPLogins
+        ps: FTPLogins
+        pg: FTPLogins
+        test: FTPLogins
+    }
+    fs: {
+        ps: FSURLs
+        pg: FSURLs
+        mf: FSURLs
+        test: FSURLs
+    }
 }
-interface FSServers {
-    ps: FSURLs
-    pg: FSURLs
-    mf: FSURLs
-    test: FSURLs
-}
-export interface FSURLs {
+interface FSURLs {
     login: string,
     dss: string,
     csg: string
-}
-interface FTPServers {
-    [key: string]: FTPLogins
-    ps: FTPLogins
-    pg: FTPLogins
-    test: FTPLogins
 }
 interface FTPLogins {
     host: string,
@@ -36,73 +35,68 @@ export interface Config {
     embedColorYellow: Discord.ColorResolvable,
     statsGraphSize: number,
     botPresence: Discord.PresenceData,
-    botSwitches: botSwitches,
+    botSwitches: {
+        commands: boolean,
+        automod: boolean,
+        logs: boolean,
+        registerCommands: boolean,
+        FSLoop: boolean,
+        YTLoop: boolean,
+        autoResponses: boolean,
+        buttonRoles: boolean,
+        errorNotify: boolean
+    },
     devWhitelist: Array<string>,
     watchListPings: Array<string>,
-    mainServer: mainServer
-}
-interface botSwitches {
-    commands: boolean,
-    automod: boolean,
-    logs: boolean,
-    registerCommands: boolean,
-    FSLoop: boolean,
-    YTLoop: boolean,
-    autoResponses: boolean,
-    buttonRoles: boolean,
-    errorNotify: boolean
-}
-interface mainServer {
-    id: string,
-    MPStaffRoles: Array<string>,
-    staffRoles: Array<string>,
-    roles: mainServerRoles,
-    channels: mainServerChannels
-
-}
-interface mainServerRoles {
-    [key: string]: string,
-    owner: string,
-    mod: string,
-    helper: string,
-    mpmanager: string,
-    mpadmin: string,
-    mppublicadmin: string,
-    mpfarmmanager: string,
-    trustedfarmer: string,
-    mpstaff: string,
-    mpmanagement: string,
-    loa: string,
-    mfmanager: string,
-    mffarmowner: string,
-    mfmember: string,
-    mffarm1: string,
-    mffarm2: string,
-    mffarm3: string,
-    mffarm4: string,
-    mffarm5: string,
-    mffarm6: string,
-    mffarm7: string,
-    mffarm8: string,
-    mffarm9: string,
-    mffarm10: string,
-    mffarm11: string,
-    subscriber: string
-}
-interface mainServerChannels {
-    [key: string]: string,
-    botlogs: string,
-    botcommands: string,
-    fs22_silage: string,
-    fs22_grain: string,
-    welcome: string,
-    testing_zone: string,
-    suggestions: string,
-    staffreports: string,
-    fslogs: string,
-    playercheck: string,
-    watchlist: string,
-    vidsandstreams: string
+    mainServer: {
+        id: string,
+        MPStaffRoles: Array<string>,
+        staffRoles: Array<string>,
+        roles: {
+            [key: string]: string,
+            owner: string,
+            mod: string,
+            helper: string,
+            mpmanager: string,
+            mpadmin: string,
+            mppublicadmin: string,
+            mpfarmmanager: string,
+            trustedfarmer: string,
+            mpstaff: string,
+            mpmanagement: string,
+            loa: string,
+            mfmanager: string,
+            mffarmowner: string,
+            mfmember: string,
+            mffarm1: string,
+            mffarm2: string,
+            mffarm3: string,
+            mffarm4: string,
+            mffarm5: string,
+            mffarm6: string,
+            mffarm7: string,
+            mffarm8: string,
+            mffarm9: string,
+            mffarm10: string,
+            mffarm11: string,
+            subscriber: string
+        },
+        channels: {
+            [key: string]: string,
+            botlogs: string,
+            botcommands: string,
+            fs22_silage: string,
+            fs22_grain: string,
+            welcome: string,
+            testing_zone: string,
+            suggestions: string,
+            staffreports: string,
+            fslogs: string,
+            playercheck: string,
+            watchlist: string,
+            vidsandstreams: string
+        }
+    }
 }
 
 export interface FSCache {
@@ -121,19 +115,10 @@ export interface YTCache {
     [key: string]: undefined | string
 }
 
-export interface global_formatTimeOpt {
-    longNames: boolean,
-    commas: boolean
-}
-
-export interface db_punishments_passthruOpt {
-	time?: string,
-	interaction?: Discord.ChatInputCommandInteraction<"cached">
-}
-export interface db_punishments_format {
-    id: number;
+export interface Punishment {
+    _id: number;
     type: string;
-    member: db_punishments_format_member;
+    member: { tag: string, _id: string };
     moderator: string;
     expired?: boolean;
     time: number;
@@ -142,27 +127,9 @@ export interface db_punishments_format {
     cancels?: number;
     duration?: number;
 }
-export interface db_punishments_format_member {
-    tag: string
-    id: string
-}
-export interface db_userLevels_format {
-    messages: number,
-    level: number
-}
-export interface db_playerTimes_format {
-    time: number;
-    lastOn: number
-}
 
-export interface FSdss_serverName {
-    data: FS_data
-}
 export interface FS_data {
-    server: FS_server,
-    slots: FS_slots
-}
-export interface FS_server {
+    server: {
         dayTime: number,
         game: string,
         mapName: string,
@@ -172,86 +139,78 @@ export interface FS_server {
         name: string,
         server: string,
         version: string
+    },
+    slots: {
+        capacity: number,
+        used: number,
+        players: Array<FS_player>
+    }
 }
-export interface FS_slots {
-    capacity: number,
-    used: number,
-    players: Array<FS_player>
-}
+
 export interface FS_player {
     isUsed: boolean,
     isAdmin: boolean,
     uptime: number,
     name: string
 }
-export interface FS_csg {
-    careerSavegame: FS_careerSavegame
-}
 
 export interface FS_careerSavegame {
-    settings: FS_careerSavegame_settings
-    statistics: FS_careerSavegame_statistics
-    slotSystem: FS_careerSavegame_slotSystem
-}
-export interface FS_careerSavegame_settings {
-    savegameName: XMLtext,
-    creationDate: XMLtext,
-    mapId: XMLtext,
-    mapTitle: XMLtext,
-    saveDateFormatted: XMLtext,
-    saveDate: XMLtext,
-    resetVehicles: XMLtext,
-    trafficEnabled: XMLtext,
-    stopAndGoBraking: XMLtext,
-    trailerFillLimit: XMLtext,
-    automaticMotorStartEnabled: XMLtext,
-    growthMode: XMLtext,
-    fixedSeasonalVisuals: XMLtext,
-    plannedDaysPerPeriod: XMLtext,
-    fruitDestruction: XMLtext,
-    plowingRequiredEnabled: XMLtext,
-    stonesEnabled: XMLtext,
-    weedsEnabled: XMLtext,
-    limeRequired: XMLtext,
-    isSnowEnabled: XMLtext,
-    fuelUsage: XMLtext,
-    helperBuyFuel: XMLtext,
-    helperBuySeeds: XMLtext,
-    helperBuyFertilizer: XMLtext,
-    helperSlurrySource: XMLtext,
-    helperManureSource: XMLtext,
-    densityMapRevision: XMLtext,
-    terrainTextureRevision: XMLtext,
-    terrainLodTextureRevision: XMLtext,
-    splitShapesRevision: XMLtext,
-    tipCollisionRevision: XMLtext,
-    placementCollisionRevision: XMLtext,
-    navigationCollisionRevision: XMLtext,
-    mapDensityMapRevision: XMLtext,
-    mapTerrainTextureRevision: XMLtext,
-    mapTerrainLodTextureRevision: XMLtext,
-    mapSplitShapesRevision: XMLtext,
-    mapTipCollisionRevision: XMLtext,
-    mapPlacementCollisionRevision: XMLtext,
-    mapNavigationCollisionRevision: XMLtext,
-    difficulty: XMLtext,
-    economicDifficulty: XMLtext,
-    dirtInterval: XMLtext,
-    timeScale: XMLtext,
-    autoSaveInterval: XMLtext
-}
-export interface FS_careerSavegame_statistics {
-    money: XMLtext
-    playTime: XMLtext
-}
-export interface FS_careerSavegame_slotSystem {
-    _attributes: slotUsage
-}
-interface slotUsage {
-    slotUsage: string
-}
-interface XMLtext {
-    _text: string
+    settings: {
+        savegameName: { _text: string },
+        creationDate: { _text: string },
+        mapId: { _text: string },
+        mapTitle: { _text: string },
+        saveDateFormatted: { _text: string },
+        saveDate: { _text: string },
+        resetVehicles: { _text: "true" | "false" },
+        trafficEnabled: { _text: "true" | "false" },
+        stopAndGoBraking: { _text: "true" | "false" },
+        trailerFillLimit: { _text: "true" | "false" },
+        automaticMotorStartEnabled: { _text: "true" | "false" },
+        growthMode: { _text: "1" | "2" | "3" },
+        fixedSeasonalVisuals: { _text: string },
+        plannedDaysPerPeriod: { _text: string },
+        fruitDestruction: { _text: "true" | "fase" },
+        plowingRequiredEnabled: { _text: "true" | "fase" },
+        stonesEnabled: { _text: "true" | "false" },
+        weedsEnabled: { _text: "true" | "false" },
+        limeRequired: { _text: "true" | "false" },
+        isSnowEnabled: { _text: "true" | "false" },
+        fuelUsage: { _text: string },
+        helperBuyFuel: { _text: "true" | "false" },
+        helperBuySeeds: { _text: "true" | "false" },
+        helperBuyFertilizer: { _text: "true" | "false" },
+        helperSlurrySource: { _text: string },
+        helperManureSource: { _text: string },
+        densityMapRevision: { _text: string },
+        terrainTextureRevision: { _text: string },
+        terrainLodTextureRevision: { _text: string },
+        splitShapesRevision: { _text: string },
+        tipCollisionRevision: { _text: string },
+        placementCollisionRevision: { _text: string },
+        navigationCollisionRevision: { _text: string },
+        mapDensityMapRevision: { _text: string },
+        mapTerrainTextureRevision: { _text: string },
+        mapTerrainLodTextureRevision: { _text: string },
+        mapSplitShapesRevision: { _text: string },
+        mapTipCollisionRevision: { _text: string },
+        mapPlacementCollisionRevision: { _text: string },
+        mapNavigationCollisionRevision: { _text: string },
+        difficulty: { _text: string },
+        economicDifficulty: { _text: string },
+        dirtInterval: { _text: string },
+        timeScale: { _text: string },
+        autoSaveInterval: { _text: string }
+    }
+    statistics: {
+        money: { _text: string }
+        playTime: { _text: string }
+    }
+    slotSystem: {
+        _attributes: {
+            slotUsage: string
+        }
+    }
 }
 
 export interface Reminder {
@@ -266,15 +225,14 @@ export interface repeatedMessages {
 
 export interface banFormat {
     blockedUserIds: {
-        user: Array<user>
-    }
-}
-interface user {
-    _attributes: {
-        uniqueUserId: string,
-        platformUserId: string,
-        platformId: string,
-        displayName: string
+        user: Array<{
+            _attributes: {
+                uniqueUserId: string,
+                platformUserId: string,
+                platformId: string,
+                displayName: string
+            }  
+        }>
     }
 }
 

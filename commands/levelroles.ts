@@ -1,18 +1,16 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client';
-import { db_userLevels_format } from '../interfaces';
-import path from 'node:path';
 import fs from 'node:fs';
 import canvas from 'canvas';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
 		const subCmd = interaction.options.getSubcommand();
+		const allData = await client.userLevels._content.find({});
 
 		if (subCmd === "leaderboard") {
-			const messageCountsTotal = Object.values<db_userLevels_format>(client.userLevels._content).reduce((a, b) => a + b.messages, 0);
+			const messageCountsTotal = allData.reduce((a, b) => a + b.messages, 0);
 
-			const dailyMsgsPath = path.join(__dirname, '../databases/dailyMsgs.json');
-			const data = JSON.parse(fs.readFileSync(dailyMsgsPath, {encoding: 'utf8'})).map((x: Array<number>, i: number, a: any) => {
+			const data = JSON.parse(fs.readFileSync('./databases/dailyMsgs.json', 'utf8')).map((x: Array<number>, i: number, a: any) => {
 				const yesterday = a[i - 1] || [];
 				return x[1] - (yesterday[1] || x[1]);
 			}).slice(1).slice(-60);
@@ -133,13 +131,15 @@ export default {
 			const tx = graphOrigin[0] + (textSize / 2);
 			const ty = graphOrigin[1] + graphSize[1] + (textSize);
 			ctx.fillText('time ->', tx, ty);
+
+			const topUsers = allData.sort((a, b) => b.messages - a.messages).slice(0, 10).map((x, i) => `\`${i + 1}.\` <@${x._id}>: ${x.messages.toLocaleString('en-US')}`).join('\n');
 			
 			interaction.reply({
 				files: [new client.attachmentBuilder(img.toBuffer(), {name: "dailymsgs.png"})],
 				embeds: [new client.embed()
 					.setTitle('Ranking leaderboard')
 					.setDescription(`A total of **${messageCountsTotal.toLocaleString('en-US')}** messages have been recorded in this server.`)
-					.addFields({name: 'Top users by messages sent:', value: Object.entries<db_userLevels_format>(client.userLevels._content).sort((a, b) => b[1].messages - a[1].messages).slice(0, 10).map((x, i) => `\`${i + 1}.\` <@${x[0]}>: ${x[1].messages.toLocaleString('en-US')}`).join('\n')})
+					.addFields({name: 'Top users by messages sent:', value: topUsers})
 					.setImage('attachment://dailymsgs.png')
 					.setColor(client.config.embedColor)]
 			});
@@ -149,25 +149,25 @@ export default {
 			const member = interaction.options.getMember("member") ?? interaction.member;
 
 			// information about users progress on level roles
-			const information = client.userLevels._content[member.user.id];
+			const userData = await client.userLevels._content.findById(member.user.id);
 		
 			const pronounBool = (you: string, they: string) => { // takes 2 words and chooses which to use based on if user did this command on themself
 				if (interaction.user.id === member.user.id) return you || true;
 				else return they || false;
 			};
 
-			if (!information) return interaction.reply(`${pronounBool('You', 'They')} currently don't have a level, send some messages to level up.`);
+			if (!userData) return interaction.reply(`${pronounBool('You', 'They')} currently don't have a level, send some messages to level up.`);
 		
-			const index = Object.entries<db_userLevels_format>(client.userLevels._content).sort((a, b) => b[1].messages - a[1].messages).map(x => x[0]).indexOf(member.id) + 1;
-			const memberDifference = information.messages - client.userLevels.algorithm(information.level);
-			const levelDifference = client.userLevels.algorithm(information.level+1) - client.userLevels.algorithm(information.level);
+			const index = allData.sort((a, b) => b.messages - a.messages).map(x => x._id).indexOf(member.id) + 1;
+			const memberDifference = userData.messages - client.userLevels.algorithm(userData.level);
+			const levelDifference = client.userLevels.algorithm(userData.level+1) - client.userLevels.algorithm(userData.level);
 
 			interaction.reply({embeds: [new client.embed()
 				.setTitle([
-					`Level: **${information.level}**`,
+					`Level: **${userData.level}**`,
 					`Rank: **${index ? '#' + index  : 'last'}**`,
 					`Progress: **${memberDifference}/${levelDifference} (${(memberDifference/levelDifference*100).toFixed(2)}%)**`,
-					`Total: **${information.messages}**`
+					`Total: **${userData.messages}**`
 				].join('\n'))
 				.setColor(member.displayColor)
 				.setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048}))

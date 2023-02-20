@@ -5,18 +5,19 @@ export default {
         if (!client.isMPStaff(interaction.member)) return client.youNeedRole(interaction, "mpstaff");
 
         const name = interaction.options.getString('username', true);
-        const wlData = (client.watchList._content as Array<Array<string>>).find(x => x[0] == name);
+        
+        const wlData = await client.watchList._content.findById(name);
         ({
-            add: () => {
+            add: async () => {
                 const reason = interaction.options.getString('reason', true);
                 if (!wlData) {
-                    client.watchList.addData([name, reason]).forceSave();
+                    await client.watchList._content.create({_id: name, reason});
                     interaction.reply({content: `Successfully added \`${name}\` with reason \`${reason}\``});
-                } else interaction.reply(`\`${wlData[0]}\` already exists on watchList for reason \`${wlData[1]}\``);
+                } else interaction.reply(`\`${name}\` already exists for reason \`${wlData.reason}\``);
             },
-            remove: () => {
+            remove: async () => {
                 if (wlData) {
-                    client.watchList.removeData(name, 1, 0).forceSave();
+                    await client.watchList._content.findByIdAndDelete(name);
                     interaction.reply(`Successfully removed \`${name}\` from watchList`);
                 } else interaction.reply(`\`${name}\` doesn't exist on watchList`);
             }

@@ -1,14 +1,13 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client';
 import fs from 'node:fs';
-import path from 'node:path';
 import canvas from 'canvas';
-import { db_playerTimes_format, FSURLs, FS_data} from '../interfaces'
+import { FS_data } from '../interfaces';
 
 async function FSstatsAll(client: YClient, serverURLdss: string, embed: Discord.EmbedBuilder, totalCount: Array<number>, failedFooter: Array<string>, serverAcro: string) {
     let serverName;
     try {
-        serverName = await fetch(serverURLdss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': 'IRTBot/StatsAll' } });
+        serverName = await fetch(serverURLdss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': 'FSG Stats' } });
     } catch (err) {
         console.log(client.timeLog('\x1b[31m'), `Stats all; ${serverAcro} failed`);
         failedFooter.push(`Failed to fetch ${serverAcro}`);
@@ -19,22 +18,21 @@ async function FSstatsAll(client: YClient, serverURLdss: string, embed: Discord.
     if (DSSFetch.slots.used !== 0) {
         totalCount.push(DSSFetch.slots.used)
         const playerInfo: Array<string> = [];
+        const watchList = await client.watchList._content.find({});
 
-        DSSFetch.slots.players.filter((x)=>x.isUsed).forEach((player) => {
+        DSSFetch.slots.players.filter(x=>x.isUsed).forEach(player => {
             const playTimeHrs = Math.floor(player.uptime / 60);
             const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
-            const inWl = client.watchList._content.find((y: Array<string>) => y[0] == player.name);
+            const inWl = watchList.some(x => x._id === player.name);
             let decorators = player.isAdmin ? ':detective:' : ''; // Tag for if player is admin
-            decorators += client.FMstaff._content.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
-            decorators += client.TFstaff._content.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
+            decorators += client.FMlist._content.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
+            decorators += client.TFlist._content.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
             decorators += inWl ? '⛔' : ''; // Tag for if player is on watchList
 
             playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
         })
         const serverSlots = `${DSSFetch.slots.used}/${DSSFetch.slots.capacity}`;
-        const serverTimeHrs = Math.floor(DSSFetch.server.dayTime / 3600 / 1000).toString().padStart(2, '0');
-        const serverTimeMins = Math.floor((DSSFetch.server.dayTime / 60 / 1000) % 60).toString().padStart(2, '0');
-        embed.addFields({name: `${DSSFetch.server.name.replace('! ! IRTGaming|', '')} - ${serverSlots} - ${serverTimeHrs}:${serverTimeMins}`, value: `${playerInfo.join("\n")}`})
+        embed.addFields({name: `${DSSFetch.server.name.replace('! ! IRTGaming|', '')} - ${serverSlots}`, value: `${playerInfo.join("\n")}`, inline: true})
     }
 }
 async function FSstats(client: YClient, interaction: Discord.CommandInteraction, serverURLdss: string, serverAcro: string) {
@@ -58,7 +56,7 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
         Color = client.config.embedColorYellow;
     }
 
-    const data = JSON.parse(fs.readFileSync(path.join(__dirname, `../databases/${serverAcro.toUpperCase()}PlayerData.json`), {encoding: 'utf8'})).slice(client.config.statsGraphSize);
+    const data: Array<number> = JSON.parse(fs.readFileSync(`./databases/${serverAcro.toUpperCase()}PlayerData.json`, 'utf8')).slice(client.config.statsGraphSize);
 
     // handle negative days
     data.forEach((change: number, i: number) => {
@@ -121,10 +119,7 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
     // draw points
     ctx.lineWidth = 5;
 
-
-    function getYCoordinate(value: number) {
-        return ((1 - (value / second_graph_top)) * graphSize[1]) + graphOrigin[1];
-    }
+    const getYCoordinate = (value: number) => ((1 - (value / second_graph_top)) * graphSize[1]) + graphOrigin[1];
     
     const gradient = ctx.createLinearGradient(0, graphOrigin[1], 0, graphOrigin[1] + graphSize[1]);
     gradient.addColorStop(1 / 16, client.config.embedColorRed as string);
@@ -191,13 +186,15 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
     const ty = graphOrigin[1] + graphSize[1] + (textSize);
     ctx.fillText('time ->', tx, ty);
 
-    FSserver.slots.players.filter((x) => x.isUsed).forEach((player) => {
+    const watchList = await client.watchList._content.find({});
+
+    FSserver.slots.players.filter(x=>x.isUsed).forEach(player => {
         const playTimeHrs = Math.floor(player.uptime / 60);
         const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
-        const inWl = client.watchList._content.find((y: Array<string>) => y[0] == player.name);
+        const inWl = watchList.some(x => x._id === player.name);
         let decorators = player.isAdmin ? ':detective:' : ''; // Tag for if player is admin
-        decorators += client.FMstaff._content.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
-        decorators += client.TFstaff._content.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
+        decorators += client.FMlist._content.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
+        decorators += client.TFlist._content.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
         decorators += inWl ? '⛔' : ''; // Tag for if player is on watchList
 
         playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
@@ -231,7 +228,7 @@ export default {
             await Promise.all([
                 FSstatsAll(client, client.tokens.fs.ps.dss, embed, totalCount, failedFooter, 'PS'),
                 FSstatsAll(client, client.tokens.fs.pg.dss, embed, totalCount, failedFooter, 'PG'),
-                //FSstatsAll(client, client.tokens.mf.dss, embed, totalCount, failedFooter, 'MF')
+                FSstatsAll(client, client.tokens.fs.mf.dss, embed, totalCount, failedFooter, 'MF')
             ]);
 
             if (failedFooter.length != 0) embed.setFooter({text: failedFooter.join(', ')});
@@ -242,20 +239,20 @@ export default {
             const player = interaction.options.getString('name');
             
             if (!player) {
-                const playerTimesData = Object.entries<db_playerTimes_format>(client.playerTimes._content).sort((a, b) => (b[1].time as number) - (a[1].time as number)).slice(0, 20);
+                const playerTimesData = (await client.playerTimes._content.find({})).sort((a, b) => b.time - a.time).slice(0, 20);
                 const leaderboard = playerTimesData.map((x, i) => [
-                    `**${i + 1}.** \`${x[0]}\``,
-                    client.FMstaff._content.includes(x[0]) ? ':farmer:' : '',
-                    client.TFstaff._content.includes(x[0]) ? ':angel:' : '',
+                    `**${i + 1}.** \`${x._id}\``,
+                    client.FMlist._content.includes(x._id) ? ':farmer:' : '',
+                    client.TFlist._content.includes(x._id) ? ':angel:' : '',
                     ' - ',
-                    client.formatTime(((x[1].time as number)*60*1000), 3, { commas: true, longNames: false })
+                    client.formatTime((x.time *60*1000), 3, { commas: true, longNames: false })
                 ].join('')).join('\n');
                 interaction.reply({embeds: [new client.embed()
                     .setColor(client.config.embedColor)
                     .setDescription(`Top 20 players with the most time spent\non IRTGaming FS22 servers since\n<t:1672560000>\n\n${leaderboard}`)
                 ]});
             } else {
-                const playerData = client.playerTimes.getPlayer(player);
+                const playerData = await client.playerTimes._content.findById(player);
                 let resultText;
 
                 if (playerData) {

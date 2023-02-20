@@ -1,11 +1,10 @@
 import Discord from 'discord.js';
-import { db_userLevels_format } from '../interfaces';
 import YClient from '../client';
 
 export default async (client: YClient, member: Discord.GuildMember) => {
     if (!client.config.botSwitches.logs || !member.joinedTimestamp) return;
         
-    const rankingData = client.userLevels._content[member.user.id] as db_userLevels_format | undefined;
+    const rankingData = await client.userLevels._content.findById(member.id);
     const embed = new client.embed()
         .setTitle(`Member Left: ${member.user.tag}`)
         .setDescription(`<@${member.user.id}>\n\`${member.user.id}\``)
@@ -19,5 +18,5 @@ export default async (client: YClient, member: Discord.GuildMember) => {
     if (rankingData && rankingData.messages > 1) embed.addFields({name: '🔹 Ranking Total', value: rankingData.messages.toLocaleString('en-US'), inline: true});
     (client.channels.resolve(client.config.mainServer.channels.botlogs) as Discord.TextChannel).send({embeds: [embed]});
 
-    delete client.userLevels._content[member.user.id]; // Delete their ranking data
+    client.userLevels._content.findByIdAndDelete(member.id);
 }

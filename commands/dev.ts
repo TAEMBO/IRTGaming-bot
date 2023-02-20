@@ -55,44 +55,31 @@ export default {
 				client.config.statsGraphSize = -(interaction.options.getInteger('number', true));
 				interaction.reply(`Set to \`${client.config.statsGraphSize}\``);
 			},
-			decrement: () => {
-				const player = interaction.options.getString('player', true);
-				const time = interaction.options.getInteger('time', true);
-				client.playerTimes.decrement(player, time).forceSave();
-				interaction.reply(`Decremented \`${time}\` min from \`${player}\``);
-			},
-			restart: () => {
-				client.userLevels.forceSave();
-				client.playerTimes.forceSave();
-				interaction.reply("Restarting...").then(() => exec('pm2 restart IRTBot'));
-			},
-			update: async () => {
-				const msg = await interaction.reply({content: "Pulling from repo...", fetchReply: true});
-				client.userLevels.forceSave();
-				client.playerTimes.forceSave();
-				exec('git pull', (error, stdout) => {
-					if (error) {
-						msg.edit(`Pull failed:\n\`\`\`${error.message}\`\`\``);
-					} else if (stdout.includes('Already up to date')) {
-						msg.edit(`Pull aborted:\nUp-to-date`);
-					} else {
-						setTimeout(() => msg.edit('Restarting...').then(() => exec('pm2 restart IRTBot')), 2500);
-					}
+			restart: () => interaction.reply("Restarting...").then(() => exec('pm2 restart IRTBot')),
+			update: () => {
+				interaction.reply({content: "Pulling from repo...", fetchReply: true}).then(msg => {
+					exec('git pull', (error, stdout) => {
+						if (error) {
+							msg.edit(`Pull failed:\n\`\`\`${error.message}\`\`\``);
+						} else if (stdout.includes('Already up to date')) {
+							msg.edit(`Pull aborted:\nUp-to-date`);
+						} else setTimeout(() => msg.edit('Restarting...').then(() => exec('pm2 restart IRTBot')), 2500);
+					});
 				});
 			},
-			increment: () => {
-				const dailyMsgsPath = path.join(__dirname, '../databases/dailyMsgs.json');
-				const data = JSON.parse(fs.readFileSync(dailyMsgsPath, {encoding: 'utf8'}));
-				const member1 = interaction.options.getMember('member') as Discord.GuildMember;
+			increment: async () => {
+				const data = JSON.parse(fs.readFileSync('./databases/dailyMsgs.json', 'utf8'));
+				const member = interaction.options.getMember('member') as Discord.GuildMember;
 				const newTotal = interaction.options.getInteger('total', true);
-				const oldTotal = client.userLevels._content[member1.id].messages;
-				if (newTotal < oldTotal) return interaction.reply('New total is smaller than old total');
+				const oldData = await client.userLevels._content.findById(member.id);
+				if (!oldData) return interaction.reply('No data found');
+				if (newTotal < oldData.messages) return interaction.reply('New total is smaller than old total');
 				const newData: Array<Array<number>> = [];
 
-				client.userLevels._content[member1.id].messages = newTotal;
-				data.forEach((x: Array<number>) => newData.push([x[0], (x[1] + (newTotal - oldTotal))]));
-				fs.writeFileSync(dailyMsgsPath, JSON.stringify(newData));
-				interaction.reply(`<@${member1.id}>'s new total set to \`${newTotal}\``);
+				await client.userLevels._content.findByIdAndUpdate(member.id, { messages: newTotal });
+				data.forEach((x: Array<number>) => newData.push([x[0], (x[1] + (newTotal - oldData.messages))]));
+				fs.writeFileSync('./databases/dailyMsgs.json', JSON.stringify(newData));
+				interaction.reply(`<@${member.id}>'s new total set to \`${newTotal}\``);
 			},
 			logs: () => interaction.reply({files: ['../../.pm2/logs/IRTBot-out-0.log']}).catch((err: Error) => interaction.channel?.send(err.message)),
 			dz: () => interaction.reply('PC has committed iWoke:tm:').then(() => exec('start C:/WakeOnLAN/WakeOnLanC.exe -w -m Desktop')),
@@ -129,82 +116,61 @@ export default {
 	data: new SlashCommandBuilder()
 		.setName("dev")
 		.setDescription("Run bot-dev-only commands")
-		.addSubcommand((optt)=>optt
+		.addSubcommand(x=>x
 			.setName('eval')
 			.setDescription('Execute code within the bot')
-			.addStringOption((opt)=>opt
+			.addStringOption(x=>x
 				.setName("code")
 				.setDescription("The code to execute")
-				.setRequired(true))
-		)
-		.addSubcommand((optt)=>optt
+				.setRequired(true)))
+		.addSubcommand(x=>x
 			.setName('restart')
-			.setDescription('Restart the bot')
-		)
-		.addSubcommand((optt)=>optt
+			.setDescription('Restart the bot'))
+		.addSubcommand(x=>x
 			.setName('update')
-			.setDescription('Pull from GitHub repository to live bot')
-		)
-		.addSubcommand((optt)=>optt
+			.setDescription('Pull from GitHub repository to live bot'))
+		.addSubcommand(x=>x
 			.setName('role')
 			.setDescription('Give or take roles')
-			.addUserOption((opt)=>opt
+			.addUserOption(x=>x
 				.setName("member")
 				.setDescription("The member to manage")
 				.setRequired(true))
-			.addRoleOption((opt)=>opt
+			.addRoleOption(x=>x
 				.setName("role")
 				.setDescription("The role to give or take")
-				.setRequired(true))
-		)
-		.addSubcommand((optt)=>optt
+				.setRequired(true)))
+		.addSubcommand(x=>x
 			.setName('file')
 			.setDescription('Send a db file')
-			.addStringOption((opt)=>opt
+			.addStringOption(x=>x
 				.setName("file")
 				.setDescription("The name of the file")
-				.setRequired(true))
-		)
-		.addSubcommand((optt)=>optt
+				.setRequired(true)))
+		.addSubcommand(x=>x
 			.setName('statsgraph')
 			.setDescription('Edit the number of data points pulled')
-			.addIntegerOption((opt)=>opt
+			.addIntegerOption(x=>x
 				.setName("number")
 				.setDescription("The number of data points to pull")
-				.setRequired(true))
-		)
-		.addSubcommand((optt)=>optt
-			.setName('decrement')
-			.setDescription('Decrement playerTimes data')
-			.addStringOption((opt)=>opt
-				.setName("player")
-				.setDescription("Player's name")
-				.setRequired(true))
-			.addIntegerOption((opt)=>opt
-				.setName("time")
-				.setDescription("The minutes to decrement")
-				.setRequired(true))
-		)
-		.addSubcommand((optt)=>optt
+				.setRequired(true)))
+		.addSubcommand(x=>x
 			.setName('increment')
 			.setDescription('Increment ranking stats')
-			.addUserOption((opt)=>opt
+			.addUserOption(x=>x
 				.setName("member")
 				.setDescription("The member to increment")
 				.setRequired(true))
-			.addIntegerOption((opt)=>opt
+			.addIntegerOption(x=>x
 				.setName("total")
 				.setDescription("Their new message total")
-				.setRequired(true))
-		)
-		.addSubcommand((optt)=>optt
+				.setRequired(true)))
+		.addSubcommand(x=>x
 			.setName('logs')
-			.setDescription('Retrieve output log')
-		)
+			.setDescription('Retrieve output log'))
 		.addSubcommand(x=>x
 			.setName('dz')
-			.setDescription('Wheezing Over Life')
-		)
+			.setDescription('Wheezing Over Life'))
 		.addSubcommand(x=>x
 			.setName('presence')
 			.setDescription('Update the bot\'s presence')
@@ -228,6 +194,5 @@ export default {
 					{name: 'Idle', value: Discord.PresenceUpdateStatus.Idle},
 					{name: 'DND', value: Discord.PresenceUpdateStatus.DoNotDisturb},
 					{name: 'Invisible', value: Discord.PresenceUpdateStatus.Invisible}
-				))
-		)
+				)))
 };

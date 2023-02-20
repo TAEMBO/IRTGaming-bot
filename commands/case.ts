@@ -1,23 +1,21 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client';
-import { db_punishments_format } from '../interfaces';
+
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
 		if (!client.hasModPerms(interaction.member as Discord.GuildMember)) return client.youNeedRole(interaction, "mod");
-
 		const caseid = interaction.options.getInteger("id");
-		const punishmentsDb = client.punishments._content as Array<db_punishments_format>;
 
 		({
-			view: () => {
-				const punishment = punishmentsDb.find(x => x.id === caseid);
+			view: async () => {
+				const punishment = await client.punishments._content.findById(caseid);
 				if (!punishment) return interaction.reply('A case with that ID wasn\'t found!');
-				const cancelledBy = punishment.expired ? punishmentsDb.find(x => x.cancels === punishment.id) : null;
-				const cancels = punishment.cancels ? punishmentsDb.find(x => x.id === punishment.cancels) as db_punishments_format : null;
+				const cancelledBy = punishment.expired ? await client.punishments._content.findOne({ cancels: punishment.id}) : null;
+				const cancels = punishment.cancels ? await client.punishments._content.findOne({ _id: punishment.cancels}) : null;
 				const embed = new client.embed()
 					.setTitle(`${punishment.type[0].toUpperCase() + punishment.type.slice(1)} | Case #${punishment.id}`)
 					.addFields(
-						{name: '🔹 User', value: `${punishment.member.tag}\n<@${punishment.member.id}> \`${punishment.member.id}\``, inline: true},
+						{name: '🔹 User', value: `${punishment.member.tag}\n<@${punishment.member._id}> \`${punishment.member._id}\``, inline: true},
 						{name: '🔹 Moderator', value: `<@${punishment.moderator}> \`${punishment.moderator}\``, inline: true},
 						{name: '\u200b', value: '\u200b', inline: true},
 						{name: '🔹 Reason', value: `\`${punishment.reason || 'unspecified'}\``, inline: true})
@@ -28,19 +26,22 @@ export default {
 				if (punishment.cancels) embed.addFields({name: '🔹 Overwrites', value: `This case overwrites Case #${cancels?.id} \`${cancels?.reason}\``});
 				interaction.reply({embeds: [embed]});
 			},
-			member: () => {
+			member: async () => {
 				const user = interaction.options.getUser("user", true);
-				const userPunishments = punishmentsDb.filter(x => x.member.id === user.id).sort((a, b) => a.time - b.time).map(punishment => {
+				const punishments = await client.punishments._content.find({});
+				const userPunishmentsData = await client.punishments._content.find({ "member._id": user.id });
+				const userPunishments = userPunishmentsData.sort((a, b) => a.time - b.time).map(punishment => {
 					return {
 						name: `${punishment.type[0].toUpperCase() + punishment.type.slice(1)} | Case #${punishment.id}`,
 						value: [
 							`> Reason: \`${punishment.reason}\``,
 							punishment.duration ? `\n> Duration: ${client.formatTime(punishment.duration, 3)}` : '',
 							`\n> Moderator: <@${punishment.moderator}>`,
-							punishment.expired ? `\n> __Overwritten by Case #${punishmentsDb.find(x => x.cancels === punishment.id)?.id}__` : '',
+							punishment.expired ? `\n> __Overwritten by Case #${punishments.find(x => x.cancels === punishment._id)?._id}__` : '',
 							punishment.cancels ? `\n> __Overwrites Case #${punishment.cancels}__` : ''].join('')
 					}
 				});
+
 				if (!userPunishments || userPunishments.length === 0) return interaction.reply('No punishments found with that user ID');
 				const pageNumber = interaction.options.getInteger("page") ?? 1;
 				interaction.reply({embeds: [new client.embed()
@@ -51,11 +52,10 @@ export default {
 					.addFields(userPunishments.slice((pageNumber - 1) * 25, pageNumber * 25))
 				]});
 			},
-			update: () => {
+			update: async () => {
 				const reason = interaction.options.getString('reason', true);
-				(punishmentsDb.find(x=>x.id===caseid) as db_punishments_format).reason = reason;
-				client.punishments.forceSave();
-				interaction.reply({embeds: [new client.embed().setColor('#00ff00').setTitle('Case updated').setDescription(`Case ${caseid} has been updated\nNew reason: ${reason}`)]});
+				await client.punishments._content.findByIdAndUpdate(caseid, { reason });
+				interaction.reply({embeds: [new client.embed().setColor(client.config.embedColor).setTitle(`Case #${caseid} updated`).setDescription(`**New reason:** ${reason}`)]});
 			}
 		} as any)[interaction.options.getSubcommand()]();
 	},

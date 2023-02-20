@@ -1,23 +1,30 @@
 import Discord, { Client, GatewayIntentBits, Partials } from "discord.js";
 import fs from "node:fs";
 import moment from 'moment';
-import tokens from './tokens.json';
 import { xml2js } from "xml-js";
+import mongoose from "mongoose";
+import userLevels from './schemas/userLevels';
+import punishments from './schemas/punishments';
+import playerTimes from './schemas/playerTimes';
+import watchList from './schemas/watchList';
+import tokens from './tokens.json';
 let importConfig: Config
 try { 
     importConfig = require('./test-config.json');
-    console.log('\x1b[31mUsing test-config');
+    console.log('\x1b[31mStartup using test-config');
 } catch(err) {
     importConfig = require('./config.json');
+    console.log('\x1b[32mStartup');
 }
-import { global_formatTimeOpt, Config, FSCache, YTCache, Tokens, repeatedMessages } from './interfaces';
-import { bannedWords, TFstaff, FMstaff, watchList, playerTimes, userLevels, punishments } from "./dbClasses";
+import { Config, FSCache, YTCache, Tokens, repeatedMessages } from './interfaces';
+import { bannedWords, TFlist, FMlist } from "./database";
+
 export default class YClient extends Client {
     config: Config; tokens: Tokens;
     embed: typeof Discord.EmbedBuilder; collection: typeof Discord.Collection; messageCollector: typeof Discord.MessageCollector; attachmentBuilder: typeof Discord.AttachmentBuilder; 
-    games: Discord.Collection<string, any>; commands: Discord.Collection<string, any>;registery: Array<Discord.ApplicationCommandDataResolvable>;
+    games: Discord.Collection<string, any>; commands: Discord.Collection<string, any>; registery: Array<Discord.ApplicationCommandDataResolvable>;
     repeatedMessages: repeatedMessages; FSCache: FSCache; YTCache: YTCache; invites: Map<any, any>;
-    bannedWords: bannedWords; TFstaff: TFstaff; FMstaff: FMstaff; watchList: watchList; playerTimes: playerTimes; userLevels: userLevels; punishments: punishments
+    bannedWords: bannedWords; TFlist: TFlist; FMlist: FMlist; userLevels: userLevels; punishments: punishments; watchList: watchList; playerTimes: playerTimes;
     constructor() {
         super({
             intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildBans, GatewayIntentBits.GuildInvites, GatewayIntentBits.GuildPresences, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildVoiceStates],
@@ -48,23 +55,29 @@ export default class YClient extends Client {
             'UCKXa-FhJpPrlRigIW1O0j8g': undefined,
             'UCWYXg1sqtG9NalK5ZGt4ITA': undefined
         };
-        this.bannedWords = new bannedWords(this);
-        this.TFstaff = new TFstaff(this);
-        this.FMstaff = new FMstaff(this);
-        this.watchList = new watchList(this);
-        this.playerTimes = new playerTimes(this);
         this.userLevels = new userLevels(this);
         this.punishments = new punishments(this);
+        this.watchList = new watchList(this);
+        this.playerTimes = new playerTimes(this);
+        this.bannedWords = new bannedWords();
+        this.TFlist = new TFlist();
+        this.FMlist = new FMlist();
     }
     async init() {
-        this.login(this.tokens.token);
+        await this.login(this.tokens.token);
         this.bannedWords.initLoad();
-        this.userLevels.initLoad().intervalSave(15000).disableSaveNotifs();
-        this.punishments.initLoad();
-        this.FMstaff.initLoad();
-        this.TFstaff.initLoad();
-        this.watchList.initLoad();
-        this.playerTimes.initLoad().intervalSave().disableSaveNotifs();
+        this.FMlist.initLoad();
+        this.TFlist.initLoad();
+
+        mongoose.set('strictQuery', true);
+        await mongoose.connect(this.tokens.mongoURL, {
+            autoIndex: true,
+            serverSelectionTimeoutMS: 5000,
+            socketTimeoutMS: 45000,
+            family: 4,
+            keepAlive: true,
+            waitQueueTimeoutMS: 50000
+        }).then(() => console.log(this.timeLog('\x1b[35m'), 'Connected to MongoDB'));
 
         // Event handler
         fs.readdirSync('./events').forEach((file, index, arr) => {
@@ -89,7 +102,7 @@ export default class YClient extends Client {
 
     timeLog = (color: string) => color + `[${moment().format('HH:mm:ss')}]`;
 
-    formatTime(integer: number, accuracy = 1, options?: global_formatTimeOpt) {
+    formatTime(integer: number, accuracy = 1, options?: { longNames: boolean, commas: boolean }) {
         let achievedAccuracy = 0;
         let text: any = '';
         for (const timeName of [

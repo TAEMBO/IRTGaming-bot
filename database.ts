@@ -1,66 +1,27 @@
-import path from 'node:path';
 import fs from 'node:fs';
-import YClient from './client';
-export default class Database {
-	public _dataType: string;
+
+class Database {
 	public _path: string;
-	public _interval?: NodeJS.Timer;
-	public _saveNotifs: boolean;
-	public _content: any;
-	public _client: YClient;
-	constructor(client: YClient, dir: string, dataType: string) {
-		this._dataType = dataType;
-		this._path = path.resolve(dir);
-		this._saveNotifs = true;
-		this._interval = undefined;
-		this._content = dataType === 'array' ? [] : {};
-		this._client = client;
+	public _content: Array<string>;
+	constructor(dir: string) {
+		this._path = dir;
+		this._content = [];
 	}
-	addData(data: any, data1?: any) {
-		if (Array.isArray(this._content)) {
-			this._content.push(data);
-		} else if (typeof this._content === "object") {
-			this._content[data] = data1;
-		}
+	addData(data: string) {
+		this._content.push(data);
 		return this;
 	}
-	removeData(key: any, type: 0 | 1, element: any) {
-		if (this._dataType === 'array') {
-			const methods = {
-				0: () => this._content = this._content.filter((x: any) => x != key),
-				1: () => this._content = this._content.filter((x: any) => x[element] != key)
-			};
-			methods[type]();
-		} else if (this._dataType === 'object') {
-			delete this._content[key];
-		}
+	removeData(data: string) {
+		this._content = this._content.filter(x => x !== data);
 		return this;
 	}
-	initLoad() {
-		this._content = JSON.parse(fs.readFileSync(this._path, { encoding: 'utf8' }));
-		console.log(`\x1b[32m${this._path.replace(__dirname, '')} Database Loaded`);
-		return this;
-	}
-	forceSave(db = this, force = false) {
-		const oldJson = fs.readFileSync(db._path, { encoding: 'utf8' });
-		const newJson = JSON.stringify(db._content);
-		if (oldJson !== newJson || force) {
-			fs.writeFileSync(this._path, JSON.stringify(this._content, null, 2));
-			if (this._saveNotifs) console.log(this._client.timeLog('\x1b[33m'), `${this._path.replace(__dirname, '')} Database Saved`);
-		}
-		return db;
-	}
-	intervalSave(milliseconds?: number) {
-		this._interval = setInterval(() => this.forceSave(this), milliseconds || 60000);
-		return this;
-	}
-	stopInterval() {
-		if (this._interval) clearInterval(this._interval);
-		return this;
-	}
-	disableSaveNotifs() {
-		this._saveNotifs = false;
-		console.log(`\x1b[32m${this._path.replace(__dirname, '')} "Database Saved" Notifications Disabled`);
-		return this;
-	}
+	initLoad = () => this._content = JSON.parse(fs.readFileSync(this._path, 'utf8'));
+
+	forceSave = () => fs.writeFileSync(this._path, JSON.stringify(this._content, null, 2));
 }
+
+export class bannedWords extends Database { constructor() { super("./databases/bannedWords.json") } };
+
+export class TFlist extends Database { constructor() { super("./databases/TFlist.json") } };
+
+export class FMlist extends Database { constructor() { super("./databases/FMlist.json") } };

@@ -7,7 +7,7 @@ import { FS_data } from '../interfaces';
 async function FSstatsAll(client: YClient, serverURLdss: string, embed: Discord.EmbedBuilder, totalCount: Array<number>, failedFooter: Array<string>, serverAcro: string) {
     let serverName;
     try {
-        serverName = await fetch(serverURLdss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': 'FSG Stats' } });
+        serverName = await fetch(serverURLdss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': 'IRTBot/StatsAll' } });
     } catch (err) {
         console.log(client.timeLog('\x1b[31m'), `Stats all; ${serverAcro} failed`);
         failedFooter.push(`Failed to fetch ${serverAcro}`);

@@ -64,7 +64,7 @@ export default {
 							.setAuthor({name: activity.name, iconURL: 'https://www.freepnglogos.com/uploads/spotify-logo-png/spotify-icon-marilyn-scott-0.png'})
 							.setColor('#1DB954')
 							.addFields({name: activity.details, value: `By: ${activity.state}\nOn: ${activity.assets.largeText}\nStarted listening <t:${Math.round(activity.createdTimestamp/1000)}:R>`})
-							.setThumbnail(`https://i.scdn.co/image/${activity.assets.largeImage?.replace('spotify:', '')}`))
+							.setThumbnail(`https://i.scdn.co/image/${activity.assets.largeImage?.replace('spotify:', '')}`));
 					} else if (activity.type == 4) {
 						embedArray.push(new client.embed()
 							.setTitle(activity.name)
@@ -72,17 +72,37 @@ export default {
 							.setDescription([
 								activity.emoji ? `**Emoji name:** ${activity.emoji.name}`: '',
 								activity.state ? `\n**Text:** ${activity.state}`: ''
-							].join('')))
-					} else embedArray.push(new client.embed()
+							].join('')));
+					} else {
+						let activityImage: Array<string> | string | null | undefined = [
+							['542474758835535872', 'https://cdn.discordapp.com/app-icons/542474758835535872/37b18c2d5633628d936dd3b2b083785b.png'], // Farming Simulator 19
+							['363426921612181504', 'https://cdn.discordapp.com/app-icons/363426921612181504/61bed87d2da8e32dd8f24423a9e83323.png'], // Farming Simulator 17
+							['732565262704050298', `https://cdn.discordapp.com/app-assets/732565262704050298/${activity.assets?.largeImage}.png`], // Visual Studio Code (Toast's)
+							['383226320970055681', `https://cdn.discordapp.com/app-assets/383226320970055681/${activity.assets?.largeImage}.png`], // Visual Studio Code (Tae's)
+							['356875570916753438', 'https://cdn.discordapp.com/app-icons/356875570916753438/166fbad351ecdd02d11a3b464748f66b.png'], // Minecraft
+							['438122941302046720', 'https://discord.com/assets/29b4af8bf13fa73258692008d25b4f0d.png'], // Any Xbox status
+							['356876176465199104', 'https://cdn.discordapp.com/app-icons/356876176465199104/069d9f4871b5ebd2f62bd342ce6ba77f.png'], // Grand Theft Auto V
+							['363445589247131668', 'https://cdn.discordapp.com/app-icons/363445589247131668/f2b60e350a2097289b3b0b877495e55f.png'], // Roblox
+							['356876590342340608', 'https://cdn.discordapp.com/app-icons/356876590342340608/554af7ef210877b5f04fd1b727a3746e.png'], // Rainbow Six Siege
+							['445956193924546560', `https://cdn.discordapp.com/app-assets/445956193924546560/${activity.assets?.largeImage}.png`], // Rainbow Six Siege again
+						].find(x => x[0] == activity.applicationId);
+
+						if (activityImage) activityImage = activityImage[1]; // If a URL was found in the array, choose the URL string in the array
+						if (!activityImage) activityImage = activity.assets?.largeImageURL(); // Struggle with PlayStation presence images
+						if (!activityImage) activityImage = activity.assets?.smallImageURL(); // Anything extra
+
+						embedArray.push(new client.embed()
 						.setTitle(activity.name)
 						.setColor('#ffffff')
 						.setDescription([
 							`\u200b**Started:** <t:${Math.round(activity.createdTimestamp/1000)}:R>`,
 							activity.details ? '\n**Details:** ' + activity.details : '',
 							activity.state ? '\n**State:** ' + activity.state : '',
-							activity.assets?.largeText ? '\n**Large text:** ' + activity.assets.largeText : ''
+							activity.assets?.largeText ? '\n**Large text:** ' + activity.assets.largeText : '',
+							activity.assets?.smallText ? '\n**Small text:** ' + activity.assets.smallText : ''
 						].join(''))
-						.setThumbnail(activity.applicationId == '383226320970055681' || activity.applicationId == '732565262704050298' ? `https://cdn.discordapp.com/app-assets/${activity.applicationId}/${activity.assets?.largeImage}.png` : null))
+						.setThumbnail(activityImage ?? null));
+					}
 				});
 			} else embedArray.push(embed0);
 

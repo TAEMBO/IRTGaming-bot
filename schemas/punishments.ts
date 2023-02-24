@@ -96,7 +96,7 @@ export default class punishments extends Schema {
 		if (['ban', 'softban'].includes(type)) {
 			const banned = await guild.bans.fetch(User.id).catch(() => undefined);
 			if (!banned) {
-				punResult = await guild.bans.create(User.id, {reason: `${reason} | Case #${punData._id}`, deleteMessageSeconds: type == 'softban' ? 86400 : undefined}).catch((err: Error) => err.message);
+				punResult = await guild.bans.create(User.id, { reason: auditLogReason, deleteMessageSeconds: type == 'softban' ? 86400 : undefined }).catch((err: Error) => err.message);
 			} else punResult = 'User is already banned.';
 		} else if (type == 'kick') {
 			punResult = await GuildMember?.kick(auditLogReason).catch((err: Error) => err.message);

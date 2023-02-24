@@ -283,6 +283,6 @@ export default {
             .setDescription("Player time data")
             .addStringOption((opt)=>opt
                 .setName("name")
-                .setDescription("Fetch total time for a player")
+                .setDescription("The in-game name of the player to get stats for")
                 .setRequired(false)))
 };

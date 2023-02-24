@@ -1,9 +1,7 @@
 import Discord from 'discord.js';
 import YClient from './client';
 import fs from 'node:fs';
-import path from 'node:path';
 import FSLoop from './FSLoop';
-import { Reminder } from './interfaces';
 const client = new YClient();
 client.init().then(() => {
 	console.log(client.config.botSwitches);
@@ -40,39 +38,38 @@ process.on('uncaughtException', (error: Error) => logError(error, 'uncaughtExcep
 process.on('error', (error: Error) => logError(error, 'error'));
 client.on('error', (error: Error) => logError(error, 'client-error'));
 
-// reminder, dailyMsgs, and punishment event loops
+// Reminder, dailyMsgs, and punishment event loops
 setInterval(async () => {
 	const now = Date.now();
-	const p = path.join(__dirname, './databases/reminders.json');
-	const db = JSON.parse(fs.readFileSync(p, {encoding: 'utf8'}));
-	const remindEmbed = new client.embed().setTitle('Reminder').setColor(client.config.embedColor);
-	const filterLambda = (x: Reminder) => x.when < Math.floor(now / 1000);
-	const filter: Array<Reminder> = db.filter((x: Reminder) => filterLambda(x));
-	for(let i = 0; i < filter.length; i++){
-		remindEmbed.setDescription(`\n\`\`\`${filter[i].what}\`\`\``);
-		await client.users.fetch(filter[i].who).then(User => User.send({embeds: [remindEmbed]}));
-		console.log(client.timeLog('\x1b[33m'), 'REMINDER EXECUTE', filter[i]);
-		db.splice(db.findIndex((x: Reminder) => filterLambda(x)), 1);
-		fs.writeFileSync(p, db.length !== 0 ? JSON.stringify(db, null, 2) : '[]');
-	}
+	client.reminders._content.find({}).then(reminders => {
+		reminders.filter(x => now > x.time).forEach(async reminder => {
+			await client.users.fetch(reminder._id).then(User => User.send({embeds: [new client.embed()
+				.setTitle('Reminder')
+				.setColor(client.config.embedColor)
+				.setDescription(`\`\`\`${reminder.content}\`\`\``)
+			]}));
+			await client.reminders._content.findByIdAndDelete(reminder._id);
+			console.log(client.timeLog('\x1b[33m'), 'REMINDER EXECUTE', reminder);
+		});
+	});
 
-	const punishments = await client.punishments._content.find({});
-	punishments.filter(x => x.endTime && x.endTime <= now && !x.expired).forEach(async punishment => {
-		console.log(client.timeLog('\x1b[33m'), `${punishment.member.tag}\'s ${punishment.type} should expire now`);
-		const unpunishResult = await client.punishments.removePunishment(punishment._id, (client.user as Discord.ClientUser).id, "Time\'s up!");
-		console.log(client.timeLog('\x1b[33m'), unpunishResult);
+	client.punishments._content.find({}).then(punishments => {
+		punishments.filter(x => x.endTime && x.endTime <= now && !x.expired).forEach(async punishment => {
+			console.log(client.timeLog('\x1b[33m'), `${punishment.member.tag}\'s ${punishment.type} should expire now`);
+			const unpunishResult = await client.punishments.removePunishment(punishment._id, (client.user as Discord.ClientUser).id, "Time\'s up!");
+			console.log(client.timeLog('\x1b[33m'), unpunishResult);
+		});
 	});
 
 	const formattedDate = Math.floor((now - 1667854800000) / 1000 / 60 / 60 / 24);
-	const dailyMsgs = JSON.parse(fs.readFileSync(__dirname + '/databases/dailyMsgs.json', {encoding: 'utf8'}));
+	const dailyMsgs = JSON.parse(fs.readFileSync('databases/dailyMsgs.json', 'utf8'));
 	if (!dailyMsgs.some((x: Array<number>) => x[0] === formattedDate)) {
 		let total = (await client.userLevels._content.find({})).reduce((a, b) => a + b.messages, 0); // sum of all users
 		const yesterday = dailyMsgs.find((x: Array<number>) => x[0] === formattedDate - 1);
-		if (total < yesterday) { // messages went down
-			total = yesterday;
-		}
+		if (total < yesterday) total = yesterday; // messages went down
+
 		dailyMsgs.push([formattedDate, total]);
-		fs.writeFileSync(__dirname + "/databases/dailyMsgs.json", JSON.stringify(dailyMsgs, null, 2));
+		fs.writeFileSync('databases/dailyMsgs.json', JSON.stringify(dailyMsgs, null, 2));
 		console.log(client.timeLog('\x1b[36m'), `Pushed [${formattedDate}, ${total}] to dailyMsgs`);
 		(client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel).send(`:warning: Pushed [${formattedDate}, ${total}] to </rank leaderboard:1042659197919178790>`);
 

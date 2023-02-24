@@ -7,8 +7,9 @@ import userLevels from './schemas/userLevels';
 import punishments from './schemas/punishments';
 import playerTimes from './schemas/playerTimes';
 import watchList from './schemas/watchList';
+import reminders from './schemas/reminders';
 import tokens from './tokens.json';
-let importConfig: Config
+let importConfig: Config;
 try { 
     importConfig = require('./test-config.json');
     console.log('\x1b[31mStartup using test-config');
@@ -24,7 +25,7 @@ export default class YClient extends Client {
     embed: typeof Discord.EmbedBuilder; collection: typeof Discord.Collection; messageCollector: typeof Discord.MessageCollector; attachmentBuilder: typeof Discord.AttachmentBuilder; 
     games: Discord.Collection<string, any>; commands: Discord.Collection<string, any>; registery: Array<Discord.ApplicationCommandDataResolvable>;
     repeatedMessages: repeatedMessages; FSCache: FSCache; YTCache: YTCache; invites: Map<any, any>;
-    bannedWords: bannedWords; TFlist: TFlist; FMlist: FMlist; userLevels: userLevels; punishments: punishments; watchList: watchList; playerTimes: playerTimes;
+    bannedWords: bannedWords; TFlist: TFlist; FMlist: FMlist; userLevels: userLevels; punishments: punishments; watchList: watchList; playerTimes: playerTimes; reminders: reminders;
     constructor() {
         super({
             intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildBans, GatewayIntentBits.GuildInvites, GatewayIntentBits.GuildPresences, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildVoiceStates],
@@ -59,6 +60,7 @@ export default class YClient extends Client {
         this.punishments = new punishments(this);
         this.watchList = new watchList(this);
         this.playerTimes = new playerTimes(this);
+        this.reminders = new reminders(this);
         this.bannedWords = new bannedWords();
         this.TFlist = new TFlist();
         this.FMlist = new FMlist();

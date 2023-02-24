@@ -213,12 +213,6 @@ export interface FS_careerSavegame {
     }
 }
 
-export interface Reminder {
-    when: number,
-    what: string,
-    who: string
-}
-
 export interface repeatedMessages {
     [key: string]: { data: Discord.Collection<number, {cont: number, ch: string}>, timeout: NodeJS.Timeout }
 }

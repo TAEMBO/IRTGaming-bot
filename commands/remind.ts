@@ -1,8 +1,6 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client';
-import fs from 'node:fs';
 import ms from 'ms';
-import { Reminder } from '../interfaces';
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
@@ -10,19 +8,15 @@ export default {
         const reminderTime = ms(interaction.options.getString("when", true)) as number | undefined;
         
         if (reminderTime) {
-            const timeStampInMs = Math.round((Date.now() + reminderTime) / 1000);
-            const remindersDb: Array<Reminder> = JSON.parse(fs.readFileSync('./databases/reminders.json', 'utf8'));
-            const reminderObj = { when: timeStampInMs, what: reminderText, who: interaction.user.id };
+            await client.reminders._content.create({ _id: interaction.user.id, content: reminderText, time: Date.now() + reminderTime }).then(reminder => {
+                console.log(client.timeLog('\x1b[33m'), 'REMINDER CREATE', reminder);
+                interaction.reply({embeds: [new client.embed()
+                    .setTitle('Reminder set')
+                    .setDescription(`\n\`\`\`${reminderText}\`\`\`\n<t:${Math.round((Date.now() + reminderTime) / 1000)}:R>.`)
+                    .setColor(client.config.embedColor)
+                ]});
+            });
 
-            remindersDb.push(reminderObj);
-            fs.writeFileSync('./databases/reminders.json', JSON.stringify(remindersDb, null, 2));
-
-            console.log(client.timeLog('\x1b[33m'), 'REMINDER CREATE', reminderObj);
-            interaction.reply({embeds: [new client.embed()
-                .setTitle('Reminder set')
-                .setDescription(`\n\`\`\`${reminderText}\`\`\`\n<t:${timeStampInMs}:R>.`)
-                .setColor(client.config.embedColor)
-            ]});
         } else interaction.reply({embeds: [new client.embed()
             .setTitle('Incorrect timestamp.')
             .addFields({name: 'Proper formatting', value: '```Seconds: 10s, 1sec, 10secs, 1second, 10seconds\nMinutes: 10m, 1min, 10mins, 1minute, 10minutes\nHours: 10h, 1hour, 10hours\nDays: 10d, 1day, 10days```'})

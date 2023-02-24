@@ -11,12 +11,12 @@ export default async (client: YClient, member: Discord.GuildMember) => {
         .addFields(
             {name: '🔹 Account Creation Date', value: `<t:${Math.round(member.user.createdTimestamp / 1000)}>\n<t:${Math.round(member.user.createdTimestamp / 1000)}:R>`},
             {name: '🔹 Server Join Date', value: `<t:${Math.round(member.joinedTimestamp / 1000)}>\n<t:${Math.round(member.joinedTimestamp / 1000)}:R>`},
-            {name: `🔹 Roles: ${member.roles.cache.size - 1}`, value: `${member.roles.cache.size > 1 ? member.roles.cache.filter((x) => x.id !== member.guild.roles.everyone.id).sort((a, b) => b.position - a.position).map(x => x).join(member.roles.cache.size > 4 ? ' ' : '\n').slice(0, 1024) : 'None'}`, inline: true})
+            {name: `🔹 Roles: ${member.roles.cache.size - 1}`, value: member.roles.cache.size > 1 ? member.roles.cache.filter(x => x.id !== member.guild.roles.everyone.id).sort((a, b) => b.position - a.position).map(x => x).join(member.roles.cache.size > 4 ? ' ' : '\n').slice(0, 1024) : 'None', inline: true})
         .setTimestamp()
         .setColor(client.config.embedColorRed)
-        .setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048}) || member.user.defaultAvatarURL);
+        .setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048}));
     if (rankingData && rankingData.messages > 1) embed.addFields({name: '🔹 Ranking Total', value: rankingData.messages.toLocaleString('en-US'), inline: true});
     (client.channels.resolve(client.config.mainServer.channels.botlogs) as Discord.TextChannel).send({embeds: [embed]});
 
-    client.userLevels._content.findByIdAndDelete(member.id);
+    await client.userLevels._content.findByIdAndDelete(member.id);
 }

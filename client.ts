@@ -24,7 +24,7 @@ export default class YClient extends Client {
     config: Config; tokens: Tokens;
     embed: typeof Discord.EmbedBuilder; collection: typeof Discord.Collection; messageCollector: typeof Discord.MessageCollector; attachmentBuilder: typeof Discord.AttachmentBuilder; 
     games: Discord.Collection<string, any>; commands: Discord.Collection<string, any>; registery: Array<Discord.ApplicationCommandDataResolvable>;
-    repeatedMessages: repeatedMessages; FSCache: FSCache; YTCache: YTCache; invites: Map<any, any>;
+    repeatedMessages: repeatedMessages; FSCache: FSCache; YTCache: YTCache; invites: Map<string, { uses: number | null, creator: string | undefined}>;
     bannedWords: bannedWords; TFlist: TFlist; FMlist: FMlist; userLevels: userLevels; punishments: punishments; watchList: watchList; playerTimes: playerTimes; reminders: reminders;
     constructor() {
         super({

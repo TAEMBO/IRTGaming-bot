@@ -6,7 +6,7 @@ export default {
 		const word = interaction.options.getString("word", true);
 
 		if (client.bannedWords._content.includes(word)) {
-			client.bannedWords.addData(word).forceSave();
+			client.bannedWords.add(word);
 			interaction.reply(`Successfully added \`${word}\` to bannedWords list`);
 		} else interaction.reply('That word is already added');
 	},

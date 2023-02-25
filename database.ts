@@ -3,25 +3,23 @@ import fs from 'node:fs';
 class Database {
 	public _path: string;
 	public _content: Array<string>;
-	constructor(dir: string) {
-		this._path = dir;
+	constructor(fileName: string) {
+		this._path = `./databases/${fileName}.json`;
 		this._content = [];
 	}
-	addData(data: string) {
+	add(data: string) {
 		this._content.push(data);
-		return this;
+		fs.writeFileSync(this._path, JSON.stringify(this._content, null, 2));
 	}
-	removeData(data: string) {
+	remove(data: string) {
 		this._content = this._content.filter(x => x !== data);
-		return this;
+		fs.writeFileSync(this._path, JSON.stringify(this._content, null, 2));
 	}
 	initLoad = () => this._content = JSON.parse(fs.readFileSync(this._path, 'utf8'));
-
-	forceSave = () => fs.writeFileSync(this._path, JSON.stringify(this._content, null, 2));
 }
 
-export class bannedWords extends Database { constructor() { super("./databases/bannedWords.json") } };
+export class bannedWords extends Database { constructor() { super('bannedWords') } };
 
-export class TFlist extends Database { constructor() { super("./databases/TFlist.json") } };
+export class TFlist extends Database { constructor() { super('TFlist') } };
 
-export class FMlist extends Database { constructor() { super("./databases/FMlist.json") } };
+export class FMlist extends Database { constructor() { super('FMlist') } };

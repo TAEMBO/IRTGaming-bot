@@ -191,19 +191,19 @@ export default {
             },
             fm: () => {
                 if (client.FMlist._content.includes(name as string)) {
-                    client.FMlist.removeData(name as string).forceSave();
+                    client.FMlist.remove(name as string);
                     interaction.reply(`Successfully removed \`${name}\``);
                 } else {
-                    client.FMlist.addData(name as string).forceSave();
+                    client.FMlist.add(name as string);
                     interaction.reply(`Successfully added \`${name}\``);
                 }
             },
             tf: () => {
                 if (client.TFlist._content.includes(name as string)) {
-                    client.TFlist.removeData(name as string).forceSave();
+                    client.TFlist.remove(name as string);
                     interaction.reply(`Successfully removed \`${name}\``);
                 } else {
-                    client.TFlist.addData(name as string).forceSave();
+                    client.TFlist.add(name as string);
                     interaction.reply(`Successfully added \`${name}\``);
                 }
             }

@@ -37,7 +37,7 @@ export default async (client: YClient, member: Discord.GuildMember) => {
     // Join log
     const oldInvites = client.invites;
     const newInvites = await member.guild.invites.fetch();
-    const usedInvite = newInvites.find(inv => oldInvites.get(inv.code)?.uses < (inv.uses as number));
+    const usedInvite = newInvites.find(inv => oldInvites.get(inv.code)?.uses as number < (inv.uses as number));
 
     newInvites.forEach(inv => client.invites.set(inv.code, {uses: inv.uses, creator: inv.inviter?.id}));
  

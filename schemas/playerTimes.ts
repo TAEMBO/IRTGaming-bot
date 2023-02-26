@@ -6,7 +6,7 @@ const Schema = mongoose.model('playerTimes', new mongoose.Schema({
     _id: { type: String },
     time: { type: Number, required: true },
     lastOn: { type: Number, required: true }
-}));
+}, { versionKey: false }));
 
 export default class playerTimes extends Schema {
 	client: YClient;

@@ -100,7 +100,7 @@ export default class YClient extends Client {
 
     isMPStaff = (guildMember: Discord.GuildMember) => this.config.mainServer.MPStaffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
 
-    youNeedRole = (interaction: Discord.CommandInteraction, role: string) => interaction.reply(`You need the <@&${this.config.mainServer.roles[role]}> role to use this command`);
+    youNeedRole = (interaction: Discord.ChatInputCommandInteraction<"cached">, role: string) => interaction.reply(`You need the <@&${this.config.mainServer.roles[role]}> role to use this command`);
 
     timeLog = (color: string) => color + `[${moment().format('HH:mm:ss')}]`;
 

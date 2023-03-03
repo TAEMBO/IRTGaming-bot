@@ -16,7 +16,7 @@ export default {
             applicationLogs.send(`<@${interaction.user.id}> (${interaction.user.tag}) opened an MP Staff application at <t:${Math.round(Date.now() / 1000)}>\nForm: <https://forms.gle/JivS14vJgcJCKigq7>`);
         } else {
             interaction.reply({content: `You need to ${deniedMsgs.join(' and ')} before applying`, ephemeral: true});
-            applicationLogs.send(`<@${interaction.user.id}> (${interaction.user.tag}) tried to open an MP Staff application but was rejected`);
+            applicationLogs.send(`<@${interaction.user.id}> (${interaction.user.tag}) tried to open an MP Staff application but was rejected (**${deniedMsgs.join(' and ').replace('and', '**and**')}**)`);
         }
     },
     data: new SlashCommandBuilder()

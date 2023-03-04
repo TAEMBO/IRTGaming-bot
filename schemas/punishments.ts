@@ -73,7 +73,7 @@ export default class punishments extends Schema {
 			.setDescription(`${User.tag}\n<@${User.id}>\n(\`${User.id}\`)`)
 			.addFields({name: 'Reason', value: reason});
 		let punResult;
-		let timeInMillis;
+		let timeInMillis: number | null;
 		let DM;
 
 		if (type == "mute") {
@@ -83,7 +83,7 @@ export default class punishments extends Schema {
 		const durationText = timeInMillis ? ` for ${this.client.formatTime(timeInMillis, 4, { longNames: true, commas: true })}` : '';
 
 		// Add field for duration if time is specified
-		if (time) embed.addFields({name: 'Duration', value: durationText});
+		if (timeInMillis) embed.addFields({ name: 'Duration', value: durationText });
 
 		if (GuildMember) {
 			try {

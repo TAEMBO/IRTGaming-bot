@@ -18,7 +18,7 @@ export default async (client: YClient, message: Discord.Message) => {
 				.setDescription(`<@${message.author.id}>`)
 				.setAuthor({name: `${message.author.tag} (${message.author.id})`, iconURL: message.author.displayAvatarURL({ extension: 'png'})})
 				.setColor(client.config.embedColor)
-				.addFields({name: 'Message Content', value: message.content.length > 1024 ? message.content.slice(0, 1000) + '...' : message.content + '\u200b'})
+				.addFields({name: 'Message Content', value: msg.length > 1024 ? msg.slice(0, 1000) + '...' : msg + '\u200b'})
 				.addFields({name: 'Roles:', value: guildMemberObject.roles.cache.size > 1 ? guildMemberObject.roles.cache.filter(x => x.id !== client.config.mainServer.id).sort((a, b) => b.position - a.position).map(x => x).join(guildMemberObject.roles.cache.size > 4 ? ' ' : '\n').slice(0, 1024) : 'None'})
 				.setTimestamp()]
 		});
@@ -48,9 +48,6 @@ export default async (client: YClient, message: Discord.Message) => {
 			}).catch(() => console.log(client.timeLog('\x1b[35m'), `Failed to collect "y" from staff`));
 		}
 	
-		const onTimeout = () => delete client.repeatedMessages[message.author.id];
-	
-		// repeated messages; banned words
 		const Whitelist = [
 			'688803177184886794', //farm-manager-chat
 			'906960370919436338', //mp-action-log
@@ -63,81 +60,59 @@ export default async (client: YClient, message: Discord.Message) => {
 			'968265015595532348', //mp-manager-chat
 			'979863373439184966', //war crimes
 		];
-	
-		if (client.bannedWords._content.some((x: string) => msgarr.includes(x)) && !client.hasModPerms(message.member as Discord.GuildMember) && !Whitelist.includes(message.channel.id) && client.config.botSwitches.automod) {
-			automodded = true;
-			const threshold = 30000;
-			message.delete();
-			message.channel.send('That word is banned here.').then(x => setTimeout(() => x.delete(), 5000));
-
+		async function repeatedMessages(thresholdTime: number, thresholdAmt: number, type: string, muteTime: string, muteReason: string) {
 			if (client.repeatedMessages[message.author.id]) {
-				// add this message to the list
-				client.repeatedMessages[message.author.id].data.set(message.createdTimestamp, { cont: 0, ch: message.channel.id });
+				// Add this message to the list
+				client.repeatedMessages[message.author.id].data.set(message.createdTimestamp, { type, channel: message.channel.id });
 	
-				// reset timeout
+				// Reset timeout
 				clearTimeout(client.repeatedMessages[message.author.id].timeout);
-				client.repeatedMessages[message.author.id].timeout = setTimeout(onTimeout, threshold);
+				client.repeatedMessages[message.author.id].timeout = setTimeout(() => delete client.repeatedMessages[message.author.id], thresholdTime);
 	
-				// message mustve been sent after (now - threshold), so purge those that were sent earlier
-				client.repeatedMessages[message.author.id].data = client.repeatedMessages[message.author.id].data.filter((x, i) => i >= Date.now() - threshold)
+				// Message mustve been sent after (now - threshold), so purge those that were sent earlier
+				client.repeatedMessages[message.author.id].data = client.repeatedMessages[message.author.id].data.filter((x, i) => i >= Date.now() - thresholdTime)
 	
-				// a spammed message is one that has been sent at least 4 times in the last threshold milliseconds
+				// A spammed message is one that has been sent within the threshold parameters
 				const spammedMessage = client.repeatedMessages[message.author.id].data.find(x => {
-					return client.repeatedMessages[message.author.id].data.filter(y => x.cont === y.cont).size >= 4;
+					return client.repeatedMessages[message.author.id].data.filter(y => x.type === y.type).size >= thresholdAmt;
 				});
 	
-				// if a spammed message exists;
 				if (spammedMessage) {
 					delete client.repeatedMessages[message.author.id];
-					await client.punishments.addPunishment('mute', { time: '30m' }, (client.user as Discord.User).id, 'Automod; Banned words', message.author, message.member as Discord.GuildMember);
+					await client.punishments.addPunishment('mute', { time: muteTime }, (client.user as Discord.User).id, `Automod; ${muteReason}`, message.author, message.member as Discord.GuildMember);
 				}
 			} else {
-				client.repeatedMessages[message.author.id] = { data: new client.collection(), timeout: setTimeout(onTimeout, threshold) };
-				client.repeatedMessages[message.author.id].data.set(message.createdTimestamp, { cont: 0, ch: message.channel.id });
+				client.repeatedMessages[message.author.id] = { data: new client.collection(), timeout: setTimeout(() => delete client.repeatedMessages[message.author.id], thresholdTime) };
+				client.repeatedMessages[message.author.id].data.set(message.createdTimestamp, { type, channel: message.channel.id });
+			}
+		}
+
+		// RepeatedMessages
+		if (client.config.botSwitches.automod && !client.hasModPerms(message.member as Discord.GuildMember)) {
+			if (client.bannedWords._content.some(x => msgarr.includes(x)) && !Whitelist.includes(message.channel.id)) { // Banned words
+				automodded = true;
+				message.delete();
+				message.channel.send('That word is banned here.').then(x => setTimeout(() => x.delete(), 5000));
+				await repeatedMessages(30000, 4, 'bw', '30m', 'Banned words');
+			} else if (msg.includes("discord.gg/") && !client.isMPStaff(message.member as Discord.GuildMember)) { // Discord advertisement
+				const inviteURL = msgarr.find(x => x.includes('discord.gg/')) as string;
+				const validInvite = await client.fetchInvite(inviteURL).catch(() => undefined);
+				if (validInvite && validInvite.guild?.id !== client.config.mainServer.id) {
+					automodded = true;
+					message.delete();
+					message.channel.send("No advertising other Discord servers.").then(x => setTimeout(() => x.delete(), 10000));
+					await repeatedMessages(60000, 2, 'adv', '1h', 'Discord advertisement');
+				}
 			}
 		}
 	
-		// repeated messages; Discord advertisement
-		if (message.content.includes("discord.gg/") && !client.hasModPerms(message.member as Discord.GuildMember) && !client.isMPStaff(message.member as Discord.GuildMember) && client.config.botSwitches.automod) {
-			automodded = true;
-			const threshold = 60000;
-			message.delete();
-			message.channel.send("No advertising other Discord servers.").then(x => setTimeout(() => x.delete(), 10000));
-
-			if (client.repeatedMessages[message.author.id]) {
-				// add this message to the list
-				client.repeatedMessages[message.author.id].data.set(message.createdTimestamp, { cont: 1, ch: message.channel.id });
-	
-				// reset timeout
-				clearTimeout(client.repeatedMessages[message.author.id].timeout);
-				client.repeatedMessages[message.author.id].timeout = setTimeout(onTimeout, threshold);
-	
-				// message mustve been sent after (now - threshold), so purge those that were sent earlier
-				client.repeatedMessages[message.author.id].data = client.repeatedMessages[message.author.id].data.filter((x, i) => i >= Date.now() - threshold)
-	
-				// a spammed message is one that has been sent at least 2 times in the last threshold milliseconds
-				const spammedMessage = client.repeatedMessages[message.author.id].data.find(x => {
-					return client.repeatedMessages[message.author.id].data.filter(y => x.cont === y.cont).size >= 2;
-				});
-	
-				// if a spammed message exists;
-				if (spammedMessage) {
-					delete client.repeatedMessages[message.author.id];
-					await client.punishments.addPunishment('mute', { time: '1h' }, (client.user as Discord.User).id, 'Automod; Discord advertisement', message.author, message.member as Discord.GuildMember);
-				}
-			} else {
-				client.repeatedMessages[message.author.id] = { data: new client.collection(), timeout: setTimeout(onTimeout, threshold) };
-				client.repeatedMessages[message.author.id].data.set(message.createdTimestamp, { cont: 1, ch: message.channel.id });
-			}
-		}
-	
-		if (message.channel.id != '557692151689904129' && !automodded) client.userLevels.incrementUser(message.author.id);
+		if (message.channel.id !== '557692151689904129' && !automodded) client.userLevels.incrementUser(message.author.id);
 			
 		// Morning message system
 		const person = message.member?.displayName;
 		const morningMsgs = [ 'morning all', 'morning everyone', 'morning guys', 'morning people' ];
-		const morningResponses1 = [ `Wakey wakey ${person}! `, `Morning ${person}! `, `Why good morning ${person}! `, `Rise and shine ${person}! `, `Up and at 'em ${person}! `];
-		const morningResponses2 = [
+		const mornRes1 = [ `Wakey wakey ${person}! `, `Morning ${person}! `, `Why good morning ${person}! `, `Rise and shine ${person}! `, `Up and at 'em ${person}! `];
+		const mornRes2 = [
 			'Here, take a pancake or two 🥞',
 			'Here, take a 🥔',
 			'Here, take a cookie 🍪',
@@ -160,9 +135,7 @@ export default async (client: YClient, message: Discord.Message) => {
 		];
 	
 		if (client.config.botSwitches.autoResponses && !automodded) { // Auto responses
-			if (morningMsgs.some(x => msg.includes(x)) && message.channel.id == '552565546093248512') message.reply({
-				content: morningResponses1[Math.floor(Math.random() * morningResponses1.length)] + morningResponses2[Math.floor(Math.random() * morningResponses2.length)], allowedMentions: {repliedUser: false}
-			});
+			if (morningMsgs.some(x => msg.includes(x)) && message.channel.id == '552565546093248512') message.reply({ content: mornRes1[Math.floor(Math.random() * mornRes1.length)] + mornRes2[Math.floor(Math.random() * mornRes2.length)], allowedMentions: { repliedUser: false } });
 			
 			if (msg.includes('giants moment')) message.react('™️');
 			
@@ -174,7 +147,7 @@ export default async (client: YClient, message: Discord.Message) => {
 			
 			if (msgarr.includes('69')) message.react(':IRT_Noice:611558357643558974');
 			
-			if (message.content.startsWith('!rank')) message.reply({content: 'Ranking has been moved to </rank view:1042659197919178790>', allowedMentions: {repliedUser: false}});
+			if (msg.startsWith('!rank')) message.reply({content: 'Ranking has been moved to </rank view:1042659197919178790>', allowedMentions: {repliedUser: false}});
 		}
 	}
 }

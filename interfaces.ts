@@ -214,7 +214,7 @@ export interface FS_careerSavegame {
 }
 
 export interface repeatedMessages {
-    [key: string]: { data: Discord.Collection<number, {cont: number, ch: string}>, timeout: NodeJS.Timeout }
+    [key: string]: { data: Discord.Collection<number, { type: string, channel: string }>, timeout: NodeJS.Timeout }
 }
 
 export interface banFormat {

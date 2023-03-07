@@ -2,6 +2,7 @@ import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
+		if (interaction.channel?.type === Discord.ChannelType.GuildStageVoice) return;
 		if (!client.hasModPerms(interaction.member)) return client.youNeedRole(interaction, "mod");
 
 		const amount = interaction.options.getInteger("amount", true);
@@ -9,7 +10,8 @@ export default {
 		
 		const user = interaction.options.getUser("user");
 
-		interaction.channel?.messages.fetch({limit: amount}).then(async msgs => {
+		interaction.channel?.messages.fetch({ limit: amount }).then(async msgs => {
+			if (interaction.channel?.type === Discord.ChannelType.GuildStageVoice) return;
 			if (user) {
 				await interaction.channel?.bulkDelete(msgs.filter(x => x.author.id === user.id));
 			} else await interaction.channel?.bulkDelete(msgs);

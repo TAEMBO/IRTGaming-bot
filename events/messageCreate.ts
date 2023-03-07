@@ -23,6 +23,7 @@ export default async (client: YClient, message: Discord.Message) => {
 				.setTimestamp()]
 		});
     } else {
+		if (message.channel.type === Discord.ChannelType.GuildStageVoice) return;
 		let automodded = false;
 
 		/* judge-your-build-event message filter; only allow messages that contain an image

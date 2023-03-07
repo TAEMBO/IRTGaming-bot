@@ -10,12 +10,11 @@ client.init().then(() => {
 	client.on("ready", async () => {
 		await client.guilds.fetch(client.config.mainServer.id).then(async guild => {
 			await guild.members.fetch();
-			setInterval(() => guild.invites.fetch().then(invs=> invs.forEach((inv) => client.invites.set(inv.code, {uses: inv.uses, creator: inv.inviter?.id}))), 500000);
+			setInterval(() => guild.invites.fetch().then(invs => invs.forEach(inv => client.invites.set(inv.code, { uses: inv.uses, creator: inv.inviter?.id }))), 500000);
 			if (client.config.botSwitches.registerCommands) guild.commands.set(client.registery).catch(e => console.log(`Couldn't register commands bcuz: ${e}`));
 		});
 
 		// Playing: 0 & 1, Listening: 2, Watching: 3, N/A: 4, Competing in: 5
-		client.user?.setPresence(client.config.botPresence);
 		setInterval(() => client.user?.setPresence(client.config.botPresence), 1800000);
 	
 		const channel = client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel;
@@ -28,9 +27,9 @@ client.init().then(() => {
 // Error handler
 function logError(error: Error, from: string) {
 	console.log(client.timeLog('\x1b[31m'), error); // vvv I'm well aware my internet is bad, I don't need my own bot to rub it in
-	if (client.config.botSwitches.errorNotify && !['Request aborted', 'getaddrinfo ENOTFOUND discord.com'].includes(error.message)) {
-		const channel = client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel | null;
-		channel?.send({content: `<@${client.config.devWhitelist[0]}>`, embeds: [new client.embed().setTitle(`Error Caught - ${error.message}`).setColor("#420420").setDescription(`\`\`\`ansi\n${error.stack?.replaceAll(' at ', ' [31mat[37m ').replaceAll(__dirname, `[33m${__dirname}[37m`).slice(0, 2500)}\`\`\``).setTimestamp().setFooter({text: from})]});
+	if (client.config.botSwitches.errorNotify && !['Request aborted', 'getaddrinfo ENOTFOUND discord.com'].includes(error.message) && client.isReady()) {
+		const channel = client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel
+		channel.send({content: `<@${client.config.devWhitelist[0]}>`, embeds: [new client.embed().setTitle(`Error Caught - ${error.message}`).setColor("#420420").setDescription(`\`\`\`ansi\n${error.stack?.replaceAll(' at ', ' [31mat[37m ').replaceAll(__dirname, `[33m${__dirname}[37m`).slice(0, 2500)}\`\`\``).setTimestamp().setFooter({text: from})]});
 	}
 }
 process.on('unhandledRejection', (error: Error) => logError(error, 'unhandledRejection'));

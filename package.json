@@ -13,6 +13,7 @@
     "@types/ftp": "^0.3.33",
     "@types/ms": "^0.7.31",
     "canvas": "^2.10.2",
+    "discord-api-types": "^0.37.35",
     "discord.js": "^14.7.1",
     "ftp": "0.3.10",
     "moment": "2.29.4",

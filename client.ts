@@ -9,6 +9,7 @@ import playerTimes from './schemas/playerTimes';
 import watchList from './schemas/watchList';
 import reminders from './schemas/reminders';
 import tokens from './tokens.json';
+import { Config, FSCache, YTCache, Tokens, repeatedMessages } from './interfaces';
 let importConfig: Config;
 try { 
     importConfig = require('./test-config.json');
@@ -17,20 +18,19 @@ try {
     importConfig = require('./config.json');
     console.log('\x1b[32mStartup');
 }
-import { Config, FSCache, YTCache, Tokens, repeatedMessages } from './interfaces';
-import { bannedWords, TFlist, FMlist } from "./database";
 
 export default class YClient extends Client {
     config: Config; tokens: Tokens;
     embed: typeof Discord.EmbedBuilder; collection: typeof Discord.Collection; messageCollector: typeof Discord.MessageCollector; attachmentBuilder: typeof Discord.AttachmentBuilder; 
     games: Discord.Collection<string, any>; commands: Discord.Collection<string, any>; registery: Array<Discord.ApplicationCommandDataResolvable>;
     repeatedMessages: repeatedMessages; FSCache: FSCache; YTCache: YTCache; invites: Map<string, { uses: number | null, creator: string | undefined}>;
-    bannedWords: bannedWords; TFlist: TFlist; FMlist: FMlist; userLevels: userLevels; punishments: punishments; watchList: watchList; playerTimes: playerTimes; reminders: reminders;
+    bannedWords: localDatabase; TFlist: localDatabase; FMlist: localDatabase; userLevels: userLevels; punishments: punishments; watchList: watchList; playerTimes: playerTimes; reminders: reminders;
     constructor() {
         super({
-            intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildBans, GatewayIntentBits.GuildInvites, GatewayIntentBits.GuildPresences, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildVoiceStates],
+            intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration, GatewayIntentBits.GuildInvites, GatewayIntentBits.GuildPresences, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildVoiceStates],
             partials: [Partials.Channel, Partials.Message, Partials.Reaction],
-            ws: {properties: {browser: "Discord iOS"}}
+            ws: { properties: { browser: "Discord iOS" } },
+            presence: importConfig.botPresence
         });
         this.invites = new Map();
         this.tokens = tokens as Tokens;
@@ -61,9 +61,9 @@ export default class YClient extends Client {
         this.watchList = new watchList(this);
         this.playerTimes = new playerTimes(this);
         this.reminders = new reminders(this);
-        this.bannedWords = new bannedWords();
-        this.TFlist = new TFlist();
-        this.FMlist = new FMlist();
+        this.bannedWords = new localDatabase('bannedWords');
+        this.TFlist = new localDatabase('TFlist');
+        this.FMlist = new localDatabase('FMlist');
     }
     async init() {
         await this.login(this.tokens.token);
@@ -176,4 +176,22 @@ export default class YClient extends Client {
         await interaction.deferReply();
         await client.punishments.addPunishment(type, { time, interaction }, interaction.user.id, reason, User, GuildMember);
     }
+}
+
+class localDatabase {
+	public _path: string;
+	public _content: Array<string>;
+	constructor(fileName: string) {
+		this._path = `./databases/${fileName}.json`;
+		this._content = [];
+	}
+	add(data: string) {
+		this._content.push(data);
+		fs.writeFileSync(this._path, JSON.stringify(this._content, null, 2));
+	}
+	remove(data: string) {
+		this._content = this._content.filter(x => x !== data);
+		fs.writeFileSync(this._path, JSON.stringify(this._content, null, 2));
+	}
+	initLoad = () => this._content = JSON.parse(fs.readFileSync(this._path, 'utf8'));
 }

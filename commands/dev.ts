@@ -78,7 +78,10 @@ export default {
 				fs.writeFileSync('./databases/dailyMsgs.json', JSON.stringify(newData));
 				interaction.reply(`<@${member.id}>'s new total set to \`${newTotal}\``);
 			},
-			logs: () => interaction.reply({files: ['../../.pm2/logs/IRTBot-out-0.log']}).catch((err: Error) => (interaction.channel as Discord.TextChannel).send(err.message)),
+			logs: () => {
+				const logType = interaction.options.getString('logType', true) as 'out' | 'error';
+				interaction.reply({files: [`../../.pm2/logs/IRTBot-${logType}-0.log`]}).catch((err: Error) => (interaction.channel as Discord.TextChannel).send(err.message));
+			},
 			dz: () => interaction.reply('PC has committed iWoke:tm:').then(() => exec('start C:/WakeOnLAN/WakeOnLanC.exe -w -m Desktop')),
 			presence: () => {
 				function convertType(Type?: number) {
@@ -164,7 +167,13 @@ export default {
 				.setRequired(true)))
 		.addSubcommand(x=>x
 			.setName('logs')
-			.setDescription('Retrieve output log'))
+			.setDescription('Retrieve output log')
+			.addStringOption(x=>x
+				.setName('logType')
+				.setDescription('The type of PM2 log to send')
+				.addChoices(
+					{ name: 'Log', value: 'log' },
+					{ name: 'Error', value: 'error' })))
 		.addSubcommand(x=>x
 			.setName('dz')
 			.setDescription('Wheezing Over Life'))

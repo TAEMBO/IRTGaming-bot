@@ -42,13 +42,10 @@ export default {
 			role: () => {
 				const role = interaction.options.getRole("role", true);
 				const member = interaction.options.getMember("member") as Discord.GuildMember;
-				let err = false;
 
 				if (member.roles.cache.has(role.id)) {
-					member.roles.remove(role.id).catch((e) => {interaction.reply(e.message); err = true}).then(()=> {if (!err) interaction.reply('Role removed');});
-				} else {
-					member.roles.add(role.id).catch((e) => {interaction.reply(e.message); err = true}).then(()=> {if (!err) interaction.reply('Role added');});
-				}
+					member.roles.remove(role.id).then(() => interaction.reply('Role removed')).catch((e: Error) => interaction.reply(e.message));
+				} else member.roles.add(role.id).then(() => interaction.reply('Role added')).catch((e: Error) => interaction.reply(e.message));
 			},
 			file: () => interaction.reply({files: [`./databases/${interaction.options.getString('file', true)}.json`]}).catch((e: Error) => (interaction.channel as Discord.TextChannel).send(e.message)),
 			statsgraph: () => {

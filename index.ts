@@ -25,10 +25,9 @@ client.init().then(() => {
 });
 
 // Error handler
-function logError(error: Error, from: string) {
-	console.log(client.timeLog('\x1b[31m'), error); // vvv I'm well aware my internet is bad, I don't need my own bot to rub it in
+function logError(error: Error, from: string) { // I'm well aware my internet is bad, I don't need my own bot to rub it in
 	if (client.config.botSwitches.errorNotify && !['Request aborted', 'getaddrinfo ENOTFOUND discord.com'].includes(error.message) && client.isReady()) {
-		const channel = client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel
+		const channel = client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel;
 		channel.send({content: `<@${client.config.devWhitelist[0]}>`, embeds: [new client.embed().setTitle(`Error Caught - ${error.message}`).setColor("#420420").setDescription(`\`\`\`ansi\n${error.stack?.replaceAll(' at ', ' [31mat[37m ').replaceAll(__dirname, `[33m${__dirname}[37m`).slice(0, 2500)}\`\`\``).setTimestamp().setFooter({text: from})]});
 	}
 }

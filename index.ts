@@ -45,7 +45,7 @@ setInterval(async () => {
 				.setTitle('Reminder')
 				.setColor(client.config.embedColor)
 				.setDescription(`\`\`\`${reminder.content}\`\`\``)
-			]}));
+			]}).catch(() => console.log(client.timeLog('\x1b[31m'), `Failed to remind ${User.tag}`)));
 			await client.reminders._content.findByIdAndDelete(reminder._id);
 			console.log(client.timeLog('\x1b[33m'), 'REMINDER EXECUTE', reminder);
 		});

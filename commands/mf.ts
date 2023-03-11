@@ -56,8 +56,7 @@ export default {
             {name: 'Farm 7', value: 'mffarm7'},
             {name: 'Farm 8', value: 'mffarm8'},
             {name: 'Farm 9', value: 'mffarm9'},
-            {name: 'Farm 10', value: 'mffarm10'},
-            {name: 'Farm 11', value: 'mffarm11'}
+            {name: 'Farm 10', value: 'mffarm10'}
         )
         .setRequired(true))
 };

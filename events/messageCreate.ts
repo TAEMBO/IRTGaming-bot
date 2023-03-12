@@ -5,7 +5,7 @@ export default async (client: YClient, message: Discord.Message) => {
     if ((!client.config.botSwitches.commands && !client.config.devWhitelist.includes(message.author.id)) || message.partial || message.author.bot) return;
 	//   ^^^     Bot is set to ignore commands and non-dev sent a message, ignore the message.      ^^^
 
-	const msg = message.content.toLowerCase();
+	const msg = message.content.replaceAll('\n', ' ').toLowerCase();
 	const msgarr = msg.split(' ');
 
 	if (!message.inGuild()) {
@@ -34,7 +34,7 @@ export default async (client: YClient, message: Discord.Message) => {
 		// useless staff ping mute
 		if (message.mentions.roles.some(mentionedRole => mentionedRole.id === client.config.mainServer.roles.mpstaff)) {
 			console.log(client.timeLog('\x1b[35m'), `${message.author.tag} mentioned staff role`);
-			const filter = (x: any) => client.isMPStaff(x.member) && x.content.toLowerCase() === "y";
+			const filter = (x: any) => client.isMPStaff(x.member) && msg === "y";
 			message.channel.awaitMessages({ filter, max: 1, time: 60000, errors: ["time"]}).then(async collected => {
 				const colMsg = collected.first() as Discord.Message;
 				console.log(client.timeLog('\x1b[35m'), `Received "y" from ${colMsg.author.tag}, indicating to mute`);
@@ -87,10 +87,47 @@ export default async (client: YClient, message: Discord.Message) => {
 				client.repeatedMessages[message.author.id].data.set(message.createdTimestamp, { type, channel: message.channel.id });
 			}
 		}
+		function combos(word: string) {
+			let val = [];
+			let chop = word[0];
+			for (let i = 1; i <= word.length; i++) {
+				if (chop[0] == word[i]) {
+					chop += word[i];
+				} else {
+					val.push(chop);
+					chop = word[i];
+				}
+			}
+			let arr = [];
+			for (let i = 0; i < val.length; i++) {
+				let temp = [];
+				if (val[i].length >= 2) temp.push(val[i][0].repeat(2));
+				temp.push(val[i][0]);
+				arr.push(temp);
+			}
+			return arr;
+		}
+		function allPossibleCases(arr: Array<Array<string>>): Array<string> {
+			if (arr.length === 1) return arr[0];
+			var result = [];
+			var allCasesOfRest = allPossibleCases(arr.slice(1));
+			for (var i = 0; i < allCasesOfRest.length; i++) {
+				for (var j = 0; j < arr[0].length; j++) result.push(arr[0][j] + allCasesOfRest[i]);
+			}
+			return result;
+		}
+		const getAllCombos = (message: string) => message.split(" ").map(w => {
+			if (/(.)\1{1,}/.test(w)) {
+				return allPossibleCases(combos(w)).join(' ');
+			} else return w;
+		});
+		let newMsg = msg;
+		new Map([[/!/g, "i"], [/@/g, "a"], [/\$/g, "s"], [/3/g, "e"], [/1/g, "i"], [/¡/g, "i"],[/5/g, "s"], [/0/g, "o"], [/4/g, "h"], [/7/g, "t"], [/9/g, "g"], [/6/g, "b"], [/8/g, "b"]]).forEach((str, reg) => newMsg = newMsg.replace(reg, str));
+		const combedMsg = getAllCombos(newMsg.replace(/[^a-zA-Z\s]/g, "")).join(' ').replace(/ +(?= )/g, "").split(' ');
 
 		// RepeatedMessages
 		if (client.config.botSwitches.automod && !client.hasModPerms(message.member as Discord.GuildMember)) {
-			if (client.bannedWords._content.some(x => msgarr.includes(x)) && !Whitelist.includes(message.channel.id)) { // Banned words
+			if (client.bannedWords._content.some(x => combedMsg.includes(x)) && !Whitelist.includes(message.channel.id)) { // Banned words
 				automodded = true;
 				message.delete();
 				message.channel.send('That word is banned here.').then(x => setTimeout(() => x.delete(), 5000));

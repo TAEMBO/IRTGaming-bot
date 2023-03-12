@@ -18,7 +18,7 @@ async function FSstatsAll(client: YClient, serverURLdss: string, embed: Discord.
     if (DSSFetch.slots.used !== 0) {
         totalCount.push(DSSFetch.slots.used)
         const playerInfo: Array<string> = [];
-        const watchList = await client.watchList._content.find({});
+        const watchList = await client.watchList._content.find();
 
         DSSFetch.slots.players.filter(x=>x.isUsed).forEach(player => {
             const playTimeHrs = Math.floor(player.uptime / 60);
@@ -186,7 +186,7 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
     const ty = graphOrigin[1] + graphSize[1] + (textSize);
     ctx.fillText('time ->', tx, ty);
 
-    const watchList = await client.watchList._content.find({});
+    const watchList = await client.watchList._content.find();
 
     FSserver.slots.players.filter(x=>x.isUsed).forEach(player => {
         const playTimeHrs = Math.floor(player.uptime / 60);
@@ -239,7 +239,7 @@ export default {
             const player = interaction.options.getString('name');
             
             if (!player) {
-                const playerTimesData = (await client.playerTimes._content.find({})).sort((a, b) => b.time - a.time).slice(0, 20);
+                const playerTimesData = (await client.playerTimes._content.find()).sort((a, b) => b.time - a.time).slice(0, 20);
                 const leaderboard = playerTimesData.map((x, i) => [
                     `**${i + 1}.** \`${x._id}\``,
                     client.FMlist._content.includes(x._id) ? ':farmer:' : '',

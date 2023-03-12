@@ -5,9 +5,9 @@ export default {
 		if (!client.hasModPerms(interaction.member) && !client.config.devWhitelist.includes(interaction.member.id)) return client.youNeedRole(interaction, "mod");
 		const word = interaction.options.getString("word", true);
 
-		if (client.bannedWords._content.includes(word)) {
+		if (!client.bannedWords._content.includes(word)) {
 			client.bannedWords.add(word);
-			interaction.reply(`Successfully added \`${word}\` to bannedWords list`);
+			interaction.reply(`Successfully added to bannedWords list`);
 		} else interaction.reply('That word is already added');
 	},
 	data: new SlashCommandBuilder()

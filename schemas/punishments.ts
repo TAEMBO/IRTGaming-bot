@@ -28,7 +28,7 @@ export default class punishments extends Schema {
 		this.client = client;
 		this._content = Schema;
 	};
-    createId = async () => Math.max(...(await this._content.find({})).map(x => x.id), 0) + 1;
+    createId = async () => Math.max(...(await this._content.find()).map(x => x.id), 0) + 1;
 
 	async makeModlogEntry(punishment: Punishment) {
         // format data into embed
@@ -95,15 +95,17 @@ export default class punishments extends Schema {
 
 		if (['ban', 'softban'].includes(type)) {
 			const banned = await guild.bans.fetch(User.id).catch(() => undefined);
-			if (!banned) {
-				punResult = await guild.bans.create(User.id, { reason: auditLogReason, deleteMessageSeconds: type == 'softban' ? 86400 : undefined }).catch((err: Error) => err.message);
-			} else punResult = 'User is already banned.';
-		} else if (type == 'kick') {
-			punResult = await GuildMember?.kick(auditLogReason).catch((err: Error) => err.message);
-		} else if (type == 'mute') punResult = await GuildMember?.timeout(timeInMillis, auditLogReason).catch((err: Error) => err.message);
+			if (banned) {
+				punResult = 'User is already banned.';
+			} else punResult = await guild.bans.create(User.id, { reason: auditLogReason, deleteMessageSeconds: type === 'softban' ? 86400 : undefined }).catch((err: Error) => err.message);
+		} else if (type === 'mute') {
+			if (GuildMember?.communicationDisabledUntil) {
+				punResult = 'Member is already muted.';
+			} else punResult = await GuildMember?.timeout(timeInMillis, auditLogReason).catch((err: Error) => err.message);
+		} else if (type === 'kick') punResult = await GuildMember?.kick(auditLogReason).catch((err: Error) => err.message);
 
 		// If type was softban and it was successful, continue with softban (unban)
-		if (type == 'softban' && typeof punResult != 'string') punResult = await guild.bans.remove(User.id, auditLogReason).catch((err: Error) => err.message);
+		if (type === 'softban' && typeof punResult !== 'string') punResult = await guild.bans.remove(User.id, auditLogReason).catch((err: Error) => err.message);
 
 		if (timeInMillis && ['mute', 'ban'].includes(type)) { // If type is mute or ban, specify duration and endTime
 			punData.endTime = now + timeInMillis;

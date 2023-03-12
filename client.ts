@@ -22,7 +22,7 @@ try {
 export default class YClient extends Client {
     config: Config; tokens: Tokens;
     embed: typeof Discord.EmbedBuilder; collection: typeof Discord.Collection; messageCollector: typeof Discord.MessageCollector; attachmentBuilder: typeof Discord.AttachmentBuilder; 
-    games: Discord.Collection<string, any>; commands: Discord.Collection<string, any>; registery: Array<Discord.ApplicationCommandDataResolvable>;
+    games: Discord.Collection<string, any>; commands: Discord.Collection<string, any>; registry: Array<Discord.ApplicationCommandDataResolvable>;
     repeatedMessages: repeatedMessages; FSCache: FSCache; YTCache: YTCache; invites: Map<string, { uses: number | null, creator: string | undefined}>;
     bannedWords: localDatabase; TFlist: localDatabase; FMlist: localDatabase; userLevels: userLevels; punishments: punishments; watchList: watchList; playerTimes: playerTimes; reminders: reminders;
     constructor() {
@@ -41,7 +41,7 @@ export default class YClient extends Client {
         this.attachmentBuilder = Discord.AttachmentBuilder;
         this.games = new this.collection();
         this.commands = new this.collection();
-        this.registery = [];
+        this.registry = [];
         this.setMaxListeners(100);
         this.repeatedMessages = {};
         this.FSCache = {
@@ -58,9 +58,9 @@ export default class YClient extends Client {
         };
         this.userLevels = new userLevels(this);
         this.punishments = new punishments(this);
-        this.watchList = new watchList(this);
-        this.playerTimes = new playerTimes(this);
-        this.reminders = new reminders(this);
+        this.watchList = new watchList();
+        this.playerTimes = new playerTimes();
+        this.reminders = new reminders();
         this.bannedWords = new localDatabase('bannedWords');
         this.TFlist = new localDatabase('TFlist');
         this.FMlist = new localDatabase('FMlist');
@@ -85,15 +85,15 @@ export default class YClient extends Client {
         fs.readdirSync('./events').forEach((file, index, arr) => {
     	    const eventFile = require(`./events/${file}`);
 	        this.on(file.replace('.ts', ''), async (...args) => eventFile.default(this, ...args));
-            if (index == (arr.length - 1)) console.log(this.timeLog('\x1b[35m'), 'Event files compiled');
+            if (index == (arr.length - 1)) console.log(this.timeLog('\x1b[35m'), 'Events deployed');
         });
 
         // Command handler
         fs.readdirSync("./commands").forEach((file, index, arr) => {
             const commandFile = require(`./commands/${file}`);
 	        this.commands.set(commandFile.default.data.name, commandFile);
-	        this.registery.push(commandFile.default.data.toJSON());
-            if (index == (arr.length - 1)) console.log(this.timeLog('\x1b[35m'), 'Command files compiled');
+	        this.registry.push(commandFile.default.data.toJSON());
+            if (index == (arr.length - 1)) console.log(this.timeLog('\x1b[35m'), 'Commands deployed');
         });
     }
     hasModPerms = (guildMember: Discord.GuildMember) => this.config.mainServer.staffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
@@ -103,6 +103,17 @@ export default class YClient extends Client {
     youNeedRole = (interaction: Discord.ChatInputCommandInteraction<"cached">, role: string) => interaction.reply(`You need the <@&${this.config.mainServer.roles[role]}> role to use this command`);
 
     timeLog = (color: string) => color + `[${moment().format('HH:mm:ss')}]`;
+
+    YTLoop = async (YTChannelID: string, YTChannelName: string) => await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${YTChannelID}`, { signal: AbortSignal.timeout(5000) }).then(async response => {
+        const Data = xml2js(await response.text(), { compact: true }) as any;
+
+        if (!this.YTCache[YTChannelID]) return this.YTCache[YTChannelID] = Data.feed.entry[0]['yt:videoId']._text;
+
+        if (Data.feed.entry[1]['yt:videoId']._text === this.YTCache[YTChannelID]) {
+            this.YTCache[YTChannelID] = Data.feed.entry[0]['yt:videoId']._text;
+            (this.channels.resolve(this.config.mainServer.channels.vidsandstreams) as Discord.TextChannel).send(`**${YTChannelName}** just uploaded a new video!\n${Data.feed.entry[0].link._attributes.href}`);
+        }
+    }).catch(() => console.log(this.timeLog('\x1b[31m'), `${YTChannelName} YT fail`));
 
     formatTime(integer: number, accuracy = 1, options?: { longNames: boolean, commas: boolean }) {
         let achievedAccuracy = 0;
@@ -134,26 +145,6 @@ export default class YClient extends Client {
             }
         } return text.trim() as string;
     }
-    async YTLoop(YTChannelID: string, YTChannelName: string) {
-        let Data: any;
-        try {
-            await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${YTChannelID}`, { signal: AbortSignal.timeout(5000) }).then(async (response) => {
-                Data = xml2js(await response.text(), {compact: true});
-            });
-        } catch (err) {
-            console.log(this.timeLog('\x1b[31m'), `${YTChannelName} YT fail`);
-            return;
-        }
-
-        if (this.YTCache[YTChannelID] == undefined) {
-            this.YTCache[YTChannelID] = Data.feed.entry[0]['yt:videoId']._text;
-            return;
-        }
-        if (Data.feed.entry[1]['yt:videoId']._text == this.YTCache[YTChannelID]) {
-            this.YTCache[YTChannelID] = Data.feed.entry[0]['yt:videoId']._text;
-            (this.channels.resolve(this.config.mainServer.channels.vidsandstreams) as Discord.TextChannel).send(`**${YTChannelName}** just uploaded a new video!\n${Data.feed.entry[0].link._attributes.href}`)
-        }
-    }
     formatBytes(bytes: number, decimals: number, bitsOrBytes: 1000 | 1024) { // Credits to Toast for making this
         if (bytes === 0) return '0 Bytes';
         const k = bitsOrBytes;
@@ -170,8 +161,8 @@ export default class YClient extends Client {
         const GuildMember = interaction.options.getMember('member') ?? undefined;
         const User = interaction.options.getUser('member', true);
 
-        if (interaction.user.id == User.id) return interaction.reply(`You cannot ${type} yourself.`);
-        if (!GuildMember && type != 'ban') return interaction.reply(`You cannot ${type} someone who is not in the server.`);
+        if (interaction.user.id === User.id) return interaction.reply(`You cannot ${type} yourself.`);
+        if (!GuildMember && type !== 'ban') return interaction.reply(`You cannot ${type} someone who is not in the server.`);
 
         await interaction.deferReply();
         await client.punishments.addPunishment(type, { time, interaction }, interaction.user.id, reason, User, GuildMember);
@@ -187,11 +178,11 @@ class localDatabase {
 	}
 	add(data: string) {
 		this._content.push(data);
-		fs.writeFileSync(this._path, JSON.stringify(this._content, null, 2));
+		fs.writeFileSync(this._path, JSON.stringify(this._content, null, 4));
 	}
 	remove(data: string) {
 		this._content = this._content.filter(x => x !== data);
-		fs.writeFileSync(this._path, JSON.stringify(this._content, null, 2));
+		fs.writeFileSync(this._path, JSON.stringify(this._content, null, 4));
 	}
 	initLoad = () => this._content = JSON.parse(fs.readFileSync(this._path, 'utf8'));
 }

@@ -2,7 +2,6 @@ import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client';
 import util from 'node:util';
 import fs from 'node:fs';
-import path from 'node:path';
 import { exec } from 'child_process';
 
 export default {
@@ -11,14 +10,18 @@ export default {
 		({
 			eval: async () => {
 				const code = interaction.options.getString("code", true);
+				const useAsync = Boolean(interaction.options.getBoolean("async", false));
 				let output = 'error';
+				
 				try {
-					output = await eval(code);
+					output = await eval(useAsync ? `(async () => { ${code} })()` : code);
 				} catch (err: any) {
 					const embed = new client.embed()
 						.setTitle('__Eval__')
-						.addFields({name: 'Input', value: `\`\`\`js\n${code.slice(0, 1010)}\n\`\`\``}, {name: 'Output', value: `\`\`\`\n${err}\n\`\`\``})
-						.setColor("#ff0000");
+						.setColor("#ff0000")
+						.addFields(
+							{ name: 'Input', value: `\`\`\`js\n${code.slice(0, 1010)}\n\`\`\``},
+							{ name: 'Output', value: `\`\`\`\n${err}\n\`\`\`` });
 					interaction.reply({embeds: [embed]}).catch(() => (interaction.channel as Discord.TextChannel).send({embeds: [embed]})).then(x => {
 						const filter = (x: any) => x.content === 'stack' && x.author.id === interaction.user.id;
 						const messagecollector = (interaction.channel as Discord.TextChannel).createMessageCollector({ filter, max: 1, time: 60000 });
@@ -30,13 +33,15 @@ export default {
 					output = 'js\n' + util.formatWithOptions({ depth: 1 }, '%O', output);
 				} else output = '\n' + String(output);
 				
-				[client.token, client.tokens.fs.ps.login, client.tokens.fs.pg.login, client.tokens.fs.mf.login, client.tokens.ftp.ps.password, client.tokens.ftp.pg.password].forEach((login) => {
+				[client.token, client.tokens.fs.ps.login, client.tokens.fs.pg.login, client.tokens.fs.mf.login, client.tokens.ftp.ps.password, client.tokens.ftp.pg.password].forEach(login => {
 					output = output.replace(login as string, 'LOGIN_LEAK');
 				});
 				const embed = new client.embed()
 					.setTitle('__Eval__')
-					.addFields({name: 'Input', value:`\`\`\`js\n${code.slice(0, 1010)}\n\`\`\``}, {name: 'Output', value: `\`\`\`${output.slice(0, 1016)}\n\`\`\``})
-					.setColor(client.config.embedColor);
+					.setColor(client.config.embedColor)
+					.addFields(
+						{ name: 'Input', value: `\`\`\`js\n${code.slice(0, 1010)}\n\`\`\`` },
+						{ name: 'Output', value: `\`\`\`${output.slice(0, 1016)}\n\`\`\`` });
 				interaction.reply({embeds: [embed]}).catch(() => (interaction.channel as Discord.TextChannel).send({embeds: [embed]}));
 			},
 			role: () => {
@@ -53,19 +58,15 @@ export default {
 				interaction.reply(`Set to \`${client.config.statsGraphSize}\``);
 			},
 			restart: () => interaction.reply("Restarting...").then(() => exec('pm2 restart IRTBot')),
-			update: () => {
-				interaction.reply({content: "Pulling from repo...", fetchReply: true}).then(msg => {
-					exec('git pull', (error, stdout) => {
-						if (error) {
-							msg.edit(`Pull failed:\n\`\`\`${error.message}\`\`\``);
-						} else if (stdout.includes('Already up to date')) {
-							msg.edit(`Pull aborted:\nUp-to-date`);
-						} else setTimeout(() => msg.edit('Restarting...').then(() => exec('pm2 restart IRTBot')), 2500);
-					});
-				});
-			},
+			update: () => interaction.reply({content: "Pulling from repo...", fetchReply: true}).then(msg => exec('git pull', (error, stdout) => {
+				if (error) {
+					msg.edit(`Pull failed:\n\`\`\`${error.message}\`\`\``);
+				} else if (stdout.includes('Already up to date')) {
+					msg.edit(`Pull aborted:\nUp-to-date`);
+				} else setTimeout(() => msg.edit('Restarting...').then(() => exec('pm2 restart IRTBot')), 2500);
+			})),
 			increment: async () => {
-				const data = JSON.parse(fs.readFileSync('./databases/dailyMsgs.json', 'utf8'));
+				const data: Array<Array<number>> = JSON.parse(fs.readFileSync('./databases/dailyMsgs.json', 'utf8'));
 				const member = interaction.options.getMember('member') as Discord.GuildMember;
 				const newTotal = interaction.options.getInteger('total', true);
 				const oldData = await client.userLevels._content.findById(member.id);
@@ -74,14 +75,11 @@ export default {
 				const newData: Array<Array<number>> = [];
 
 				await client.userLevels._content.findByIdAndUpdate(member.id, { messages: newTotal });
-				data.forEach((x: Array<number>) => newData.push([x[0], (x[1] + (newTotal - oldData.messages))]));
-				fs.writeFileSync('./databases/dailyMsgs.json', JSON.stringify(newData));
+				data.forEach(x => newData.push([x[0], (x[1] + (newTotal - oldData.messages))]));
+				fs.writeFileSync('./databases/dailyMsgs.json', JSON.stringify(newData, null, 4));
 				interaction.reply(`<@${member.id}>'s new total set to \`${newTotal}\``);
 			},
-			logs: () => {
-				const logType = interaction.options.getString('logType', true) as 'out' | 'error';
-				interaction.reply({files: [`../../.pm2/logs/IRTBot-${logType}-0.log`]}).catch((err: Error) => (interaction.channel as Discord.TextChannel).send(err.message));
-			},
+			logs: () => interaction.reply({files: [`../../.pm2/logs/IRTBot-${interaction.options.getString('logtype', true)}-0.log`]}).catch((err: Error) => (interaction.channel as Discord.TextChannel).send(err.message)),
 			dz: () => interaction.reply('PC has committed iWoke:tm:').then(() => exec('start C:/WakeOnLAN/WakeOnLanC.exe -w -m Desktop')),
 			presence: () => {
 				function convertType(Type?: number) {
@@ -105,7 +103,6 @@ export default {
 				client.user?.setPresence(client.config.botPresence);
 
 				interaction.reply([
-					'Presence updated:',
 					`Status: **${client.config.botPresence.status}**`,
 					`Type: **${convertType(currentActivities[0].type)}**`,
 					`Name: **${currentActivities[0].name}**`
@@ -122,7 +119,10 @@ export default {
 			.addStringOption(x=>x
 				.setName("code")
 				.setDescription("The code to execute")
-				.setRequired(true)))
+				.setRequired(true))
+			.addBooleanOption(x=>x
+				.setName('async')
+				.setDescription('Whether to wrap the code in an async block or not')))
 		.addSubcommand(x=>x
 			.setName('restart')
 			.setDescription('Restart the bot'))
@@ -169,7 +169,7 @@ export default {
 			.setName('logs')
 			.setDescription('Retrieve output log')
 			.addStringOption(x=>x
-				.setName('logType')
+				.setName('logtype')
 				.setDescription('The type of PM2 log to send')
 				.addChoices(
 					{ name: 'Log', value: 'log' },

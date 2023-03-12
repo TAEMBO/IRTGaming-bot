@@ -5,7 +5,7 @@ import canvas from 'canvas';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
 		const subCmd = interaction.options.getSubcommand();
-		const allData = await client.userLevels._content.find({});
+		const allData = await client.userLevels._content.find();
 
 		if (subCmd === "leaderboard") {
 			const messageCountsTotal = allData.reduce((a, b) => a + b.messages, 0);

@@ -1,6 +1,4 @@
 import mongoose from 'mongoose';
-import Discord from 'discord.js';
-import YClient from '../client';
 
 const Schema = mongoose.model('reminders', new mongoose.Schema({
     _id: { type: String },
@@ -9,11 +7,9 @@ const Schema = mongoose.model('reminders', new mongoose.Schema({
 }, { versionKey: false }));
 
 export default class reminders extends Schema {
-	client: YClient;
 	_content: typeof Schema;
-	constructor(client: YClient) {
+	constructor() {
 		super();
-		this.client = client;
 		this._content = Schema;
 	}
 }

@@ -5,7 +5,7 @@ export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
 		if (!client.hasModPerms(interaction.member)) return client.youNeedRole(interaction, "mod");
 
-		const punishment = (await client.punishments._content.find({})).find(x => x._id === interaction.options.getInteger("case_id", true));
+		const punishment = (await client.punishments._content.find()).find(x => x._id === interaction.options.getInteger("case_id", true));
 		if (!punishment) return interaction.reply('That isn\'t a valid case ID');
 		if (punishment.expired) return interaction.reply('That case has already been overwritten');
 		if (['warn', 'mute'].includes(punishment.type) && interaction.member.roles.cache.has(client.config.mainServer.roles.helper)) return client.youNeedRole(interaction, "mod");

@@ -28,7 +28,7 @@ export default {
 			},
 			member: async () => {
 				const user = interaction.options.getUser("user", true);
-				const punishments = await client.punishments._content.find({});
+				const punishments = await client.punishments._content.find();
 				const userPunishmentsData = await client.punishments._content.find({ "member._id": user.id });
 				const userPunishments = userPunishmentsData.sort((a, b) => a.time - b.time).map(punishment => {
 					return {

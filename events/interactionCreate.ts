@@ -24,12 +24,10 @@ export default async (client: YClient, interaction: Discord.BaseInteraction) => 
 
             if (interaction.member.roles.cache.has(RoleID)) {
                 interaction.member.roles.remove(RoleID);
-                await interaction.reply({content: `You've been removed from <@&${RoleID}>`, ephemeral: true});
-                console.log(client.timeLog('\x1b[35m'), `Removed ${RoleID} from ${interaction.user.tag}`);
+                interaction.reply({content: `You've been removed from <@&${RoleID}>`, ephemeral: true});
             } else {
                 interaction.member.roles.add(RoleID);
-                await interaction.reply({content: `You've been added to <@&${RoleID}>`, ephemeral: true});
-                console.log(client.timeLog('\x1b[35m'), `Added ${RoleID} to ${interaction.user.tag}`);
+                interaction.reply({content: `You've been added to <@&${RoleID}>`, ephemeral: true});
             }
         } else if (interaction.customId.startsWith('sub-')) { // Subscriber role verification
             const args = interaction.customId.replace('sub-', '').split('-');

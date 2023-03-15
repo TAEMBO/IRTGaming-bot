@@ -171,8 +171,9 @@ export default {
 			.addStringOption(x=>x
 				.setName('logtype')
 				.setDescription('The type of PM2 log to send')
+				.setRequired(true)
 				.addChoices(
-					{ name: 'Log', value: 'log' },
+					{ name: 'Log', value: 'out' },
 					{ name: 'Error', value: 'error' })))
 		.addSubcommand(x=>x
 			.setName('dz')

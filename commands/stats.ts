@@ -35,7 +35,7 @@ async function FSstatsAll(client: YClient, serverURLdss: string, embed: Discord.
         embed.addFields({name: `${DSSFetch.server.name.replace('! ! IRTGaming|', '')} - ${serverSlots}`, value: `${playerInfo.join("\n")}`, inline: true})
     }
 }
-async function FSstats(client: YClient, interaction: Discord.CommandInteraction, serverURLdss: string, serverAcro: string) {
+async function FSstats(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">, serverURLdss: string, serverAcro: string) {
 
     const playerInfo: Array<string> = [];
     let FSFetch;
@@ -52,9 +52,7 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
 
     if (FSserver.slots.used === FSserver.slots.capacity) {
         Color = client.config.embedColorRed;
-    } else if (FSserver.slots.used > 9) {
-        Color = client.config.embedColorYellow;
-    }
+    } else if (FSserver.slots.used > 9) Color = client.config.embedColorYellow;
 
     const data: Array<number> = JSON.parse(fs.readFileSync(`./databases/${serverAcro.toUpperCase()}PlayerData.json`, 'utf8')).slice(client.config.statsGraphSize);
 
@@ -122,9 +120,9 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
     const getYCoordinate = (value: number) => ((1 - (value / second_graph_top)) * graphSize[1]) + graphOrigin[1];
     
     const gradient = ctx.createLinearGradient(0, graphOrigin[1], 0, graphOrigin[1] + graphSize[1]);
-    gradient.addColorStop(1 / 16, client.config.embedColorRed as string);
-    gradient.addColorStop(5 / 16, client.config.embedColorYellow as string);
-    gradient.addColorStop(12 / 16, client.config.embedColorGreen as string);
+    gradient.addColorStop(1 / 16, client.config.embedColorRed);
+    gradient.addColorStop(5 / 16, client.config.embedColorYellow);
+    gradient.addColorStop(12 / 16, client.config.embedColorGreen);
     
     let lastCoords: Array<number> = [];
     data.forEach((curPC: number /* current player count */, i: number) => {
@@ -143,9 +141,7 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
                 if (data[j] === curPC) newX += nodeWidth; else break;
             }
             ctx.lineTo(newX, y);
-        } else {
-            ctx.lineTo(x, y);
-        }
+        } else ctx.lineTo(x, y);
         lastCoords = [x, y];
         ctx.stroke();
         ctx.closePath();
@@ -209,14 +205,14 @@ async function FSstats(client: YClient, interaction: Discord.CommandInteraction,
         .setDescription(FSserver.slots.used == 0 ? '*No players online*' : playerInfo.join("\n"))
         .setImage('attachment://FSStats.png')
         .setColor(Color)
-    if (FSserver.slots.players.filter((x)=> x.isAdmin).length == 0 && client.FSCache[serverAcro].lastAdmin) embed.setTimestamp(client.FSCache[serverAcro].lastAdmin).setFooter({text: 'Admin last on'});
+    if (FSserver.slots.players.filter(x=>x.isAdmin).length == 0 && client.FSCache[serverAcro].lastAdmin) embed.setTimestamp(client.FSCache[serverAcro].lastAdmin).setFooter({text: 'Admin last on'});
 
-    interaction.reply({embeds: [embed], files: [Image]}).catch(() => (interaction.channel as Discord.TextChannel).send({embeds: [embed], files: [Image]}));
+    interaction.reply({embeds: [embed], files: [Image]}).catch(() => interaction.channel?.send({embeds: [embed], files: [Image]}) );
 }
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
-        if (['891791005098053682', '729823615096324166'].includes((interaction.channel as Discord.TextChannel).id) && !client.isMPStaff(interaction.member)) return interaction.reply({content: 'This command has [restrictions](https://discord.com/channels/552565546089054218/891791005098053682/991799952084828170) set, please use <#552583841936834560> for `/stats` commands.', ephemeral: true}); 
+        if (['891791005098053682', '729823615096324166'].includes(interaction.channel?.id as string) && !client.isMPStaff(interaction.member)) return interaction.reply({content: 'This command has [restrictions](https://discord.com/channels/552565546089054218/891791005098053682/991799952084828170) set, please use <#552583841936834560> for `/stats` commands.', ephemeral: true}); 
         const subCmd = interaction.options.getSubcommand() as 'ps' | 'pg' | 'all' | 'playertimes';
 
         if (subCmd === 'all') {
@@ -231,36 +227,67 @@ export default {
                 FSstatsAll(client, client.tokens.fs.mf.dss, embed, totalCount, failedFooter, 'MF')
             ]);
 
-            if (failedFooter.length != 0) embed.setFooter({text: failedFooter.join(', ')});
+            if (failedFooter.length > 0) embed.setFooter({text: failedFooter.join(', ')});
 
             embed.setTitle(`All Servers: ${totalCount.reduce((a, b) => a + b, 0)} online`);
             interaction.editReply({embeds: [embed]});
         } else if (subCmd === 'playertimes') {
-            const player = interaction.options.getString('name');
-            
-            if (!player) {
-                const playerTimesData = (await client.playerTimes._content.find()).sort((a, b) => b.time - a.time).slice(0, 20);
-                const leaderboard = playerTimesData.map((x, i) => [
-                    `**${i + 1}.** \`${x._id}\``,
+
+            client.playerTimes._content.find().then(playersData => {
+                const sortedData = playersData.sort((a, b) => b.time - a.time);
+                const player = interaction.options.getString('name');
+
+                const leaderboard = (data: Array<typeof sortedData[0]>, isFirstField: boolean) => data.map((x, i) => [
+                    `**${i + (isFirstField ? 1 : 26)}.** \`${x._id}\``,
                     client.FMlist._content.includes(x._id) ? ':farmer:' : '',
                     client.TFlist._content.includes(x._id) ? ':angel:' : '',
                     ' - ',
-                    client.formatTime((x.time *60*1000), 3, { commas: true, longNames: false })
+                    client.formatTime((x.time * 60 * 1000), 3, { commas: true, longNames: false })
                 ].join('')).join('\n');
-                interaction.reply({embeds: [new client.embed()
+
+                if (player) {
+                    const playerData = playersData.find(x => x._id === player);
+                    const isOnPS = client.FSCache.ps.players.some(x => x.name === player);
+                    const isOnPG = client.FSCache.pg.players.some(x => x.name === player);
+                    let resultText;
+    
+                    if (playerData) {
+                        let lastOnText: string;
+    
+                        if (isOnPS) {
+                            lastOnText = 'Right now (Public Silage)';
+                        } else if (isOnPG) {
+                            lastOnText = 'Right now (Public Grain)';
+                        } else lastOnText = `<t:${playerData.lastOn}:R>`;
+
+                        interaction.reply({embeds: [new client.embed()
+                            .setColor(client.config.embedColor)
+                            .setTitle([
+                                `Player - \`${playerData._id}\``,
+                                `Total time - **${client.formatTime(playerData.time * 60 * 1000, 3, { commas: true, longNames: false })}**`,
+                                `Leaderboard position - **#${playersData.indexOf(playerData) + 1}**`,
+                                `Time last on - **${lastOnText}**`
+                            ].join('\n'))
+                        ]});
+    
+                        resultText = `'s total time is **${client.formatTime(playerData.time * 60 * 1000, 3, { commas: true, longNames: false })}**, their position in the leaderboard is **#${playersData.indexOf(playerData) + 1}**, and ${lastOnText}`;
+                    } else interaction.reply('No data found with that name.');
+
+                } else interaction.reply({embeds: [new client.embed()
                     .setColor(client.config.embedColor)
-                    .setDescription(`Top 20 players with the most time spent\non IRTGaming FS22 servers since\n<t:1672560000>\n\n${leaderboard}`)
+                    .setDescription(`Top 50 players with the most time spenton IRTGaming FS22 servers since\n<t:1672560000>`)
+                    .addFields(
+                        { name: '\u200b', value: leaderboard(sortedData.slice(0, 25), true), inline: true },
+                        { name: '\u200b', value: leaderboard(sortedData.slice(25, 50), false), inline: true })
                 ]});
-            } else {
-                const playerData = await client.playerTimes._content.findById(player);
-                let resultText;
 
-                if (playerData) {
-                    resultText = `'s total time is **${client.formatTime(playerData.time*60*1000, 3, { commas: true, longNames: false })}** and the last time they were on was <t:${playerData.lastOn}:R>.`;
-                } else resultText = ` has no logged play time.`;
 
-                interaction.reply(`\`${player}\`${resultText}`);
-            }
+
+
+
+
+                
+            });
         } else FSstats(client, interaction, client.tokens.fs[subCmd].dss, subCmd);
     },
     data: new SlashCommandBuilder()

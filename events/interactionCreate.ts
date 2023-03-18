@@ -7,17 +7,12 @@ export default async (client: YClient, interaction: Discord.BaseInteraction) => 
     if (interaction.isChatInputCommand()) {
         const subCmd = interaction.options.getSubcommand(false);
         const commandFile = client.commands.get(interaction.commandName);
+
         console.log(client.timeLog('\x1b[37m'), `\x1b[32m${interaction.user.tag}\x1b[37m used \x1b[32m/${interaction.commandName} ${subCmd ?? ''}\x1b[37m in \x1b[32m#${interaction.channel.name}`);
         if (!client.config.botSwitches.commands && !client.config.devWhitelist.includes(interaction.user.id)) return interaction.reply('Commands are currently disabled.');
-        if (commandFile) {
-            try {
-                commandFile.default.run(client, interaction);
-                commandFile.uses ? commandFile.uses++ : commandFile.uses = 1;
-            } catch (error: any) {
-                console.log(`An error occured while running command "${commandFile.name}"`, error, error.stack);
-                return interaction.reply("An error occured while executing that command.");
-            }
-        }
+
+        commandFile.default.run(client, interaction);
+        commandFile.uses ? commandFile.uses++ : commandFile.uses = 1;
     } else if (interaction.isButton()) {
         if (interaction.customId.startsWith('reaction-') && client.config.botSwitches.buttonRoles) { // Button roles
             const RoleID = interaction.customId.replace('reaction-', '');
@@ -33,8 +28,7 @@ export default async (client: YClient, interaction: Discord.BaseInteraction) => 
             const args = interaction.customId.replace('sub-', '').split('-');
 
             if (args[0] === 'yes') {
-                const member = interaction.guild.members.cache.get(args[1]);
-                member?.roles.add(client.config.mainServer.roles.subscriber);
+                interaction.guild.members.cache.get(args[1])?.roles.add(client.config.mainServer.roles.subscriber);
                 interaction.reply('Accepted verification');
                 interaction.message.edit({components: []});
             } else {
@@ -44,7 +38,7 @@ export default async (client: YClient, interaction: Discord.BaseInteraction) => 
         } else if (interaction.customId === 'mpReport') {
             interaction.showModal(new ModalBuilder().setCustomId('mpReport').setTitle('MP Report').addComponents(
                 new ActionRowBuilder<TextInputBuilder>().addComponents(
-                    new TextInputBuilder().setCustomId('serverName').setLabel('Server name').setStyle(TextInputStyle.Short).setPlaceholder('Silage or Grain')),
+                    new TextInputBuilder().setCustomId('serverName').setLabel('Server name').setStyle(TextInputStyle.Short).setPlaceholder('Silage or Grain').setMaxLength(6)),
                 new ActionRowBuilder<TextInputBuilder>().addComponents(
                     new TextInputBuilder().setCustomId('playerNames').setLabel('Player names').setStyle(TextInputStyle.Short).setPlaceholder('Who\'s causing trouble? (skip if none)').setRequired(false)),
                 new ActionRowBuilder<TextInputBuilder>().addComponents(
@@ -66,18 +60,22 @@ export default async (client: YClient, interaction: Discord.BaseInteraction) => 
             const reason = interaction.fields.fields.get('reason')?.value as string;
             
             (client.channels.resolve('733828561215029268') as Discord.TextChannel).send({
-                content: `No role ping for now`,
+                content: client.reportCooldown.isActive ? undefined : `No role ping for now`,
                 embeds: [new client.embed()
                     .setTitle(`MP Report by ${interaction.user.tag}`)
                     .setColor(client.config.embedColor)
                     .setTimestamp()
                     .setDescription(`<@${interaction.user.id}>\n\`${interaction.user.id}\``)
                     .addFields(
-                        {name: 'Server', value: serverName},
-                        {name: 'Reported players', value: playerNames.length > 0 ? playerNames : '*No names provided*'},
-                        {name: 'Reason', value: reason})
+                        { name: 'Server', value: serverName },
+                        { name: 'Reported players', value: playerNames.length > 0 ? playerNames : '*No names provided*' },
+                        { name: 'Reason', value: reason })
                 ]
             });
+            
+            client.reportCooldown.isActive = true;
+            clearInterval(client.reportCooldown.timeout as NodeJS.Timeout);
+            client.reportCooldown.timeout = setTimeout(() => { client.reportCooldown.isActive = false; console.log('eee') }, 20000);
         }
     }
 }

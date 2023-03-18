@@ -29,10 +29,10 @@ interface FTPLogins {
 }
 
 export interface Config {
-    embedColor: Discord.ColorResolvable
-    embedColorGreen: Discord.ColorResolvable,
-    embedColorRed: Discord.ColorResolvable,
-    embedColorYellow: Discord.ColorResolvable,
+    embedColor: '#hexColor',
+    embedColorGreen: '#hexColor',
+    embedColorRed: '#hexColor',
+    embedColorYellow: '#hexColor',
     statsGraphSize: number,
     botPresence: Discord.PresenceData,
     botSwitches: {
@@ -109,10 +109,6 @@ export interface FSCacheServer {
     players: Array<FS_player>,
     status: undefined | "online" | "offline",
     lastAdmin: undefined | number
-}
-
-export interface YTCache {
-    [key: string]: undefined | string
 }
 
 export interface Punishment {
@@ -211,10 +207,6 @@ export interface FS_careerSavegame {
             slotUsage: string
         }
     }
-}
-
-export interface repeatedMessages {
-    [key: string]: { data: Discord.Collection<number, { type: string, channel: string }>, timeout: NodeJS.Timeout }
 }
 
 export interface banFormat {

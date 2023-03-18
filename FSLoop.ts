@@ -96,6 +96,7 @@ export default async (client: YClient, serverURLdss: string, serverURLcsg: strin
         return;
     } 
     const FSdss = await DSSFetch.json() as FS_data;
+    if (!FSdss.slots) return;
     const FScsg = xjs.xml2js(await CSGFetch.text(), { compact: true }).careerSavegame as FS_careerSavegame;
     const Players = FSdss.slots.players.filter(x=>x.isUsed);
     const watchList = await client.watchList._content.find();

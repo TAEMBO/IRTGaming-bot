@@ -6,7 +6,7 @@ export default {
         const time = interaction.options.getInteger("time", true);
         
         if (time > 21600) return interaction.reply('The slowmode limit is 6 hours (\`21600\` seconds).');
-        (interaction.channel as Discord.TextChannel).setRateLimitPerUser(time, `Done by ${interaction.user.tag}`)
+        interaction.channel?.setRateLimitPerUser(time, `Done by ${interaction.user.tag}`)
         if (time === 0) {
             interaction.reply('Slowmode removed.')
         } else return interaction.reply(`Slowmode set to \`${time}\` ${time === 1 ? 'second' : 'seconds'}.`)

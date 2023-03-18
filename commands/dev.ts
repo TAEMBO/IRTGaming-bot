@@ -22,9 +22,9 @@ export default {
 						.addFields(
 							{ name: 'Input', value: `\`\`\`js\n${code.slice(0, 1010)}\n\`\`\``},
 							{ name: 'Output', value: `\`\`\`\n${err}\n\`\`\`` });
-					interaction.reply({embeds: [embed]}).catch(() => (interaction.channel as Discord.TextChannel).send({embeds: [embed]})).then(x => {
+					interaction.reply({embeds: [embed]}).catch(() => interaction.channel?.send({embeds: [embed]})).then(x => {
 						const filter = (x: any) => x.content === 'stack' && x.author.id === interaction.user.id;
-						const messagecollector = (interaction.channel as Discord.TextChannel).createMessageCollector({ filter, max: 1, time: 60000 });
+						const messagecollector = interaction.channel?.createMessageCollector({ filter, max: 1, time: 60000 });
 						messagecollector?.on('collect', msg => { msg.reply({content: `\`\`\`\n${err.stack}\n\`\`\``, allowedMentions: { repliedUser: false }}) });
 					});
 					return;
@@ -42,7 +42,7 @@ export default {
 					.addFields(
 						{ name: 'Input', value: `\`\`\`js\n${code.slice(0, 1010)}\n\`\`\`` },
 						{ name: 'Output', value: `\`\`\`${output.slice(0, 1016)}\n\`\`\`` });
-				interaction.reply({embeds: [embed]}).catch(() => (interaction.channel as Discord.TextChannel).send({embeds: [embed]}));
+				interaction.reply({embeds: [embed]}).catch(() => interaction.channel?.send({embeds: [embed]}));
 			},
 			role: () => {
 				const role = interaction.options.getRole("role", true);
@@ -52,7 +52,7 @@ export default {
 					member.roles.remove(role.id).then(() => interaction.reply('Role removed')).catch((e: Error) => interaction.reply(e.message));
 				} else member.roles.add(role.id).then(() => interaction.reply('Role added')).catch((e: Error) => interaction.reply(e.message));
 			},
-			file: () => interaction.reply({files: [`./databases/${interaction.options.getString('file', true)}.json`]}).catch((e: Error) => (interaction.channel as Discord.TextChannel).send(e.message)),
+			file: () => interaction.reply({files: [`./databases/${interaction.options.getString('file', true)}.json`]}).catch((e: Error) => interaction.channel?.send(e.message)),
 			statsgraph: () => {
 				client.config.statsGraphSize = -(interaction.options.getInteger('number', true));
 				interaction.reply(`Set to \`${client.config.statsGraphSize}\``);
@@ -79,7 +79,7 @@ export default {
 				fs.writeFileSync('./databases/dailyMsgs.json', JSON.stringify(newData, null, 4));
 				interaction.reply(`<@${member.id}>'s new total set to \`${newTotal}\``);
 			},
-			logs: () => interaction.reply({files: [`../../.pm2/logs/IRTBot-${interaction.options.getString('logtype', true)}-0.log`]}).catch((err: Error) => (interaction.channel as Discord.TextChannel).send(err.message)),
+			logs: () => interaction.reply({files: [`../../.pm2/logs/IRTBot-${interaction.options.getString('logtype', true)}-0.log`]}).catch((err: Error) => interaction.channel?.send(err.message)),
 			dz: () => interaction.reply('PC has committed iWoke:tm:').then(() => exec('start C:/WakeOnLAN/WakeOnLanC.exe -w -m Desktop')),
 			presence: () => {
 				function convertType(Type?: number) {

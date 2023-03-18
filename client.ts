@@ -9,7 +9,7 @@ import playerTimes from './schemas/playerTimes';
 import watchList from './schemas/watchList';
 import reminders from './schemas/reminders';
 import tokens from './tokens.json';
-import { Config, FSCache, YTCache, Tokens, repeatedMessages } from './interfaces';
+import { Config, FSCache, Tokens } from './interfaces';
 let importConfig: Config;
 try { 
     importConfig = require('./test-config.json');
@@ -20,10 +20,10 @@ try {
 }
 
 export default class YClient extends Client {
-    config: Config; tokens: Tokens;
-    embed: typeof Discord.EmbedBuilder; collection: typeof Discord.Collection; messageCollector: typeof Discord.MessageCollector; attachmentBuilder: typeof Discord.AttachmentBuilder; 
+    config: Config; tokens: Tokens; embed: typeof Discord.EmbedBuilder; collection: typeof Discord.Collection; messageCollector: typeof Discord.MessageCollector; attachmentBuilder: typeof Discord.AttachmentBuilder; 
     games: Discord.Collection<string, any>; commands: Discord.Collection<string, any>; registry: Array<Discord.ApplicationCommandDataResolvable>;
-    repeatedMessages: repeatedMessages; FSCache: FSCache; YTCache: YTCache; invites: Map<string, { uses: number | null, creator: string | undefined}>;
+    repeatedMessages: { [key: string]: { data: Discord.Collection<number, { type: string, channel: string }>, timeout: NodeJS.Timeout } }; FSCache: FSCache; YTCache: { [key: string]: undefined | string };
+    invites: Map<string, { uses: number | null, creator: string | undefined }>; reportCooldown:  { isActive: boolean, timeout: NodeJS.Timeout | undefined };
     bannedWords: localDatabase; TFlist: localDatabase; FMlist: localDatabase; userLevels: userLevels; punishments: punishments; watchList: watchList; playerTimes: playerTimes; reminders: reminders;
     constructor() {
         super({
@@ -43,10 +43,14 @@ export default class YClient extends Client {
         this.commands = new this.collection();
         this.registry = [];
         this.setMaxListeners(100);
+        this.reportCooldown = {
+            isActive: false,
+            timeout: undefined
+        };
         this.repeatedMessages = {};
         this.FSCache = {
-            ps: {players: [], status: undefined, lastAdmin: undefined},
-            pg: {players: [], status: undefined, lastAdmin: undefined},
+            ps: { players: [], status: undefined, lastAdmin: undefined },
+            pg: { players: [], status: undefined, lastAdmin: undefined },
         };
         this.YTCache = {
             'UCQ8k8yTDLITldfWYKDs3xFg': undefined,
@@ -71,8 +75,7 @@ export default class YClient extends Client {
         this.FMlist.initLoad();
         this.TFlist.initLoad();
 
-        mongoose.set('strictQuery', true);
-        await mongoose.connect(this.tokens.mongoURL, {
+        await mongoose.set('strictQuery', true).connect(this.tokens.mongoURL, {
             autoIndex: true,
             serverSelectionTimeoutMS: 5000,
             socketTimeoutMS: 45000,
@@ -136,9 +139,9 @@ export default class YClient extends Client {
             } else break;
         }
         if (text.length == 0) text = integer + (options?.longNames ? ' milliseconds' : 'ms') + (options?.commas ? ', ' : '');
-        if (options?.commas){
+        if (options?.commas) {
             text = text.slice(0, -2);
-            if (options?.longNames){
+            if (options?.longNames) {
                 text = text.split('');
                 text[text.lastIndexOf(',')] = ' and';
                 text = text.join('');

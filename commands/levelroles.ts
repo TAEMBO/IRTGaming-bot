@@ -173,16 +173,6 @@ export default {
 				.setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048}))
 				.setAuthor({name: `Ranking for ${member.user.tag}`})
 			]});
-	 	} else if (subCmd == 'info') {
-			interaction.reply({embeds: [new client.embed()
-				.setColor(client.config.embedColor)
-				.setDescription([
-					'**Q** How do I progress?\n**A** This system is message-based, meaning each message you send progresses you.',
-					'**Q** What is going to happen to the <@757962216535359586> (MEE6) level system?\n**A** It will be replaced with this one.',
-					'**Q** Can I transfer my progress from the MEE6 level system to this one?\n**A** Yes, message <@615761944154210305> (TÆMBØ#5512) with your request.',
-					'**Q** Why is this change being done?\n**A** This bot is free for IRTGaming, MEE6 is not free for IRTGaming. I\'m sure you can figure out the rest.'
-				].join('\n\n'))
-			]});
 		}
 	},
 	data: new SlashCommandBuilder()
@@ -199,9 +189,5 @@ export default {
 	.addSubcommand((optt)=>optt
 		.setName("leaderboard")
 		.setDescription("View top 10 users")
-	)
-	.addSubcommand((optt)=>optt
-		.setName('info')
-		.setDescription('Information on how ranking works')
 	)
 };

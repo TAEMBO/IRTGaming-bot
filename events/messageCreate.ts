@@ -133,7 +133,7 @@ export default async (client: YClient, message: Discord.Message) => {
 				message.channel.send('That word is banned here.').then(x => setTimeout(() => x.delete(), 5000));
 				await repeatedMessages(30000, 4, 'bw', '30m', 'Banned words');
 			} else if (msg.includes("discord.gg/") && !client.isMPStaff(message.member as Discord.GuildMember)) { // Discord advertisement
-				const inviteURL = msgarr.find(x => x.includes('discord.gg/')) as string;
+				const inviteURL = message.content.split(' ').find(x => x.includes('discord.gg/')) as string;
 				const validInvite = await client.fetchInvite(inviteURL).catch(() => undefined);
 				if (validInvite && validInvite.guild?.id !== client.config.mainServer.id) {
 					automodded = true;

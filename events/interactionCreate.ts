@@ -5,6 +5,8 @@ export default async (client: YClient, interaction: Discord.BaseInteraction) => 
     if (!interaction.inGuild() || !interaction.inCachedGuild() || !interaction.channel) return;
 
     if (interaction.isChatInputCommand()) {
+        if (interaction.commandName === 'sus') return interaction.reply(`${interaction.user.id} is sus!`);
+        
         const subCmd = interaction.options.getSubcommand(false);
         const commandFile = client.commands.get(interaction.commandName);
 

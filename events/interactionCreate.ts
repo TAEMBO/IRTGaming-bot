@@ -5,7 +5,7 @@ export default async (client: YClient, interaction: Discord.BaseInteraction) => 
     if (!interaction.inGuild() || !interaction.inCachedGuild() || !interaction.channel) return;
 
     if (interaction.isChatInputCommand()) {
-        if (interaction.commandName === 'sus') return interaction.reply(`${interaction.user.id} is sus!`);
+        if (interaction.commandName === 'ping') return interaction.reply({ content: 'Pinging...', fetchReply: true }).then(msg => msg.edit(`Websocket: \`${client.ws.ping}\`ms\nBot: \`${msg.createdTimestamp - interaction.createdTimestamp}\`ms`));
         
         const subCmd = interaction.options.getSubcommand(false);
         const commandFile = client.commands.get(interaction.commandName);

@@ -1,5 +1,5 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
-import YClient from '../client';
+import YClient from '../client.js';
 import fs from 'node:fs';
 import canvas from 'canvas';
 export default {
@@ -10,7 +10,7 @@ export default {
 		if (subCmd === "leaderboard") {
 			const messageCountsTotal = allData.reduce((a, b) => a + b.messages, 0);
 
-			const data = JSON.parse(fs.readFileSync('./databases/dailyMsgs.json', 'utf8')).map((x: Array<number>, i: number, a: any) => {
+			const data = JSON.parse(fs.readFileSync('../databases/dailyMsgs.json', 'utf8')).map((x: Array<number>, i: number, a: any) => {
 				const yesterday = a[i - 1] || [];
 				return x[1] - (yesterday[1] || x[1]);
 			}).slice(1).slice(-60);

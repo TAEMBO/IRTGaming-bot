@@ -1,5 +1,5 @@
 import Discord from 'discord.js';
-import YClient from '../client';
+import YClient from '../client.js';
 
 export default async (client: YClient, message: Discord.Message) => {
     if (!client.config.botSwitches.logs || message.partial || message.author.bot || ['979863373439184966', '968265015595532348'].includes(message.channel.id) || message.channel.type == 1) return;

@@ -1,5 +1,5 @@
 import Discord from "discord.js";
-import YClient from '../client';
+import YClient from '../client.js';
 
 export default async (client: YClient, oldState: Discord.VoiceState, newState: Discord.VoiceState) => {
     if (!client.config.botSwitches.logs || !newState.member) return;

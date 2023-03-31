@@ -1,5 +1,5 @@
 import Discord from 'discord.js';
-import YClient from '../client';
+import YClient from '../client.js';
 
 export default async (client: YClient, messages: Discord.Collection<string, Discord.Message<boolean>>, channel: Discord.GuildTextBasedChannel) => {
     if (!client.config.botSwitches.logs) return;

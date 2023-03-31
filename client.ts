@@ -3,38 +3,31 @@ import fs from "node:fs";
 import moment from 'moment';
 import { xml2js } from "xml-js";
 import mongoose from "mongoose";
-import userLevels from './schemas/userLevels';
-import punishments from './schemas/punishments';
-import playerTimes from './schemas/playerTimes';
-import watchList from './schemas/watchList';
-import reminders from './schemas/reminders';
-import tokens from './tokens.json';
-import { Config, FSCache, Tokens } from './interfaces';
-let importConfig: Config;
-try { 
-    importConfig = require('./test-config.json');
-    console.log('\x1b[31mStartup using test-config');
-} catch(err) {
-    importConfig = require('./config.json');
-    console.log('\x1b[32mStartup');
-}
+import userLevels from './schemas/userLevels.js';
+import punishments from './schemas/punishments.js';
+import playerTimes from './schemas/playerTimes.js';
+import watchList from './schemas/watchList.js';
+import reminders from './schemas/reminders.js';
+import tokens from './tokens.json' assert { type: 'json' };
+import config from './config.json' assert { type: 'json' };
+import { Config, FSCache, Tokens } from './interfaces.js';
 
 export default class YClient extends Client {
     config: Config; tokens: Tokens; embed: typeof Discord.EmbedBuilder; collection: typeof Discord.Collection; messageCollector: typeof Discord.MessageCollector; attachmentBuilder: typeof Discord.AttachmentBuilder; 
     games: Discord.Collection<string, any>; commands: Discord.Collection<string, any>; registry: Array<Discord.ApplicationCommandDataResolvable>;
     repeatedMessages: { [key: string]: { data: Discord.Collection<number, { type: string, channel: string }>, timeout: NodeJS.Timeout } }; FSCache: FSCache; YTCache: { [key: string]: undefined | string };
     invites: Map<string, { uses: number | null, creator: string | undefined }>; reportCooldown:  { isActive: boolean, timeout: NodeJS.Timeout | undefined };
-    bannedWords: localDatabase; TFlist: localDatabase; FMlist: localDatabase; userLevels: userLevels; punishments: punishments; watchList: watchList; playerTimes: playerTimes; reminders: reminders;
+    bannedWords: localDatabase; TFlist: localDatabase; FMlist: localDatabase; whitelist: localDatabase; userLevels: userLevels; punishments: punishments; watchList: watchList; playerTimes: playerTimes; reminders: reminders;
     constructor() {
         super({
             intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration, GatewayIntentBits.GuildInvites, GatewayIntentBits.GuildPresences, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildVoiceStates],
             partials: [Partials.Channel, Partials.Message, Partials.Reaction],
             ws: { properties: { browser: "Discord iOS" } },
-            presence: importConfig.botPresence
+            presence: config.botPresence as Discord.PresenceData
         });
         this.invites = new Map();
         this.tokens = tokens as Tokens;
-        this.config = importConfig;
+        this.config = config as Config;
         this.embed = Discord.EmbedBuilder;
         this.collection = Discord.Collection;
         this.messageCollector = Discord.MessageCollector;
@@ -51,6 +44,7 @@ export default class YClient extends Client {
         this.FSCache = {
             ps: { players: [], status: undefined, lastAdmin: undefined },
             pg: { players: [], status: undefined, lastAdmin: undefined },
+            mf: { players: [], status: undefined, lastAdmin: undefined },
         };
         this.YTCache = {
             'UCQ8k8yTDLITldfWYKDs3xFg': undefined,
@@ -68,6 +62,7 @@ export default class YClient extends Client {
         this.bannedWords = new localDatabase('bannedWords');
         this.TFlist = new localDatabase('TFlist');
         this.FMlist = new localDatabase('FMlist');
+        this.whitelist = new localDatabase('adminWhitelist');
     }
     async init() {
         await this.login(this.tokens.token);
@@ -85,18 +80,16 @@ export default class YClient extends Client {
         }).then(() => console.log(this.timeLog('\x1b[35m'), 'Connected to MongoDB'));
 
         // Event handler
-        fs.readdirSync('./events').forEach((file, index, arr) => {
-    	    const eventFile = require(`./events/${file}`);
-	        this.on(file.replace('.ts', ''), async (...args) => eventFile.default(this, ...args));
-            if (index == (arr.length - 1)) console.log(this.timeLog('\x1b[35m'), 'Events deployed');
+        fs.readdirSync('./events').forEach(async file => {
+    	    const eventFile = await import(`./events/${file}`);
+	        this.on(file.replace('.js', ''), async (...args) => eventFile.default(this, ...args));
         });
 
         // Command handler
-        fs.readdirSync("./commands").forEach((file, index, arr) => {
-            const commandFile = require(`./commands/${file}`);
-	        this.commands.set(commandFile.default.data.name, commandFile);
+        fs.readdirSync('./commands').forEach(async file => {
+            const commandFile = await import(`./commands/${file}`);
+	        this.commands.set(commandFile.default.data.name, { commandFile, uses: 0 });
 	        this.registry.push(commandFile.default.data.toJSON());
-            if (index == (arr.length - 1)) console.log(this.timeLog('\x1b[35m'), 'Commands deployed');
         });
     }
     hasModPerms = (guildMember: Discord.GuildMember) => this.config.mainServer.staffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
@@ -120,7 +113,7 @@ export default class YClient extends Client {
 
     formatTime(integer: number, accuracy = 1, options?: { longNames: boolean, commas: boolean }) {
         let achievedAccuracy = 0;
-        let text: any = '';
+        let text = '';
         for (const timeName of [
             { name: 'year',   length: 1000 * 60 * 60 * 24 * 365 },
             { name: 'month',  length: 1000 * 60 * 60 * 24 * 30 },
@@ -142,11 +135,11 @@ export default class YClient extends Client {
         if (options?.commas) {
             text = text.slice(0, -2);
             if (options?.longNames) {
-                text = text.split('');
-                text[text.lastIndexOf(',')] = ' and';
-                text = text.join('');
+                let textArr = text.split('');
+                textArr[text.lastIndexOf(',')] = ' and';
+                text = textArr.join('');
             }
-        } return text.trim() as string;
+        } return text.trim();
     }
     formatBytes(bytes: number, decimals: number, bitsOrBytes: 1000 | 1024) { // Credits to Toast for making this
         if (bytes === 0) return '0 Bytes';
@@ -176,7 +169,7 @@ class localDatabase {
 	public _path: string;
 	public _content: Array<string>;
 	constructor(fileName: string) {
-		this._path = `./databases/${fileName}.json`;
+		this._path = `../databases/${fileName}.json`;
 		this._content = [];
 	}
 	add(data: string) {

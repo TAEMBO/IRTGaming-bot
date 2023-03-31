@@ -1,5 +1,5 @@
 import Discord, { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
-import YClient from '../client';
+import YClient from '../client.js';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
         interaction.reply({content: `Verification sent, please wait for someone to verify your subscription. You will then receive the <@&${client.config.mainServer.roles.subscriber}> role.`, ephemeral: true});

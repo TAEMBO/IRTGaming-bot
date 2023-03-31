@@ -1,4 +1,5 @@
 @echo off
 cls
-pm2 start index.ts -i 1 --name IRTBot
+cd compiled
+pm2 start index.js --name IRTBot
 pause

@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 import Discord from 'discord.js';
-import YClient from '../client';
+import YClient from '../client.js';
 import ms from 'ms';
-import { Punishment } from '../interfaces';
+import { Punishment } from '../interfaces.js';
 
 const Schema = mongoose.model('punishments', new mongoose.Schema({
     _id: { type: Number, required: true },
@@ -21,9 +21,8 @@ const Schema = mongoose.model('punishments', new mongoose.Schema({
 }, { versionKey: false }));
 
 export default class punishments extends Schema {
-    client: YClient;
     _content: typeof Schema;
-    constructor(client: YClient) {
+    constructor(public client: YClient) {
 		super();
 		this.client = client;
 		this._content = Schema;

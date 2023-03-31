@@ -1,5 +1,5 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
-import YClient from '../client';
+import YClient from '../client.js';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
         ({
@@ -68,12 +68,12 @@ export default {
         .setName("staff")
         .setDescription("Staff member information")
         .addSubcommand((optt)=>optt
-                .setName("mp")
-                .setDescription("Shows all MP Staff members within Discord"))
+            .setName("mp")
+            .setDescription("Shows all MP Staff members within Discord"))
         .addSubcommand((optt)=>optt
-                .setName("fs")
-                .setDescription("Shows all MP Staff usernames within FS"))
+            .setName("fs")
+            .setDescription("Shows all MP Staff usernames within FS"))
         .addSubcommand((optt)=>optt
-                .setName("discord")
-                .setDescription("Shows all Discord staff members"))
+            .setName("discord")
+            .setDescription("Shows all Discord staff members"))
 };

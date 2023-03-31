@@ -1,5 +1,5 @@
 import Discord from 'discord.js';
-import YClient from '../client';
+import YClient from '../client.js';
 
 export default async (client: YClient, member: Discord.GuildMember) => {
     if (!client.config.botSwitches.logs || member.partial) return;

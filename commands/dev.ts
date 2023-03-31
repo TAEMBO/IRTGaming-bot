@@ -1,5 +1,5 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
-import YClient from '../client';
+import YClient from '../client.js';
 import util from 'node:util';
 import fs from 'node:fs';
 import { exec } from 'child_process';
@@ -44,29 +44,25 @@ export default {
 						{ name: 'Output', value: `\`\`\`${output.slice(0, 1016)}\n\`\`\`` });
 				interaction.reply({embeds: [embed]}).catch(() => interaction.channel?.send({embeds: [embed]}));
 			},
-			role: () => {
-				const role = interaction.options.getRole("role", true);
-				const member = interaction.options.getMember("member") as Discord.GuildMember;
-
-				if (member.roles.cache.has(role.id)) {
-					member.roles.remove(role.id).then(() => interaction.reply('Role removed')).catch((e: Error) => interaction.reply(e.message));
-				} else member.roles.add(role.id).then(() => interaction.reply('Role added')).catch((e: Error) => interaction.reply(e.message));
-			},
-			file: () => interaction.reply({files: [`./databases/${interaction.options.getString('file', true)}.json`]}).catch((e: Error) => interaction.channel?.send(e.message)),
+			file: () => interaction.reply({files: [`../databases/${interaction.options.getString('file', true)}.json`]}).catch((e: Error) => interaction.channel?.send(e.message)),
 			statsgraph: () => {
 				client.config.statsGraphSize = -(interaction.options.getInteger('number', true));
 				interaction.reply(`Set to \`${client.config.statsGraphSize}\``);
 			},
-			restart: () => interaction.reply("Restarting...").then(() => exec('pm2 restart IRTBot')),
+			restart: () => interaction.reply("Restarting...").then(() => process.exit(-1)),
 			update: () => interaction.reply({content: "Pulling from repo...", fetchReply: true}).then(msg => exec('git pull', (error, stdout) => {
 				if (error) {
 					msg.edit(`Pull failed:\n\`\`\`${error.message}\`\`\``);
 				} else if (stdout.includes('Already up to date')) {
 					msg.edit(`Pull aborted:\nUp-to-date`);
-				} else setTimeout(() => msg.edit('Restarting...').then(() => exec('pm2 restart IRTBot')), 2500);
+				} else msg.edit('Compiling...').then(() => exec('tsc', (error, stdout) => {
+					if (error) {
+						msg.edit(error.message);
+					} else msg.edit('Restarting...').then(() => process.exit(-1));
+				}));
 			})),
 			increment: async () => {
-				const data: Array<Array<number>> = JSON.parse(fs.readFileSync('./databases/dailyMsgs.json', 'utf8'));
+				const data: Array<Array<number>> = JSON.parse(fs.readFileSync('../databases/dailyMsgs.json', 'utf8'));
 				const member = interaction.options.getMember('member') as Discord.GuildMember;
 				const newTotal = interaction.options.getInteger('total', true);
 				const oldData = await client.userLevels._content.findById(member.id);
@@ -76,10 +72,10 @@ export default {
 
 				await client.userLevels._content.findByIdAndUpdate(member.id, { messages: newTotal });
 				data.forEach(x => newData.push([x[0], (x[1] + (newTotal - oldData.messages))]));
-				fs.writeFileSync('./databases/dailyMsgs.json', JSON.stringify(newData, null, 4));
+				fs.writeFileSync('../databases/dailyMsgs.json', JSON.stringify(newData, null, 4));
 				interaction.reply(`<@${member.id}>'s new total set to \`${newTotal}\``);
 			},
-			logs: () => interaction.reply({files: [`../../.pm2/logs/IRTBot-${interaction.options.getString('logtype', true)}-0.log`]}).catch((err: Error) => interaction.channel?.send(err.message)),
+			logs: () => interaction.reply({files: [`../../../.pm2/logs/IRTBot-${interaction.options.getString('logtype', true)}.log`]}).catch((err: Error) => interaction.channel?.send(err.message)),
 			dz: () => interaction.reply('PC has committed iWoke:tm:').then(() => exec('start C:/WakeOnLAN/WakeOnLanC.exe -w -m Desktop')),
 			presence: () => {
 				function convertType(Type?: number) {
@@ -129,17 +125,6 @@ export default {
 		.addSubcommand(x=>x
 			.setName('update')
 			.setDescription('Pull from GitHub repository to live bot'))
-		.addSubcommand(x=>x
-			.setName('role')
-			.setDescription('Give or take roles')
-			.addUserOption(x=>x
-				.setName("member")
-				.setDescription("The member to manage")
-				.setRequired(true))
-			.addRoleOption(x=>x
-				.setName("role")
-				.setDescription("The role to give or take")
-				.setRequired(true)))
 		.addSubcommand(x=>x
 			.setName('file')
 			.setDescription('Send a db file')

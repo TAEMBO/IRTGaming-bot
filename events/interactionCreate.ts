@@ -1,5 +1,5 @@
 import Discord, { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } from 'discord.js';
-import YClient from '../client';
+import YClient from '../client.js';
 
 export default async (client: YClient, interaction: Discord.BaseInteraction) => {
     if (!interaction.inGuild() || !interaction.inCachedGuild() || !interaction.channel) return;
@@ -13,7 +13,7 @@ export default async (client: YClient, interaction: Discord.BaseInteraction) => 
         console.log(client.timeLog('\x1b[37m'), `\x1b[32m${interaction.user.tag}\x1b[37m used \x1b[32m/${interaction.commandName} ${subCmd ?? ''}\x1b[37m in \x1b[32m#${interaction.channel.name}`);
         if (!client.config.botSwitches.commands && !client.config.devWhitelist.includes(interaction.user.id)) return interaction.reply('Commands are currently disabled.');
 
-        commandFile.default.run(client, interaction);
+        commandFile.commandFile.default.run(client, interaction);
         commandFile.uses ? commandFile.uses++ : commandFile.uses = 1;
     } else if (interaction.isButton()) {
         if (interaction.customId.startsWith('reaction-') && client.config.botSwitches.buttonRoles) { // Button roles

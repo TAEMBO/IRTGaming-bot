@@ -1,5 +1,5 @@
 import Discord, { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import YClient from '../client';
+import YClient from '../client.js';
 
 function convertStatus(status?: Discord.ClientPresenceStatus) {
 	if (status) {
@@ -15,7 +15,7 @@ const formatTime = (timestamp: number) => `<t:${Math.round(timestamp / 1000)}>\n
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
 		const member = interaction.options.getMember("member");
-		if (member == null) {
+		if (!member) {
 			const user = interaction.options.getUser('member', true);
 
 			interaction.reply({embeds: [new client.embed()

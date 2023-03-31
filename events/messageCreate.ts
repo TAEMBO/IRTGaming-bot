@@ -1,5 +1,5 @@
 import Discord from 'discord.js';
-import YClient from '../client';
+import YClient from '../client.js';
 
 export default async (client: YClient, message: Discord.Message) => {
     if ((!client.config.botSwitches.commands && !client.config.devWhitelist.includes(message.author.id)) || message.partial || message.author.bot) return;
@@ -107,17 +107,21 @@ export default async (client: YClient, message: Discord.Message) => {
 			}
 			return arr;
 		}
+		let loop = 0;
 		function allPossibleCases(arr: Array<Array<string>>): Array<string> {
-			if (arr.length === 1) return arr[0];
+			loop++;
+			if (arr.length === 1 || loop > 30) return arr[0];
 			var result = [];
 			var allCasesOfRest = allPossibleCases(arr.slice(1));
 			for (var i = 0; i < allCasesOfRest.length; i++) {
-				for (var j = 0; j < arr[0].length; j++) result.push(arr[0][j] + allCasesOfRest[i]);
+				for (var j = 0; j < arr[0].length; j++) {
+					result.push(arr[0][j] + allCasesOfRest[i]);
+				};
 			}
 			return result;
 		}
 		const getAllCombos = (message: string) => message.split(" ").map(w => {
-			if (/(.)\1{1,}/.test(w)) {
+			if (/(.)\1{1,}/.test(w) && w.length > 3) {
 				return allPossibleCases(combos(w)).join(' ');
 			} else return w;
 		});

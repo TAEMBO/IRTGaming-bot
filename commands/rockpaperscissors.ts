@@ -1,5 +1,5 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
-import YClient from '../client';
+import YClient from '../client.js';
 const rpsChannels: { [key: string]: RpsInstance } = {};
 class RpsInstance {
     firstPlayer: Discord.User;

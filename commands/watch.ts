@@ -1,17 +1,16 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
-import YClient from '../client';
+import YClient from '../client.js';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
         if (!client.isMPStaff(interaction.member)) return client.youNeedRole(interaction, "mpstaff");
 
-        const name = interaction.options.getString('username', true);
-        
+        const name = interaction.options.getString('username', false) as string;
         const wlData = await client.watchList._content.findById(name);
         ({
             add: async () => {
                 const reason = interaction.options.getString('reason', true);
                 if (!wlData) {
-                    await client.watchList._content.create({_id: name, reason});
+                    await client.watchList._content.create({ _id: name, reason });
                     interaction.reply({content: `Successfully added \`${name}\` with reason \`${reason}\``});
                 } else interaction.reply(`\`${name}\` already exists for reason \`${wlData.reason}\``);
             },
@@ -20,6 +19,10 @@ export default {
                     await client.watchList._content.findByIdAndDelete(name);
                     interaction.reply(`Successfully removed \`${name}\` from watchList`);
                 } else interaction.reply(`\`${name}\` doesn't exist on watchList`);
+            },
+            view: async () => {
+                const list = await client.watchList._content.find();
+                interaction.reply(`\`\`\`json\n${JSON.stringify(list, null, 1)}\`\`\``)
             }
         } as any)[interaction.options.getSubcommand()]();
     },
@@ -44,4 +47,7 @@ export default {
                 .setName('username')
                 .setDescription('The player name to remove')
                 .setRequired(true)))
+        .addSubcommand(x=>x
+            .setName('view')
+            .setDescription('View the full watchList'))
 };

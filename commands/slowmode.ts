@@ -1,5 +1,5 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
-import YClient from '../client';
+import YClient from '../client.js';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
 		if(!client.hasModPerms(interaction.member)) return client.youNeedRole(interaction, "mod");
@@ -9,7 +9,7 @@ export default {
         interaction.channel?.setRateLimitPerUser(time, `Done by ${interaction.user.tag}`)
         if (time === 0) {
             interaction.reply('Slowmode removed.')
-        } else return interaction.reply(`Slowmode set to \`${time}\` ${time === 1 ? 'second' : 'seconds'}.`)
+        } else interaction.reply(`Slowmode set to \`${time}\` ${time === 1 ? 'second' : 'seconds'}.`)
 	},
     data: new SlashCommandBuilder()
         .setName("slowmode")

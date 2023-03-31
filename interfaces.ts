@@ -4,16 +4,15 @@ export interface Tokens {
     token: string,
     mongoURL: string
     ftp: {
-        [key: string]: FTPLogins
-        ps: FTPLogins
+        [key: string]: FTPLogins,
+        ps: FTPLogins,
         pg: FTPLogins
-        test: FTPLogins
     }
     fs: {
-        ps: FSURLs
-        pg: FSURLs
+        [key: string]: FSURLs,
+        ps: FSURLs,
+        pg: FSURLs,
         mf: FSURLs
-        test: FSURLs
     }
 }
 interface FSURLs {
@@ -78,7 +77,6 @@ export interface Config {
             mffarm8: string,
             mffarm9: string,
             mffarm10: string,
-            mffarm11: string,
             subscriber: string
         },
         channels: {

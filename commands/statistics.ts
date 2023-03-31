@@ -1,16 +1,16 @@
 import Discord, { SlashCommandBuilder, version } from 'discord.js';
-import YClient from '../client';
+import YClient from '../client.js';
 import os from 'node:os';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
 		const colunms = ['Command Name', 'Count'];
 		const includedCommands = client.commands.filter(x => x.uses).sort((a, b) => b.uses - a.uses);
 		if (includedCommands.size === 0) return interaction.reply(`No commands have been used yet.\nUptime: ${client.formatTime(client.uptime as number, 2, { commas: true, longNames: true })}`); 
-		const nameLength = Math.max(...includedCommands.map(x => x.default.data.name.length), colunms[0].length) + 2;
+		const nameLength = Math.max(...includedCommands.map(x => x.commandFile.default.data.name.length), colunms[0].length) + 2;
 		const amountLength = Math.max(...includedCommands.map(x => x.uses.toString().length), colunms[1].length) + 1;
 		const rows = [`${colunms[0] + ' '.repeat(nameLength - colunms[0].length)}|${' '.repeat(amountLength - colunms[1].length) + colunms[1]}\n`, '-'.repeat(nameLength) + '-'.repeat(amountLength) + '\n'];
 		includedCommands.forEach(command => {
-			const name = command.default.data.name;
+			const name = command.commandFile.default.data.name;
 			const count = command.uses.toString();
 			rows.push(`${name + '.'.repeat(nameLength - name.length)}${'.'.repeat(amountLength - count.length) + count}\n`);
 		});
@@ -31,7 +31,7 @@ export default {
 		
 		embed.addFields(
 			{name: 'Node.js', value: [
-				`**RAM:** ${client.formatBytes(process.memoryUsage().heapTotal, 2, 1000)}**/**${client.formatBytes(os.freemem(), 2, 1024)}`,
+				`**RAM:** ${client.formatBytes(process.memoryUsage().heapUsed, 2, 1000)}**/**${client.formatBytes(os.freemem(), 2, 1024)}`,
 				`**Version:** ${process.version}`,
 				`**Discord.js version:** v${version}`,
 				`**Uptime:** ${client.formatTime(client.uptime as number, 2, { commas: true, longNames: true })}`

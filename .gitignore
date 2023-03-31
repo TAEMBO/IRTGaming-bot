@@ -6,11 +6,10 @@ package-lock.json
 
 tokens.json
 
-test-config.json
+config.json
 
 databases
 
-ftpFiles
+compiled
 
 gw.js
-

@@ -1,5 +1,5 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
-import YClient from '../client';
+import YClient from '../client.js';
 import ms from 'ms';
 
 export default {
@@ -8,15 +8,14 @@ export default {
         const reminderTime = ms(interaction.options.getString("when", true)) as number | undefined;
         
         if (reminderTime) {
-            await client.reminders._content.create({ _id: interaction.user.id, content: reminderText, time: Date.now() + reminderTime }).then(reminder => {
+            interaction.reply({embeds: [new client.embed()
+                .setTitle('Reminder set')
+                .setDescription(`\n\`\`\`${reminderText}\`\`\`\n<t:${Math.round((Date.now() + reminderTime) / 1000)}:R>.`)
+                .setColor(client.config.embedColor)
+            ], fetchReply: true}).then(async msg => {
+                const reminder = await client.reminders._content.create({ userid: interaction.user.id, content: reminderText, time: Date.now() + reminderTime, ch: msg.channelId, msg: msg.id });
                 console.log(client.timeLog('\x1b[33m'), 'REMINDER CREATE', reminder);
-                interaction.reply({embeds: [new client.embed()
-                    .setTitle('Reminder set')
-                    .setDescription(`\n\`\`\`${reminderText}\`\`\`\n<t:${Math.round((Date.now() + reminderTime) / 1000)}:R>.`)
-                    .setColor(client.config.embedColor)
-                ]});
             });
-
         } else interaction.reply({embeds: [new client.embed()
             .setTitle('Incorrect timestamp.')
             .addFields({name: 'Proper formatting', value: '```Seconds: 10s, 1sec, 10secs, 1second, 10seconds\nMinutes: 10m, 1min, 10mins, 1minute, 10minutes\nHours: 10h, 1hour, 10hours\nDays: 10d, 1day, 10days```'})

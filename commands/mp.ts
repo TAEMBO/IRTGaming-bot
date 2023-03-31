@@ -1,11 +1,11 @@
 
 import Discord, { SlashCommandBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } from 'discord.js';
-import YClient from '../client';
+import YClient from '../client.js';
 import puppeteer from 'puppeteer'; // Credits to Trolly for suggesting this package
 import FTPClient from 'ftp';
 import fs from 'node:fs';
 import { xml2js } from 'xml-js';
-import { banFormat, farmFormat } from '../interfaces';
+import { banFormat, farmFormat } from '../interfaces.js';
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
@@ -46,7 +46,7 @@ export default {
                         setTimeout(async () => {
                             await browser.close();
                             if (chosenServer == 'ps' && chosenAction == 'stop') {
-                                interaction.editReply({content: result += `Total time taken: **${Date.now() - time}ms**`, files: ['../../Documents/My Games/FarmingSimulator2022/log.txt']});
+                                interaction.editReply({content: result += `Total time taken: **${Date.now() - time}ms**`, files: ['../../../Documents/My Games/FarmingSimulator2022/log.txt']});
                             } else interaction.editReply(result += `Total time taken: **${Date.now() - time}ms**`);
                         }, 2000);
                     });
@@ -64,19 +64,15 @@ export default {
                 const FTPLogin = client.tokens.ftp[chosenServer];
                 const time = Date.now();
     
-                FTP.on('ready', async () => {
-                    FTP.delete(FTPLogin.path + `savegame1/${chosenAction}`, async (err) => {
-                        if (err) return interaction.editReply(err.message);
-                        await interaction.editReply(`Successfully deleted **${chosenAction}** from **${chosenServer.toUpperCase()}** after **${Date.now() - time}ms**`);
-                        FTP.end();
-                    });
-                });
+                FTP.on('ready', async () => FTP.delete(FTPLogin.path + `savegame1/${chosenAction}`, async (err) => {
+                    if (err) return interaction.editReply(err.message);
+                    await interaction.editReply(`Successfully deleted **${chosenAction}** from **${chosenServer.toUpperCase()}** after **${Date.now() - time}ms**`);
+                    FTP.end();
+                }));
     
                 FTP.connect(FTPLogin);
             },
             bans: async () => {
-                if (!interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager)) return client.youNeedRole(interaction, "mpmanager");
-
                 const chosenServer = interaction.options.getString('server', true) as 'ps' | 'pg';
                 const chosenAction = interaction.options.getString('action', true) as 'dl' | 'ul';
     
@@ -91,16 +87,16 @@ export default {
                                 if (err) return interaction.editReply(err.message);
                                 console.log(client.timeLog('\x1b[33m'), 'Downloaded PG bans');
                                 stream.once('close', ()=>FTP.end());
-                                stream.pipe(fs.createWriteStream('./databases/blockedUserIds.xml'));
+                                stream.pipe(fs.createWriteStream('../databases/blockedUserIds.xml'));
         
                                 console.log(client.timeLog('\x1b[33m'), `Write via ${client.tokens.ftp.pg.path}`);
-                                setTimeout(() => interaction.editReply({files: ['./databases/blockedUserIds.xml']}), 1000);
+                                setTimeout(() => interaction.editReply({files: ['../databases/blockedUserIds.xml']}), 1000);
                             });
                         });
-                    } else {
-                        interaction.editReply({files: ['../../Documents/My Games/FarmingSimulator2022/blockedUserIds.xml']});
-                    }
+                    } else interaction.editReply({files: ['../../../Documents/My Games/FarmingSimulator2022/blockedUserIds.xml']});
                 } else {
+                    if (!interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager)) return client.youNeedRole(interaction, "mpmanager");
+                    
                     let data: banFormat;
                     const banAttachment = interaction.options.getAttachment('bans');
                     if (!banAttachment) return interaction.editReply(`Canceled: A ban file must be supplied`);
@@ -129,38 +125,51 @@ export default {
                             });
                         });
                     } else {
-                        fs.writeFileSync(`../../Documents/My Games/FarmingSimulator2022/blockedUserIds.xml`, banData);
+                        fs.writeFileSync(`../../../Documents/My Games/FarmingSimulator2022/blockedUserIds.xml`, banData);
                         interaction.editReply('Successfully uploaded ban file for PS');
                     }
                 }
             },
-            farm: async () => {
+            search: async () => {
                 await interaction.deferReply();
                 const chosenServer = interaction.options.getString('server', true) as 'ps' | 'pg';
                 const name = interaction.options.getString('name', true);
                 function permIcon(perm: string) {
-                    if (perm == 'true') {
+                    if (perm === 'true') {
                         return '✅';
-                    } else if (perm == 'false') {
+                    } else if (perm === 'false') {
                         return '❌';
                     } else return perm;
                 }
                 function checkPlayer(farmData: farmFormat) {
-                    const playerData = farmData.farms.farm[0].players.player.find(x => x._attributes.lastNickname == name);
+                    const playerData = name.length === 44 ? farmData.farms.farm[0].players.player.find(x => x._attributes.uniqueUserId === name) : farmData.farms.farm[0].players.player.find(x => x._attributes.lastNickname === name);
                     if (playerData) {
                         interaction.editReply('```\n' + Object.entries(playerData._attributes).map(x => x[0].padEnd(18, ' ') + permIcon(x[1])).join('\n') + '```');
-                    } else interaction.editReply('No green farm data found with that name');
+                    } else interaction.editReply('No green farm data found with that name/UUID');
                 }
                 if (chosenServer == 'pg') {
                     FTP.connect(client.tokens.ftp.pg);
-                    FTP.on('ready', () => {
-                        FTP.get(client.tokens.ftp.pg.path + 'savegame1/farms.xml', async (err, stream) => {
-                            if (err) return interaction.editReply(err.message);
-                            checkPlayer(xml2js(await new Response(stream as any).text(), {compact: true}) as farmFormat);
-                            stream.once('close', ()=>FTP.end());
-                        });
-                    });
-                } else checkPlayer(xml2js(fs.readFileSync('../../Documents/My Games/FarmingSimulator2022/savegame1/farms.xml', 'utf8'), {compact: true}) as farmFormat);
+                    FTP.on('ready', () => FTP.get(client.tokens.ftp.pg.path + 'savegame1/farms.xml', async (err, stream) => {
+                        if (err) return interaction.editReply(err.message);
+                        checkPlayer(xml2js(await new Response(stream as any).text(), { compact: true }) as farmFormat);
+                        stream.once('close', ()=>FTP.end());
+                    }));
+                } else checkPlayer(xml2js(fs.readFileSync('../../../Documents/My Games/FarmingSimulator2022/savegame1/farms.xml', 'utf8'), { compact: true }) as farmFormat);
+            },
+            farms: async () => {
+                const chosenServer = interaction.options.getString('server', true) as 'ps' | 'pg';
+
+                if (chosenServer == 'pg') {
+                    await interaction.deferReply();
+                    FTP.connect(client.tokens.ftp.pg);
+
+                    FTP.on('ready', () => FTP.get(client.tokens.ftp.pg.path + 'savegame1/farms.xml', (err, stream) => {
+                        if (err) return interaction.editReply(err.message);
+                        stream.once('close', ()=>FTP.end());
+                        stream.pipe(fs.createWriteStream('../databases/farms.xml'));
+                        setTimeout(() => interaction.editReply({files: ['../databases/farms.xml']}), 4000);
+                    }));
+                } else interaction.reply({files: ['../../../Documents/My Games/FarmingSimulator2022/savegame1/farms.xml']});
             },
             roles: async () => {
                 if (!interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager)) return client.youNeedRole(interaction, "mpmanager");
@@ -269,7 +278,7 @@ export default {
                 .setDescription('The ban file if uploading')
                 .setRequired(false)))
         .addSubcommand(x=>x
-            .setName('farm')
+            .setName('search')
             .setDescription('Fetch farm data for a player')
             .addStringOption(x=>x
                 .setName('server')
@@ -281,6 +290,16 @@ export default {
             .addStringOption(x=>x
                 .setName('name')
                 .setDescription('The name of the player to search for')
+                .setRequired(true)))
+        .addSubcommand(x=>x
+            .setName('farms')
+            .setDescription('Download farms.xml from a server')
+            .addStringOption(x=>x
+                .setName('server')
+                .setDescription('The server to fetch from')
+                .addChoices(
+                    {name: 'Public Silage', value: 'ps'},
+                    {name: 'Public Grain', value: 'pg'})
                 .setRequired(true)))
         .addSubcommand(x=>x
             .setName('roles')

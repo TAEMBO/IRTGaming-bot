@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import Discord from 'discord.js';
-import YClient from '../client';
+import YClient from '../client.js';
 
 const Schema = mongoose.model('userLevels', new mongoose.Schema({
     _id: { type: String },
@@ -9,9 +9,8 @@ const Schema = mongoose.model('userLevels', new mongoose.Schema({
 }, { versionKey: false }));
 
 export default class userLevels extends Schema {
-    client: YClient;
     _content: typeof Schema;
-    constructor(client: YClient) {
+    constructor(public client: YClient) {
 		super();
 		this.client = client;
 		this._content = Schema;
@@ -20,16 +19,17 @@ export default class userLevels extends Schema {
         const userData = await this._content.findById(userid);
 
         if (userData) {
-            await this._content.findByIdAndUpdate(userid, { messages: userData.messages + 1 });
+            userData.messages++;
             if (userData.messages >= this.algorithm(userData.level+2)) {
                 while (userData.messages > this.algorithm(userData.level+1)) {
-					const newData = await this._content.findByIdAndUpdate(userid, { level: userData.level + 1 }, { new: true });
-					console.log(`${userid} EXTENDED LEVELUP ${newData?.level}`);
-				}
+                    userData.level++;
+                    console.log(`${userid} EXTENDED LEVELUP ${userData.level}`);
+                }
             } else if (userData.messages >= this.algorithm(userData.level+1)) {
-                const newData = await this._content.findByIdAndUpdate(userid, { level: userData.level + 1 }, { new: true });
-                (this.client.channels.resolve(this.client.config.mainServer.channels.botcommands) as Discord.TextChannel).send({content: `Well done <@${userid}>, you made it to **level ${newData?.level}**!`})
+                userData.level++
+                (this.client.channels.resolve(this.client.config.mainServer.channels.botcommands) as Discord.TextChannel).send({content: `Well done <@${userid}>, you made it to **level ${userData.level + 1}**!`})
             }
+            await userData.save();
         } else await this._content.create({ _id: userid, messages: 1, level: 0 });
     }
     algorithm = (level: number) => level * level * 15;

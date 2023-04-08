@@ -10,14 +10,50 @@ import watchList from './schemas/watchList.js';
 import reminders from './schemas/reminders.js';
 import tokens from './tokens.json' assert { type: 'json' };
 import config from './config.json' assert { type: 'json' };
-import { Config, FSCache, Tokens } from './interfaces.js';
+import { Config, FSCache, Tokens } from './typings.js';
 
 export default class YClient extends Client {
-    config: Config; tokens: Tokens; embed: typeof Discord.EmbedBuilder; collection: typeof Discord.Collection; messageCollector: typeof Discord.MessageCollector; attachmentBuilder: typeof Discord.AttachmentBuilder; 
-    games: Discord.Collection<string, any>; commands: Discord.Collection<string, any>; registry: Array<Discord.ApplicationCommandDataResolvable>;
-    repeatedMessages: { [key: string]: { data: Discord.Collection<number, { type: string, channel: string }>, timeout: NodeJS.Timeout } }; FSCache: FSCache; YTCache: { [key: string]: undefined | string };
-    invites: Map<string, { uses: number | null, creator: string | undefined }>; reportCooldown:  { isActive: boolean, timeout: NodeJS.Timeout | undefined };
-    bannedWords: localDatabase; TFlist: localDatabase; FMlist: localDatabase; whitelist: localDatabase; userLevels: userLevels; punishments: punishments; watchList: watchList; playerTimes: playerTimes; reminders: reminders;
+    config = config as Config;
+    tokens = tokens as Tokens;
+    embed = Discord.EmbedBuilder;
+    collection = Discord.Collection;
+    messageCollector = Discord.MessageCollector;
+    attachmentBuilder = Discord.AttachmentBuilder;
+    games = new this.collection() as Discord.Collection<string, any>;
+    commands = new this.collection() as Discord.Collection<string, any>;
+    registry = [] as Array<Discord.ApplicationCommandDataResolvable>;
+    timeLog = (color: string) => color + `[${moment().format('HH:mm:ss')}]`;
+    youNeedRole = (interaction: Discord.ChatInputCommandInteraction<"cached">, role: keyof typeof config.mainServer.roles) => interaction.reply(`You need the <@&${this.config.mainServer.roles[role]}> role to use this command`);
+    hasModPerms = (guildMember: Discord.GuildMember) => this.config.mainServer.staffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
+    isMPStaff = (guildMember: Discord.GuildMember) => this.config.mainServer.MPStaffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
+    repeatedMessages = {} as { [key: string]: { data: Discord.Collection<number, { type: string, channel: string }>, timeout: NodeJS.Timeout } };
+    FSCache = {
+        ps: { players: [], status: undefined, lastAdmin: undefined },
+        pg: { players: [], status: undefined, lastAdmin: undefined },
+        mf: { players: [], status: undefined, lastAdmin: undefined },
+    } as FSCache;
+    YTCache = {
+        'UCQ8k8yTDLITldfWYKDs3xFg': undefined,
+        'UCLIExdPYmEreJPKx_O1dtZg': undefined,
+        'UCguI73--UraJpso4NizXNzA': undefined,
+        'UCuNIKo9EMJZ_FdZfGnM9G1w': undefined,
+        'UCKXa-FhJpPrlRigIW1O0j8g': undefined,
+        'UCWYXg1sqtG9NalK5ZGt4ITA': undefined
+    } as { [key: string]: undefined | string };
+    invites = new Map() as Map<string, { uses: number | null, creator: string | undefined }>;
+    reportCooldown = {
+        isActive: false,
+        timeout: undefined
+    } as { isActive: boolean, timeout: NodeJS.Timeout | undefined };
+    bannedWords = new localDatabase('bannedWords'); 
+    TFlist = new localDatabase('TFlist');
+    FMlist = new localDatabase('FMlist');
+    whitelist = new localDatabase('adminWhitelist');
+    userLevels = new userLevels(this);
+    punishments = new punishments(this);
+    watchList = new watchList();
+    playerTimes = new playerTimes();
+    reminders = new reminders();
     constructor() {
         super({
             intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration, GatewayIntentBits.GuildInvites, GatewayIntentBits.GuildPresences, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildVoiceStates],
@@ -25,50 +61,14 @@ export default class YClient extends Client {
             ws: { properties: { browser: "Discord iOS" } },
             presence: config.botPresence as Discord.PresenceData
         });
-        this.invites = new Map();
-        this.tokens = tokens as Tokens;
-        this.config = config as Config;
-        this.embed = Discord.EmbedBuilder;
-        this.collection = Discord.Collection;
-        this.messageCollector = Discord.MessageCollector;
-        this.attachmentBuilder = Discord.AttachmentBuilder;
-        this.games = new this.collection();
-        this.commands = new this.collection();
-        this.registry = [];
-        this.setMaxListeners(100);
-        this.reportCooldown = {
-            isActive: false,
-            timeout: undefined
-        };
-        this.repeatedMessages = {};
-        this.FSCache = {
-            ps: { players: [], status: undefined, lastAdmin: undefined },
-            pg: { players: [], status: undefined, lastAdmin: undefined },
-            mf: { players: [], status: undefined, lastAdmin: undefined },
-        };
-        this.YTCache = {
-            'UCQ8k8yTDLITldfWYKDs3xFg': undefined,
-            'UCLIExdPYmEreJPKx_O1dtZg': undefined,
-            'UCguI73--UraJpso4NizXNzA': undefined,
-            'UCuNIKo9EMJZ_FdZfGnM9G1w': undefined,
-            'UCKXa-FhJpPrlRigIW1O0j8g': undefined,
-            'UCWYXg1sqtG9NalK5ZGt4ITA': undefined
-        };
-        this.userLevels = new userLevels(this);
-        this.punishments = new punishments(this);
-        this.watchList = new watchList();
-        this.playerTimes = new playerTimes();
-        this.reminders = new reminders();
-        this.bannedWords = new localDatabase('bannedWords');
-        this.TFlist = new localDatabase('TFlist');
-        this.FMlist = new localDatabase('FMlist');
-        this.whitelist = new localDatabase('adminWhitelist');
     }
     async init() {
         await this.login(this.tokens.token);
+        this.setMaxListeners(100);
         this.bannedWords.initLoad();
         this.FMlist.initLoad();
         this.TFlist.initLoad();
+        this.whitelist.initLoad();
 
         await mongoose.set('strictQuery', true).connect(this.tokens.mongoURL, {
             autoIndex: true,
@@ -92,14 +92,6 @@ export default class YClient extends Client {
 	        this.registry.push(commandFile.default.data.toJSON());
         });
     }
-    hasModPerms = (guildMember: Discord.GuildMember) => this.config.mainServer.staffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
-
-    isMPStaff = (guildMember: Discord.GuildMember) => this.config.mainServer.MPStaffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
-
-    youNeedRole = (interaction: Discord.ChatInputCommandInteraction<"cached">, role: string) => interaction.reply(`You need the <@&${this.config.mainServer.roles[role]}> role to use this command`);
-
-    timeLog = (color: string) => color + `[${moment().format('HH:mm:ss')}]`;
-
     YTLoop = async (YTChannelID: string, YTChannelName: string) => await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${YTChannelID}`, { signal: AbortSignal.timeout(5000) }).then(async response => {
         const Data = xml2js(await response.text(), { compact: true }) as any;
 
@@ -167,10 +159,10 @@ export default class YClient extends Client {
 
 class localDatabase {
 	public _path: string;
-	public _content: Array<string>;
+	public _content = [] as Array<string>;
+    public initLoad = () => this._content = JSON.parse(fs.readFileSync(this._path, 'utf8'));
 	constructor(fileName: string) {
 		this._path = `../databases/${fileName}.json`;
-		this._content = [];
 	}
 	add(data: string) {
 		this._content.push(data);
@@ -180,5 +172,4 @@ class localDatabase {
 		this._content = this._content.filter(x => x !== data);
 		fs.writeFileSync(this._path, JSON.stringify(this._content, null, 4));
 	}
-	initLoad = () => this._content = JSON.parse(fs.readFileSync(this._path, 'utf8'));
 }

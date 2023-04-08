@@ -6,9 +6,8 @@ const Schema = mongoose.model('watchList', new mongoose.Schema({
 }, { versionKey: false }));
 
 export default class watchList extends Schema {
-    _content: typeof Schema;
+    public _content = Schema;
     constructor() {
 		super();
-		this._content = Schema;
 	}
 }

@@ -7,10 +7,9 @@ const Schema = mongoose.model('playerTimes', new mongoose.Schema({
 }, { versionKey: false }));
 
 export default class playerTimes extends Schema {
-	_content: typeof Schema;
+	public _content = Schema;
 	constructor() {
 		super();
-		this._content = Schema;
 	}
 	async addPlayerTime(playerName: string, time: number) {
 		const now = Math.round(Date.now() / 1000);

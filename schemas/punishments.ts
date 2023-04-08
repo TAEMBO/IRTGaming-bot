@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import Discord from 'discord.js';
 import YClient from '../client.js';
 import ms from 'ms';
-import { Punishment } from '../interfaces.js';
+import { Punishment } from '../typings.js';
 
 const Schema = mongoose.model('punishments', new mongoose.Schema({
     _id: { type: Number, required: true },
@@ -21,16 +21,12 @@ const Schema = mongoose.model('punishments', new mongoose.Schema({
 }, { versionKey: false }));
 
 export default class punishments extends Schema {
-    _content: typeof Schema;
-    constructor(public client: YClient) {
+    public _content = Schema;
+	private createId = async () => Math.max(...(await this._content.find()).map(x => x.id), 0) + 1;
+    constructor(private client: YClient) {
 		super();
-		this.client = client;
-		this._content = Schema;
-	};
-    createId = async () => Math.max(...(await this._content.find()).map(x => x.id), 0) + 1;
-
+	}
 	async makeModlogEntry(punishment: Punishment) {
-        // format data into embed
         const embed = new this.client.embed()
             .setTitle(`${punishment.type[0].toUpperCase() + punishment.type.slice(1)} | Case #${punishment._id}`)
             .addFields(
@@ -47,7 +43,6 @@ export default class punishments extends Schema {
             embed.addFields({name: '🔹 Overwrites', value: `This case overwrites Case #${cancels?._id} \`${cancels?.reason}\``});
         }
     
-        // send embed in modlog channel
         (this.client.channels.cache.get(this.client.config.mainServer.channels.staffreports) as Discord.TextChannel).send({embeds: [embed]});
     };
 	getTense(type: string) { // Get past tense form of punishment type, grammar yes

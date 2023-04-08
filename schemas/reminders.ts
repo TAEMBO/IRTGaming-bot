@@ -9,9 +9,8 @@ const Schema = mongoose.model('reminders', new mongoose.Schema({
 }, { versionKey: false }));
 
 export default class reminders extends Schema {
-	_content: typeof Schema;
+	public _content = Schema;
 	constructor() {
 		super();
-		this._content = Schema;
 	}
 }

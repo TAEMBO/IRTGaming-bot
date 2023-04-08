@@ -1,31 +1,27 @@
 import Discord from 'discord.js';
 import YClient from './client.js';
-import fs from 'node:fs';
 import FSLoop from './FSLoop.js';
+import fs from 'node:fs';
 import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from 'node:url';
 
 console.log('\x1b[32mStartup');
 const client = new YClient();
-client.init().then(() => {
-	console.log(client.config.botSwitches);
-	console.log(client.config.devWhitelist);
-
-	client.once("ready", async () => {
-		await client.guilds.fetch(client.config.mainServer.id).then(async guild => {
-			await guild.members.fetch();
-			setInterval(() => guild.invites.fetch().then(invs => invs.forEach(inv => client.invites.set(inv.code, { uses: inv.uses, creator: inv.inviter?.id }))), 500000);
-			if (client.config.botSwitches.registerCommands) guild.commands.set(client.registry).then(() => console.log(client.timeLog('\x1b[35m'), 'Slash commands registered')).catch(e => console.log(`Couldn't register commands bcuz: ${e}`));
-		});
-
-		// Playing: 0 & 1, Listening: 2, Watching: 3, N/A: 4, Competing in: 5
-		setInterval(() => client.user?.setPresence(client.config.botPresence), 3600000);
-	
-		const channel = client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel;
-		await channel.send(`:warning: Bot restarted :warning:\n<@${client.config.devWhitelist[0]}>\n\`\`\`json\n${Object.entries(client.config.botSwitches).map(x => `${x[0]}: ${x[1]}`).join('\n')}\`\`\``);
-
-		console.log(client.timeLog('\x1b[34m'), `Bot active as ${client.user?.tag}`);
+await client.init();
+console.log(client.config.botSwitches);
+console.log(client.config.devWhitelist);
+client.once("ready", async () => {
+	await client.guilds.fetch(client.config.mainServer.id).then(async guild => {
+		await guild.members.fetch();
+		setInterval(() => guild.invites.fetch().then(invs => invs.forEach(inv => client.invites.set(inv.code, { uses: inv.uses, creator: inv.inviter?.id }))), 500000);
+		if (client.config.botSwitches.registerCommands) guild.commands.set(client.registry).then(() => console.log(client.timeLog('\x1b[35m'), 'Slash commands registered')).catch(e => console.log(`Couldn't register commands bcuz: ${e}`));
 	});
+	// Playing: 0 & 1, Listening: 2, Watching: 3, N/A: 4, Competing in: 5
+	setInterval(() => client.user?.setPresence(client.config.botPresence), 3600000);
+
+	const channel = client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel;
+	await channel.send(`:warning: Bot restarted :warning:\n<@${client.config.devWhitelist[0]}>\n\`\`\`json\n${Object.entries(client.config.botSwitches).map(x => `${x[0]}: ${x[1]}`).join('\n')}\`\`\``);
+	console.log(client.timeLog('\x1b[34m'), `Bot active as ${client.user?.tag}`);
 });
 
 // Error handler

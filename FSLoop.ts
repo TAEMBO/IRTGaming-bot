@@ -2,7 +2,7 @@ import Discord from "discord.js";
 import YClient from "./client.js";
 import { xml2js } from "xml-js";
 import fs from "node:fs";
-import { FS_careerSavegame, FS_data, FS_player } from "./interfaces.js";
+import { FS_careerSavegame, FS_data, FS_player } from "./typings.js";
 
 export default async (client: YClient, serverURLdss: string, serverURLcsg: string, Channel: string, Message: string, serverAcro: string) => {
     function wlEmbed(playerName: string, joinLog: boolean, wlReason?: string) {
@@ -26,10 +26,8 @@ export default async (client: YClient, serverURLdss: string, serverURLcsg: strin
         } else return embed.setColor(client.config.embedColorRed).setFooter({text: `Playtime: ${playTimeHrs}:${playTimeMins}`});
     }
     function adminCheck() {
-        const Whitelist: Array<string> = JSON.parse(fs.readFileSync('../databases/adminWhitelist.json', 'utf8'));
-    
         Players.filter(x => !PlayersCache.some(y => {
-            if (y.name === x.name && !y.isAdmin && x.isAdmin && !Whitelist.includes(x.name) && !client.FMlist._content.includes(x.name)) {
+            if (y.name === x.name && !y.isAdmin && x.isAdmin && !client.whitelist._content.includes(x.name) && !client.FMlist._content.includes(x.name)) {
                 (client.channels.resolve('830916009107652630') as Discord.TextChannel).send({embeds: [new client.embed()
                     .setTitle('UNKNOWN ADMIN LOGIN')
                     .setDescription(`\`${x.name}\` on **${serverAcro}** at <t:${now}>`)

@@ -5,7 +5,7 @@ import puppeteer from 'puppeteer'; // Credits to Trolly for suggesting this pack
 import FTPClient from 'ftp';
 import fs from 'node:fs';
 import { xml2js } from 'xml-js';
-import { banFormat, farmFormat } from '../interfaces.js';
+import { banFormat, farmFormat } from '../typings.js';
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
@@ -57,20 +57,19 @@ export default {
                 const chosenServer = interaction.options.getString('server', true) as 'ps' | 'pg';
                 const chosenAction = interaction.options.getString('action', true) as 'items.xml' | 'players.xml';
                 
-                if (client.FSCache[chosenServer].status == 'online') return interaction.reply(`You cannot mop files from **${chosenServer.toUpperCase()}** while it is online`);
-                if (chosenServer != 'pg' && chosenAction == 'items.xml') return interaction.reply(`You can only mop **${chosenAction}** from **PG**`);
+                if (client.FSCache[chosenServer].status === 'online') return interaction.reply(`You cannot mop files from **${chosenServer.toUpperCase()}** while it is online`);
+                if (chosenServer !== 'pg' && chosenAction === 'items.xml') return interaction.reply(`You can only mop **${chosenAction}** from **PG**`);
                 
                 await interaction.deferReply();
                 const FTPLogin = client.tokens.ftp[chosenServer];
                 const time = Date.now();
     
-                FTP.on('ready', async () => FTP.delete(FTPLogin.path + `savegame1/${chosenAction}`, async (err) => {
+                FTP.connect(FTPLogin);
+                FTP.on('ready', () => FTP.delete(FTPLogin.path + `savegame1/${chosenAction}`, async (err) => {
                     if (err) return interaction.editReply(err.message);
                     await interaction.editReply(`Successfully deleted **${chosenAction}** from **${chosenServer.toUpperCase()}** after **${Date.now() - time}ms**`);
                     FTP.end();
                 }));
-    
-                FTP.connect(FTPLogin);
             },
             bans: async () => {
                 const chosenServer = interaction.options.getString('server', true) as 'ps' | 'pg';
@@ -78,21 +77,16 @@ export default {
     
                 await interaction.deferReply();
     
-                if (chosenAction == 'dl') {
-                    if (chosenServer == 'pg') {
+                if (chosenAction === 'dl') {
+                    if (chosenServer === 'pg') {
                         FTP.connect(client.tokens.ftp.pg);
-                        FTP.on('ready', async () => {
-                            console.log(client.timeLog('\x1b[33m'), 'Connected to FTP for PG');
-                            FTP.get(client.tokens.ftp.pg.path + 'blockedUserIds.xml', async (err, stream) => {
-                                if (err) return interaction.editReply(err.message);
-                                console.log(client.timeLog('\x1b[33m'), 'Downloaded PG bans');
-                                stream.once('close', ()=>FTP.end());
-                                stream.pipe(fs.createWriteStream('../databases/blockedUserIds.xml'));
+                        FTP.on('ready', () => FTP.get(client.tokens.ftp.pg.path + 'blockedUserIds.xml', (err, stream) => {
+                            if (err) return interaction.editReply(err.message);
+                            stream.once('close', ()=>FTP.end());
+                            stream.pipe(fs.createWriteStream('../databases/blockedUserIds.xml'));
         
-                                console.log(client.timeLog('\x1b[33m'), `Write via ${client.tokens.ftp.pg.path}`);
-                                setTimeout(() => interaction.editReply({files: ['../databases/blockedUserIds.xml']}), 1000);
-                            });
-                        });
+                            setTimeout(() => interaction.editReply({files: ['../databases/blockedUserIds.xml']}), 1000);
+                        }));
                     } else interaction.editReply({files: ['../../../Documents/My Games/FarmingSimulator2022/blockedUserIds.xml']});
                 } else {
                     if (!interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager)) return client.youNeedRole(interaction, "mpmanager");
@@ -102,7 +96,6 @@ export default {
                     if (!banAttachment) return interaction.editReply(`Canceled: A ban file must be supplied`);
     
                     const banData = await fetch(banAttachment.url).then((res) => res.text());
-                    console.log(client.timeLog('\x1b[33m'), `Discord API; Downloaded ${banAttachment.name}`);
                     try {
                         data = xml2js(banData, {compact: true}) as banFormat;
                     } catch (err) {
@@ -111,19 +104,13 @@ export default {
     
                     if (!data.blockedUserIds?.user[0]?._attributes?.displayName) return interaction.editReply(`Canceled: Improper file (data format)`);
     
-                    if (chosenServer == 'pg') {
+                    if (chosenServer === 'pg') {
                         FTP.connect(client.tokens.ftp.pg);
-                        FTP.on('ready', async () => {
-                            console.log(client.timeLog('\x1b[33m'), 'Connected to FTP for PG');
-                            FTP.put(banData, client.tokens.ftp.pg.path + 'blockedUserIds.xml', async (error) => {
-                                if (error) {
-                                    interaction.editReply(error.message);
-                                } else {
-                                    console.log(client.timeLog('\x1b[33m'), 'Uploaded PG bans');
-                                    interaction.editReply('Successfully uploaded ban file for PG');
-                                }
-                            });
-                        });
+                        FTP.on('ready', () => FTP.put(banData, client.tokens.ftp.pg.path + 'blockedUserIds.xml', error => {
+                            if (error) {
+                                interaction.editReply(error.message);
+                            } else interaction.editReply('Successfully uploaded ban file for PG');
+                        }));
                     } else {
                         fs.writeFileSync(`../../../Documents/My Games/FarmingSimulator2022/blockedUserIds.xml`, banData);
                         interaction.editReply('Successfully uploaded ban file for PS');

@@ -2,10 +2,7 @@ import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client.js';
 const rpsChannels: { [key: string]: RpsInstance } = {};
 class RpsInstance {
-    firstPlayer: Discord.User;
-    firstMove: string;
-    message: Discord.Message;
-    constructor(client: YClient, firstPlayer: Discord.User, firstMove: string, message: Discord.Message) {
+    constructor(client: YClient, public firstPlayer: Discord.User, public firstMove: string, public message: Discord.Message) {
         this.firstPlayer = firstPlayer;
         this.firstMove = firstMove;
         this.message = message;

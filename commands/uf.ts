@@ -13,7 +13,7 @@ export default {
         if (chosenServer == 'pg') {
             await interaction.deferReply({ ephemeral: true });
             FTP.connect(client.tokens.ftp.pg);
-            FTP.on('ready', () => FTP.get(client.tokens.ftp.pg.path + 'blockedUserIds.xml', async (err, stream) => {
+            FTP.on('ready', () => FTP.get(client.tokens.ftp.pg.path + 'blockedUserIds.xml', (err, stream) => {
                 if (err) return interaction.editReply(err.message);
                 stream.once('close', ()=>FTP.end());
                 stream.pipe(fs.createWriteStream('../databases/blockedUserIds.xml'));

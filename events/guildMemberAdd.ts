@@ -9,17 +9,15 @@ export default async (client: YClient, member: Discord.GuildMember) => {
 
     // Welcome message
     const index = member.guild.memberCount;
-    const suffix = ((index) => {
+    const suffix = (() => {
         const numbers = index.toString().split('').reverse(); // eg. 1850 -> [0, 5, 8, 1]
-        if (numbers[1] === '1') { // this is some -teen
-            return 'th';
-        } else {
+        if (numbers[1] !== '1') { // this is some -teen
             if (numbers[0] === '1') return 'st';
             else if (numbers[0] === '2') return 'nd';
             else if (numbers[0] === '3') return 'rd';
             else return 'th';
-        }
-    })(index);
+        } else return 'th';
+    })();
     let usefulChannels = '<:IRTDot:908818924286648350> Our game servers: <#739100711073218611>\n';
     usefulChannels += '<:IRTDot:908818924286648350> Report players: <#825046442300145744>\n';
     usefulChannels += '<:IRTDot:908818924286648350> Come chat with us!: <#552565546093248512>\n';

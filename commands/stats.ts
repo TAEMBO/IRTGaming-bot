@@ -2,7 +2,7 @@ import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client.js';
 import fs from 'node:fs';
 import canvas from 'canvas';
-import { FS_data } from '../interfaces.js';
+import { FS_data } from '../typings.js';
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
@@ -10,10 +10,11 @@ export default {
         const subCmd = interaction.options.getSubcommand() as 'ps' | 'pg' | 'mf' | 'all' | 'playertimes';
 
         async function FSstats() {
-            const FSdss: FS_data = await fetch(client.tokens.fs[subCmd].dss, { signal: AbortSignal.timeout(2000), headers: { 'User-Agent': 'IRTBot/Stats' } }).then(res => res.json()).catch(() => {
+            const FSdss: FS_data | void = await fetch(client.tokens.fs[subCmd].dss, { signal: AbortSignal.timeout(2000), headers: { 'User-Agent': 'IRTBot/Stats' } }).then(res => res.json()).catch(() => {
                 console.log(client.timeLog('\x1b[31m'), `Stats ${subCmd.toUpperCase()} failed`);
-                return interaction.reply('Server did not respond');
             });
+
+            if (!FSdss) return interaction.reply('Server did not respond');
 
             const data: Array<number> = JSON.parse(fs.readFileSync(`../databases/${subCmd.toUpperCase()}PlayerData.json`, 'utf8')).slice(client.config.statsGraphSize);
         
@@ -184,13 +185,12 @@ export default {
             const totalCount: Array<number> = [];
 
             async function FSstatsAll(serverAcro: string) {
-                const FSdss: FS_data = await fetch(client.tokens.fs[serverAcro.toLowerCase()].dss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': 'IRTBot/StatsAll' } }).then(res => res.json()).catch(() => {
+                const FSdss: FS_data | void = await fetch(client.tokens.fs[serverAcro.toLowerCase()].dss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': 'IRTBot/StatsAll' } }).then(res => res.json()).catch(() => {
                     console.log(client.timeLog('\x1b[31m'), `Stats all; ${serverAcro} failed`);
                     failedFooter.push(`Failed to fetch ${serverAcro}`);
-                    return;
                 });
 
-                if (FSdss.slots.used === 0) return;
+                if (!FSdss || FSdss.slots.used === 0 ) return;
 
                 totalCount.push(FSdss.slots.used);
                 const playerInfo: Array<string> = [];

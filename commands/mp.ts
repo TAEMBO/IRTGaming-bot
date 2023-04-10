@@ -97,7 +97,7 @@ export default {
     
                     const banData = await fetch(banAttachment.url).then((res) => res.text());
                     try {
-                        data = xml2js(banData, {compact: true}) as banFormat;
+                        data = xml2js(banData, { compact: true }) as banFormat;
                     } catch (err) {
                         return interaction.editReply(`Canceled: Improper file (not XML)`);
                     }
@@ -157,6 +157,26 @@ export default {
                         setTimeout(() => interaction.editReply({files: ['../databases/farms.xml']}), 4000);
                     }));
                 } else interaction.reply({files: ['../../../Documents/My Games/FarmingSimulator2022/savegame1/farms.xml']});
+            },
+            password: async () => {
+                await interaction.deferReply()
+                const chosenServer = interaction.options.getString('server', true) as 'ps' | 'pg';
+                function getPassword(data: string) {
+                    const pw = (xml2js(data, { compact: true }) as any).gameserver.settings.game_password._text as string | undefined;
+
+                    if (pw) {
+                        interaction.editReply(`Current password for **${chosenServer.toUpperCase()}** is \`${pw}\``);
+                    } else interaction.editReply(`**${chosenServer.toUpperCase()}** doesn't currently have a password set`);
+                }
+
+                if (chosenServer === 'pg') {
+                    FTP.connect(client.tokens.ftp.pg);
+                    FTP.once('ready', () => FTP.get(client.tokens.ftp.pg.path + 'dedicated_server/dedicatedServerConfig.xml', async (err, stream) => {
+                        if (err) return interaction.editReply(err.message);
+                        getPassword(await new Response(stream as any).text());
+                        stream.once('close', ()=>FTP.end());
+                    }));
+                } else getPassword(fs.readFileSync('../../../Documents/My Games/FarmingSimulator2022/dedicated_server/dedicatedServerConfig.xml', 'utf8'));
             },
             roles: async () => {
                 if (!interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager)) return client.youNeedRole(interaction, "mpmanager");
@@ -289,6 +309,16 @@ export default {
                     {name: 'Public Grain', value: 'pg'})
                 .setRequired(true)))
         .addSubcommand(x=>x
+            .setName('password')
+            .setDescription('Fetch the game password for a given server')
+            .addStringOption(x=>x
+                .setName('server')
+                .setDescription('The server to fetch from')
+                .addChoices(
+                    { name: 'Public Silage', value: 'ps' },
+                    { name: 'Public Grain', value: 'pg' })
+                .setRequired(true)))
+        .addSubcommand(x=>x
             .setName('roles')
             .setDescription('Give or take MP Staff roles')
             .addUserOption(x=>x
@@ -317,4 +347,4 @@ export default {
                 .setName('name')
                 .setDescription('The player name to add or remove')
                 .setRequired(true)))
-};
+}

@@ -183,19 +183,18 @@ export default {
             const embed = new client.embed().setColor(client.config.embedColor);
             const failedFooter: Array<string> = [];
             const totalCount: Array<number> = [];
+            const watchList = await client.watchList._content.find();
 
             async function FSstatsAll(serverAcro: string) {
                 const FSdss: FS_data | void = await fetch(client.tokens.fs[serverAcro.toLowerCase()].dss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': 'IRTBot/StatsAll' } }).then(res => res.json()).catch(() => {
                     console.log(client.timeLog('\x1b[31m'), `Stats all; ${serverAcro} failed`);
                     failedFooter.push(`Failed to fetch ${serverAcro}`);
                 });
-
                 if (!FSdss || FSdss.slots.used === 0 ) return;
 
                 totalCount.push(FSdss.slots.used);
                 const playerInfo: Array<string> = [];
-                const watchList = await client.watchList._content.find();
-            
+                const serverSlots = `${FSdss.slots.used}/${FSdss.slots.capacity}`;
                 FSdss.slots.players.filter(x=>x.isUsed).forEach(player => {
                     const playTimeHrs = Math.floor(player.uptime / 60);
                     const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
@@ -207,8 +206,7 @@ export default {
         
                     playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
                 });
-                const serverSlots = `${FSdss.slots.used}/${FSdss.slots.capacity}`;
-                embed.addFields({name: `${FSdss.server.name.replace('! ! IRTGaming|', '')} - ${serverSlots}`, value: `${playerInfo.join("\n")}`, inline: true});
+                embed.addFields({name: `${FSdss.server.name.replace('! ! IRTGaming | ', '')} - ${serverSlots}`, value: `${playerInfo.join("\n")}`, inline: true});
             }
             await Promise.all([FSstatsAll('PS'), FSstatsAll('PG'), FSstatsAll('MF')]);
 

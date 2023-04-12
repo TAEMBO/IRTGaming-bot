@@ -39,8 +39,8 @@ export default {
                     .setTitle('__MP Staff Usernames__')
                     .setColor(client.config.embedColor)
                     .addFields(
-                        {name: 'Farm Managers :farmer:', value: `\`${client.FMlist._content.map((x: string)=>x).join("\`\n\`")}\``},
-                        {name: 'Trusted Farmers :angel:', value: `\`${client.TFlist._content.map((x: string)=>x).join("\`\n\`")}\``})
+                        { name: 'Farm Managers :farmer:', value: `\`${client.FMlist._content.join("\`\n\`")}\`` },
+                        { name: 'Trusted Farmers :angel:', value: `\`${client.TFlist._content.join("\`\n\`")}\`` })
                 ]});
             },
             discord: async () => {

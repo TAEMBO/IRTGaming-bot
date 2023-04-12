@@ -82,7 +82,7 @@ export default async (client: YClient, serverURLdss: string, serverURLcsg: strin
     }).catch(err => console.log(client.timeLog('\x1b[31m'), `${serverAcro} csg ${err.message}`)); // Fetch dedicated-server-savegame.html
 
     if (!DSS || !DSS.slots || !CSG) { // Blame Red
-        if (!DSS?.slots) console.log(client.timeLog('\x1b[31m'), `${serverAcro} undefined slots`);
+        if (DSS && !DSS.slots) console.log(client.timeLog('\x1b[31m'), `${serverAcro} undefined slots`);
         statsEmbed.setTitle('Host not responding').setColor(client.config.embedColorRed);
         statsMsg.edit({embeds: [statsEmbed]});
         return;

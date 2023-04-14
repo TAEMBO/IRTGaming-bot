@@ -6,22 +6,21 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 console.log('\x1b[32mStartup');
-const client = new YClient();
-await client.init();
+const client = await new YClient().init();
 console.log(client.config.botSwitches);
 console.log(client.config.devWhitelist);
 client.once("ready", async () => {
 	await client.guilds.fetch(client.config.mainServer.id).then(async guild => {
 		await guild.members.fetch();
-		setInterval(() => guild.invites.fetch().then(invs => invs.forEach(inv => client.invites.set(inv.code, { uses: inv.uses, creator: inv.inviter?.id }))), 500000);
-		if (client.config.botSwitches.registerCommands) guild.commands.set(client.registry).then(() => console.log(client.timeLog('\x1b[35m'), 'Slash commands registered')).catch(e => console.log(`Couldn't register commands bcuz: ${e}`));
+		setInterval(async () => (await guild.invites.fetch()).forEach(inv => client.invites.set(inv.code, { uses: inv.uses, creator: inv.inviter?.id })), 500000);
+		if (client.config.botSwitches.registerCommands) guild.commands.set(client.registry).then(() => client.log('\x1b[35m', 'Slash commands registered')).catch(e => console.log(`Couldn't register commands bcuz: ${e}`));
 	});
 	// Playing: 0 & 1, Listening: 2, Watching: 3, N/A: 4, Competing in: 5
 	setInterval(() => client.user?.setPresence(client.config.botPresence), 3600000);
 
 	const channel = client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel;
 	await channel.send(`:warning: Bot restarted :warning:\n<@${client.config.devWhitelist[0]}>\n\`\`\`json\n${Object.entries(client.config.botSwitches).map(x => `${x[0]}: ${x[1]}`).join('\n')}\`\`\``);
-	console.log(client.timeLog('\x1b[34m'), `Bot active as ${client.user?.tag}`);
+	client.log('\x1b[34m', `Bot active as ${client.user?.tag}`);
 });
 
 // Error handler
@@ -49,12 +48,12 @@ setInterval(async () => {
 			(client.channels.resolve(reminder.ch) as Discord.TextChannel).messages.fetch(reminder.msg).then(msg => msg.reply({ content:`<@${reminder.userid}>`, embeds: [embed]}))
 		));
 		await client.reminders._content.findByIdAndDelete(reminder._id);
-		console.log(client.timeLog('\x1b[33m'), 'REMINDER EXECUTE', reminder);
+		client.log('\x1b[33m', 'REMINDER EXECUTE', reminder);
 	});
 
 	Punishments.forEach(punishment => {
-		console.log(client.timeLog('\x1b[33m'), `${punishment.member.tag}\'s ${punishment.type} should expire now`);
-		client.punishments.removePunishment(punishment._id, (client.user as Discord.ClientUser).id, "Time\'s up!").then(result => console.log(client.timeLog('\x1b[33m'), result));
+		client.log('\x1b[33m', `${punishment.member.tag}\'s ${punishment.type} should expire now`);
+		client.punishments.removePunishment(punishment._id, (client.user as Discord.ClientUser).id, "Time\'s up!").then(result => client.log('\x1b[33m', result));
 	});
 
 	const formattedDate = Math.floor((now - 1667854800000) / 1000 / 60 / 60 / 24);
@@ -66,11 +65,11 @@ setInterval(async () => {
 
 		dailyMsgs.push([formattedDate, total]);
 		fs.writeFileSync('../databases/dailyMsgs.json', JSON.stringify(dailyMsgs, null, 4));
-		console.log(client.timeLog('\x1b[36m'), `Pushed [${formattedDate}, ${total}] to dailyMsgs`);
+		client.log('\x1b[36m', `Pushed [${formattedDate}, ${total}] to dailyMsgs`);
 		(client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel).send(`:warning: Pushed [${formattedDate}, ${total}] to </rank leaderboard:1042659197919178790>`);
 
 		setTimeout(() => {
-			console.log(client.timeLog('\x1b[36m'), 'Interval messages');
+			client.log('\x1b[36m', 'Interval messages');
 			const Day = Date().toLowerCase();
 			const channel = client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel;
 

@@ -72,17 +72,17 @@ export default async (client: YClient, serverURLdss: string, serverURLcsg: strin
 
     const DSS = await fetch(serverURLdss, { signal: AbortSignal.timeout(7000), headers: { 'User-Agent': 'IRTBot/FSLoop' } }).then(async res => {
         return await res.json() as FS_data;
-    }).catch(err => console.log(client.timeLog('\x1b[31m'), `${serverAcro} dss ${err.message}`)); // Fetch dedicated-server-stats.json
+    }).catch(err => client.log('\x1b[31m', `${serverAcro} dss ${err.message}`)); // Fetch dedicated-server-stats.json
 
     const CSG = await fetch(serverURLcsg, { signal: AbortSignal.timeout(7000), headers: { 'User-Agent': 'IRTBot/FSLoop' } }).then(async res => {
         if (res.status === 204) {
             statsEmbed.setImage('https://http.cat/204');
-            console.log(client.timeLog('\x1b[31m'), `${serverAcro} csg empty content`);
+            client.log('\x1b[31m', `${serverAcro} csg empty content`);
         } else return (xml2js(await res.text(), { compact: true }) as any).careerSavegame as FS_careerSavegame;
-    }).catch(err => console.log(client.timeLog('\x1b[31m'), `${serverAcro} csg ${err.message}`)); // Fetch dedicated-server-savegame.html
+    }).catch(err => client.log('\x1b[31m', `${serverAcro} csg ${err.message}`)); // Fetch dedicated-server-savegame.html
 
     if (!DSS || !DSS.slots || !CSG) { // Blame Red
-        if (DSS && !DSS.slots) console.log(client.timeLog('\x1b[31m'), `${serverAcro} undefined slots`);
+        if (DSS && !DSS.slots) client.log('\x1b[31m', `${serverAcro} undefined slots`);
         statsEmbed.setTitle('Host not responding').setColor(client.config.embedColorRed);
         statsMsg.edit({embeds: [statsEmbed]});
         return;

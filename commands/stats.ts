@@ -11,7 +11,7 @@ export default {
 
         async function FSstats() {
             const FSdss: FS_data | void = await fetch(client.tokens.fs[subCmd].dss, { signal: AbortSignal.timeout(2000), headers: { 'User-Agent': 'IRTBot/Stats' } }).then(res => res.json()).catch(() => {
-                console.log(client.timeLog('\x1b[31m'), `Stats ${subCmd.toUpperCase()} failed`);
+                client.log('\x1b[31m', `Stats ${subCmd.toUpperCase()} failed`);
             });
 
             if (!FSdss) return interaction.reply('Server did not respond');
@@ -187,7 +187,7 @@ export default {
 
             async function FSstatsAll(serverAcro: string) {
                 const FSdss: FS_data | void = await fetch(client.tokens.fs[serverAcro.toLowerCase()].dss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': 'IRTBot/StatsAll' } }).then(res => res.json()).catch(() => {
-                    console.log(client.timeLog('\x1b[31m'), `Stats all; ${serverAcro} failed`);
+                    client.log('\x1b[31m', `Stats all; ${serverAcro} failed`);
                     failedFooter.push(`Failed to fetch ${serverAcro}`);
                 });
                 if (!FSdss || FSdss.slots.used === 0 ) return;

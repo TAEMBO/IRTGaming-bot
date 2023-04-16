@@ -10,7 +10,7 @@ import watchList from './schemas/watchList.js';
 import reminders from './schemas/reminders.js';
 import tokens from './tokens.json' assert { type: 'json' };
 import config from './config.json' assert { type: 'json' };
-import { Config, FSCache, Tokens } from './typings.js';
+import { Config, Tokens, FS_player } from './typings.js';
 
 export default class YClient extends Client {
     config = config as Config;
@@ -27,25 +27,14 @@ export default class YClient extends Client {
     hasModPerms = (guildMember: Discord.GuildMember) => this.config.mainServer.staffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
     isMPStaff = (guildMember: Discord.GuildMember) => this.config.mainServer.MPStaffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
     repeatedMessages = {} as { [key: string]: { data: Discord.Collection<number, { type: string, channel: string }>, timeout: NodeJS.Timeout } };
-    FSCache = {
-        ps: { players: [], status: undefined, lastAdmin: undefined },
-        pg: { players: [], status: undefined, lastAdmin: undefined },
-        mf: { players: [], status: undefined, lastAdmin: undefined },
-    } as FSCache;
-    YTCache = {
-        'UCQ8k8yTDLITldfWYKDs3xFg': undefined,
-        'UCLIExdPYmEreJPKx_O1dtZg': undefined,
-        'UCguI73--UraJpso4NizXNzA': undefined,
-        'UCuNIKo9EMJZ_FdZfGnM9G1w': undefined,
-        'UCKXa-FhJpPrlRigIW1O0j8g': undefined,
-        'UCWYXg1sqtG9NalK5ZGt4ITA': undefined
-    } as { [key: string]: undefined | string };
+    FSCache = {} as { [key: string]: { players: Array<FS_player>, status: "online" | "offline" | null, lastAdmin: number | null } };
+    YTCache = {} as { [key: string]: null | string };
     invites = new Map() as Map<string, { uses: number | null, creator: string | undefined }>;
     reportCooldown = {
         isActive: false,
         timeout: undefined
     } as { isActive: boolean, timeout: NodeJS.Timeout | undefined };
-    bannedWords = new localDatabase('bannedWords'); 
+    bannedWords = new localDatabase('bannedWords');
     TFlist = new localDatabase('TFlist');
     FMlist = new localDatabase('FMlist');
     whitelist = new localDatabase('adminWhitelist');
@@ -69,6 +58,8 @@ export default class YClient extends Client {
         this.FMlist.initLoad();
         this.TFlist.initLoad();
         this.whitelist.initLoad();
+        this.config.YTCacheChannels.forEach(ch => this.YTCache[ch[0]] = null);
+        this.config.FSCacheServers.forEach(srv => this.FSCache[srv[2].toLowerCase()] = { players: [], status: null, lastAdmin: null });
 
         await mongoose.set('strictQuery', true).connect(this.tokens.mongoURL, {
             autoIndex: true,

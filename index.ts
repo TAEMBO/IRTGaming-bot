@@ -83,18 +83,7 @@ setInterval(async () => {
 }, 5000);
 
 // Farming Simulator 22 stats loops
-if (client.config.botSwitches.FSLoop) setInterval(async () => {
-	await FSLoop(client, client.tokens.fs.ps.dss, client.tokens.fs.ps.csg, '891791005098053682', '980240981922291752', 'PS');
-	await FSLoop(client, client.tokens.fs.pg.dss, client.tokens.fs.pg.csg, '729823615096324166', '980241004718329856', 'PG');
-	await FSLoop(client, client.tokens.fs.mf.dss, client.tokens.fs.mf.csg, '982143077554720768', '985586585707900928', 'MF');
-}, 30000);
+if (client.config.botSwitches.FSLoop) setInterval(() => client.config.FSCacheServers.forEach(srv => FSLoop(client, srv[0], srv[1], srv[2])), 30_000);
 
 // YouTube upload nofitcations loop
-if (client.config.botSwitches.YTLoop) setInterval(async () => {
-	await client.YTLoop('UCQ8k8yTDLITldfWYKDs3xFg', 'Daggerwin');
-	await client.YTLoop('UCLIExdPYmEreJPKx_O1dtZg', 'IRTGaming');
-	await client.YTLoop('UCguI73--UraJpso4NizXNzA', 'Machinery Restorer');
-	await client.YTLoop('UCuNIKo9EMJZ_FdZfGnM9G1w', 'Tom Pemberton Farm Life');
-	await client.YTLoop('UCKXa-FhJpPrlRigIW1O0j8g', 'Alan McPhearson');
-	await client.YTLoop('UCWYXg1sqtG9NalK5ZGt4ITA', 'Chainsaw100');
-}, 300000);
+if (client.config.botSwitches.YTLoop) setInterval(() => client.config.YTCacheChannels.forEach(ch => client.YTLoop(ch[0], ch[1])), 300_000);

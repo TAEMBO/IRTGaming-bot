@@ -4,7 +4,7 @@ import { xml2js } from "xml-js";
 import fs from "node:fs";
 import { FS_careerSavegame, FS_data, FS_player } from "./typings.js";
 
-export default async (client: YClient, serverURLdss: string, serverURLcsg: string, Channel: string, Message: string, serverAcro: string) => {
+export default async (client: YClient, ChannelID: string, MessageID: string, serverAcro: string) => {
     function wlEmbed(playerName: string, joinLog: boolean, wlReason?: string) {
         const embed = new client.embed()
             .setTitle('WATCHLIST')
@@ -64,17 +64,17 @@ export default async (client: YClient, serverURLdss: string, serverURLcsg: strin
 
     const wlChannel = client.channels.resolve(client.config.mainServer.channels.watchlist) as Discord.TextChannel;
     const logChannel = client.channels.resolve(client.config.mainServer.channels.fslogs) as Discord.TextChannel;
-    const statsMsg = await (client.channels.resolve(Channel) as Discord.TextChannel).messages.fetch(Message);
+    const statsMsg = await (client.channels.resolve(ChannelID) as Discord.TextChannel).messages.fetch(MessageID);
     const now = Math.round(Date.now() / 1000);
     const playerInfo: Array<string> = [];
     const statsEmbed = new client.embed();
     let justStarted = false;
 
-    const DSS = await fetch(serverURLdss, { signal: AbortSignal.timeout(7000), headers: { 'User-Agent': 'IRTBot/FSLoop' } }).then(async res => {
+    const DSS = await fetch(client.tokens.fs[serverAcro.toLowerCase()].dss, { signal: AbortSignal.timeout(7000), headers: { 'User-Agent': 'IRTBot/FSLoop' } }).then(async res => {
         return await res.json() as FS_data;
     }).catch(err => client.log('\x1b[31m', `${serverAcro} dss ${err.message}`)); // Fetch dedicated-server-stats.json
 
-    const CSG = await fetch(serverURLcsg, { signal: AbortSignal.timeout(7000), headers: { 'User-Agent': 'IRTBot/FSLoop' } }).then(async res => {
+    const CSG = await fetch(client.tokens.fs[serverAcro.toLowerCase()].csg, { signal: AbortSignal.timeout(7000), headers: { 'User-Agent': 'IRTBot/FSLoop' } }).then(async res => {
         if (res.status === 204) {
             statsEmbed.setImage('https://http.cat/204');
             client.log('\x1b[31m', `${serverAcro} csg empty content`);

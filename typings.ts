@@ -47,6 +47,8 @@ export interface Config {
     },
     devWhitelist: Array<string>,
     watchListPings: Array<string>,
+    FSCacheServers: Array<Array<string>>,
+    YTCacheChannels: Array<Array<string>>,
     mainServer: {
         id: string,
         MPStaffRoles: Array<string>,
@@ -95,18 +97,6 @@ export interface Config {
             vidsandstreams: string
         }
     }
-}
-
-export interface FSCache {
-    [key: string]: FSCacheServer,
-    ps: FSCacheServer,
-    pg: FSCacheServer
-}
-
-export interface FSCacheServer {
-    players: Array<FS_player>,
-    status: undefined | "online" | "offline",
-    lastAdmin: undefined | number
 }
 
 export interface Punishment {

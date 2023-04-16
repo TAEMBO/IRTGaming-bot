@@ -245,8 +245,8 @@ export default {
                         interaction.reply({embeds: [new client.embed()
                             .setColor(client.config.embedColor)
                             .setTitle([
-                                `Player - \`${playerData._id}\``,
-                                `Total time - **${client.formatTime(playerData.time * 60 * 1000, 3, { commas: true, longNames: false })}**`,
+                                `Player - \`${playerData._id}\`${client.FMlist._content.includes(playerData._id) ? ':farmer:' : ''}${client.TFlist._content.includes(playerData._id) ? ':angel:' : ''}`,
+                                `Total time - **${client.formatTime(playerData.time * 60 * 1000, 5, { commas: true, longNames: false })}**`,
                                 `Leaderboard position - **#${playersData.indexOf(playerData) + 1}**`,
                                 `Time last on - **${lastOnText}**`
                             ].join('\n'))

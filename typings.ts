@@ -43,7 +43,6 @@ export interface Config {
         YTLoop: boolean,
         autoResponses: boolean,
         buttonRoles: boolean,
-        errorNotify: boolean
     },
     devWhitelist: Array<string>,
     watchListPings: Array<string>,

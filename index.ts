@@ -25,7 +25,7 @@ client.once("ready", async () => {
 
 // Error handler
 function logError(error: Error, from: string) { // I'm well aware my internet is bad, I don't need my own bot to rub it in
-	if (client.config.botSwitches.errorNotify && !['Request aborted', 'getaddrinfo ENOTFOUND discord.com'].includes(error.message) && client.isReady()) {
+	if (!['Request aborted', 'getaddrinfo ENOTFOUND discord.com'].includes(error.message) && client.isReady()) {
 		const channel = client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel;
 		const Dirname = join(dirname(fileURLToPath(import.meta.url))).replaceAll('\\', '/');
 		channel.send({content: `<@${client.config.devWhitelist[0]}>`, embeds: [new client.embed().setTitle(`Error Caught - ${error.message}`).setColor("#420420").setDescription(`\`\`\`ansi\n${error.stack?.replaceAll(' at ', ' [31mat[37m ').replaceAll(Dirname, `[33m${Dirname}[37m`).slice(0, 2500)}\`\`\``).setTimestamp().setFooter({text: from})]});

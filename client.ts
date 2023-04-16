@@ -153,15 +153,9 @@ class localDatabase {
 	public _path: string;
 	public _content = [] as Array<string>;
     public initLoad = () => this._content = JSON.parse(fs.readFileSync(this._path, 'utf8'));
+    public add = (data: string) => fs.writeFileSync(this._path, JSON.stringify(this._content = this._content.concat([data]), null, 4));
+    public remove = (data: string) => fs.writeFileSync(this._path, JSON.stringify(this._content = this._content.filter(x => x !== data), null, 4));
 	constructor(fileName: string) {
 		this._path = `../databases/${fileName}.json`;
-	}
-	add(data: string) {
-		this._content.push(data);
-		fs.writeFileSync(this._path, JSON.stringify(this._content, null, 4));
-	}
-	remove(data: string) {
-		this._content = this._content.filter(x => x !== data);
-		fs.writeFileSync(this._path, JSON.stringify(this._content, null, 4));
 	}
 }

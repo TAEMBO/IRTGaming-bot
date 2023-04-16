@@ -4,27 +4,20 @@ export interface Tokens {
     token: string,
     mongoURL: string
     ftp: {
-        [key: string]: FTPLogins,
-        ps: FTPLogins,
-        pg: FTPLogins
+        [key: string]: {
+            host: string,
+            user: string,
+            password: string
+            path: string
+        },
     }
     fs: {
-        [key: string]: FSURLs,
-        ps: FSURLs,
-        pg: FSURLs,
-        mf: FSURLs
+        [key: string]: {
+            login: string,
+            dss: string,
+            csg: string
+        },
     }
-}
-interface FSURLs {
-    login: string,
-    dss: string,
-    csg: string
-}
-interface FTPLogins {
-    host: string,
-    user: string,
-    password: string
-    path: string
 }
 
 export interface Config {
@@ -96,19 +89,6 @@ export interface Config {
             vidsandstreams: string
         }
     }
-}
-
-export interface Punishment {
-    _id: number;
-    type: string;
-    member: { tag: string, _id: string };
-    moderator: string;
-    expired?: boolean;
-    time: number;
-    reason: string;
-    endTime?: number;
-    cancels?: number;
-    duration?: number;
 }
 
 export interface FS_data {

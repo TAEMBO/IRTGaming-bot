@@ -2,7 +2,6 @@ import mongoose from 'mongoose';
 import Discord from 'discord.js';
 import YClient from '../client.js';
 import ms from 'ms';
-import { Punishment } from '../typings.js';
 
 const Schema = mongoose.model('punishments', new mongoose.Schema({
     _id: { type: Number, required: true },
@@ -19,6 +18,7 @@ const Schema = mongoose.model('punishments', new mongoose.Schema({
     cancels: { type: Number },
     duration: { type: Number }
 }, { versionKey: false }));
+const DocType = Schema.castObject(Schema);
 
 export default class punishments extends Schema {
     public _content = Schema;
@@ -26,7 +26,7 @@ export default class punishments extends Schema {
     constructor(private client: YClient) {
 		super();
 	}
-	async makeModlogEntry(punishment: Punishment) {
+	async makeModlogEntry(punishment: typeof DocType) {
         const embed = new this.client.embed()
             .setTitle(`${punishment.type[0].toUpperCase() + punishment.type.slice(1)} | Case #${punishment._id}`)
             .addFields(
@@ -58,7 +58,7 @@ export default class punishments extends Schema {
 		const { time, interaction } = options;
 		const now = Date.now();
 		const guild = this.client.guilds.cache.get(this.client.config.mainServer.id) as Discord.Guild;
-		const punData: Punishment = { type, _id: await this.createId(), member: { tag: User.tag, _id: User.id }, reason, moderator, time: now };
+		const punData: typeof DocType = { type, _id: await this.createId(), member: { tag: User.tag, _id: User.id }, reason, moderator, time: now };
 		const inOrFromBoolean = ['warn', 'mute'].includes(type) ? 'in' : 'from'; // Use 'in' if the punishment doesn't remove the member from the server, eg. kick, softban, ban
 		const auditLogReason = `${reason} | Case #${punData._id}`;
 		const embed = new this.client.embed()
@@ -70,7 +70,7 @@ export default class punishments extends Schema {
 		let timeInMillis: number | null;
 		let DM;
 
-		if (type == "mute") {
+		if (type === "mute") {
 			timeInMillis = time ? ms(time) : 2419140000; // Timeouts have a limit of 4 weeks
 		} else timeInMillis = time ? ms(time) : null;
 
@@ -106,14 +106,16 @@ export default class punishments extends Schema {
 			punData.duration = timeInMillis;
 		}
 
-		if (typeof punResult == 'string') { // Punishment was unsuccessful
+		if (typeof punResult === 'string') { // Punishment was unsuccessful
 			if (DM) DM.delete();
 			if (interaction) {
 				return interaction.editReply(punResult);
 			} else return punResult;
 		} else { // Punishment was successful
-			await this.makeModlogEntry(punData);
-			await this._content.create(punData);
+			await Promise.allSettled([
+				this.makeModlogEntry(punData),
+				this._content.create(punData)
+			]);
 
 			if (interaction) {
 				return interaction.editReply({embeds: [embed]});
@@ -130,26 +132,28 @@ export default class punishments extends Schema {
 		const User = await this.client.users.fetch(punishment.member._id);
 		const GuildMember = await guild.members.fetch(punishment.member._id).catch(() => undefined);
 		
-		let removePunishmentData: Punishment = { type: `un${punishment.type}`, _id, cancels: punishment.id, member: punishment.member, reason, moderator, time: now };
+		let removePunishmentData: typeof DocType = { type: `un${punishment.type}`, _id, cancels: punishment.id, member: punishment.member, reason, moderator, time: now };
 		let removePunishmentResult;
 
-		if (punishment.type == 'ban') {
+		if (punishment.type === 'ban') {
 			removePunishmentResult = guild.bans.remove(punishment.member._id, auditLogReason).catch((err: Error) => err.message);
-		} else if (punishment.type == 'mute') {
+		} else if (punishment.type === 'mute') {
 			if (GuildMember) {
 				removePunishmentResult = GuildMember.timeout(null, auditLogReason).catch((err: Error) => err.message);
 				GuildMember.send(`You've been unmuted in ${guild.name}.`).catch((err: Error) => console.log(err.message));
 			} else await this._content.findByIdAndUpdate(caseId, { expired: true }, { new: true });
 		} else removePunishmentData.type = 'removeOtherPunishment';
 
-		if (typeof removePunishmentResult == 'string') { // Unpunish was unsuccessful
+		if (typeof removePunishmentResult === 'string') { // Unpunish was unsuccessful
 			if (interaction) {
 				return interaction.reply(removePunishmentResult);
 			} else return removePunishmentResult;
 		} else { // Unpunish was successful
-			await this._content.findByIdAndUpdate(caseId, { expired: true }, { new: true });
-			await this._content.create(removePunishmentData);
-            await this.makeModlogEntry(removePunishmentData);
+			await Promise.allSettled([
+				this._content.findByIdAndUpdate(caseId, { expired: true }, { new: true }),
+				this._content.create(removePunishmentData),
+				this.makeModlogEntry(removePunishmentData)
+			]);
 
 			if (interaction) {
 				return interaction.reply({embeds: [new this.client.embed()

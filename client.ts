@@ -59,7 +59,7 @@ export default class YClient extends Client {
         this.TFlist.initLoad();
         this.whitelist.initLoad();
         this.config.YTCacheChannels.forEach(ch => this.YTCache[ch[0]] = null);
-        this.config.FSCacheServers.forEach(srv => this.FSCache[srv[2].toLowerCase()] = { players: [], status: null, lastAdmin: null });
+        this.config.FSCacheServers.forEach(srv => this.FSCache[srv[2]] = { players: [], status: null, lastAdmin: null });
 
         await mongoose.set('strictQuery', true).connect(this.tokens.mongoURL, {
             autoIndex: true,

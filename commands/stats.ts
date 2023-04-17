@@ -173,7 +173,7 @@ export default {
                 .setDescription(FSdss.slots.used == 0 ? '*No players online*' : playerInfo.join("\n"))
                 .setImage('attachment://FSStats.png')
                 .setColor(Color);
-            if (FSdss.slots.players.filter(x=>x.isAdmin).length === 0 && client.FSCache[subCmd].lastAdmin) embed.setTimestamp(client.FSCache[subCmd].lastAdmin).setFooter({text: 'Admin last on'});
+            if (FSdss.slots.players.filter(x=>x.isAdmin).length === 0 && client.FSCache[subCmd.toUpperCase()].lastAdmin) embed.setTimestamp(client.FSCache[subCmd.toUpperCase()].lastAdmin).setFooter({text: 'Admin last on'});
         
             interaction.reply({embeds: [embed], files: [Image]}).catch(() => interaction.channel?.send({embeds: [embed], files: [Image]}) );
         }
@@ -227,9 +227,9 @@ export default {
 
                 if (player) {
                     const playerData = playersData.find(x => x._id === player);
-                    const isOnPS = client.FSCache.ps.players.some(x => x.name === player);
-                    const isOnPG = client.FSCache.pg.players.some(x => x.name === player);
-                    const isOnMF = client.FSCache.mf.players.some(x => x.name === player);
+                    const isOnPS = client.FSCache.PS.players.some(x => x.name === player);
+                    const isOnPG = client.FSCache.PG.players.some(x => x.name === player);
+                    const isOnMF = client.FSCache.MF.players.some(x => x.name === player);
     
                     if (playerData) {
                         let lastOnText: string;

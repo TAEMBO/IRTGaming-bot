@@ -18,7 +18,7 @@ client.once("ready", async () => {
 	// Playing: 0 & 1, Listening: 2, Watching: 3, N/A: 4, Competing in: 5
 	setInterval(() => client.user?.setPresence(client.config.botPresence), 3600000);
 
-	const channel = client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel;
+	const channel = client.channels.resolve(client.config.mainServer.channels.taesTestingZone) as Discord.TextChannel;
 	await channel.send(`:warning: Bot restarted :warning:\n<@${client.config.devWhitelist[0]}>\n\`\`\`json\n${Object.entries(client.config.botSwitches).map(x => `${x[0]}: ${x[1]}`).join('\n')}\`\`\``);
 	client.log('\x1b[34m', `Bot active as ${client.user?.tag}`);
 });
@@ -26,7 +26,7 @@ client.once("ready", async () => {
 // Error handler
 function logError(error: Error, from: string) { // I'm well aware my internet is bad, I don't need my own bot to rub it in
 	if (!['Request aborted', 'getaddrinfo ENOTFOUND discord.com'].includes(error.message) && client.isReady()) {
-		const channel = client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel;
+		const channel = client.channels.resolve(client.config.mainServer.channels.taesTestingZone) as Discord.TextChannel;
 		const Dirname = join(dirname(fileURLToPath(import.meta.url))).replaceAll('\\', '/');
 		channel.send({content: `<@${client.config.devWhitelist[0]}>`, embeds: [new client.embed().setTitle(`Error Caught - ${error.message}`).setColor("#420420").setDescription(`\`\`\`ansi\n${error.stack?.replaceAll(' at ', ' [31mat[37m ').replaceAll(Dirname, `[33m${Dirname}[37m`).slice(0, 2500)}\`\`\``).setTimestamp().setFooter({text: from})]});
 	}
@@ -39,14 +39,14 @@ client.on('error', (error: Error) => logError(error, 'client-error'));
 // Reminder, dailyMsgs, and punishment event loops
 setInterval(async () => {
 	const now = Date.now();
-	const Reminders = await client.reminders._content.find().then(x => x.filter(x => now > x.time));
-	const Punishments = await client.punishments._content.find().then(x => x.filter(x => x.endTime && x.endTime <= now && !x.expired));
+	const Reminders = (await client.reminders._content.find()).filter(x => now > x.time);
+	const Punishments = (await client.punishments._content.find()).filter(x => x.endTime && x.endTime <= now && !x.expired);
 
 	Reminders.forEach(async reminder => {
 		const embed = new client.embed().setTitle('Reminder').setColor(client.config.embedColor).setDescription(`\`\`\`${reminder.content}\`\`\``);
-		await client.users.fetch(reminder.userid).then(User => User.send({embeds: [embed]}).catch(() =>
-			(client.channels.resolve(reminder.ch) as Discord.TextChannel).messages.fetch(reminder.msg).then(msg => msg.reply({ content:`<@${reminder.userid}>`, embeds: [embed]}))
-		));
+		await client.users.fetch(reminder.userid)
+			.then(User => User.send({embeds: [embed]})
+			.catch(async () => (await (client.channels.resolve(reminder.ch) as Discord.TextChannel).messages.fetch(reminder.msg)).reply({ content:`<@${reminder.userid}>`, embeds: [embed] })));
 		await client.reminders._content.findByIdAndDelete(reminder._id);
 		client.log('\x1b[33m', 'REMINDER EXECUTE', reminder);
 	});
@@ -66,12 +66,12 @@ setInterval(async () => {
 		dailyMsgs.push([formattedDate, total]);
 		fs.writeFileSync('../databases/dailyMsgs.json', JSON.stringify(dailyMsgs, null, 4));
 		client.log('\x1b[36m', `Pushed [${formattedDate}, ${total}] to dailyMsgs`);
-		(client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel).send(`:warning: Pushed [${formattedDate}, ${total}] to </rank leaderboard:1042659197919178790>`);
+		(client.channels.resolve(client.config.mainServer.channels.taesTestingZone) as Discord.TextChannel).send(`:warning: Pushed [${formattedDate}, ${total}] to </rank leaderboard:1042659197919178790>`);
 
 		setTimeout(() => {
 			client.log('\x1b[36m', 'Interval messages');
 			const Day = Date().toLowerCase();
-			const channel = client.channels.resolve(client.config.mainServer.channels.testing_zone) as Discord.TextChannel;
+			const channel = client.channels.resolve(client.config.mainServer.channels.taesTestingZone) as Discord.TextChannel;
 
 			channel.send('<:IRT_RollSee:908055712368853002>');
 

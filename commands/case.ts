@@ -3,7 +3,7 @@ import YClient from '../client.js';
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
-		if (!client.hasModPerms(interaction.member as Discord.GuildMember)) return client.youNeedRole(interaction, "mod");
+		if (!client.hasModPerms(interaction.member as Discord.GuildMember)) return client.youNeedRole(interaction, 'discordmoderator');
 		const caseid = interaction.options.getInteger("id");
 
 		({

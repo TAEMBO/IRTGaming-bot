@@ -6,8 +6,8 @@ export default {
             mp: async () => {
                 const staff = {
                     mp_manager: await interaction.guild.roles.fetch(client.config.mainServer.roles.mpmanager) as Discord.Role,
-                    mp_admin: await interaction.guild.roles.fetch(client.config.mainServer.roles.mpadmin) as Discord.Role,
-                    mp_publicadmin: await interaction.guild.roles.fetch(client.config.mainServer.roles.mppublicadmin) as Discord.Role,
+                    mp_admin: await interaction.guild.roles.fetch(client.config.mainServer.roles.mpsradmin) as Discord.Role,
+                    mp_publicadmin: await interaction.guild.roles.fetch(client.config.mainServer.roles.mpjradmin) as Discord.Role,
                     mp_farmmanager: await interaction.guild.roles.fetch(client.config.mainServer.roles.mpfarmmanager) as Discord.Role,
                     mp_trustedfarmer: await interaction.guild.roles.fetch(client.config.mainServer.roles.trustedfarmer) as Discord.Role
                 };
@@ -23,9 +23,9 @@ export default {
                     .setDescription([
                         `<@&${client.config.mainServer.roles.mpmanager}>`,
                         `${mp_m}\n`,
-                        `<@&${client.config.mainServer.roles.mpadmin}>`,
+                        `<@&${client.config.mainServer.roles.mpsradmin}>`,
                         `${mp_a}\n`,
-                        `<@&${client.config.mainServer.roles.mppublicadmin}>`,
+                        `<@&${client.config.mainServer.roles.mpjradmin}>`,
                         `${mp_pa}\n`,
                         `<@&${client.config.mainServer.roles.mpfarmmanager}>`,
                         `${mp_fm}\n`,
@@ -45,19 +45,19 @@ export default {
             },
             discord: async () => {
                 const staff = {
-                    moderator: await interaction.guild.roles.fetch(client.config.mainServer.roles.mod) as Discord.Role,
-                    helper: await interaction.guild.roles.fetch(client.config.mainServer.roles.helper) as Discord.Role
+                    moderator: await interaction.guild.roles.fetch(client.config.mainServer.roles.discordmoderator) as Discord.Role,
+                    helper: await interaction.guild.roles.fetch(client.config.mainServer.roles.discordhelper) as Discord.Role
                 };
-                const mod = staff.moderator.members.filter(x=>!x.roles.cache.has(client.config.mainServer.roles.helper)).map(e=>`<@${e.user.id}>`).join("\n") || "None";
+                const mod = staff.moderator.members.filter(x=>!x.roles.cache.has(client.config.mainServer.roles.discordhelper)).map(e=>`<@${e.user.id}>`).join("\n") || "None";
                 const helper = staff.helper.members.map(e=>`<@${e.user.id}>`).join("\n") || "None";
          
                 interaction.reply({embeds: [new client.embed()
                     .setTitle('__Discord Staff Members__')
                     .setColor(client.config.embedColor)
                     .setDescription([
-                        `<@&${client.config.mainServer.roles.mod}>`,
+                        `<@&${client.config.mainServer.roles.discordmoderator}>`,
                         `${mod}\n`,
-                        `<@&${client.config.mainServer.roles.helper}>`,
+                        `<@&${client.config.mainServer.roles.discordhelper}>`,
                         `${helper}`
                     ].join('\n'))
                 ]});

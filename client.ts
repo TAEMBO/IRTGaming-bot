@@ -10,7 +10,7 @@ import watchList from './schemas/watchList.js';
 import reminders from './schemas/reminders.js';
 import tokens from './tokens.json' assert { type: 'json' };
 import config from './config.json' assert { type: 'json' };
-import { Config, Tokens, FS_player } from './typings.js';
+import type { Config, Tokens, FS_player } from './typings.js';
 
 export default class YClient extends Client {
     config = config as Config;
@@ -24,8 +24,8 @@ export default class YClient extends Client {
     registry = [] as Array<Discord.ApplicationCommandDataResolvable>;
     log = (color: string, ...data: any[]) => console.log(`${color}[${moment().format('HH:mm:ss')}]`, ...data);
     youNeedRole = (interaction: Discord.ChatInputCommandInteraction<"cached">, role: keyof typeof config.mainServer.roles) => interaction.reply(`You need the <@&${this.config.mainServer.roles[role]}> role to use this command`);
-    hasModPerms = (guildMember: Discord.GuildMember) => this.config.mainServer.staffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
-    isMPStaff = (guildMember: Discord.GuildMember) => this.config.mainServer.MPStaffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
+    hasModPerms = (guildMember: Discord.GuildMember) => this.config.mainServer.staffRoles.map(x => this.config.mainServer.roles[x as keyof typeof config.mainServer.roles]).some(x => guildMember.roles.cache.has(x));
+    isMPStaff = (guildMember: Discord.GuildMember) => this.config.mainServer.MPStaffRoles.map(x => this.config.mainServer.roles[x as keyof typeof config.mainServer.roles]).some(x => guildMember.roles.cache.has(x));
     repeatedMessages = {} as { [key: string]: { data: Discord.Collection<number, { type: string, channel: string }>, timeout: NodeJS.Timeout } };
     FSCache = {} as { [key: string]: { players: Array<FS_player>, status: "online" | "offline" | null, lastAdmin: number | null } };
     YTCache = {} as { [key: string]: null | string };
@@ -91,7 +91,7 @@ export default class YClient extends Client {
 
         if (Data.feed.entry[1]['yt:videoId']._text === this.YTCache[YTChannelID]) {
             this.YTCache[YTChannelID] = Data.feed.entry[0]['yt:videoId']._text;
-            (this.channels.resolve(this.config.mainServer.channels.vidsandstreams) as Discord.TextChannel).send(`**${YTChannelName}** just uploaded a new video!\n${Data.feed.entry[0].link._attributes.href}`);
+            (this.channels.resolve(this.config.mainServer.channels.videosAndLiveStreams) as Discord.TextChannel).send(`**${YTChannelName}** just uploaded a new video!\n${Data.feed.entry[0].link._attributes.href}`);
         }
     }).catch(() => this.log('\x1b[31m', `${YTChannelName} YT fail`));
 
@@ -134,7 +134,7 @@ export default class YClient extends Client {
         return (bytes / Math.pow(k, i)).toFixed(dm) + ' ' + sizes[i];
     }
     async punish(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">, type: string) {
-        if ((!client.hasModPerms(interaction.member)) || (!['warn', 'mute'].includes(type) && interaction.member.roles.cache.has(client.config.mainServer.roles.helper))) return client.youNeedRole(interaction, "mod");
+        if ((!client.hasModPerms(interaction.member)) || (!['warn', 'mute'].includes(type) && interaction.member.roles.cache.has(client.config.mainServer.roles.discordhelper))) return client.youNeedRole(interaction, 'discordmoderator');
 
         const time = interaction.options.getString('time') ?? undefined;
         const reason = interaction.options.getString('reason') ?? 'Unspecified';

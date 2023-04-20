@@ -2,7 +2,7 @@ import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client.js';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
-		if (!client.hasModPerms(interaction.member) && !client.config.devWhitelist.includes(interaction.member.id)) return client.youNeedRole(interaction, "mod");
+		if (!client.hasModPerms(interaction.member) && !client.config.devWhitelist.includes(interaction.member.id)) return client.youNeedRole(interaction, 'discordmoderator');
 		const word = interaction.options.getString("word", true);
 
 		if (!client.bannedWords._content.includes(word)) {

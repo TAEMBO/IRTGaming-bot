@@ -2,7 +2,7 @@ import Discord from "discord.js";
 import YClient from "./client.js";
 import { xml2js } from "xml-js";
 import fs from "node:fs";
-import { FS_careerSavegame, FS_data, FS_player } from "./typings.js";
+import type { FS_careerSavegame, FS_data, FS_player } from "./typings.js";
 
 export default async (client: YClient, ChannelID: string, MessageID: string, serverAcro: string) => {
     function wlEmbed(playerName: string, joinLog: boolean, wlReason?: string) {
@@ -62,8 +62,8 @@ export default async (client: YClient, ChannelID: string, MessageID: string, ser
         });
     }
 
-    const wlChannel = client.channels.resolve(client.config.mainServer.channels.watchlist) as Discord.TextChannel;
-    const logChannel = client.channels.resolve(client.config.mainServer.channels.fslogs) as Discord.TextChannel;
+    const wlChannel = client.channels.resolve(client.config.mainServer.channels.watchList) as Discord.TextChannel;
+    const logChannel = client.channels.resolve(client.config.mainServer.channels.fsLogs) as Discord.TextChannel;
     const statsMsg = await (client.channels.resolve(ChannelID) as Discord.TextChannel).messages.fetch(MessageID);
     const now = Math.round(Date.now() / 1000);
     const playerInfo: Array<string> = [];

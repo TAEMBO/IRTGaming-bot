@@ -2,7 +2,7 @@ import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client.js';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
-		if (!client.hasModPerms(interaction.member)) return client.youNeedRole(interaction, "mod");
+		if (!client.hasModPerms(interaction.member)) return client.youNeedRole(interaction, 'discordmoderator');
         const member = interaction.options.getMember('member') as Discord.GuildMember;
 
         (client.channels.resolve('855577815491280958') as Discord.TextChannel).permissionOverwrites.edit(member.user.id, { SendMessages: false });

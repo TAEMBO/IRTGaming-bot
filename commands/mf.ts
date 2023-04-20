@@ -8,7 +8,7 @@ export default {
 
         if (!hasRole(globalRoles.mpmanager) && !hasRole(globalRoles.mfmanager) && !hasRole(globalRoles.mffarmowner)) return client.youNeedRole(interaction, "mffarmowner");
         const member = interaction.options.getMember("member") as Discord.GuildMember;
-        const Role = client.config.mainServer.roles[interaction.options.getString("role", true)];
+        const Role = client.config.mainServer.roles[interaction.options.getString("role", true) as keyof typeof client.config.mainServer.roles];
 
         if (member.roles.cache.has(Role)) {
             if (hasRole(globalRoles.mffarmowner) && !hasRole(globalRoles.mfmanager) && !hasRole(Role)) return interaction.reply('You cannot remove users from a farm you do not own.');

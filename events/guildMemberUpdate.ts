@@ -34,11 +34,11 @@ export default async (client: YClient, oldMember: Discord.GuildMember, newMember
             embed.addFields({name: '🔹 Roles Removed', value: oldRoles.map(x => `<@&${x}>`).join(' ')});
         }
     }
-    if (changes) (client.channels.resolve(client.config.mainServer.channels.botlogs) as Discord.TextChannel).send({embeds: [embed]});
+    if (changes) (client.channels.resolve(client.config.mainServer.channels.botLogs) as Discord.TextChannel).send({embeds: [embed]});
 
     if (oldRoles.includes('631894963474530306') || newRoles.includes('631894963474530306')) (client.channels.resolve('803795484174319646') as Discord.TextChannel).send({embeds: [embed]});
 
     // Trusted Farmer auto-updating list
     const mp_tf = (await (client.guilds.cache.get(client.config.mainServer.id) as Discord.Guild).roles.fetch(client.config.mainServer.roles.trustedfarmer) as Discord.Role).members;
-    (client.channels.resolve('718555644801712200') as Discord.TextChannel)?.messages?.fetch('980240957167521863').then(msg=>msg.edit(`<@&${client.config.mainServer.roles.trustedfarmer}>: ${mp_tf.size}\n${mp_tf.map(e=>`<@${e.user.id}>`).join("\n")}`));
+    (await (client.channels.resolve('718555644801712200') as Discord.TextChannel)?.messages?.fetch('980240957167521863')).edit(`<@&${client.config.mainServer.roles.trustedfarmer}>: ${mp_tf.size}\n${mp_tf.map(e=>`<@${e.user.id}>`).join("\n")}`);
 }

@@ -3,7 +3,7 @@ import YClient from '../client.js';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
 		if (interaction.channel?.type === Discord.ChannelType.GuildStageVoice) return;
-		if (!client.hasModPerms(interaction.member)) return client.youNeedRole(interaction, "mod");
+		if (!client.hasModPerms(interaction.member)) return client.youNeedRole(interaction, 'discordmoderator');
 
 		const amount = interaction.options.getInteger("amount", true);
 		if (amount > 100) return interaction.reply({content: 'Discord\'s API limits purging up to 100 messages.', ephemeral: true});

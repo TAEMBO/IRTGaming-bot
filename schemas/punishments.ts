@@ -43,7 +43,7 @@ export default class punishments extends Schema {
             embed.addFields({name: '🔹 Overwrites', value: `This case overwrites Case #${cancels?._id} \`${cancels?.reason}\``});
         }
     
-        (this.client.channels.cache.get(this.client.config.mainServer.channels.staffreports) as Discord.TextChannel).send({embeds: [embed]});
+        (this.client.channels.cache.get(this.client.config.mainServer.channels.staffReports) as Discord.TextChannel).send({embeds: [embed]});
     };
 	getTense(type: string) { // Get past tense form of punishment type, grammar yes
 		return {
@@ -59,7 +59,7 @@ export default class punishments extends Schema {
 		const now = Date.now();
 		const guild = this.client.guilds.cache.get(this.client.config.mainServer.id) as Discord.Guild;
 		const punData: typeof DocType = { type, _id: await this.createId(), member: { tag: User.tag, _id: User.id }, reason, moderator, time: now };
-		const inOrFromBoolean = ['warn', 'mute'].includes(type) ? 'in' : 'from'; // Use 'in' if the punishment doesn't remove the member from the server, eg. kick, softban, ban
+		const inOrFromBoolean = ['warn', 'mute'].includes(type) ? 'in' : 'from'; // Use 'in' if the punishment doesn't remove the member from the server, eg. mute, warn
 		const auditLogReason = `${reason} | Case #${punData._id}`;
 		const embed = new this.client.embed()
 			.setColor(this.client.config.embedColor)

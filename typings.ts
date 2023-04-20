@@ -21,10 +21,10 @@ export interface Tokens {
 }
 
 export interface Config {
-    embedColor: '#hexColor',
-    embedColorGreen: '#hexColor',
-    embedColorRed: '#hexColor',
-    embedColorYellow: '#hexColor',
+    embedColor: `#${string}`,
+    embedColorGreen: `#${string}`,
+    embedColorRed: `#${string}`,
+    embedColorYellow: `#${string}`,
     statsGraphSize: number,
     botPresence: Discord.PresenceData,
     botSwitches: {
@@ -46,13 +46,12 @@ export interface Config {
         MPStaffRoles: Array<string>,
         staffRoles: Array<string>,
         roles: {
-            [key: string]: string,
             owner: string,
-            mod: string,
-            helper: string,
+            discordmoderator: string,
+            discordhelper: string,
             mpmanager: string,
-            mpadmin: string,
-            mppublicadmin: string,
+            mpsradmin: string,
+            mpjradmin: string,
             mpfarmmanager: string,
             trustedfarmer: string,
             mpstaff: string,
@@ -74,19 +73,18 @@ export interface Config {
             subscriber: string
         },
         channels: {
-            [key: string]: string,
-            botlogs: string,
-            botcommands: string,
-            fs22_silage: string,
-            fs22_grain: string,
+            botLogs: string,
+            botCommands: string,
+            mpPublicSilage: string,
+            mpPublicGrain: string,
             welcome: string,
-            testing_zone: string,
-            suggestions: string,
-            staffreports: string,
-            fslogs: string,
-            playercheck: string,
-            watchlist: string,
-            vidsandstreams: string
+            taesTestingZone: string,
+            communityIdeas: string,
+            staffReports: string,
+            fsLogs: string,
+            mpStaffCommands: string,
+            watchList: string,
+            videosAndLiveStreams: string
         }
     }
 }

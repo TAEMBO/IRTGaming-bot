@@ -26,7 +26,7 @@ export default class userLevels extends Schema {
                 }
             } else if (userData.messages >= this.algorithm(userData.level+1)) {
                 userData.level++
-                (this.client.channels.resolve(this.client.config.mainServer.channels.botcommands) as Discord.TextChannel).send({content: `Well done <@${userid}>, you made it to **level ${userData.level}**!`})
+                (this.client.channels.resolve(this.client.config.mainServer.channels.botCommands) as Discord.TextChannel).send({content: `Well done <@${userid}>, you made it to **level ${userData.level}**!`})
             }
             await userData.save();
         } else await this._content.create({ _id: userid, messages: 1, level: 0 });

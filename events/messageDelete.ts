@@ -15,5 +15,5 @@ export default async (client: YClient, message: Discord.Message) => {
         {name: '🔹 Channel', value: `<#${message.channel.id}>`},
         {name: '🔹 Sent At', value: `<t:${Math.round(message.createdTimestamp / 1000)}>\n<t:${Math.round(message.createdTimestamp / 1000)}:R>`});
 
-    (client.channels.resolve(client.config.mainServer.channels.botlogs) as Discord.TextChannel).send({embeds: [embed], files: message.attachments.map(x => x.url)});
+    (client.channels.resolve(client.config.mainServer.channels.botLogs) as Discord.TextChannel).send({embeds: [embed], files: message.attachments.map(x => x.url)});
 } 

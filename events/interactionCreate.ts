@@ -77,7 +77,7 @@ export default async (client: YClient, interaction: Discord.BaseInteraction) => 
             
             client.reportCooldown.isActive = true;
             clearInterval(client.reportCooldown.timeout as NodeJS.Timeout);
-            client.reportCooldown.timeout = setTimeout(() => { client.reportCooldown.isActive = false; console.log('eee') }, 20000);
+            client.reportCooldown.timeout = setTimeout(() => { client.reportCooldown.isActive = false; console.log('eee') }, 1_800_000);
         }
     }
 }

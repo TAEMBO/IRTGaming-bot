@@ -16,7 +16,7 @@ export default async (client: YClient, member: Discord.GuildMember) => {
         .setColor(client.config.embedColorRed)
         .setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048}));
     if (rankingData && rankingData.messages > 1) embed.addFields({name: '🔹 Ranking Total', value: rankingData.messages.toLocaleString('en-US'), inline: true});
-    (client.channels.resolve(client.config.mainServer.channels.botlogs) as Discord.TextChannel).send({embeds: [embed]});
+    (client.channels.resolve(client.config.mainServer.channels.botLogs) as Discord.TextChannel).send({embeds: [embed]});
     (client.channels.resolve('622864143866789919') as Discord.TextChannel).send(`**${member.user.tag}** left the server.`);
 
     await client.userLevels._content.findByIdAndDelete(member.id);

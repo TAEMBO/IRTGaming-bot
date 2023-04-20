@@ -39,7 +39,7 @@ export default async (client: YClient, member: Discord.GuildMember) => {
 
     newInvites.forEach(inv => client.invites.set(inv.code, {uses: inv.uses, creator: inv.inviter?.id}));
  
-    (client.channels.resolve(client.config.mainServer.channels.botlogs) as Discord.TextChannel).send({embeds: [new client.embed()
+    (client.channels.resolve(client.config.mainServer.channels.botLogs) as Discord.TextChannel).send({embeds: [new client.embed()
         .setTitle(`Member Joined: ${member.user.tag}`)
         .setDescription(`<@${member.user.id}>\n\`${member.user.id}\``)
         .addFields(

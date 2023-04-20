@@ -2,7 +2,7 @@ import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client.js';
 import fs from 'node:fs';
 import canvas from 'canvas';
-import { FS_data } from '../typings.js';
+import type { FS_data } from '../typings.js';
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
@@ -186,7 +186,7 @@ export default {
             const watchList = await client.watchList._content.find();
 
             async function FSstatsAll(serverAcro: string) {
-                const FSdss: FS_data | void = await fetch(client.tokens.fs[serverAcro.toLowerCase()].dss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': 'IRTBot/StatsAll' } }).then(res => res.json()).catch(() => {
+                const FSdss = await fetch(client.tokens.fs[serverAcro.toLowerCase()].dss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': 'IRTBot/StatsAll' } }).then(res => res.json() as Promise<FS_data>).catch(() => {
                     client.log('\x1b[31m', `Stats all; ${serverAcro} failed`);
                     failedFooter.push(`Failed to fetch ${serverAcro}`);
                 });

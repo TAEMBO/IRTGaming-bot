@@ -5,11 +5,11 @@ import puppeteer from 'puppeteer'; // Credits to Trolly for suggesting this pack
 import FTPClient from 'ftp';
 import fs from 'node:fs';
 import { xml2js } from 'xml-js';
-import { banFormat, farmFormat } from '../typings.js';
+import type { banFormat, farmFormat } from '../typings.js';
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
-        if (!client.isMPStaff(interaction.member)) return client.youNeedRole(interaction, "mpstaff");
+        if (!client.isMPStaff(interaction.member)) return client.youNeedRole(interaction, 'mpstaff');
         const name = interaction.options.getString('name');
         const FTP = new FTPClient();
         ({
@@ -36,21 +36,17 @@ export default {
                 let result = 'Dedi panel closed, result:\n';
                 result += `Server: **${chosenServer.toUpperCase()}**\n`;
                 result += `Action: **${chosenAction}**\n`;
-                if (chosenAction == 'stop') {
-                    const uptimeText = await page.evaluate(()=>(document.querySelector("span.monitorHead") as Element).textContent);
+                if (chosenAction === 'stop') {
+                    const uptimeText = await page.evaluate(() => document.querySelector("span.monitorHead")?.textContent);
                     result += `Uptime before stopping: **${uptimeText}**\n`;
                 };
     
-                page.waitForSelector(serverSelector).then(() => {
-                    page.click(serverSelector).then(() => {
-                        setTimeout(async () => {
-                            await browser.close();
-                            if (chosenServer == 'ps' && chosenAction == 'stop') {
-                                interaction.editReply({content: result += `Total time taken: **${Date.now() - time}ms**`, files: ['../../../Documents/My Games/FarmingSimulator2022/log.txt']});
-                            } else interaction.editReply(result += `Total time taken: **${Date.now() - time}ms**`);
-                        }, 2000);
-                    });
-                });
+                await page.waitForSelector(serverSelector);
+                await page.click(serverSelector);
+                setTimeout(async () => {
+                    await browser.close();
+                    interaction.editReply(result += `Total time taken: **${Date.now() - time}ms**`);
+                }, 2000);
             },
             mop: async () => {
                 if (!interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager)) return client.youNeedRole(interaction, 'mpmanager');
@@ -83,7 +79,8 @@ export default {
                         FTP.on('ready', () => FTP.get(client.tokens.ftp.pg.path + 'blockedUserIds.xml', (err, stream) => {
                             if (err) return interaction.editReply(err.message);
                             stream.once('close', ()=>FTP.end());
-                            stream.pipe(fs.createWriteStream('../databases/blockedUserIds.xml'));
+                            stream.read().length
+                            stream.pipe(fs.createWriteStream('../databases/blockedUserIds.xml', {}));
         
                             setTimeout(() => interaction.editReply({files: ['../databases/blockedUserIds.xml']}), 1000);
                         }));
@@ -95,7 +92,7 @@ export default {
                     const banAttachment = interaction.options.getAttachment('bans');
                     if (!banAttachment) return interaction.editReply(`Canceled: A ban file must be supplied`);
     
-                    const banData = await fetch(banAttachment.url).then((res) => res.text());
+                    const banData = await (await fetch(banAttachment.url)).text();
                     try {
                         data = xml2js(banData, { compact: true }) as banFormat;
                     } catch (err) {
@@ -111,10 +108,7 @@ export default {
                                 interaction.editReply(error.message);
                             } else interaction.editReply('Successfully uploaded ban file for PG');
                         }));
-                    } else {
-                        fs.writeFileSync(`../../../Documents/My Games/FarmingSimulator2022/blockedUserIds.xml`, banData);
-                        interaction.editReply('Successfully uploaded ban file for PS');
-                    }
+                    } else fs.writeFile(`../../../Documents/My Games/FarmingSimulator2022/blockedUserIds.xml`, banData, () => interaction.editReply('Successfully uploaded ban file for PS'));
                 }
             },
             search: async () => {
@@ -182,7 +176,7 @@ export default {
                 if (!interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager)) return client.youNeedRole(interaction, "mpmanager");
                 const member = interaction.options.getMember("member") as Discord.GuildMember;
                 const owner = await interaction.guild.members.fetch(interaction.guild.ownerId);
-                const Role = client.config.mainServer.roles[interaction.options.getString("role", true)];
+                const Role = client.config.mainServer.roles[interaction.options.getString("role", true) as keyof typeof client.config.mainServer.roles];
                 
                 if(member.roles.cache.has(Role)){
                     const msg = await interaction.reply({embeds: [new client.embed().setDescription(`This user already has the <@&${Role}> role, do you want to remove it from them?`).setColor(client.config.embedColor)], fetchReply: true, components: [new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder().setCustomId(`Yes`).setStyle(ButtonStyle.Success).setLabel("Confirm"), new ButtonBuilder().setCustomId(`No`).setStyle(ButtonStyle.Danger).setLabel("Cancel"))]});

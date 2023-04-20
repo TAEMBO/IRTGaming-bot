@@ -10,7 +10,7 @@ export default async (client: YClient, message: Discord.Message) => {
 
 	if (!message.inGuild()) {
 		const guildMemberObject = (client.guilds.cache.get(client.config.mainServer.id) as Discord.Guild).members.cache.get(message.author.id) as Discord.GuildMember;
-    	(client.channels.cache.get(client.config.mainServer.channels.testing_zone) as Discord.TextChannel).send({
+    	(client.channels.cache.get(client.config.mainServer.channels.taesTestingZone) as Discord.TextChannel).send({
 			content: `DM Forward <@${client.config.devWhitelist[0]}>`,
 			files: message.attachments.map(x => x.url),
 			embeds: [new client.embed()

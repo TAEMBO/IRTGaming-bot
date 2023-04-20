@@ -11,7 +11,7 @@ export default {
 
         async function FSstats() {
             const FSdss: FS_data | void = await fetch(client.tokens.fs[subCmd].dss, { signal: AbortSignal.timeout(2000), headers: { 'User-Agent': 'IRTBot/Stats' } }).then(res => res.json()).catch(() => {
-                console.log(client.timeLog('\x1b[31m'), `Stats ${subCmd.toUpperCase()} failed`);
+                client.log('\x1b[31m', `Stats ${subCmd.toUpperCase()} failed`);
             });
 
             if (!FSdss) return interaction.reply('Server did not respond');
@@ -173,7 +173,7 @@ export default {
                 .setDescription(FSdss.slots.used == 0 ? '*No players online*' : playerInfo.join("\n"))
                 .setImage('attachment://FSStats.png')
                 .setColor(Color);
-            if (FSdss.slots.players.filter(x=>x.isAdmin).length === 0 && client.FSCache[subCmd].lastAdmin) embed.setTimestamp(client.FSCache[subCmd].lastAdmin).setFooter({text: 'Admin last on'});
+            if (FSdss.slots.players.filter(x=>x.isAdmin).length === 0 && client.FSCache[subCmd.toUpperCase()].lastAdmin) embed.setTimestamp(client.FSCache[subCmd.toUpperCase()].lastAdmin).setFooter({text: 'Admin last on'});
         
             interaction.reply({embeds: [embed], files: [Image]}).catch(() => interaction.channel?.send({embeds: [embed], files: [Image]}) );
         }
@@ -187,7 +187,7 @@ export default {
 
             async function FSstatsAll(serverAcro: string) {
                 const FSdss: FS_data | void = await fetch(client.tokens.fs[serverAcro.toLowerCase()].dss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': 'IRTBot/StatsAll' } }).then(res => res.json()).catch(() => {
-                    console.log(client.timeLog('\x1b[31m'), `Stats all; ${serverAcro} failed`);
+                    client.log('\x1b[31m', `Stats all; ${serverAcro} failed`);
                     failedFooter.push(`Failed to fetch ${serverAcro}`);
                 });
                 if (!FSdss || FSdss.slots.used === 0 ) return;
@@ -227,9 +227,9 @@ export default {
 
                 if (player) {
                     const playerData = playersData.find(x => x._id === player);
-                    const isOnPS = client.FSCache.ps.players.some(x => x.name === player);
-                    const isOnPG = client.FSCache.pg.players.some(x => x.name === player);
-                    const isOnMF = client.FSCache.mf.players.some(x => x.name === player);
+                    const isOnPS = client.FSCache.PS.players.some(x => x.name === player);
+                    const isOnPG = client.FSCache.PG.players.some(x => x.name === player);
+                    const isOnMF = client.FSCache.MF.players.some(x => x.name === player);
     
                     if (playerData) {
                         let lastOnText: string;
@@ -245,8 +245,8 @@ export default {
                         interaction.reply({embeds: [new client.embed()
                             .setColor(client.config.embedColor)
                             .setTitle([
-                                `Player - \`${playerData._id}\``,
-                                `Total time - **${client.formatTime(playerData.time * 60 * 1000, 3, { commas: true, longNames: false })}**`,
+                                `Player - \`${playerData._id}\`${client.FMlist._content.includes(playerData._id) ? ':farmer:' : ''}${client.TFlist._content.includes(playerData._id) ? ':angel:' : ''}`,
+                                `Total time - **${client.formatTime(playerData.time * 60 * 1000, 5, { commas: true, longNames: false })}**`,
                                 `Leaderboard position - **#${playersData.indexOf(playerData) + 1}**`,
                                 `Time last on - **${lastOnText}**`
                             ].join('\n'))

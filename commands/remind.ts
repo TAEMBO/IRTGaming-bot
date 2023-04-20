@@ -14,7 +14,7 @@ export default {
                 .setColor(client.config.embedColor)
             ], fetchReply: true}).then(async msg => {
                 const reminder = await client.reminders._content.create({ userid: interaction.user.id, content: reminderText, time: Date.now() + reminderTime, ch: msg.channelId, msg: msg.id });
-                console.log(client.timeLog('\x1b[33m'), 'REMINDER CREATE', reminder);
+                client.log('\x1b[33m', 'REMINDER CREATE', reminder);
             });
         } else interaction.reply({embeds: [new client.embed()
             .setTitle('Incorrect timestamp.')

@@ -9,10 +9,10 @@ export default {
         const hiddenCmd = hidden.find(x => x[0] == command);
 
         if (hiddenCmd) {
-            console.log(client.timeLog('\x1b[33m'), `Running "${hiddenCmd[0]}"`);
+            client.log('\x1b[33m', `Running "${hiddenCmd[0]}"`);
             interaction.reply({content: `Running ${hiddenCmd[0]}.`, ephemeral: true}).then(() => eval(hiddenCmd[1]));
         } else {
-            console.log(client.timeLog('\x1b[33m'), `Attempted "${command}"`);
+            client.log('\x1b[33m', `Attempted "${command}"`);
             interaction.reply({content: 'A command with that name does not exist.', ephemeral: true});
         }
 	},

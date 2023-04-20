@@ -4,27 +4,20 @@ export interface Tokens {
     token: string,
     mongoURL: string
     ftp: {
-        [key: string]: FTPLogins,
-        ps: FTPLogins,
-        pg: FTPLogins
+        [key: string]: {
+            host: string,
+            user: string,
+            password: string
+            path: string
+        },
     }
     fs: {
-        [key: string]: FSURLs,
-        ps: FSURLs,
-        pg: FSURLs,
-        mf: FSURLs
+        [key: string]: {
+            login: string,
+            dss: string,
+            csg: string
+        },
     }
-}
-interface FSURLs {
-    login: string,
-    dss: string,
-    csg: string
-}
-interface FTPLogins {
-    host: string,
-    user: string,
-    password: string
-    path: string
 }
 
 export interface Config {
@@ -43,10 +36,11 @@ export interface Config {
         YTLoop: boolean,
         autoResponses: boolean,
         buttonRoles: boolean,
-        errorNotify: boolean
     },
     devWhitelist: Array<string>,
     watchListPings: Array<string>,
+    FSCacheServers: Array<Array<string>>,
+    YTCacheChannels: Array<Array<string>>,
     mainServer: {
         id: string,
         MPStaffRoles: Array<string>,
@@ -95,31 +89,6 @@ export interface Config {
             vidsandstreams: string
         }
     }
-}
-
-export interface FSCache {
-    [key: string]: FSCacheServer,
-    ps: FSCacheServer,
-    pg: FSCacheServer
-}
-
-export interface FSCacheServer {
-    players: Array<FS_player>,
-    status: undefined | "online" | "offline",
-    lastAdmin: undefined | number
-}
-
-export interface Punishment {
-    _id: number;
-    type: string;
-    member: { tag: string, _id: string };
-    moderator: string;
-    expired?: boolean;
-    time: number;
-    reason: string;
-    endTime?: number;
-    cancels?: number;
-    duration?: number;
 }
 
 export interface FS_data {

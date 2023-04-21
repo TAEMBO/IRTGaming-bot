@@ -61,24 +61,24 @@ setInterval(async () => {
 	if (!dailyMsgs.some((x: Array<number>) => x[0] === formattedDate)) {
 		let total = (await client.userLevels._content.find()).reduce((a, b) => a + b.messages, 0); // sum of all users
 		const yesterday = dailyMsgs.find((x: Array<number>) => x[0] === formattedDate - 1);
+		const channel = client.channels.resolve(client.config.mainServer.channels.taesTestingZone) as Discord.TextChannel;
 		if (total < yesterday) total = yesterday; // messages went down
 
 		dailyMsgs.push([formattedDate, total]);
 		fs.writeFileSync('../databases/dailyMsgs.json', JSON.stringify(dailyMsgs, null, 4));
+		channel.send(`:warning: Pushed [${formattedDate}, ${total}] to </rank leaderboard:1042659197919178790>`);
 		client.log('\x1b[36m', `Pushed [${formattedDate}, ${total}] to dailyMsgs`);
-		(client.channels.resolve(client.config.mainServer.channels.taesTestingZone) as Discord.TextChannel).send(`:warning: Pushed [${formattedDate}, ${total}] to </rank leaderboard:1042659197919178790>`);
 
 		setTimeout(() => {
-			client.log('\x1b[36m', 'Interval messages');
+			client.log('\x1b[36m', 'timeout messages');
 			const Day = Date().toLowerCase();
-			const channel = client.channels.resolve(client.config.mainServer.channels.taesTestingZone) as Discord.TextChannel;
-
-			channel.send('<:IRT_RollSee:908055712368853002>');
 
 			if (Day.startsWith('fri')) {
 				channel.send('It\'s the weekend! <a:IRT_FrogClap:722536810399662160>');
-			} else if (Day.startsWith('sun')) channel.send('Oh no! It\'s Monday... <:IRT_FrogBans:605519995761590273>');
-		}, 10_800_000); // 3 hour timeout, account for time zone differences
+			} else if (Day.startsWith('sun')) {
+				channel.send('Oh no! It\'s Monday... <:IRT_FrogBans:605519995761590273>');
+			} else channel.send('<:IRT_RollSee:908055712368853002>');
+		}, 7_200_000); // 2 hour timeout, account for time zone differences
 	}
 }, 5000);
 

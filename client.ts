@@ -71,17 +71,17 @@ export default class YClient extends Client {
         }).then(() => this.log('\x1b[35m', 'Connected to MongoDB'));
 
         // Event handler
-        fs.readdirSync('./events').forEach(async file => {
-    	    const eventFile = await import(`./events/${file}`);
+        for await (const file of fs.readdirSync('./events')) {
+            const eventFile = await import(`./events/${file}`);
 	        this.on(file.replace('.js', ''), async (...args) => eventFile.default(this, ...args));
-        });
+        }
 
         // Command handler
-        fs.readdirSync('./commands').forEach(async file => {
+        for await (const file of fs.readdirSync('./commands')) {
             const commandFile = await import(`./commands/${file}`);
 	        this.commands.set(commandFile.default.data.name, { commandFile, uses: 0 });
 	        this.registry.push(commandFile.default.data.toJSON());
-        });
+        }
         return this;
     }
     YTLoop = async (YTChannelID: string, YTChannelName: string) => await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${YTChannelID}`, { signal: AbortSignal.timeout(5000) }).then(async response => {

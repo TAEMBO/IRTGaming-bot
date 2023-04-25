@@ -52,7 +52,7 @@ export default class YClient extends Client {
         });
     }
     async init() {
-        await this.login(this.tokens.token);
+        this.login(this.tokens.token);
         this.setMaxListeners(100);
         this.bannedWords.initLoad();
         this.FMlist.initLoad();

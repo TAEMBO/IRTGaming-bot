@@ -79,7 +79,6 @@ export default {
                         FTP.on('ready', () => FTP.get(client.tokens.ftp.pg.path + 'blockedUserIds.xml', (err, stream) => {
                             if (err) return interaction.editReply(err.message);
                             stream.once('close', ()=>FTP.end());
-                            stream.read().length
                             stream.pipe(fs.createWriteStream('../databases/blockedUserIds.xml', {}));
         
                             setTimeout(() => interaction.editReply({files: ['../databases/blockedUserIds.xml']}), 1000);
@@ -197,6 +196,16 @@ export default {
                     if (Role !== client.config.mainServer.roles.trustedfarmer) member.roles.add(client.config.mainServer.roles.mpstaff);
                     await owner.send(`**${interaction.user.tag}** has promoted **${member.user.tag}** to **${(interaction.guild.roles.cache.get(Role) as Discord.Role).name}**`)
                     interaction.reply({embeds: [new client.embed().setDescription(`<@${member.user.id}> has been given <@&${Role}>.`).setColor(client.config.embedColor)]});
+                }
+            },
+            blacklist: () => {
+                const userId = interaction.options.getString('userid', true);
+                if (client.blacklist._content.includes(userId)) {
+                    client.blacklist.remove(userId);
+                    interaction.reply(`Successfully removed \`${userId}\``);
+                } else {
+                    client.blacklist.add(userId);
+                    interaction.reply(`Successfully added \`${userId}\``);
                 }
             },
             fm: () => {
@@ -326,6 +335,13 @@ export default {
                     {name: 'Trusted Farmer', value: 'trustedfarmer'},
                     {name: 'Farm Manager', value: 'mpfarmmanager'},
                     {name: 'Public Admin', value: 'mppublicadmin'})
+                .setRequired(true)))
+        .addSubcommand(x=>x
+            .setName('blacklist')
+            .setDescription('Add or remove user IDs on report blacklist')
+            .addStringOption(x=>x
+                .setName('userid')
+                .setDescription('The ID to add or remove')
                 .setRequired(true)))
         .addSubcommand(x=>x
             .setName('fm')

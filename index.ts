@@ -61,7 +61,7 @@ setInterval(async () => {
 	if (!dailyMsgs.some((x: Array<number>) => x[0] === formattedDate)) {
 		let total = (await client.userLevels._content.find()).reduce((a, b) => a + b.messages, 0); // sum of all users
 		const yesterday = dailyMsgs.find((x: Array<number>) => x[0] === formattedDate - 1);
-		const channel = client.channels.resolve(client.config.mainServer.channels.taesTestingZone) as Discord.TextChannel;
+		const channel = client.channels.resolve(client.config.mainServer.channels.general) as Discord.TextChannel;
 		if (total < yesterday) total = yesterday; // messages went down
 
 		dailyMsgs.push([formattedDate, total]);
@@ -70,7 +70,7 @@ setInterval(async () => {
 		client.log('\x1b[36m', `Pushed [${formattedDate}, ${total}] to dailyMsgs`);
 
 		setTimeout(() => {
-			client.log('\x1b[36m', 'timeout messages');
+			client.log('\x1b[36m', 'Interval messages');
 			const Day = Date().toLowerCase();
 
 			if (Day.startsWith('fri')) {

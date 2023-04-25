@@ -78,6 +78,7 @@ export interface Config {
             mpPublicSilage: string,
             mpPublicGrain: string,
             welcome: string,
+            general: string,
             taesTestingZone: string,
             communityIdeas: string,
             staffReports: string,

@@ -133,8 +133,8 @@ export default class YClient extends Client {
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return (bytes / Math.pow(k, i)).toFixed(dm) + ' ' + sizes[i];
     }
-    async punish(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">, type: string) {
-        if ((!client.hasModPerms(interaction.member)) || (!['warn', 'mute'].includes(type) && interaction.member.roles.cache.has(client.config.mainServer.roles.discordhelper))) return client.youNeedRole(interaction, 'discordmoderator');
+    async punish(interaction: Discord.ChatInputCommandInteraction<"cached">, type: string) {
+        if ((!this.hasModPerms(interaction.member)) || (!['warn', 'mute'].includes(type) && interaction.member.roles.cache.has(this.config.mainServer.roles.discordhelper))) return this.youNeedRole(interaction, 'discordmoderator');
 
         const time = interaction.options.getString('time') ?? undefined;
         const reason = interaction.options.getString('reason') ?? 'Unspecified';
@@ -145,7 +145,7 @@ export default class YClient extends Client {
         if (!GuildMember && type !== 'ban') return interaction.reply(`You cannot ${type} someone who is not in the server.`);
 
         await interaction.deferReply();
-        await client.punishments.addPunishment(type, { time, interaction }, interaction.user.id, reason, User, GuildMember);
+        await this.punishments.addPunishment(type, { time, interaction }, interaction.user.id, reason, User, GuildMember);
     }
 }
 

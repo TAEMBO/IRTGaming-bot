@@ -19,17 +19,17 @@ export default class YClient extends Client {
     collection = Discord.Collection;
     messageCollector = Discord.MessageCollector;
     attachmentBuilder = Discord.AttachmentBuilder;
-    games = new this.collection() as Discord.Collection<string, string>;
-    commands = new this.collection() as Discord.Collection<string, any>;
-    registry = [] as Array<Discord.ApplicationCommandDataResolvable>;
+    games = new this.collection<string, string>();
+    commands = new this.collection<string, any>();
+    registry = <Discord.ApplicationCommandDataResolvable[]>[];
     log = (color: string, ...data: any[]) => console.log(`${color}[${moment().format('HH:mm:ss')}]`, ...data);
     youNeedRole = (interaction: Discord.ChatInputCommandInteraction<"cached">, role: keyof typeof config.mainServer.roles) => interaction.reply(`You need the <@&${this.config.mainServer.roles[role]}> role to use this command`);
     hasModPerms = (guildMember: Discord.GuildMember) => this.config.mainServer.staffRoles.map(x => this.config.mainServer.roles[x as keyof typeof config.mainServer.roles]).some(x => guildMember.roles.cache.has(x));
     isMPStaff = (guildMember: Discord.GuildMember) => this.config.mainServer.MPStaffRoles.map(x => this.config.mainServer.roles[x as keyof typeof config.mainServer.roles]).some(x => guildMember.roles.cache.has(x));
-    repeatedMessages = {} as { [key: string]: { data: Discord.Collection<number, { type: string, channel: string }>, timeout: NodeJS.Timeout } };
-    FSCache = {} as { [key: string]: { players: Array<FS_player>, status: "online" | "offline" | null, lastAdmin: number | null } };
-    YTCache = {} as { [key: string]: null | string };
-    invites = new Map() as Map<string, { uses: number | null, creator: string | undefined }>;
+    repeatedMessages = <{ [key: string]: { data: Discord.Collection<number, { type: string, channel: string }>, timeout: NodeJS.Timeout } }>{};
+    FSCache = <{ [key: string]: { players: FS_player[], status: "online" | "offline" | null, lastAdmin: number | null } }>{};
+    YTCache = <{ [key: string]: null | string }>{};
+    invites = new Map<string, { uses: number | null, creator: string | undefined }>();
     reportCooldown = {
         isActive: false,
         timeout: undefined
@@ -140,7 +140,7 @@ export default class YClient extends Client {
 
         const time = interaction.options.getString('time') ?? undefined;
         const reason = interaction.options.getString('reason') ?? 'Unspecified';
-        const GuildMember = interaction.options.getMember('member') ?? undefined;
+        const GuildMember = interaction.options.getMember('member');
         const User = interaction.options.getUser('member', true);
 
         if (interaction.user.id === User.id) return interaction.reply(`You cannot ${type} yourself.`);
@@ -153,7 +153,7 @@ export default class YClient extends Client {
 
 class localDatabase {
 	public _path: string;
-	public _content = [] as Array<string>;
+	public _content = <string[]>[];
     public initLoad = () => this._content = JSON.parse(fs.readFileSync(this._path, 'utf8'));
     public add = (data: string) => fs.writeFileSync(this._path, JSON.stringify(this._content = this._content.concat([data]), null, 4));
     public remove = (data: string) => fs.writeFileSync(this._path, JSON.stringify(this._content = this._content.filter(x => x !== data), null, 4));

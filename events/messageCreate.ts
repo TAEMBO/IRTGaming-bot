@@ -39,7 +39,7 @@ export default async (client: YClient, message: Discord.Message) => {
 				const colMsg = collected.first() as Discord.Message;
 				client.log('\x1b[35m', `Received "y" from ${colMsg.author.tag}, indicating to mute`);
 				try {
-					await client.punishments.addPunishment('mute', { time: '5m' }, colMsg.author.id, 'Automod; Misuse of staff ping', message.author, message.member as Discord.GuildMember);
+					await client.punishments.addPunishment('mute', { time: '5m' }, colMsg.author.id, 'Automod; Misuse of staff ping', message.author, message.member);
 				} catch (error) {
 					client.log('\x1b[31m', 'Muting failed cuz:', error);
 					colMsg.react('❌');
@@ -80,7 +80,7 @@ export default async (client: YClient, message: Discord.Message) => {
 	
 				if (spammedMessage) {
 					delete client.repeatedMessages[message.author.id];
-					await client.punishments.addPunishment('mute', { time: muteTime }, (client.user as Discord.User).id, `Automod; ${muteReason}`, message.author, message.member as Discord.GuildMember);
+					await client.punishments.addPunishment('mute', { time: muteTime }, (client.user as Discord.User).id, `Automod; ${muteReason}`, message.author, message.member);
 				}
 			} else {
 				client.repeatedMessages[message.author.id] = { data: new client.collection(), timeout: setTimeout(() => delete client.repeatedMessages[message.author.id], thresholdTime) };
@@ -133,22 +133,28 @@ export default async (client: YClient, message: Discord.Message) => {
 		if (client.config.botSwitches.automod && !client.hasModPerms(message.member as Discord.GuildMember)) {
 			if (client.bannedWords._content.some(x => combedMsg.includes(x)) && !Whitelist.includes(message.channel.id)) { // Banned words
 				automodded = true;
-				message.delete();
-				message.channel.send('That word is banned here.').then(x => setTimeout(() => x.delete(), 5000));
+				await message.reply('That word is banned here.').then(msg => {
+					message.delete();
+					setTimeout(() => msg.delete(), 5000);
+				});
 				await repeatedMessages(30000, 4, 'bw', '30m', 'Banned words');
 			} else if (msg.includes("discord.gg/") && !client.isMPStaff(message.member as Discord.GuildMember)) { // Discord advertisement
 				const inviteURL = message.content.split(' ').find(x => x.includes('discord.gg/')) as string;
 				const validInvite = await client.fetchInvite(inviteURL).catch(() => undefined);
 				if (validInvite && validInvite.guild?.id !== client.config.mainServer.id) {
 					automodded = true;
-					message.delete();
-					message.channel.send("No advertising other Discord servers.").then(x => setTimeout(() => x.delete(), 10000));
+					await message.reply("No advertising other Discord servers.").then(msg => {
+						message.delete();
+						setTimeout(() => msg.delete(), 10000);
+					});
 					await repeatedMessages(60000, 2, 'adv', '1h', 'Discord advertisement');
 				}
 			}
 		}
-	
-		if (message.channel.id !== '557692151689904129' && !automodded) client.userLevels.incrementUser(message.author.id);
+
+		if (automodded) return;
+		if (message.channel.id !== '557692151689904129') client.userLevels.incrementUser(message.author.id);
+		if (!client.config.botSwitches.autoResponses) return;
 			
 		// Morning message system
 		const person = message.member?.displayName;
@@ -176,20 +182,19 @@ export default async (client: YClient, message: Discord.Message) => {
 			''
 		];
 	
-		if (client.config.botSwitches.autoResponses && !automodded) { // Auto responses
-			if (morningMsgs.some(x => msg.includes(x)) && message.channel.id == '552565546093248512') message.reply({ content: mornRes1[Math.floor(Math.random() * mornRes1.length)] + mornRes2[Math.floor(Math.random() * mornRes2.length)], allowedMentions: { repliedUser: false } });
-			
-			if (msg.includes('giants moment')) message.react('™️');
-			
-			if (msg.includes('sync sim')) message.react(':IRT_SyncSim22:929440249577365525');
-			
-			if (msg.includes('smoker')) message.react('🚭');
-			
-			if (msg.includes("forgor")) message.react("💀");
-			
-			if (msgarr.includes('69')) message.react(':IRT_Noice:611558357643558974');
-			
-			if (msg.startsWith('!rank')) message.reply({content: 'Ranking has been moved to </rank view:1042659197919178790>', allowedMentions: {repliedUser: false}});
-		}
+		// Auto responses
+		if (morningMsgs.some(x => msg.includes(x)) && message.channel.id === client.config.mainServer.channels.general) message.reply({ content: mornRes1[Math.floor(Math.random() * mornRes1.length)] + mornRes2[Math.floor(Math.random() * mornRes2.length)], allowedMentions: { repliedUser: false } });
+		
+		if (msg.includes('giants moment')) message.react('™️');
+		
+		if (msg.includes('sync sim')) message.react(':IRT_SyncSim22:929440249577365525');
+		
+		if (msg.includes('smoker')) message.react('🚭');
+		
+		if (msg.includes("forgor")) message.react("💀");
+		
+		if (msgarr.includes('69')) message.react(':IRT_Noice:611558357643558974');
+		
+		if (msg.startsWith('!rank')) message.reply({content: 'Ranking has been moved to </rank view:1042659197919178790>', allowedMentions: {repliedUser: false}});
 	}
 }

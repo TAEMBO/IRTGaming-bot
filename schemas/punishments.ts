@@ -54,7 +54,7 @@ export default class punishments extends Schema {
 			warn: 'warned'
 		}[type];
 	}
-	async addPunishment(type: string, options: { time?: string, interaction?: Discord.ChatInputCommandInteraction<"cached">}, moderator: string, reason: string, User: Discord.User, GuildMember?: Discord.GuildMember) {
+	async addPunishment(type: string, options: { time?: string, interaction?: Discord.ChatInputCommandInteraction<"cached">}, moderator: string, reason: string, User: Discord.User, GuildMember: Discord.GuildMember | null) {
 		const { time, interaction } = options;
 		const now = Date.now();
 		const guild = this.client.guilds.cache.get(this.client.config.mainServer.id) as Discord.Guild;

@@ -11,12 +11,11 @@ export default {
 
         interaction.reply({embeds: [new client.embed()
             .setColor(client.config.embedColor)
-            .setDescription([
-                '### ',
+            .setTitle([
                 interaction.user.username,
                 ' bonked ',
                 interaction.user.id === member.id ? 'themselves' : member.user.username,
-                '\n### for ',
+                '\nfor ',
                 reason ?? 'no reason',
                 '!'
             ].join(''))

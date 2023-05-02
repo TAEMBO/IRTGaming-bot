@@ -10,7 +10,6 @@ function convertStatus(status?: Discord.ClientPresenceStatus) {
 		}[status];
 	} else return '⚫';
 }
-const formatTime = (timestamp: number) => `<t:${Math.round(timestamp / 1000)}>\n<t:${Math.round(timestamp / 1000)}:R>`;
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
@@ -19,16 +18,16 @@ export default {
 			const user = interaction.options.getUser('member', true);
 
 			interaction.reply({embeds: [new client.embed()
-				.setThumbnail(user.displayAvatarURL({ extension: 'png', size: 2048}))
+				.setThumbnail(user.displayAvatarURL({ extension: 'png', size: 2048 }))
 				.setTitle(`${user.bot ? 'Bot' : 'User'} info: ${user.tag}`)
 				.setURL(`https://discord.com/users/${user.id}`)
 				.setDescription(`<@${user.id}>\n\`${user.id}\``)
-				.addFields({name: '🔹 Account Creation Date', value: formatTime(user.createdTimestamp)})
+				.addFields({name: '🔹 Account Creation Date', value: `<t:${Math.round(user.createdTimestamp / 1000)}:R>`})
 				.setColor(client.config.embedColor)
 			]});
 		} else {
 			await member.user.fetch();
-			const embedArray: Array<EmbedBuilder> = [];
+			const embeds = <EmbedBuilder[]>[];
 			let titleText = 'Member';
 			if (member.user.bot) {
 				titleText = 'Bot';
@@ -40,33 +39,33 @@ export default {
 				.setURL(`https://discord.com/users/${member.user.id}`)
 				.setDescription(`<@${member.user.id}>\n\`${member.user.id}\``)
 				.addFields(
-					{name: '🔹 Account Creation Date', value: formatTime(member.user.createdTimestamp)},
-					{name: '🔹 Join Date', value: formatTime(member.joinedTimestamp as number)},
+					{name: '🔹 Account Creation Date', value: `<t:${Math.round(member.user.createdTimestamp / 1000)}:R>`},
+					{name: '🔹 Join Date', value: `<t:${Math.round(member.joinedTimestamp as number / 1000)}:R>`},
 					{name: `🔹 Roles: ${member.roles.cache.size - 1}`, value: member.roles.cache.size > 1 ? member.roles.cache.filter(x => x.id !== interaction.guild.id).sort((a, b) => b.position - a.position).map(x => x).join(member.roles.cache.size > 4 ? ' ' : '\n').slice(0, 1024) : 'None'})
 				.setColor(member.displayColor || '#ffffff')
-				.setImage(member.user.bannerURL({ extension: 'png', size: 1024}) as string);
-			if (member.premiumSinceTimestamp) embed0.addFields({name: '🔹 Server Boosting Since', value: formatTime(member.premiumSinceTimestamp), inline: true});
+				.setImage(member.user.bannerURL({ extension: 'png', size: 1024}) ?? null);
+			if (member.premiumSinceTimestamp) embed0.addFields({name: '🔹 Server Boosting Since', value: `<t:${Math.round(member.premiumSinceTimestamp / 1000)}:R>`, inline: true});
 				
 			if (member.presence && !member.user.bot) {
-				const presenceStatus = member.presence.clientStatus as Discord.ClientPresenceStatusData;
-				embed0.addFields({
+				embeds.push(embed0.addFields({
 					name: `🔹 Status: ${member.presence.status}`,
 					value: `${member.presence.status === 'offline' ? '\u200b' : [
-						`Web: ${convertStatus(presenceStatus.web)}`,
-						`Mobile: ${convertStatus(presenceStatus.mobile)}`,
-						`Desktop: ${convertStatus(presenceStatus.desktop)}`
+						`Web: ${convertStatus(member.presence.clientStatus?.web)}`,
+						`Mobile: ${convertStatus(member.presence.clientStatus?.mobile)}`,
+						`Desktop: ${convertStatus(member.presence.clientStatus?.desktop)}`
 					].join('\n')}`,
-					inline: true});
-				embedArray.push(embed0);
+					inline: true
+				}));
+
 				member.presence.activities.forEach(activity => {
-					if (activity.type == 2 && activity.details && activity.assets) {
-						embedArray.push(new client.embed()
+					if (activity.type === 2 && activity.details && activity.assets) {
+						embeds.push(new client.embed()
 							.setAuthor({name: activity.name, iconURL: 'https://www.freepnglogos.com/uploads/spotify-logo-png/spotify-icon-marilyn-scott-0.png'})
 							.setColor('#1DB954')
 							.addFields({name: activity.details, value: `By: ${activity.state}\nOn: ${activity.assets.largeText}\nStarted listening <t:${Math.round(activity.createdTimestamp/1000)}:R>`})
 							.setThumbnail(`https://i.scdn.co/image/${activity.assets.largeImage?.replace('spotify:', '')}`));
-					} else if (activity.type == 4) {
-						embedArray.push(new client.embed()
+					} else if (activity.type === 4) {
+						embeds.push(new client.embed()
 							.setTitle(activity.name)
 							.setColor('#ffffff')
 							.setDescription([
@@ -85,28 +84,29 @@ export default {
 							['363445589247131668', 'https://cdn.discordapp.com/app-icons/363445589247131668/f2b60e350a2097289b3b0b877495e55f.png'], // Roblox
 							['356876590342340608', 'https://cdn.discordapp.com/app-icons/356876590342340608/554af7ef210877b5f04fd1b727a3746e.png'], // Rainbow Six Siege
 							['445956193924546560', `https://cdn.discordapp.com/app-assets/445956193924546560/${activity.assets?.largeImage}.png`], // Rainbow Six Siege again
-						].find(x => x[0] == activity.applicationId);
+						].find(x => x[0] === activity.applicationId);
 
 						if (activityImage) activityImage = activityImage[1]; // If a URL was found in the array, choose the URL string in the array
 						if (!activityImage) activityImage = activity.assets?.largeImageURL(); // Struggle with PlayStation presence images
 						if (!activityImage) activityImage = activity.assets?.smallImageURL(); // Anything extra
 
-						embedArray.push(new client.embed()
-						.setTitle(activity.name)
-						.setColor('#ffffff')
-						.setDescription([
-							`\u200b**Started:** <t:${Math.round(activity.createdTimestamp/1000)}:R>`,
-							activity.details ? '\n**Details:** ' + activity.details : '',
-							activity.state ? '\n**State:** ' + activity.state : '',
-							activity.assets?.largeText ? '\n**Large text:** ' + activity.assets.largeText : '',
-							activity.assets?.smallText ? '\n**Small text:** ' + activity.assets.smallText : ''
-						].join(''))
-						.setThumbnail(activityImage ?? null));
+						embeds.push(new client.embed()
+							.setTitle(activity.name)
+							.setColor('#ffffff')
+							.setDescription([
+								`\u200b**Started:** <t:${Math.round(activity.createdTimestamp/1000)}:R>`,
+								activity.details ? '\n**Details:** ' + activity.details : '',
+								activity.state ? '\n**State:** ' + activity.state : '',
+								activity.assets?.largeText ? '\n**Large text:** ' + activity.assets.largeText : '',
+								activity.assets?.smallText ? '\n**Small text:** ' + activity.assets.smallText : ''
+							].join(''))
+							.setThumbnail(activityImage ?? null)
+						);
 					}
 				});
-			} else embedArray.push(embed0);
+			} else embeds.push(embed0);
 
-			interaction.reply({embeds: embedArray});
+			interaction.reply({embeds});
 		}
 	},
 	data: new SlashCommandBuilder()

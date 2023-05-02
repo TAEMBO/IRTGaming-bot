@@ -41,7 +41,7 @@ export default class YClient extends Client {
     userLevels = new userLevels(this);
     punishments = new punishments(this);
     watchList = new watchList();
-    playerTimes = new playerTimes();
+    playerTimes = new playerTimes(this);
     reminders = new reminders();
     constructor() {
         super({

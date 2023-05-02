@@ -242,15 +242,18 @@ export default {
                             lastOnText = 'Right now (Multi Farm)';
                         } else lastOnText = `<t:${playerData.lastOn}:R>`;
 
-                        interaction.reply({embeds: [new client.embed()
-                            .setColor(client.config.embedColor)
-                            .setTitle([
-                                `Player - \`${playerData._id}\`${client.FMlist._content.includes(playerData._id) ? ':farmer:' : ''}${client.TFlist._content.includes(playerData._id) ? ':angel:' : ''}`,
-                                `Total time - **${client.formatTime(playerData.time * 60 * 1000, 5, { commas: true, longNames: false })}**`,
-                                `Leaderboard position - **#${playersData.indexOf(playerData) + 1}**`,
-                                `Time last on - **${lastOnText}**`
-                            ].join('\n'))
-                        ]});
+                        const embed = new client.embed()
+                        .setColor(client.config.embedColor)
+                        .setTitle([
+                            `Player - \`${playerData._id}\`${client.FMlist._content.includes(playerData._id) ? ':farmer:' : ''}${client.TFlist._content.includes(playerData._id) ? ':angel:' : ''}`,
+                            `Total time - **${client.formatTime(playerData.time * 60 * 1000, 5, { commas: true, longNames: false })}**`,
+                            `Leaderboard position - **#${playersData.indexOf(playerData) + 1}**`,
+                            `Time last on - **${lastOnText}**`
+                        ].join('\n'));
+
+                        if (client.isMPStaff(interaction.member) && playerData.uuid) embed.setFooter({ text: `UUID: ${playerData.uuid}` });
+
+                        interaction.reply({embeds: [embed]});
                     } else interaction.reply('No data found with that name. [Find out why.](https://canary.discord.com/channels/552565546089054218/552583841936834560/1087422094519836792)');
 
                 } else interaction.reply({embeds: [new client.embed()

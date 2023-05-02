@@ -30,10 +30,6 @@ export default class YClient extends Client {
     FSCache = <{ [key: string]: { players: FS_player[], status: "online" | "offline" | null, lastAdmin: number | null } }>{};
     YTCache = <{ [key: string]: null | string }>{};
     invites = new Map<string, { uses: number | null, creator: string | undefined }>();
-    reportCooldown = {
-        isActive: false,
-        timeout: undefined
-    } as { isActive: boolean, timeout: NodeJS.Timeout | undefined };
     bannedWords = new localDatabase('bannedWords');
     TFlist = new localDatabase('TFlist');
     FMlist = new localDatabase('FMlist');

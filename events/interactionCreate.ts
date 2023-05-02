@@ -1,4 +1,4 @@
-import Discord, { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } from 'discord.js';
+import Discord from 'discord.js';
 import YClient from '../client.js';
 
 export default async (client: YClient, interaction: Discord.BaseInteraction) => {
@@ -37,47 +37,6 @@ export default async (client: YClient, interaction: Discord.BaseInteraction) => 
                 interaction.reply('Denied verification');
                 interaction.message.edit({components: []});
             }
-        } else if (interaction.customId === 'mpReport') {
-            interaction.showModal(new ModalBuilder().setCustomId('mpReport').setTitle('MP Report').addComponents(
-                new ActionRowBuilder<TextInputBuilder>().addComponents(
-                    new TextInputBuilder().setCustomId('serverName').setLabel('Server name').setStyle(TextInputStyle.Short).setPlaceholder('Silage or Grain').setMaxLength(6)),
-                new ActionRowBuilder<TextInputBuilder>().addComponents(
-                    new TextInputBuilder().setCustomId('playerNames').setLabel('Player names').setStyle(TextInputStyle.Short).setPlaceholder('Who\'s causing trouble? (skip if none)').setRequired(false)),
-                new ActionRowBuilder<TextInputBuilder>().addComponents(
-                    new TextInputBuilder().setCustomId('reason').setLabel('Reason for report').setStyle(TextInputStyle.Paragraph))
-            ));
         } else client.log('\x1b[35m', `Alternate button pressed at ${interaction.message.url}`);
-    } else if (interaction.isModalSubmit()) {
-        if (interaction.customId === 'mpReport') {
-            interaction.reply({
-                ephemeral: true,
-                embeds: [new client.embed()
-                    .setColor(client.config.embedColor)
-                    .setTitle('Your report has been sent!')
-                    .setDescription('If you\'re reporting a player, please refrain from announcing in-game that a staff member may be coming, as it does not assist staff members.')]
-            });
-
-            const serverName = interaction.fields.fields.get('serverName')?.value as string;
-            const playerNames = interaction.fields.fields.get('playerNames')?.value as string;
-            const reason = interaction.fields.fields.get('reason')?.value as string;
-            
-            (client.channels.resolve('733828561215029268') as Discord.TextChannel).send({
-                content: client.reportCooldown.isActive ? undefined : `No role ping for now`,
-                embeds: [new client.embed()
-                    .setTitle(`MP Report by ${interaction.user.tag}`)
-                    .setColor(client.config.embedColor)
-                    .setTimestamp()
-                    .setDescription(`<@${interaction.user.id}>\n\`${interaction.user.id}\``)
-                    .addFields(
-                        { name: 'Server', value: serverName },
-                        { name: 'Reported players', value: playerNames.length > 0 ? playerNames : '*No names provided*' },
-                        { name: 'Reason', value: reason })
-                ]
-            });
-            
-            client.reportCooldown.isActive = true;
-            clearInterval(client.reportCooldown.timeout as NodeJS.Timeout);
-            client.reportCooldown.timeout = setTimeout(() => { client.reportCooldown.isActive = false; console.log('eee') }, 1_800_000);
-        }
     }
 }

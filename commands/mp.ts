@@ -198,16 +198,6 @@ export default {
                     interaction.reply({embeds: [new client.embed().setDescription(`<@${member.user.id}> has been given <@&${Role}>.`).setColor(client.config.embedColor)]});
                 }
             },
-            blacklist: () => {
-                const userId = interaction.options.getString('userid', true);
-                if (client.blacklist._content.includes(userId)) {
-                    client.blacklist.remove(userId);
-                    interaction.reply(`Successfully removed \`${userId}\``);
-                } else {
-                    client.blacklist.add(userId);
-                    interaction.reply(`Successfully added \`${userId}\``);
-                }
-            },
             fm: () => {
                 if (client.FMlist._content.includes(name as string)) {
                     client.FMlist.remove(name as string);
@@ -335,13 +325,6 @@ export default {
                     {name: 'Trusted Farmer', value: 'trustedfarmer'},
                     {name: 'Farm Manager', value: 'mpfarmmanager'},
                     {name: 'Public Admin', value: 'mppublicadmin'})
-                .setRequired(true)))
-        .addSubcommand(x=>x
-            .setName('blacklist')
-            .setDescription('Add or remove user IDs on report blacklist')
-            .addStringOption(x=>x
-                .setName('userid')
-                .setDescription('The ID to add or remove')
                 .setRequired(true)))
         .addSubcommand(x=>x
             .setName('fm')

@@ -28,7 +28,7 @@ export default async (client: YClient, ChannelID: string, MessageID: string, ser
     function adminCheck() {
         newPlayers.filter(x => !oldPlayers.some(y => {
             if (y.name === x.name && !y.isAdmin && x.isAdmin && !client.whitelist._content.includes(x.name) && !client.FMlist._content.includes(x.name)) {
-                (client.channels.resolve('830916009107652630') as Discord.TextChannel).send({embeds: [new client.embed()
+                (client.channels.resolve(client.config.mainServer.channels.juniorAdminChat) as Discord.TextChannel).send({embeds: [new client.embed()
                     .setTitle('UNKNOWN ADMIN LOGIN')
                     .setDescription(`\`${x.name}\` on **${serverAcro}** at <t:${now}>`)
                     .setColor('#ff4d00')]});
@@ -160,4 +160,30 @@ export default async (client: YClient, ChannelID: string, MessageID: string, ser
 
         client.FSCache[serverAcro].players = newPlayers;
     }
+}
+
+export function FSLoopAll(client: YClient) {
+    const embed = new client.embed().setColor(client.config.embedColor);
+    const totalCount = <number[]>[];
+
+    for (const server of Object.entries(client.FSCache)) {
+        const playerInfo = <string[]>[];
+        const serverSlots = server[1].players.length;
+        totalCount.push(serverSlots);
+
+        for (const player of server[1].players) {
+            const playTimeHrs = Math.floor(player.uptime / 60);
+            const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
+            let decorators = player.isAdmin ? ':detective:' : ''; // Tag for if player is admin
+            decorators += client.FMlist._content.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
+            decorators += client.TFlist._content.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
+
+            playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
+        }
+        if (server[1].players.length !== 0) embed.addFields({ name: `${server[0]} - ${serverSlots}/16`, value: playerInfo.join('\n') });
+    }
+
+    (client.channels.cache.get(client.config.mainServer.channels.taesTestingZone) as Discord.TextChannel).messages.cache.get(client.config.FSLoopMsgId)?.edit({
+        embeds: [embed.setTitle(`All Servers: ${totalCount.reduce((a, b) => a + b, 0)} online`)]
+    });
 }

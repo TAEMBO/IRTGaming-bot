@@ -1,6 +1,6 @@
 import Discord from 'discord.js';
 import YClient from './client.js';
-import FSLoop from './FSLoop.js';
+import FSLoop, { FSLoopAll } from './FSLoop.js';
 import fs from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,6 +12,7 @@ console.log(client.config.devWhitelist);
 client.once("ready", async () => {
 	await client.guilds.fetch(client.config.mainServer.id).then(async guild => {
 		await guild.members.fetch();
+		await (guild.channels.cache.get(client.config.mainServer.channels.juniorAdminChat) as Discord.TextChannel).messages.fetch(client.config.FSLoopMsgId);
 		setInterval(async () => (await guild.invites.fetch()).forEach(inv => client.invites.set(inv.code, { uses: inv.uses, creator: inv.inviter?.id })), 500000);
 		if (client.config.botSwitches.registerCommands) guild.commands.set(client.registry).then(() => client.log('\x1b[35m', 'Slash commands registered')).catch(e => console.log(`Couldn't register commands bcuz: ${e}`));
 	});
@@ -83,7 +84,10 @@ setInterval(async () => {
 }, 5000);
 
 // Farming Simulator 22 stats loops
-if (client.config.botSwitches.FSLoop) setInterval(() => client.config.FSCacheServers.forEach(srv => FSLoop(client, srv[0], srv[1], srv[2])), 30_000);
+if (client.config.botSwitches.FSLoop) setInterval(async () => {
+	for await (const server of client.config.FSCacheServers) await FSLoop(client, server[0], server[1], server[2]);
+	FSLoopAll(client);
+}, 30_000);
 
 // YouTube upload nofitcations loop
 if (client.config.botSwitches.YTLoop) setInterval(() => client.config.YTCacheChannels.forEach(ch => client.YTLoop(ch[0], ch[1])), 300_000);

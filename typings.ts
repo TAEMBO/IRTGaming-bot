@@ -41,6 +41,7 @@ export interface Config {
     watchListPings: Array<string>,
     FSCacheServers: Array<Array<string>>,
     YTCacheChannels: Array<Array<string>>,
+    FSLoopMsgId: string,
     mainServer: {
         id: string,
         MPStaffRoles: Array<string>,
@@ -83,6 +84,7 @@ export interface Config {
             communityIdeas: string,
             staffReports: string,
             fsLogs: string,
+            juniorAdminChat: string,
             mpStaffCommands: string,
             watchList: string,
             videosAndLiveStreams: string

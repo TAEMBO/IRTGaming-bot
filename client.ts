@@ -43,7 +43,6 @@ export default class YClient extends Client {
         super({
             intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration, GatewayIntentBits.GuildInvites, GatewayIntentBits.GuildPresences, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildVoiceStates],
             partials: [Partials.Channel, Partials.Message, Partials.Reaction],
-            ws: { properties: { browser: "Discord iOS" } },
             presence: config.botPresence as Discord.PresenceData
         });
     }

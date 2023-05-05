@@ -183,7 +183,7 @@ export function FSLoopAll(client: YClient) {
         if (server[1].players.length !== 0) embed.addFields({ name: `${server[0]} - ${serverSlots}/16`, value: playerInfo.join('\n') });
     }
 
-    (client.channels.cache.get(client.config.mainServer.channels.taesTestingZone) as Discord.TextChannel).messages.cache.get(client.config.FSLoopMsgId)?.edit({
+    (client.channels.cache.get(client.config.mainServer.channels.juniorAdminChat) as Discord.TextChannel).messages.cache.get(client.config.FSLoopMsgId)?.edit({
         embeds: [embed.setTitle(`All Servers: ${totalCount.reduce((a, b) => a + b, 0)} online`)]
     });
 }

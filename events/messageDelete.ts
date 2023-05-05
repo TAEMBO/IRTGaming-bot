@@ -13,7 +13,7 @@ export default async (client: YClient, message: Discord.Message) => {
     if (message.content.length != 0) embed.addFields({name: '🔹 Content', value: `\`\`\`\n${message.content.slice(0, 1000)}\n\`\`\``});
     embed.addFields(
         {name: '🔹 Channel', value: `<#${message.channel.id}>`},
-        {name: '🔹 Sent At', value: `<t:${Math.round(message.createdTimestamp / 1000)}:R>`});
+        {name: '🔹 Sent', value: `<t:${Math.round(message.createdTimestamp / 1000)}:R>`});
 
     (client.channels.resolve(client.config.mainServer.channels.botLogs) as Discord.TextChannel).send({embeds: [embed], files: message.attachments.map(x => x.url)});
 } 

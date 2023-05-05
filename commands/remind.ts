@@ -10,7 +10,7 @@ export default {
         if (reminderTime) {
             interaction.reply({embeds: [new client.embed()
                 .setTitle('Reminder set')
-                .setDescription(`\n\`\`\`${reminderText}\`\`\`\n<t:${Math.round((Date.now() + reminderTime) / 1000)}:R>.`)
+                .setDescription(`\n\`\`\`${reminderText}\`\`\`\n<t:${Math.round((Date.now() + reminderTime) / 1000)}:R>`)
                 .setColor(client.config.embedColor)
             ], fetchReply: true}).then(async msg => {
                 const reminder = await client.reminders._content.create({ userid: interaction.user.id, content: reminderText, time: Date.now() + reminderTime, ch: msg.channelId, msg: msg.id });

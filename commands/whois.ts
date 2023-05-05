@@ -22,7 +22,7 @@ export default {
 				.setTitle(`${user.bot ? 'Bot' : 'User'} info: ${user.tag}`)
 				.setURL(`https://discord.com/users/${user.id}`)
 				.setDescription(`<@${user.id}>\n\`${user.id}\``)
-				.addFields({name: '🔹 Account Creation Date', value: `<t:${Math.round(user.createdTimestamp / 1000)}:R>`})
+				.addFields({name: '🔹 Account Created', value: `<t:${Math.round(user.createdTimestamp / 1000)}:R>`})
 				.setColor(client.config.embedColor)
 			]});
 		} else {
@@ -39,8 +39,8 @@ export default {
 				.setURL(`https://discord.com/users/${member.user.id}`)
 				.setDescription(`<@${member.user.id}>\n\`${member.user.id}\``)
 				.addFields(
-					{name: '🔹 Account Creation Date', value: `<t:${Math.round(member.user.createdTimestamp / 1000)}:R>`},
-					{name: '🔹 Join Date', value: `<t:${Math.round(member.joinedTimestamp as number / 1000)}:R>`},
+					{name: '🔹 Account created', value: `<t:${Math.round(member.user.createdTimestamp / 1000)}:R>`},
+					{name: '🔹 Joined Server', value: `<t:${Math.round(member.joinedTimestamp as number / 1000)}:R>`},
 					{name: `🔹 Roles: ${member.roles.cache.size - 1}`, value: member.roles.cache.size > 1 ? member.roles.cache.filter(x => x.id !== interaction.guild.id).sort((a, b) => b.position - a.position).map(x => x).join(member.roles.cache.size > 4 ? ' ' : '\n').slice(0, 1024) : 'None'})
 				.setColor(member.displayColor || '#ffffff')
 				.setImage(member.user.bannerURL({ extension: 'png', size: 1024}) ?? null);

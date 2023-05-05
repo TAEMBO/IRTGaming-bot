@@ -43,7 +43,7 @@ export default async (client: YClient, member: Discord.GuildMember) => {
         .setTitle(`Member Joined: ${member.user.tag}`)
         .setDescription(`<@${member.user.id}>\n\`${member.user.id}\``)
         .addFields(
-            {name: '🔹 Account Creation Date', value: `<t:${Math.round(member.user.createdTimestamp / 1000)}:R>`},
+            {name: '🔹 Account Created', value: `<t:${Math.round(member.user.createdTimestamp / 1000)}:R>`},
             {name: '🔹 Invite Data', value: usedInvite ? `Invite: \`${usedInvite.code}\`\nCreated by: **${usedInvite.inviter?.tag}**` : 'No data found'})
         .setColor(client.config.embedColorGreen)
         .setTimestamp()

@@ -11,7 +11,7 @@ export default {
 			.addFields(
 				{name: '🔹 ID', value: `\`${role.id}\``, inline: true},
 				{name: '🔹 Color', value: `\`${role.hexColor}\``, inline: true},
-				{name: '🔹 Creation Date', value: `<t:${Math.round(role.createdTimestamp/1000)}:R> `, inline: true},
+				{name: '🔹 Created', value: `<t:${Math.round(role.createdTimestamp/1000)}:R> `, inline: true},
 				{name: '🔹 Misc', value: `Hoist: \`${role.hoist}\`\nMentionable: \`${role.mentionable}\`\nPosition: \`${role.position}\` from bottom\nMembers: \`${role.members.size}\`\n${role.members.size < 21 ? roleMembers : ''}`, inline: true},
 				{name: '🔹 Key Permissions', value: (permissions.includes('Administrator') ? ['Administrator'] : permissions.filter(x => keyPermissions.includes(x))).join(', ') || 'None', inline: true})
 			.setColor(role.color || '#fefefe')

@@ -5,15 +5,10 @@ export default {
         ({
             staff: () => interaction.reply({components: [new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder().setStyle(5).setURL(`https://canary.discord.com/channels/552565546089054218/852483521859551232/866257346513862687`).setLabel("Apply for MP Staff"))]}),
             troll: () => interaction.reply({embeds: [new client.embed()
-                .setTitle('Reporting trolls: Brief')
+                .setTitle('Reporting trolls')
                 .setColor(client.config.embedColor)
-                .setDescription(`Go to <#${client.config.mainServer.channels.mpPublicSilage}> or <#${client.config.mainServer.channels.mpPublicGrain}> and type:\n\n<@&${client.config.mainServer.roles.mpstaff}> **[**troll's name**] [**what they're doing**] [**picture or video if possible**]**`),
-                new client.embed()
-                .setTitle('Reporting trolls: Detailed')
-                .setDescription(`While playing on the public servers, you may come across the odd player misbehaving and messing things up. If you do, please report them in <#${client.config.mainServer.channels.mpPublicSilage}> or <#${client.config.mainServer.channels.mpPublicGrain}> along with a short description of what they're doing and tag <@&${client.config.mainServer.roles.mpstaff}>.`)
-                .addFields({name: 'Notes', value: `> When reporting a player, please include a name or screenshot/video including the name of the player. Staff can't help if they don't know who to look out for.\n\n> Please do not tag individual staff members unless they are already on the server. Otherwise, it'll take longer for an available staff member to notice it.\n\n> Please do not DM staff members to report players unless otherwise allowed to.`})
                 .setImage('https://media.discordapp.net/attachments/979863373439184966/996178337984675961/unknown.png')
-                .setColor(client.config.embedColor)
+                .setDescription(`While playing on our public servers, you may come across a player causing issues. If you do, please send a report to <#${client.config.mainServer.channels.mpPublicSilage}> or <#${client.config.mainServer.channels.mpPublicGrain}> with the __name of the player__, __what they're doing__, and __a picture or video as evidence if possible__.\nIt's important to note that we ask that people to __not ping or DM individual staff members__ **(**unless otherwise allowed to**)**, __ping <@&${client.config.mainServer.roles.mpstaff}> in your report__ so it can be swiftly dealt with.`)
             ]}),
             appeal: () => interaction.reply({components: [new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder().setStyle(5).setURL(`https://discord.com/channels/552565546089054218/825046442300145744/969893324947337246`).setLabel("Appeal an MP ban"))]}),
             filters: () => interaction.reply({embeds: [new client.embed().setColor(client.config.embedColor).setTitle('Please note that our servers may "ghost" and not show up until you\'ve refreshed your MP menu some times.').setImage('https://cdn.discordapp.com/attachments/830916009107652630/978795707681079376/unknown.png')]}),

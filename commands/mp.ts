@@ -14,10 +14,23 @@ export default {
         const FTP = new FTPClient();
         ({
             server: async () => {
-                if (!interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager)) return client.youNeedRole(interaction, 'mpmanager');
-                await interaction.deferReply();
+                async function checkRole(role: keyof typeof client.config.mainServer.roles) {
+                    if (!interaction.member.roles.cache.has(client.config.mainServer.roles[role])) await client.youNeedRole(interaction, role);
+                }
+
                 const chosenServer = interaction.options.getString('server', true) as 'ps' | 'pg' | 'mf';
                 const chosenAction = interaction.options.getString('action', true) as 'start' | 'stop';
+
+                if (chosenServer === 'mf' && !interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager)) {
+                    await checkRole('mfmanager');
+                } else await checkRole('mpmanager');
+
+                try {
+                    await interaction.deferReply();
+                } catch (err) {
+                    return;
+                }
+
                 const serverSelector = `[name="${chosenAction}_server"]`;
                 const time = Date.now();
                 const browser = await puppeteer.launch();

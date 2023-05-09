@@ -337,7 +337,7 @@ export default {
                 .addChoices(
                     {name: 'Trusted Farmer', value: 'trustedfarmer'},
                     {name: 'Farm Manager', value: 'mpfarmmanager'},
-                    {name: 'Public Admin', value: 'mppublicadmin'})
+                    {name: 'Public Admin', value: 'mpjradmin'})
                 .setRequired(true)))
         .addSubcommand(x=>x
             .setName('fm')

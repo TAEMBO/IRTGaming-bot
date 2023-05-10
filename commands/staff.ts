@@ -5,32 +5,27 @@ export default {
         ({
             mp: async () => {
                 const staff = {
-                    mp_manager: await interaction.guild.roles.fetch(client.config.mainServer.roles.mpmanager) as Discord.Role,
-                    mp_admin: await interaction.guild.roles.fetch(client.config.mainServer.roles.mpsradmin) as Discord.Role,
-                    mp_publicadmin: await interaction.guild.roles.fetch(client.config.mainServer.roles.mpjradmin) as Discord.Role,
-                    mp_farmmanager: await interaction.guild.roles.fetch(client.config.mainServer.roles.mpfarmmanager) as Discord.Role,
-                    mp_trustedfarmer: await interaction.guild.roles.fetch(client.config.mainServer.roles.trustedfarmer) as Discord.Role
+                    mp_manager: (await interaction.guild.roles.fetch(client.config.mainServer.roles.mpmanager) as Discord.Role).members.map(e=>e.toString()).join("\n") || "None",
+                    mp_sr_admin: (await interaction.guild.roles.fetch(client.config.mainServer.roles.mpsradmin) as Discord.Role).members.filter(x=>!x.roles.cache.has(client.config.mainServer.roles.mpmanager)).map(e=>e.toString()).join("\n") || "None",
+                    mp_jr_admin: (await interaction.guild.roles.fetch(client.config.mainServer.roles.mpjradmin) as Discord.Role).members.map(e=>e.toString()).join("\n") || "None",
+                    mp_farm_manager: (await interaction.guild.roles.fetch(client.config.mainServer.roles.mpfarmmanager) as Discord.Role).members.map(e=>e.toString()).join("\n") || "None",
+                    mp_trusted_farmer: (await interaction.guild.roles.fetch(client.config.mainServer.roles.trustedfarmer) as Discord.Role).members.filter(x=>!client.isMPStaff(x)).map(e=>e.toString()).join("\n") || "None"
                 };
-                const mp_m = staff.mp_manager.members.map(e=>`<@${e.user.id}>`).join("\n") || "None";
-                const mp_a = staff.mp_admin.members.filter(x=>!x.roles.cache.has(client.config.mainServer.roles.mpmanager)).map(e=>`<@${e.user.id}>`).join("\n") || "None";
-                const mp_pa = staff.mp_publicadmin.members.map(e=>`<@${e.user.id}>`).join("\n") || "None";
-                const mp_fm = staff.mp_farmmanager.members.map(e=>`<@${e.user.id}>`).join("\n") || "None";
-                const mp_tf = staff.mp_trustedfarmer.members.filter(x=>!client.isMPStaff(x)).map(e=>`<@${e.user.id}>`).join("\n") || "None";
          
                 interaction.reply({embeds: [new client.embed()
                     .setTitle('__MP Staff Members__')
                     .setColor(client.config.embedColor)
                     .setDescription([
                         `<@&${client.config.mainServer.roles.mpmanager}>`,
-                        `${mp_m}\n`,
+                        `${staff.mp_manager}\n`,
                         `<@&${client.config.mainServer.roles.mpsradmin}>`,
-                        `${mp_a}\n`,
+                        `${staff.mp_sr_admin}\n`,
                         `<@&${client.config.mainServer.roles.mpjradmin}>`,
-                        `${mp_pa}\n`,
+                        `${staff.mp_jr_admin}\n`,
                         `<@&${client.config.mainServer.roles.mpfarmmanager}>`,
-                        `${mp_fm}\n`,
+                        `${staff.mp_farm_manager}\n`,
                         `<@&${client.config.mainServer.roles.trustedfarmer}>`,
-                        `${mp_tf}`
+                        `${staff.mp_trusted_farmer}`
                     ].join('\n'))
                 ]});
             },
@@ -45,20 +40,21 @@ export default {
             },
             discord: async () => {
                 const staff = {
-                    moderator: await interaction.guild.roles.fetch(client.config.mainServer.roles.discordmoderator) as Discord.Role,
-                    helper: await interaction.guild.roles.fetch(client.config.mainServer.roles.discordhelper) as Discord.Role
+                    admin: (await interaction.guild.roles.fetch(client.config.mainServer.roles.admin) as Discord.Role).members.map(e=>e.toString()).join("\n") || "None",
+                    moderator: (await interaction.guild.roles.fetch(client.config.mainServer.roles.discordmoderator) as Discord.Role).members.filter(x=>!x.roles.cache.has(client.config.mainServer.roles.discordhelper)).map(e=>e.toString()).join("\n") || "None",
+                    helper: (await interaction.guild.roles.fetch(client.config.mainServer.roles.discordhelper) as Discord.Role).members.map(e=>e.toString()).join("\n") || "None"
                 };
-                const mod = staff.moderator.members.filter(x=>!x.roles.cache.has(client.config.mainServer.roles.discordhelper)).map(e=>`<@${e.user.id}>`).join("\n") || "None";
-                const helper = staff.helper.members.map(e=>`<@${e.user.id}>`).join("\n") || "None";
          
                 interaction.reply({embeds: [new client.embed()
                     .setTitle('__Discord Staff Members__')
                     .setColor(client.config.embedColor)
                     .setDescription([
+                        `<@&${client.config.mainServer.roles.admin}>`,
+                        `${staff.admin}\n`,
                         `<@&${client.config.mainServer.roles.discordmoderator}>`,
-                        `${mod}\n`,
+                        `${staff.moderator}\n`,
                         `<@&${client.config.mainServer.roles.discordhelper}>`,
-                        `${helper}`
+                        `${staff.helper}`
                     ].join('\n'))
                 ]});
             }
@@ -67,13 +63,13 @@ export default {
     data: new SlashCommandBuilder()
         .setName("staff")
         .setDescription("Staff member information")
-        .addSubcommand((optt)=>optt
+        .addSubcommand(x=>x
             .setName("mp")
             .setDescription("Shows all MP Staff members within Discord"))
-        .addSubcommand((optt)=>optt
+        .addSubcommand(x=>x
             .setName("fs")
             .setDescription("Shows all MP Staff usernames within FS"))
-        .addSubcommand((optt)=>optt
+        .addSubcommand(x=>x
             .setName("discord")
             .setDescription("Shows all Discord staff members"))
 };

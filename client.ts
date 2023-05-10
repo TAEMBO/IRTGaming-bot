@@ -30,11 +30,11 @@ export default class YClient extends Client {
     FSCache = <{ [key: string]: { players: FS_player[], status: "online" | "offline" | null, lastAdmin: number | null } }>{};
     YTCache = <{ [key: string]: null | string }>{};
     invites = new Map<string, { uses: number | null, creator: string | undefined }>();
-    bannedWords = new localDatabase('bannedWords');
-    TFlist = new localDatabase('TFlist');
-    FMlist = new localDatabase('FMlist');
-    whitelist = new localDatabase('adminWhitelist');
-    watchListPings = new localDatabase('watchListPings');
+    bannedWords = new localDatabase<string>('bannedWords');
+    TFlist = new localDatabase<string>('TFlist');
+    FMlist = new localDatabase<string>('FMlist');
+    whitelist = new localDatabase<string>('adminWhitelist');
+    watchListPings = new localDatabase<string>('watchListPings');
     userLevels = new userLevels(this);
     punishments = new punishments(this);
     watchList = new watchList();
@@ -146,12 +146,12 @@ export default class YClient extends Client {
     }
 }
 
-class localDatabase {
+class localDatabase<T> {
 	public _path: string;
-	public _content = <string[]>[];
+	public _content = <T[]>[];
     public initLoad = () => this._content = JSON.parse(fs.readFileSync(this._path, 'utf8'));
-    public add = (data: string) => fs.writeFileSync(this._path, JSON.stringify(this._content = this._content.concat([data]), null, 4));
-    public remove = (data: string) => fs.writeFileSync(this._path, JSON.stringify(this._content = this._content.filter(x => x !== data), null, 4));
+    public add = (data: T) => fs.writeFileSync(this._path, JSON.stringify(this._content = this._content.concat([data]), null, 4));
+    public remove = (data: T) => fs.writeFileSync(this._path, JSON.stringify(this._content = this._content.filter(x => x !== data), null, 4));
 	constructor(fileName: string) {
 		this._path = `../databases/${fileName}.json`;
 	}

@@ -46,7 +46,7 @@ export interface Config {
         MPStaffRoles: Array<string>,
         staffRoles: Array<string>,
         roles: {
-            owner: string,
+            admin: string,
             discordmoderator: string,
             discordhelper: string,
             mpmanager: string,

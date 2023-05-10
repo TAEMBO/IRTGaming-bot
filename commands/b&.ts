@@ -2,16 +2,15 @@ import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client.js';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
-        if (interaction.channel?.type === Discord.ChannelType.GuildStageVoice) return;
-        const user = interaction.options.getUser("user", true);
-        interaction.reply({content: "ok", ephemeral: true});
-        interaction.channel?.send({content: `<@${user.id}> has received an honorary ban!`});
+        const user = interaction.options.getUser("member", true);
+        interaction.reply({ ephemeral: true }).then(() => interaction.deleteReply());
+        interaction.channel?.send(`<@${user.id}> has received an honorary ban!`);
     },
     data: new SlashCommandBuilder()
         .setName("band")
-        .setDescription("Honorary ban")
+        .setDescription("Introduce an honorary ban")
         .addUserOption((opt)=>opt
-            .setName("user")
+            .setName("member")
             .setDescription("It's an honor")
             .setRequired(true))
 };

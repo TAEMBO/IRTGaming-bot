@@ -38,7 +38,6 @@ export interface Config {
         buttonRoles: boolean,
     },
     devWhitelist: Array<string>,
-    watchListPings: Array<string>,
     FSCacheServers: Array<Array<string>>,
     YTCacheChannels: Array<Array<string>>,
     FSLoopMsgId: string,

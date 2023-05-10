@@ -55,7 +55,7 @@ export default async (client: YClient, ChannelID: string, MessageID: string, ser
             const inWl = watchList.find(y => y._id === x.name);
             const guild = client.guilds.cache.get(client.config.mainServer.id) as Discord.Guild;
             if (client.config.mainServer.id == '552565546089054218' && inWl) {
-                const filterWLPings = client.config.watchListPings.filter(x => !(guild.members.cache.get(x) as Discord.GuildMember).roles.cache.has(client.config.mainServer.roles.loa)).map(x=>`<@${x}>`).join(" ");
+                const filterWLPings = client.watchListPings._content.filter(x => !(guild.members.cache.get(x) as Discord.GuildMember).roles.cache.has(client.config.mainServer.roles.loa)).map(x=>`<@${x}>`).join(" ");
                 wlChannel.send({ content: filterWLPings, embeds: [wlEmbed(inWl._id, true, inWl.reason)] }); // Oh no, go get em Toast
             }
             logChannel.send({embeds: [logEmbed(x, true)]});

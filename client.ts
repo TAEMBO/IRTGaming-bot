@@ -34,6 +34,7 @@ export default class YClient extends Client {
     TFlist = new localDatabase('TFlist');
     FMlist = new localDatabase('FMlist');
     whitelist = new localDatabase('adminWhitelist');
+    watchListPings = new localDatabase('watchListPings');
     userLevels = new userLevels(this);
     punishments = new punishments(this);
     watchList = new watchList();
@@ -53,6 +54,7 @@ export default class YClient extends Client {
         this.FMlist.initLoad();
         this.TFlist.initLoad();
         this.whitelist.initLoad();
+        this.watchListPings.initLoad();
         this.config.YTCacheChannels.forEach(ch => this.YTCache[ch[0]] = null);
         this.config.FSCacheServers.forEach(srv => this.FSCache[srv[2]] = { players: [], status: null, lastAdmin: null });
 

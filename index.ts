@@ -12,7 +12,6 @@ console.log(client.config.devWhitelist);
 client.once("ready", async () => {
 	await client.guilds.fetch(client.config.mainServer.id).then(async guild => {
 		await guild.members.fetch();
-		await (guild.channels.cache.get(client.config.mainServer.channels.juniorAdminChat) as Discord.TextChannel).messages.fetch(client.config.FSLoopMsgId);
 		setInterval(async () => (await guild.invites.fetch()).forEach(inv => client.invites.set(inv.code, { uses: inv.uses, creator: inv.inviter?.id })), 500000);
 		if (client.config.botSwitches.registerCommands) guild.commands.set(client.registry).then(() => client.log('\x1b[35m', 'Slash commands registered')).catch(e => console.log(`Couldn't register commands bcuz: ${e}`));
 	});

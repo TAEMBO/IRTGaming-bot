@@ -10,7 +10,7 @@ import watchList from './schemas/watchList.js';
 import reminders from './schemas/reminders.js';
 import tokens from './tokens.json' assert { type: 'json' };
 import config from './config.json' assert { type: 'json' };
-import type { Config, Tokens, FS_player } from './typings.js';
+import type { Config, Tokens, RepeatedMessages, FSCache, YTCache, InviteCache } from './typings.js';
 
 export default class YClient extends Client {
     config = config as Config;
@@ -22,14 +22,10 @@ export default class YClient extends Client {
     games = new this.collection<string, string>();
     commands = new this.collection<string, any>();
     registry = <Discord.ApplicationCommandDataResolvable[]>[];
-    log = (color: string, ...data: any[]) => console.log(`${color}[${moment().format('HH:mm:ss')}]`, ...data);
-    youNeedRole = (interaction: Discord.ChatInputCommandInteraction<"cached">, role: keyof typeof config.mainServer.roles) => interaction.reply(`You need the <@&${this.config.mainServer.roles[role]}> role to use this command`);
-    hasModPerms = (guildMember: Discord.GuildMember) => this.config.mainServer.staffRoles.map(x => this.config.mainServer.roles[x as keyof typeof config.mainServer.roles]).some(x => guildMember.roles.cache.has(x));
-    isMPStaff = (guildMember: Discord.GuildMember) => this.config.mainServer.MPStaffRoles.map(x => this.config.mainServer.roles[x as keyof typeof config.mainServer.roles]).some(x => guildMember.roles.cache.has(x));
-    repeatedMessages = <{ [key: string]: { data: Discord.Collection<number, { type: string, channel: string }>, timeout: NodeJS.Timeout } }>{};
-    FSCache = <{ [key: string]: { players: FS_player[], status: "online" | "offline" | null, lastAdmin: number | null } }>{};
-    YTCache = <{ [key: string]: null | string }>{};
-    invites = new Map<string, { uses: number | null, creator: string | undefined }>();
+    repeatedMessages = <RepeatedMessages>{};
+    FSCache = <FSCache>{};
+    YTCache = <YTCache>{};
+    invites = new Map<string, InviteCache>();
     bannedWords = new localDatabase<string>('bannedWords');
     TFlist = new localDatabase<string>('TFlist');
     FMlist = new localDatabase<string>('FMlist');
@@ -40,6 +36,10 @@ export default class YClient extends Client {
     watchList = new watchList();
     playerTimes = new playerTimes(this);
     reminders = new reminders();
+    log = (color: string, ...data: any[]) => console.log(`${color}[${moment().format('HH:mm:ss')}]`, ...data);
+    youNeedRole = (interaction: Discord.ChatInputCommandInteraction<"cached">, role: keyof typeof this.config.mainServer.roles) => interaction.reply(`You need the <@&${this.config.mainServer.roles[role]}> role to use this command`);
+    hasModPerms = (guildMember: Discord.GuildMember) => this.config.mainServer.staffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
+    isMPStaff = (guildMember: Discord.GuildMember) => this.config.mainServer.MPStaffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
     constructor() {
         super({
             intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration, GatewayIntentBits.GuildInvites, GatewayIntentBits.GuildPresences, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildVoiceStates],
@@ -122,13 +122,11 @@ export default class YClient extends Client {
             }
         } return text.trim();
     }
-    formatBytes(bytes: number, decimals: number, bitsOrBytes: 1000 | 1024) { // Credits to Toast for making this
+    formatBytes(bytes: number, decimals: number, bitsOrBytes: 1000 | 1024) { // Credits to Toast for providing this
         if (bytes === 0) return '0 Bytes';
-        const k = bitsOrBytes;
-        const dm = decimals < 0 ? 0 : decimals;
         const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return (bytes / Math.pow(k, i)).toFixed(dm) + ' ' + sizes[i];
+        const i = Math.floor(Math.log(bytes) / Math.log(bitsOrBytes));
+        return (bytes / Math.pow(bitsOrBytes, i)).toFixed(decimals < 0 ? 0 : decimals) + ' ' + sizes[i];
     }
     async punish(interaction: Discord.ChatInputCommandInteraction<"cached">, type: string) {
         if ((!this.hasModPerms(interaction.member)) || (!['warn', 'mute'].includes(type) && interaction.member.roles.cache.has(this.config.mainServer.roles.discordhelper))) return this.youNeedRole(interaction, 'discordmoderator');
@@ -142,7 +140,7 @@ export default class YClient extends Client {
         if (!GuildMember && type !== 'ban') return interaction.reply(`You cannot ${type} someone who is not in the server.`);
 
         await interaction.deferReply();
-        await this.punishments.addPunishment(type, { time, interaction }, interaction.user.id, reason, User, GuildMember);
+        await this.punishments.addPunishment(type, interaction.user.id, reason, User, GuildMember, { time, interaction });
     }
 }
 

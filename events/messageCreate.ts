@@ -39,7 +39,7 @@ export default async (client: YClient, message: Discord.Message) => {
 				const colMsg = collected.first() as Discord.Message;
 				client.log('\x1b[35m', `Received "y" from ${colMsg.author.tag}, indicating to mute`);
 				try {
-					await client.punishments.addPunishment('mute', { time: '5m' }, colMsg.author.id, 'Automod; Misuse of staff ping', message.author, message.member);
+					await client.punishments.addPunishment('mute', colMsg.author.id, 'Automod; Misuse of staff ping', message.author, message.member, {});
 				} catch (error) {
 					client.log('\x1b[31m', 'Muting failed cuz:', error);
 					colMsg.react('❌');
@@ -80,7 +80,7 @@ export default async (client: YClient, message: Discord.Message) => {
 	
 				if (spammedMessage) {
 					delete client.repeatedMessages[message.author.id];
-					await client.punishments.addPunishment('mute', { time: muteTime }, (client.user as Discord.User).id, `Automod; ${muteReason}`, message.author, message.member);
+					await client.punishments.addPunishment('mute', (client.user as Discord.User).id, `Automod; ${muteReason}`, message.author, message.member, { time: muteTime });
 				}
 			} else {
 				client.repeatedMessages[message.author.id] = { data: new client.collection(), timeout: setTimeout(() => delete client.repeatedMessages[message.author.id], thresholdTime) };

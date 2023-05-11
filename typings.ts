@@ -1,5 +1,32 @@
 import Discord from 'discord.js';
 
+export interface RepeatedMessages {
+    [key: string]: {
+        data: Discord.Collection<number, {
+            type: string,
+            channel: string
+        }>,
+        timeout: NodeJS.Timeout
+    }
+}
+
+export interface FSCache {
+    [key: string]: {
+        players: FS_player[],
+        status: "online" | "offline" | null,
+        lastAdmin: number | null
+    }
+}
+
+export interface YTCache {
+    [key: string]: string | null
+}
+
+export interface InviteCache {
+    uses: number | null,
+    creator: string | undefined
+}
+
 export interface Tokens {
     token: string,
     mongoURL: string
@@ -43,8 +70,8 @@ export interface Config {
     FSLoopMsgId: string,
     mainServer: {
         id: string,
-        MPStaffRoles: Array<string>,
-        staffRoles: Array<string>,
+        MPStaffRoles: Array<keyof Config["mainServer"]["roles"]>,
+        staffRoles: Array<keyof Config["mainServer"]["roles"]>,
         roles: {
             admin: string,
             discordmoderator: string,

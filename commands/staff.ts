@@ -40,8 +40,8 @@ export default {
             },
             discord: async () => {
                 const staff = {
-                    admin: (await interaction.guild.roles.fetch(client.config.mainServer.roles.admin) as Discord.Role).members.map(e=>e.toString()).join("\n") || "None",
-                    moderator: (await interaction.guild.roles.fetch(client.config.mainServer.roles.discordmoderator) as Discord.Role).members.filter(x=>!x.roles.cache.has(client.config.mainServer.roles.discordhelper)).map(e=>e.toString()).join("\n") || "None",
+                    admin: (await interaction.guild.roles.fetch(client.config.mainServer.roles.admin) as Discord.Role).members.filter(x=>!x.roles.cache.has(client.config.mainServer.roles.discordmoderator)).map(e=>e.toString()).join("\n") || "None",
+                    moderator: (await interaction.guild.roles.fetch(client.config.mainServer.roles.discordmoderator) as Discord.Role).members.map(e=>e.toString()).join("\n") || "None",
                     helper: (await interaction.guild.roles.fetch(client.config.mainServer.roles.discordhelper) as Discord.Role).members.map(e=>e.toString()).join("\n") || "None"
                 };
          

@@ -17,9 +17,7 @@ export default class YClient extends Client {
     tokens = tokens as Tokens;
     embed = Discord.EmbedBuilder;
     collection = Discord.Collection;
-    messageCollector = Discord.MessageCollector;
     attachmentBuilder = Discord.AttachmentBuilder;
-    games = new this.collection<string, string>();
     commands = new this.collection<string, Command>();
     registry = <Discord.ApplicationCommandDataResolvable[]>[];
     repeatedMessages = <RepeatedMessages>{};

@@ -3,9 +3,7 @@ import YClient from '../client.js';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
 		const channel = interaction.channel as Discord.TextChannel;
-		if (client.games.has(channel.id)) return interaction.reply(`There is already an ongoing game in this channel created by ${client.games.get(channel.id)}`);
 
-		client.games.set(channel.id, interaction.user.tag);
 		await interaction.reply({content: `Game started!`, ephemeral: true});
 
 		let hiddenLetters = true;
@@ -21,7 +19,6 @@ export default {
 			let text = `A part of the ${wordOrPhrase} has been revealed, this is what it looks like now:\n\`\`\`\n${hideWordResult}\n\`\`\``;
 			if (!hiddenLetters) {
 				text = `The whole ${wordOrPhrase} has been revealed! The hangman game ends with the ${wordOrPhrase} being:\n\`\`\`\n${phrase}\n\`\`\``;
-				client.games.delete(channel.id);
 				guessCollector.stop();
 				clearInterval(interval);
 			}
@@ -81,9 +78,8 @@ export default {
 
 		const interval = setInterval(() => {
 			const channel = interaction.channel as Discord.TextChannel;
-			if (Date.now() > latestActivity + 60000 && client.games.has(channel.id)) {
+			if (Date.now() > latestActivity + 60000) {
 				botMsg.reply({content: 'The hangman game has ended due to inactivity.', allowedMentions: {repliedUser: false}});
-				client.games.delete(channel.id);
 				guessCollector.stop();
 				clearInterval(interval);
 			}
@@ -151,7 +147,6 @@ export default {
 			let loseText = '';
 			if (fouls === 7) {
 				loseText = `\nThe poor fella got hung. You lost the game. The ${wordOrPhrase} was:\n\`\`\`\n${phrase}\n\`\`\``;
-				client.games.delete((interaction.channel as Discord.TextChannel).id);
 				guessCollector.stop();
 				clearInterval(interval);
 			}

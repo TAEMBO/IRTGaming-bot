@@ -3,9 +3,6 @@ import YClient from '../client.js';
 const rpsChannels: { [key: string]: RpsInstance } = {};
 class RpsInstance {
     constructor(client: YClient, public firstPlayer: Discord.User, public firstMove: string, public message: Discord.Message) {
-        this.firstPlayer = firstPlayer;
-        this.firstMove = firstMove;
-        this.message = message;
         this.timeOut(client, message);
     }
 
@@ -14,7 +11,6 @@ class RpsInstance {
             if (rpsChannels.hasOwnProperty(message.channel.id)) {
                 await this.message.edit({embeds: [], content: "This rock paper scissors game has ended due to inactivity."});
                 delete rpsChannels[message.channel.id];
-                client.games.delete(message.channel.id);
             }
         }, 60000);
     }
@@ -26,8 +22,7 @@ export default {
         const move = interaction.options.getString("move", true);
         const Channel = interaction.channel as Discord.TextChannel;
 
-        if (!rpsChannels.hasOwnProperty(Channel.id) && !client.games.has(Channel.id)) {
-            client.games.set(Channel.id, interaction.user.tag);
+        if (!rpsChannels.hasOwnProperty(Channel.id)) {
             await interaction.deferReply();
             await interaction.deleteReply();
 
@@ -38,7 +33,7 @@ export default {
             ]});
 
             rpsChannels[Channel.id] = new RpsInstance(client, interaction.user, move, message);
-        } else if (rpsChannels.hasOwnProperty(Channel.id) && client.games.has(Channel.id)) {
+        } else if (rpsChannels.hasOwnProperty(Channel.id)) {
             let firstMove = rpsChannels[Channel.id];
             if (interaction.user.id !== firstMove.firstPlayer.id) {
                 await interaction.deferReply();
@@ -56,7 +51,6 @@ export default {
                 ]});
 
                 delete rpsChannels[Channel.id];
-                client.games.delete(Channel.id);
                 await interaction.deleteReply();
             } else interaction.reply({content: "You can't play with yourself."});
         } else interaction.reply({content: "You can't start 2 different games in the same channel, go to another channel or wait for the current game to end.", ephemeral: true});

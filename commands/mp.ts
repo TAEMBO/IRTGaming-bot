@@ -127,17 +127,26 @@ export default {
                 await interaction.deferReply();
                 const chosenServer = interaction.options.getString('server', true) as 'ps' | 'pg';
                 const name = interaction.options.getString('name', true);
-                function permIcon(perm: string) {
+                const timeZoneDiff = {
+                    ps: new Date().getTimezoneOffset(),
+                    pg: 120
+                };
+
+                function permIcon(perm: string, key: string) {
                     if (perm === 'true') {
                         return '✅';
                     } else if (perm === 'false') {
                         return '❌';
+                    } else if (key === 'timeLastConnected') {
+                        const utcDate = new Date(perm);
+                        utcDate.setMinutes(utcDate.getMinutes() + timeZoneDiff[chosenServer]);
+                        return utcDate.toUTCString();
                     } else return perm;
                 }
                 function checkPlayer(farmData: farmFormat) {
                     const playerData = name.length === 44 ? farmData.farms.farm[0].players.player.find(x => x._attributes.uniqueUserId === name) : farmData.farms.farm[0].players.player.find(x => x._attributes.lastNickname === name);
                     if (playerData) {
-                        interaction.editReply('```\n' + Object.entries(playerData._attributes).map(x => x[0].padEnd(18, ' ') + permIcon(x[1])).join('\n') + '```');
+                        interaction.editReply('```\n' + Object.entries(playerData._attributes).map(x => x[0].padEnd(18, ' ') + permIcon(x[1], x[0])).join('\n') + '```');
                     } else interaction.editReply('No green farm data found with that name/UUID');
                 }
                 if (chosenServer == 'pg') {
@@ -189,25 +198,42 @@ export default {
                 const member = interaction.options.getMember("member") as Discord.GuildMember;
                 const owner = await interaction.guild.members.fetch(interaction.guild.ownerId);
                 const Role = client.config.mainServer.roles[interaction.options.getString("role", true) as keyof typeof client.config.mainServer.roles];
+                let roles = member.roles.cache.map((x, i) => i);
                 
-                if(member.roles.cache.has(Role)){
-                    const msg = await interaction.reply({embeds: [new client.embed().setDescription(`This user already has the <@&${Role}> role, do you want to remove it from them?`).setColor(client.config.embedColor)], fetchReply: true, components: [new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder().setCustomId(`Yes`).setStyle(ButtonStyle.Success).setLabel("Confirm"), new ButtonBuilder().setCustomId(`No`).setStyle(ButtonStyle.Danger).setLabel("Cancel"))]});
+                if (member.roles.cache.has(Role)) {
+                    const msg = await interaction.reply({
+                        embeds: [new client.embed()
+                            .setDescription(`This user already has the <@&${Role}> role, do you want to remove it from them?`)
+                            .setColor(client.config.embedColor)
+                        ],
+                        fetchReply: true,
+                        components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
+                            new ButtonBuilder()
+                                .setCustomId(`Yes`)
+                                .setStyle(ButtonStyle.Success)
+                                .setLabel("Confirm"),
+                            new ButtonBuilder()
+                                .setCustomId(`No`)
+                                .setStyle(ButtonStyle.Danger)
+                                .setLabel("Cancel"))
+                        ]
+                    });
+
                     const filter = (i: any) => ["Yes", "No"].includes(i.customId) && i.user.id === interaction.user.id;
-                    const collector = msg.createMessageComponentCollector({filter, max: 1, time: 30000});
-                    collector.on("collect", async (int: Discord.MessageComponentInteraction) => {
-                        if(int.customId === "Yes"){
-                            member.roles.remove(Role);
-                            member.roles.remove(client.config.mainServer.roles.mpstaff);
+                    const collector = msg.createMessageComponentCollector({ filter, max: 1, time: 30000 });
+                    collector.on("collect", async int => {
+                        if (int.customId === "Yes") {
+                            member.edit({ roles: roles.filter(x => x !== Role).filter(x => x !== client.config.mainServer.roles.mpstaff) });
                             int.update({embeds: [new client.embed().setDescription(`<@${member.user.id}> has been removed from <@&${Role}>.`).setColor(client.config.embedColor)], components: []})
-                            await owner.send(`**${interaction.user.tag}** has demoted **${member.user.tag}** from **${(interaction.guild.roles.cache.get(Role) as Discord.Role).name}**`)
-                        } else if(int.customId === "No"){
-                            int.update({embeds: [new client.embed().setDescription(`Command canceled`).setColor(client.config.embedColor)], components: []});
-                        }
+                            await owner.send(`**${interaction.user.tag}** has demoted **${member.user.tag}** from **${interaction.guild.roles.cache.get(Role)?.name}**`)
+                        } else int.update({embeds: [new client.embed().setDescription(`Command canceled`).setColor(client.config.embedColor)], components: []});
                     });
                 } else {
-                    member.roles.add(Role);
-                    if (Role !== client.config.mainServer.roles.trustedfarmer) member.roles.add(client.config.mainServer.roles.mpstaff);
-                    await owner.send(`**${interaction.user.tag}** has promoted **${member.user.tag}** to **${(interaction.guild.roles.cache.get(Role) as Discord.Role).name}**`)
+                    roles.push(Role);
+                    if (Role === client.config.mainServer.roles.mpfarmmanager) roles.push(client.config.mainServer.roles.mpstaff);
+                    if (Role === client.config.mainServer.roles.mpjradmin) roles.splice(roles.indexOf(client.config.mainServer.roles.mpfarmmanager), 1);
+                    member.edit({ roles });
+                    await owner.send(`**${interaction.user.tag}** has promoted **${member.user.tag}** to **${interaction.guild.roles.cache.get(Role)?.name}**`);
                     interaction.reply({embeds: [new client.embed().setDescription(`<@${member.user.id}> has been given <@&${Role}>.`).setColor(client.config.embedColor)]});
                 }
             },
@@ -335,9 +361,10 @@ export default {
                 .setName("role")
                 .setDescription("the role to add or remove")
                 .addChoices(
-                    {name: 'Trusted Farmer', value: 'trustedfarmer'},
-                    {name: 'Farm Manager', value: 'mpfarmmanager'},
-                    {name: 'Public Admin', value: 'mpjradmin'})
+                    { name: 'Trusted Farmer', value: 'trustedfarmer' },
+                    { name: 'Farm Manager', value: 'mpfarmmanager' },
+                    { name: 'Junior Admin', value: 'mpjradmin' },
+                    { name: 'Senior Admin', value: 'mpsradmin' })
                 .setRequired(true)))
         .addSubcommand(x=>x
             .setName('fm')

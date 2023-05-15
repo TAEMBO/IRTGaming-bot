@@ -1,4 +1,5 @@
-import Discord from 'discord.js';
+import YClient from './client.js';
+import Discord, { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 
 export interface RepeatedMessages {
     [key: string]: {
@@ -116,6 +117,16 @@ export interface Config {
             videosAndLiveStreams: string
         }
     }
+}
+
+export interface Command {
+    commandFile: {
+        default: {
+            run: (client: YClient, interaction: ChatInputCommandInteraction<"cached">) => any;
+            data: SlashCommandBuilder;
+        };
+    };
+    uses: number;
 }
 
 export interface FS_data {

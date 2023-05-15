@@ -10,7 +10,7 @@ import watchList from './schemas/watchList.js';
 import reminders from './schemas/reminders.js';
 import tokens from './tokens.json' assert { type: 'json' };
 import config from './config.json' assert { type: 'json' };
-import type { Config, Tokens, RepeatedMessages, FSCache, YTCache, InviteCache } from './typings.js';
+import type { Config, Tokens, RepeatedMessages, FSCache, YTCache, InviteCache, Command } from './typings.js';
 
 export default class YClient extends Client {
     config = config as Config;
@@ -20,7 +20,7 @@ export default class YClient extends Client {
     messageCollector = Discord.MessageCollector;
     attachmentBuilder = Discord.AttachmentBuilder;
     games = new this.collection<string, string>();
-    commands = new this.collection<string, any>();
+    commands = new this.collection<string, Command>();
     registry = <Discord.ApplicationCommandDataResolvable[]>[];
     repeatedMessages = <RepeatedMessages>{};
     FSCache = <FSCache>{};
@@ -75,7 +75,7 @@ export default class YClient extends Client {
 
         // Command handler
         for await (const file of fs.readdirSync('./commands')) {
-            const commandFile = await import(`./commands/${file}`);
+            const commandFile: Command["commandFile"] = await import(`./commands/${file}`);
 	        this.commands.set(commandFile.default.data.name, { commandFile, uses: 0 });
 	        this.registry.push(commandFile.default.data.toJSON());
         }

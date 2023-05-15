@@ -1,5 +1,6 @@
 import Discord from 'discord.js';
 import YClient from '../client.js';
+import { Command } from '../typings.js';
 
 export default async (client: YClient, interaction: Discord.BaseInteraction) => {
     if (!interaction.inGuild() || !interaction.inCachedGuild() || !interaction.channel) return;
@@ -8,7 +9,7 @@ export default async (client: YClient, interaction: Discord.BaseInteraction) => 
         if (interaction.commandName === 'ping') return interaction.reply({ content: 'Pinging...', fetchReply: true }).then(msg => msg.edit(`Websocket: \`${client.ws.ping}\`ms\nBot: \`${msg.createdTimestamp - interaction.createdTimestamp}\`ms`));
         
         const subCmd = interaction.options.getSubcommand(false);
-        const commandFile = client.commands.get(interaction.commandName);
+        const commandFile = client.commands.get(interaction.commandName) as Command;
 
         client.log('\x1b[37m', `\x1b[32m${interaction.user.tag}\x1b[37m used \x1b[32m/${interaction.commandName} ${subCmd ?? ''}\x1b[37m in \x1b[32m#${interaction.channel.name}`);
         if (!client.config.botSwitches.commands && !client.config.devWhitelist.includes(interaction.user.id)) return interaction.reply('Commands are currently disabled.');

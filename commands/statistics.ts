@@ -10,8 +10,8 @@ export default {
 		const amountLength = Math.max(...includedCommands.map(x => x.uses.toString().length), colunms[1].length) + 1;
 		const rows = [`${colunms[0] + ' '.repeat(nameLength - colunms[0].length)}|${' '.repeat(amountLength - colunms[1].length) + colunms[1]}\n`, '-'.repeat(nameLength) + '-'.repeat(amountLength) + '\n'];
 		includedCommands.forEach(command => {
-			const name: string = command.commandFile.default.data.name;
-			const count: string = command.uses.toString();
+			const name = command.commandFile.default.data.name;
+			const count = command.uses.toString();
 			rows.push(`${name + '.'.repeat(nameLength - name.length)}${'.'.repeat(amountLength - count.length) + count}\n`);
 		});
 		const embed = new client.embed()

@@ -30,26 +30,27 @@ export default class punishments extends Schema {
         const embed = new this.client.embed()
             .setTitle(`${punishment.type[0].toUpperCase() + punishment.type.slice(1)} | Case #${punishment._id}`)
             .addFields(
-            	{name: '🔹 User', value: `${punishment.member.tag}\n<@${punishment.member._id}>\n\`${punishment.member._id}\``, inline: true},
-            	{name: '🔹 Moderator', value: `<@${punishment.moderator}> \`${punishment.moderator}\``, inline: true},
-            	{name: '\u200b', value: '\u200b', inline: true},
-            	{name: '🔹 Reason', value: `\`${punishment.reason}\``, inline: true})
+            	{ name: '🔹 User', value: `${punishment.member.tag}\n<@${punishment.member._id}>\n\`${punishment.member._id}\``, inline: true },
+            	{ name: '🔹 Moderator', value: `<@${punishment.moderator}> \`${punishment.moderator}\``, inline: true },
+            	{ name: '\u200b', value: '\u200b', inline: true },
+            	{ name: '🔹 Reason', value: `\`${punishment.reason}\``, inline: true })
             .setColor(this.client.config.embedColor)
             .setTimestamp(punishment.time);
-        if (punishment.duration) embed.addFields({name: '🔹 Duration', value: this.client.formatTime(punishment.duration, 100), inline: true}, {name: '\u200b', value: '\u200b', inline: true});
+        if (punishment.duration) embed.addFields({ name: '🔹 Duration', value: this.client.formatTime(punishment.duration, 100), inline: true }, { name: '\u200b', value: '\u200b', inline: true });
 		
         if (punishment.cancels) {
             const cancels = await this._content.findById(punishment.cancels);
-            embed.addFields({name: '🔹 Overwrites', value: `This case overwrites Case #${cancels?._id} \`${cancels?.reason}\``});
+            embed.addFields({ name: '🔹 Overwrites', value: `This case overwrites Case #${cancels?._id} \`${cancels?.reason}\`` });
         }
     
         (this.client.channels.cache.get(this.client.config.mainServer.channels.staffReports) as Discord.TextChannel).send({embeds: [embed]});
     };
-	getTense(type: string) { // Get past tense form of punishment type, grammar yes
+	getTense (type: string) { // Get past tense form of punishment type, grammar yes
 		return {
 			ban: 'banned',
 			softban: 'softbanned',
 			kick: 'kicked',
+			detain: 'detained',
 			mute: 'muted',
 			warn: 'warned'
 		}[type];
@@ -65,7 +66,7 @@ export default class punishments extends Schema {
 			.setColor(this.client.config.embedColor)
 			.setTitle(`Case #${punData._id}: ${type[0].toUpperCase() + type.slice(1)}`)
 			.setDescription(`${User.tag}\n<@${User.id}>\n(\`${User.id}\`)`)
-			.addFields({name: 'Reason', value: reason});
+			.addFields({ name: 'Reason', value: reason });
 		let punResult;
 		let timeInMillis: number | null;
 		let DM;
@@ -88,10 +89,12 @@ export default class punishments extends Schema {
 		}
 
 		if (['ban', 'softban'].includes(type)) {
-			const banned = await guild.bans.fetch(User.id).catch(() => undefined);
+			const banned = await guild.bans.fetch(User).catch(() => null);
 			if (banned) {
 				punResult = 'User is already banned.';
-			} else punResult = await guild.bans.create(User.id, { reason: auditLogReason, deleteMessageSeconds: type === 'softban' ? 86400 : undefined }).catch((err: Error) => err.message);
+			} else punResult = await guild.bans.create(User, { reason: auditLogReason, deleteMessageSeconds: type === 'softban' ? 86400 : undefined }).catch((err: Error) => err.message);
+		} else if (type === 'detain') {
+			punResult = await GuildMember?.roles.add(this.client.config.mainServer.roles.detained).catch((err: Error) => err.message);
 		} else if (type === 'mute') {
 			if (GuildMember?.communicationDisabledUntil) {
 				punResult = 'Member is already muted.';
@@ -124,19 +127,20 @@ export default class punishments extends Schema {
 	}
 	async removePunishment(caseId: number, moderator: string, reason: string, interaction?: Discord.ChatInputCommandInteraction<"cached">) {
 		const now = Date.now();
-		const _id = await this.createId();
 		const punishment = await this._content.findById(caseId);
         if (!punishment) return;
 		const guild = this.client.guilds.cache.get(this.client.config.mainServer.id) as Discord.Guild;
 		const auditLogReason = `${reason} | Case #${punishment.id}`;
 		const User = await this.client.users.fetch(punishment.member._id);
-		const GuildMember = await guild.members.fetch(punishment.member._id).catch(() => undefined);
+		const GuildMember = await guild.members.fetch(punishment.member._id).catch(() => null);
 		
-		let removePunishmentData: typeof DocType = { type: `un${punishment.type}`, _id, cancels: punishment.id, member: punishment.member, reason, moderator, time: now };
+		let removePunishmentData: typeof DocType = { type: `un${punishment.type}`, _id: await this.createId(), cancels: punishment.id, member: punishment.member, reason, moderator, time: now };
 		let removePunishmentResult;
 
 		if (punishment.type === 'ban') {
 			removePunishmentResult = guild.bans.remove(punishment.member._id, auditLogReason).catch((err: Error) => err.message);
+		} else if (punishment.type === 'detain') {
+			removePunishmentResult = GuildMember?.roles.remove(this.client.config.mainServer.roles.detained).catch((err: Error) => err.message);
 		} else if (punishment.type === 'mute') {
 			if (GuildMember) {
 				removePunishmentResult = GuildMember.timeout(null, auditLogReason).catch((err: Error) => err.message);
@@ -161,11 +165,10 @@ export default class punishments extends Schema {
 					.setTitle(`Case #${removePunishmentData._id}: ${removePunishmentData.type[0].toUpperCase() + removePunishmentData.type.slice(1)}`)
 					.setDescription(`${User.tag}\n<@${User.id}>\n(\`${User.id}\`)`)
 					.addFields(
-						{name: 'Reason', value: reason},
-						{name: 'Overwrites', value: `Case #${punishment.id}`}
-					)
+						{ name: 'Reason', value: reason },
+						{ name: 'Overwrites', value: `Case #${punishment.id}` })
 				]});
-			} else return `Successfully un${this.getTense(removePunishmentData.type.replace('un', ''))} ${User.tag} (${User.id}) for reason '${reason}'`;
+			} else return `Successfully un${this.getTense(punishment.type)} ${User.tag} (${User.id}) for reason '${reason}'`;
 		}
 	}
 }

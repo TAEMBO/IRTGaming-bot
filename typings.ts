@@ -99,6 +99,7 @@ export interface Config {
             mffarm9: string,
             mffarm10: string,
             subscriber: string
+            detained: string
         },
         channels: {
             botLogs: string,

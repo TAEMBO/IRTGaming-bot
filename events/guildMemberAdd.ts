@@ -5,7 +5,7 @@ export default async (client: YClient, member: Discord.GuildMember) => {
     if (!client.config.botSwitches.logs || member.partial) return;
 
     // Add Member role upon joining if mainServer is the IRTGaming server
-    if (client.config.mainServer.id == '552565546089054218') member.roles.add('552566408240693289');
+    if (client.config.mainServer.id === '552565546089054218') member.roles.add('552566408240693289');
 
     // Welcome message
     const index = member.guild.memberCount;
@@ -20,33 +20,36 @@ export default async (client: YClient, member: Discord.GuildMember) => {
     })();
     let usefulChannels = '<:IRTDot:908818924286648350> Our game servers: <#739100711073218611>\n';
     usefulChannels += '<:IRTDot:908818924286648350> Report players: <#825046442300145744>\n';
-    usefulChannels += '<:IRTDot:908818924286648350> Come chat with us!: <#552565546093248512>\n';
-    usefulChannels += '<:IRTDot:908818924286648350> Come from our FS22 servers?: <#759874158610874458>';
+    usefulChannels += '<:IRTDot:908818924286648350> Come chat with us! <#552565546093248512>\n';
+    usefulChannels += '<:IRTDot:908818924286648350> Come from our FS22 servers? <#759874158610874458>';
 
     (client.channels.resolve(client.config.mainServer.channels.welcome) as Discord.TextChannel).send({content: `<@${member.user.id}>`, embeds: [new client.embed()
         .setTitle(`Welcome, ${member.user.tag}!`)
         .setColor(client.config.embedColor)
-        .setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048}) || member.user.defaultAvatarURL)
+        .setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048 }))
         .setDescription(`Please familiarize yourself with our <#552590507352653827> and head over to <#922631314195243080> to gain access to more channels & receive notification about community news.`)
-        .addFields({name: 'Useful channels', value: usefulChannels})
-        .setFooter({text: `${index}${suffix} member`}) 
+        .addFields({ name: 'Useful channels', value: usefulChannels })
+        .setFooter({ text: `${index}${suffix} member` })
     ]});
 
     // Join log
     const oldInvites = client.invites;
     const newInvites = await member.guild.invites.fetch();
     const usedInvite = newInvites.find(inv => oldInvites.get(inv.code)?.uses as number < (inv.uses as number));
+    const evadingCase = await client.punishments._content.findOne({ 'member._id': member.user.id, type: 'detain', expired: undefined });
 
-    newInvites.forEach(inv => client.invites.set(inv.code, {uses: inv.uses, creator: inv.inviter?.id}));
+    newInvites.forEach(inv => client.invites.set(inv.code, { uses: inv.uses, creator: inv.inviter?.id }));
  
     (client.channels.resolve(client.config.mainServer.channels.botLogs) as Discord.TextChannel).send({embeds: [new client.embed()
         .setTitle(`Member Joined: ${member.user.tag}`)
         .setDescription(`<@${member.user.id}>\n\`${member.user.id}\``)
         .addFields(
-            {name: '🔹 Account Created', value: `<t:${Math.round(member.user.createdTimestamp / 1000)}:R>`},
-            {name: '🔹 Invite Data', value: usedInvite ? `Invite: \`${usedInvite.code}\`\nCreated by: **${usedInvite.inviter?.tag}**` : 'No data found'})
+            { name: '🔹 Account Created', value: `<t:${Math.round(member.user.createdTimestamp / 1000)}:R>` },
+            { name: '🔹 Invite Data', value: usedInvite ? `Invite: \`${usedInvite.code}\`\nCreated by: **${usedInvite.inviter?.tag}**` : 'No data found' })
         .setColor(client.config.embedColorGreen)
         .setTimestamp()
-        .setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048}))
+        .setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048 }))
     ]});
+
+    if (evadingCase) member.roles.add(client.config.mainServer.roles.detained);
 }

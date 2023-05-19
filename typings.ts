@@ -68,9 +68,9 @@ export interface Config {
     devWhitelist: Array<string>,
     FSCacheServers: Array<Array<string>>,
     YTCacheChannels: Array<Array<string>>,
-    FSLoopMsgId: string,
     mainServer: {
         id: string,
+        FSLoopMsgId: string,
         MPStaffRoles: Array<keyof Config["mainServer"]["roles"]>,
         staffRoles: Array<keyof Config["mainServer"]["roles"]>,
         roles: {

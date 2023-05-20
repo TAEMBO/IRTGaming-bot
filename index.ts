@@ -9,52 +9,47 @@ console.log('\x1b[32mStartup');
 const client = await new YClient().init();
 console.log(client.config.botSwitches);
 console.log(client.config.devWhitelist);
-client.once("ready", async () => {
-	await client.guilds.fetch(client.config.mainServer.id).then(async guild => {
-		await guild.members.fetch();
-		setInterval(async () => (await guild.invites.fetch()).forEach(inv => client.invites.set(inv.code, { uses: inv.uses, creator: inv.inviter?.id })), 500000);
-		if (client.config.botSwitches.registerCommands) guild.commands.set(client.registry).then(() => client.log('\x1b[35m', 'Slash commands registered')).catch(e => console.log(`Couldn't register commands bcuz: ${e}`));
-	});
-	// Playing: 0 & 1, Listening: 2, Watching: 3, N/A: 4, Competing in: 5
-	setInterval(() => client.user?.setPresence(client.config.botPresence), 3600000);
-
-	const channel = client.channels.resolve(client.config.mainServer.channels.taesTestingZone) as Discord.TextChannel;
-	await channel.send(`:warning: Bot restarted :warning:\n<@${client.config.devWhitelist[0]}>\n\`\`\`json\n${Object.entries(client.config.botSwitches).map(x => `${x[0]}: ${x[1]}`).join('\n')}\`\`\``);
-	client.log('\x1b[34m', `Bot active as ${client.user?.tag}`);
-});
 
 // Error handler
-function logError(error: Error, from: string) { // I'm well aware my internet is bad, I don't need my own bot to rub it in
+function logError(error: Error, event: string) {
 	if (!['Request aborted', 'getaddrinfo ENOTFOUND discord.com'].includes(error.message) && client.isReady()) {
-		const channel = client.channels.resolve(client.config.mainServer.channels.taesTestingZone) as Discord.TextChannel;
 		const Dirname = join(dirname(fileURLToPath(import.meta.url))).replaceAll('\\', '/');
-		channel.send({content: `<@${client.config.devWhitelist[0]}>`, embeds: [new client.embed().setTitle(`Error Caught - ${error.message}`).setColor("#420420").setDescription(`\`\`\`ansi\n${error.stack?.replaceAll(' at ', ' [31mat[37m ').replaceAll(Dirname, `[33m${Dirname}[37m`).slice(0, 2500)}\`\`\``).setTimestamp().setFooter({text: from})]});
+		(client.channels.resolve(client.config.mainServer.channels.taesTestingZone) as Discord.TextChannel).send({
+			content: `<@${client.config.devWhitelist[0]}>`,
+			embeds: [new client.embed()
+				.setTitle(`Error Caught - ${error.message}`)
+				.setColor("#420420")
+				.setDescription(`\`\`\`ansi\n${error.stack?.replaceAll(' at ', ' [31mat[37m ').replaceAll(Dirname, `[33m${Dirname}[37m`).slice(0, 2500)}\`\`\``)
+				.setTimestamp()
+				.setFooter({ text: event })
+			]
+		});
 	}
 }
 process.on('unhandledRejection', (error: Error) => logError(error, 'unhandledRejection'));
 process.on('uncaughtException', (error: Error) => logError(error, 'uncaughtException'));
-process.on('error', (error: Error) => logError(error, 'error'));
+process.on('error', (error: Error) => logError(error, 'process-error'));
 client.on('error', (error: Error) => logError(error, 'client-error'));
 
-// Reminder, dailyMsgs, and punishment event loops
+// Reminders, dailyMsgs, and punishments loop
 setInterval(async () => {
 	const now = Date.now();
 	const Reminders = (await client.reminders._content.find()).filter(x => now > x.time);
 	const Punishments = (await client.punishments._content.find()).filter(x => x.endTime && x.endTime <= now && !x.expired);
 
-	Reminders.forEach(async reminder => {
+	for (const reminder of Reminders) {
 		const embed = new client.embed().setTitle('Reminder').setColor(client.config.embedColor).setDescription(`\`\`\`${reminder.content}\`\`\``);
 		await client.users.fetch(reminder.userid)
 			.then(User => User.send({embeds: [embed]})
 			.catch(async () => (await (client.channels.resolve(reminder.ch) as Discord.TextChannel).messages.fetch(reminder.msg)).reply({ content:`<@${reminder.userid}>`, embeds: [embed] })));
 		await client.reminders._content.findByIdAndDelete(reminder._id);
 		client.log('\x1b[33m', 'REMINDER EXECUTE', reminder);
-	});
+	};
 
-	Punishments.forEach(punishment => {
+	for (const punishment of Punishments) {
 		client.log('\x1b[33m', `${punishment.member.tag}\'s ${punishment.type} should expire now`);
 		client.punishments.removePunishment(punishment._id, (client.user as Discord.ClientUser).id, "Time\'s up!").then(result => client.log('\x1b[33m', result));
-	});
+	};
 
 	const formattedDate = Math.floor((now - 1667854800000) / 1000 / 60 / 60 / 24);
 	const dailyMsgs = JSON.parse(fs.readFileSync('../databases/dailyMsgs.json', 'utf8'));
@@ -80,7 +75,7 @@ setInterval(async () => {
 			} else channel.send('<:IRT_RollSee:908055712368853002>');
 		}, 7_200_000); // 2 hour timeout, account for time zone differences
 	}
-}, 5000);
+}, 5_000);
 
 // Farming Simulator 22 stats loops
 if (client.config.botSwitches.FSLoop) setInterval(async () => {

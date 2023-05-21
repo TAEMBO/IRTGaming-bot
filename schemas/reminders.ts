@@ -6,7 +6,7 @@ const Schema = mongoose.model('reminders', new mongoose.Schema({
     time: { type: Number, required: true },
 	ch: { type: String, required: true },
 	msg: { type: String, required: true }
-}, { versionKey: false, _id: false }));
+}, { versionKey: false }));
 
 export default class reminders extends Schema {
 	public _content = Schema;

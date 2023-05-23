@@ -4,8 +4,6 @@ package-lock.json
 
 .vscode/settings.json
 
-tokens.json
-
 config.json
 
 databases

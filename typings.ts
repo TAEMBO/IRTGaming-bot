@@ -28,6 +28,16 @@ export interface InviteCache {
     creator: string | undefined
 }
 
+export interface Command {
+    commandFile: {
+        default: {
+            run(client: YClient, interaction: ChatInputCommandInteraction<"cached">): Promise<void>;
+            data: SlashCommandBuilder;
+        };
+    };
+    uses: number;
+}
+
 export interface Tokens {
     token: string,
     mongoURL: string
@@ -66,13 +76,13 @@ export interface Config {
         buttonRoles: boolean,
     },
     devWhitelist: Array<string>,
-    FSCacheServers: Array<Array<string>>,
-    YTCacheChannels: Array<Array<string>>,
+    FSCacheServers: Array<Array<string>>, // [ [ChannelID, MessageID, serverAcro] ]
+    YTCacheChannels: Array<Array<string>>, // [ [ChannelID, ChannelName] ]
     mainServer: {
         id: string,
         FSLoopMsgId: string,
         MPStaffRoles: Array<keyof Config["mainServer"]["roles"]>,
-        staffRoles: Array<keyof Config["mainServer"]["roles"]>,
+        DCStaffRoles: Array<keyof Config["mainServer"]["roles"]>,
         roles: {
             admin: string,
             discordmoderator: string,
@@ -118,16 +128,6 @@ export interface Config {
             videosAndLiveStreams: string
         }
     }
-}
-
-export interface Command {
-    commandFile: {
-        default: {
-            run: (client: YClient, interaction: ChatInputCommandInteraction<"cached">) => any;
-            data: SlashCommandBuilder;
-        };
-    };
-    uses: number;
 }
 
 export interface FS_data {
@@ -212,6 +212,79 @@ export interface FS_careerSavegame {
         _attributes: {
             slotUsage: string
         }
+    }
+}
+
+export interface YTCacheFeed {
+    feed: {
+        _attributes: {
+            "xmlns:yt": string,
+            "xmlns:media": string,
+            xmlns: string
+        },
+        link: Array<{
+            _attributes: {
+                rel: string,
+                href: string
+            }
+        }>,
+        id: { _text: string },
+        title: { _text: string },
+        author: {
+            name: { _text: string },
+            uri: { _text: string }
+        },
+        published: { _text: string },
+        entry: Array<{
+            id: { _text: string },
+            "yt:videoId": { _text: string },
+            "yt:channelId": { _text: string },
+            title: { _text: string },
+            link: {
+                _attributes: {
+                    rel: string,
+                    href: string
+                }
+            },
+            author: {
+                name: { _text: string },
+                uri: { _text: string }
+            },
+            published: { _text: string },
+            updated: { _text: string },
+            "media:group": {
+                "media:title": { _text: string },
+                "media:content": {
+                    _attributes: {
+                        url: string,
+                        type: string,
+                        width: string,
+                        height: string
+                    }
+                },
+                "media:thumbnail": {
+                    _attributes: {
+                        url: string,
+                        width: string,
+                        height: string
+                    }
+                },
+                "media:description": { _text: string },
+                "media:community": {
+                    "media:starRating": {
+                        _attributes: {
+                            count: string,
+                            average: string,
+                            min: string,
+                            max: string
+                        }
+                    },
+                    "media:statistics": {
+                        _attributes: { views: string }
+                    }
+                }
+            }
+        }>
     }
 }
 

@@ -10,7 +10,7 @@ import watchList from './schemas/watchList.js';
 import reminders from './schemas/reminders.js';
 import tokens from './tokens.json' assert { type: 'json' };
 import config from './config.json' assert { type: 'json' };
-import type { Config, Tokens, RepeatedMessages, FSCache, YTCache, InviteCache, Command } from './typings.js';
+import type { Config, Tokens, RepeatedMessages, FSCache, YTCache, InviteCache, Command, YTCacheFeed } from './typings.js';
 
 export default class YClient extends Client {
     config = config as Config;
@@ -36,7 +36,7 @@ export default class YClient extends Client {
     reminders = new reminders();
     log = (color: string, ...data: any[]) => console.log(`${color}[${moment().format('HH:mm:ss')}]`, ...data);
     youNeedRole = (interaction: Discord.ChatInputCommandInteraction<"cached">, role: keyof typeof this.config.mainServer.roles) => interaction.reply(`You need the <@&${this.config.mainServer.roles[role]}> role to use this command`);
-    hasModPerms = (guildMember: Discord.GuildMember) => this.config.mainServer.staffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
+    hasModPerms = (guildMember: Discord.GuildMember) => this.config.mainServer.DCStaffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
     isMPStaff = (guildMember: Discord.GuildMember) => this.config.mainServer.MPStaffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
     constructor() {
         super({
@@ -79,17 +79,19 @@ export default class YClient extends Client {
         }
         return this;
     }
-    YTLoop = async (YTChannelID: string, YTChannelName: string) => await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${YTChannelID}`, { signal: AbortSignal.timeout(5000) }).then(async response => {
-        const Data = xml2js(await response.text(), { compact: true }) as any;
+    async YTLoop(YTChannelID: string, YTChannelName: string) {
+        await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${YTChannelID}`, { signal: AbortSignal.timeout(5000) }).then(async res => {
+            const Data = xml2js(await res.text(), { compact: true }) as YTCacheFeed;
+            const latestVid = Data.feed.entry[0];
 
-        if (!this.YTCache[YTChannelID]) return this.YTCache[YTChannelID] = Data.feed.entry[0]['yt:videoId']._text;
-
-        if (Data.feed.entry[1]['yt:videoId']._text === this.YTCache[YTChannelID]) {
-            this.YTCache[YTChannelID] = Data.feed.entry[0]['yt:videoId']._text;
-            (this.channels.resolve(this.config.mainServer.channels.videosAndLiveStreams) as Discord.TextChannel).send(`**${YTChannelName}** just uploaded a new video!\n${Data.feed.entry[0].link._attributes.href}`);
-        }
-    }).catch(() => this.log('\x1b[31m', `${YTChannelName} YT fail`));
-
+            if (!this.YTCache[YTChannelID]) return this.YTCache[YTChannelID] = latestVid['yt:videoId']._text;
+        
+            if (Data.feed.entry[1]['yt:videoId']._text === this.YTCache[YTChannelID]) {
+                this.YTCache[YTChannelID] = latestVid['yt:videoId']._text;
+                (this.channels.resolve(this.config.mainServer.channels.videosAndLiveStreams) as Discord.TextChannel).send(`**${YTChannelName}** just uploaded a new video!\n${latestVid.link._attributes.href}`);
+            }
+        }).catch(() => this.log('\x1b[31m', `${YTChannelName} YT fail`));
+    }
     formatTime(integer: number, accuracy = 1, options?: { longNames: boolean, commas: boolean }) {
         let achievedAccuracy = 0;
         let text = '';

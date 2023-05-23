@@ -8,13 +8,11 @@ import punishments from './schemas/punishments.js';
 import playerTimes from './schemas/playerTimes.js';
 import watchList from './schemas/watchList.js';
 import reminders from './schemas/reminders.js';
-import tokens from './tokens.json' assert { type: 'json' };
 import config from './config.json' assert { type: 'json' };
-import type { Config, Tokens, RepeatedMessages, FSCache, YTCache, InviteCache, Command, YTCacheFeed } from './typings.js';
+import type { Config, RepeatedMessages, FSCache, YTCache, InviteCache, Command, YTCacheFeed } from './typings.js';
 
 export default class YClient extends Client {
     config = config as Config;
-    tokens = tokens as Tokens;
     embed = Discord.EmbedBuilder;
     collection = Discord.Collection;
     attachmentBuilder = Discord.AttachmentBuilder;
@@ -46,7 +44,7 @@ export default class YClient extends Client {
         });
     }
     async init() {
-        this.login(this.tokens.token);
+        this.login(this.config.token);
         this.setMaxListeners(100);
         this.bannedWords.initLoad();
         this.FMlist.initLoad();
@@ -56,7 +54,7 @@ export default class YClient extends Client {
         this.config.YTCacheChannels.forEach(ch => this.YTCache[ch[0]] = null);
         this.config.FSCacheServers.forEach(srv => this.FSCache[srv[2]] = { players: [], status: null, lastAdmin: null });
 
-        await mongoose.set('strictQuery', true).connect(this.tokens.mongoURL, {
+        await mongoose.set('strictQuery', true).connect(this.config.mongoURL, {
             autoIndex: true,
             serverSelectionTimeoutMS: 5000,
             socketTimeoutMS: 45000,

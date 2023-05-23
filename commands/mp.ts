@@ -40,7 +40,7 @@ export default {
                 if (client.FSCache[chosenServer.toUpperCase()].status === 'online' && chosenAction === 'start') return interaction.editReply('Server is already online');
     
                 try {
-                    await page.goto(client.tokens.fs[chosenServer].login, { timeout: 120000 });
+                    await page.goto(client.config.fs[chosenServer].login, { timeout: 120000 });
                 } catch (err: any) {
                     return interaction.editReply(err.message);
                 }
@@ -70,7 +70,7 @@ export default {
                 if (chosenServer !== 'pg' && chosenAction === 'items.xml') return interaction.reply(`You can only mop **${chosenAction}** from **PG**`);
                 
                 await interaction.deferReply();
-                const FTPLogin = client.tokens.ftp[chosenServer];
+                const FTPLogin = client.config.ftp[chosenServer];
                 const time = Date.now();
     
                 FTP.connect(FTPLogin);
@@ -88,8 +88,8 @@ export default {
     
                 if (chosenAction === 'dl') {
                     if (chosenServer === 'pg') {
-                        FTP.connect(client.tokens.ftp.pg);
-                        FTP.on('ready', () => FTP.get(client.tokens.ftp.pg.path + 'blockedUserIds.xml', (err, stream) => {
+                        FTP.connect(client.config.ftp.pg);
+                        FTP.on('ready', () => FTP.get(client.config.ftp.pg.path + 'blockedUserIds.xml', (err, stream) => {
                             if (err) return interaction.editReply(err.message);
                             stream.once('close', ()=>FTP.end());
                             stream.pipe(fs.createWriteStream('../databases/blockedUserIds.xml', {}));
@@ -114,8 +114,8 @@ export default {
                     if (!data.blockedUserIds?.user[0]?._attributes?.displayName) return interaction.editReply(`Canceled: Improper file (data format)`);
     
                     if (chosenServer === 'pg') {
-                        FTP.connect(client.tokens.ftp.pg);
-                        FTP.on('ready', () => FTP.put(banData, client.tokens.ftp.pg.path + 'blockedUserIds.xml', error => {
+                        FTP.connect(client.config.ftp.pg);
+                        FTP.on('ready', () => FTP.put(banData, client.config.ftp.pg.path + 'blockedUserIds.xml', error => {
                             if (error) {
                                 interaction.editReply(error.message);
                             } else interaction.editReply('Successfully uploaded ban file for PG');
@@ -150,8 +150,8 @@ export default {
                     } else interaction.editReply('No green farm data found with that name/UUID');
                 }
                 if (chosenServer == 'pg') {
-                    FTP.connect(client.tokens.ftp.pg);
-                    FTP.on('ready', () => FTP.get(client.tokens.ftp.pg.path + 'savegame1/farms.xml', async (err, stream) => {
+                    FTP.connect(client.config.ftp.pg);
+                    FTP.on('ready', () => FTP.get(client.config.ftp.pg.path + 'savegame1/farms.xml', async (err, stream) => {
                         if (err) return interaction.editReply(err.message);
                         checkPlayer(xml2js(await new Response(stream as any).text(), { compact: true }) as farmFormat);
                         stream.once('close', ()=>FTP.end());
@@ -163,9 +163,9 @@ export default {
 
                 if (chosenServer == 'pg') {
                     await interaction.deferReply();
-                    FTP.connect(client.tokens.ftp.pg);
+                    FTP.connect(client.config.ftp.pg);
 
-                    FTP.on('ready', () => FTP.get(client.tokens.ftp.pg.path + 'savegame1/farms.xml', (err, stream) => {
+                    FTP.on('ready', () => FTP.get(client.config.ftp.pg.path + 'savegame1/farms.xml', (err, stream) => {
                         if (err) return interaction.editReply(err.message);
                         stream.once('close', ()=>FTP.end());
                         stream.pipe(fs.createWriteStream('../databases/farms.xml'));
@@ -185,8 +185,8 @@ export default {
                 }
 
                 if (chosenServer === 'pg') {
-                    FTP.connect(client.tokens.ftp.pg);
-                    FTP.once('ready', () => FTP.get(client.tokens.ftp.pg.path + 'dedicated_server/dedicatedServerConfig.xml', async (err, stream) => {
+                    FTP.connect(client.config.ftp.pg);
+                    FTP.once('ready', () => FTP.get(client.config.ftp.pg.path + 'dedicated_server/dedicatedServerConfig.xml', async (err, stream) => {
                         if (err) return interaction.editReply(err.message);
                         getPassword(await new Response(stream as any).text());
                         stream.once('close', ()=>FTP.end());
@@ -196,7 +196,7 @@ export default {
             roles: async () => {
                 if (!interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager)) return client.youNeedRole(interaction, "mpmanager");
                 const member = interaction.options.getMember("member") as Discord.GuildMember;
-                const owner = await interaction.guild.members.fetch(interaction.guild.ownerId);
+                const owner = await interaction.guild.fetchOwner();
                 const Role = client.config.mainServer.roles[interaction.options.getString("role", true) as keyof typeof client.config.mainServer.roles];
                 let roles = member.roles.cache.map((x, i) => i);
                 

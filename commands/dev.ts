@@ -33,7 +33,7 @@ export default {
 					output = 'js\n' + util.formatWithOptions({ depth: 1 }, '%O', output);
 				} else output = '\n' + String(output);
 				
-				[client.token, client.tokens.fs.ps.login, client.tokens.fs.pg.login, client.tokens.fs.mf.login, client.tokens.ftp.ps.password, client.tokens.ftp.pg.password].forEach(login => {
+				[client.token, client.config.fs.ps.login, client.config.fs.pg.login, client.config.fs.mf.login, client.config.ftp.ps.password, client.config.ftp.pg.password].forEach(login => {
 					output = output.replace(login as string, 'LOGIN_LEAK');
 				});
 				const embed = new client.embed()

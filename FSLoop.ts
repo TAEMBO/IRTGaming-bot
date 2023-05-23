@@ -71,11 +71,11 @@ export default async (client: YClient, ChannelID: string, MessageID: string, ser
     const init = { signal: AbortSignal.timeout(7000), headers: { 'User-Agent': 'IRTBot/FSLoop' } };
     let justStarted = false;
 
-    const DSS = await fetch(client.tokens.fs[serverAcro.toLowerCase()].dss, init) // Fetch dedicated-server-stats.json
+    const DSS = await fetch(client.config.fs[serverAcro.toLowerCase()].dss, init) // Fetch dedicated-server-stats.json
         .then(res => res.json() as Promise<FS_data>)
         .catch(err => client.log('\x1b[31m', `${serverAcro} dss ${err.message}`));
 
-    const CSG = await fetch(client.tokens.fs[serverAcro.toLowerCase()].csg, init).then(async res => { // Fetch dedicated-server-savegame.html
+    const CSG = await fetch(client.config.fs[serverAcro.toLowerCase()].csg, init).then(async res => { // Fetch dedicated-server-savegame.html
         if (res.status === 204) {
             statsEmbed.setImage('https://http.cat/204');
             client.log('\x1b[31m', `${serverAcro} csg empty content`);

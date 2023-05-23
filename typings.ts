@@ -38,27 +38,9 @@ export interface Command {
     uses: number;
 }
 
-export interface Tokens {
-    token: string,
-    mongoURL: string
-    ftp: {
-        [key: string]: {
-            host: string,
-            user: string,
-            password: string
-            path: string
-        },
-    }
-    fs: {
-        [key: string]: {
-            login: string,
-            dss: string,
-            csg: string
-        },
-    }
-}
-
 export interface Config {
+    token: string,
+    mongoURL: string,
     embedColor: `#${string}`,
     embedColorGreen: `#${string}`,
     embedColorRed: `#${string}`,
@@ -75,6 +57,21 @@ export interface Config {
         autoResponses: boolean,
         buttonRoles: boolean,
     },
+    ftp: {
+        [key: string]: {
+            host: string,
+            user: string,
+            password: string
+            path: string
+        },
+    }
+    fs: {
+        [key: string]: {
+            login: string,
+            dss: string,
+            csg: string
+        },
+    }
     devWhitelist: Array<string>,
     FSCacheServers: Array<Array<string>>, // [ [ChannelID, MessageID, serverAcro] ]
     YTCacheChannels: Array<Array<string>>, // [ [ChannelID, ChannelName] ]

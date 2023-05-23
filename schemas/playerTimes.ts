@@ -29,7 +29,7 @@ export default class playerTimes extends Schema {
 		const allData = await this._content.find();
 		const channel = this.client.channels.resolve(this.client.config.mainServer.channels.fsLogs) as Discord.TextChannel;
 
-		FTP.once('ready', () => FTP.get(this.client.tokens.ftp[serverAcro].path + 'savegame1/farms.xml', async (err, stream) => {
+		FTP.once('ready', () => FTP.get(this.client.config.ftp[serverAcro].path + 'savegame1/farms.xml', async (err, stream) => {
 			this.client.log('\x1b[33m', `Downloaded farms.xml from ${serverAcro}, crunching...`);
 			if (err) throw err;
 			const farmData = xjs.xml2js(await new Response(stream as any).text(), { compact: true }) as farmFormat;
@@ -65,6 +65,6 @@ export default class playerTimes extends Schema {
 			}
 			this.client.log('\x1b[33m', 'Finished crunching farms.xml data');
 			stream.once('close', () => FTP.end());
-		})).connect(this.client.tokens.ftp[serverAcro]);
+		})).connect(this.client.config.ftp[serverAcro]);
 	}
 }

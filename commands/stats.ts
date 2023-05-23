@@ -10,7 +10,7 @@ export default {
         const subCmd = interaction.options.getSubcommand() as 'ps' | 'pg' | 'mf' | 'all' | 'playertimes';
 
         async function FSstats() {
-            const FSdss: FS_data | void = await fetch(client.tokens.fs[subCmd].dss, { signal: AbortSignal.timeout(2000), headers: { 'User-Agent': 'IRTBot/Stats' } }).then(res => res.json()).catch(() => {
+            const FSdss: FS_data | void = await fetch(client.config.fs[subCmd].dss, { signal: AbortSignal.timeout(2000), headers: { 'User-Agent': 'IRTBot/Stats' } }).then(res => res.json()).catch(() => {
                 client.log('\x1b[31m', `Stats ${subCmd.toUpperCase()} failed`);
             });
 
@@ -186,7 +186,7 @@ export default {
             const watchList = await client.watchList._content.find();
 
             async function FSstatsAll(serverAcro: string) {
-                const FSdss = await fetch(client.tokens.fs[serverAcro.toLowerCase()].dss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': 'IRTBot/StatsAll' } }).then(res => res.json() as Promise<FS_data>).catch(() => {
+                const FSdss = await fetch(client.config.fs[serverAcro.toLowerCase()].dss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': 'IRTBot/StatsAll' } }).then(res => res.json() as Promise<FS_data>).catch(() => {
                     client.log('\x1b[31m', `Stats all; ${serverAcro} failed`);
                     failedFooter.push(`Failed to fetch ${serverAcro}`);
                 });

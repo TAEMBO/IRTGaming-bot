@@ -1,8 +1,8 @@
 import Discord, { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import YClient from "../client.js";
 
-export default async (client: YClient, oldMsg: Discord.Message<true>, newMsg: Discord.Message<true>) => {
-    if (!client.config.botSwitches.logs || newMsg.author.bot || oldMsg.partial || newMsg.partial || !oldMsg.member || oldMsg.content.length == 0 || newMsg.content === oldMsg.content || ['979863373439184966', '968265015595532348'].includes(newMsg.channel.id)) return;
+export default async (client: YClient, oldMsg: Discord.Message<boolean> | Discord.PartialMessage, newMsg: Discord.Message<boolean> | Discord.PartialMessage) => {
+    if (!client.config.botSwitches.logs || newMsg.author?.bot || oldMsg.partial || newMsg.partial || !oldMsg.member || oldMsg.content.length == 0 || newMsg.content === oldMsg.content || ['979863373439184966', '968265015595532348'].includes(newMsg.channel.id)) return;
     const msgarr = newMsg.content.toLowerCase().split(' ');
 
     if (client.bannedWords._content.some(word => msgarr.includes(word)) && (!client.isMPStaff(oldMsg.member) && !client.hasModPerms(oldMsg.member))) newMsg.delete();

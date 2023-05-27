@@ -3,7 +3,7 @@ import YClient from '../client.js';
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
-		if (!client.hasModPerms(interaction.member)) return client.youNeedRole(interaction, 'discordmoderator');
+		if (!client.isDCStaff(interaction.member)) return client.youNeedRole(interaction, 'discordmoderator');
 
 		const punishment = await client.punishments._content.findById(interaction.options.getInteger('caseid', true));
 		if (!punishment) return interaction.reply('No case found with that ID');

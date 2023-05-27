@@ -30,7 +30,7 @@ export default async (client: YClient, oldMember: Discord.GuildMember | Discord.
         changes = true;
     }
     
-    if (changes) (client.channels.resolve(client.config.mainServer.channels.botLogs) as Discord.TextChannel).send({ embeds: [embed] });
+    if (changes) client.getChan('botLogs').send({ embeds: [embed] });
 
     if (oldRoles.has('631894963474530306') || newRoles.has('631894963474530306')) (client.channels.resolve('803795484174319646') as Discord.TextChannel).send({ embeds: [embed] });
 

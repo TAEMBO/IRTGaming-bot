@@ -43,7 +43,7 @@ export default class punishments extends Schema {
             embed.addFields({ name: '🔹 Overwrites', value: `This case overwrites Case #${cancels?._id} \`${cancels?.reason}\`` });
         }
     
-        (this.client.channels.cache.get(this.client.config.mainServer.channels.staffReports) as Discord.TextChannel).send({embeds: [embed]});
+        this.client.getChan('staffReports').send({ embeds: [embed] });
     };
 	getTense (type: string) { // Get past tense form of punishment type, grammar yes
 		return {
@@ -58,7 +58,7 @@ export default class punishments extends Schema {
 	async addPunishment(type: string, moderator: string, reason: string, User: Discord.User, GuildMember: Discord.GuildMember | null, options: { time?: string, interaction?: Discord.ChatInputCommandInteraction<"cached">}) {
 		const { time, interaction } = options;
 		const now = Date.now();
-		const guild = this.client.guilds.cache.get(this.client.config.mainServer.id) as Discord.Guild;
+		const guild = this.client.mainGuild();
 		const punData: typeof DocType = { type, _id: await this.createId(), member: { tag: User.tag, _id: User.id }, reason, moderator, time: now };
 		const inOrFromBoolean = ['warn', 'mute'].includes(type) ? 'in' : 'from'; // Use 'in' if the punishment doesn't remove the member from the server, eg. mute, warn
 		const auditLogReason = `${reason} | Case #${punData._id}`;
@@ -130,7 +130,7 @@ export default class punishments extends Schema {
 		const punishment = await this._content.findById(caseId);
 		if (!punishment) return;
 
-		const guild = this.client.guilds.cache.get(this.client.config.mainServer.id) as Discord.Guild;
+		const guild = this.client.mainGuild();
 		const auditLogReason = `${reason} | Case #${punishment.id}`;
 		const [User, GuildMember, _id] = await Promise.all([
 			this.client.users.fetch(punishment.member._id),

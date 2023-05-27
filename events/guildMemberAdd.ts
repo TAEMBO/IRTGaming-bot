@@ -23,7 +23,7 @@ export default async (client: YClient, member: Discord.GuildMember) => {
     usefulChannels += '<:IRTDot:908818924286648350> Come chat with us! <#552565546093248512>\n';
     usefulChannels += '<:IRTDot:908818924286648350> Come from our FS22 servers? <#759874158610874458>';
 
-    (client.channels.resolve(client.config.mainServer.channels.welcome) as Discord.TextChannel).send({content: `<@${member.user.id}>`, embeds: [new client.embed()
+    client.getChan('welcome').send({content: `<@${member.user.id}>`, embeds: [new client.embed()
         .setTitle(`Welcome, ${member.user.tag}!`)
         .setColor(client.config.embedColor)
         .setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048 }))
@@ -40,7 +40,7 @@ export default async (client: YClient, member: Discord.GuildMember) => {
 
     newInvites.forEach(inv => client.invites.set(inv.code, { uses: inv.uses, creator: inv.inviter?.id }));
  
-    (client.channels.resolve(client.config.mainServer.channels.botLogs) as Discord.TextChannel).send({embeds: [new client.embed()
+    client.getChan('botLogs').send({embeds: [new client.embed()
         .setTitle(`Member Joined: ${member.user.tag}`)
         .setDescription(`<@${member.user.id}>\n\`${member.user.id}\``)
         .addFields(

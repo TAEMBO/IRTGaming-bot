@@ -5,7 +5,7 @@ export default async (client: YClient, oldMsg: Discord.Message<boolean> | Discor
     if (!client.config.botSwitches.logs || newMsg.author?.bot || oldMsg.partial || newMsg.partial || !oldMsg.member || oldMsg.content.length == 0 || newMsg.content === oldMsg.content || ['979863373439184966', '968265015595532348'].includes(newMsg.channel.id)) return;
     const msgarr = newMsg.content.toLowerCase().split(' ');
 
-    if (client.bannedWords._content.some(word => msgarr.includes(word)) && (!client.isMPStaff(oldMsg.member) && !client.hasModPerms(oldMsg.member))) newMsg.delete();
+    if (client.bannedWords._content.some(word => msgarr.includes(word)) && (!client.isMPStaff(oldMsg.member) && !client.isDCStaff(oldMsg.member))) newMsg.delete();
 
     let oldContent = oldMsg.content;
     let newContent = newMsg.content;
@@ -15,7 +15,7 @@ export default async (client: YClient, oldMsg: Discord.Message<boolean> | Discor
     editedWordsOld.forEach(word => oldContent = oldContent.replace(word, `[31m${word}[37m`));
     editedWordsNew.forEach(word => newContent = newContent.replace(word, `[32m${word}[37m`));
 
-    (client.channels.resolve(client.config.mainServer.channels.botLogs) as Discord.TextChannel).send({embeds: [new client.embed()
+    client.getChan('botLogs').send({embeds: [new client.embed()
         .setTitle('Message Edited')
         .setDescription(`<@${oldMsg.author.id}>\n\`${oldMsg.author.id}\``)
         .addFields(

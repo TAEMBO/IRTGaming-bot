@@ -3,7 +3,7 @@ import YClient from '../client.js';
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
-		if (!client.hasModPerms(interaction.member as Discord.GuildMember)) return client.youNeedRole(interaction, 'discordmoderator');
+		if (!client.isDCStaff(interaction.member as Discord.GuildMember)) return client.youNeedRole(interaction, 'discordmoderator');
 		const caseid = interaction.options.getInteger("id");
 
 		({
@@ -28,8 +28,10 @@ export default {
 			},
 			member: async () => {
 				const user = interaction.options.getUser("user", true);
-				const punishments = await client.punishments._content.find();
-				const userPunishmentsData = await client.punishments._content.find({ "member._id": user.id });
+				const [punishments, userPunishmentsData] = await Promise.all([
+					client.punishments._content.find(),
+					client.punishments._content.find({ "member._id": user.id })
+				]);
 				const userPunishments = userPunishmentsData.sort((a, b) => a.time - b.time).map(punishment => {
 					return {
 						name: `${punishment.type[0].toUpperCase() + punishment.type.slice(1)} | Case #${punishment.id}`,
@@ -62,32 +64,32 @@ export default {
 	data: new SlashCommandBuilder()
 		.setName("case")
 		.setDescription("Views a member's cases, or a single case ID.")
-		.addSubcommand((optt)=>optt
+		.addSubcommand(x=>x
 			.setName("view")
 			.setDescription("Views a single case ID")
-			.addIntegerOption((opt)=>opt
+			.addIntegerOption(x=>x
 				.setName("id")
 				.setDescription("The ID of the case.")
 				.setRequired(true)))
-		.addSubcommand((optt)=>optt
+		.addSubcommand(x=>x
 			.setName("member")
 			.setDescription("Views all a members cases")
-			.addUserOption((opt)=>opt
+			.addUserOption(x=>x
 				.setName("user")
 				.setDescription("The user whomm's punishments you want to view.")
 				.setRequired(true))
-			.addIntegerOption((opt)=>opt
+			.addIntegerOption(x=>x
 				.setName("page")
 				.setDescription("The page number.")
 				.setRequired(false)))
-		.addSubcommand((optt)=>optt
+		.addSubcommand(x=>x
 			.setName("update")
 			.setDescription("Updates a cases reason.")
-			.addIntegerOption((opt)=>opt
+			.addIntegerOption(x=>x
 				.setName("id")
 				.setDescription("The ID Of The Case To Update.")
 				.setRequired(true))
-			.addStringOption((opt)=>opt
+			.addStringOption(x=>x
 				.setName("reason")
 				.setDescription("The New Reason For The Case.")
 				.setRequired(true)))

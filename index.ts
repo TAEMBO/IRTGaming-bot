@@ -14,7 +14,7 @@ console.log(client.config.devWhitelist);
 function logError(error: Error, event: string) {
 	if (!['Request aborted', 'getaddrinfo ENOTFOUND discord.com'].includes(error.message) && client.isReady()) {
 		const Dirname = join(dirname(fileURLToPath(import.meta.url))).replaceAll('\\', '/');
-		(client.channels.resolve(client.config.mainServer.channels.taesTestingZone) as Discord.TextChannel).send({
+		client.getChan('taesTestingZone').send({
 			content: `<@${client.config.devWhitelist[0]}>`,
 			embeds: [new client.embed()
 				.setTitle(`Error Caught - ${error.message}`)
@@ -47,21 +47,21 @@ setInterval(async () => {
 	};
 
 	for (const punishment of Punishments) {
-		client.log('\x1b[33m', `${punishment.member.tag}\'s ${punishment.type} should expire now`);
+		client.log('\x1b[33m', `${punishment.member.tag}\'s ${punishment.type} (case #${punishment._id}) should expire now`);
 		client.punishments.removePunishment(punishment._id, (client.user as Discord.ClientUser).id, "Time\'s up!").then(result => client.log('\x1b[33m', result));
 	};
 
 	const formattedDate = Math.floor((now - 1667854800000) / 1000 / 60 / 60 / 24);
-	const dailyMsgs = JSON.parse(fs.readFileSync('../databases/dailyMsgs.json', 'utf8'));
-	if (!dailyMsgs.some((x: Array<number>) => x[0] === formattedDate)) {
+	const dailyMsgs: number[][] = JSON.parse(fs.readFileSync('../databases/dailyMsgs.json', 'utf8'));
+	if (!dailyMsgs.some(x => x[0] === formattedDate)) {
 		let total = (await client.userLevels._content.find()).reduce((a, b) => a + b.messages, 0); // sum of all users
-		const yesterday = dailyMsgs.find((x: Array<number>) => x[0] === formattedDate - 1);
-		const channel = client.channels.resolve(client.config.mainServer.channels.general) as Discord.TextChannel;
-		if (total < yesterday) total = yesterday; // messages went down
+		const yesterday = dailyMsgs.find(x => x[0] === formattedDate - 1) as number[];
+		const channel = client.getChan('general');
+		if (total < yesterday[1]) total = yesterday[1]; // messages went down
 
 		dailyMsgs.push([formattedDate, total]);
 		fs.writeFileSync('../databases/dailyMsgs.json', JSON.stringify(dailyMsgs, null, 4));
-		(client.channels.resolve(client.config.mainServer.channels.taesTestingZone) as Discord.TextChannel).send(`:warning: Pushed [${formattedDate}, ${total}] to </rank leaderboard:1042659197919178790>`);
+		client.getChan('taesTestingZone').send(`:warning: Pushed [${formattedDate}, ${total}] to </rank leaderboard:1042659197919178790>`);
 		client.log('\x1b[36m', `Pushed [${formattedDate}, ${total}] to dailyMsgs`);
 
 		setTimeout(() => {

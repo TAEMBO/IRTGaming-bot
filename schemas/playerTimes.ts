@@ -27,7 +27,7 @@ export default class playerTimes extends Schema {
 	async fetchFarmData(serverAcro: string) {
 		const FTP = new FTPClient();
 		const allData = await this._content.find();
-		const channel = this.client.channels.resolve(this.client.config.mainServer.channels.fsLogs) as Discord.TextChannel;
+		const channel = this.client.getChan('fsLogs');
 
 		FTP.once('ready', () => FTP.get(this.client.config.ftp[serverAcro].path + 'savegame1/farms.xml', async (err, stream) => {
 			this.client.log('\x1b[33m', `Downloaded farms.xml from ${serverAcro}, crunching...`);

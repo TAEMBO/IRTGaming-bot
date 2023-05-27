@@ -9,8 +9,8 @@ export default async (client: YClient, message: Discord.Message) => {
 	const msgarr = msg.split(' ');
 
 	if (!message.inGuild()) {
-		const guildMemberObject = (client.guilds.cache.get(client.config.mainServer.id) as Discord.Guild).members.cache.get(message.author.id) as Discord.GuildMember;
-    	(client.channels.cache.get(client.config.mainServer.channels.taesTestingZone) as Discord.TextChannel).send({
+		const guildMemberObject = client.mainGuild().members.cache.get(message.author.id) as Discord.GuildMember;
+    	client.getChan('taesTestingZone').send({
 			content: `DM Forward <@${client.config.devWhitelist[0]}>`,
 			files: message.attachments.map(x => x.url),
 			embeds: [new client.embed()
@@ -23,7 +23,6 @@ export default async (client: YClient, message: Discord.Message) => {
 				.setTimestamp()]
 		});
     } else {
-		if (message.channel.type === Discord.ChannelType.GuildStageVoice) return;
 		let automodded = false;
 
 		/* judge-your-build-event message filter; only allow messages that contain an image
@@ -34,17 +33,15 @@ export default async (client: YClient, message: Discord.Message) => {
 		// useless staff ping mute
 		if (message.mentions.roles.some(mentionedRole => mentionedRole.id === client.config.mainServer.roles.mpstaff)) {
 			client.log('\x1b[35m', `${message.author.tag} mentioned staff role`);
-			const filter = (x: any) => client.isMPStaff(x.member) && msg === "y";
-			message.channel.awaitMessages({ filter, max: 1, time: 60000, errors: ["time"]}).then(async collected => {
-				const colMsg = collected.first() as Discord.Message;
+			message.channel.awaitMessages({
+				filter: x => client.isMPStaff(x.member as Discord.GuildMember) && x.content === 'y',
+				max: 1,
+				time: 60000,
+				errors: ["time"]
+			}).then(async collected => {
+				const colMsg = collected.first() as Discord.Message<true>;
 				client.log('\x1b[35m', `Received "y" from ${colMsg.author.tag}, indicating to mute`);
-				try {
-					await client.punishments.addPunishment('mute', colMsg.author.id, 'Automod; Misuse of staff ping', message.author, message.member, {});
-				} catch (error) {
-					client.log('\x1b[31m', 'Muting failed cuz:', error);
-					colMsg.react('❌');
-					return;
-				}
+				await client.punishments.addPunishment('mute', colMsg.author.id, 'Automod; Misuse of staff ping', message.author, message.member, { time: '10m' });
 				colMsg.react('✅');
 			}).catch(() => client.log('\x1b[35m', 'Failed to collect "y" from staff'));
 		}
@@ -61,7 +58,7 @@ export default async (client: YClient, message: Discord.Message) => {
 			'968265015595532348', //mp-manager-chat
 			'979863373439184966', //war crimes
 		];
-		async function repeatedMessages(thresholdTime: number, thresholdAmt: number, type: string, muteTime: string, muteReason: string) {
+		async function repeatedMessages(thresholdTime: number, thresholdAmt: number, type: string, muteTime?: string, muteReason?: string) {
 			if (client.repeatedMessages[message.author.id]) {
 				// Add this message to the list
 				client.repeatedMessages[message.author.id].data.set(message.createdTimestamp, { type, channel: message.channel.id });
@@ -130,7 +127,7 @@ export default async (client: YClient, message: Discord.Message) => {
 		const combedMsg = getAllCombos(newMsg.replace(/[^a-zA-Z\s]/g, "")).join(' ').replace(/ +(?= )/g, "").split(' ');
 
 		// RepeatedMessages
-		if (client.config.botSwitches.automod && !client.hasModPerms(message.member as Discord.GuildMember)) {
+		if (client.config.botSwitches.automod && !client.isDCStaff(message.member as Discord.GuildMember)) {
 			if (client.bannedWords._content.some(x => combedMsg.includes(x)) && !Whitelist.includes(message.channel.id)) { // Banned words
 				automodded = true;
 				await message.reply('That word is banned here.').then(msg => {

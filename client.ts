@@ -32,10 +32,6 @@ export default class YClient extends Client {
     watchList = new watchList();
     playerTimes = new playerTimes(this);
     reminders = new reminders();
-    log = (color: string, ...data: any[]) => console.log(`${color}[${moment().format('HH:mm:ss')}]`, ...data);
-    youNeedRole = (interaction: Discord.ChatInputCommandInteraction<"cached">, role: keyof typeof this.config.mainServer.roles) => interaction.reply(`You need the <@&${this.config.mainServer.roles[role]}> role to use this command`);
-    hasModPerms = (guildMember: Discord.GuildMember) => this.config.mainServer.DCStaffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
-    isMPStaff = (guildMember: Discord.GuildMember) => this.config.mainServer.MPStaffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
     constructor() {
         super({
             intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration, GatewayIntentBits.GuildInvites, GatewayIntentBits.GuildPresences, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildVoiceStates],
@@ -77,6 +73,24 @@ export default class YClient extends Client {
         }
         return this;
     }
+    log(color: string, ...data: any[]) {
+        console.log(`${color}[${moment().format('HH:mm:ss')}]`, ...data);
+    }
+    youNeedRole(interaction: Discord.ChatInputCommandInteraction<"cached">, role: keyof typeof this.config.mainServer.roles) {
+        interaction.reply(`You need the <@&${this.config.mainServer.roles[role]}> role to use this command`);
+    }
+    isDCStaff(guildMember: Discord.GuildMember) {
+        return this.config.mainServer.DCStaffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
+    }
+    isMPStaff(guildMember: Discord.GuildMember) {
+        return this.config.mainServer.MPStaffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
+    }
+    getChan(channel: keyof typeof this.config.mainServer.channels) {
+        return this.channels.resolve(this.config.mainServer.channels[channel]) as Discord.TextChannel;
+    }
+    mainGuild() {
+        return this.guilds.cache.get(this.config.mainServer.id) as Discord.Guild;
+    }
     async YTLoop(YTChannelID: string, YTChannelName: string) {
         await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${YTChannelID}`, { signal: AbortSignal.timeout(5000) }).then(async res => {
             const Data = xml2js(await res.text(), { compact: true }) as YTCacheFeed;
@@ -86,7 +100,7 @@ export default class YClient extends Client {
         
             if (Data.feed.entry[1]['yt:videoId']._text === this.YTCache[YTChannelID]) {
                 this.YTCache[YTChannelID] = latestVid['yt:videoId']._text;
-                (this.channels.resolve(this.config.mainServer.channels.videosAndLiveStreams) as Discord.TextChannel).send(`**${YTChannelName}** just uploaded a new video!\n${latestVid.link._attributes.href}`);
+                this.getChan('videosAndLiveStreams').send(`**${YTChannelName}** just uploaded a new video!\n${latestVid.link._attributes.href}`);
             }
         }).catch(() => this.log('\x1b[31m', `${YTChannelName} YT fail`));
     }
@@ -127,7 +141,7 @@ export default class YClient extends Client {
         return (bytes / Math.pow(bitsOrBytes, i)).toFixed(decimals < 0 ? 0 : decimals) + ' ' + sizes[i];
     }
     async punish(interaction: Discord.ChatInputCommandInteraction<"cached">, type: string) {
-        if ((!this.hasModPerms(interaction.member)) || (!['warn', 'mute'].includes(type) && interaction.member.roles.cache.has(this.config.mainServer.roles.discordhelper))) return this.youNeedRole(interaction, 'discordmoderator');
+        if ((!this.isDCStaff(interaction.member)) || (!['warn', 'mute'].includes(type) && interaction.member.roles.cache.has(this.config.mainServer.roles.discordhelper))) return this.youNeedRole(interaction, 'discordmoderator');
 
         const time = interaction.options.getString('time') ?? undefined;
         const reason = interaction.options.getString('reason') ?? 'Unspecified';

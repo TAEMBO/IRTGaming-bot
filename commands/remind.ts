@@ -4,6 +4,10 @@ import ms from 'ms';
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
+        function formatTime(time: number) {
+            return `<t:${Math.round((Date.now() + time) / 1000)}> (<t:${Math.round((Date.now() + time) / 1000)}:R>)`
+        };
+
         ({
             create: async () => {
                 const reminderText = interaction.options.getString("what", true);
@@ -16,7 +20,7 @@ export default {
                             .setDescription([
                                 'Are you sure you want to create a new reminder?',
                                 `> Content: \`${reminderText}\``,
-                                `> Time to remind: <t:${Math.round((Date.now() + reminderTime) / 1000)}:R>`
+                                `> Time to remind: ${formatTime(reminderTime)}`
                             ].join('\n'))
                             .setFooter({ text: '60s to respond' })
                         ],
@@ -38,7 +42,7 @@ export default {
                                 int.update({
                                     embeds: [new client.embed()
                                         .setTitle('Reminder set')
-                                        .setDescription(`\n\`\`\`${reminderText}\`\`\`\n<t:${Math.round((Date.now() + reminderTime) / 1000)}:R>`)
+                                        .setDescription(`\n\`\`\`${reminderText}\`\`\`\n${formatTime(reminderTime)}`)
                                         .setColor(client.config.embedColor)
                                     ],
                                     components: []
@@ -48,7 +52,7 @@ export default {
                             client.log('\x1b[33m', 'REMINDER CREATE', reminder);
                         } else int.update({ content: 'Command manually canceled', embeds: [], components: [] });
                     }).on('end', ints => {
-                        if (ints.size === 0) interaction.editReply({ content: 'No response given, command canceled', embeds: [], components: [] });
+                        if (ints.size < 1) interaction.editReply({ content: 'No response given, command canceled', embeds: [], components: [] });
                     });
                 } else interaction.reply({
                     embeds: [new client.embed()
@@ -70,7 +74,7 @@ export default {
             delete: async () => {
                 const userReminders = await client.reminders._content.find({ userid: interaction.user.id });
 
-                if (userReminders.length === 0) return interaction.reply('You have no active current reminders');
+                if (userReminders.length < 1) return interaction.reply('You have no active current reminders');
 
                 const embed = new client.embed()
                     .setColor(client.config.embedColor)
@@ -81,7 +85,7 @@ export default {
                     name: `#${i + 1}`,
                     value: [
                         `> Content: \`${x.content}\``,
-                        `> Time to remind: <t:${Math.round(x.time / 1000)}:R>`
+                        `> Time to remind: ${formatTime(x.time)}`
                     ].join('\n')
                 });
 

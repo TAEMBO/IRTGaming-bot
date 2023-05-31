@@ -18,7 +18,7 @@ const Schema = mongoose.model('punishments', new mongoose.Schema({
     cancels: { type: Number },
     duration: { type: Number }
 }, { versionKey: false }));
-const DocType = Schema.castObject(Schema);
+type Document =  ReturnType<typeof Schema.castObject>;
 
 export default class punishments extends Schema {
     public _content = Schema;
@@ -26,7 +26,7 @@ export default class punishments extends Schema {
     constructor(private client: YClient) {
 		super();
 	}
-	async makeModlogEntry(punishment: typeof DocType) {
+	async makeModlogEntry(punishment: Document) {
         const embed = new this.client.embed()
             .setTitle(`${punishment.type[0].toUpperCase() + punishment.type.slice(1)} | Case #${punishment._id}`)
             .addFields(
@@ -59,7 +59,7 @@ export default class punishments extends Schema {
 		const { time, interaction } = options;
 		const now = Date.now();
 		const guild = this.client.mainGuild();
-		const punData: typeof DocType = { type, _id: await this.createId(), member: { tag: User.tag, _id: User.id }, reason, moderator, time: now };
+		const punData: Document = { type, _id: await this.createId(), member: { tag: User.tag, _id: User.id }, reason, moderator, time: now };
 		const inOrFromBoolean = ['warn', 'mute'].includes(type) ? 'in' : 'from'; // Use 'in' if the punishment doesn't remove the member from the server, eg. mute, warn
 		const auditLogReason = `${reason} | Case #${punData._id}`;
 		const embed = new this.client.embed()
@@ -138,7 +138,7 @@ export default class punishments extends Schema {
 			this.createId()
 		]);
 		
-		let removePunishmentData: typeof DocType = { type: `un${punishment.type}`, _id, cancels: punishment.id, member: punishment.member, reason, moderator, time: now };
+		let removePunishmentData: Document = { type: `un${punishment.type}`, _id, cancels: punishment.id, member: punishment.member, reason, moderator, time: now };
 		let removePunishmentResult: Discord.User | Discord.GuildMember | string | null | undefined;
 
 		if (punishment.type === 'ban') {

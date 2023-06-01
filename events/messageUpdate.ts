@@ -12,8 +12,8 @@ export default async (client: YClient, oldMsg: Discord.Message<boolean> | Discor
     const editedWordsOld = oldContent.split(' ').filter(oldWord => !newContent.split(' ').some(newWord => oldWord === newWord));
     const editedWordsNew = newContent.split(' ').filter(newWord => !oldContent.split(' ').some(oldWord => newWord === oldWord));
     
-    editedWordsOld.forEach(word => oldContent = oldContent.replace(word, `[31m${word}[37m`));
-    editedWordsNew.forEach(word => newContent = newContent.replace(word, `[32m${word}[37m`));
+    editedWordsOld.forEach(word => oldContent = oldContent.replace(word, `[31m${word}[0m`));
+    editedWordsNew.forEach(word => newContent = newContent.replace(word, `[32m${word}[0m`));
 
     client.getChan('botLogs').send({embeds: [new client.embed()
         .setTitle('Message Edited')

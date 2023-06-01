@@ -4,20 +4,20 @@ import { xml2js } from "xml-js";
 import fs from "node:fs";
 import type { FSLoopCSG, FSLoopDSS, FSLoopDSSPlayer } from "./typings.js";
 
-export default async (client: YClient, ChannelID: string, MessageID: string, serverAcro: string) => {
-    function decorators(player: FSLoopDSSPlayer, publicLoc?: boolean) {
-        const inWl = watchList.some(x => x._id === player.name);
-        let decorators = player.isAdmin ? ':detective:' : ''; // Tag for if player is admin
-        decorators += client.FMlist._content.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
-        decorators += client.TFlist._content.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
-        decorators += (client.whitelist._content.includes(player.name) && !publicLoc) ? ':white_circle:' : ''; // Tag for if player is on whitelist and location is not public
-        decorators += inWl ? '⛔' : ''; // Tag for if player is on watchList
+function decorators(client: YClient, player: FSLoopDSSPlayer, watchList?: { _id: string, reason: string }[], publicLoc?: boolean) {
+    const inWl = watchList?.some(x => x._id === player.name);
+    let decorators = player.isAdmin ? ':detective:' : ''; // Tag for if player is admin
+    decorators += client.FMlist._content.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
+    decorators += client.TFlist._content.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
+    decorators += (client.whitelist._content.includes(player.name) && !publicLoc) ? ':white_circle:' : ''; // Tag for if player is on whitelist and location is not public
+    decorators += inWl ? ':no_entry:' : ''; // Tag for if player is on watchList
+    return decorators;
+}
 
-        return decorators;
-    }
+export default async (client: YClient, ChannelID: string, MessageID: string, serverAcro: string) => {
     function wlEmbed(playerName: string, joinLog: boolean, wlReason?: string) {
         const embed = new client.embed()
-            .setTitle('WATCHLIST')
+            .setTitle('WatchList')
             .setDescription(`\`${playerName}\` ${joinLog ? 'joined' : 'left'} **${serverAcro}** at <t:${now}:t>`);
 
         if (joinLog) {
@@ -27,7 +27,7 @@ export default async (client: YClient, ChannelID: string, MessageID: string, ser
     function logEmbed(player: FSLoopDSSPlayer, joinLog: boolean) {
         const playTimeHrs = Math.floor(player.uptime / 60);
         const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
-        const embed = new client.embed().setDescription(`\`${player.name}\`${decorators(player)} ${joinLog ? 'joined': 'left'} **${serverAcro}** at <t:${now}:t>`);
+        const embed = new client.embed().setDescription(`\`${player.name}\`${decorators(client, player, watchList)} ${joinLog ? 'joined': 'left'} **${serverAcro}** at <t:${now}:t>`);
     
         if (joinLog) {
             return embed.setColor(client.config.embedColorGreen);
@@ -43,7 +43,7 @@ export default async (client: YClient, ChannelID: string, MessageID: string, ser
                 ] }); 
             } else logChannel.send({ embeds: [new client.embed()
                 .setColor(client.config.embedColorYellow)
-                .setDescription(`\`${player.name}\`${decorators(player)} logged into admin on **${serverAcro}** at <t:${now}:t>`)
+                .setDescription(`\`${player.name}\`${decorators(client, player, watchList)} logged into admin on **${serverAcro}** at <t:${now}:t>`)
             ] });
         }
     }
@@ -108,9 +108,8 @@ export default async (client: YClient, ChannelID: string, MessageID: string, ser
     for (const player of newPlayers) {
         const playTimeHrs = Math.floor(player.uptime / 60);
         const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
-        const inWl = watchList.some(x => x._id === player.name);
 
-        playerInfo.push(`\`${player.name}\` ${decorators(player, true)} **|** ${playTimeHrs}:${playTimeMins}`);
+        playerInfo.push(`\`${player.name}\` ${decorators(client, player, watchList, true)} **|** ${playTimeHrs}:${playTimeMins}`);
     };
 
     // Data crunching for stats embed
@@ -123,7 +122,6 @@ export default async (client: YClient, ChannelID: string, MessageID: string, ser
     const Seasons = { '1': serverAcro === 'MF' ? 'Yes' : 'Yes 🔴', '2': 'No', '3':'Paused 🔴' }[CSG.settings?.growthMode?._text] ?? null;
     const AutosaveInterval = parseInt(CSG.settings?.autoSaveInterval?._text).toFixed(0) ?? null;
     const SlotUsage = parseInt(CSG.slotSystem?._attributes?.slotUsage).toLocaleString('en-US') ?? null;
-    CSG.slotSystem._attributes.slotUsage
 
     // Stats embed
     statsEmbed.setAuthor({ name: `${DSS.slots.used}/${DSS.slots.capacity}` })
@@ -176,25 +174,21 @@ export function FSLoopAll(client: YClient) {
     const totalCount = <number[]>[];
 
     for (const server of Object.entries(client.FSCache)) {
-        const playerInfo = <string[]>[];
+        const playerInfo: string[] = [];
         const serverSlots = server[1].players.length;
         totalCount.push(serverSlots);
 
         for (const player of server[1].players) {
             const playTimeHrs = Math.floor(player.uptime / 60);
             const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
-            let decorators = player.isAdmin ? ':detective:' : ''; // Tag for if player is admin
-            decorators += client.FMlist._content.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
-            decorators += client.TFlist._content.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
-            decorators += client.whitelist._content.includes(player.name) ? ':white_circle:' : ''; // Tag for if player is whitelisted
 
-            playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
+            playerInfo.push(`\`${player.name}\` ${decorators(client, player)} **|** ${playTimeHrs}:${playTimeMins}`);
         }
         if (playerInfo.length > 0) embed.addFields({ name: `${server[0]} - ${serverSlots}/16`, value: playerInfo.join('\n') });
     }
 
     client.getChan('juniorAdminChat').messages.edit(client.config.mainServer.FSLoopMsgId, {
         content: `\`\`\`js\n['${client.whitelist._content.join("', '")}']\`\`\`Updates every 30 seconds`,
-        embeds: [embed.setTitle(totalCount.reduce((a, b) => a + b, 0) + 'online')]
+        embeds: [embed.setTitle(totalCount.reduce((a, b) => a + b, 0) + ' online')]
     }).catch(() => client.log('\x1b[31m', 'FSLoopAll invalid msg'));
 }

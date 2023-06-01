@@ -2,7 +2,7 @@ import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client.js';
 import fs from 'node:fs';
 import canvas from 'canvas';
-import type { FS_data } from '../typings.js';
+import type { FSLoopDSS } from '../typings.js';
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
@@ -10,7 +10,7 @@ export default {
         const subCmd = interaction.options.getSubcommand() as 'ps' | 'pg' | 'mf' | 'all' | 'playertimes';
 
         async function FSstats() {
-            const FSdss: FS_data | void = await fetch(client.config.fs[subCmd].dss, { signal: AbortSignal.timeout(2000), headers: { 'User-Agent': 'IRTBot/Stats' } }).then(res => res.json()).catch(() => {
+            const FSdss: FSLoopDSS | void = await fetch(client.config.fs[subCmd].dss, { signal: AbortSignal.timeout(2000), headers: { 'User-Agent': 'IRTBot/Stats' } }).then(res => res.json()).catch(() => {
                 client.log('\x1b[31m', `Stats ${subCmd.toUpperCase()} failed`);
             });
 
@@ -152,7 +152,7 @@ export default {
                 Color = client.config.embedColorRed;
             } else if (FSdss.slots.used > 9) Color = client.config.embedColorYellow;
         
-            FSdss.slots.players.filter(x=>x.isUsed).forEach(player => {
+            for (const player of FSdss.slots.players.filter(x=>x.isUsed)) {
                 const playTimeHrs = Math.floor(player.uptime / 60);
                 const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
                 const inWl = watchList.some(x => x._id === player.name);
@@ -162,7 +162,7 @@ export default {
                 decorators += inWl ? '⛔' : ''; // Tag for if player is on watchList
         
                 playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
-            });
+            };
             const Image = new client.attachmentBuilder(img.toBuffer(), { name: "FSStats.png" });
             const serverSlots = `${FSdss.slots.used}/${FSdss.slots.capacity}`;
             const serverTimeHrs = Math.floor(FSdss.server.dayTime / 3600 / 1000).toString().padStart(2, '0');
@@ -173,9 +173,9 @@ export default {
                 .setDescription(FSdss.slots.used == 0 ? '*No players online*' : playerInfo.join("\n"))
                 .setImage('attachment://FSStats.png')
                 .setColor(Color);
-            if (FSdss.slots.players.filter(x=>x.isAdmin).length === 0 && client.FSCache[subCmd.toUpperCase()].lastAdmin) embed.setTimestamp(client.FSCache[subCmd.toUpperCase()].lastAdmin).setFooter({text: 'Admin last on'});
+            if (!FSdss.slots.players.some(x=>x.isAdmin) && client.FSCache[subCmd.toUpperCase()].lastAdmin) embed.setTimestamp(client.FSCache[subCmd.toUpperCase()].lastAdmin).setFooter({text: 'Admin last on'});
         
-            interaction.reply({embeds: [embed], files: [Image]}).catch(() => interaction.channel?.send({embeds: [embed], files: [Image]}) );
+            interaction.reply({embeds: [embed], files: [Image]}).catch(() => interaction.channel?.send({embeds: [embed], files: [Image]}));
         }
 
         if (subCmd === 'all') {
@@ -186,16 +186,18 @@ export default {
             const watchList = await client.watchList._content.find();
 
             async function FSstatsAll(serverAcro: string) {
-                const FSdss = await fetch(client.config.fs[serverAcro.toLowerCase()].dss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': 'IRTBot/StatsAll' } }).then(res => res.json() as Promise<FS_data>).catch(() => {
-                    client.log('\x1b[31m', `Stats all; ${serverAcro} failed`);
-                    failedFooter.push(`Failed to fetch ${serverAcro}`);
-                });
+                const FSdss = await fetch(client.config.fs[serverAcro.toLowerCase()].dss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': 'IRTBot/StatsAll' } })
+                    .then(res => res.json() as Promise<FSLoopDSS>)
+                    .catch(() => {
+                        client.log('\x1b[31m', `Stats all; ${serverAcro} failed`);
+                        failedFooter.push(`Failed to fetch ${serverAcro}`);
+                    });
                 if (!FSdss || FSdss.slots.used === 0 ) return;
 
                 totalCount.push(FSdss.slots.used);
                 const playerInfo: Array<string> = [];
                 const serverSlots = `${FSdss.slots.used}/${FSdss.slots.capacity}`;
-                FSdss.slots.players.filter(x=>x.isUsed).forEach(player => {
+                for (const player of FSdss.slots.players.filter(x=>x.isUsed)) {
                     const playTimeHrs = Math.floor(player.uptime / 60);
                     const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
                     const inWl = watchList.some(x => x._id === player.name);
@@ -205,63 +207,59 @@ export default {
                     decorators += inWl ? '⛔' : ''; // Tag for if player is on watchList
         
                     playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
-                });
-                embed.addFields({name: `${FSdss.server.name.replace('! ! IRTGaming | ', '')} - ${serverSlots}`, value: `${playerInfo.join("\n")}`, inline: true});
+                };
+                embed.addFields({ name: `${FSdss.server.name.replace('! ! IRTGaming | ', '')} - ${serverSlots}`, value: `${playerInfo.join("\n")}`, inline: true });
             }
             await Promise.all([FSstatsAll('PS'), FSstatsAll('PG'), FSstatsAll('MF')]);
 
             embed.setTitle(`All Servers: ${totalCount.reduce((a, b) => a + b, 0)} online`).setFooter(failedFooter.length > 0 ? { text: failedFooter.join(', ') } : null);
-            interaction.editReply({embeds: [embed]});
+            interaction.editReply({ embeds: [embed] });
         } else if (subCmd === 'playertimes') {
             client.playerTimes._content.find().then(playersData => {
-                const sortedData = playersData.sort((a, b) => b.time - a.time);
+                const sortedData = playersData.sort((a, b) => client.playerTimes.getTimeData(b).reduce((x, y) => x + y[1].time, 0) - client.playerTimes.getTimeData(a).reduce((x, y) => x + y[1].time, 0));
                 const player = interaction.options.getString('name');
 
-                const leaderboard = (data: Array<typeof sortedData[0]>, isFirstField: boolean) => data.map((x, i) => [
+                const leaderboard = (data: typeof sortedData, isFirstField: boolean) => data.map((x, i) => [
                     `**${i + (isFirstField ? 1 : 26)}.** \`${x._id}\``,
                     client.FMlist._content.includes(x._id) ? ':farmer:' : '',
                     client.TFlist._content.includes(x._id) ? ':angel:' : '',
                     ' - ',
-                    client.formatTime((x.time * 60 * 1000), 3, { commas: true, longNames: false })
+                    client.formatTime((client.playerTimes.getTimeData(x).reduce((x, y) => x + y[1].time, 0) * 60 * 1000), 3, { commas: true, longNames: false })
                 ].join('')).join('\n');
 
                 if (player) {
                     const playerData = playersData.find(x => x._id === player);
-                    const isOnPS = client.FSCache.PS.players.some(x => x.name === player);
-                    const isOnPG = client.FSCache.PG.players.some(x => x.name === player);
-                    const isOnMF = client.FSCache.MF.players.some(x => x.name === player);
     
                     if (playerData) {
-                        let lastOnText: string;
-    
-                        if (isOnPS) {
-                            lastOnText = 'Right now (Public Silage)';
-                        } else if (isOnPG) {
-                            lastOnText = 'Right now (Public Grain)';
-                        } else if (isOnMF) {
-                            lastOnText = 'Right now (Multi Farm)';
-                        } else lastOnText = `<t:${playerData.lastOn}:R>`;
+                        const playerTimeData = client.playerTimes.getTimeData(playerData);
+                        const playerTimeDataTotal = playerTimeData.reduce((x, y) => x + y[1].time, 0);
+                        const formattedTimeData = playerTimeData.map(timeData => [
+                            `> **${timeData[0].toUpperCase()}**`,
+                            `> - Time - ${client.formatTime(timeData[1].time * 60 * 1000, 5, { commas: true, longNames: false })}`,
+                            `> - Last on - ${client.FSCache[timeData[0].toUpperCase()].players.some(x => x.name === playerData._id) ? 'Right now' : `<t:${timeData[1].lastOn}:R>`}`
+                        ].join('\n'));
 
                         const embed = new client.embed()
-                        .setColor(client.config.embedColor)
-                        .setTitle([
-                            `Player - \`${playerData._id}\`${client.FMlist._content.includes(playerData._id) ? ':farmer:' : ''}${client.TFlist._content.includes(playerData._id) ? ':angel:' : ''}`,
-                            `Total time - **${client.formatTime(playerData.time * 60 * 1000, 5, { commas: true, longNames: false })}**`,
-                            `Leaderboard position - **#${playersData.indexOf(playerData) + 1}**`,
-                            `Time last on - **${lastOnText}**`
-                        ].join('\n'));
+                            .setColor(client.config.embedColor)
+                            .setTitle([
+                                `Player - \`${playerData._id}\`${client.FMlist._content.includes(playerData._id) ? ':farmer:' : ''}${client.TFlist._content.includes(playerData._id) ? ':angel:' : ''}`,
+                                `Leaderboard position - **#${sortedData.indexOf(playerData) + 1}**`,
+                                `Total time - **${client.formatTime(playerTimeDataTotal * 60 * 1000, 5, { commas: true, longNames: false })}**`,
+                                'Server times:',
+                                formattedTimeData.join('\n')
+                            ].join('\n'));
 
                         if (client.isMPStaff(interaction.member) && playerData.uuid) embed.setFooter({ text: `UUID: ${playerData.uuid}` });
 
-                        interaction.reply({embeds: [embed]});
+                        interaction.reply({ embeds: [embed] });
                     } else interaction.reply('No data found with that name. [Find out why.](https://canary.discord.com/channels/552565546089054218/552583841936834560/1087422094519836792)');
 
                 } else interaction.reply({embeds: [new client.embed()
                     .setColor(client.config.embedColor)
-                    .setDescription(`Top 50 players with the most time spent on IRTGaming FS22 servers since\n<t:1672560000>`)
+                    .setDescription(`Top 50 players with the most time spent on IRTGaming FS22 servers since\n<t:1685602800>`)
                     .addFields(
                         { name: '\u200b', value: leaderboard(sortedData.slice(0, 25), true), inline: true },
-                        { name: '\u200b', value: leaderboard(sortedData.slice(25, 50), false), inline: true })
+                        { name: '\u200b', value: leaderboard(sortedData.slice(25, 50), false) + '\u200b', inline: true })
                 ]});
             });
         } else FSstats();
@@ -269,22 +267,22 @@ export default {
     data: new SlashCommandBuilder()
         .setName("stats")
         .setDescription("Gets info on an FS22 server")
-        .addSubcommand((optt)=>optt
+        .addSubcommand(x=>x
             .setName("all")
             .setDescription("Server stats for all servers"))
-        .addSubcommand((optt)=>optt
+        .addSubcommand(x=>x
             .setName("ps")
             .setDescription("Public Silage server stats"))
-        .addSubcommand((optt)=>optt
+        .addSubcommand(x=>x
             .setName("pg")
             .setDescription("Public Grain server stats"))
-        .addSubcommand((optt)=>optt
+        .addSubcommand(x=>x
             .setName("mf")
             .setDescription("Multi Farm server stats"))
-        .addSubcommand((optt)=>optt
+        .addSubcommand(x=>x
             .setName("playertimes")
             .setDescription("Player time data")
-            .addStringOption((opt)=>opt
+            .addStringOption(x=>x
                 .setName("name")
                 .setDescription("The in-game name of the player to get stats for")
                 .setRequired(false)))

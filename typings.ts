@@ -1,5 +1,5 @@
 import YClient from './client.js';
-import Discord, { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
+import Discord from 'discord.js';
 
 export interface RepeatedMessages {
     [key: string]: {
@@ -13,7 +13,7 @@ export interface RepeatedMessages {
 
 export interface FSCache {
     [key: string]: {
-        players: FS_player[],
+        players: FSLoopDSSPlayer[],
         status: "online" | "offline" | null,
         lastAdmin: number | null
     }
@@ -31,8 +31,8 @@ export interface InviteCache {
 export interface Command {
     commandFile: {
         default: {
-            run(client: YClient, interaction: ChatInputCommandInteraction<"cached">): Promise<void>;
-            data: SlashCommandBuilder;
+            run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">): Promise<any>;
+            data: Omit<Discord.SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup"> | Discord.SlashCommandSubcommandsOnlyBuilder;
         };
     };
     uses: number;
@@ -73,9 +73,11 @@ export interface Config {
         },
     }
     devWhitelist: Array<string>,
-    FSCacheServers: Array<Array<string>>, // [ [ChannelID, MessageID, serverAcro] ]
-    YTCacheChannels: Array<Array<string>>, // [ [ChannelID, ChannelName] ]
-    mainServer: {
+    /** `Array<[ChannelID, MessageID, serverAcro]>` */
+    FSCacheServers: Array<Array<string>>,
+    /** `Array<[ChannelID, ChannelName]>` */
+    YTCacheChannels: Array<Array<string>>,
+    readonly mainServer: {
         id: string,
         FSLoopMsgId: string,
         MPStaffRoles: Array<keyof Config["mainServer"]["roles"]>,
@@ -127,7 +129,7 @@ export interface Config {
     }
 }
 
-export interface FS_data {
+export interface FSLoopDSS {
     server: {
         dayTime: number,
         game: string,
@@ -142,18 +144,18 @@ export interface FS_data {
     slots: {
         capacity: number,
         used: number,
-        players: Array<FS_player>
+        players: Array<FSLoopDSSPlayer>
     }
 }
 
-export interface FS_player {
+export interface FSLoopDSSPlayer {
     isUsed: boolean,
     isAdmin: boolean,
     uptime: number,
     name: string
 }
 
-export interface FS_careerSavegame {
+export interface FSLoopCSG {
     settings: {
         savegameName: { _text: string },
         creationDate: { _text: string },

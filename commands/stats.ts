@@ -239,19 +239,19 @@ export default {
                             `> - Last on - ${client.FSCache[timeData[0].toUpperCase()].players.some(x => x.name === playerData._id) ? 'Right now' : `<t:${timeData[1].lastOn}:R>`}`
                         ].join('\n'));
 
-                        const embed = new client.embed()
-                            .setColor(client.config.embedColor)
-                            .setTitle([
-                                `Player - \`${playerData._id}\`${client.FMlist._content.includes(playerData._id) ? ':farmer:' : ''}${client.TFlist._content.includes(playerData._id) ? ':angel:' : ''}`,
-                                `Leaderboard position - **#${sortedData.indexOf(playerData) + 1}**`,
-                                `Total time - **${client.formatTime(playerTimeDataTotal * 60 * 1000, 5, { commas: true, longNames: false })}**`,
-                                'Server times:',
-                                formattedTimeData.join('\n')
-                            ].join('\n'));
-
-                        if (client.isMPStaff(interaction.member) && playerData.uuid) embed.setFooter({ text: `UUID: ${playerData.uuid}` });
-
-                        interaction.reply({ embeds: [embed] });
+                        interaction.reply({ embeds: [
+                            new client.embed()
+                                .setColor(client.config.embedColor)
+                                .setTitle([
+                                    `Player - \`${playerData._id}\`${client.FMlist._content.includes(playerData._id) ? ':farmer:' : ''}${client.TFlist._content.includes(playerData._id) ? ':angel:' : ''}`,
+                                    `Leaderboard position - **#${sortedData.indexOf(playerData) + 1}**`,
+                                    `Total time - **${client.formatTime(playerTimeDataTotal * 60 * 1000, 5, { commas: true, longNames: false })}**`,
+                                    (client.isMPStaff(interaction.member) && playerData.uuid) ? `UUID: \`${playerData.uuid}\`` : ''
+                                ].join('\n')),
+                            new client.embed()
+                                .setColor(client.config.embedColor)
+                                .setTitle(`Server times:\n${formattedTimeData.join('\n')}`)
+                        ] });
                     } else interaction.reply('No data found with that name. [Find out why.](https://canary.discord.com/channels/552565546089054218/552583841936834560/1087422094519836792)');
 
                 } else interaction.reply({embeds: [new client.embed()

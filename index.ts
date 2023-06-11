@@ -10,7 +10,7 @@ const client = await new YClient().init();
 console.log(client.config.botSwitches);
 console.log(client.config.devWhitelist);
 
-// Error handler
+/** Error handler */
 function logError(error: Error, event: string) {
 	if (!['Request aborted', 'getaddrinfo ENOTFOUND discord.com'].includes(error.message) && client.isReady()) {
 		const Dirname = join(dirname(fileURLToPath(import.meta.url))).replaceAll('\\', '/');
@@ -39,11 +39,13 @@ setInterval(async () => {
 
 	for (const reminder of Reminders) {
 		const embed = new client.embed().setTitle('Reminder').setColor(client.config.embedColor).setDescription(`\`\`\`${reminder.content}\`\`\``);
-		await client.users.fetch(reminder.userid)
-			.then(User => User.send({embeds: [embed]})
-			.catch(async () => (await (client.channels.resolve(reminder.ch) as Discord.TextChannel).messages.fetch(reminder.msg)).reply({ content:`<@${reminder.userid}>`, embeds: [embed] })));
+		const User = await client.users.fetch(reminder.userid);
+		
+		await User.send({ embeds: [embed] }).catch(() => (client.channels.resolve(reminder.ch) as Discord.TextChannel).send({
+			content: User.toString(),
+			embeds: [embed.setFooter({ text: 'Failed to DM' })]
+		}));
 		await client.reminders._content.findByIdAndDelete(reminder._id);
-		client.log('\x1b[33m', 'REMINDER EXECUTE', reminder);
 	};
 
 	for (const punishment of Punishments) {
@@ -55,13 +57,12 @@ setInterval(async () => {
 	const dailyMsgs: number[][] = JSON.parse(fs.readFileSync('../databases/dailyMsgs.json', 'utf8'));
 	if (!dailyMsgs.some(x => x[0] === formattedDate)) {
 		let total = (await client.userLevels._content.find()).reduce((a, b) => a + b.messages, 0); // sum of all users
-		const yesterday = dailyMsgs.find(x => x[0] === formattedDate - 1) as number[];
+		const yesterday = dailyMsgs.find(x => x[0] === formattedDate - 1) ?? [formattedDate - 1, 0];
 		const channel = client.getChan('general');
 		if (total < yesterday[1]) total = yesterday[1]; // messages went down
 
 		dailyMsgs.push([formattedDate, total]);
 		fs.writeFileSync('../databases/dailyMsgs.json', JSON.stringify(dailyMsgs, null, 4));
-		client.getChan('taesTestingZone').send(`:warning: Pushed [${formattedDate}, ${total}] to </rank leaderboard:1042659197919178790>`);
 		client.log('\x1b[36m', `Pushed [${formattedDate}, ${total}] to dailyMsgs`);
 
 		setTimeout(() => {

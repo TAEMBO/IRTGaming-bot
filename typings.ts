@@ -74,6 +74,7 @@ export interface Config {
     mainServer: {
         id: string,
         FSLoopMsgId: string,
+        TFListMsgId: string;
         MPStaffRoles: Array<keyof Config["mainServer"]["roles"]>,
         DCStaffRoles: Array<keyof Config["mainServer"]["roles"]>,
         roles: {
@@ -118,7 +119,8 @@ export interface Config {
             juniorAdminChat: string,
             mpStaffCommands: string,
             watchList: string,
-            videosAndLiveStreams: string
+            videosAndLiveStreams: string;
+            trustedFarmerChat: string
         }
     }
 }

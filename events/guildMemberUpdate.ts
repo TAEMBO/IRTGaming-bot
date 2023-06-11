@@ -35,8 +35,16 @@ export default async (client: YClient, oldMember: Discord.GuildMember | Discord.
     if (oldRoles.has('631894963474530306') || newRoles.has('631894963474530306')) (client.channels.resolve('803795484174319646') as Discord.TextChannel).send({ embeds: [embed] });
 
     // Trusted Farmer auto-updating list
-    const mpTf = (await newMember.guild.roles.fetch(client.config.mainServer.roles.trustedfarmer) as Discord.Role);
-    const tfList = `<@&${mpTf.id}>: ${mpTf.members.size}\n${mpTf.members.map(e=>e.toString()).join("\n")}`;
-    const tfMsg = await (client.channels.resolve('718555644801712200') as Discord.TextChannel)?.messages?.fetch('980240957167521863').catch(() => null);
-    if (tfMsg && tfMsg.content !== tfList) tfMsg.edit(tfList);
+    const TFID = client.config.mainServer.roles.trustedfarmer;
+    if (!newMember.roles.cache.has(TFID) || !oldMember.roles.cache.has(TFID)) return;
+
+    const TFRole = (await newMember.guild.roles.fetch(TFID) as Discord.Role);
+    const tfMsg = await (client.channels.resolve(client.config.mainServer.channels.trustedFarmerChat) as Discord.TextChannel)?.messages?.fetch(client.config.mainServer.TFListMsgId).catch(() => null);
+    const sortedMemberMentions = TFRole.members.sort((a, b) => {
+        if (a.displayName.toLowerCase() < b.displayName.toLowerCase()) return -1;
+        if (a.displayName.toLowerCase() > b.displayName.toLowerCase()) return 1;
+        return 0;
+    }).map(x => x.toString()).join('\n');
+    
+    tfMsg?.edit(`<@&${TFRole.id}>: ${TFRole.members.size}\n${sortedMemberMentions}`);
 }

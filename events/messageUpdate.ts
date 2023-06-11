@@ -2,7 +2,7 @@ import Discord, { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.j
 import YClient from "../client.js";
 
 export default async (client: YClient, oldMsg: Discord.Message<boolean> | Discord.PartialMessage, newMsg: Discord.Message<boolean> | Discord.PartialMessage) => {
-    if (!client.config.botSwitches.logs || newMsg.author?.bot || oldMsg.partial || newMsg.partial || !oldMsg.member || oldMsg.content.length == 0 || newMsg.content === oldMsg.content || ['979863373439184966', '968265015595532348'].includes(newMsg.channel.id)) return;
+    if (!client.config.botSwitches.logs || newMsg.author?.bot || oldMsg.partial || newMsg.partial || !oldMsg.member || !oldMsg.content || newMsg.content === oldMsg.content || client.config.blacklistedCh.includes(newMsg.channel.id)) return;
     const msgarr = newMsg.content.toLowerCase().split(' ');
 
     if (client.bannedWords._content.some(word => msgarr.includes(word)) && (!client.isMPStaff(oldMsg.member) && !client.isDCStaff(oldMsg.member))) newMsg.delete();

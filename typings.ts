@@ -65,6 +65,8 @@ export interface Config {
         csg: string;
     }>
     devWhitelist: Array<string>,
+    /** messageDelete, messageUpdate */
+    blacklistedCh: Array<string>,
     /** `Array<[ChannelID, MessageID, serverAcro]>` */
     FSCacheServers: Array<Array<string>>,
     /** `Array<[ChannelID, ChannelName]>` */

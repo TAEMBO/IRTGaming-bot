@@ -80,8 +80,9 @@ setInterval(async () => {
 
 // Farming Simulator 22 stats loops
 if (client.config.botSwitches.FSLoop) setInterval(async () => {
-	for await (const server of client.config.FSCacheServers) await FSLoop(client, server[0], server[1], server[2]);
-	FSLoopAll(client);
+	const watchList = await client.watchList._content.find();
+	for await (const server of client.config.FSCacheServers) await FSLoop(client, watchList, server[0], server[1], server[2]);
+	FSLoopAll(client, watchList);
 }, 30_000);
 
 // YouTube upload nofitcations loop

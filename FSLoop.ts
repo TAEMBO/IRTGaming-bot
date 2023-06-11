@@ -4,7 +4,9 @@ import { xml2js } from "xml-js";
 import fs from "node:fs";
 import type { FSLoopCSG, FSLoopDSS, FSLoopDSSPlayer } from "./typings.js";
 
-function decorators(client: YClient, player: FSLoopDSSPlayer, watchList?: { _id: string, reason: string }[], publicLoc?: boolean) {
+type WatchList = { _id: string, reason: string }[];
+
+function decorators(client: YClient, player: FSLoopDSSPlayer, watchList: WatchList, publicLoc?: boolean) {
     const inWl = watchList?.some(x => x._id === player.name);
     let decorators = player.isAdmin ? ':detective:' : ''; // Tag for if player is admin
     decorators += client.FMlist._content.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
@@ -14,7 +16,7 @@ function decorators(client: YClient, player: FSLoopDSSPlayer, watchList?: { _id:
     return decorators;
 }
 
-export default async (client: YClient, ChannelID: string, MessageID: string, serverAcro: string) => {
+export default async (client: YClient, watchList: WatchList, ChannelID: string, MessageID: string, serverAcro: string) => {
     function wlEmbed(playerName: string, joinLog: boolean, wlReason?: string) {
         const embed = new client.embed()
             .setTitle('WatchList')
@@ -97,7 +99,6 @@ export default async (client: YClient, ChannelID: string, MessageID: string, ser
 
     const newPlayers = DSS.slots.players.filter(x=>x.isUsed);
     const oldPlayers = client.FSCache[serverAcro].players;
-    const watchList = await client.watchList._content.find();
     const serverStatusEmbed = (status: string) => new client.embed().setTitle(`${serverAcro} now ${status}`).setColor(client.config.embedColorYellow).setTimestamp();
     const wlChannel = client.getChan('watchList');
     const logChannel = client.getChan('fsLogs');
@@ -169,7 +170,7 @@ export default async (client: YClient, ChannelID: string, MessageID: string, ser
     }
 }
 
-export function FSLoopAll(client: YClient) {
+export function FSLoopAll(client: YClient, watchList: WatchList) {
     const embed = new client.embed().setColor(client.config.embedColor);
     const totalCount = <number[]>[];
 
@@ -182,7 +183,7 @@ export function FSLoopAll(client: YClient) {
             const playTimeHrs = Math.floor(player.uptime / 60);
             const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
 
-            playerInfo.push(`\`${player.name}\` ${decorators(client, player)} **|** ${playTimeHrs}:${playTimeMins}`);
+            playerInfo.push(`\`${player.name}\` ${decorators(client, player, watchList)} **|** ${playTimeHrs}:${playTimeMins}`);
         }
         if (playerInfo.length > 0) embed.addFields({ name: `${server[0]} - ${serverSlots}/16`, value: playerInfo.join('\n') });
     }

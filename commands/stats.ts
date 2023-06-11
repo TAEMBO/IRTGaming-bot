@@ -1,4 +1,4 @@
-import Discord, { SlashCommandBuilder } from 'discord.js';
+import Discord, { SlashCommandBuilder, AttachmentBuilder } from 'discord.js';
 import YClient from '../client.js';
 import fs from 'node:fs';
 import canvas from 'canvas';
@@ -16,10 +16,10 @@ export default {
 
             if (!FSdss) return interaction.reply('Server did not respond');
 
-            const data: Array<number> = JSON.parse(fs.readFileSync(`../databases/${subCmd.toUpperCase()}PlayerData.json`, 'utf8')).slice(client.config.statsGraphSize);
+            const data: number[] = JSON.parse(fs.readFileSync(`../databases/${subCmd.toUpperCase()}PlayerData.json`, 'utf8')).slice(client.config.statsGraphSize);
         
             // handle negative days
-            data.forEach((change: number, i: number) => {
+            data.forEach((change, i) => {
                 if (change < 0) data[i] = data[i - 1] || data[i + 1] || 0;
             });
             
@@ -49,7 +49,7 @@ export default {
             }
             const chosen_interval = interval_candidates.sort((a, b) => b[2] - a[2])[0];
         
-            const previousY: Array<number> = [];
+            const previousY: number[] = [];
         
             ctx.strokeStyle = '#202225';
             for (let i = 0; i <= chosen_interval[1]; i++) {
@@ -86,8 +86,8 @@ export default {
             gradient.addColorStop(5 / 16, client.config.embedColorYellow);
             gradient.addColorStop(12 / 16, client.config.embedColorGreen);
             
-            let lastCoords: Array<number> = [];
-            data.forEach((curPC: number /* current player count */, i: number) => {
+            let lastCoords: number[] = [];
+            data.forEach((curPC /* current player count */, i) => {
                 if (curPC < 0) curPC = 0;
                 const x = i * nodeWidth + graphOrigin[0];
                 const y = getYCoordinate(curPC);
@@ -144,7 +144,7 @@ export default {
             const ty = graphOrigin[1] + graphSize[1] + (textSize);
             ctx.fillText('time ->', tx, ty);
 
-            const playerInfo: Array<string> = [];
+            const playerInfo: string[] = [];
             const watchList = await client.watchList._content.find();
             let Color = client.config.embedColorGreen;
         
@@ -163,26 +163,26 @@ export default {
         
                 playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
             };
-            const Image = new client.attachmentBuilder(img.toBuffer(), { name: "FSStats.png" });
+            const Image = new AttachmentBuilder(img.toBuffer(), { name: "FSStats.png" });
             const serverSlots = `${FSdss.slots.used}/${FSdss.slots.capacity}`;
             const serverTimeHrs = Math.floor(FSdss.server.dayTime / 3600 / 1000).toString().padStart(2, '0');
             const serverTimeMins = Math.floor((FSdss.server.dayTime / 60 / 1000) % 60).toString().padStart(2, '0');
             const embed = new client.embed()
-                .setAuthor({name: `${serverSlots} - ${serverTimeHrs}:${serverTimeMins}`})
-                .setTitle(FSdss.server.name.length == 0 ? 'Offline' : FSdss.server.name)
+                .setAuthor({ name: `${serverSlots} - ${serverTimeHrs}:${serverTimeMins}` })
+                .setTitle(FSdss.server.name || 'Offline')
                 .setDescription(FSdss.slots.used == 0 ? '*No players online*' : playerInfo.join("\n"))
                 .setImage('attachment://FSStats.png')
                 .setColor(Color);
-            if (!FSdss.slots.players.some(x=>x.isAdmin) && client.FSCache[subCmd.toUpperCase()].lastAdmin) embed.setTimestamp(client.FSCache[subCmd.toUpperCase()].lastAdmin).setFooter({text: 'Admin last on'});
+            if (!FSdss.slots.players.some(x=>x.isAdmin) && client.FSCache[subCmd.toUpperCase()].lastAdmin) embed.setTimestamp(client.FSCache[subCmd.toUpperCase()].lastAdmin).setFooter({ text: 'Admin last on' });
         
-            interaction.reply({embeds: [embed], files: [Image]}).catch(() => interaction.channel?.send({embeds: [embed], files: [Image]}));
+            interaction.reply({ embeds: [embed], files: [Image] }).catch(() => interaction.channel?.send({ embeds: [embed], files: [Image] }));
         }
 
         if (subCmd === 'all') {
             await interaction.deferReply();
             const embed = new client.embed().setColor(client.config.embedColor);
-            const failedFooter: Array<string> = [];
-            const totalCount: Array<number> = [];
+            const failedFooter: string[] = [];
+            const totalCount: number[] = [];
             const watchList = await client.watchList._content.find();
 
             async function FSstatsAll(serverAcro: string) {
@@ -195,7 +195,7 @@ export default {
                 if (!FSdss || FSdss.slots.used === 0 ) return;
 
                 totalCount.push(FSdss.slots.used);
-                const playerInfo: Array<string> = [];
+                const playerInfo: string[] = [];
                 const serverSlots = `${FSdss.slots.used}/${FSdss.slots.capacity}`;
                 for (const player of FSdss.slots.players.filter(x=>x.isUsed)) {
                     const playTimeHrs = Math.floor(player.uptime / 60);

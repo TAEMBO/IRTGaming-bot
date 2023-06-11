@@ -15,7 +15,6 @@ export default class YClient extends Client {
     config = config as Config;
     embed = Discord.EmbedBuilder;
     collection = Discord.Collection;
-    attachmentBuilder = Discord.AttachmentBuilder;
     commands = new this.collection<string, Command>();
     registry: Registry = [];
     repeatedMessages: RepeatedMessages = {};

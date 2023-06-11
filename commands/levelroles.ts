@@ -1,4 +1,4 @@
-import Discord, { SlashCommandBuilder } from 'discord.js';
+import Discord, { SlashCommandBuilder, AttachmentBuilder } from 'discord.js';
 import YClient from '../client.js';
 import fs from 'node:fs';
 import canvas from 'canvas';
@@ -135,7 +135,7 @@ export default {
 			const topUsers = allData.sort((a, b) => b.messages - a.messages).slice(0, 10).map((x, i) => `\`${i + 1}.\` <@${x._id}>: ${x.messages.toLocaleString('en-US')}`).join('\n');
 			
 			interaction.reply({
-				files: [new client.attachmentBuilder(img.toBuffer(), {name: "dailymsgs.png"})],
+				files: [new AttachmentBuilder(img.toBuffer(), { name: "dailymsgs.png" })],
 				embeds: [new client.embed()
 					.setTitle('Ranking leaderboard')
 					.setDescription(`A total of **${messageCountsTotal.toLocaleString('en-US')}** messages have been recorded in this server.`)

@@ -51,10 +51,10 @@ export default async (client: YClient, ChannelID: string, MessageID: string, ser
         // Filter for players leaving
         for (const player of oldPlayers.filter(x => !newPlayers.some(y => y.name === x.name))) {
             const inWl = watchList.find(x => x._id === player.name);
-            if (inWl) wlChannel.send({embeds: [wlEmbed(inWl._id, false)]}); // Hopefully that person got banned
+            if (inWl) wlChannel.send({ embeds: [wlEmbed(inWl._id, false)] });
             
             if (player.uptime > 0) client.playerTimes.addPlayerTime(player.name, player.uptime, serverAcro.toLowerCase() as 'ps' | 'pg' | 'mf'); // Add playerTimes data
-            logChannel.send({embeds: [logEmbed(player, false)]});
+            logChannel.send({ embeds: [logEmbed(player, false)] });
         };
 
         // Filter for players joining
@@ -67,9 +67,9 @@ export default async (client: YClient, ChannelID: string, MessageID: string, ser
             const inWl = watchList.find(y => y._id === x.name);
             if (client.config.mainServer.id === '552565546089054218' && inWl) {
                 const filterWLPings = client.watchListPings._content.filter(x => !client.mainGuild().members.cache.get(x)?.roles.cache.has(client.config.mainServer.roles.loa)).map(x=>`<@${x}>`).join(" ");
-                wlChannel.send({ content: filterWLPings, embeds: [wlEmbed(inWl._id, true, inWl.reason)] }); // Oh no, go get em Toast
+                wlChannel.send({ content: filterWLPings, embeds: [wlEmbed(inWl._id, true, inWl.reason)] });
             }
-            logChannel.send({embeds: [logEmbed(x, true)]});
+            logChannel.send({ embeds: [logEmbed(x, true)] });
         };
     }
 
@@ -81,12 +81,12 @@ export default async (client: YClient, ChannelID: string, MessageID: string, ser
         .then(res => res.json() as Promise<FSLoopDSS>)
         .catch(err => client.log('\x1b[31m', `${serverAcro} dss ${err.message}`));
 
-    const CSG = await fetch(client.config.fs[serverAcro.toLowerCase()].csg, init).then(async res => { // Fetch dedicated-server-savegame.html
+    const CSG = (!DSS ? null : await fetch(client.config.fs[serverAcro.toLowerCase()].csg, init).then(async res => { // Fetch dedicated-server-savegame.html
         if (res.status === 204) {
             statsEmbed.setImage('https://http.cat/204');
             client.log('\x1b[31m', `${serverAcro} csg empty content`);
         } else return (xml2js(await res.text(), { compact: true }) as any).careerSavegame as FSLoopCSG;
-    }).catch(err => client.log('\x1b[31m', `${serverAcro} csg ${err.message}`));
+    }).catch(err => client.log('\x1b[31m', `${serverAcro} csg ${err.message}`)));
 
     if (!DSS || !DSS.slots || !CSG) { // Blame Red
         if (DSS && !DSS.slots) client.log('\x1b[31m', `${serverAcro} undefined slots`);
@@ -126,7 +126,7 @@ export default async (client: YClient, ChannelID: string, MessageID: string, ser
     // Stats embed
     statsEmbed.setAuthor({ name: `${DSS.slots.used}/${DSS.slots.capacity}` })
         .setColor(client.config.embedColorGreen)
-        .setDescription(DSS.slots.used < 1 ? '*No players online*' : playerInfo.join("\n"))
+        .setDescription(DSS.slots.used ? playerInfo.join('\n') : '*No players online*')
         .setFields({ name: `**Server Statistics**`, value: [
             `**Money:** $${Money}`,
             `**In-game time:** ${IngameTimeHrs}:${IngameTimeMins}`,
@@ -145,12 +145,12 @@ export default async (client: YClient, ChannelID: string, MessageID: string, ser
     statsMsgEdit();
     
     // Logs
-    if (DSS.server.name.length < 1) {
-        if (client.FSCache[serverAcro].status === 'online') logChannel.send({embeds: [serverStatusEmbed('offline')]});
+    if (!DSS.server.name) {
+        if (client.FSCache[serverAcro].status === 'online') logChannel.send({ embeds: [serverStatusEmbed('offline')] });
         client.FSCache[serverAcro].status = 'offline';
     } else {
         if (client.FSCache[serverAcro].status === 'offline') {
-            logChannel.send({embeds: [serverStatusEmbed('online')]});
+            logChannel.send({ embeds: [serverStatusEmbed('online')] });
             justStarted = true;
         }
         client.FSCache[serverAcro].status = 'online';

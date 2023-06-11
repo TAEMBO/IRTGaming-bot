@@ -1,27 +1,23 @@
 import YClient from './client.js';
 import Discord from 'discord.js';
 
-export interface RepeatedMessages {
-    [key: string]: {
-        data: Discord.Collection<number, {
-            type: string,
-            channel: string
-        }>,
-        timeout: NodeJS.Timeout
-    }
-}
+export type RepeatedMessages = Record<string, {
+    data: Discord.Collection<number, {
+        type: string;
+        channel: string;
+    }>;
+    timeout: NodeJS.Timeout;
+}>;
 
-export interface FSCache {
-    [key: string]: {
-        players: FSLoopDSSPlayer[],
-        status: "online" | "offline" | null,
-        lastAdmin: number | null
-    }
-}
+export type FSCache = Record<string, {
+    players: FSLoopDSSPlayer[];
+    status: "online" | "offline" | null;
+    lastAdmin: number | null;
+}>;
 
-export interface YTCache {
-    [key: string]: string | null
-}
+export type YTCache = Record<string, string | null>;
+
+export type Registry = Discord.ApplicationCommandDataResolvable[];
 
 export interface InviteCache {
     uses: number | null,
@@ -57,27 +53,23 @@ export interface Config {
         autoResponses: boolean,
         buttonRoles: boolean,
     },
-    ftp: {
-        [key: string]: {
-            host: string,
-            user: string,
-            password: string
-            path: string
-        },
-    }
-    fs: {
-        [key: string]: {
-            login: string,
-            dss: string,
-            csg: string
-        },
-    }
+    ftp: Record<string, {
+        host: string;
+        user: string;
+        password: string;
+        path: string;
+    }>,
+    fs: Record<string, {
+        login: string;
+        dss: string;
+        csg: string;
+    }>
     devWhitelist: Array<string>,
     /** `Array<[ChannelID, MessageID, serverAcro]>` */
     FSCacheServers: Array<Array<string>>,
     /** `Array<[ChannelID, ChannelName]>` */
     YTCacheChannels: Array<Array<string>>,
-    readonly mainServer: {
+    mainServer: {
         id: string,
         FSLoopMsgId: string,
         MPStaffRoles: Array<keyof Config["mainServer"]["roles"]>,

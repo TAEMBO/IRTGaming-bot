@@ -75,14 +75,17 @@ export default class YClient extends Client {
     public log(color: string, ...data: any[]) {
         console.log(`${color}[${moment().format('HH:mm:ss')}]`, ...data);
     }
-    public youNeedRole(interaction: Discord.ChatInputCommandInteraction<"cached">, role: keyof typeof this.config.mainServer.roles) {
-        interaction.reply(`You need the <@&${this.config.mainServer.roles[role]}> role to use this command`);
+    public async youNeedRole(interaction: Discord.ChatInputCommandInteraction<"cached">, role: keyof typeof this.config.mainServer.roles) {
+        return await interaction.reply(`You need the <@&${this.config.mainServer.roles[role]}> role to use this command`);
     }
     public isDCStaff(guildMember: Discord.GuildMember) {
         return this.config.mainServer.DCStaffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
     }
     public isMPStaff(guildMember: Discord.GuildMember) {
         return this.config.mainServer.MPStaffRoles.map(x => this.config.mainServer.roles[x]).some(x => guildMember.roles.cache.has(x));
+    }
+    public onMFFarms(guildMember: Discord.GuildMember) {
+        return this.config.mainServer.MFFarmRoles.map(x => this.config.mainServer.roles[x]).filter(x => guildMember.roles.cache.has(x));
     }
     public getChan(channel: keyof typeof this.config.mainServer.channels) {
         return this.channels.resolve(this.config.mainServer.channels[channel]) as Discord.TextChannel;
@@ -94,7 +97,6 @@ export default class YClient extends Client {
         fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${YTChannelID}`, { signal: AbortSignal.timeout(5000) }).then(async res => {
             const Data = xml2js(await res.text(), { compact: true }) as YTCacheFeed;
             const latestVid = Data.feed.entry[0];
-            
 
             if (!this.YTCache[YTChannelID]) return this.YTCache[YTChannelID] = latestVid['yt:videoId']._text;
         

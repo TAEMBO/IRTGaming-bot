@@ -75,6 +75,7 @@ export interface Config {
         id: string,
         FSLoopMsgId: string,
         TFListMsgId: string;
+        MFFarmRoles: Array<keyof Config["mainServer"]["roles"]>;
         MPStaffRoles: Array<keyof Config["mainServer"]["roles"]>,
         DCStaffRoles: Array<keyof Config["mainServer"]["roles"]>,
         roles: {

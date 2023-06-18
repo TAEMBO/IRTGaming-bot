@@ -69,16 +69,15 @@ export default {
                 if (client.FSCache[chosenServer.toUpperCase()].status === 'online') return interaction.reply(`You cannot mop files from **${chosenServer.toUpperCase()}** while it is online`);
                 if (chosenServer !== 'pg' && chosenAction === 'items.xml') return interaction.reply(`You can only mop **${chosenAction}** from **PG**`);
                 
+                const time = Date.now();
                 await interaction.deferReply();
                 const FTPLogin = client.config.ftp[chosenServer];
-                const time = Date.now();
     
-                FTP.connect(FTPLogin);
                 FTP.on('ready', () => FTP.delete(FTPLogin.path + `savegame1/${chosenAction}`, async (err) => {
                     if (err) return interaction.editReply(err.message);
                     await interaction.editReply(`Successfully deleted **${chosenAction}** from **${chosenServer.toUpperCase()}** after **${Date.now() - time}ms**`);
                     FTP.end();
-                }));
+                })).connect(FTPLogin);
             },
             bans: async () => {
                 const chosenServer = interaction.options.getString('server', true) as 'ps' | 'pg';
@@ -88,15 +87,14 @@ export default {
     
                 if (chosenAction === 'dl') {
                     if (chosenServer === 'pg') {
-                        FTP.connect(client.config.ftp.pg);
                         FTP.on('ready', () => FTP.get(client.config.ftp.pg.path + 'blockedUserIds.xml', (err, stream) => {
                             if (err) return interaction.editReply(err.message);
-                            stream.once('close', ()=>FTP.end());
-                            stream.pipe(fs.createWriteStream('../databases/blockedUserIds.xml', {}));
+                            stream.once('close', () => FTP.end());
+                            stream.pipe(fs.createWriteStream('../databases/blockedUserIds.xml'));
         
-                            setTimeout(() => interaction.editReply({files: ['../databases/blockedUserIds.xml']}), 1000);
-                        }));
-                    } else interaction.editReply({files: ['../../../Documents/My Games/FarmingSimulator2022/blockedUserIds.xml']});
+                            setTimeout(() => interaction.editReply({ files: ['../databases/blockedUserIds.xml'] }), 1000);
+                        })).connect(client.config.ftp.pg);
+                    } else interaction.editReply({ files: ['../../../Documents/My Games/FarmingSimulator2022/blockedUserIds.xml'] });
                 } else {
                     if (!interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager)) return client.youNeedRole(interaction, "mpmanager");
                     
@@ -114,12 +112,11 @@ export default {
                     if (!data.blockedUserIds?.user[0]?._attributes?.displayName) return interaction.editReply(`Canceled: Improper file (data format)`);
     
                     if (chosenServer === 'pg') {
-                        FTP.connect(client.config.ftp.pg);
                         FTP.on('ready', () => FTP.put(banData, client.config.ftp.pg.path + 'blockedUserIds.xml', error => {
                             if (error) {
                                 interaction.editReply(error.message);
                             } else interaction.editReply('Successfully uploaded ban file for PG');
-                        }));
+                        })).connect(client.config.ftp.pg);
                     } else fs.writeFile(`../../../Documents/My Games/FarmingSimulator2022/blockedUserIds.xml`, banData, () => interaction.editReply('Successfully uploaded ban file for PS'));
                 }
             },
@@ -144,18 +141,21 @@ export default {
                     } else return perm;
                 }
                 function checkPlayer(farmData: farmFormat) {
-                    const playerData = name.length === 44 ? farmData.farms.farm[0].players.player.find(x => x._attributes.uniqueUserId === name) : farmData.farms.farm[0].players.player.find(x => x._attributes.lastNickname === name);
+                    const playerData = farmData.farms.farm[0].players.player.find(x => {
+                        if (name.length === 44) {
+                            return x._attributes.uniqueUserId === name;
+                        } else return x._attributes.lastNickname === name;
+                    });
                     if (playerData) {
                         interaction.editReply('```\n' + Object.entries(playerData._attributes).map(x => x[0].padEnd(18, ' ') + permIcon(x[1], x[0])).join('\n') + '```');
                     } else interaction.editReply('No green farm data found with that name/UUID');
                 }
                 if (chosenServer == 'pg') {
-                    FTP.connect(client.config.ftp.pg);
                     FTP.on('ready', () => FTP.get(client.config.ftp.pg.path + 'savegame1/farms.xml', async (err, stream) => {
                         if (err) return interaction.editReply(err.message);
                         checkPlayer(xml2js(await new Response(stream as any).text(), { compact: true }) as farmFormat);
-                        stream.once('close', ()=>FTP.end());
-                    }));
+                        stream.once('close', () => FTP.end());
+                    })).connect(client.config.ftp.pg);
                 } else checkPlayer(xml2js(fs.readFileSync('../../../Documents/My Games/FarmingSimulator2022/savegame1/farms.xml', 'utf8'), { compact: true }) as farmFormat);
             },
             farms: async () => {
@@ -163,21 +163,20 @@ export default {
 
                 if (chosenServer == 'pg') {
                     await interaction.deferReply();
-                    FTP.connect(client.config.ftp.pg);
 
                     FTP.on('ready', () => FTP.get(client.config.ftp.pg.path + 'savegame1/farms.xml', (err, stream) => {
                         if (err) return interaction.editReply(err.message);
-                        stream.once('close', ()=>FTP.end());
+                        stream.once('close', () => FTP.end());
                         stream.pipe(fs.createWriteStream('../databases/farms.xml'));
-                        setTimeout(() => interaction.editReply({files: ['../databases/farms.xml']}), 4000);
-                    }));
-                } else interaction.reply({files: ['../../../Documents/My Games/FarmingSimulator2022/savegame1/farms.xml']});
+                        setTimeout(() => interaction.editReply({ files: ['../databases/farms.xml'] }), 4000);
+                    })).connect(client.config.ftp.pg);
+                } else interaction.reply({ files: ['../../../Documents/My Games/FarmingSimulator2022/savegame1/farms.xml'] });
             },
             password: async () => {
-                await interaction.deferReply()
+                await interaction.deferReply();
                 const chosenServer = interaction.options.getString('server', true) as 'ps' | 'pg';
                 function getPassword(data: string) {
-                    const pw = (xml2js(data, { compact: true }) as any).gameserver.settings.game_password._text as string | undefined;
+                    const pw = (xml2js(data, { compact: true }) as any).gameserver?.settings?.game_password?._text as string | undefined;
 
                     if (pw) {
                         interaction.editReply(`Current password for **${chosenServer.toUpperCase()}** is \`${pw}\``);
@@ -185,12 +184,11 @@ export default {
                 }
 
                 if (chosenServer === 'pg') {
-                    FTP.connect(client.config.ftp.pg);
                     FTP.once('ready', () => FTP.get(client.config.ftp.pg.path + 'dedicated_server/dedicatedServerConfig.xml', async (err, stream) => {
                         if (err) return interaction.editReply(err.message);
                         getPassword(await new Response(stream as any).text());
-                        stream.once('close', ()=>FTP.end());
-                    }));
+                        stream.once('close', () => FTP.end());
+                    })).connect(client.config.ftp.pg);
                 } else getPassword(fs.readFileSync('../../../Documents/My Games/FarmingSimulator2022/dedicated_server/dedicatedServerConfig.xml', 'utf8'));
             },
             roles: async () => {
@@ -201,7 +199,7 @@ export default {
                 let roles = member.roles.cache.map((x, i) => i);
                 
                 if (member.roles.cache.has(Role)) {
-                    const msg = await interaction.reply({
+                    (await interaction.reply({
                         embeds: [new client.embed()
                             .setDescription(`This user already has the <@&${Role}> role, do you want to remove it from them?`)
                             .setColor(client.config.embedColor)
@@ -209,24 +207,27 @@ export default {
                         fetchReply: true,
                         components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
                             new ButtonBuilder()
-                                .setCustomId(`Yes`)
+                                .setCustomId('Yes')
                                 .setStyle(ButtonStyle.Success)
-                                .setLabel("Confirm"),
+                                .setLabel('Confirm'),
                             new ButtonBuilder()
-                                .setCustomId(`No`)
+                                .setCustomId('No')
                                 .setStyle(ButtonStyle.Danger)
-                                .setLabel("Cancel"))
+                                .setLabel('Cancel'))
                         ]
-                    });
-
-                    const filter = (i: any) => ["Yes", "No"].includes(i.customId) && i.user.id === interaction.user.id;
-                    const collector = msg.createMessageComponentCollector({ filter, max: 1, time: 30000 });
-                    collector.on("collect", async int => {
-                        if (int.customId === "Yes") {
-                            member.edit({ roles: roles.filter(x => x !== Role).filter(x => x !== client.config.mainServer.roles.mpstaff) });
-                            int.update({embeds: [new client.embed().setDescription(`<@${member.user.id}> has been removed from <@&${Role}>.`).setColor(client.config.embedColor)], components: []})
-                            await owner.send(`**${interaction.user.tag}** has demoted **${member.user.tag}** from **${interaction.guild.roles.cache.get(Role)?.name}**`)
-                        } else int.update({embeds: [new client.embed().setDescription(`Command canceled`).setColor(client.config.embedColor)], components: []});
+                    })).createMessageComponentCollector({
+                        filter: x => x.user.id === interaction.user.id,
+                        max: 1,
+                        time: 30_000
+                    }).on('collect', int => {
+                        ({
+                            yes: () => {
+                                member.edit({ roles: roles.filter(x => x !== Role).filter(x => x !== client.config.mainServer.roles.mpstaff) });
+                                int.update({ embeds: [new client.embed().setDescription(`<@${member.user.id}> has been removed from <@&${Role}>.`).setColor(client.config.embedColor)], components: [] });
+                                owner.send(`**${interaction.user.tag}** has demoted **${member.user.tag}** from **${interaction.guild.roles.cache.get(Role)?.name}**`);
+                            },
+                            no: () => int.update({ embeds: [new client.embed().setDescription(`Command canceled`).setColor(client.config.embedColor)], components: [] })
+                        } as any)[int.customId]();
                     });
                 } else {
                     roles.push(Role);
@@ -234,7 +235,7 @@ export default {
                     if (Role === client.config.mainServer.roles.mpjradmin) roles.splice(roles.indexOf(client.config.mainServer.roles.mpfarmmanager), 1);
                     member.edit({ roles });
                     await owner.send(`**${interaction.user.tag}** has promoted **${member.user.tag}** to **${interaction.guild.roles.cache.get(Role)?.name}**`);
-                    interaction.reply({embeds: [new client.embed().setDescription(`<@${member.user.id}> has been given <@&${Role}>.`).setColor(client.config.embedColor)]});
+                    interaction.reply({ embeds: [new client.embed().setDescription(`<@${member.user.id}> has been given <@&${Role}>.`).setColor(client.config.embedColor)] });
                 }
             },
             fm: () => {
@@ -267,16 +268,16 @@ export default {
                 .setName('server')
                 .setDescription('The server to manage')
                 .addChoices(
-                    {name: 'Public Silage', value: 'ps'},
-                    {name: 'Public Grain', value: 'pg'},
-                    {name: 'Multi Farm', value: 'mf'})
+                    { name: 'Public Silage', value: 'ps' },
+                    { name: 'Public Grain', value: 'pg' },
+                    { name: 'Multi Farm', value: 'mf' })
                 .setRequired(true))
             .addStringOption(x=>x
                 .setName('action')
                 .setDescription('Start or stop the given server')
                 .addChoices(
-                    {name: 'Start', value: 'start'},
-                    {name: 'Stop', value: 'stop'})
+                    { name: 'Start', value: 'start' },
+                    { name: 'Stop', value: 'stop' })
                 .setRequired(true)))
         .addSubcommand(x=>x
             .setName('mop')
@@ -285,15 +286,15 @@ export default {
                 .setName('server')
                 .setDescription('The server to manage')
                 .addChoices(
-                    {name: 'Public Silage', value: 'ps'},
-                    {name: 'Public Grain', value: 'pg'})
+                    { name: 'Public Silage', value: 'ps' },
+                    { name: 'Public Grain', value: 'pg' })
                 .setRequired(true))
             .addStringOption(x=>x
                 .setName('action')
                 .setDescription('The action to perform on the given server')
                 .addChoices(
-                    {name: 'Mop players.xml', value: 'players.xml'},
-                    {name: 'Mop items.xml', value: 'items.xml'})
+                    { name: 'Mop players.xml', value: 'players.xml' },
+                    { name: 'Mop items.xml', value: 'items.xml' })
                 .setRequired(true)))
         .addSubcommand(x=>x
             .setName('bans')
@@ -302,15 +303,15 @@ export default {
                 .setName('server')
                 .setDescription('The server to manage')
                 .addChoices(
-                    {name: 'Public Silage', value: 'ps'},
-                    {name: 'Public Grain', value: 'pg'})
+                    { name: 'Public Silage', value: 'ps' },
+                    { name: 'Public Grain', value: 'pg' })
                 .setRequired(true))
             .addStringOption(x=>x
                 .setName('action')
                 .setDescription('To download or upload a ban file')
                 .addChoices(
-                    {name: 'Download', value: 'dl'},
-                    {name: 'Upload', value: 'ul'})
+                    { name: 'Download', value: 'dl' },
+                    { name: 'Upload', value: 'ul' })
                 .setRequired(true))
             .addAttachmentOption(x=>x
                 .setName('bans')
@@ -323,8 +324,8 @@ export default {
                 .setName('server')
                 .setDescription('The server to search on')
                 .addChoices(
-                    {name: 'Public Silage', value: 'ps'},
-                    {name: 'Public Grain', value: 'pg'})
+                    { name: 'Public Silage', value: 'ps' },
+                    { name: 'Public Grain', value: 'pg' })
                 .setRequired(true))
             .addStringOption(x=>x
                 .setName('name')
@@ -337,8 +338,8 @@ export default {
                 .setName('server')
                 .setDescription('The server to fetch from')
                 .addChoices(
-                    {name: 'Public Silage', value: 'ps'},
-                    {name: 'Public Grain', value: 'pg'})
+                    { name: 'Public Silage', value: 'ps' },
+                    { name: 'Public Grain', value: 'pg' })
                 .setRequired(true)))
         .addSubcommand(x=>x
             .setName('password')

@@ -16,7 +16,7 @@ export default async (client: YClient) => {
     await client.getChan('taesTestingZone').send([
         ':warning: Bot restarted :warning:',
         `<@${client.config.devWhitelist[0]}>`,
-        `\`\`\`json\n${Object.entries(client.config.botSwitches).map(x => `${x[0]}: ${x[1]}`).join('\n')}\`\`\``
+        `\`\`\`json\n${JSON.stringify(client.config.botSwitches).slice(1, -1)}\`\`\``
     ].join('\n'));
 
     client.log('\x1b[34m', `Bot active as ${client.user?.tag}`);

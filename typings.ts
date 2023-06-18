@@ -103,15 +103,15 @@ export interface Config {
             mffarm8: string,
             mffarm9: string,
             mffarm10: string,
-            subscriber: string
-            detained: string
+            subscriber: string;
+            detained: string;
+            member: string;
         },
         channels: {
             botLogs: string,
             botCommands: string,
             mpPublicSilage: string,
             mpPublicGrain: string,
-            welcome: string,
             general: string,
             taesTestingZone: string,
             communityIdeas: string,

@@ -5,7 +5,7 @@ import ms from 'ms';
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
         function formatTime(time: number) {
-            return `<t:${Math.round((time) / 1000)}> (<t:${Math.round((time) / 1000)}:R>)`;
+            return `<t:${Math.round(time / 1000)}> (<t:${Math.round(time / 1000)}:R>)`;
         };
         function rplText(content: string) {
             return { content, embeds: [], components: [] };
@@ -16,72 +16,73 @@ export default {
                 const reminderText = interaction.options.getString("what", true);
                 const reminderTime = ms(interaction.options.getString("when", true)) as number | undefined;
                 
-                if (reminderTime) {
-                    const timeToRemind = Date.now() + reminderTime;
-                    const currentReminders = await client.reminders._content.find({ userid: interaction.user.id });
-
-                    if (currentReminders.length > 25) return interaction.reply({ content: 'You can only have up to 25 reminders at a time', ephemeral: true });
-
-                    const msg = await interaction.reply({
-                        embeds: [new client.embed()
-                            .setColor(client.config.embedColor)
-                            .setDescription([
-                                'Are you sure you want to create a new reminder?',
-                                `> Content: \`${reminderText}\``,
-                                `> Time to remind: ${formatTime(timeToRemind)}`
-                            ].join('\n'))
-                            .setFooter({ text: '60s to respond' })
-                        ],
-                        ephemeral: true,
-                        components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
-                            new ButtonBuilder().setCustomId('yes').setStyle(ButtonStyle.Success).setLabel("Confirm"),
-                            new ButtonBuilder().setCustomId('no').setStyle(ButtonStyle.Danger).setLabel("Cancel")
-                        )]
-                    });
-                    
-                    msg.createMessageComponentCollector({
-                        filter: x => x.user.id === interaction.user.id,
-                        max: 1,
-                        time: 60_000
-                    }).on('collect', async int => {
-                        ({
-                            yes: () => Promise.all([
-                                client.reminders._content.create({ userid: interaction.user.id, content: reminderText, time: timeToRemind, ch: interaction.channelId }),
-                                int.update({
-                                    components: [],
-                                    embeds: [new client.embed()
-                                        .setTitle('Reminder set')
-                                        .setDescription(`\n\`\`\`${reminderText}\`\`\`\n${formatTime(timeToRemind)}`)
-                                        .setColor(client.config.embedColor)
-                                    ]
-                                })
-                            ]),
-                            no: () => int.update(rplText('Command manually canceled'))
-                        } as any)[int.customId]();
-                    }).on('end', ints => {
-                        if (ints.size < 1) interaction.editReply(rplText('No response given, command canceled'));
-                    });
-                } else interaction.reply({
+                if (!reminderTime) return interaction.reply({
                     ephemeral: true,
                     embeds: [new client.embed()
                         .setTitle('Incorrect timestamp')
                         .setColor(client.config.embedColorRed)
-                        .setFields({
-                            name: 'Proper formatting',
-                            value: [
-                                '```Seconds: 10s, 1sec, 10secs, 1second, 10seconds',
-                                'Minutes: 10m, 1min, 10mins, 1minute, 10minutes',
-                                'Hours: 10h, 1hour, 10hours',
-                                'Days: 10d, 1day, 10days```'
-                            ].join('\n')
-                        })
+                        .setDescription([
+                            '**Format:** `[amount][quantity]`',
+                            '**Quantities:**',
+                            [
+                                '- Seconds: `s`, `sec`, `secs`, `second`, `seconds`',
+                                '- Minutes: `m`, `min`, `mins`, `minute`, `minutes`',
+                                '- Hours: `h`, `hour`, `hours`',
+                                '- Days: `d`, `day`, `days`'
+                            ].join('\n'),
+                            '**Examples:** `60s`, `1min`, `45minutes`, `3hours`, `7days`'
+                        ].join('\n'))
+                        .setFooter({ text: 'Note that times should be relative from now, i.e. 45 minutes from now' })
                     ]
+                });
+
+                const timeToRemind = Date.now() + reminderTime;
+                const currentReminders = await client.reminders._content.find({ userid: interaction.user.id });
+
+                if (currentReminders.length > 25) return interaction.reply({ content: 'You can only have up to 25 reminders at a time', ephemeral: true });
+
+                (await interaction.reply({
+                    embeds: [new client.embed()
+                        .setColor(client.config.embedColor)
+                        .setDescription([
+                            'Are you sure you want to create a new reminder?',
+                            `> Content: \`${reminderText}\``,
+                            `> Time to remind: ${formatTime(timeToRemind)}`
+                        ].join('\n'))
+                        .setFooter({ text: '60s to respond' })
+                    ],
+                    ephemeral: true,
+                    components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
+                        new ButtonBuilder().setCustomId('yes').setStyle(ButtonStyle.Success).setLabel("Confirm"),
+                        new ButtonBuilder().setCustomId('no').setStyle(ButtonStyle.Danger).setLabel("Cancel")
+                    )]
+                })).createMessageComponentCollector({
+                    filter: x => x.user.id === interaction.user.id,
+                    max: 1,
+                    time: 60_000
+                }).on('collect', async int => {
+                    ({
+                        yes: () => Promise.all([
+                            client.reminders._content.create({ userid: interaction.user.id, content: reminderText, time: timeToRemind, ch: interaction.channelId }),
+                            int.update({
+                                components: [],
+                                embeds: [new client.embed()
+                                    .setTitle('Reminder set')
+                                    .setDescription(`\n\`\`\`${reminderText}\`\`\`\n${formatTime(timeToRemind)}`)
+                                    .setColor(client.config.embedColor)
+                                ]
+                            })
+                        ]),
+                        no: () => int.update(rplText('Command manually canceled'))
+                    } as any)[int.customId]();
+                }).on('end', ints => {
+                    if (ints.size < 1) interaction.editReply(rplText('No response given, command canceled'));
                 });
             },
             delete: async () => {
                 const userReminders = await client.reminders._content.find({ userid: interaction.user.id });
 
-                if (userReminders.length < 1) return interaction.reply({ content: 'You have no active current reminders', ephemeral: true }).then(m => m.createMessageComponentCollector);
+                if (userReminders.length < 1) return interaction.reply({ content: 'You have no active current reminders', ephemeral: true });
 
                 const selectMenu = new StringSelectMenuBuilder()
                     .setCustomId('reminders')
@@ -159,7 +160,7 @@ export default {
                 .setRequired(true))
             .addStringOption(x=>x
                 .setName('when')
-                .setDescription('When to remind, do "help" to see format')
+                .setDescription('The time to remind from now. Do "help" to see format')
                 .setRequired(true)))
         .addSubcommand(x=>x
             .setName('delete')

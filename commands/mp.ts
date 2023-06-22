@@ -89,10 +89,12 @@ export default {
                     if (chosenServer === 'pg') {
                         FTP.on('ready', () => FTP.get(client.config.ftp.pg.path + 'blockedUserIds.xml', (err, stream) => {
                             if (err) return interaction.editReply(err.message);
-                            stream.once('close', () => FTP.end());
+
                             stream.pipe(fs.createWriteStream('../databases/blockedUserIds.xml'));
-        
-                            setTimeout(() => interaction.editReply({ files: ['../databases/blockedUserIds.xml'] }), 1000);
+                            stream.once('close', () => {
+                                FTP.end();
+                                interaction.editReply({ files: ['../databases/blockedUserIds.xml'] })
+                            });
                         })).connect(client.config.ftp.pg);
                     } else interaction.editReply({ files: ['../../../Documents/My Games/FarmingSimulator2022/blockedUserIds.xml'] });
                 } else {
@@ -153,6 +155,7 @@ export default {
                 if (chosenServer == 'pg') {
                     FTP.on('ready', () => FTP.get(client.config.ftp.pg.path + 'savegame1/farms.xml', async (err, stream) => {
                         if (err) return interaction.editReply(err.message);
+
                         checkPlayer(xml2js(await new Response(stream as any).text(), { compact: true }) as farmFormat);
                         stream.once('close', () => FTP.end());
                     })).connect(client.config.ftp.pg);
@@ -166,9 +169,12 @@ export default {
 
                     FTP.on('ready', () => FTP.get(client.config.ftp.pg.path + 'savegame1/farms.xml', (err, stream) => {
                         if (err) return interaction.editReply(err.message);
-                        stream.once('close', () => FTP.end());
+
                         stream.pipe(fs.createWriteStream('../databases/farms.xml'));
-                        setTimeout(() => interaction.editReply({ files: ['../databases/farms.xml'] }), 4000);
+                        stream.once('close', () => {
+                            FTP.end();
+                            interaction.editReply({ files: ['../databases/farms.xml'] });
+                        });
                     })).connect(client.config.ftp.pg);
                 } else interaction.reply({ files: ['../../../Documents/My Games/FarmingSimulator2022/savegame1/farms.xml'] });
             },

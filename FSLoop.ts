@@ -20,7 +20,7 @@ export default async (client: YClient, watchList: WatchList, ChannelID: string, 
     function wlEmbed(playerName: string, joinLog: boolean, wlReason?: string) {
         const embed = new client.embed()
             .setTitle('WatchList')
-            .setDescription(`\`${playerName}\` ${joinLog ? 'joined' : 'left'} **${serverAcro}** at <t:${now}:t>`);
+            .setDescription(`\`${playerName}\` ${joinLog ? 'joined' : 'left'} **${serverAcroUp}** at <t:${now}:t>`);
 
         if (joinLog) {
             return embed.setColor(client.config.embedColorGreen).setFooter({ text: `Reason: ${wlReason}` });
@@ -29,7 +29,7 @@ export default async (client: YClient, watchList: WatchList, ChannelID: string, 
     function logEmbed(player: FSLoopDSSPlayer, joinLog: boolean) {
         const playTimeHrs = Math.floor(player.uptime / 60);
         const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
-        const embed = new client.embed().setDescription(`\`${player.name}\`${decorators(client, player, watchList)} ${joinLog ? 'joined': 'left'} **${serverAcro}** at <t:${now}:t>`);
+        const embed = new client.embed().setDescription(`\`${player.name}\`${decorators(client, player, watchList)} ${joinLog ? 'joined': 'left'} **${serverAcroUp}** at <t:${now}:t>`);
     
         if (joinLog) {
             return embed.setColor(client.config.embedColorGreen);
@@ -40,12 +40,12 @@ export default async (client: YClient, watchList: WatchList, ChannelID: string, 
             if (!client.whitelist._content.includes(player.name) && !client.FMlist._content.includes(player.name)) {
                 client.getChan('juniorAdminChat').send({ embeds: [new client.embed()
                     .setTitle('UNKNOWN ADMIN LOGIN')
-                    .setDescription(`\`${player.name}\` on **${serverAcro}** on <t:${now}>`)
+                    .setDescription(`\`${player.name}\` on **${serverAcroUp}** on <t:${now}>`)
                     .setColor('#ff4d00')
                 ] }); 
             } else logChannel.send({ embeds: [new client.embed()
                 .setColor(client.config.embedColorYellow)
-                .setDescription(`\`${player.name}\`${decorators(client, player, watchList)} logged into admin on **${serverAcro}** at <t:${now}:t>`)
+                .setDescription(`\`${player.name}\`${decorators(client, player, watchList)} logged into admin on **${serverAcroUp}** at <t:${now}:t>`)
             ] });
         }
     }
@@ -55,7 +55,7 @@ export default async (client: YClient, watchList: WatchList, ChannelID: string, 
             const inWl = watchList.find(x => x._id === player.name);
             if (inWl) wlChannel.send({ embeds: [wlEmbed(inWl._id, false)] });
             
-            if (player.uptime > 0) client.playerTimes.addPlayerTime(player.name, player.uptime, serverAcro.toLowerCase() as 'ps' | 'pg' | 'mf'); // Add playerTimes data
+            if (player.uptime > 0) client.playerTimes.addPlayerTime(player.name, player.uptime, serverAcro); // Add playerTimes data
             logChannel.send({ embeds: [logEmbed(player, false)] });
         };
 
@@ -75,23 +75,24 @@ export default async (client: YClient, watchList: WatchList, ChannelID: string, 
         };
     }
 
+    const serverAcroUp = serverAcro.toUpperCase();
     const statsEmbed = new client.embed();
     const statsMsgEdit = () => (client.channels.resolve(ChannelID) as Discord.TextChannel).messages.edit(MessageID, { embeds: [statsEmbed] }); 
     const init = { signal: AbortSignal.timeout(7000), headers: { 'User-Agent': 'IRTBot/FSLoop' } };
 
-    const DSS = await fetch(client.config.fs[serverAcro.toLowerCase()].dss, init) // Fetch dedicated-server-stats.json
+    const DSS = await fetch(client.config.fs[serverAcro].dss, init) // Fetch dedicated-server-stats.json
         .then(res => res.json() as Promise<FSLoopDSS>)
-        .catch(err => client.log('\x1b[31m', `${serverAcro} dss ${err.message}`));
+        .catch(err => client.log('\x1b[31m', `${serverAcroUp} DSS ${err.message}`));
 
-    const CSG = (!DSS ? null : await fetch(client.config.fs[serverAcro.toLowerCase()].csg, init).then(async res => { // Fetch dedicated-server-savegame.html
+    const CSG = (!DSS ? null : await fetch(client.config.fs[serverAcro].csg, init).then(async res => { // Fetch dedicated-server-savegame.html if DSS was successful
         if (res.status === 204) {
             statsEmbed.setImage('https://http.cat/204');
-            client.log('\x1b[31m', `${serverAcro} csg empty content`);
+            client.log('\x1b[31m', `${serverAcroUp} CSG empty content`);
         } else return (xml2js(await res.text(), { compact: true }) as any).careerSavegame as FSLoopCSG;
-    }).catch(err => client.log('\x1b[31m', `${serverAcro} csg ${err.message}`)));
+    }).catch(err => client.log('\x1b[31m', `${serverAcroUp} CSG ${err.message}`)));
 
     if (!DSS || !DSS.slots || !CSG) { // Blame Red
-        if (DSS && !DSS.slots) client.log('\x1b[31m', `${serverAcro} undefined slots`);
+        if (DSS && !DSS.slots) client.log('\x1b[31m', `${serverAcroUp} DSS undefined slots`);
         statsEmbed.setTitle('Host not responding').setColor(client.config.embedColorRed);
         statsMsgEdit();
         return;
@@ -99,7 +100,7 @@ export default async (client: YClient, watchList: WatchList, ChannelID: string, 
 
     const newPlayers = DSS.slots.players.filter(x=>x.isUsed);
     const oldPlayers = client.FSCache[serverAcro].players;
-    const serverStatusEmbed = (status: string) => new client.embed().setTitle(`${serverAcro} now ${status}`).setColor(client.config.embedColorYellow).setTimestamp();
+    const serverStatusEmbed = (status: string) => new client.embed().setTitle(`${serverAcroUp} now ${status}`).setColor(client.config.embedColorYellow).setTimestamp();
     const wlChannel = client.getChan('watchList');
     const logChannel = client.getChan('fsLogs');
     const now = Math.round(Date.now() / 1000);
@@ -120,7 +121,7 @@ export default async (client: YClient, watchList: WatchList, ChannelID: string, 
     const Timescale = CSG.settings?.timeScale?._text?.slice(0, -5) ?? null;
     const playTimeHrs = (parseInt(CSG.statistics?.playTime?._text) / 60).toFixed(2) ?? null;
     const PlaytimeFormatted = client.formatTime((parseInt(CSG.statistics?.playTime?._text) * 60 * 1000), 3, { commas: true, longNames: false }) ?? null;
-    const Seasons = { '1': serverAcro === 'MF' ? 'Yes' : 'Yes 🔴', '2': 'No', '3':'Paused 🔴' }[CSG.settings?.growthMode?._text] ?? null;
+    const Seasons = { '1': serverAcro === 'mf' ? 'Yes' : 'Yes 🔴', '2': 'No', '3': 'Paused 🔴' }[CSG.settings?.growthMode?._text] ?? null;
     const AutosaveInterval = parseInt(CSG.settings?.autoSaveInterval?._text).toFixed(0) ?? null;
     const SlotUsage = parseInt(CSG.slotSystem?._attributes?.slotUsage).toLocaleString('en-US') ?? null;
 
@@ -158,12 +159,12 @@ export default async (client: YClient, watchList: WatchList, ChannelID: string, 
     }
 
     if (!justStarted) {
-        if (serverAcro !== 'MF') adminCheck();
+        if (serverAcro !== 'mf') adminCheck();
         log();
         
-        const DB: Array<number> = JSON.parse(fs.readFileSync(`../databases/${serverAcro}PlayerData.json`, 'utf8'));
+        const DB: Array<number> = JSON.parse(fs.readFileSync(`../databases/${serverAcroUp}PlayerData.json`, 'utf8'));
         DB.push(DSS.slots.used);
-        fs.writeFileSync(`../databases/${serverAcro}PlayerData.json`, JSON.stringify(DB));
+        fs.writeFileSync(`../databases/${serverAcroUp}PlayerData.json`, JSON.stringify(DB));
         if (DSS.slots.players.some(x=>x.isAdmin)) client.FSCache[serverAcro].lastAdmin = Date.now();
 
         client.FSCache[serverAcro].players = newPlayers;

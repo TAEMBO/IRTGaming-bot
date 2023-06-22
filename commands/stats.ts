@@ -173,7 +173,7 @@ export default {
                 .setDescription(FSdss.slots.used == 0 ? '*No players online*' : playerInfo.join("\n"))
                 .setImage('attachment://FSStats.png')
                 .setColor(Color);
-            if (!FSdss.slots.players.some(x=>x.isAdmin) && client.FSCache[subCmd.toUpperCase()].lastAdmin) embed.setTimestamp(client.FSCache[subCmd.toUpperCase()].lastAdmin).setFooter({ text: 'Admin last on' });
+            if (!FSdss.slots.players.some(x=>x.isAdmin) && client.FSCache[subCmd].lastAdmin) embed.setTimestamp(client.FSCache[subCmd].lastAdmin).setFooter({ text: 'Admin last on' });
         
             interaction.reply({ embeds: [embed], files: [Image] }).catch(() => interaction.channel?.send({ embeds: [embed], files: [Image] }));
         }
@@ -236,7 +236,7 @@ export default {
                         const formattedTimeData = playerTimeData.map(timeData => [
                             `> **${timeData[0].toUpperCase()}**`,
                             `> - Time - ${client.formatTime(timeData[1].time * 60 * 1000, 5, { commas: true, longNames: false })}`,
-                            `> - Last on - ${client.FSCache[timeData[0].toUpperCase()].players.some(x => x.name === playerData._id) ? 'Right now' : `<t:${timeData[1].lastOn}:R>`}`
+                            `> - Last on - ${client.FSCache[timeData[0]]?.players?.some(x => x.name === playerData._id) ? 'Right now' : `<t:${timeData[1].lastOn}:R>`}`
                         ].join('\n'));
 
                         interaction.reply({ embeds: [

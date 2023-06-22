@@ -2,22 +2,28 @@ import YClient from 'client.js';
 import mongoose from 'mongoose';
 import FTPClient from 'ftp';
 import xjs from 'xml-js';
+import config from '../config.json' assert { type: 'json' };
 import { farmFormat } from 'typings.js';
 
-const ServerSchema = new mongoose.Schema({
+/** The object that each server will have */
+const serverObj = {
 	time: { type: Number, required: true },
 	lastOn: { type: Number, required: true }
-}, { _id: false });
+};
+/** The schema containing the server's object */
+const serverSchema = new mongoose.Schema(serverObj, { _id: false });
+/** The base object for all servers */
+const serversObj = {} as Record<string, { type: typeof serverSchema }>;
+
+// Populate the base object with all server schemas by referencing config
+for (const server of config.FSCacheServers) serversObj[server[2]] = { type: serverSchema };
 
 const Schema = mongoose.model('playerTimes', new mongoose.Schema({
     _id: { type: String, required: true },
 	uuid: { type: String },
-	servers: { required: true, type: new mongoose.Schema({
-		ps: { type: ServerSchema },
-		pg: { type: ServerSchema },
-		mf: { type: ServerSchema }
-	}, { _id: false })}
+	servers: { required: true, type: new mongoose.Schema(serversObj, { _id: false }) }
 }, { versionKey: false }));
+
 type Document = ReturnType<typeof Schema.castObject>;
 
 export default class playerTimes extends Schema {
@@ -31,7 +37,9 @@ export default class playerTimes extends Schema {
 	 * @returns An array of all server time objects from the player, with the first element for each being the server's acronym
 	 */
 	getTimeData(data: Document) {
-		return (Object.entries(Object.values(data.servers)[3]) as unknown) as [string, NonNullable<Document['servers']['ps']>][];
+		return (Object.entries(Object.values(data.servers)[3]) as unknown) as [string, {
+            [key in keyof typeof serverObj]: number;
+        }][];
 	}
 	/**
 	 * Add server-specific time to a player's data.
@@ -40,7 +48,7 @@ export default class playerTimes extends Schema {
 	 * @param serverAcro The lowercase acronym for the server to add the time to, a string
 	 * @returns The MongoDB document for the player, a Promise
 	 */
-	async addPlayerTime(playerName: string, playerTime: number, serverAcro: keyof Document['servers']) {
+	async addPlayerTime(playerName: string, playerTime: number, serverAcro: string) {
 		const now = Math.round(Date.now() / 1000);
 		const playerData = await this._content.findById(playerName);
 
@@ -68,6 +76,7 @@ export default class playerTimes extends Schema {
 			this.client.log('\x1b[33m', `Downloaded farms.xml from ${serverAcro}, crunching...`);
 			if (err) throw err;
 			const farmData = xjs.xml2js(await new Response(stream as any).text(), { compact: true }) as farmFormat;
+            let iterationCount = 0;
 
 			for await (const player of farmData.farms.farm[0].players.player) {
 				const playerDatabyUuid = allData.find(x => x.uuid === player._attributes.uniqueUserId);
@@ -84,6 +93,7 @@ export default class playerTimes extends Schema {
 								`**New name:** ${player._attributes.lastNickname}`
 							].join('\n'))
 						]});
+                        iterationCount++;
 						
 						await this._content.create({ _id: player._attributes.lastNickname, uuid: player._attributes.uniqueUserId, servers: playerDatabyUuid.servers })
 							.then(() => playerDatabyUuid.delete()) // New name is unoccupied, delete old name data
@@ -98,6 +108,7 @@ export default class playerTimes extends Schema {
 					if (playerDataByName && !playerDataByName.uuid) await this._content.findByIdAndUpdate(player._attributes.lastNickname, { uuid: player._attributes.uniqueUserId }, { new: true });
 				}
 			}
+            this.client.getChan('fsLogs').send(`⚠️ Name change detector ran. Iterated over ${iterationCount} changed names`);
 			this.client.log('\x1b[33m', 'Finished crunching farms.xml data');
 			stream.once('close', () => FTP.end());
 		})).connect(this.client.config.ftp[serverAcro]);

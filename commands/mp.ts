@@ -36,8 +36,8 @@ export default {
                 const browser = await puppeteer.launch();
                 const page = await browser.newPage();
     
-                if (client.FSCache[chosenServer.toUpperCase()].status === 'offline' && chosenAction === 'stop') return interaction.editReply('Server is already offline');
-                if (client.FSCache[chosenServer.toUpperCase()].status === 'online' && chosenAction === 'start') return interaction.editReply('Server is already online');
+                if (client.FSCache[chosenServer].status === 'offline' && chosenAction === 'stop') return interaction.editReply('Server is already offline');
+                if (client.FSCache[chosenServer].status === 'online' && chosenAction === 'start') return interaction.editReply('Server is already online');
     
                 try {
                     await page.goto(client.config.fs[chosenServer].login, { timeout: 120000 });
@@ -66,7 +66,7 @@ export default {
                 const chosenServer = interaction.options.getString('server', true) as 'ps' | 'pg';
                 const chosenAction = interaction.options.getString('action', true) as 'items.xml' | 'players.xml';
                 
-                if (client.FSCache[chosenServer.toUpperCase()].status === 'online') return interaction.reply(`You cannot mop files from **${chosenServer.toUpperCase()}** while it is online`);
+                if (client.FSCache[chosenServer].status === 'online') return interaction.reply(`You cannot mop files from **${chosenServer.toUpperCase()}** while it is online`);
                 if (chosenServer !== 'pg' && chosenAction === 'items.xml') return interaction.reply(`You can only mop **${chosenAction}** from **PG**`);
                 
                 const time = Date.now();

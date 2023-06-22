@@ -3,6 +3,7 @@ import fs from "node:fs";
 import moment from 'moment';
 import { xml2js } from "xml-js";
 import mongoose from "mongoose";
+import path from 'node:path';
 import userLevels from './schemas/userLevels.js';
 import punishments from './schemas/punishments.js';
 import playerTimes from './schemas/playerTimes.js';
@@ -163,7 +164,7 @@ class localDatabase<T> {
     public _path: string;
     public _content: T[] = [];
     constructor(fileName: string) {
-        this._path = `../databases/${fileName}.json`;
+        this._path = path.resolve(`../databases/${fileName}.json`);
     }
     public initLoad() {
         this._content = JSON.parse(fs.readFileSync(this._path, 'utf8'));

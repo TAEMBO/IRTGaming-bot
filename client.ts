@@ -10,7 +10,7 @@ import playerTimes from './schemas/playerTimes.js';
 import watchList from './schemas/watchList.js';
 import reminders from './schemas/reminders.js';
 import config from './config.json' assert { type: 'json' };
-import type { Config, RepeatedMessages, FSCache, YTCache, InviteCache, Command, YTCacheFeed, Registry } from './typings.js';
+import { Config, RepeatedMessages, FSCache, YTCache, InviteCache, Command, YTCacheFeed, Registry, LogColor } from './typings.js';
 
 export default class YClient extends Client {
     config = config as Config;
@@ -57,7 +57,7 @@ export default class YClient extends Client {
             family: 4,
             keepAlive: true,
             waitQueueTimeoutMS: 50000
-        }).then(() => this.log('\x1b[35m', 'Connected to MongoDB'));
+        }).then(() => this.log(LogColor.Purple, 'Connected to MongoDB'));
 
         // Event handler
         for await (const file of fs.readdirSync('./events')) {
@@ -73,8 +73,14 @@ export default class YClient extends Client {
         }
         return this;
     }
-    public log(color: string, ...data: any[]) {
+    public log(color: LogColor, ...data: any[]) {
         console.log(`${color}[${moment().format('HH:mm:ss')}]`, ...data);
+    }
+    public async meetsPerms(role: keyof typeof this.config.mainServer.roles, int: Discord.ChatInputCommandInteraction<"cached">, ...conditions: boolean[]) {
+        if (!conditions.every(x => x)) {
+            await this.youNeedRole(int, role);
+            throw new Error(`${int.user.username} Does not meet permission requirement(s)`);
+        } return true;
     }
     public async youNeedRole(interaction: Discord.ChatInputCommandInteraction<"cached">, role: keyof typeof this.config.mainServer.roles) {
         return await interaction.reply(`You need the <@&${this.config.mainServer.roles[role]}> role to use this command`);
@@ -89,7 +95,7 @@ export default class YClient extends Client {
         return this.config.mainServer.MFFarmRoles.map(x => this.config.mainServer.roles[x]).filter(x => guildMember.roles.cache.has(x));
     }
     public getChan(channel: keyof typeof this.config.mainServer.channels) {
-        return this.channels.resolve(this.config.mainServer.channels[channel]) as Discord.TextChannel;
+        return this.channels.cache.get(this.config.mainServer.channels[channel]) as Discord.TextChannel;
     }
     public mainGuild() {
         return this.guilds.cache.get(this.config.mainServer.id) as Discord.Guild;
@@ -105,7 +111,7 @@ export default class YClient extends Client {
                 this.YTCache[YTChannelID] = latestVid['yt:videoId']._text;
                 this.getChan('videosAndLiveStreams').send(`**${YTChannelName}** just uploaded a new video!\n${latestVid.link._attributes.href}`);
             }
-        }).catch(() => this.log('\x1b[31m', `${YTChannelName} YT fail`));
+        }).catch(() => this.log(LogColor.Red, `${YTChannelName} YT fail`));
     }
     public formatTime(integer: number, accuracy = 1, options?: { longNames: boolean, commas: boolean }) {
         let achievedAccuracy = 0;

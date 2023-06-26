@@ -1,5 +1,6 @@
 import Discord from 'discord.js';
 import YClient from '../client.js';
+import { LogColor } from '../typings.js';
 
 export default async (client: YClient, message: Discord.Message<boolean>) => {
     if ((!client.config.botSwitches.commands && !client.config.devWhitelist.includes(message.author.id)) || message.partial || message.author.bot) return;
@@ -29,14 +30,14 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
 	
 		// useless staff ping mute
 		if (message.mentions.roles.some(mentionedRole => mentionedRole.id === client.config.mainServer.roles.mpstaff)) {
-			client.log('\x1b[35m', `${message.author.tag} mentioned staff role`);
+			client.log(LogColor.Purple, `${message.author.tag} mentioned staff role`);
 			message.channel.awaitMessages({
 				filter: x => client.isMPStaff(x.member as Discord.GuildMember) && x.content === 'y',
 				max: 1,
 				time: 60000
 			}).then(async collected => {
 				const colMsg = collected.first() as Discord.Message<true>;
-				client.log('\x1b[35m', `Received "y" from ${colMsg.author.tag}, indicating to mute`);
+				client.log(LogColor.Purple, `Received "y" from ${colMsg.author.tag}, indicating to mute`);
 				await client.punishments.addPunishment('mute', colMsg.author.id, 'Automod; Misuse of staff ping', message.author, message.member, { time: '10m' });
 				colMsg.react('✅');
 			});

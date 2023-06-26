@@ -4,6 +4,7 @@ import FSLoop, { FSLoopAll } from './FSLoop.js';
 import fs from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { LogColor } from './typings.js';
 
 console.log('\x1b[32mStartup');
 const client = await new YClient().init();
@@ -49,8 +50,8 @@ setInterval(async () => {
 	};
 
 	for (const punishment of Punishments) {
-		client.log('\x1b[33m', `${punishment.member.tag}\'s ${punishment.type} (case #${punishment._id}) should expire now`);
-		client.punishments.removePunishment(punishment._id, (client.user as Discord.ClientUser).id, "Time\'s up!").then(result => client.log('\x1b[33m', result));
+		client.log(LogColor.Yellow, `${punishment.member.tag}\'s ${punishment.type} (case #${punishment._id}) should expire now`);
+		client.punishments.removePunishment(punishment._id, (client.user as Discord.ClientUser).id, "Time\'s up!").then(result => client.log(LogColor.Yellow, result));
 	};
 
 	const formattedDate = Math.floor((now - 1667854800000) / 1000 / 60 / 60 / 24);
@@ -63,10 +64,10 @@ setInterval(async () => {
 
 		dailyMsgs.push([formattedDate, total]);
 		fs.writeFileSync('../databases/dailyMsgs.json', JSON.stringify(dailyMsgs, null, 4));
-		client.log('\x1b[36m', `Pushed [${formattedDate}, ${total}] to dailyMsgs`);
+		client.log(LogColor.Cyan, `Pushed [${formattedDate}, ${total}] to dailyMsgs`);
 
 		setTimeout(() => {
-			client.log('\x1b[36m', 'Interval messages');
+			client.log(LogColor.Cyan, 'Interval messages');
 			const Day = Date().toLowerCase();
 
 			if (Day.startsWith('fri')) {

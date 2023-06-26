@@ -1,19 +1,20 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client.js';
 import fs from 'node:fs';
+import { LogColor } from '../typings.js';
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
-        const hidden: Array<Array<string>> = JSON.parse(fs.readFileSync('../databases/hidden.json', 'utf8'));
+        const hidden: string[][] = JSON.parse(fs.readFileSync('../databases/hidden.json', 'utf8'));
         const command = interaction.options.getString('command', true);
-        const hiddenCmd = hidden.find(x => x[0] == command);
+        const hiddenCmd = hidden.find(x => x[0] === command);
 
         if (hiddenCmd) {
-            client.log('\x1b[33m', `Running "${hiddenCmd[0]}"`);
-            interaction.reply({content: `Running ${hiddenCmd[0]}.`, ephemeral: true}).then(() => eval(hiddenCmd[1]));
+            client.log(LogColor.Yellow, `Running "${hiddenCmd[0]}"`);
+            interaction.reply({ content: `Running ${hiddenCmd[0]}.`, ephemeral: true }).then(() => eval(hiddenCmd[1]));
         } else {
-            client.log('\x1b[33m', `Attempted "${command}"`);
-            interaction.reply({content: 'A command with that name does not exist.', ephemeral: true});
+            client.log(LogColor.Yellow, `Attempted "${command}"`);
+            interaction.reply({ content: 'A command with that name does not exist.', ephemeral: true });
         }
 	},
     data: new SlashCommandBuilder()

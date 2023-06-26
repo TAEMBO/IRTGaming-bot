@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import FTPClient from 'ftp';
 import xjs from 'xml-js';
 import config from '../config.json' assert { type: 'json' };
-import { farmFormat } from 'typings.js';
+import { LogColor, farmFormat } from '../typings.js';
 
 /** The object that each server will have */
 const serverObj = {
@@ -73,7 +73,7 @@ export default class playerTimes extends Schema {
 		const allData = await this._content.find();
 
 		FTP.once('ready', () => FTP.get(this.client.config.ftp[serverAcro].path + 'savegame1/farms.xml', async (err, stream) => {
-			this.client.log('\x1b[33m', `Downloaded farms.xml from ${serverAcro}, crunching...`);
+			this.client.log(LogColor.Yellow, `Downloaded farms.xml from ${serverAcro}, crunching...`);
 			if (err) throw err;
 			const farmData = xjs.xml2js(await new Response(stream as any).text(), { compact: true }) as farmFormat;
             let iterationCount = 0;
@@ -109,7 +109,7 @@ export default class playerTimes extends Schema {
 				}
 			}
             this.client.getChan('fsLogs').send(`⚠️ Name change detector ran. Iterated over ${iterationCount} changed names`);
-			this.client.log('\x1b[33m', 'Finished crunching farms.xml data');
+			this.client.log(LogColor.Yellow, 'Finished crunching farms.xml data');
 			stream.once('close', () => FTP.end());
 		})).connect(this.client.config.ftp[serverAcro]);
 	}

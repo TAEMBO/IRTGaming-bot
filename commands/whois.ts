@@ -1,18 +1,6 @@
 import Discord, { APIEmbedField, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import YClient from '../client.js';
-
-type ApplicationRPC = {
-    bot_public: boolean;
-    bot_require_code_grant: boolean;
-    description: string;
-    flags: number;
-    hook: boolean;
-    icon: string;
-    id: string;
-    name: string;
-    summary: string;
-    tags?: string[];
-};
+import { ApplicationRPC } from '../typings.js';
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {

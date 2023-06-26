@@ -2,7 +2,7 @@ import Discord, { SlashCommandBuilder, AttachmentBuilder } from 'discord.js';
 import YClient from '../client.js';
 import fs from 'node:fs';
 import canvas from 'canvas';
-import type { FSLoopDSS } from '../typings.js';
+import { LogColor, FSLoopDSS } from '../typings.js';
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
@@ -11,7 +11,7 @@ export default {
 
         async function FSstats() {
             const FSdss: FSLoopDSS | void = await fetch(client.config.fs[subCmd].dss, { signal: AbortSignal.timeout(2000), headers: { 'User-Agent': 'IRTBot/Stats' } }).then(res => res.json()).catch(() => {
-                client.log('\x1b[31m', `Stats ${subCmd.toUpperCase()} failed`);
+                client.log(LogColor.Red, `Stats ${subCmd.toUpperCase()} failed`);
             });
 
             if (!FSdss) return interaction.reply('Server did not respond');
@@ -189,7 +189,7 @@ export default {
                 const FSdss = await fetch(client.config.fs[serverAcro.toLowerCase()].dss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': 'IRTBot/StatsAll' } })
                     .then(res => res.json() as Promise<FSLoopDSS>)
                     .catch(() => {
-                        client.log('\x1b[31m', `Stats all; ${serverAcro} failed`);
+                        client.log(LogColor.Red, `Stats all; ${serverAcro} failed`);
                         failedFooter.push(`Failed to fetch ${serverAcro}`);
                     });
                 if (!FSdss || FSdss.slots.used === 0 ) return;

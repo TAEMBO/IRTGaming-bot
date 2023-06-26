@@ -201,8 +201,10 @@ export default {
                 if (!interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager)) return client.youNeedRole(interaction, "mpmanager");
                 const member = interaction.options.getMember("member") as Discord.GuildMember;
                 const owner = await interaction.guild.fetchOwner();
-                const Role = client.config.mainServer.roles[interaction.options.getString("role", true) as keyof typeof client.config.mainServer.roles];
-                let roles = member.roles.cache.map((x, i) => i);
+
+                const roleName = interaction.options.getString("role", true) as 'trustedfarmer' | 'mpfarmmanager' | 'mpjradmin' | 'mpsradmin';
+                const Role = client.config.mainServer.roles[roleName];
+                const roles = member.roles.cache.map((x, i) => i);
                 
                 if (member.roles.cache.has(Role)) {
                     (await interaction.reply({
@@ -213,11 +215,11 @@ export default {
                         fetchReply: true,
                         components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
                             new ButtonBuilder()
-                                .setCustomId('Yes')
+                                .setCustomId('yes')
                                 .setStyle(ButtonStyle.Success)
                                 .setLabel('Confirm'),
                             new ButtonBuilder()
-                                .setCustomId('No')
+                                .setCustomId('no')
                                 .setStyle(ButtonStyle.Danger)
                                 .setLabel('Cancel'))
                         ]
@@ -228,19 +230,54 @@ export default {
                     }).on('collect', int => {
                         ({
                             yes: () => {
-                                member.edit({ roles: roles.filter(x => x !== Role).filter(x => x !== client.config.mainServer.roles.mpstaff) });
-                                int.update({ embeds: [new client.embed().setDescription(`<@${member.user.id}> has been removed from <@&${Role}>.`).setColor(client.config.embedColor)], components: [] });
+                                const slicedNick = {
+                                    trustedfarmer: '',
+                                    mpfarmmanager: ' | MP Farm Manager',
+                                    mpjradmin: ' | MP Jr. Admin',
+                                    mpsradmin: ' | MP Sr. Admin'
+                                }[roleName];
+
+                                member.edit({
+                                    roles: roles.filter(x => x !== Role && x !== client.config.mainServer.roles.mpstaff),
+                                    nick: (member.nickname as string).replace(slicedNick, '')
+                                });
+
+                                int.update({
+                                    embeds: [new client.embed()
+                                        .setDescription(`<@${member.user.id}> has been removed from <@&${Role}>.`)
+                                        .setColor(client.config.embedColor)
+                                    ],
+                                    components: []
+                                });
+
                                 owner.send(`**${interaction.user.tag}** has demoted **${member.user.tag}** from **${interaction.guild.roles.cache.get(Role)?.name}**`);
                             },
                             no: () => int.update({ embeds: [new client.embed().setDescription(`Command canceled`).setColor(client.config.embedColor)], components: [] })
                         } as any)[int.customId]();
                     });
                 } else {
-                    roles.push(Role);
-                    if (Role === client.config.mainServer.roles.mpfarmmanager) roles.push(client.config.mainServer.roles.mpstaff);
-                    if (Role === client.config.mainServer.roles.mpjradmin) roles.splice(roles.indexOf(client.config.mainServer.roles.mpfarmmanager), 1);
-                    member.edit({ roles });
-                    await owner.send(`**${interaction.user.tag}** has promoted **${member.user.tag}** to **${interaction.guild.roles.cache.get(Role)?.name}**`);
+                    let newNickname: string | undefined;
+                    ({
+                        trustedfarmer: () => {
+                            roles.push(Role);
+                        },
+                        mpfarmmanager: () => {
+                            roles.push(Role, client.config.mainServer.roles.mpstaff);
+                            newNickname = `${member.displayName.slice(0, 12)} | MP Farm Manager`;
+                        },
+                        mpjradmin: () => {
+                            roles.push(Role);
+                            roles.splice(roles.indexOf(client.config.mainServer.roles.mpfarmmanager), 1);
+                            newNickname = (member.nickname as string).replace('MP Farm Manager', 'MP Jr. Admin');
+                        },
+                        mpsradmin: () => {
+                            roles.push(Role);
+                            roles.splice(roles.indexOf(client.config.mainServer.roles.mpjradmin), 1);
+                            newNickname = (member.nickname as string).replace('MP Jr. Admin', 'MP Sr. Admin');
+                        }
+                    })[roleName]();
+                    member.edit({ roles, nick: newNickname });
+                    owner.send(`**${interaction.user.tag}** has promoted **${member.user.tag}** to **${interaction.guild.roles.cache.get(Role)?.name}**`);
                     interaction.reply({ embeds: [new client.embed().setDescription(`<@${member.user.id}> has been given <@&${Role}>.`).setColor(client.config.embedColor)] });
                 }
             },

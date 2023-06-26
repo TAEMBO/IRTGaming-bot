@@ -147,7 +147,8 @@ export interface Config {
             mpStaffCommands: string,
             watchList: string,
             videosAndLiveStreams: string;
-            trustedFarmerChat: string
+            trustedFarmerChat: string;
+            mpApplicationLogs: string;
         }
     }
 }

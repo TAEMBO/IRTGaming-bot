@@ -27,6 +27,21 @@ export interface ApplicationRPC {
     tags?: string[];
 };
 
+export interface APIUser {
+    id: string;
+    username: string;
+    avatar: string;
+    discriminator: string;
+    public_flags: number;
+    flags: number;
+    banner: string | null;
+    accent_color: number | null;
+    global_name: string | null;
+    avatar_decoration: null;
+    display_name: string | null;
+    banner_color: string | null;
+};
+
 export type RepeatedMessages = Record<string, {
     data: Discord.Collection<number, {
         type: string;

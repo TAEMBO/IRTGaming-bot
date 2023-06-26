@@ -1,6 +1,6 @@
 import Discord from 'discord.js';
 import YClient from '../client.js';
-import { LogColor } from '../typings.js';
+import { APIUser, LogColor } from '../typings.js';
 
 export default async (client: YClient, message: Discord.Message<boolean>) => {
     if ((!client.config.botSwitches.commands && !client.config.devWhitelist.includes(message.author.id)) || message.partial || message.author.bot) return;
@@ -143,42 +143,51 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
         if (automodded) return;
         if (message.channel.id !== '557692151689904129') client.userLevels.incrementUser(message.author.id);
         if (!client.config.botSwitches.autoResponses || !message.member) return;
-			
-        // Morning message system
-        const hasStaffTag = message.member.displayName.indexOf(' | ') < 0 ? false : true;
-        const person = message.member.displayName.slice(0, hasStaffTag ? message.member.displayName.indexOf(' | ') : undefined);
-        const morningMsgs = [ 'morning all', 'morning everyone', 'morning guys', 'morning people' ];
-        const mornRes1 = [ `Wakey wakey ${person}! `, `Morning ${person}! `, `Why good morning ${person}! `, `Rise and shine ${person}! `, `Up and at 'em ${person}! `];
-        const mornRes2 = [
-			'Here, take a pancake or two 🥞',
-			'Here, take a 🥔',
-			'Here, take a cookie 🍪',
-			'Fancy a piece of pizza? Here you go 🍕',
-			'I have no movie, but I have some popcorn! Here you go 🍿',
-			'It\'s a bit stale but enjoy 🍞',
-			'Don\'t fall out of bed!',
-			'Coffee\'s gonna be a little late this morning.',
-			'Tea\'s gonna be a little late this morning.',
-			'Did you have a good dream?',
-			'<a:IRT_DogWave:716263418495238215>',
-			'<:IRT_GoodMorning:605524803008593920>',
-			'I hope you have a good day today sweetie!',
-			'Here\'s some wheat to make some bread that\'s not stale <:IRT_Wheat:761356327708131329>',
-			'I have a movie this time! Sync Sim 22, a real good one.',
-			'Is it Friday yet?',
-			'Did you sleep on the cold side of the pillow?',
-			'I have a sausage roll for you! <:IRT_Sausageroll:666726520701845534>',
-			''
-		];
-	
+
+        // Morning message systen
+        const morningMsgs = ['morning all', 'morning everyone', 'morning guys', 'morning people'];
+
+		if (morningMsgs.some(x => msg.includes(x)) && message.channel.id === client.config.mainServer.channels.general) {
+            const randomEl = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
+            const User = await client.rest.get(`/users${message.author.id}`).catch(() => null) as APIUser | null;
+            const person = (() => {
+                if (message.member.displayName === message.author.username) {
+                    return User?.display_name ?? message.author.username;
+                } else {
+                    const hasStaffTag = message.member.displayName.indexOf(' | ') < 0 ? false : true;
+                    message.member.displayName.slice(0, hasStaffTag ? message.member.displayName.indexOf(' | ') : undefined);
+                }
+            })();
+            const mornRes1 = [`Wakey wakey ${person}! `, `Morning ${person}! `, `Why good morning ${person}! `, `Rise and shine ${person}! `, `Up and at 'em ${person}! `];
+            const mornRes2 = [
+                'Here, take a pancake or two 🥞',
+                'Here, take a 🥔',
+                'Here, take a cookie 🍪',
+                'Fancy a piece of pizza? Here you go 🍕',
+                'I have no movie, but I have some popcorn! Here you go 🍿',
+                'It\'s a bit stale but enjoy 🍞',
+                'Don\'t fall out of bed!',
+                'Coffee\'s gonna be a little late this morning.',
+                'Tea\'s gonna be a little late this morning.',
+                'Did you have a good dream?',
+                '<a:IRT_DogWave:716263418495238215>',
+                '<:IRT_GoodMorning:605524803008593920>',
+                'I hope you have a good day today sweetie!',
+                'Here\'s some wheat to make some bread that\'s not stale <:IRT_Wheat:761356327708131329>',
+                'I have a movie this time! Sync Sim 22, a real good one.',
+                'Is it Friday yet?',
+                'Did you sleep on the cold side of the pillow?',
+                'I have a sausage roll for you! <:IRT_Sausageroll:666726520701845534>',
+                ''
+            ];
+
+            message.reply({
+                content: randomEl(mornRes1) + randomEl(mornRes2),
+                allowedMentions: { repliedUser: false }
+            });
+        }
+
 		// Auto responses
-        const randomEl = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
-        
-		if (morningMsgs.some(x => msg.includes(x)) && message.channel.id === client.config.mainServer.channels.general) message.reply({
-            content: randomEl(mornRes1) + randomEl(mornRes2),
-            allowedMentions: { repliedUser: false }
-        });
-		
 		if (msg.includes('giants moment')) message.react('™️');
 		
 		if (msg.includes('sync sim')) message.react(':IRT_SyncSim22:929440249577365525');

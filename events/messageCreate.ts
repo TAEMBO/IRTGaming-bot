@@ -31,16 +31,15 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
 		// useless staff ping mute
 		if (message.mentions.roles.some(mentionedRole => mentionedRole.id === client.config.mainServer.roles.mpstaff)) {
 			client.log(LogColor.Purple, `${message.author.tag} mentioned staff role`);
-			message.channel.awaitMessages({
-				filter: x => client.isMPStaff(x.member as Discord.GuildMember) && x.content === 'y',
-				max: 1,
-				time: 60000
-			}).then(async collected => {
-				const colMsg = collected.first() as Discord.Message<true>;
-				client.log(LogColor.Purple, `Received "y" from ${colMsg.author.tag}, indicating to mute`);
-				await client.punishments.addPunishment('mute', colMsg.author.id, 'Automod; Misuse of staff ping', message.author, message.member, { time: '10m' });
-				colMsg.react('✅');
-			});
+            message.channel.createMessageCollector({
+                filter: x => client.isMPStaff(x.member as Discord.GuildMember) && x.content === 'y',
+                max: 1,
+                time: 60_000
+            }).on('collect', async collected => {
+				client.log(LogColor.Purple, `Received "y" from ${collected.author.tag}, indicating to mute`);
+				await client.punishments.addPunishment('mute', collected.author.id, 'Automod; Misuse of staff ping', message.author, message.member, { time: '10m' });
+				collected.react('✅');
+            });
 		}
 	
 		const Whitelist = [

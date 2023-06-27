@@ -2,6 +2,7 @@ import Discord from "discord.js";
 import YClient from "./client.js";
 import { xml2js } from "xml-js";
 import fs from "node:fs";
+import path from 'node:path';
 import { LogColor, FSLoopCSG, FSLoopDSS, FSLoopDSSPlayer } from "./typings.js";
 
 type WatchList = { _id: string, reason: string }[];
@@ -65,13 +66,13 @@ export default async (client: YClient, watchList: WatchList, ChannelID: string, 
             playerObj = newPlayers;
         } else if (oldPlayers.length > 0) playerObj = newPlayers.filter(y => !oldPlayers.some(z => z.name === y.name));
      
-        if (playerObj) for (const x of playerObj) {
-            const inWl = watchList.find(y => y._id === x.name);
-            if (client.config.mainServer.id === '552565546089054218' && inWl) {
-                const filterWLPings = client.watchListPings._content.filter(x => !client.mainGuild().members.cache.get(x)?.roles.cache.has(client.config.mainServer.roles.loa)).map(x=>`<@${x}>`).join(" ");
-                wlChannel.send({ content: filterWLPings, embeds: [wlEmbed(inWl._id, true, inWl.reason)] });
+        if (playerObj) for (const player of playerObj) {
+            const inWl = watchList.find(y => y._id === player.name);
+            if (inWl) {
+                const filterWLPings = client.watchListPings._content.filter(x => !client.mainGuild().members.cache.get(x)?.roles.cache.has(client.config.mainServer.roles.loa));
+                wlChannel.send({ content: filterWLPings.map(x=>`<@${x}>`).join(" "), embeds: [wlEmbed(inWl._id, true, inWl.reason)] });
             }
-            logChannel.send({ embeds: [logEmbed(x, true)] });
+            logChannel.send({ embeds: [logEmbed(player, true)] });
         };
     }
 
@@ -119,7 +120,7 @@ export default async (client: YClient, watchList: WatchList, ChannelID: string, 
     const IngameTimeHrs = Math.floor(DSS.server?.dayTime / 3600 / 1000).toString().padStart(2, '0') ?? null;
     const IngameTimeMins = Math.floor((DSS.server?.dayTime / 60 / 1000) % 60).toString().padStart(2, '0') ?? null;
     const Timescale = CSG.settings?.timeScale?._text?.slice(0, -5) ?? null;
-    const playTimeHrs = (parseInt(CSG.statistics?.playTime?._text) / 60).toFixed(2) ?? null;
+    const PlayTimeHrs = (parseInt(CSG.statistics?.playTime?._text) / 60).toFixed(2) ?? null;
     const PlaytimeFormatted = client.formatTime((parseInt(CSG.statistics?.playTime?._text) * 60 * 1000), 3, { commas: true, longNames: false }) ?? null;
     const Seasons = { '1': serverAcro === 'mf' ? 'Yes' : 'Yes 🔴', '2': 'No', '3': 'Paused 🔴' }[CSG.settings?.growthMode?._text] ?? null;
     const AutosaveInterval = parseInt(CSG.settings?.autoSaveInterval?._text).toFixed(0) ?? null;
@@ -133,7 +134,7 @@ export default async (client: YClient, watchList: WatchList, ChannelID: string, 
             `**Money:** $${Money}`,
             `**In-game time:** ${IngameTimeHrs}:${IngameTimeMins}`,
             `**Timescale:** ${Timescale}x`,
-            `**Playtime:** ${playTimeHrs}hrs (${PlaytimeFormatted})`,
+            `**Playtime:** ${PlayTimeHrs}hrs (${PlaytimeFormatted})`,
             `**Map:** ${DSS.server.mapName}`,
             `**Seasonal growth:** ${Seasons}`,
             `**Autosave interval:** ${AutosaveInterval} min`,
@@ -162,9 +163,9 @@ export default async (client: YClient, watchList: WatchList, ChannelID: string, 
         if (serverAcro !== 'mf') adminCheck();
         log();
         
-        const DB: Array<number> = JSON.parse(fs.readFileSync(`../databases/${serverAcroUp}PlayerData.json`, 'utf8'));
-        DB.push(DSS.slots.used);
-        fs.writeFileSync(`../databases/${serverAcroUp}PlayerData.json`, JSON.stringify(DB));
+        const data: number[] = JSON.parse(fs.readFileSync(path.resolve(`../databases/${serverAcroUp}PlayerData.json`), 'utf8'));
+        data.push(DSS.slots.used);
+        fs.writeFileSync(path.resolve(`../databases/${serverAcroUp}PlayerData.json`), JSON.stringify(data));
         if (DSS.slots.players.some(x=>x.isAdmin)) client.FSCache[serverAcro].lastAdmin = Date.now();
 
         client.FSCache[serverAcro].players = newPlayers;
@@ -173,7 +174,7 @@ export default async (client: YClient, watchList: WatchList, ChannelID: string, 
 
 export function FSLoopAll(client: YClient, watchList: WatchList) {
     const embed = new client.embed().setColor(client.config.embedColor);
-    const totalCount = <number[]>[];
+    const totalCount: number[] = [];
 
     for (const server of Object.entries(client.FSCache)) {
         const playerInfo: string[] = [];
@@ -186,7 +187,7 @@ export function FSLoopAll(client: YClient, watchList: WatchList) {
 
             playerInfo.push(`\`${player.name}\` ${decorators(client, player, watchList)} **|** ${playTimeHrs}:${playTimeMins}`);
         }
-        if (playerInfo.length > 0) embed.addFields({ name: `${server[0]} - ${serverSlots}/16`, value: playerInfo.join('\n') });
+        if (playerInfo.length > 0) embed.addFields({ name: `${server[0].toUpperCase()} - ${serverSlots}/16`, value: playerInfo.join('\n') });
     }
 
     client.getChan('juniorAdminChat').messages.edit(client.config.mainServer.FSLoopMsgId, {

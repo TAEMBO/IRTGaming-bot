@@ -164,6 +164,7 @@ export interface Config {
             videosAndLiveStreams: string;
             trustedFarmerChat: string;
             mpApplicationLogs: string;
+            mpRulesAndInfo: string;
         }
     }
 }

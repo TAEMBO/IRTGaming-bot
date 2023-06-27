@@ -9,12 +9,18 @@ export default {
             troll: () => interaction.reply({ embeds: [new client.embed()
                 .setTitle('Reporting trolls')
                 .setColor(client.config.embedColor)
-                .setImage('https://media.discordapp.net/attachments/979863373439184966/996178337984675961/unknown.png')
+                .setImage('https://cdn.discordapp.com/attachments/979863373439184966/1123088776185516032/image.png')
                 .setDescription([
-                    'While playing on our public servers, you may come across a player causing issues',
-                    `If you do, please send a report to <#${client.config.mainServer.channels.mpPublicSilage}> or <#${client.config.mainServer.channels.mpPublicGrain}> with the __name of the player__, __what they're doing__, and __a picture or video as evidence if possible__`,
-                    `\nIt's important to note that we ask that people to __not ping or DM individual staff members__ **(**unless otherwise allowed to**)**, __ping <@&${client.config.mainServer.roles.mpstaff}> in your report__ so it can be swiftly dealt with.`
-                ].join('. '))
+                    `If a player is causing problems on a server, don't hesitate to send a report to <#${client.config.mainServer.channels.mpPublicSilage}> or <#${client.config.mainServer.channels.mpPublicGrain}> with:`,
+                    [
+                        '- The name of the player',
+                        '- What they are doing',
+                        '- A picture or video as proof if possible',
+                        `- The <@&${client.config.mainServer.roles.mpstaff}> tag to notify staff`
+                    ].join('\n'),
+                    `Please do not ping or DM individual staff members, use the <@&${client.config.mainServer.roles.mpstaff}> tag as mentioned above.`,
+                    `Check ⁠<#${client.config.mainServer.channels.mpRulesAndInfo}> to see what a good reason could be for a player report.`
+                ].join('\n'))
             ] }),
             appeal: () => interaction.reply({ components: [
                 new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder().setStyle(ButtonStyle.Link).setURL(`https://discord.com/channels/552565546089054218/825046442300145744/969893324947337246`).setLabel("Appeal an MP ban"))

@@ -154,7 +154,7 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
                     return User?.display_name ?? message.author.username;
                 } else {
                     const hasStaffTag = message.member.displayName.indexOf(' | ') < 0 ? false : true;
-                    message.member.displayName.slice(0, hasStaffTag ? message.member.displayName.indexOf(' | ') : undefined);
+                    return message.member.displayName.slice(0, hasStaffTag ? message.member.displayName.indexOf(' | ') : undefined);
                 }
             })();
             const mornRes1 = [`Wakey wakey ${person}! `, `Morning ${person}! `, `Why good morning ${person}! `, `Rise and shine ${person}! `, `Up and at 'em ${person}! `];

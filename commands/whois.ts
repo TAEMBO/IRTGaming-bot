@@ -73,13 +73,13 @@ export default {
 
                 if (appData) embed0.addFields(...appData);
 
-                return interaction.reply({ embeds });
-            }
-
-            if (!member.presence) {
                 embeds.push(embed0);
                 return interaction.reply({ embeds });
             }
+
+            embeds.push(embed0);
+
+            if (!member.presence) return interaction.reply({ embeds });
 
             for (const activity of member.presence.activities) {
                 if (activity.type === 2 && activity.details && activity.assets) {

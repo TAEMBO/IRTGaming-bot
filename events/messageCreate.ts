@@ -76,7 +76,7 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
 					await client.punishments.addPunishment('mute', (client.user?.id as string), `Automod; ${muteReason}`, message.author, message.member, { time: muteTime });
 				}
 			} else {
-				client.repeatedMessages[message.author.id] = { data: new client.collection(), timeout: setTimeout(() => delete client.repeatedMessages[message.author.id], thresholdTime) };
+				client.repeatedMessages[message.author.id] = { data: new Discord.Collection(), timeout: setTimeout(() => delete client.repeatedMessages[message.author.id], thresholdTime) };
 				client.repeatedMessages[message.author.id].data.set(message.createdTimestamp, { type, channel: message.channel.id });
 			}
 		}

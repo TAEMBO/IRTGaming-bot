@@ -15,8 +15,7 @@ import { Config, RepeatedMessages, FSCache, YTCache, InviteCache, Command, YTCac
 export default class YClient extends Client {
     config = config as Config;
     embed = Discord.EmbedBuilder;
-    collection = Discord.Collection;
-    commands = new this.collection<string, Command>();
+    commands = new Discord.Collection<string, Command>();
     registry: Registry = [];
     repeatedMessages: RepeatedMessages = {};
     FSCache: FSCache = {};

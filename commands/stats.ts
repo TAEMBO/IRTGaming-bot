@@ -2,26 +2,33 @@ import Discord, { SlashCommandBuilder, AttachmentBuilder } from 'discord.js';
 import YClient from '../client.js';
 import fs from 'node:fs';
 import canvas from 'canvas';
+import path from 'node:path';
 import { LogColor, FSLoopDSS } from '../typings.js';
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
-        if (['891791005098053682', '729823615096324166'].includes(interaction.channel?.id as string) && !client.isMPStaff(interaction.member)) return interaction.reply({content: 'This command has [restrictions](https://discord.com/channels/552565546089054218/891791005098053682/991799952084828170) set, please use <#552583841936834560> for `/stats` commands.', ephemeral: true}); 
         const subCmd = interaction.options.getSubcommand() as 'ps' | 'pg' | 'mf' | 'all' | 'playertimes';
+        const blacklistedChannels = [client.config.mainServer.channels.mpPublicSilage, client.config.mainServer.channels.mpPublicGrain];
+
+        if (blacklistedChannels.includes(interaction.channelId) && !client.isMPStaff(interaction.member)) return interaction.reply({
+            content: [
+                'This command has [restrictions](https://discord.com/channels/552565546089054218/891791005098053682/991799952084828170) set',
+                ` please use <#${client.config.mainServer.channels.botCommands}> for \`/stats\` commands.`
+            ].join(),
+            ephemeral: true
+        });
 
         async function FSstats() {
-            const FSdss: FSLoopDSS | void = await fetch(client.config.fs[subCmd].dss, { signal: AbortSignal.timeout(2000), headers: { 'User-Agent': 'IRTBot/Stats' } }).then(res => res.json()).catch(() => {
-                client.log(LogColor.Red, `Stats ${subCmd.toUpperCase()} failed`);
-            });
+            const FSdss = await fetch(client.config.fs[subCmd].dss, { signal: AbortSignal.timeout(2000), headers: { 'User-Agent': 'IRTBot/Stats' } })
+                .then(res => res.json() as Promise<FSLoopDSS>)
+                .catch(() => client.log(LogColor.Red, `Stats ${subCmd.toUpperCase()} failed`));
 
             if (!FSdss) return interaction.reply('Server did not respond');
 
-            const data: number[] = JSON.parse(fs.readFileSync(`../databases/${subCmd.toUpperCase()}PlayerData.json`, 'utf8')).slice(client.config.statsGraphSize);
+            const data: number[] = JSON.parse(fs.readFileSync(path.resolve(`../databases/${subCmd.toUpperCase()}PlayerData.json`), 'utf8')).slice(client.config.statsGraphSize);
         
             // handle negative days
-            data.forEach((change, i) => {
-                if (change < 0) data[i] = data[i - 1] || data[i + 1] || 0;
-            });
+            for (const [i, change] of data.entries()) if (change < 0) data[i] = data[i - 1] || data[i + 1] || 0;
             
             const first_graph_top = 16;
             const second_graph_top = 16;
@@ -38,7 +45,7 @@ export default {
             // grey horizontal lines
             ctx.lineWidth = 5;
         
-            let interval_candidates = [];
+            const interval_candidates: [number, number, number][] = [];
             for (let i = 4; i < 10; i++) {
                 const interval = first_graph_top / i;
                 if (Number.isInteger(interval)) {
@@ -48,10 +55,9 @@ export default {
                 }
             }
             const chosen_interval = interval_candidates.sort((a, b) => b[2] - a[2])[0];
-        
             const previousY: number[] = [];
-        
             ctx.strokeStyle = '#202225';
+
             for (let i = 0; i <= chosen_interval[1]; i++) {
                 const y = graphOrigin[1] + graphSize[1] - (i * (chosen_interval[0] / second_graph_top) * graphSize[1]);
                 if (y < graphOrigin[1]) continue;
@@ -78,8 +84,6 @@ export default {
         
             // draw points
             ctx.lineWidth = 5;
-        
-            const getYCoordinate = (value: number) => ((1 - (value / second_graph_top)) * graphSize[1]) + graphOrigin[1];
             
             const gradient = ctx.createLinearGradient(0, graphOrigin[1], 0, graphOrigin[1] + graphSize[1]);
             gradient.addColorStop(1 / 16, client.config.embedColorRed);
@@ -87,10 +91,11 @@ export default {
             gradient.addColorStop(12 / 16, client.config.embedColorGreen);
             
             let lastCoords: number[] = [];
-            data.forEach((curPC /* current player count */, i) => {
+
+            for (let [i, curPC /* current player count */] of data.entries()) {
                 if (curPC < 0) curPC = 0;
                 const x = i * nodeWidth + graphOrigin[0];
-                const y = getYCoordinate(curPC);
+                const y = ((1 - (curPC / second_graph_top)) * graphSize[1]) + graphOrigin[1];
                 const nexPC /* next player count */ = data[i + 1];
                 const prvPC /* previous player count */ = data[i - 1];
                 ctx.strokeStyle = gradient;
@@ -100,25 +105,26 @@ export default {
                 if (y === lastCoords[1]) {
                     let newX = x;
                     for (let j = i + 1; j <= data.length; j++) {
-                        if (data[j] === curPC) newX += nodeWidth; else break;
+                        if (data[j] === curPC) {
+                            newX += nodeWidth;
+                        } else break;
                     }
                     ctx.lineTo(newX, y);
                 } else ctx.lineTo(x, y);
+                
                 lastCoords = [x, y];
                 ctx.stroke();
                 ctx.closePath();
             
-                if (curPC === prvPC && curPC === nexPC) {
-                    return; // no ball because no vertical difference to next or prev point
-                } else {
+                if (curPC !== prvPC || curPC !== nexPC) { // Ball if vertical different to next or prev point
                     // ball
                     ctx.fillStyle = gradient;
                     ctx.beginPath();
                     ctx.arc(x, y, ctx.lineWidth * 1.3, 0, 2 * Math.PI)
                     ctx.closePath();
                     ctx.fill();
-                }
-            });
+                };
+            }
         
             // draw text
             ctx.font = '400 ' + textSize + 'px sans-serif';
@@ -163,6 +169,7 @@ export default {
         
                 playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
             };
+
             const Image = new AttachmentBuilder(img.toBuffer(), { name: "FSStats.png" });
             const serverSlots = `${FSdss.slots.used}/${FSdss.slots.capacity}`;
             const serverTimeHrs = Math.floor(FSdss.server.dayTime / 3600 / 1000).toString().padStart(2, '0');
@@ -170,9 +177,10 @@ export default {
             const embed = new client.embed()
                 .setAuthor({ name: `${serverSlots} - ${serverTimeHrs}:${serverTimeMins}` })
                 .setTitle(FSdss.server.name || 'Offline')
-                .setDescription(FSdss.slots.used == 0 ? '*No players online*' : playerInfo.join("\n"))
+                .setDescription(FSdss.slots.used ? playerInfo.join("\n"): '*No players online*')
                 .setImage('attachment://FSStats.png')
                 .setColor(Color);
+
             if (!FSdss.slots.players.some(x=>x.isAdmin) && client.FSCache[subCmd].lastAdmin) embed.setTimestamp(client.FSCache[subCmd].lastAdmin).setFooter({ text: 'Admin last on' });
         
             interaction.reply({ embeds: [embed], files: [Image] }).catch(() => interaction.channel?.send({ embeds: [embed], files: [Image] }));
@@ -192,11 +200,13 @@ export default {
                         client.log(LogColor.Red, `Stats all; ${serverAcro} failed`);
                         failedFooter.push(`Failed to fetch ${serverAcro}`);
                     });
-                if (!FSdss || FSdss.slots.used === 0 ) return;
+                
+                if (!FSdss || !FSdss.slots.used) return;
 
                 totalCount.push(FSdss.slots.used);
                 const playerInfo: string[] = [];
                 const serverSlots = `${FSdss.slots.used}/${FSdss.slots.capacity}`;
+
                 for (const player of FSdss.slots.players.filter(x=>x.isUsed)) {
                     const playTimeHrs = Math.floor(player.uptime / 60);
                     const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
@@ -208,11 +218,11 @@ export default {
         
                     playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
                 };
-                embed.addFields({ name: `${FSdss.server.name.replace('! ! IRTGaming | ', '')} - ${serverSlots}`, value: `${playerInfo.join("\n")}`, inline: true });
+                embed.addFields({ name: `${FSdss.server.name.replace('! ! IRTGaming | ', '')} - ${serverSlots}`, value: playerInfo.join("\n"), inline: true });
             }
             await Promise.all([FSstatsAll('PS'), FSstatsAll('PG'), FSstatsAll('MF')]);
 
-            embed.setTitle(`All Servers: ${totalCount.reduce((a, b) => a + b, 0)} online`).setFooter(failedFooter.length > 0 ? { text: failedFooter.join(', ') } : null);
+            embed.setTitle(`All Servers: ${totalCount.reduce((a, b) => a + b, 0)} online`).setFooter(failedFooter.length ? { text: failedFooter.join(', ') } : null);
             interaction.editReply({ embeds: [embed] });
         } else if (subCmd === 'playertimes') {
             client.playerTimes._content.find().then(playersData => {
@@ -250,7 +260,7 @@ export default {
                                 ].join('\n')),
                             new client.embed()
                                 .setColor(client.config.embedColor)
-                                .setTitle(`Server times:\n${formattedTimeData.join('\n')}`)
+                                .setTitle(`Server times\n${formattedTimeData.join('\n')}`)
                         ] });
                     } else interaction.reply('No data found with that name. [Find out why.](https://canary.discord.com/channels/552565546089054218/552583841936834560/1087422094519836792)');
 

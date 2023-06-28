@@ -1,7 +1,6 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client.js';
 import util from 'node:util';
-import fs from 'node:fs';
 import { exec } from 'child_process';
 
 export default {
@@ -11,71 +10,82 @@ export default {
 			eval: async () => {
 				const code = interaction.options.getString("code", true);
 				const useAsync = Boolean(interaction.options.getBoolean("async", false));
-				let output = 'error';
+                const embed = new client.embed()
+                    .setTitle('__Eval__')
+                    .setColor(client.config.embedColor)
+                    .addFields({ name: 'Input', value: `\`\`\`js\n${code.slice(0, 1010)}\n\`\`\`` });
+                let output = 'error';
 				
 				try {
 					output = await eval(useAsync ? `(async () => { ${code} })()` : code);
 				} catch (err: any) {
-					const embed = new client.embed()
-						.setTitle('__Eval__')
-						.setColor("#ff0000")
-						.addFields(
-							{ name: 'Input', value: `\`\`\`js\n${code.slice(0, 1010)}\n\`\`\``},
-							{ name: 'Output', value: `\`\`\`\n${err}\n\`\`\`` });
-					interaction.reply({embeds: [embed]}).catch(() => interaction.channel?.send({embeds: [embed]})).then(x => {
-						const filter = (x: any) => x.content === 'stack' && x.author.id === interaction.user.id;
-						const messagecollector = interaction.channel?.createMessageCollector({ filter, max: 1, time: 60000 });
-						messagecollector?.on('collect', msg => { msg.reply({content: `\`\`\`\n${err.stack}\n\`\`\``, allowedMentions: { repliedUser: false }}) });
-					});
+                    embed.setColor('#ff0000').addFields({ name: 'Output', value: `\`\`\`\n${err}\n\`\`\`` });
+
+					await interaction.reply({ embeds: [embed] }).catch(() => interaction.channel?.send({ embeds: [embed] }));
+
+                    interaction.channel?.createMessageCollector({
+                        filter: x => x.content === 'stack' && x.author.id === interaction.user.id,
+                        max: 1,
+                        time: 60_000
+                    }).on('collect', msg => {
+                        const dirname = process.cwd().replaceAll('\\', '/');
+
+                        msg.reply({
+                            content: `\`\`\`ansi\n${err.stack.replaceAll(' at ', ' [31mat[37m ').replaceAll(dirname, `[33m${dirname}[37m`)}\n\`\`\``,
+                            allowedMentions: { repliedUser: false }
+                        });
+                    });
+
 					return;
 				}
+
+                // Output manipulation
 				if (typeof output === 'object') {
 					output = 'js\n' + util.formatWithOptions({ depth: 1 }, '%O', output);
 				} else output = '\n' + String(output);
-				
-				[client.token, client.config.fs.ps.login, client.config.fs.pg.login, client.config.fs.mf.login, client.config.ftp.ps.password, client.config.ftp.pg.password].forEach(login => {
-					output = output.replace(login as string, 'LOGIN_LEAK');
-				});
-				const embed = new client.embed()
-					.setTitle('__Eval__')
-					.setColor(client.config.embedColor)
-					.addFields(
-						{ name: 'Input', value: `\`\`\`js\n${code.slice(0, 1010)}\n\`\`\`` },
-						{ name: 'Output', value: `\`\`\`${output.slice(0, 1016)}\n\`\`\`` });
-				interaction.reply({embeds: [embed]}).catch(() => interaction.channel?.send({embeds: [embed]}));
+
+                // Hide credentials
+				for (const credential of [client.config.token] // Bot token
+                    .concat(Object.values(client.config.fs).map(x => x.login)) // Dedi panel logins
+                    .concat(Object.values(client.config.ftp).map(x => x.password)) // FTP passwords
+                ) output = output.replace(credential, 'CREDENTIAL_LEAK');
+
+                embed.addFields({ name: 'Output', value: `\`\`\`${output.slice(0, 1016)}\n\`\`\`` });
+
+				interaction.reply({ embeds: [embed] }).catch(() => interaction.channel?.send({ embeds: [embed] }));
 			},
-			file: () => interaction.reply({files: [`../databases/${interaction.options.getString('file', true)}.json`]}).catch((e: Error) => interaction.channel?.send(e.message)),
 			statsgraph: () => {
 				client.config.statsGraphSize = -(interaction.options.getInteger('number', true));
 				interaction.reply(`Set to \`${client.config.statsGraphSize}\``);
 			},
-			restart: () => interaction.reply("Restarting...").then(() => process.exit(-1)),
-			update: () => interaction.reply({content: "Pulling from repo...", fetchReply: true}).then(msg => exec('git pull', (error, stdout) => {
-				if (error) {
-					msg.edit(`Pull failed:\n\`\`\`${error.message}\`\`\``);
-				} else if (stdout.includes('Already up to date')) {
-					msg.edit(`Pull aborted:\nUp-to-date`);
-				} else msg.edit('Compiling...').then(() => exec('tsc', (error, stdout) => {
-					if (error) {
-						msg.edit(error.message);
-					} else msg.edit('Restarting...').then(() => process.exit(-1));
-				}));
-			})),
-			increment: async () => {
-				const data: Array<Array<number>> = JSON.parse(fs.readFileSync('../databases/dailyMsgs.json', 'utf8'));
-				const member = interaction.options.getMember('member') as Discord.GuildMember;
-				const newTotal = interaction.options.getInteger('total', true);
-				const oldData = await client.userLevels._content.findById(member.id);
-				if (!oldData) return interaction.reply('No data found');
-				if (newTotal < oldData.messages) return interaction.reply('New total is smaller than old total');
-				const newData: Array<Array<number>> = [];
+			restart: async () => {
+                await interaction.reply('Compiling...');
 
-				await client.userLevels._content.findByIdAndUpdate(member.id, { messages: newTotal });
-				data.forEach(x => newData.push([x[0], (x[1] + (newTotal - oldData.messages))]));
-				fs.writeFileSync('../databases/dailyMsgs.json', JSON.stringify(newData, null, 4));
-				interaction.reply(`<@${member.id}>'s new total set to \`${newTotal}\``);
-			},
-			logs: () => interaction.reply({files: [`../../../.pm2/logs/IRTBot-${interaction.options.getString('logtype', true)}.log`]}).catch((err: Error) => interaction.channel?.send(err.message)),
+                exec('tsc', (error, stdout) => {
+                    if (error) {
+                        interaction.editReply(error.message);
+                    } else interaction.editReply('Restarting...').then(() => process.exit(-1));
+                });
+            },
+			update: async () => {
+                await interaction.reply('Pulling from repo...');
+
+                exec('git pull', async (error, stdout) => {
+                    if (error) {
+			    		interaction.editReply(`Pull failed:\n\`\`\`${error.message}\`\`\``);
+			    	} else if (stdout.includes('Already up to date')) {
+			    		interaction.editReply(`Pull aborted:\nUp-to-date`);
+			    	} else {
+                        await interaction.editReply('Compiling...');
+
+                        exec('tsc', (error, stdout) => {
+                            if (error) {
+                                interaction.editReply(error.message);
+                            } else interaction.editReply('Restarting...').then(() => process.exit(-1));
+                        });
+                    }
+                });
+            },
 			dz: () => interaction.reply('PC has committed iWoke:tm:').then(() => exec('start C:/WakeOnLAN/WakeOnLanC.exe -w -m Desktop')),
 			presence: () => {
 				function convertType(Type?: number) {
@@ -126,40 +136,12 @@ export default {
 			.setName('update')
 			.setDescription('Pull from GitHub repository to live bot'))
 		.addSubcommand(x=>x
-			.setName('file')
-			.setDescription('Send a db file')
-			.addStringOption(x=>x
-				.setName("file")
-				.setDescription("The name of the file")
-				.setRequired(true)))
-		.addSubcommand(x=>x
 			.setName('statsgraph')
 			.setDescription('Edit the number of data points pulled')
 			.addIntegerOption(x=>x
 				.setName("number")
 				.setDescription("The number of data points to pull")
 				.setRequired(true)))
-		.addSubcommand(x=>x
-			.setName('increment')
-			.setDescription('Increment ranking stats')
-			.addUserOption(x=>x
-				.setName("member")
-				.setDescription("The member to increment")
-				.setRequired(true))
-			.addIntegerOption(x=>x
-				.setName("total")
-				.setDescription("Their new message total")
-				.setRequired(true)))
-		.addSubcommand(x=>x
-			.setName('logs')
-			.setDescription('Retrieve output log')
-			.addStringOption(x=>x
-				.setName('logtype')
-				.setDescription('The type of PM2 log to send')
-				.setRequired(true)
-				.addChoices(
-					{ name: 'Log', value: 'out' },
-					{ name: 'Error', value: 'error' })))
 		.addSubcommand(x=>x
 			.setName('dz')
 			.setDescription('Wheezing Over Life'))
@@ -170,11 +152,10 @@ export default {
 				.setName('type')
 				.setDescription('The activity type to set')
 				.addChoices(
-					{name: 'Playing', value: Discord.ActivityType.Playing},
-					{name: 'Listening', value: Discord.ActivityType.Listening},
-					{name: 'Watching', value: Discord.ActivityType.Watching},
-					{name: 'Competing', value: Discord.ActivityType.Competing}
-				))
+					{ name: 'Playing', value: Discord.ActivityType.Playing },
+					{ name: 'Listening', value: Discord.ActivityType.Listening },
+					{ name: 'Watching', value: Discord.ActivityType.Watching },
+					{ name: 'Competing', value: Discord.ActivityType.Competing }))
 			.addStringOption(x=>x
 				.setName('name')
 				.setDescription('The activity name to set'))
@@ -182,9 +163,8 @@ export default {
 				.setName('status')
 				.setDescription('The status to set')
 				.addChoices(
-					{name: 'Online', value: Discord.PresenceUpdateStatus.Online},
-					{name: 'Idle', value: Discord.PresenceUpdateStatus.Idle},
-					{name: 'DND', value: Discord.PresenceUpdateStatus.DoNotDisturb},
-					{name: 'Invisible', value: Discord.PresenceUpdateStatus.Invisible}
-				)))
+					{ name: 'Online', value: Discord.PresenceUpdateStatus.Online },
+					{ name: 'Idle', value: Discord.PresenceUpdateStatus.Idle },
+					{ name: 'DND', value: Discord.PresenceUpdateStatus.DoNotDisturb },
+					{ name: 'Invisible', value: Discord.PresenceUpdateStatus.Invisible })))
 };

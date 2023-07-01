@@ -55,7 +55,7 @@ export default {
 				titleText = 'Bot';
 			} else if (member.user.id === interaction.guild.ownerId) titleText = ':crown: Server Owner';
 			
-			const embed0 = new client.embed()
+			embeds.push(new client.embed()
 				.setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048 }))
 				.setTitle(`${titleText} info: ${member.user.tag}`)
 				.setURL(`https://discord.com/users/${member.user.id}`)
@@ -65,21 +65,30 @@ export default {
 					{ name: '🔹 Joined Server', value: `<t:${Math.round(member.joinedTimestamp as number / 1000)}:R>` },
 					{ name: `🔹 Roles: ${member.roles.cache.size - 1}`, value: member.roles.cache.size > 1 ? member.roles.cache.filter(x => x.id !== interaction.guildId).sort((a, b) => b.position - a.position).map(x => x).join(member.roles.cache.size > 4 ? ' ' : '\n').slice(0, 1024) : 'None' })
 				.setColor(member.displayColor || '#ffffff')
-				.setImage(member.user.bannerURL({ extension: 'png', size: 1024 }) ?? null);
-			if (member.premiumSinceTimestamp) embed0.addFields({ name: '🔹 Server Boosting Since', value: `<t:${Math.round(member.premiumSinceTimestamp / 1000)}:R>`, inline: true });
+				.setImage(member.user.bannerURL({ extension: 'png', size: 1024 }) ?? null)
+            );
+
+			if (member.premiumSinceTimestamp) embeds[0].addFields({ name: '🔹 Server Boosting Since', value: `<t:${Math.round(member.premiumSinceTimestamp / 1000)}:R>`, inline: true });
 			
             if (member.user.bot) {
                 const appData = await getApplicationData(member.user.id);
 
-                if (appData) embed0.addFields(...appData);
+                if (appData) embeds[0].addFields(...appData);
 
-                embeds.push(embed0);
                 return interaction.reply({ embeds });
             }
 
-            embeds.push(embed0);
-
             if (!member.presence) return interaction.reply({ embeds });
+
+            embeds[0].addFields({
+                name: `🔹 Status: ${member.presence.status}`,
+                value: `${member.presence.status === 'offline' ? '\u200b' : [
+                    `Web: ${convertStatus(member.presence.clientStatus?.web)}`,
+                    `Mobile: ${convertStatus(member.presence.clientStatus?.mobile)}`,
+                    `Desktop: ${convertStatus(member.presence.clientStatus?.desktop)}`
+                ].join('\n')}`,
+                inline: true
+            });
 
             for (const activity of member.presence.activities) {
                 if (activity.type === 2 && activity.details && activity.assets) {
@@ -87,7 +96,8 @@ export default {
 						.setAuthor({ name: activity.name, iconURL: 'https://www.freepnglogos.com/uploads/spotify-logo-png/spotify-icon-marilyn-scott-0.png' })
 						.setColor('#1DB954')
 						.setFields({ name: activity.details, value: `By: ${activity.state}\nOn: ${activity.assets.largeText}\nStarted listening <t:${Math.round(activity.createdTimestamp / 1000)}:R>` })
-						.setThumbnail(`https://i.scdn.co/image/${activity.assets.largeImage?.replace('spotify:', '')}`));
+						.setThumbnail(`https://i.scdn.co/image/${activity.assets.largeImage?.replace('spotify:', '')}`)
+                    );
 				} else if (activity.type === 4) {
 					embeds.push(new client.embed()
 						.setTitle(activity.name)
@@ -95,7 +105,8 @@ export default {
 						.setDescription([
 							activity.emoji ? `**Emoji name:** ${activity.emoji.name}`: '',
 							activity.state ? `\n**Text:** ${activity.state}`: ''
-						].join('')));
+						].join(''))
+                    );
 				} else {
 					let activityImage: string[] | string | null | undefined = [
 						['542474758835535872', 'https://cdn.discordapp.com/app-icons/542474758835535872/37b18c2d5633628d936dd3b2b083785b.png'], // Farming Simulator 19

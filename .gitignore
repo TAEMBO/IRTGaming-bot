@@ -8,6 +8,6 @@ config.json
 
 databases
 
-compiled
+dist
 
 gw.js

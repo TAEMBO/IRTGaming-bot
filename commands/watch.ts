@@ -1,10 +1,11 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client.js';
 import fs from 'node:fs';
+import { isMPStaff, youNeedRole } from '../utilities.js';
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
-        if (!client.isMPStaff(interaction.member)) return client.youNeedRole(interaction, "mpstaff");
+        if (!isMPStaff(interaction.member)) return youNeedRole(interaction, "mpstaff");
 
         const name = interaction.options.getString('username', false) as string;
         const wlData = await client.watchList._content.findById(name);
@@ -14,7 +15,7 @@ export default {
                 const reason = interaction.options.getString('reason', true);
                 if (!wlData) {
                     await client.watchList._content.create({ _id: name, reason });
-                    interaction.reply({content: `Successfully added \`${name}\` with reason \`${reason}\``});
+                    interaction.reply(`Successfully added \`${name}\` with reason \`${reason}\``);
                 } else interaction.reply(`\`${name}\` already exists for reason \`${wlData.reason}\``);
             },
             remove: async () => {
@@ -25,28 +26,28 @@ export default {
             },
             view: async () => {
                 fs.writeFileSync('../databases/watchListCache.json', JSON.stringify(await client.watchList._content.find(), null, 2));
-                interaction.reply({files: ['../databases/watchListCache.json']});
+                interaction.reply({ files: ['../databases/watchListCache.json'] });
             }
         } as any)[interaction.options.getSubcommand()]();
     },
     data: new SlashCommandBuilder()
         .setName("watch")
         .setDescription("Manage watchList names")
-        .addSubcommand((optt)=>optt
+        .addSubcommand(x=>x
             .setName('add')
             .setDescription('add a player to watchList')
-            .addStringOption((opt)=>opt
+            .addStringOption(x=>x
                 .setName('username')
                 .setDescription('The player name to add')
                 .setRequired(true))
-            .addStringOption((opt)=>opt
+            .addStringOption(x=>x
                 .setName('reason')
                 .setDescription('The reason for adding the player')
                 .setRequired(true)))
-        .addSubcommand((optt)=>optt
+        .addSubcommand(x=>x
             .setName('remove')
             .setDescription('remove a player from watchList')
-            .addStringOption((opt)=>opt
+            .addStringOption(x=>x
                 .setName('username')
                 .setDescription('The player name to remove')
                 .setRequired(true)))

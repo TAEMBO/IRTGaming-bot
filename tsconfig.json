@@ -10,7 +10,7 @@
         "resolveJsonModule": true,
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
-        "outDir": "compiled"
+        "outDir": "dist"
     },
     "exclude": [
         "node_modules"

@@ -1,5 +1,6 @@
 import YClient from './client.js';
 import Discord from 'discord.js';
+import config from './config.json' assert { type: 'json' };
 
 export enum LogColor {
     Black = "\x1b[30m",
@@ -113,59 +114,15 @@ export interface Config {
     /** `Array<[ChannelID, ChannelName]>` */
     YTCacheChannels: Array<Array<string>>,
     mainServer: {
-        id: string,
-        FSLoopMsgId: string,
+        /** The ID of the Guild that this bot is for */
+        id: string;
+        FSLoopMsgId: string;
         TFListMsgId: string;
         MFFarmRoles: Array<keyof Config["mainServer"]["roles"]>;
-        MPStaffRoles: Array<keyof Config["mainServer"]["roles"]>,
-        DCStaffRoles: Array<keyof Config["mainServer"]["roles"]>,
-        roles: {
-            admin: string,
-            discordmoderator: string,
-            discordhelper: string,
-            mpmanager: string,
-            mpsradmin: string,
-            mpjradmin: string,
-            mpfarmmanager: string,
-            trustedfarmer: string,
-            mpstaff: string,
-            mpmanagement: string,
-            loa: string,
-            mfmanager: string,
-            mffarmowner: string,
-            mfmember: string,
-            mffarm1: string,
-            mffarm2: string,
-            mffarm3: string,
-            mffarm4: string,
-            mffarm5: string,
-            mffarm6: string,
-            mffarm7: string,
-            mffarm8: string,
-            mffarm9: string,
-            mffarm10: string,
-            subscriber: string;
-            detained: string;
-            member: string;
-        },
-        channels: {
-            botLogs: string,
-            botCommands: string,
-            mpPublicSilage: string,
-            mpPublicGrain: string,
-            general: string,
-            taesTestingZone: string,
-            communityIdeas: string,
-            staffReports: string,
-            fsLogs: string,
-            juniorAdminChat: string,
-            mpStaffCommands: string,
-            watchList: string,
-            videosAndLiveStreams: string;
-            trustedFarmerChat: string;
-            mpApplicationLogs: string;
-            mpRulesAndInfo: string;
-        }
+        MPStaffRoles: Array<keyof Config["mainServer"]["roles"]>;
+        DCStaffRoles: Array<keyof Config["mainServer"]["roles"]>;
+        roles: Record<keyof typeof config.mainServer.roles, string>;
+        channels: Record<keyof typeof config.mainServer.channels, string>;
     }
 }
 

@@ -1,5 +1,6 @@
 import Discord from 'discord.js';
 import YClient from '../client.js';
+import { getChan } from '../utilities.js';
 
 export default async (client: YClient, member: Discord.GuildMember) => {
     if (!client.config.botSwitches.logs || member.partial) return;
@@ -12,7 +13,7 @@ export default async (client: YClient, member: Discord.GuildMember) => {
 
     newInvites.forEach(inv => client.invites.set(inv.code, { uses: inv.uses, creator: inv.inviter?.id }));
  
-    client.getChan('botLogs').send({embeds: [new client.embed()
+    getChan(client, 'botLogs').send({ embeds: [new client.embed()
         .setTitle(`Member Joined: ${member.user.tag}`)
         .setDescription(`<@${member.user.id}>\n\`${member.user.id}\``)
         .setFields(
@@ -21,7 +22,7 @@ export default async (client: YClient, member: Discord.GuildMember) => {
         .setColor(client.config.embedColorGreen)
         .setTimestamp()
         .setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048 }))
-    ]});
+    ] });
 
     if (evadingCase) member.roles.add(client.config.mainServer.roles.detained);
 }

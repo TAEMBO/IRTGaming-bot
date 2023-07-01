@@ -1,5 +1,6 @@
 import Discord from 'discord.js';
 import YClient from '../client.js';
+import { getChan, isDCStaff, isMPStaff, log, mainGuild } from '../utilities.js';
 import { APIUser, LogColor } from '../typings.js';
 
 export default async (client: YClient, message: Discord.Message<boolean>) => {
@@ -10,8 +11,8 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
     const msgarr = msg.split(' ');
 
     if (!message.inGuild()) {
-        const guildMemberObject = client.mainGuild().members.cache.get(message.author.id) as Discord.GuildMember;
-        client.getChan('taesTestingZone').send({
+        const guildMemberObject = mainGuild(client).members.cache.get(message.author.id) as Discord.GuildMember;
+        getChan(client, 'taesTestingZone').send({
             content: `DM Forward <@${client.config.devWhitelist[0]}>`,
             files: message.attachments.map(x => x.url),
             embeds: [new client.embed()
@@ -30,13 +31,13 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
 	
 		// useless staff ping mute
 		if (message.mentions.roles.some(mentionedRole => mentionedRole.id === client.config.mainServer.roles.mpstaff)) {
-			client.log(LogColor.Purple, `${message.author.tag} mentioned staff role`);
+			log(LogColor.Purple, `${message.author.tag} mentioned staff role`);
             message.channel.createMessageCollector({
-                filter: x => client.isMPStaff(x.member as Discord.GuildMember) && x.content === 'y',
+                filter: x => isMPStaff(x.member as Discord.GuildMember) && x.content === 'y',
                 max: 1,
                 time: 60_000
             }).on('collect', async collected => {
-				client.log(LogColor.Purple, `Received "y" from ${collected.author.tag}, indicating to mute`);
+				log(LogColor.Purple, `Received "y" from ${collected.author.tag}, indicating to mute`);
 				await client.punishments.addPunishment('mute', collected.author.id, 'Automod; Misuse of staff ping', message.author, message.member, { time: '10m' });
 				collected.react('✅');
             });
@@ -112,12 +113,13 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
 				return allPossibleCases(arr).join(' ');
 			} else return word;
 		});
+        
 		let newMsg = msg;
 		new Map([[/!/g, "i"], [/@/g, "a"], [/\$/g, "s"], [/3/g, "e"], [/1/g, "i"], [/¡/g, "i"],[/5/g, "s"], [/0/g, "o"], [/4/g, "h"], [/7/g, "t"], [/9/g, "g"], [/6/g, "b"], [/8/g, "b"]]).forEach((str, reg) => newMsg = newMsg.replace(reg, str));
 		const combedMsg = getAllCombos(newMsg.replace(/[^a-zA-Z\s]/g, "")).join(' ').replace(/ +(?= )/g, "").split(' ');
 
 		// RepeatedMessages
-		if (client.config.botSwitches.automod && !client.isDCStaff(message.member as Discord.GuildMember)) {
+		if (client.config.botSwitches.automod && !isDCStaff(message.member as Discord.GuildMember)) {
 			if (client.bannedWords._content.some(x => combedMsg.includes(x)) && !Whitelist.includes(message.channel.id)) { // Banned words
 				automodded = true;
 				await message.reply('That word is banned here.').then(msg => {
@@ -125,7 +127,7 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
 					setTimeout(() => msg.delete(), 5000);
 				});
 				await repeatedMessages(30000, 4, 'bw', '30m', 'Banned words');
-			} else if (msg.includes("discord.gg/") && !client.isMPStaff(message.member as Discord.GuildMember)) { // Discord advertisement
+			} else if (msg.includes("discord.gg/") && !isMPStaff(message.member as Discord.GuildMember)) { // Discord advertisement
 				const inviteURL = message.content.split(' ').find(x => x.includes('discord.gg/')) as string;
 				const validInvite = await client.fetchInvite(inviteURL).catch(() => null);
 				if (validInvite && validInvite.guild?.id !== client.config.mainServer.id) {
@@ -196,7 +198,5 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
 		if (msg.includes("forgor")) message.react("💀");
 		
 		if (msgarr.includes('69')) message.react(':IRT_Noice:611558357643558974');
-		
-		if (msg.startsWith('!rank')) message.reply({ content: 'Ranking has been moved to </rank view:1042659197919178790>', allowedMentions: { repliedUser: false } });
 	}
 }

@@ -1,10 +1,12 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client.js';
+import { isMPStaff } from '../utilities.js';
+
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
-        if (interaction.channel?.parentId !== '980947706736427019' && !client.isMPStaff(interaction.member)) return interaction.reply({content: 'You cannot use this command here', ephemeral: true});
+        if (interaction.channel?.parentId !== '980947706736427019' && !isMPStaff(interaction)) return interaction.reply({ content: 'You cannot use this command here', ephemeral: true });
 
-        interaction.reply({embeds: [new client.embed()
+        interaction.reply({ embeds: [new client.embed()
             .setTitle('MP Support - Ban Appeal')
             .setColor(client.config.embedColor)
             .setDescription([
@@ -17,7 +19,7 @@ export default {
                 '\u200b',
                 'Once you have done so, we will review your ban as soon as possible. Please be patient as we may have to wait for staff in other time zones before making a decision.'
             ].join('\n'))
-        ]})
+        ] })
     },
     data: new SlashCommandBuilder()
         .setName("appeal")

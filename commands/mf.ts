@@ -1,62 +1,70 @@
 import Discord, { SlashCommandBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } from 'discord.js';
 import YClient from '../client.js';
+import { hasRole, onMFFarms, youNeedRole } from '../utilities.js';
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
-        const hasRole = (Role: string) => interaction.member.roles.cache.has(Role);
-        const globalRoles = client.config.mainServer.roles;
+        if (!hasRole(interaction, 'mpmanager') && !hasRole(interaction, 'mfmanager') && !hasRole(interaction, 'mffarmowner')) return youNeedRole(interaction, "mffarmowner");
 
-        if (!hasRole(globalRoles.mpmanager) && !hasRole(globalRoles.mfmanager) && !hasRole(globalRoles.mffarmowner)) return client.youNeedRole(interaction, "mffarmowner");
         const member = interaction.options.getMember("member") as Discord.GuildMember;
         const Role = client.config.mainServer.roles[interaction.options.getString("role", true) as keyof typeof client.config.mainServer.roles];
 
         if (member.roles.cache.has(Role)) {
-            if (hasRole(globalRoles.mffarmowner) && !hasRole(globalRoles.mfmanager) && !hasRole(Role)) return interaction.reply('You cannot remove users from a farm you do not own.');
-            const msg = await interaction.reply({
+            if (!hasRole(interaction, 'mfmanager') && hasRole(interaction, 'mffarmowner') && !interaction.member.roles.cache.has(Role)) return interaction.reply('You cannot remove users from a farm you do not own.');
+            
+            (await interaction.reply({
                 embeds: [new client.embed()
                     .setDescription(`This user already has the <@&${Role}> role, do you want to remove it from them?`)
                     .setColor(client.config.embedColor)],
                 fetchReply: true, 
                 components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
-                    new ButtonBuilder().setCustomId(`Yes`).setStyle(ButtonStyle.Success).setLabel("Confirm"),
-                    new ButtonBuilder().setCustomId(`No`).setStyle(ButtonStyle.Danger).setLabel("Cancel")
+                    new ButtonBuilder().setCustomId('yes').setStyle(ButtonStyle.Success).setLabel("Confirm"),
+                    new ButtonBuilder().setCustomId('no').setStyle(ButtonStyle.Danger).setLabel("Cancel")
                 )]
-            });
-            const filter = (i: any) => ["Yes", "No"].includes(i.customId) && i.user.id === interaction.user.id;
-            const collector = msg.createMessageComponentCollector({filter, max: 1, time: 30000});
-            collector.on("collect", async (int: Discord.MessageComponentInteraction) => {
-                if (int.customId === "Yes") {
-                    member.roles.remove([Role, client.config.mainServer.roles.mfmember]);
-                    int.update({embeds: [new client.embed().setDescription(`<@${member.user.id}> (${member.user.tag}) has been removed from the <@&${globalRoles.mfmember}> and <@&${Role}> roles.`).setColor(client.config.embedColor)], components: []});
-                } else if (int.customId === "No") int.update({embeds: [new client.embed().setDescription(`Command canceled`).setColor(client.config.embedColor)], components: []});
+            })).createMessageComponentCollector({
+                filter: x => x.user.id === interaction.user.id,
+                max: 1,
+                time: 30_000
+            }).on('collect', int => {
+                ({
+                    yes: () => {
+                        const rolesToRemove = onMFFarms(member).length === 1 ? [Role, client.config.mainServer.roles.mfmember] : [Role];
+                        
+                        member.roles.remove(rolesToRemove);
+                        int.update({ embeds: [new client.embed().setDescription(`<@${member.user.id}> (${member.user.tag}) has been removed from the <@&${client.config.mainServer.roles.mfmember}> and <@&${Role}> roles.`).setColor(client.config.embedColor)], components: [] });
+                    },
+                    no: () => {
+                        int.update({ embeds: [new client.embed().setDescription(`Command canceled`).setColor(client.config.embedColor)], components: [] });
+                    }
+                } as any)[int.customId]();
             });
         } else {
-            if (hasRole(globalRoles.mffarmowner) && !hasRole(globalRoles.mfmanager) && !hasRole(Role)) return interaction.reply('You cannot add users to a farm you do not own.');
+            if (hasRole(interaction, 'mffarmowner') && !hasRole(interaction, 'mfmanager') && !interaction.member.roles.cache.has(Role)) return interaction.reply('You cannot add users to a farm you do not own.');
+
             member.roles.add([Role, client.config.mainServer.roles.mfmember]);
-            interaction.reply({embeds: [new client.embed().setDescription(`<@${member.user.id}> (${member.user.tag}) has been given the <@&${globalRoles.mfmember}> and <@&${Role}> roles.`).setColor(client.config.embedColor)]});
+            interaction.reply({ embeds: [new client.embed().setDescription(`<@${member.user.id}> (${member.user.tag}) has been given the <@&${client.config.mainServer.roles.mfmember}> and <@&${Role}> roles.`).setColor(client.config.embedColor)] });
         }
 	},
     data: new SlashCommandBuilder()
-    .setName("mf")
-    .setDescription("Manage MF members")
-    .addUserOption((opt)=>opt
-        .setName("member")
-        .setDescription("The member to add or remove the role from")
-        .setRequired(true))
-    .addStringOption((opt)=>opt
-        .setName("role")
-        .setDescription("the role to add or remove")
-        .addChoices(
-            {name: 'Farm 1', value: 'mffarm1'},
-            {name: 'Farm 2', value: 'mffarm2'},
-            {name: 'Farm 3', value: 'mffarm3'},
-            {name: 'Farm 4', value: 'mffarm4'},
-            {name: 'Farm 5', value: 'mffarm5'},
-            {name: 'Farm 6', value: 'mffarm6'},
-            {name: 'Farm 7', value: 'mffarm7'},
-            {name: 'Farm 8', value: 'mffarm8'},
-            {name: 'Farm 9', value: 'mffarm9'},
-            {name: 'Farm 10', value: 'mffarm10'}
-        )
-        .setRequired(true))
+        .setName("mf")
+        .setDescription("Manage MF members")
+        .addUserOption(x=>x
+            .setName("member")
+            .setDescription("The member to add or remove a role from")
+            .setRequired(true))
+        .addStringOption(x=>x
+            .setName("role")
+            .setDescription("the role to add or remove")
+            .addChoices(
+                { name: 'Farm 1', value: 'mffarm1' },
+                { name: 'Farm 2', value: 'mffarm2' },
+                { name: 'Farm 3', value: 'mffarm3' },
+                { name: 'Farm 4', value: 'mffarm4' },
+                { name: 'Farm 5', value: 'mffarm5' },
+                { name: 'Farm 6', value: 'mffarm6' },
+                { name: 'Farm 7', value: 'mffarm7' },
+                { name: 'Farm 8', value: 'mffarm8' },
+                { name: 'Farm 9', value: 'mffarm9' },
+                { name: 'Farm 10', value: 'mffarm10' })
+            .setRequired(true))
 };

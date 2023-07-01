@@ -1,27 +1,35 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client.js';
+
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
 		const role = interaction.options.getRole("role", true);
 		const keyPermissions = ['Administrator', 'KickMembers', 'BanMembers', 'ManageChannels', 'ManageGuild', 'ViewAuditLog', 'ManageMessages', 'ManageNicknames', 'MentionEveryone', 'UseExternalEmojis', 'ManageRoles', 'ManageEmojisAndStickers', 'ModerateMembers'];
 		const permissions = role.permissions.toArray();
 		const roleMembers = role.members.map(e =>`**${e.user.tag}**`).join("\n") || "";
-		interaction.reply({embeds: [new client.embed()
+        const includedPermissions = permissions.includes('Administrator') ? ['Administrator'] : permissions.filter(x => keyPermissions.includes(x));
+
+		interaction.reply({ embeds: [new client.embed()
 			.setTitle(`Role Info: ${role.name}`)
 			.addFields(
-				{name: '🔹 ID', value: `\`${role.id}\``, inline: true},
-				{name: '🔹 Color', value: `\`${role.hexColor}\``, inline: true},
-				{name: '🔹 Created', value: `<t:${Math.round(role.createdTimestamp/1000)}:R> `, inline: true},
-				{name: '🔹 Misc', value: `Hoist: \`${role.hoist}\`\nMentionable: \`${role.mentionable}\`\nPosition: \`${role.position}\` from bottom\nMembers: \`${role.members.size}\`\n${role.members.size < 21 ? roleMembers : ''}`, inline: true},
-				{name: '🔹 Key Permissions', value: (permissions.includes('Administrator') ? ['Administrator'] : permissions.filter(x => keyPermissions.includes(x))).join(', ') || 'None', inline: true})
-			.setColor(role.color || '#fefefe')
+				{ name: '🔹 ID', value: `\`${role.id}\``, inline: true},
+				{ name: '🔹 Color', value: `\`${role.hexColor}\``, inline: true},
+				{ name: '🔹 Created', value: `<t:${Math.round(role.createdTimestamp/1000)}:R> `, inline: true },
+				{ name: '🔹 Misc', value: [
+                    `Hoist: \`${role.hoist}\``,
+                    `Mentionable: \`${role.mentionable}\``,
+                    `Position: \`${role.position}\` from bottom`,
+                    `Members: \`${role.members.size}\`\n${role.members.size < 21 ? roleMembers : ''}`
+                ].join('\n'), inline: true },
+				{ name: '🔹 Key Permissions', value: includedPermissions.join(', ') || 'None', inline: true })
+			.setColor(role.color)
 			.setThumbnail(role.iconURL())
-		]});
+		] });
 	},
 	data: new SlashCommandBuilder()
 		.setName("roleinfo")
 		.setDescription("Get information about a role")
-		.addRoleOption((opt)=>opt
+		.addRoleOption(x=>x
 			.setName("role")
 			.setDescription("The role to get information on")
 			.setRequired(true))

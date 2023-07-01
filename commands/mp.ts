@@ -5,23 +5,25 @@ import puppeteer from 'puppeteer'; // Credits to Trolly for suggesting this pack
 import FTPClient from 'ftp';
 import fs from 'node:fs';
 import { xml2js } from 'xml-js';
+import { hasRole, isMPStaff, youNeedRole } from '../utilities.js';
 import type { banFormat, farmFormat } from '../typings.js';
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
-        if (!client.isMPStaff(interaction.member)) return client.youNeedRole(interaction, 'mpstaff');
+        if (!isMPStaff(interaction)) return youNeedRole(interaction, 'mpstaff');
+
         const name = interaction.options.getString('name');
         const FTP = new FTPClient();
         ({
             server: async () => {
                 async function checkRole(role: keyof typeof client.config.mainServer.roles) {
-                    if (!interaction.member.roles.cache.has(client.config.mainServer.roles[role])) await client.youNeedRole(interaction, role);
+                    if (!hasRole(interaction, role)) await youNeedRole(interaction, role);
                 }
 
                 const chosenServer = interaction.options.getString('server', true) as 'ps' | 'pg' | 'mf';
                 const chosenAction = interaction.options.getString('action', true) as 'start' | 'stop';
 
-                if (chosenServer === 'mf' && !interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager)) {
+                if (chosenServer === 'mf' && !hasRole(interaction, 'mpmanager')) {
                     await checkRole('mfmanager');
                 } else await checkRole('mpmanager');
 
@@ -49,6 +51,7 @@ export default {
                 let result = 'Dedi panel closed, result:\n';
                 result += `Server: **${chosenServer.toUpperCase()}**\n`;
                 result += `Action: **${chosenAction}**\n`;
+
                 if (chosenAction === 'stop') {
                     const uptimeText = await page.evaluate(() => document.querySelector("span.monitorHead")?.textContent);
                     result += `Uptime before stopping: **${uptimeText}**\n`;
@@ -62,16 +65,17 @@ export default {
                 }, 2000);
             },
             mop: async () => {
-                if (!interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager)) return client.youNeedRole(interaction, 'mpmanager');
+                if (!hasRole(interaction, 'mpmanager')) return youNeedRole(interaction, 'mpmanager');
+
                 const chosenServer = interaction.options.getString('server', true) as 'ps' | 'pg';
                 const chosenAction = interaction.options.getString('action', true) as 'items.xml' | 'players.xml';
+                const time = Date.now();
+                const FTPLogin = client.config.ftp[chosenServer];
                 
                 if (client.FSCache[chosenServer].status === 'online') return interaction.reply(`You cannot mop files from **${chosenServer.toUpperCase()}** while it is online`);
                 if (chosenServer !== 'pg' && chosenAction === 'items.xml') return interaction.reply(`You can only mop **${chosenAction}** from **PG**`);
                 
-                const time = Date.now();
                 await interaction.deferReply();
-                const FTPLogin = client.config.ftp[chosenServer];
     
                 FTP.on('ready', () => FTP.delete(FTPLogin.path + `savegame1/${chosenAction}`, async (err) => {
                     if (err) return interaction.editReply(err.message);
@@ -98,13 +102,15 @@ export default {
                         })).connect(client.config.ftp.pg);
                     } else interaction.editReply({ files: ['../../../Documents/My Games/FarmingSimulator2022/blockedUserIds.xml'] });
                 } else {
-                    if (!interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager)) return client.youNeedRole(interaction, "mpmanager");
+                    if (!hasRole(interaction, 'mpmanager')) return youNeedRole(interaction, 'mpmanager');
                     
                     let data: banFormat;
                     const banAttachment = interaction.options.getAttachment('bans');
+
                     if (!banAttachment) return interaction.editReply(`Canceled: A ban file must be supplied`);
     
                     const banData = await (await fetch(banAttachment.url)).text();
+
                     try {
                         data = xml2js(banData, { compact: true }) as banFormat;
                     } catch (err) {
@@ -138,6 +144,7 @@ export default {
                         return '❌';
                     } else if (key === 'timeLastConnected') {
                         const utcDate = new Date(perm);
+
                         utcDate.setMinutes(utcDate.getMinutes() + timeZoneDiff[chosenServer]);
                         return utcDate.toUTCString();
                     } else return perm;
@@ -148,6 +155,7 @@ export default {
                             return x._attributes.uniqueUserId === name;
                         } else return x._attributes.lastNickname === name;
                     });
+
                     if (playerData) {
                         interaction.editReply('```\n' + Object.entries(playerData._attributes).map(x => x[0].padEnd(18, ' ') + permIcon(x[1], x[0])).join('\n') + '```');
                     } else interaction.editReply('No green farm data found with that name/UUID');
@@ -181,6 +189,7 @@ export default {
             password: async () => {
                 await interaction.deferReply();
                 const chosenServer = interaction.options.getString('server', true) as 'ps' | 'pg';
+
                 function getPassword(data: string) {
                     const pw = (xml2js(data, { compact: true }) as any).gameserver?.settings?.game_password?._text as string | undefined;
 
@@ -198,10 +207,10 @@ export default {
                 } else getPassword(fs.readFileSync('../../../Documents/My Games/FarmingSimulator2022/dedicated_server/dedicatedServerConfig.xml', 'utf8'));
             },
             roles: async () => {
-                if (!interaction.member.roles.cache.has(client.config.mainServer.roles.mpmanager)) return client.youNeedRole(interaction, "mpmanager");
+                if (!hasRole(interaction, 'mpmanager')) return youNeedRole(interaction, 'mpmanager');
+
                 const member = interaction.options.getMember("member") as Discord.GuildMember;
                 const owner = await interaction.guild.fetchOwner();
-
                 const roleName = interaction.options.getString("role", true) as 'trustedfarmer' | 'mpfarmmanager' | 'mpjradmin' | 'mpsradmin';
                 const Role = client.config.mainServer.roles[roleName];
                 const roles = member.roles.cache.map((x, i) => i);
@@ -257,6 +266,7 @@ export default {
                     });
                 } else {
                     let newNickname: string | undefined;
+
                     ({
                         trustedfarmer: () => {
                             roles.push(Role);
@@ -276,6 +286,7 @@ export default {
                             newNickname = (member.nickname as string).replace('MP Jr. Admin', 'MP Sr. Admin');
                         }
                     })[roleName]();
+                    
                     member.edit({ roles, nick: newNickname });
                     owner.send(`**${interaction.user.tag}** has promoted **${member.user.tag}** to **${interaction.guild.roles.cache.get(Role)?.name}**`);
                     interaction.reply({ embeds: [new client.embed().setDescription(`<@${member.user.id}> has been given <@&${Role}>.`).setColor(client.config.embedColor)] });

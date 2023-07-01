@@ -2,6 +2,7 @@ import Discord, { SlashCommandBuilder, AttachmentBuilder } from 'discord.js';
 import YClient from '../client.js';
 import fs from 'node:fs';
 import canvas from 'canvas';
+
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
 		const subCmd = interaction.options.getSubcommand();
@@ -10,30 +11,21 @@ export default {
 		if (subCmd === "leaderboard") {
 			const messageCountsTotal = allData.reduce((a, b) => a + b.messages, 0);
 
-			const data = JSON.parse(fs.readFileSync('../databases/dailyMsgs.json', 'utf8')).map((x: Array<number>, i: number, a: any) => {
+			const data: number[] = JSON.parse(fs.readFileSync('../databases/dailyMsgs.json', 'utf8')).map((x: number[], i: number, a: any) => {
 				const yesterday = a[i - 1] || [];
 				return x[1] - (yesterday[1] || x[1]);
 			}).slice(1).slice(-60);
 			
-			// handle negative days
-			data.forEach((change: number, i: number) => {
-				if (change < 0) data[i] = data[i - 1] || data[i + 1] || 0;
-			});
+            // handle negative days
+            for (const [i, change] of data.entries()) if (change < 0) data[i] = data[i - 1] || data[i + 1] || 0;
 			
 			const maxValue = Math.max(...data);
 			const maxValueArr = maxValue.toString().split('');
-			
 			const first_graph_top = Math.ceil(maxValue * 10 ** (-maxValueArr.length + 1)) * 10 ** (maxValueArr.length - 1);
-			// console.log({ first_graph_top });
-			
 			const second_graph_top = Math.ceil(maxValue * 10 ** (-maxValueArr.length + 2)) * 10 ** (maxValueArr.length - 2);
-			// console.log({ second_graph_top });
-			
 			const textSize = 40;
-			
 			const img = canvas.createCanvas(1500, 750);
 			const ctx = img.getContext('2d');
-			
 			const graphOrigin = [15, 65];
 			const graphSize = [1300, 630];
 			const nodeWidth = graphSize[0] / (data.length - 1);
@@ -43,7 +35,7 @@ export default {
 			// grey horizontal lines
 			ctx.lineWidth = 5;
 			
-			let interval_candidates = [];
+			const interval_candidates: [number, number, number][] = [];
 			for (let i = 4; i < 10; i++) {
 				const interval = first_graph_top / i;
 				if (Number.isInteger(interval)) {
@@ -52,13 +44,10 @@ export default {
 					interval_candidates.push([interval, i, reference_number]);
 				}
 			}
-			// console.log({ interval_candidates });
 			const chosen_interval = interval_candidates.sort((a, b) => b[2] - a[2])[0];
-			// console.log({ chosen_interval });
-			
-			let previousY: Array<number> = [];
-			
+			let previousY: number[] = [];
 			ctx.strokeStyle = '#202225';
+
 			for (let i = 0; i <= chosen_interval[1]; i++) {
 				const y = graphOrigin[1] + graphSize[1] - (i * (chosen_interval[0] / second_graph_top) * graphSize[1]);
 				if (y < graphOrigin[1]) continue;
@@ -91,7 +80,7 @@ export default {
 			
 			const getYCoordinate = (value: number) => ((1 - (value / second_graph_top)) * graphSize[1]) + graphOrigin[1];
 			
-			let lastCoords: Array<number> = [];
+			let lastCoords: number[] = [];
 			data.forEach((val: number, i: number) => {
 				ctx.beginPath();
 				if (lastCoords) ctx.moveTo(lastCoords[0], lastCoords[1]);
@@ -139,7 +128,7 @@ export default {
 				embeds: [new client.embed()
 					.setTitle('Ranking leaderboard')
 					.setDescription(`A total of **${messageCountsTotal.toLocaleString('en-US')}** messages have been recorded in this server.`)
-					.addFields({name: 'Top users by messages sent:', value: topUsers})
+					.addFields({ name: 'Top users by messages sent:', value: topUsers })
 					.setImage('attachment://dailymsgs.png')
 					.setColor(client.config.embedColor)]
 			});
@@ -162,7 +151,7 @@ export default {
 			const memberDifference = userData.messages - client.userLevels.algorithm(userData.level);
 			const levelDifference = client.userLevels.algorithm(userData.level+1) - client.userLevels.algorithm(userData.level);
 
-			interaction.reply({embeds: [new client.embed()
+			interaction.reply({ embeds: [new client.embed()
 				.setTitle([
 					`Level: **${userData.level}**`,
 					`Rank: **${index ? '#' + index  : 'last'}**`,
@@ -170,24 +159,22 @@ export default {
 					`Total: **${userData.messages}**`
 				].join('\n'))
 				.setColor(member.displayColor)
-				.setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048}))
+				.setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048 }))
 				.setAuthor({name: `Ranking for ${member.user.tag}`})
-			]});
+			] });
 		}
 	},
 	data: new SlashCommandBuilder()
-	.setName("rank")
-	.setDescription("Ranking system")
-	.addSubcommand((optt)=>optt
-		.setName("view")
-		.setDescription("View your or another member's ranking information")
-		.addUserOption((opt)=>opt
-			.setName("member")
-			.setDescription("Member whose rank to view")
-			.setRequired(false))
-	)
-	.addSubcommand((optt)=>optt
-		.setName("leaderboard")
-		.setDescription("View top 10 users")
-	)
+	    .setName("rank")
+	    .setDescription("Ranking system")
+	    .addSubcommand(x=>x
+	    	.setName("view")
+	    	.setDescription("View your or another member's ranking information")
+	    	.addUserOption(x=>x
+	    		.setName("member")
+	    		.setDescription("Member whose rank to view")
+	    		.setRequired(false)))
+	    .addSubcommand(x=>x
+	    	.setName("leaderboard")
+	    	.setDescription("View top 10 users"))
 };

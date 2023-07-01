@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import Discord from 'discord.js';
 import YClient from '../client.js';
 import ms from 'ms';
+import { formatTime, getChan, mainGuild } from '../utilities.js';
 
 const Schema = mongoose.model('punishments', new mongoose.Schema({
     _id: { type: Number, required: true },
@@ -9,7 +10,7 @@ const Schema = mongoose.model('punishments', new mongoose.Schema({
     member: { required: true, type: new mongoose.Schema({
         _id: { type: String, required: true },
         tag: { type: String, required: true }
-    })},
+    }) },
     moderator: { type: String, required: true },
     expired: { type: Boolean },
     time: { type: Number, required: true },
@@ -18,15 +19,15 @@ const Schema = mongoose.model('punishments', new mongoose.Schema({
     cancels: { type: Number },
     duration: { type: Number }
 }, { versionKey: false }));
+
 type Document =  ReturnType<typeof Schema.castObject>;
 
 export default class punishments extends Schema {
     public _content = Schema;
-	private createId = async () => Math.max(...(await this._content.find()).map(x => x.id), 0) + 1;
     constructor(private client: YClient) {
 		super();
 	}
-	async makeModlogEntry(punishment: Document) {
+	private async makeModlogEntry(punishment: Document) {
         const embed = new this.client.embed()
             .setTitle(`${punishment.type[0].toUpperCase() + punishment.type.slice(1)} | Case #${punishment._id}`)
             .addFields(
@@ -36,16 +37,24 @@ export default class punishments extends Schema {
             	{ name: '🔹 Reason', value: `\`${punishment.reason}\``, inline: true })
             .setColor(this.client.config.embedColor)
             .setTimestamp(punishment.time);
-        if (punishment.duration) embed.addFields({ name: '🔹 Duration', value: this.client.formatTime(punishment.duration, 100), inline: true }, { name: '\u200b', value: '\u200b', inline: true });
+
+        if (punishment.duration) embed.addFields(
+            { name: '🔹 Duration', value: formatTime(punishment.duration, 100), inline: true },
+            { name: '\u200b', value: '\u200b', inline: true }
+        );
 		
         if (punishment.cancels) {
             const cancels = await this._content.findById(punishment.cancels);
             embed.addFields({ name: '🔹 Overwrites', value: `This case overwrites Case #${cancels?._id} \`${cancels?.reason}\`` });
         }
     
-        this.client.getChan('staffReports').send({ embeds: [embed] });
+        getChan(this.client, 'staffReports').send({ embeds: [embed] });
     };
-	getTense (type: string) { // Get past tense form of punishment type, grammar yes
+    private async createId() {
+        return Math.max(...(await this._content.find()).map(x => x._id), 0) + 1;
+    }
+    /** Get past tense form of punishment type */
+	private getTense(type: string) {
 		return {
 			ban: 'banned',
 			softban: 'softbanned',
@@ -55,10 +64,10 @@ export default class punishments extends Schema {
 			warn: 'warned'
 		}[type];
 	}
-	async addPunishment(type: string, moderator: string, reason: string, User: Discord.User, GuildMember: Discord.GuildMember | null, options: { time?: string, interaction?: Discord.ChatInputCommandInteraction<"cached">}) {
+	public async addPunishment(type: string, moderator: string, reason: string, User: Discord.User, GuildMember: Discord.GuildMember | null, options: { time?: string, interaction?: Discord.ChatInputCommandInteraction<"cached">}) {
 		const { time, interaction } = options;
 		const now = Date.now();
-		const guild = this.client.mainGuild();
+		const guild = mainGuild(this.client);
 		const punData: Document = { type, _id: await this.createId(), member: { tag: User.tag, _id: User.id }, reason, moderator, time: now };
 		const inOrFromBoolean = ['warn', 'mute'].includes(type) ? 'in' : 'from'; // Use 'in' if the punishment doesn't remove the member from the server, eg. mute, warn
 		const auditLogReason = `${reason} | Case #${punData._id}`;
@@ -75,7 +84,7 @@ export default class punishments extends Schema {
 			timeInMillis = time ? ms(time) : 2419140000; // Timeouts have a limit of 4 weeks
 		} else timeInMillis = time ? ms(time) : null;
 
-		const durationText = timeInMillis ? ` for ${this.client.formatTime(timeInMillis, 4, { longNames: true, commas: true })}` : '';
+		const durationText = timeInMillis ? ` for ${formatTime(timeInMillis, 4, { longNames: true, commas: true })}` : '';
 
 		// Add field for duration if time is specified
 		if (timeInMillis) embed.addFields({ name: 'Duration', value: durationText });
@@ -111,6 +120,7 @@ export default class punishments extends Schema {
 
 		if (typeof punResult === 'string') { // Punishment was unsuccessful
 			DM?.delete();
+            
 			if (interaction) {
 				return interaction.editReply(punResult);
 			} else return punResult;
@@ -121,24 +131,25 @@ export default class punishments extends Schema {
 			]);
 
 			if (interaction) {
-				return interaction.editReply({embeds: [embed]});
+				return interaction.editReply({ embeds: [embed] });
 			} else return punResult;
 		}
 	}
 	async removePunishment(caseId: number, moderator: string, reason: string, interaction?: Discord.ChatInputCommandInteraction<"cached">) {
 		const now = Date.now();
 		const punishment = await this._content.findById(caseId);
+
 		if (!punishment) return;
 
-		const guild = this.client.mainGuild();
-		const auditLogReason = `${reason} | Case #${punishment.id}`;
+		const guild = mainGuild(this.client);
+		const auditLogReason = `${reason} | Case #${punishment._id}`;
 		const [User, GuildMember, _id] = await Promise.all([
 			this.client.users.fetch(punishment.member._id),
 			guild.members.fetch(punishment.member._id).catch(() => null),
 			this.createId()
 		]);
 		
-		let removePunishmentData: Document = { type: `un${punishment.type}`, _id, cancels: punishment.id, member: punishment.member, reason, moderator, time: now };
+		let removePunishmentData: Document = { type: `un${punishment.type}`, _id, cancels: punishment._id, member: punishment.member, reason, moderator, time: now };
 		let removePunishmentResult: Discord.User | Discord.GuildMember | string | null | undefined;
 
 		if (punishment.type === 'ban') {
@@ -164,14 +175,14 @@ export default class punishments extends Schema {
 			]);
 
 			if (interaction) {
-				return interaction.reply({embeds: [new this.client.embed()
+				return interaction.reply({ embeds: [new this.client.embed()
 					.setColor(this.client.config.embedColor)
 					.setTitle(`Case #${removePunishmentData._id}: ${removePunishmentData.type[0].toUpperCase() + removePunishmentData.type.slice(1)}`)
 					.setDescription(`${User.tag}\n<@${User.id}>\n(\`${User.id}\`)`)
 					.addFields(
 						{ name: 'Reason', value: reason },
-						{ name: 'Overwrites', value: `Case #${punishment.id}` })
-				]});
+						{ name: 'Overwrites', value: `Case #${punishment._id}` })
+				] });
 			} else return `Successfully un${this.getTense(punishment.type)} ${User.tag} (${User.id}) for reason '${reason}'`;
 		}
 	}

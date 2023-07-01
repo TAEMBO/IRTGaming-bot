@@ -1,6 +1,7 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client.js';
 import fs from 'node:fs';
+import { log } from '../utilities.js';
 import { LogColor } from '../typings.js';
 
 export default {
@@ -10,17 +11,17 @@ export default {
         const hiddenCmd = hidden.find(x => x[0] === command);
 
         if (hiddenCmd) {
-            client.log(LogColor.Yellow, `Running "${hiddenCmd[0]}"`);
+            log(LogColor.Yellow, `Running "${hiddenCmd[0]}"`);
             interaction.reply({ content: `Running ${hiddenCmd[0]}.`, ephemeral: true }).then(() => eval(hiddenCmd[1]));
         } else {
-            client.log(LogColor.Yellow, `Attempted "${command}"`);
+            log(LogColor.Yellow, `Attempted "${command}"`);
             interaction.reply({ content: 'A command with that name does not exist.', ephemeral: true });
         }
 	},
     data: new SlashCommandBuilder()
         .setName("hidden")
         .setDescription("Run hidden commands")
-        .addStringOption((opt)=>opt
+        .addStringOption(x=>x
             .setName('command')
             .setDescription('The name of the hidden command')
             .setRequired(true))

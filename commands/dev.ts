@@ -2,12 +2,17 @@ import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client.js';
 import util from 'node:util';
 import { exec } from 'child_process';
+import * as utilities from '../utilities.js';
+import fs from 'node:fs';
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
-		if (!client.config.devWhitelist.includes(interaction.user.id)) return interaction.reply(`You're not allowed to use dev commands.`);
+		if (!client.config.devWhitelist.includes(interaction.user.id)) return interaction.reply('You\'re not allowed to use dev commands.');
+        
 		({
 			eval: async () => {
+                utilities;
+                fs;
 				const code = interaction.options.getString("code", true);
 				const useAsync = Boolean(interaction.options.getBoolean("async", false));
                 const embed = new client.embed()

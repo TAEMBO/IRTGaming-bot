@@ -1,5 +1,6 @@
 import Discord from 'discord.js';
 import YClient from '../client.js';
+import { getChan } from '../utilities.js';
 
 export default async (client: YClient, oldMember: Discord.GuildMember | Discord.PartialGuildMember, newMember: Discord.GuildMember) => {
     if (!client.config.botSwitches.logs) return;
@@ -23,23 +24,25 @@ export default async (client: YClient, oldMember: Discord.GuildMember | Discord.
     // Role changes
     const newRoles = newMember.roles.cache.filter((x, i) => !oldMember.roles.cache.has(i));
     const oldRoles = oldMember.roles.cache.filter((x, i) => !newMember.roles.cache.has(i));
+    const boosterRole = client.config.mainServer.roles.legendarynitrobooster;
 
-    if ((newRoles.size > 0 || oldRoles.size > 0) && ((Date.now() - (newMember.joinedTimestamp as number)) > 5000)) {
-        if (newRoles.size > 0) embed.addFields({ name: '🔹 Roles Added', value: newRoles.map(x=>x.toString()).join(' ') });
-        if (oldRoles.size > 0) embed.addFields({ name: '🔹 Roles Removed', value: oldRoles.map(x=>x.toString()).join(' ') });
+    if ((newRoles.size || oldRoles.size) && ((Date.now() - (newMember.joinedTimestamp as number)) > 5000)) {
+        if (newRoles.size) embed.addFields({ name: '🔹 Roles Added', value: newRoles.map(x=>x.toString()).join(' ') });
+        if (oldRoles.size) embed.addFields({ name: '🔹 Roles Removed', value: oldRoles.map(x=>x.toString()).join(' ') });
+
         changes = true;
     }
     
-    if (changes) client.getChan('botLogs').send({ embeds: [embed] });
+    if (changes) getChan(client, 'botLogs').send({ embeds: [embed] });
 
-    if (oldRoles.has('631894963474530306') || newRoles.has('631894963474530306')) (client.channels.resolve('803795484174319646') as Discord.TextChannel).send({ embeds: [embed] });
+    if (oldRoles.has(boosterRole) || newRoles.has(boosterRole)) getChan(client, 'boostLogs').send({ embeds: [embed] });
 
     // Trusted Farmer auto-updating list
     const TFID = client.config.mainServer.roles.trustedfarmer;
     if (!newMember.roles.cache.has(TFID) || !oldMember.roles.cache.has(TFID)) return;
 
     const TFRole = (await newMember.guild.roles.fetch(TFID) as Discord.Role);
-    const tfMsg = await (client.channels.resolve(client.config.mainServer.channels.trustedFarmerChat) as Discord.TextChannel)?.messages?.fetch(client.config.mainServer.TFListMsgId).catch(() => null);
+    const tfMsg = await getChan(client, 'trustedFarmerChat')?.messages?.fetch(client.config.mainServer.TFListMsgId).catch(() => null);
     const sortedMemberMentions = TFRole.members.sort((a, b) => {
         if (a.displayName.toLowerCase() < b.displayName.toLowerCase()) return -1;
         if (a.displayName.toLowerCase() > b.displayName.toLowerCase()) return 1;

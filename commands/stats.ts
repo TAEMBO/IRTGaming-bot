@@ -3,6 +3,7 @@ import YClient from '../client.js';
 import fs from 'node:fs';
 import canvas from 'canvas';
 import path from 'node:path';
+import { formatTime, isMPStaff, log } from '../utilities.js';
 import { LogColor, FSLoopDSS } from '../typings.js';
 
 export default {
@@ -10,7 +11,7 @@ export default {
         const subCmd = interaction.options.getSubcommand() as 'ps' | 'pg' | 'mf' | 'all' | 'playertimes';
         const blacklistedChannels = [client.config.mainServer.channels.mpPublicSilage, client.config.mainServer.channels.mpPublicGrain];
 
-        if (blacklistedChannels.includes(interaction.channelId) && !client.isMPStaff(interaction.member)) return interaction.reply({
+        if (blacklistedChannels.includes(interaction.channelId) && !isMPStaff(interaction)) return interaction.reply({
             content: [
                 'This command has [restrictions](https://discord.com/channels/552565546089054218/891791005098053682/991799952084828170) set',
                 ` please use <#${client.config.mainServer.channels.botCommands}> for \`/stats\` commands.`
@@ -21,7 +22,7 @@ export default {
         async function FSstats() {
             const FSdss = await fetch(client.config.fs[subCmd].dss, { signal: AbortSignal.timeout(2000), headers: { 'User-Agent': 'IRTBot/Stats' } })
                 .then(res => res.json() as Promise<FSLoopDSS>)
-                .catch(() => client.log(LogColor.Red, `Stats ${subCmd.toUpperCase()} failed`));
+                .catch(() => log(LogColor.Red, `Stats ${subCmd.toUpperCase()} failed`));
 
             if (!FSdss) return interaction.reply('Server did not respond');
 
@@ -35,7 +36,6 @@ export default {
             const textSize = 40;
             const img = canvas.createCanvas(1500, 750);
             const ctx = img.getContext('2d');
-        
             const graphOrigin = [15, 65];
             const graphSize = [1300, 630];
             const nodeWidth = graphSize[0] / (data.length - 1);
@@ -100,7 +100,7 @@ export default {
                 const prvPC /* previous player count */ = data[i - 1];
                 ctx.strokeStyle = gradient;
                 ctx.beginPath();
-                if (lastCoords.length > 0) ctx.moveTo(lastCoords[0], lastCoords[1]);
+                if (lastCoords.length) ctx.moveTo(lastCoords[0], lastCoords[1]);
                 // if the line being drawn is horizontal, make it go until it has to go down
                 if (y === lastCoords[1]) {
                     let newX = x;
@@ -197,7 +197,7 @@ export default {
                 const FSdss = await fetch(client.config.fs[serverAcro.toLowerCase()].dss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': 'IRTBot/StatsAll' } })
                     .then(res => res.json() as Promise<FSLoopDSS>)
                     .catch(() => {
-                        client.log(LogColor.Red, `Stats all; ${serverAcro} failed`);
+                        log(LogColor.Red, `Stats all; ${serverAcro} failed`);
                         failedFooter.push(`Failed to fetch ${serverAcro}`);
                     });
                 
@@ -234,7 +234,7 @@ export default {
                     client.FMlist._content.includes(x._id) ? ':farmer:' : '',
                     client.TFlist._content.includes(x._id) ? ':angel:' : '',
                     ' - ',
-                    client.formatTime((client.playerTimes.getTimeData(x).reduce((x, y) => x + y[1].time, 0) * 60 * 1000), 3, { commas: true, longNames: false })
+                    formatTime((client.playerTimes.getTimeData(x).reduce((x, y) => x + y[1].time, 0) * 60 * 1000), 3, { commas: true, longNames: false })
                 ].join('')).join('\n');
 
                 if (player) {
@@ -245,7 +245,7 @@ export default {
                         const playerTimeDataTotal = playerTimeData.reduce((x, y) => x + y[1].time, 0);
                         const formattedTimeData = playerTimeData.map(timeData => [
                             `> **${timeData[0].toUpperCase()}**`,
-                            `> - Time - ${client.formatTime(timeData[1].time * 60 * 1000, 5, { commas: true, longNames: false })}`,
+                            `> - Time - ${formatTime(timeData[1].time * 60 * 1000, 5, { commas: true, longNames: false })}`,
                             `> - Last on - ${client.FSCache[timeData[0]]?.players?.some(x => x.name === playerData._id) ? 'Right now' : `<t:${timeData[1].lastOn}:R>`}`
                         ].join('\n'));
 
@@ -255,8 +255,8 @@ export default {
                                 .setTitle([
                                     `Player - \`${playerData._id}\`${client.FMlist._content.includes(playerData._id) ? ':farmer:' : ''}${client.TFlist._content.includes(playerData._id) ? ':angel:' : ''}`,
                                     `Leaderboard position - **#${sortedData.indexOf(playerData) + 1}**`,
-                                    `Total time - **${client.formatTime(playerTimeDataTotal * 60 * 1000, 5, { commas: true, longNames: false })}**`,
-                                    (client.isMPStaff(interaction.member) && playerData.uuid) ? `UUID: \`${playerData.uuid}\`` : ''
+                                    `Total time - **${formatTime(playerTimeDataTotal * 60 * 1000, 5, { commas: true, longNames: false })}**`,
+                                    (isMPStaff(interaction) && playerData.uuid) ? `UUID: \`${playerData.uuid}\`` : ''
                                 ].join('\n')),
                             new client.embed()
                                 .setColor(client.config.embedColor)
@@ -264,13 +264,13 @@ export default {
                         ] });
                     } else interaction.reply('No data found with that name. [Find out why.](https://canary.discord.com/channels/552565546089054218/552583841936834560/1087422094519836792)');
 
-                } else interaction.reply({embeds: [new client.embed()
+                } else interaction.reply({ embeds: [new client.embed()
                     .setColor(client.config.embedColor)
                     .setDescription(`Top 50 players with the most time spent on IRTGaming FS22 servers since\n<t:1685602800>`)
                     .addFields(
                         { name: '\u200b', value: leaderboard(sortedData.slice(0, 25), true), inline: true },
                         { name: '\u200b', value: leaderboard(sortedData.slice(25, 50), false) + '\u200b', inline: true })
-                ]});
+                ] });
             });
         } else FSstats();
     },

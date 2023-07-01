@@ -1,8 +1,10 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client.js';
+import { punish } from '../utilities.js';
+
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
-		client.punish(interaction, this.data.name);
+		punish(client, interaction, this.data.name);
 	},
 	data: new SlashCommandBuilder()
 		.setName("kick")

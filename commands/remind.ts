@@ -76,13 +76,13 @@ export default {
                         no: () => int.update(rplText('Command manually canceled'))
                     } as any)[int.customId]();
                 }).on('end', ints => {
-                    if (ints.size < 1) interaction.editReply(rplText('No response given, command canceled'));
+                    if (!ints.size) interaction.editReply(rplText('No response given, command canceled'));
                 });
             },
             delete: async () => {
                 const userReminders = await client.reminders._content.find({ userid: interaction.user.id });
 
-                if (userReminders.length < 1) return interaction.reply({ content: 'You have no active current reminders', ephemeral: true });
+                if (!userReminders.length) return interaction.reply({ content: 'You have no active current reminders', ephemeral: true });
 
                 const selectMenu = new StringSelectMenuBuilder()
                     .setCustomId('reminders')
@@ -140,10 +140,10 @@ export default {
                             no: () => int.update(rplText('Command manually canceled'))
                         } as any)[int.customId]();
                     }).on('end', ints => {
-                        if (ints.size < 1) interaction.editReply(rplText('No response given, command canceled'));
+                        if (!ints.size) interaction.editReply(rplText('No response given, command canceled'));
                     });
                 }).on('end', ints => {
-                    if (ints.size < 1) interaction.editReply(rplText('No response given, command canceled'));
+                    if (!ints.size) interaction.editReply(rplText('No response given, command canceled'));
                 });
             }
         } as any)[interaction.options.getSubcommand()]();

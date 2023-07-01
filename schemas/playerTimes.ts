@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import FTPClient from 'ftp';
 import xjs from 'xml-js';
 import config from '../config.json' assert { type: 'json' };
+import { getChan, log } from '../utilities.js';
 import { LogColor, farmFormat } from '../typings.js';
 
 /** The object that each server will have */
@@ -10,8 +11,10 @@ const serverObj = {
 	time: { type: Number, required: true },
 	lastOn: { type: Number, required: true }
 };
+
 /** The schema containing the server's object */
 const serverSchema = new mongoose.Schema(serverObj, { _id: false });
+
 /** The base object for all servers */
 const serversObj = {} as Record<string, { type: typeof serverSchema }>;
 
@@ -73,8 +76,9 @@ export default class playerTimes extends Schema {
 		const allData = await this._content.find();
 
 		FTP.once('ready', () => FTP.get(this.client.config.ftp[serverAcro].path + 'savegame1/farms.xml', async (err, stream) => {
-			this.client.log(LogColor.Yellow, `Downloaded farms.xml from ${serverAcro}, crunching...`);
+			log(LogColor.Yellow, `Downloaded farms.xml from ${serverAcro}, crunching...`);
 			if (err) throw err;
+            
 			const farmData = xjs.xml2js(await new Response(stream as any).text(), { compact: true }) as farmFormat;
             let iterationCount = 0;
 
@@ -83,7 +87,7 @@ export default class playerTimes extends Schema {
 
 				if (playerDatabyUuid) { // PlayerTimes data was found with UUID
 					if (playerDatabyUuid._id !== player._attributes.lastNickname) { // PlayerTimes name does not match given name, update playerTimes data to reflect new name
-						await this.client.getChan('fsLogs').send({embeds: [new this.client.embed()
+						await getChan(this.client, 'fsLogs').send({ embeds: [new this.client.embed()
 							.setColor(this.client.config.embedColorYellow)
 							.setTitle('Player name change')
 							.setTimestamp()
@@ -92,7 +96,7 @@ export default class playerTimes extends Schema {
 								`**Old name:** ${playerDatabyUuid._id}`,
 								`**New name:** ${player._attributes.lastNickname}`
 							].join('\n'))
-						]});
+						] });
                         iterationCount++;
 						
 						await this._content.create({ _id: player._attributes.lastNickname, uuid: player._attributes.uniqueUserId, servers: playerDatabyUuid.servers })
@@ -108,8 +112,8 @@ export default class playerTimes extends Schema {
 					if (playerDataByName && !playerDataByName.uuid) await this._content.findByIdAndUpdate(player._attributes.lastNickname, { uuid: player._attributes.uniqueUserId }, { new: true });
 				}
 			}
-            this.client.getChan('fsLogs').send(`⚠️ Name change detector ran. Iterated over ${iterationCount} changed names`);
-			this.client.log(LogColor.Yellow, 'Finished crunching farms.xml data');
+            getChan(this.client, 'fsLogs').send(`⚠️ Name change detector ran. Iterated over ${iterationCount} changed names`);
+			log(LogColor.Yellow, 'Finished crunching farms.xml data');
 			stream.once('close', () => FTP.end());
 		})).connect(this.client.config.ftp[serverAcro]);
 	}

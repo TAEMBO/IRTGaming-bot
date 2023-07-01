@@ -1,10 +1,11 @@
 import Discord from 'discord.js';
 import YClient from '../client.js';
+import { getChan } from '../utilities.js';
 
 export default async (client: YClient, oldUser: Discord.User | Discord.PartialUser, newUser: Discord.User) => {
     if (!client.config.botSwitches.logs || oldUser.tag === newUser.tag) return;
 
-    client.getChan('botLogs').send({ embeds: [new client.embed()
+    getChan(client, 'botLogs').send({ embeds: [new client.embed()
         .setTimestamp()
         .setColor(client.config.embedColor)
         .setTitle(`User Update: ${newUser.tag}`)
@@ -13,5 +14,5 @@ export default async (client: YClient, oldUser: Discord.User | Discord.PartialUs
         .setFields(
             { name: '🔹 Old Tag', value: `\`\`\`${oldUser.tag}\`\`\`` },
             { name: '🔹 New Tag', value: `\`\`\`${newUser.tag}\`\`\`` })
-    ] })
+    ] });
 }

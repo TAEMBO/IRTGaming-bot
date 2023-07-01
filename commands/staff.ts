@@ -1,15 +1,17 @@
 import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client.js';
+import { hasRole, isMPStaff } from '../utilities.js';
+
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
         ({
             mp: async () => {
                 const staff = {
                     mp_manager: (await interaction.guild.roles.fetch(client.config.mainServer.roles.mpmanager) as Discord.Role).members.map(e=>e.toString()).join("\n") || "None",
-                    mp_sr_admin: (await interaction.guild.roles.fetch(client.config.mainServer.roles.mpsradmin) as Discord.Role).members.filter(x=>!x.roles.cache.has(client.config.mainServer.roles.mpmanager)).map(e=>e.toString()).join("\n") || "None",
+                    mp_sr_admin: (await interaction.guild.roles.fetch(client.config.mainServer.roles.mpsradmin) as Discord.Role).members.filter(x=>!hasRole(x, 'mpmanager')).map(e=>e.toString()).join("\n") || "None",
                     mp_jr_admin: (await interaction.guild.roles.fetch(client.config.mainServer.roles.mpjradmin) as Discord.Role).members.map(e=>e.toString()).join("\n") || "None",
                     mp_farm_manager: (await interaction.guild.roles.fetch(client.config.mainServer.roles.mpfarmmanager) as Discord.Role).members.map(e=>e.toString()).join("\n") || "None",
-                    mp_trusted_farmer: (await interaction.guild.roles.fetch(client.config.mainServer.roles.trustedfarmer) as Discord.Role).members.filter(x=>!client.isMPStaff(x)).map(e=>e.toString()).join("\n") || "None"
+                    mp_trusted_farmer: (await interaction.guild.roles.fetch(client.config.mainServer.roles.trustedfarmer) as Discord.Role).members.filter(x=>!isMPStaff(x)).map(e=>e.toString()).join("\n") || "None"
                 };
          
                 interaction.reply({embeds: [new client.embed()
@@ -41,7 +43,7 @@ export default {
             discord: async () => {
                 const staff = {
                     admin: (await interaction.guild.roles.fetch(client.config.mainServer.roles.admin) as Discord.Role).members.map(e=>e.toString()).join("\n") || "None",
-                    moderator: (await interaction.guild.roles.fetch(client.config.mainServer.roles.discordmoderator) as Discord.Role).members.filter(x=>!x.roles.cache.has(client.config.mainServer.roles.admin)).map(e=>e.toString()).join("\n") || "None",
+                    moderator: (await interaction.guild.roles.fetch(client.config.mainServer.roles.discordmoderator) as Discord.Role).members.filter(x=>!hasRole(x, 'admin')).map(e=>e.toString()).join("\n") || "None",
                     helper: (await interaction.guild.roles.fetch(client.config.mainServer.roles.discordhelper) as Discord.Role).members.map(e=>e.toString()).join("\n") || "None"
                 };
          

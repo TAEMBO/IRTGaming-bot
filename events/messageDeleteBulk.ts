@@ -8,7 +8,7 @@ export default async (client: YClient, messages: Discord.Collection<string, Disc
     getChan(client, 'botLogs').send({ embeds: [new client.embed()
         .setTitle(`${messages.size} messages were deleted`)
         .setDescription(`\`\`\`ansi\n${messages.map(msg => `[33m${msg.author.username}:[37m ${msg.content}`).reverse().join('\n').slice(0, 3900)}\`\`\``)
-        .addFields({ name: '🔹 Channel', value: `<#${channel.id}>` })
+        .addFields({ name: '🔹 Channel', value: channel.toString() })
         .setColor(client.config.embedColor)
         .setTimestamp()
     ] });

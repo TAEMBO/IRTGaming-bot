@@ -1,4 +1,4 @@
-import Discord, { SlashCommandBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } from 'discord.js';
+import Discord, { SlashCommandBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ComponentType } from 'discord.js';
 import YClient from '../client.js';
 import ms from 'ms';
 
@@ -97,6 +97,7 @@ export default {
                     const index = (i + 1).toString();
 
                     selectMenu.addOptions(new StringSelectMenuOptionBuilder().setLabel(`#${index}`).setValue(index));
+                    
                     embed.addFields({
                         name: `#${index}`,
                         value: [
@@ -113,8 +114,9 @@ export default {
                 })).createMessageComponentCollector({
                     filter: x => x.user.id === interaction.user.id,
                     max: 1,
-                    time: 60_000
-                }).on('collect', async (int: Discord.StringSelectMenuInteraction<"cached">) => {
+                    time: 60_000,
+                    componentType: ComponentType.StringSelect
+                }).on('collect', async int => {
                     const chosenReminder = userReminders[parseInt(int.values[0]) - 1];
 
                     (await int.update({

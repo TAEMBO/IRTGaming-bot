@@ -14,6 +14,7 @@ export default {
 
         const name = interaction.options.getString('name');
         const FTP = new FTPClient();
+        
         ({
             server: async () => {
                 async function checkRole(role: keyof typeof client.config.mainServer.roles) {
@@ -124,6 +125,8 @@ export default {
                             if (error) {
                                 interaction.editReply(error.message);
                             } else interaction.editReply('Successfully uploaded ban file for PG');
+                            
+                            FTP.end();
                         })).connect(client.config.ftp.pg);
                     } else fs.writeFile(`../../../Documents/My Games/FarmingSimulator2022/blockedUserIds.xml`, banData, () => interaction.editReply('Successfully uploaded ban file for PS'));
                 }
@@ -235,7 +238,8 @@ export default {
                     })).createMessageComponentCollector({
                         filter: x => x.user.id === interaction.user.id,
                         max: 1,
-                        time: 30_000
+                        time: 30_000,
+                        componentType: Discord.ComponentType.Button
                     }).on('collect', int => {
                         ({
                             yes: () => {

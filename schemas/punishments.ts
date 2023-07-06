@@ -4,7 +4,7 @@ import YClient from '../client.js';
 import ms from 'ms';
 import { formatTime, getChan, mainGuild } from '../utilities.js';
 
-const Schema = mongoose.model('punishments', new mongoose.Schema({
+const Model = mongoose.model('punishments', new mongoose.Schema({
     _id: { type: Number, required: true },
     type: { type: String, required: true },
     member: { required: true, type: new mongoose.Schema({
@@ -20,13 +20,13 @@ const Schema = mongoose.model('punishments', new mongoose.Schema({
     duration: { type: Number }
 }, { versionKey: false }));
 
-type Document =  ReturnType<typeof Schema.castObject>;
+type Document =  ReturnType<typeof Model.castObject>;
 
-export default class punishments extends Schema {
-    public _content = Schema;
-    constructor(private client: YClient) {
-		super();
-	}
+export default class punishments {
+    public _content = Model;
+
+    constructor(private client: YClient) { }
+
 	private async makeModlogEntry(punishment: Document) {
         const embed = new this.client.embed()
             .setTitle(`${punishment.type[0].toUpperCase() + punishment.type.slice(1)} | Case #${punishment._id}`)
@@ -50,9 +50,11 @@ export default class punishments extends Schema {
     
         getChan(this.client, 'staffReports').send({ embeds: [embed] });
     };
+
     private async createId() {
         return Math.max(...(await this._content.find()).map(x => x._id), 0) + 1;
     }
+
     /** Get past tense form of punishment type */
 	private getTense(type: string) {
 		return {
@@ -64,6 +66,7 @@ export default class punishments extends Schema {
 			warn: 'warned'
 		}[type];
 	}
+
 	public async addPunishment(type: string, moderator: string, reason: string, User: Discord.User, GuildMember: Discord.GuildMember | null, options: { time?: string, interaction?: Discord.ChatInputCommandInteraction<"cached">}) {
 		const { time, interaction } = options;
 		const now = Date.now();
@@ -93,22 +96,37 @@ export default class punishments extends Schema {
 			try {
 				DM = await GuildMember.send(`You've been ${this.getTense(type)} ${inOrFromBoolean} ${guild.name}${durationText} for reason \`${reason}\` (case #${punData._id})`);
 			} catch (err: any) {
-				embed.setFooter({text: 'Failed to DM member of punishment'});
+				embed.setFooter({ text: 'Failed to DM member of punishment' });
 			}
 		}
 
-		if (['ban', 'softban'].includes(type)) {
-			const banned = await guild.bans.fetch(User).catch(() => null);
-			if (banned) {
-				punResult = 'User is already banned.';
-			} else punResult = await guild.bans.create(User, { reason: auditLogReason, deleteMessageSeconds: type === 'softban' ? 86400 : undefined }).catch((err: Error) => err.message);
-		} else if (type === 'detain') {
-			punResult = await GuildMember?.roles.add(this.client.config.mainServer.roles.detained, auditLogReason).catch((err: Error) => err.message);
-		} else if (type === 'mute') {
-			if (GuildMember?.communicationDisabledUntil) {
-				punResult = 'Member is already muted.';
-			} else punResult = await GuildMember?.timeout(timeInMillis, auditLogReason).catch((err: Error) => err.message);
-		} else if (type === 'kick') punResult = await GuildMember?.kick(auditLogReason).catch((err: Error) => err.message);
+        punResult = await ({
+            ban: async () => {
+                const banned = await guild.bans.fetch(User).catch(() => null);
+
+                if (banned) {
+                    return 'User is already banned.';
+                } else return await guild.bans.create(User, { reason: auditLogReason }).catch((err: Error) => err.message);
+            },
+            softban: async () => {
+                const banned = await guild.bans.fetch(User).catch(() => null);
+
+                if (banned) {
+                    return 'User is already banned.';
+                } else return await guild.bans.create(User, { reason: auditLogReason, deleteMessageSeconds: 86400 }).catch((err: Error) => err.message);
+            },
+            kick: async () => {
+                return await GuildMember?.kick(auditLogReason).catch((err: Error) => err.message);
+            },
+            detain: async () => {
+                return await GuildMember?.roles.add(this.client.config.mainServer.roles.detained, auditLogReason).catch((err: Error) => err.message);
+            },
+            mute: async () => {
+                if (GuildMember?.communicationDisabledUntil) {
+                    return 'Member is already muted.';
+                } else return await GuildMember?.timeout(timeInMillis, auditLogReason).catch((err: Error) => err.message);
+            }
+        } as any)[type]();
 
 		// If type was softban and it was successful, continue with softban (unban)
 		if (type === 'softban' && typeof punResult !== 'string') punResult = await guild.bans.remove(User.id, auditLogReason).catch((err: Error) => err.message);
@@ -135,7 +153,9 @@ export default class punishments extends Schema {
 			} else return punResult;
 		}
 	}
-	async removePunishment(caseId: number, moderator: string, reason: string, interaction?: Discord.ChatInputCommandInteraction<"cached">) {
+
+
+	public async removePunishment(caseId: number, moderator: string, reason: string, interaction?: Discord.ChatInputCommandInteraction<"cached">) {
 		const now = Date.now();
 		const punishment = await this._content.findById(caseId);
 
@@ -148,25 +168,37 @@ export default class punishments extends Schema {
 			guild.members.fetch(punishment.member._id).catch(() => null),
 			this.createId()
 		]);
-		
 		let removePunishmentData: Document = { type: `un${punishment.type}`, _id, cancels: punishment._id, member: punishment.member, reason, moderator, time: now };
-		let removePunishmentResult: Discord.User | Discord.GuildMember | string | null | undefined;
+        let punResult: Discord.User | Discord.GuildMember | string | null | undefined;
 
-		if (punishment.type === 'ban') {
-			removePunishmentResult = await guild.bans.remove(punishment.member._id, auditLogReason).catch((err: Error) => err.message);
-		} else if (punishment.type === 'detain') {
-			removePunishmentResult = await GuildMember?.roles.remove(this.client.config.mainServer.roles.detained, auditLogReason).catch((err: Error) => err.message);
-		} else if (punishment.type === 'mute') {
-			if (GuildMember) {
-				removePunishmentResult = await GuildMember.timeout(null, auditLogReason).catch((err: Error) => err.message);
-				GuildMember.send(`You've been unmuted in ${guild.name}.`).catch((err: Error) => console.log(err.message));
-			} else await this._content.findByIdAndUpdate(caseId, { expired: true }, { new: true });
-		} else removePunishmentData.type = 'removeOtherPunishment';
+        punResult = await ({
+            ban: async () => {
+                return await guild.bans.remove(punishment.member._id, auditLogReason).catch((err: Error) => err.message);
+            },
+            softban: () => {
+                removePunishmentData.type = 'removeOtherPunishment';
+            },
+            kick: () => {
+                removePunishmentData.type = 'removeOtherPunishment';
+            },
+            detain: async () => {
+                return await GuildMember?.roles.remove(this.client.config.mainServer.roles.detained, auditLogReason).catch((err: Error) => err.message);
+            },
+            mute: async () => {
+                if (GuildMember) {
+                    GuildMember.send(`You've been unmuted in ${guild.name}.`).catch((err: Error) => console.log(err.message));
+                    return await GuildMember.timeout(null, auditLogReason).catch((err: Error) => err.message);
+                } else await this._content.findByIdAndUpdate(caseId, { expired: true }, { new: true });
+            },
+            warn: () => {
+                removePunishmentData.type = 'removeOtherPunishment';
+            }
+        } as any)[punishment.type]();
 
-		if (typeof removePunishmentResult === 'string') { // Unpunish was unsuccessful
+		if (typeof punResult === 'string') { // Unpunish was unsuccessful
 			if (interaction) {
-				return interaction.reply(removePunishmentResult);
-			} else return removePunishmentResult;
+				return interaction.reply(punResult);
+			} else return punResult;
 		} else { // Unpunish was successful
 			await Promise.all([
 				this._content.findByIdAndUpdate(caseId, { expired: true }, { new: true }),

@@ -2,17 +2,17 @@ import mongoose from 'mongoose';
 import YClient from '../client.js';
 import { getChan } from '../utilities.js';
 
-const Schema = mongoose.model('userLevels', new mongoose.Schema({
+const Model = mongoose.model('userLevels', new mongoose.Schema({
     _id: { type: String },
     messages: { type: Number, required: true },
     level: { type: Number, required: true }
 }, { versionKey: false }));
 
-export default class userLevels extends Schema {
-    public _content = Schema;
-    constructor(private client: YClient) {
-        super();
-    }
+export default class userLevels {
+    public _content = Model;
+
+    constructor(private client: YClient) { }
+    
     public async incrementUser(userid: string) {
         const userData = await this._content.findById(userid);
         

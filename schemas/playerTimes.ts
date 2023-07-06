@@ -21,19 +21,19 @@ const serversObj = {} as Record<string, { type: typeof serverSchema }>;
 // Populate the base object with all server schemas by referencing config
 for (const server of config.FSCacheServers) serversObj[server[2]] = { type: serverSchema };
 
-const Schema = mongoose.model('playerTimes', new mongoose.Schema({
+const Model = mongoose.model('playerTimes', new mongoose.Schema({
     _id: { type: String, required: true },
 	uuid: { type: String },
 	servers: { required: true, type: new mongoose.Schema(serversObj, { _id: false }) }
 }, { versionKey: false }));
 
-type Document = ReturnType<typeof Schema.castObject>;
+type Document = ReturnType<typeof Model.castObject>;
 
-export default class playerTimes extends Schema {
-	public _content = Schema;
-	constructor(private client: YClient) {
-		super();
-	}
+export default class playerTimes {
+	public _content = Model;
+
+	constructor(private client: YClient) { }
+    
 	/**
 	 * Retrieve an array-ified form of a player's server time data.
 	 * @param data The MongoDB document for the player

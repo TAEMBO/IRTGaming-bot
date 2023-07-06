@@ -13,10 +13,9 @@ export async function mainLoop(client: YClient) {
 
     for (const reminder of Reminders) {
     	const embed = new client.embed().setTitle('Reminder').setColor(client.config.embedColor).setDescription(`\`\`\`${reminder.content}\`\`\``);
-    	const User = await client.users.fetch(reminder.userid);
     
-    	await User.send({ embeds: [embed] }).catch(() => (client.channels.resolve(reminder.ch) as Discord.GuildTextBasedChannel).send({
-    		content: User.toString(),
+        client.users.send(reminder.userid, {embeds: [embed]}).catch(() => (client.channels.resolve(reminder.ch) as Discord.GuildTextBasedChannel).send({
+    		content: `Reminder <@${reminder.userid}>`,
     		embeds: [embed.setFooter({ text: 'Failed to DM' })]
     	}));
     	await client.reminders._content.findByIdAndDelete(reminder._id);

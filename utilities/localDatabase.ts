@@ -2,17 +2,21 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 /** A class for managing local JSON array files */
-export default class localDatabase<T> {
-    /** The path for this localDatabase's JSON file */
+export class LocalDatabase<T> {
+    /** The path for this LocalDatabase's JSON file */
     public _path: string;
-    /** The content for this localDatabase */
+    /** The content for this LocalDatabase */
     public _content: T[] = [];
     constructor(fileName: string) {
         this._path = path.resolve(`../databases/${fileName}.json`);
     }
     /** Loads the data from the JSON file */
     public initLoad() {
-        this._content = JSON.parse(fs.readFileSync(this._path, 'utf8'));
+        const ingestedCon = JSON.parse(fs.readFileSync(this._path, 'utf8'));
+
+        if (!Array.isArray(ingestedCon)) throw new Error(`LocalDatabase "${this._path}", content does not equal Array`)
+
+        this._content = ingestedCon;
 
         return this._content;
     }

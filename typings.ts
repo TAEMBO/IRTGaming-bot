@@ -43,7 +43,9 @@ export interface APIUser {
     banner_color: string | null;
 };
 
-export type RepeatedMessages = Record<string, {
+export type GuildMemberOrInt = Discord.GuildMember | Discord.ChatInputCommandInteraction<"cached">;
+
+export type RepeatedMessagesData = Record<string, {
     data: Discord.Collection<number, {
         type: string;
         channel: string;

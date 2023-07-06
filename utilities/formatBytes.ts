@@ -1,4 +1,3 @@
-/** Credits to Toast for providing this */
 /**
  * Credits to Toast for providing this
  * @param integer The bits or bytes to format

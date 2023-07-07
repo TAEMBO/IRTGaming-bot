@@ -21,10 +21,10 @@ export default {
                     .setTitle('__Eval__')
                     .setColor(client.config.embedColor)
                     .addFields({ name: 'Input', value: `\`\`\`js\n${code.slice(0, 1010)}\n\`\`\`` });
-                    let output = 'error';
+                let output = 'error';
 				
                 try {
-					output = await eval(useAsync ? `(async () => { ${code} })()` : code);
+                    output = await eval(useAsync ? `(async () => { ${code} })()` : code);
                 } catch (err: any) {
                     embed.setColor('#ff0000').addFields({ name: 'Output', value: `\`\`\`\n${err}\n\`\`\`` });
 
@@ -78,9 +78,9 @@ export default {
                 await interaction.reply('Pulling from repo...');
 
                 exec('git pull', async (error, stdout) => {
-                    if (error) {
-                        interaction.editReply(`Pull failed:\n\`\`\`${error.message}\`\`\``);
-                    } else if (stdout.includes('Already up to date')) {
+                    if (error) return interaction.editReply(`Pull failed:\n\`\`\`${error.message}\`\`\``);
+
+                    if (stdout.includes('Already up to date')) {
                         interaction.editReply(`Pull aborted:\nUp-to-date`);
                     } else {
                         await interaction.editReply('Compiling...');
@@ -95,23 +95,23 @@ export default {
             },
             dz: () => interaction.reply('PC has committed iWoke:tm:').then(() => exec('start C:/WakeOnLAN/WakeOnLanC.exe -w -m Desktop')),
             presence: () => {
-                function convertType(Type?: number) {
+                function convertType(type?: number) {
                     return {
                         0: 'Playing',
-                        2: 'Listening',
+                        2: 'Listening to',
                         3: 'Watching',
-                        5: 'Competing',
+                        5: 'Competing in',
                         default: undefined
-                    }[Type || 'default'];
+                    }[type ?? 'default'];
                 }
 
                 const status = interaction.options.getString('status') as Discord.PresenceStatusData | null;
-                const type = interaction.options.getInteger('type');
+                const type = interaction.options.getInteger('type') as Exclude<Discord.ActivityType, Discord.ActivityType.Custom> | null;
                 const name = interaction.options.getString('name');
                 const currentActivities = client.config.botPresence.activities as Discord.ActivitiesOptions[];
 
                 if (status) client.config.botPresence.status = status;
-                if (type) currentActivities[0].type = type;
+                if (type !== null) currentActivities[0].type = type;
                 if (name) currentActivities[0].name = name;
 
                 client.user?.setPresence(client.config.botPresence);

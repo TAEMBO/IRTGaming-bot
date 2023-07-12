@@ -82,7 +82,9 @@ export class Profanity {
      * @param profanityList A list of words that are considered as profanity
      */
     public hasProfanity(profanityList: string[]) {
-        return profanityList.some(word => this.getProfanity().includes(word));
+        const parsedText = this.getProfanity();
+        
+        return profanityList.some(word => parsedText.includes(word));
     }
 
     /**

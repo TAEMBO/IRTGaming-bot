@@ -1,20 +1,16 @@
 import YClient from '../client.js';
-import { getChan, log } from '../utilities.js';
+import { getChan, log, mainGuild } from '../utilities.js';
 import { LogColor } from '../typings.js';
 
 
 export default async (client: YClient) => {
-    const guild = await client.guilds.fetch(client.config.mainServer.id);
-    await guild.members.fetch();
+    const guild = mainGuild(client);
 
     if (client.config.botSwitches.registerCommands) guild.commands.set(client.registry)
         .then(() => log(LogColor.Purple, 'Slash commands registered'))
         .catch(e => log(LogColor.Red, 'Couldn\'t register commands: ', e));
         
-    setInterval(async () => {
-        (await guild.invites.fetch()).forEach(inv => client.invites.set(inv.code, { uses: inv.uses, creator: inv.inviter?.id }));
-        client.user?.setPresence(client.config.botPresence);
-    }, 7_200_000);
+    for (const [code, inv] of await guild.invites.fetch()) client.invites.set(code, { uses: inv.uses, creator: inv.inviter?.id });
 
     await getChan(client, 'taesTestingZone').send([
         ':warning: Bot restarted :warning:',

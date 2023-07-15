@@ -3,7 +3,7 @@ import YClient from "../client.js";
 import { xml2js } from "xml-js";
 import fs from "node:fs";
 import path from 'node:path';
-import { formatTime, getChan, hasRole, log, mainGuild } from '../utilities.js';
+import { formatTime, getChan, log, mainGuild } from '../utilities.js';
 import { LogColor, FSLoopCSG, FSLoopDSS, FSLoopDSSPlayer } from "../typings.js";
 
 type WatchList = { _id: string, reason: string }[];
@@ -79,7 +79,13 @@ export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: s
 
     const serverAcroUp = serverAcro.toUpperCase();
     const statsEmbed = new client.embed();
-    const statsMsgEdit = () => (client.channels.resolve(ChannelID) as Discord.TextChannel).messages.edit(MessageID, { embeds: [statsEmbed] }); 
+    const statsMsgEdit = () => {
+        const channel = client.channels.cache.get(ChannelID) as Discord.TextChannel | undefined;
+
+        if (!channel) return log(LogColor.Red, `FSLoop ${serverAcroUp} invalid msg`);
+        
+        channel.messages.edit(MessageID, { embeds: [statsEmbed] });
+    };
     const init = { signal: AbortSignal.timeout(7000), headers: { 'User-Agent': 'IRTBot/FSLoop' } };
 
     const DSS = await fetch(client.config.fs[serverAcro].dss, init) // Fetch dedicated-server-stats.json
@@ -180,19 +186,19 @@ export function FSLoopAll(client: YClient, watchList: WatchList) {
     const embed = new client.embed().setColor(client.config.embedColor);
     const totalCount: number[] = [];
 
-    for (const server of Object.entries(client.FSCache)) {
+    for (const [serverAcro, server] of Object.entries(client.FSCache)) {
         const playerInfo: string[] = [];
-        const serverSlots = server[1].players.length;
+        const serverSlots = server.players.length;
         totalCount.push(serverSlots);
 
-        for (const player of server[1].players) {
+        for (const player of server.players) {
             const playTimeHrs = Math.floor(player.uptime / 60);
             const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
 
             playerInfo.push(`\`${player.name}\` ${decorators(client, player, watchList)} **|** ${playTimeHrs}:${playTimeMins}`);
         }
         
-        if (playerInfo.length) embed.addFields({ name: `${server[0].toUpperCase()} - ${serverSlots}/16`, value: playerInfo.join('\n') });
+        if (playerInfo.length) embed.addFields({ name: `${serverAcro.toUpperCase()} - ${serverSlots}/16`, value: playerInfo.join('\n') });
     }
 
     getChan(client, 'juniorAdminChat').messages.edit(client.config.mainServer.FSLoopMsgId, {

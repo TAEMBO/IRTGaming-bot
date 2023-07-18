@@ -1,5 +1,4 @@
 import YClient from '../client.js';
-import { getChan } from '../utilities.js';
 
 /**
  * Error handler
@@ -12,7 +11,7 @@ export function errorLog(client: YClient, error: Error, event: string) {
 
     const dirname = process.cwd().replaceAll('\\', '/');
 
-    getChan(client, 'taesTestingZone').send({
+    client.getChan('taesTestingZone').send({
         content: `<@${client.config.devWhitelist[0]}>`,
         embeds: [new client.embed()
             .setTitle(`Error Caught - ${error.message.slice(0, 240)}`)

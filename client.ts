@@ -8,7 +8,7 @@ import playerTimes from './schemas/playerTimes.js';
 import watchList from './schemas/watchList.js';
 import reminders from './schemas/reminders.js';
 import config from './config.json' assert { type: 'json' };
-import { LocalDatabase, log, RepeatedMessages } from './utilities.js';
+import { hasRole, isDCStaff, LocalDatabase, log, RepeatedMessages, youNeedRole } from './utilities.js';
 import { Config, FSCache, YTCache, InviteCache, Command, Registry, LogColor } from './typings.js';
 
 export default class YClient extends Client {
@@ -72,5 +72,39 @@ export default class YClient extends Client {
             this.commands.set(commandFile.default.data.name, { commandFile, uses: 0 });
             this.registry.push(commandFile.default.data.toJSON());
         }
+    }
+
+    /**
+     * Get a text channel via config
+     * @param channel 
+     */
+    public getChan(channel: keyof typeof this.config.mainServer.channels) {
+        return this.channels.cache.get(this.config.mainServer.channels[channel]) as Discord.TextChannel;
+    }
+
+    /**
+     * @returns The main Guild that this bot is made for
+     */
+    public mainGuild() {
+        return this.guilds.cache.get(this.config.mainServer.id) as Discord.Guild;
+    }
+
+    /**
+     * @param interaction 
+     * @param type The type of punishment this is
+     */
+    public async punish(interaction: Discord.ChatInputCommandInteraction<"cached">, type: string) {
+        if ((!isDCStaff(interaction.member)) || (!['warn', 'mute'].includes(type) && hasRole(interaction, 'discordhelper'))) return youNeedRole(interaction, 'discordmoderator');
+    
+        const time = interaction.options.getString('time') ?? undefined;
+        const reason = interaction.options.getString('reason') ?? 'Unspecified';
+        const GuildMember = interaction.options.getMember('member');
+        const User = interaction.options.getUser('member', true);
+    
+        if (interaction.user.id === User.id) return interaction.reply(`You cannot ${type} yourself.`);
+        if (!GuildMember && type !== 'ban') return interaction.reply(`You cannot ${type} someone who is not in the server.`);
+    
+        await interaction.deferReply();
+        await this.punishments.addPunishment(type, interaction.user.id, reason, User, GuildMember, { time, interaction });
     }
 }

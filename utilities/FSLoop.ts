@@ -3,7 +3,7 @@ import YClient from "../client.js";
 import { xml2js } from "xml-js";
 import fs from "node:fs";
 import path from 'node:path';
-import { formatTime, getChan, log, mainGuild } from '../utilities.js';
+import { formatTime, log } from '../utilities.js';
 import { LogColor, FSLoopCSG, FSLoopDSS, FSLoopDSSPlayer, ServerAcroList } from "../typings.js";
 
 type WatchList = { _id: string, reason: string }[];
@@ -40,7 +40,7 @@ export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: s
     function adminCheck() {
         for (const player of newPlayers.filter(x => oldPlayers.some(y => x.isAdmin && !y.isAdmin && y.name === x.name))) {
             if (!client.whitelist._content.includes(player.name) && !client.FMlist._content.includes(player.name)) {
-                getChan(client, 'juniorAdminChat').send({ embeds: [new client.embed()
+                client.getChan('juniorAdminChat').send({ embeds: [new client.embed()
                     .setTitle('UNKNOWN ADMIN LOGIN')
                     .setDescription(`\`${player.name}\` on **${serverAcroUp}** on <t:${now}>`)
                     .setColor('#ff4d00')
@@ -70,7 +70,7 @@ export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: s
         if (playerObj) for (const player of playerObj) {
             const inWl = watchList.find(y => y._id === player.name);
             if (inWl) {
-                const filterWLPings = client.watchListPings._content.filter(x => !mainGuild(client).members.cache.get(x)?.roles.cache.has(client.config.mainServer.roles.loa));
+                const filterWLPings = client.watchListPings._content.filter(x => !client.mainGuild().members.cache.get(x)?.roles.cache.has(client.config.mainServer.roles.loa));
                 wlChannel.send({ content: filterWLPings.map(x=>`<@${x}>`).join(" "), embeds: [wlEmbed(inWl._id, true, inWl.reason)] });
             }
             logChannel.send({ embeds: [logEmbed(player, true)] });
@@ -109,8 +109,8 @@ export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: s
     const newPlayers = DSS.slots.players.filter(x=>x.isUsed);
     const oldPlayers = client.fsCache[serverAcro].players;
     const serverStatusEmbed = (status: string) => new client.embed().setTitle(`${serverAcroUp} now ${status}`).setColor(client.config.embedColorYellow).setTimestamp();
-    const wlChannel = getChan(client, 'watchList');
-    const logChannel = getChan(client, 'fsLogs');
+    const wlChannel = client.getChan('watchList');
+    const logChannel = client.getChan('fsLogs');
     const now = Math.round(Date.now() / 1000);
     const playerInfo: Array<string> = [];
     let justStarted = false;
@@ -202,7 +202,7 @@ export function FSLoopAll(client: YClient, watchList: WatchList) {
         if (playerInfo.length) embed.addFields({ name: `${serverAcro.toUpperCase()} - ${serverSlots}/16`, value: playerInfo.join('\n') });
     }
 
-    getChan(client, 'juniorAdminChat').messages.edit(client.config.mainServer.FSLoopMsgId, {
+    client.getChan('juniorAdminChat').messages.edit(client.config.mainServer.FSLoopMsgId, {
         content: `\`\`\`js\n['${client.whitelist._content.join("', '")}']\`\`\`Updates every 30 seconds`,
         embeds: [embed.setTitle(totalCount.reduce((a, b) => a + b, 0) + ' online')]
     }).catch(() => log(LogColor.Red, 'FSLoopAll invalid msg'));

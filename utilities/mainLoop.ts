@@ -2,7 +2,7 @@ import Discord from 'discord.js';
 import YClient from '../client.js';
 import fs from 'node:fs';
 import path from 'node:path';
-import { getChan, log } from '../utilities.js';
+import { log } from '../utilities.js';
 import { LogColor } from '../typings.js';
 
 /** Reminders, dailyMsgs, and punishments loop */
@@ -44,7 +44,7 @@ export async function mainLoop(client: YClient) {
             log(LogColor.Cyan, 'Interval messages');
 
             const Day = Date().toLowerCase();
-            const channel = getChan(client, 'general');
+            const channel = client.getChan('general');
         
             if (Day.startsWith('fri')) {
                 channel.send('It\'s the weekend! <a:IRT_FrogClap:722536810399662160>');

@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import Discord from 'discord.js';
 import YClient from '../client.js';
 import ms from 'ms';
-import { formatTime, getChan, mainGuild } from '../utilities.js';
+import { formatTime } from '../utilities.js';
 
 const Model = mongoose.model('punishments', new mongoose.Schema({
     _id: { type: Number, required: true },
@@ -48,7 +48,7 @@ export default class punishments {
             embed.addFields({ name: '🔹 Overwrites', value: `This case overwrites Case #${cancels?._id} \`${cancels?.reason}\`` });
         }
     
-        getChan(this.client, 'staffReports').send({ embeds: [embed] });
+        this.client.getChan('staffReports').send({ embeds: [embed] });
     };
 
     private async createId() {
@@ -70,7 +70,7 @@ export default class punishments {
 	public async addPunishment(type: string, moderator: string, reason: string, User: Discord.User, GuildMember: Discord.GuildMember | null, options: { time?: string, interaction?: Discord.ChatInputCommandInteraction<"cached">}) {
 		const { time, interaction } = options;
 		const now = Date.now();
-		const guild = mainGuild(this.client);
+		const guild = this.client.mainGuild();
 		const punData: Document = { type, _id: await this.createId(), member: { tag: User.tag, _id: User.id }, reason, moderator, time: now };
 		const inOrFromBoolean = ['warn', 'mute'].includes(type) ? 'in' : 'from'; // Use 'in' if the punishment doesn't remove the member from the server, eg. mute, warn
 		const auditLogReason = `${reason} | Case #${punData._id}`;
@@ -161,7 +161,7 @@ export default class punishments {
 
 		if (!punishment) return;
 
-		const guild = mainGuild(this.client);
+		const guild = this.client.mainGuild();
 		const auditLogReason = `${reason} | Case #${punishment._id}`;
 		const [User, GuildMember, _id] = await Promise.all([
 			this.client.users.fetch(punishment.member._id),

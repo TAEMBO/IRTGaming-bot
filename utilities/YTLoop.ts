@@ -1,5 +1,5 @@
 import YClient from '../client.js';
-import { getChan, log } from '../utilities.js';
+import { log } from '../utilities.js';
 import { LogColor, YTCacheFeed } from '../typings.js';
 import { xml2js } from 'xml-js';
 
@@ -23,6 +23,6 @@ export async function YTLoop(client: YClient, YTChannelID: string, YTChannelName
 
     if (Data.feed.entry[1]['yt:videoId']._text === client.YTCache[YTChannelID]) {
         client.YTCache[YTChannelID] = latestVid['yt:videoId']._text;
-        getChan(client, 'videosAndLiveStreams').send(`**${YTChannelName}** just uploaded a new video!\n${latestVid.link._attributes.href}`);
+        client.getChan('videosAndLiveStreams').send(`**${YTChannelName}** just uploaded a new video!\n${latestVid.link._attributes.href}`);
     }
 }

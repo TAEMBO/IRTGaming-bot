@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import YClient from '../client.js';
-import { getChan } from '../utilities.js';
 
 const Model = mongoose.model('userLevels', new mongoose.Schema({
     _id: { type: String },
@@ -25,7 +24,7 @@ export default class userLevels {
                 }
             } else if (userData.messages >= this.algorithm(userData.level + 1)) {
                 userData.level++
-                getChan(this.client, 'botCommands').send(`Well done <@${userid}>, you made it to **level ${userData.level}**!`);
+                this.client.getChan('botCommands').send(`Well done <@${userid}>, you made it to **level ${userData.level}**!`);
             }
             await userData.save();
         } else await this._content.create({ _id: userid, messages: 1, level: 0 });

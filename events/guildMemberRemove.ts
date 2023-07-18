@@ -1,6 +1,5 @@
 import Discord from 'discord.js';
 import YClient from '../client.js';
-import { getChan } from '../utilities.js';
 
 export default async (client: YClient, member: Discord.GuildMember) => {
     if (!client.config.botSwitches.logs || !member.joinedTimestamp) return;
@@ -19,9 +18,9 @@ export default async (client: YClient, member: Discord.GuildMember) => {
 
     if (rankingData && rankingData.messages) embed.addFields({ name: '🔹 Ranking Total', value: rankingData.messages.toLocaleString('en-US'), inline: true });
 
-    getChan(client, 'botLogs').send({ embeds: [embed] });
+    client.getChan('botLogs').send({ embeds: [embed] });
     
-    getChan(client, 'leaveLogs').send(`**${member.user.tag}** left the server.`);
+    client.getChan('leaveLogs').send(`**${member.user.tag}** left the server.`);
 
     await client.userLevels._content.findByIdAndDelete(member.id);
 }

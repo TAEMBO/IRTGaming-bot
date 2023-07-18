@@ -1,6 +1,6 @@
 import Discord from 'discord.js';
 import YClient from '../client.js';
-import { getChan, isDCStaff, isMPStaff, log, mainGuild, Profanity } from '../utilities.js';
+import { isDCStaff, isMPStaff, log, Profanity } from '../utilities.js';
 import { APIUser, LogColor } from '../typings.js';
 
 export default async (client: YClient, message: Discord.Message<boolean>) => {
@@ -12,9 +12,9 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
     const profanity = new Profanity(msg);
 
     if (!message.inGuild()) {
-        const guildMemberObject = mainGuild(client).members.cache.get(message.author.id) as Discord.GuildMember;
+        const guildMemberObject = client.mainGuild().members.cache.get(message.author.id) as Discord.GuildMember;
 
-        getChan(client, 'taesTestingZone').send({
+        client.getChan('taesTestingZone').send({
             content: `DM Forward <@${client.config.devWhitelist[0]}>`,
             files: message.attachments.map(x => x.url),
             embeds: [new client.embed()

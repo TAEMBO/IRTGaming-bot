@@ -1,6 +1,6 @@
 import Discord, { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import YClient from "../client.js";
-import { getChan, isDCStaff, isMPStaff, Profanity } from '../utilities.js';
+import { isDCStaff, isMPStaff, Profanity } from '../utilities.js';
 
 export default async (client: YClient, oldMsg: Discord.Message<boolean> | Discord.PartialMessage, newMsg: Discord.Message<boolean> | Discord.PartialMessage) => {
     if (!client.config.botSwitches.logs || newMsg.author?.bot || oldMsg.partial || newMsg.partial || !oldMsg.member || !oldMsg.content || newMsg.content === oldMsg.content || client.config.blacklistedCh.includes(newMsg.channel.id)) return;
@@ -18,7 +18,7 @@ export default async (client: YClient, oldMsg: Discord.Message<boolean> | Discor
     editedWordsOld.forEach(word => oldContent = oldContent.replace(word, `[31m${word}[0m`));
     editedWordsNew.forEach(word => newContent = newContent.replace(word, `[32m${word}[0m`));
 
-    getChan(client, 'botLogs').send({
+    client.getChan('botLogs').send({
         embeds: [
             new client.embed()
                 .setTitle('Message Edited')

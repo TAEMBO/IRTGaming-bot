@@ -1,11 +1,10 @@
 import Discord from "discord.js";
 import YClient from '../client.js';
-import { getChan } from '../utilities.js';
 
 export default async (client: YClient, oldState: Discord.VoiceState, newState: Discord.VoiceState) => {
     if (!client.config.botSwitches.logs || !newState.member) return;
 
-    const channel = getChan(client, 'botLogs');
+    const channel = client.getChan('botLogs');
     const embed = new client.embed()
         .setTimestamp()
         .setDescription(`<@${newState.member.user.id}>\n\`${newState.member.user.id}\``)

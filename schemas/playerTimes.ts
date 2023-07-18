@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import FTPClient from 'ftp';
 import xjs from 'xml-js';
 import config from '../config.json' assert { type: 'json' };
-import { getChan, log } from '../utilities.js';
+import { log } from '../utilities.js';
 import { LogColor, farmFormat, ServerAcroList } from '../typings.js';
 
 /** The object that each server will have */
@@ -87,7 +87,7 @@ export default class playerTimes {
 
 				if (playerDatabyUuid) { // PlayerTimes data was found with UUID
 					if (playerDatabyUuid._id !== player._attributes.lastNickname) { // PlayerTimes name does not match given name, update playerTimes data to reflect new name
-						await getChan(this.client, 'fsLogs').send({ embeds: [new this.client.embed()
+						await this.client.getChan('fsLogs').send({ embeds: [new this.client.embed()
 							.setColor(this.client.config.embedColorYellow)
 							.setTitle('Player name change')
 							.setTimestamp()
@@ -112,7 +112,7 @@ export default class playerTimes {
 					if (playerDataByName && !playerDataByName.uuid) await this._content.findByIdAndUpdate(player._attributes.lastNickname, { uuid: player._attributes.uniqueUserId }, { new: true });
 				}
 			}
-            getChan(this.client, 'fsLogs').send(`⚠️ Name change detector ran. Iterated over ${iterationCount} changed names`);
+            this.client.getChan('fsLogs').send(`⚠️ Name change detector ran. Iterated over ${iterationCount} changed names`);
 			log(LogColor.Yellow, 'Finished crunching farms.xml data');
 			stream.once('close', () => FTP.end());
 		})).connect(this.client.config.ftp[serverAcro]);

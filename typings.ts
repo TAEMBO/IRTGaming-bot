@@ -43,6 +43,8 @@ export interface APIUser {
     banner_color: string | null;
 };
 
+export type ServerAcroList = keyof typeof config.FSCacheServers;
+
 export type GuildMemberOrInt = Discord.GuildMember | Discord.ChatInputCommandInteraction<"cached">;
 
 export type RepeatedMessagesData = Record<string, {
@@ -107,16 +109,24 @@ export interface Config {
         login: string;
         dss: string;
         csg: string;
-    }>
+    }>;
+    FSCacheServers: Record<ServerAcroList, {
+        /** The unabbreviated name of the server */
+        fullName: string;
+        /** The channel ID for the server's stats embed, used in FSLoop */
+        channelId: string;
+        /** The message ID for the server's stats embed, used in FSLoop */
+        messageId: string;
+        /** Whether or not the server is a public server with no password */
+        isPrivate: boolean;
+    }>;
     devWhitelist: Array<string>,
     /** messageDelete, messageUpdate */
     blacklistedCh: Array<string>,
-    /** `Array<[ChannelID, MessageID, serverAcro]>` */
-    FSCacheServers: Array<Array<string>>,
     /** `Array<[ChannelID, ChannelName]>` */
     YTCacheChannels: Array<Array<string>>,
     mainServer: {
-        /** The ID of the Guild that this bot is for */
+        /** The ID of the guild that this bot is for */
         id: string;
         FSLoopMsgId: string;
         TFListMsgId: string;

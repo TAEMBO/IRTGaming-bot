@@ -4,7 +4,7 @@ import FTPClient from 'ftp';
 import xjs from 'xml-js';
 import config from '../config.json' assert { type: 'json' };
 import { getChan, log } from '../utilities.js';
-import { LogColor, farmFormat } from '../typings.js';
+import { LogColor, farmFormat, ServerAcroList } from '../typings.js';
 
 /** The object that each server will have */
 const serverObj = {
@@ -16,10 +16,10 @@ const serverObj = {
 const serverSchema = new mongoose.Schema(serverObj, { _id: false });
 
 /** The base object for all servers */
-const serversObj = {} as Record<string, { type: typeof serverSchema }>;
+const serversObj = {} as Record<ServerAcroList, { type: typeof serverSchema }>;
 
 // Populate the base object with all server schemas by referencing config
-for (const server of config.FSCacheServers) serversObj[server[2]] = { type: serverSchema };
+for (const serverAcro of Object.keys(config.FSCacheServers) as ServerAcroList[]) serversObj[serverAcro] = { type: serverSchema };
 
 const Model = mongoose.model('playerTimes', new mongoose.Schema({
     _id: { type: String, required: true },
@@ -51,7 +51,7 @@ export default class playerTimes {
 	 * @param serverAcro The lowercase acronym for the server to add the time to, a string
 	 * @returns The MongoDB document for the player, a Promise
 	 */
-	async addPlayerTime(playerName: string, playerTime: number, serverAcro: string) {
+	async addPlayerTime(playerName: string, playerTime: number, serverAcro: ServerAcroList) {
 		const now = Math.round(Date.now() / 1000);
 		const playerData = await this._content.findById(playerName);
 

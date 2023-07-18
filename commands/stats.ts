@@ -3,12 +3,30 @@ import YClient from '../client.js';
 import fs from 'node:fs';
 import canvas from 'canvas';
 import path from 'node:path';
+import config from '../config.json' assert { type: 'json' };
 import { formatTime, isMPStaff, log } from '../utilities.js';
-import { LogColor, FSLoopDSS } from '../typings.js';
+import { LogColor, FSLoopDSS, ServerAcroList } from '../typings.js';
+
+const cmdBuilderData = new SlashCommandBuilder()
+    .setName("stats")
+    .setDescription("Gets info on an FS22 server")
+    .addSubcommand(x=>x
+        .setName("all")
+        .setDescription("Server stats for all servers"))
+    .addSubcommand(x=>x
+        .setName("playertimes")
+        .setDescription("Player time data")
+        .addStringOption(x=>x
+            .setName("name")
+            .setDescription("The in-game name of the player to get stats for")
+            .setRequired(false)));
+
+// Dynamically manage subcommands via FSCacheServers data
+for (const [serverAcro, { fullName }] of Object.entries(config.FSCacheServers)) cmdBuilderData.addSubcommand(x => x.setName(serverAcro).setDescription(`${fullName} server stats`));
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
-        const subCmd = interaction.options.getSubcommand() as 'ps' | 'pg' | 'mf' | 'all' | 'playertimes';
+        const subCmd = interaction.options.getSubcommand() as ServerAcroList | 'all' | 'playertimes';
         const blacklistedChannels = [client.config.mainServer.channels.mpPublicSilage, client.config.mainServer.channels.mpPublicGrain];
 
         if (blacklistedChannels.includes(interaction.channelId) && !isMPStaff(interaction)) return interaction.reply({
@@ -181,7 +199,7 @@ export default {
                 .setImage('attachment://FSStats.png')
                 .setColor(Color);
 
-            if (!FSdss.slots.players.some(x=>x.isAdmin) && client.FSCache[subCmd].lastAdmin) embed.setTimestamp(client.FSCache[subCmd].lastAdmin).setFooter({ text: 'Admin last on' });
+            if (!FSdss.slots.players.some(x=>x.isAdmin) && client.fsCache[subCmd].lastAdmin) embed.setTimestamp(client.fsCache[subCmd].lastAdmin).setFooter({ text: 'Admin last on' });
         
             interaction.reply({ embeds: [embed], files: [Image] }).catch(() => interaction.channel?.send({ embeds: [embed], files: [Image] }));
         }
@@ -194,11 +212,12 @@ export default {
             const watchList = await client.watchList._content.find();
 
             async function FSstatsAll(serverAcro: string) {
-                const FSdss = await fetch(client.config.fs[serverAcro.toLowerCase()].dss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': 'IRTBot/StatsAll' } })
+                const serverAcroUp = serverAcro.toUpperCase();
+                const FSdss = await fetch(client.config.fs[serverAcro].dss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': 'IRTBot/StatsAll' } })
                     .then(res => res.json() as Promise<FSLoopDSS>)
                     .catch(() => {
-                        log(LogColor.Red, `Stats all; ${serverAcro} failed`);
-                        failedFooter.push(`Failed to fetch ${serverAcro}`);
+                        log(LogColor.Red, `Stats all; ${serverAcroUp} failed`);
+                        failedFooter.push(`Failed to fetch ${serverAcroUp}`);
                     });
                 
                 if (!FSdss || !FSdss.slots.used) return;
@@ -218,9 +237,11 @@ export default {
         
                     playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
                 };
+
                 embed.addFields({ name: `${FSdss.server.name.replace('! ! IRTGaming | ', '')} - ${serverSlots}`, value: playerInfo.join("\n"), inline: true });
             }
-            await Promise.all([FSstatsAll('PS'), FSstatsAll('PG'), FSstatsAll('MF')]);
+
+            for await (const serverAcro of Object.keys(client.config.FSCacheServers)) await FSstatsAll(serverAcro);
 
             embed.setTitle(`All Servers: ${totalCount.reduce((a, b) => a + b, 0)} online`).setFooter(failedFooter.length ? { text: failedFooter.join(', ') } : null);
             interaction.editReply({ embeds: [embed] });
@@ -243,10 +264,10 @@ export default {
                     if (playerData) {
                         const playerTimeData = client.playerTimes.getTimeData(playerData);
                         const playerTimeDataTotal = playerTimeData.reduce((x, y) => x + y[1].time, 0);
-                        const formattedTimeData = playerTimeData.map(timeData => [
-                            `> **${timeData[0].toUpperCase()}**`,
-                            `> - Time - ${formatTime(timeData[1].time * 60 * 1000, 5, { commas: true, longNames: false })}`,
-                            `> - Last on - ${client.FSCache[timeData[0]]?.players?.some(x => x.name === playerData._id) ? 'Right now' : `<t:${timeData[1].lastOn}:R>`}`
+                        const formattedTimeData = playerTimeData.map(([serverAcro, timeData]) => [
+                            `> **${serverAcro.toUpperCase()}**`,
+                            `> - Time - ${formatTime(timeData.time * 60 * 1000, 5, { commas: true, longNames: false })}`,
+                            `> - Last on - ${client.fsCache[serverAcro]?.players?.some(x => x.name === playerData._id) ? 'Right now' : `<t:${timeData.lastOn}:R>`}`
                         ].join('\n'));
 
                         interaction.reply({ embeds: [
@@ -274,26 +295,5 @@ export default {
             });
         } else FSstats();
     },
-    data: new SlashCommandBuilder()
-        .setName("stats")
-        .setDescription("Gets info on an FS22 server")
-        .addSubcommand(x=>x
-            .setName("all")
-            .setDescription("Server stats for all servers"))
-        .addSubcommand(x=>x
-            .setName("ps")
-            .setDescription("Public Silage server stats"))
-        .addSubcommand(x=>x
-            .setName("pg")
-            .setDescription("Public Grain server stats"))
-        .addSubcommand(x=>x
-            .setName("mf")
-            .setDescription("Multi Farm server stats"))
-        .addSubcommand(x=>x
-            .setName("playertimes")
-            .setDescription("Player time data")
-            .addStringOption(x=>x
-                .setName("name")
-                .setDescription("The in-game name of the player to get stats for")
-                .setRequired(false)))
+    data: cmdBuilderData
 };

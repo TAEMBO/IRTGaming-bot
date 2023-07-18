@@ -15,7 +15,7 @@ export default class YClient extends Client {
     public config = config as Config;
     public embed = Discord.EmbedBuilder;
     public registry: Registry = [];
-    public FSCache: FSCache = {};
+    public fsCache: FSCache = {};
     public YTCache: YTCache = {};
     public commands = new Discord.Collection<string, Command>();
     public repeatedMessages = new RepeatedMessages(this);
@@ -58,7 +58,7 @@ export default class YClient extends Client {
         this.whitelist.initLoad();
         this.watchListPings.initLoad();
         for (const ch of this.config.YTCacheChannels) this.YTCache[ch[0]] = null;
-        for (const srv of this.config.FSCacheServers) this.FSCache[srv[2]] = { players: [], status: null, lastAdmin: null };
+        for (const serverAcro of Object.keys(this.config.FSCacheServers)) this.fsCache[serverAcro] = { players: [], status: null, lastAdmin: null };
 
         // Event handler
         for await (const file of fs.readdirSync(path.resolve('./events'))) {

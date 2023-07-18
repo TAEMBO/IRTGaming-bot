@@ -4,7 +4,7 @@ import { xml2js } from "xml-js";
 import fs from "node:fs";
 import path from 'node:path';
 import { formatTime, getChan, log, mainGuild } from '../utilities.js';
-import { LogColor, FSLoopCSG, FSLoopDSS, FSLoopDSSPlayer } from "../typings.js";
+import { LogColor, FSLoopCSG, FSLoopDSS, FSLoopDSSPlayer, ServerAcroList } from "../typings.js";
 
 type WatchList = { _id: string, reason: string }[];
 
@@ -57,7 +57,7 @@ export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: s
             const inWl = watchList.find(x => x._id === player.name);
             if (inWl) wlChannel.send({ embeds: [wlEmbed(inWl._id, false)] });
             
-            if (player.uptime) client.playerTimes.addPlayerTime(player.name, player.uptime, serverAcro); // Add playerTimes data
+            if (player.uptime) client.playerTimes.addPlayerTime(player.name, player.uptime, serverAcro as ServerAcroList); // Add playerTimes data
             logChannel.send({ embeds: [logEmbed(player, false)] });
         };
 
@@ -107,7 +107,7 @@ export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: s
     }
 
     const newPlayers = DSS.slots.players.filter(x=>x.isUsed);
-    const oldPlayers = client.FSCache[serverAcro].players;
+    const oldPlayers = client.fsCache[serverAcro].players;
     const serverStatusEmbed = (status: string) => new client.embed().setTitle(`${serverAcroUp} now ${status}`).setColor(client.config.embedColorYellow).setTimestamp();
     const wlChannel = getChan(client, 'watchList');
     const logChannel = getChan(client, 'fsLogs');
@@ -148,6 +148,7 @@ export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: s
             `**Game version:** ${DSS.server.version}`,
             `**Slot usage:** ${SlotUsage}`
         ].join('\n') });
+
     if (DSS.slots.used === DSS.slots.capacity) {
         statsEmbed.setColor(client.config.embedColorRed);
     } else if (DSS.slots.used > 9) statsEmbed.setColor(client.config.embedColorYellow);
@@ -156,16 +157,16 @@ export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: s
     
     // Logs
     if (!DSS.server.name) {
-        if (client.FSCache[serverAcro].status === 'online') logChannel.send({ embeds: [serverStatusEmbed('offline')] });
+        if (client.fsCache[serverAcro].status === 'online') logChannel.send({ embeds: [serverStatusEmbed('offline')] });
 
-        client.FSCache[serverAcro].status = 'offline';
+        client.fsCache[serverAcro].status = 'offline';
     } else {
-        if (client.FSCache[serverAcro].status === 'offline') {
+        if (client.fsCache[serverAcro].status === 'offline') {
             logChannel.send({ embeds: [serverStatusEmbed('online')] });
             justStarted = true;
         }
 
-        client.FSCache[serverAcro].status = 'online';
+        client.fsCache[serverAcro].status = 'online';
     }
 
     if (!justStarted) {
@@ -176,9 +177,9 @@ export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: s
         const data: number[] = JSON.parse(fs.readFileSync(path.resolve(`../databases/${serverAcroUp}PlayerData.json`), 'utf8'));
         data.push(DSS.slots.used);
         fs.writeFileSync(path.resolve(`../databases/${serverAcroUp}PlayerData.json`), JSON.stringify(data));
-        if (DSS.slots.players.some(x=>x.isAdmin)) client.FSCache[serverAcro].lastAdmin = Date.now();
+        if (DSS.slots.players.some(x=>x.isAdmin)) client.fsCache[serverAcro].lastAdmin = Date.now();
 
-        client.FSCache[serverAcro].players = newPlayers;
+        client.fsCache[serverAcro].players = newPlayers;
     }
 }
 
@@ -186,7 +187,7 @@ export function FSLoopAll(client: YClient, watchList: WatchList) {
     const embed = new client.embed().setColor(client.config.embedColor);
     const totalCount: number[] = [];
 
-    for (const [serverAcro, server] of Object.entries(client.FSCache)) {
+    for (const [serverAcro, server] of Object.entries(client.fsCache)) {
         const playerInfo: string[] = [];
         const serverSlots = server.players.length;
         totalCount.push(serverSlots);

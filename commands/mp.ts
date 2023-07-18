@@ -5,11 +5,16 @@ import puppeteer from 'puppeteer'; // Credits to Trolly for suggesting this pack
 import FTPClient from 'ftp';
 import fs from 'node:fs';
 import { xml2js } from 'xml-js';
+import config from '../config.json' assert { type: 'json' };
 import { hasRole, isMPStaff, youNeedRole } from '../utilities.js';
-import type { banFormat, farmFormat } from '../typings.js';
+import type { ServerAcroList, banFormat, farmFormat } from '../typings.js';
+
+const cmdOptionChoices = Object.entries(config.FSCacheServers).filter(x => !x[1].isPrivate).map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));
+
+type PublicAcroList = Exclude<ServerAcroList, 'mf'>;
 
 export default {
-	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
+async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
         if (!isMPStaff(interaction)) return youNeedRole(interaction, 'mpstaff');
 
         const name = interaction.options.getString('name');
@@ -21,7 +26,7 @@ export default {
                     if (!hasRole(interaction, role)) await youNeedRole(interaction, role);
                 }
 
-                const chosenServer = interaction.options.getString('server', true) as 'ps' | 'pg' | 'mf';
+                const chosenServer = interaction.options.getString('server', true) as ServerAcroList;
                 const chosenAction = interaction.options.getString('action', true) as 'start' | 'stop';
 
                 if (chosenServer === 'mf' && !hasRole(interaction, 'mpmanager')) {
@@ -39,8 +44,8 @@ export default {
                 const browser = await puppeteer.launch();
                 const page = await browser.newPage();
     
-                if (client.FSCache[chosenServer].status === 'offline' && chosenAction === 'stop') return interaction.editReply('Server is already offline');
-                if (client.FSCache[chosenServer].status === 'online' && chosenAction === 'start') return interaction.editReply('Server is already online');
+                if (client.fsCache[chosenServer].status === 'offline' && chosenAction === 'stop') return interaction.editReply('Server is already offline');
+                if (client.fsCache[chosenServer].status === 'online' && chosenAction === 'start') return interaction.editReply('Server is already online');
     
                 try {
                     await page.goto(client.config.fs[chosenServer].login, { timeout: 120000 });
@@ -68,12 +73,12 @@ export default {
             mop: async () => {
                 if (!hasRole(interaction, 'mpmanager')) return youNeedRole(interaction, 'mpmanager');
 
-                const chosenServer = interaction.options.getString('server', true) as 'ps' | 'pg';
+                const chosenServer = interaction.options.getString('server', true) as PublicAcroList;
                 const chosenAction = interaction.options.getString('action', true) as 'items.xml' | 'players.xml';
                 const time = Date.now();
                 const FTPLogin = client.config.ftp[chosenServer];
                 
-                if (client.FSCache[chosenServer].status === 'online') return interaction.reply(`You cannot mop files from **${chosenServer.toUpperCase()}** while it is online`);
+                if (client.fsCache[chosenServer].status === 'online') return interaction.reply(`You cannot mop files from **${chosenServer.toUpperCase()}** while it is online`);
                 if (chosenServer !== 'pg' && chosenAction === 'items.xml') return interaction.reply(`You can only mop **${chosenAction}** from **PG**`);
                 
                 await interaction.deferReply();
@@ -85,7 +90,7 @@ export default {
                 })).connect(FTPLogin);
             },
             bans: async () => {
-                const chosenServer = interaction.options.getString('server', true) as 'ps' | 'pg';
+                const chosenServer = interaction.options.getString('server', true) as PublicAcroList;
                 const chosenAction = interaction.options.getString('action', true) as 'dl' | 'ul';
     
                 await interaction.deferReply();
@@ -133,7 +138,7 @@ export default {
             },
             search: async () => {
                 await interaction.deferReply();
-                const chosenServer = interaction.options.getString('server', true) as 'ps' | 'pg';
+                const chosenServer = interaction.options.getString('server', true) as PublicAcroList;
                 const name = interaction.options.getString('name', true);
                 const timeZoneDiff = {
                     ps: new Date().getTimezoneOffset(),
@@ -173,7 +178,7 @@ export default {
                 } else checkPlayer(xml2js(fs.readFileSync('../../../Documents/My Games/FarmingSimulator2022/savegame1/farms.xml', 'utf8'), { compact: true }) as farmFormat);
             },
             farms: async () => {
-                const chosenServer = interaction.options.getString('server', true) as 'ps' | 'pg';
+                const chosenServer = interaction.options.getString('server', true) as PublicAcroList;
 
                 if (chosenServer == 'pg') {
                     await interaction.deferReply();
@@ -191,7 +196,7 @@ export default {
             },
             password: async () => {
                 await interaction.deferReply();
-                const chosenServer = interaction.options.getString('server', true) as 'ps' | 'pg';
+                const chosenServer = interaction.options.getString('server', true) as PublicAcroList;
 
                 function getPassword(data: string) {
                     const pw = (xml2js(data, { compact: true }) as any).gameserver?.settings?.game_password?._text as string | undefined;
@@ -325,10 +330,7 @@ export default {
             .addStringOption(x=>x
                 .setName('server')
                 .setDescription('The server to manage')
-                .addChoices(
-                    { name: 'Public Silage', value: 'ps' },
-                    { name: 'Public Grain', value: 'pg' },
-                    { name: 'Multi Farm', value: 'mf' })
+                .addChoices(...cmdOptionChoices, { name: 'Multi Farm', value: 'mf' })
                 .setRequired(true))
             .addStringOption(x=>x
                 .setName('action')
@@ -343,9 +345,7 @@ export default {
             .addStringOption(x=>x
                 .setName('server')
                 .setDescription('The server to manage')
-                .addChoices(
-                    { name: 'Public Silage', value: 'ps' },
-                    { name: 'Public Grain', value: 'pg' })
+                .addChoices(...cmdOptionChoices)
                 .setRequired(true))
             .addStringOption(x=>x
                 .setName('action')
@@ -360,9 +360,7 @@ export default {
             .addStringOption(x=>x
                 .setName('server')
                 .setDescription('The server to manage')
-                .addChoices(
-                    { name: 'Public Silage', value: 'ps' },
-                    { name: 'Public Grain', value: 'pg' })
+                .addChoices(...cmdOptionChoices)
                 .setRequired(true))
             .addStringOption(x=>x
                 .setName('action')
@@ -381,9 +379,7 @@ export default {
             .addStringOption(x=>x
                 .setName('server')
                 .setDescription('The server to search on')
-                .addChoices(
-                    { name: 'Public Silage', value: 'ps' },
-                    { name: 'Public Grain', value: 'pg' })
+                .addChoices(...cmdOptionChoices)
                 .setRequired(true))
             .addStringOption(x=>x
                 .setName('name')
@@ -395,9 +391,7 @@ export default {
             .addStringOption(x=>x
                 .setName('server')
                 .setDescription('The server to fetch from')
-                .addChoices(
-                    { name: 'Public Silage', value: 'ps' },
-                    { name: 'Public Grain', value: 'pg' })
+                .addChoices(...cmdOptionChoices)
                 .setRequired(true)))
         .addSubcommand(x=>x
             .setName('password')
@@ -405,9 +399,7 @@ export default {
             .addStringOption(x=>x
                 .setName('server')
                 .setDescription('The server to fetch from')
-                .addChoices(
-                    { name: 'Public Silage', value: 'ps' },
-                    { name: 'Public Grain', value: 'pg' })
+                .addChoices(...cmdOptionChoices)
                 .setRequired(true)))
         .addSubcommand(x=>x
             .setName('roles')

@@ -4,17 +4,14 @@ import YClient from '../client.js';
 const rpsChannels: Record<string, RpsInstance> = {};
 
 class RpsInstance {
-    constructor(public firstPlayer: Discord.User, public firstMove: string, public message: Discord.Message) {
-        this.timeOut(message);
-    }
+    to = (() => setTimeout(() => {
+        if (!rpsChannels.hasOwnProperty(this.message.channelId)) return;
+        
+        this.message.edit({ embeds: [], content: "This rock paper scissors game has ended due to inactivity." });
+        delete rpsChannels[this.message.channel.id];
+    }, 60_000))();
+    constructor(public firstPlayer: Discord.User, public firstMove: string, public message: Discord.Message<boolean>) {
 
-    async timeOut(message: Discord.Message) {
-        setTimeout(async () => {
-            if (rpsChannels.hasOwnProperty(message.channel.id)) {
-                await this.message.edit({ embeds: [], content: "This rock paper scissors game has ended due to inactivity." });
-                delete rpsChannels[message.channel.id];
-            }
-        }, 60000);
     }
 }
 

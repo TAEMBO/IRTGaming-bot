@@ -129,8 +129,10 @@ export interface Config {
     }>;
     /** A list of user IDs that are considered developers of this bot */
     devWhitelist: Array<string>,
-    /** messageDelete, messageUpdate */
+    /** A list of channel IDs that messageUpdate and messageDelete logs do not apply to  */
     blacklistedCh: Array<string>,
+    /** A list of channel IDs that automod does not apply to */
+    whitelistedCh: Array<string>;
     /** `Array<[ChannelID, ChannelName]>` */
     YTCacheChannels: Array<Array<string>>,
     mainServer: {

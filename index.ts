@@ -1,5 +1,6 @@
 import YClient from './client.js';
 import { errorLog, mainLoop, YTLoop, FSLoop, FSLoopAll } from './utilities.js';
+import { ServerAcroList } from './typings.js';
 
 const client = new YClient();
 
@@ -19,7 +20,7 @@ setInterval(() => mainLoop(client), 5_000);
 if (client.config.botSwitches.FSLoop) setInterval(async () => {
 	const watchList = await client.watchList._content.find();
 
-	for await (const [serverAcro, server] of Object.entries(client.config.FSCacheServers)) await FSLoop(client, watchList, server.channelId, server.messageId, serverAcro);
+	for await (const [serverAcro, server] of Object.entries(client.config.fs)) await FSLoop(client, watchList, server.channelId, server.messageId, serverAcro as ServerAcroList);
 	FSLoopAll(client, watchList);
 }, 30_000);
 

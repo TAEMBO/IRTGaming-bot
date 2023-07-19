@@ -16,7 +16,7 @@ export default async (client: YClient, interaction: Discord.Interaction<Discord.
         if (!client.config.botSwitches.commands && !client.config.devWhitelist.includes(interaction.user.id)) return interaction.reply('Commands are currently disabled.');
 
         command.commandFile.default.run(client, interaction);
-        command.uses++
+        command.uses++;
     } else if (interaction.isButton()) {
         if (interaction.customId.startsWith('reaction-') && client.config.botSwitches.buttonRoles) { // Button roles
             const RoleID = interaction.customId.replace('reaction-', '');

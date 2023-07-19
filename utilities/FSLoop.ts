@@ -18,7 +18,7 @@ function decorators(client: YClient, player: FSLoopDSSPlayer, watchList: WatchLi
     return decorators;
 }
 
-export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: string, MessageID: string, serverAcro: string) {
+export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: string, MessageID: string, serverAcro: ServerAcroList) {
     function wlEmbed(playerName: string, joinLog: boolean, wlReason?: string) {
         const embed = new client.embed()
             .setTitle('WatchList')
@@ -57,7 +57,7 @@ export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: s
             const inWl = watchList.find(x => x._id === player.name);
             if (inWl) wlChannel.send({ embeds: [wlEmbed(inWl._id, false)] });
             
-            if (player.uptime) client.playerTimes.addPlayerTime(player.name, player.uptime, serverAcro as ServerAcroList); // Add playerTimes data
+            if (player.uptime) client.playerTimes.addPlayerTime(player.name, player.uptime, serverAcro); // Add playerTimes data
             logChannel.send({ embeds: [logEmbed(player, false)] });
         };
 

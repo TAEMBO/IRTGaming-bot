@@ -16,18 +16,18 @@ export default {
                 const FTP = new FTPClient();
                 await interaction.deferReply({ ephemeral: true });
             
-                FTP.on('ready', () => FTP.get(client.config.ftp.pg.path + 'blockedUserIds.xml', (err, stream) => {
+                FTP.on('ready', () => FTP.get(client.config.fs.pg.ftp.path + 'blockedUserIds.xml', (err, stream) => {
                     if (err) return interaction.editReply(err.message);
     
                     stream.pipe(fs.createWriteStream('../databases/blockedUserIds.xml'));
                     stream.once('close', ()=> {
                         FTP.end();
-                        interaction.editReply({ files: ['../databases/blockedUserIds.xml'] })
+                        interaction.editReply({ files: ['../databases/blockedUserIds.xml'] });
                     });
-                })).connect(client.config.ftp.pg);
+                })).connect(client.config.fs.pg.ftp);
             },
             ps: () => {
-                interaction.reply({ files: ['../../../Documents/My Games/FarmingSimulator2022/blockedUserIds.xml'], ephemeral: true })
+                interaction.reply({ files: ['../../../Documents/My Games/FarmingSimulator2022/blockedUserIds.xml'], ephemeral: true });
             }
         })[chosenServer]();
 	},

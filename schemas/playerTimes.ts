@@ -19,7 +19,7 @@ const serverSchema = new mongoose.Schema(serverObj, { _id: false });
 const serversObj = {} as Record<ServerAcroList, { type: typeof serverSchema }>;
 
 // Populate the base object with all server schemas by referencing config
-for (const serverAcro of Object.keys(config.FSCacheServers) as ServerAcroList[]) serversObj[serverAcro] = { type: serverSchema };
+for (const serverAcro of Object.keys(config.fs) as ServerAcroList[]) serversObj[serverAcro] = { type: serverSchema };
 
 const Model = mongoose.model('playerTimes', new mongoose.Schema({
     _id: { type: String, required: true },
@@ -71,11 +71,11 @@ export default class playerTimes {
 			}
 		});
 	}
-	async fetchFarmData(serverAcro: string) {
+	async fetchFarmData(serverAcro: ServerAcroList) {
 		const FTP = new FTPClient();
 		const allData = await this._content.find();
 
-		FTP.once('ready', () => FTP.get(this.client.config.ftp[serverAcro].path + 'savegame1/farms.xml', async (err, stream) => {
+		FTP.once('ready', () => FTP.get(this.client.config.fs[serverAcro].ftp.path + 'savegame1/farms.xml', async (err, stream) => {
 			log(LogColor.Yellow, `Downloaded farms.xml from ${serverAcro}, crunching...`);
 			if (err) throw err;
             
@@ -115,6 +115,6 @@ export default class playerTimes {
             this.client.getChan('fsLogs').send(`⚠️ Name change detector ran. Iterated over ${iterationCount} changed names`);
 			log(LogColor.Yellow, 'Finished crunching farms.xml data');
 			stream.once('close', () => FTP.end());
-		})).connect(this.client.config.ftp[serverAcro]);
+		})).connect(this.client.config.fs[serverAcro].ftp);
 	}
 }

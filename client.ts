@@ -58,7 +58,7 @@ export default class YClient extends Client {
         this.whitelist.initLoad();
         this.watchListPings.initLoad();
         for (const ch of this.config.YTCacheChannels) this.YTCache[ch[0]] = null;
-        for (const serverAcro of Object.keys(this.config.FSCacheServers)) this.fsCache[serverAcro] = { players: [], status: null, lastAdmin: null };
+        for (const serverAcro of Object.keys(this.config.fs)) this.fsCache[serverAcro] = { players: [], status: null, lastAdmin: null };
 
         // Event handler
         for await (const file of fs.readdirSync(path.resolve('./events'))) {

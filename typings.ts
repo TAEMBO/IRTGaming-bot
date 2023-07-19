@@ -43,7 +43,7 @@ export interface APIUser {
     banner_color: string | null;
 };
 
-export type ServerAcroList = keyof typeof config.FSCacheServers;
+export type ServerAcroList = keyof typeof config.fs;
 
 export type GuildMemberOrInt = Discord.GuildMember | Discord.ChatInputCommandInteraction<"cached">;
 
@@ -80,8 +80,11 @@ export interface Command {
     uses: number;
 }
 
+/** Template for creating a config.json */
 export interface Config {
+    /** The Discord bot client token */
     token: string,
+    /** The URL for connecting to a MongoDB server */
     mongoURL: string,
     embedColor: `#${string}`,
     embedColorGreen: `#${string}`,
@@ -99,27 +102,32 @@ export interface Config {
         autoResponses: boolean,
         buttonRoles: boolean,
     },
-    ftp: Record<string, {
-        host: string;
-        user: string;
-        password: string;
-        path: string;
-    }>,
-    fs: Record<string, {
-        login: string;
-        dss: string;
-        csg: string;
-    }>;
-    FSCacheServers: Record<ServerAcroList, {
+    /** An object for managing and communicating with Farming Simulator servers, keyed by their abbreviated acronym */
+    fs: Record<ServerAcroList, {
         /** The unabbreviated name of the server */
         fullName: string;
+        /** Whether or not the server is a public server with no password */
+        isPrivate: boolean;
         /** The channel ID for the server's stats embed, used in FSLoop */
         channelId: string;
         /** The message ID for the server's stats embed, used in FSLoop */
         messageId: string;
-        /** Whether or not the server is a public server with no password */
-        isPrivate: boolean;
+        /** The dedicated server panel login for the server */
+        login: string;
+        /** The Link XML URL for the server (w/ .json extension) */
+        dss: string;
+        /** The Link Savegame File (careerSavegame) URL */
+        csg: string;
+        /** The FTP details for the server */
+        ftp: {
+            host: string;
+            user: string;
+            password: string;
+            /** The path to navigate to the game's profile folder */
+            path: string;
+        };
     }>;
+    /** A list of user IDs that are considered developers of this bot */
     devWhitelist: Array<string>,
     /** messageDelete, messageUpdate */
     blacklistedCh: Array<string>,

@@ -52,9 +52,12 @@ export default {
                 } else output = '\n' + String(output);
 
                 // Hide credentials
-                for (const credential of [client.config.token] // Bot token
-                    .concat(Object.values(client.config.fs).map(x => x.login)) // Dedi panel logins
-                    .concat(Object.values(client.config.ftp).map(x => x.password)) // FTP passwords
+                for (const credential of [client.config.token]
+                    .concat(Object.values(client.config.fs).map(x => x.login))
+                    .concat(Object.values(client.config.fs).map(x => x.dss))
+                    .concat(Object.values(client.config.fs).map(x => x.csg))
+                    .concat(Object.values(client.config.fs).map(x => x.ftp.host))
+                    .concat(Object.values(client.config.fs).map(x => x.ftp.password))
                 ) output = output.replace(credential, 'CREDENTIAL_LEAK');
 
                 embed.addFields({ name: 'Output', value: `\`\`\`${output.slice(0, 1016)}\n\`\`\`` });

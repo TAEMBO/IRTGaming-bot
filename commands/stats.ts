@@ -22,7 +22,7 @@ const cmdBuilderData = new SlashCommandBuilder()
             .setRequired(false)));
 
 // Dynamically manage subcommands via FSCacheServers data
-for (const [serverAcro, { fullName }] of Object.entries(config.FSCacheServers)) cmdBuilderData.addSubcommand(x => x.setName(serverAcro).setDescription(`${fullName} server stats`));
+for (const [serverAcro, { fullName }] of Object.entries(config.fs)) cmdBuilderData.addSubcommand(x => x.setName(serverAcro).setDescription(`${fullName} server stats`));
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
@@ -38,7 +38,7 @@ export default {
         });
 
         async function FSstats() {
-            const FSdss = await fetch(client.config.fs[subCmd].dss, { signal: AbortSignal.timeout(2000), headers: { 'User-Agent': 'IRTBot/Stats' } })
+            const FSdss = await fetch(client.config.fs[subCmd as ServerAcroList].dss, { signal: AbortSignal.timeout(2000), headers: { 'User-Agent': 'IRTBot/Stats' } })
                 .then(res => res.json() as Promise<FSLoopDSS>)
                 .catch(() => log(LogColor.Red, `Stats ${subCmd.toUpperCase()} failed`));
 
@@ -211,7 +211,7 @@ export default {
             const totalCount: number[] = [];
             const watchList = await client.watchList._content.find();
 
-            async function FSstatsAll(serverAcro: string) {
+            async function FSstatsAll(serverAcro: ServerAcroList) {
                 const serverAcroUp = serverAcro.toUpperCase();
                 const FSdss = await fetch(client.config.fs[serverAcro].dss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': 'IRTBot/StatsAll' } })
                     .then(res => res.json() as Promise<FSLoopDSS>)
@@ -241,7 +241,7 @@ export default {
                 embed.addFields({ name: `${FSdss.server.name.replace('! ! IRTGaming | ', '')} - ${serverSlots}`, value: playerInfo.join("\n"), inline: true });
             }
 
-            for await (const serverAcro of Object.keys(client.config.FSCacheServers)) await FSstatsAll(serverAcro);
+            for await (const serverAcro of Object.keys(client.config.fs)) await FSstatsAll(serverAcro as ServerAcroList);
 
             embed.setTitle(`All Servers: ${totalCount.reduce((a, b) => a + b, 0)} online`).setFooter(failedFooter.length ? { text: failedFooter.join(', ') } : null);
             interaction.editReply({ embeds: [embed] });

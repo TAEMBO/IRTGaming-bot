@@ -108,6 +108,8 @@ export interface Config {
         fullName: string;
         /** Whether or not the server is a public server with no password */
         isPrivate: boolean;
+        /** The time zone difference between the server's location and UTC in minutes */
+        utcDiff: number;
         /** The channel ID for the server's stats embed, used in FSLoop */
         channelId: string;
         /** The message ID for the server's stats embed, used in FSLoop */

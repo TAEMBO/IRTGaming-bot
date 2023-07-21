@@ -29,9 +29,9 @@ async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cac
                 }
 
                 const chosenServer = interaction.options.getString('server', true) as ServerAcroList;
-                const chosenAction = interaction.options.getString('action', true) as 'start' | 'stop';
+                const chosenAction = interaction.options.getString('action', true) as 'start' | 'stop' | 'restart';
 
-                if (chosenServer === 'mf' && !hasRole(interaction, 'mpmanager')) {
+                if (client.config.fs[chosenServer].isPrivate && !hasRole(interaction, 'mpmanager')) {
                     await checkRole('mfmanager');
                 } else await checkRole('mpmanager');
 
@@ -46,7 +46,7 @@ async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cac
                 const browser = await puppeteer.launch();
                 const page = await browser.newPage();
     
-                if (client.fsCache[chosenServer].status === 'offline' && chosenAction === 'stop') return interaction.editReply('Server is already offline');
+                if (client.fsCache[chosenServer].status === 'offline' && ['stop', 'restart'].includes(chosenAction)) return interaction.editReply('Server is already offline');
                 if (client.fsCache[chosenServer].status === 'online' && chosenAction === 'start') return interaction.editReply('Server is already online');
     
                 try {
@@ -70,6 +70,7 @@ async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cac
                 setTimeout(async () => {
                     await browser.close();
                     interaction.editReply(result += `Total time taken: **${Date.now() - time}ms**`);
+                    client.getChan('fsLogs').send({ embeds: [new client.embed().setTitle(`${chosenServer} now restarting`).setColor(client.config.embedColorYellow).setTimestamp()] });
                 }, 2000);
             },
             mop: async () => {
@@ -81,7 +82,6 @@ async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cac
                 const FTPLogin = client.config.fs[chosenServer].ftp;
                 
                 if (client.fsCache[chosenServer].status === 'online') return interaction.reply(`You cannot mop files from **${chosenServer.toUpperCase()}** while it is online`);
-                if (chosenServer !== 'pg' && chosenAction === 'items.xml') return interaction.reply(`You can only mop **${chosenAction}** from **PG**`);
                 
                 await interaction.deferReply();
     
@@ -98,17 +98,15 @@ async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cac
                 await interaction.deferReply();
     
                 if (chosenAction === 'dl') {
-                    if (chosenServer === 'pg') {
-                        FTP.on('ready', () => FTP.get(client.config.fs.pg.ftp.path + 'blockedUserIds.xml', (err, stream) => {
-                            if (err) return interaction.editReply(err.message);
+                    FTP.on('ready', () => FTP.get(client.config.fs[chosenServer].ftp.path + 'blockedUserIds.xml', (err, stream) => {
+                        if (err) return interaction.editReply(err.message);
 
-                            stream.pipe(fs.createWriteStream('../databases/blockedUserIds.xml'));
-                            stream.once('close', () => {
-                                FTP.end();
-                                interaction.editReply({ files: ['../databases/blockedUserIds.xml'] })
-                            });
-                        })).connect(client.config.fs.pg.ftp);
-                    } else interaction.editReply({ files: ['../../../Documents/My Games/FarmingSimulator2022/blockedUserIds.xml'] });
+                        stream.pipe(fs.createWriteStream('../databases/blockedUserIds.xml'));
+                        stream.once('close', () => {
+                            FTP.end();
+                            interaction.editReply({ files: ['../databases/blockedUserIds.xml'] })
+                        });
+                    })).connect(client.config.fs[chosenServer].ftp);
                 } else {
                     if (!hasRole(interaction, 'mpmanager')) return youNeedRole(interaction, 'mpmanager');
                     
@@ -125,27 +123,21 @@ async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cac
                         return interaction.editReply(`Canceled: Improper file (not XML)`);
                     }
     
-                    if (!data.blockedUserIds?.user[0]?._attributes?.displayName) return interaction.editReply(`Canceled: Improper file (data format)`);
+                    if (!data.blockedUserIds?.user[0]?._attributes?.displayName) return interaction.editReply('Canceled: Improper file (data format)');
     
-                    if (chosenServer === 'pg') {
-                        FTP.on('ready', () => FTP.put(banData, client.config.fs.pg.ftp.path + 'blockedUserIds.xml', error => {
-                            if (error) {
-                                interaction.editReply(error.message);
-                            } else interaction.editReply('Successfully uploaded ban file for PG');
-                            
-                            FTP.end();
-                        })).connect(client.config.fs.pg.ftp);
-                    } else fs.writeFile(`../../../Documents/My Games/FarmingSimulator2022/blockedUserIds.xml`, banData, () => interaction.editReply('Successfully uploaded ban file for PS'));
+                    FTP.on('ready', () => FTP.put(banData, client.config.fs[chosenServer].ftp.path + 'blockedUserIds.xml', error => {
+                        if (error) {
+                            interaction.editReply(error.message);
+                        } else interaction.editReply(`Successfully uploaded ban file for ${chosenServer.toUpperCase()}`);
+                        
+                        FTP.end();
+                    })).connect(client.config.fs[chosenServer].ftp);
                 }
             },
             search: async () => {
                 await interaction.deferReply();
                 const chosenServer = interaction.options.getString('server', true) as PublicAcroList;
                 const name = interaction.options.getString('name', true);
-                const timeZoneDiff = {
-                    ps: new Date().getTimezoneOffset(),
-                    pg: 120
-                };
 
                 function permIcon(perm: string, key: string) {
                     if (perm === 'true') {
@@ -155,11 +147,16 @@ async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cac
                     } else if (key === 'timeLastConnected') {
                         const utcDate = new Date(perm);
 
-                        utcDate.setMinutes(utcDate.getMinutes() + timeZoneDiff[chosenServer]);
+                        utcDate.setMinutes(utcDate.getMinutes() + client.config.fs[chosenServer].utcDiff);
                         return utcDate.toUTCString();
                     } else return perm;
                 }
-                function checkPlayer(farmData: farmFormat) {
+
+                FTP.on('ready', () => FTP.get(client.config.fs[chosenServer].ftp.path + 'savegame1/farms.xml', async (err, stream) => {
+                    if (err) return interaction.editReply(err.message);
+
+                    const farmData = xml2js(await new Response(stream as any).text(), { compact: true }) as farmFormat;
+
                     const playerData = farmData.farms.farm[0].players.player.find(x => {
                         if (name.length === 44) {
                             return x._attributes.uniqueUserId === name;
@@ -169,52 +166,38 @@ async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cac
                     if (playerData) {
                         interaction.editReply('```\n' + Object.entries(playerData._attributes).map(x => x[0].padEnd(18, ' ') + permIcon(x[1], x[0])).join('\n') + '```');
                     } else interaction.editReply('No green farm data found with that name/UUID');
-                }
-                if (chosenServer == 'pg') {
-                    FTP.on('ready', () => FTP.get(client.config.fs.pg.ftp.path + 'savegame1/farms.xml', async (err, stream) => {
-                        if (err) return interaction.editReply(err.message);
-
-                        checkPlayer(xml2js(await new Response(stream as any).text(), { compact: true }) as farmFormat);
-                        stream.once('close', () => FTP.end());
-                    })).connect(client.config.fs.pg.ftp);
-                } else checkPlayer(xml2js(fs.readFileSync('../../../Documents/My Games/FarmingSimulator2022/savegame1/farms.xml', 'utf8'), { compact: true }) as farmFormat);
+                    stream.once('close', () => FTP.end());
+                })).connect(client.config.fs[chosenServer].ftp);
             },
             farms: async () => {
                 const chosenServer = interaction.options.getString('server', true) as PublicAcroList;
 
-                if (chosenServer == 'pg') {
-                    await interaction.deferReply();
+                await interaction.deferReply();
 
-                    FTP.on('ready', () => FTP.get(client.config.fs.pg.ftp.path + 'savegame1/farms.xml', (err, stream) => {
-                        if (err) return interaction.editReply(err.message);
+                FTP.on('ready', () => FTP.get(client.config.fs[chosenServer].ftp.path + 'savegame1/farms.xml', (err, stream) => {
+                    if (err) return interaction.editReply(err.message);
 
-                        stream.pipe(fs.createWriteStream('../databases/farms.xml'));
-                        stream.once('close', () => {
-                            FTP.end();
-                            interaction.editReply({ files: ['../databases/farms.xml'] });
-                        });
-                    })).connect(client.config.fs.pg.ftp);
-                } else interaction.reply({ files: ['../../../Documents/My Games/FarmingSimulator2022/savegame1/farms.xml'] });
+                    stream.pipe(fs.createWriteStream('../databases/farms.xml'));
+                    stream.once('close', () => {
+                        FTP.end();
+                        interaction.editReply({ files: ['../databases/farms.xml'] });
+                    });
+                })).connect(client.config.fs[chosenServer].ftp);
             },
             password: async () => {
                 await interaction.deferReply();
                 const chosenServer = interaction.options.getString('server', true) as PublicAcroList;
 
-                function getPassword(data: string) {
-                    const pw = (xml2js(data, { compact: true }) as any).gameserver?.settings?.game_password?._text as string | undefined;
+                FTP.once('ready', () => FTP.get(client.config.fs[chosenServer].ftp.path + 'dedicated_server/dedicatedServerConfig.xml', async (err, stream) => {
+                    if (err) return interaction.editReply(err.message);
+
+                    const pw = (xml2js(await new Response(stream as any).text(), { compact: true }) as any).gameserver?.settings?.game_password?._text as string | undefined;
 
                     if (pw) {
                         interaction.editReply(`Current password for **${chosenServer.toUpperCase()}** is \`${pw}\``);
                     } else interaction.editReply(`**${chosenServer.toUpperCase()}** doesn't currently have a password set`);
-                }
-
-                if (chosenServer === 'pg') {
-                    FTP.once('ready', () => FTP.get(client.config.fs.pg.ftp.path + 'dedicated_server/dedicatedServerConfig.xml', async (err, stream) => {
-                        if (err) return interaction.editReply(err.message);
-                        getPassword(await new Response(stream as any).text());
-                        stream.once('close', () => FTP.end());
-                    })).connect(client.config.fs.pg.ftp);
-                } else getPassword(fs.readFileSync('../../../Documents/My Games/FarmingSimulator2022/dedicated_server/dedicatedServerConfig.xml', 'utf8'));
+                    stream.once('close', () => FTP.end());
+                })).connect(client.config.fs[chosenServer].ftp);
             },
             roles: async () => {
                 if (!hasRole(interaction, 'mpmanager')) return youNeedRole(interaction, 'mpmanager');
@@ -339,7 +322,8 @@ async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cac
                 .setDescription('Start or stop the given server')
                 .addChoices(
                     { name: 'Start', value: 'start' },
-                    { name: 'Stop', value: 'stop' })
+                    { name: 'Stop', value: 'stop' },
+                    { name: 'Restart', value: 'restart' })
                 .setRequired(true)))
         .addSubcommand(x=>x
             .setName('mop')

@@ -1,4 +1,4 @@
-import Discord from 'discord.js';
+import Discord, { EmbedBuilder } from 'discord.js';
 import YClient from '../client.js';
 
 export default async (client: YClient, member: Discord.GuildMember) => {
@@ -12,7 +12,7 @@ export default async (client: YClient, member: Discord.GuildMember) => {
 
     newInvites.forEach(inv => client.invites.set(inv.code, { uses: inv.uses, creator: inv.inviter?.id }));
  
-    client.getChan('botLogs').send({ embeds: [new client.embed()
+    client.getChan('botLogs').send({ embeds: [new EmbedBuilder()
         .setTitle(`Member Joined: ${member.user.tag}`)
         .setDescription(`<@${member.user.id}>\n\`${member.user.id}\``)
         .setFields(

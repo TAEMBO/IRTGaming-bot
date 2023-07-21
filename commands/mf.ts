@@ -1,21 +1,21 @@
-import Discord, { SlashCommandBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } from 'discord.js';
-import YClient from '../client.js';
+import Discord, { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } from 'discord.js';
+import { TInteraction } from '../typings.js';
 import { hasRole, onMFFarms, youNeedRole } from '../utilities.js';
 
 export default {
-	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
+	async run(interaction: TInteraction) {
         if (!hasRole(interaction, 'mpmanager') && !hasRole(interaction, 'mfmanager') && !hasRole(interaction, 'mffarmowner')) return youNeedRole(interaction, "mffarmowner");
 
         const member = interaction.options.getMember("member") as Discord.GuildMember;
-        const Role = client.config.mainServer.roles[interaction.options.getString("role", true) as keyof typeof client.config.mainServer.roles];
+        const Role = interaction.client.config.mainServer.roles[interaction.options.getString("role", true) as keyof typeof interaction.client.config.mainServer.roles];
 
         if (member.roles.cache.has(Role)) {
             if (!hasRole(interaction, 'mfmanager') && hasRole(interaction, 'mffarmowner') && !interaction.member.roles.cache.has(Role)) return interaction.reply('You cannot remove users from a farm you do not own.');
             
             (await interaction.reply({
-                embeds: [new client.embed()
+                embeds: [new EmbedBuilder()
                     .setDescription(`This user already has the <@&${Role}> role, do you want to remove it from them?`)
-                    .setColor(client.config.embedColor)],
+                    .setColor(interaction.client.config.embedColor)],
                 fetchReply: true, 
                 components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
                     new ButtonBuilder().setCustomId('yes').setStyle(ButtonStyle.Success).setLabel("Confirm"),
@@ -28,21 +28,30 @@ export default {
             }).on('collect', int => {
                 ({
                     yes: () => {
-                        const rolesToRemove = onMFFarms(member).length === 1 ? [Role, client.config.mainServer.roles.mfmember] : [Role];
+                        const rolesToRemove = onMFFarms(member).length === 1 ? [Role, interaction.client.config.mainServer.roles.mfmember] : [Role];
                         
                         member.roles.remove(rolesToRemove);
-                        int.update({ embeds: [new client.embed().setDescription(`<@${member.user.id}> (${member.user.tag}) has been removed from the <@&${client.config.mainServer.roles.mfmember}> and <@&${Role}> roles.`).setColor(client.config.embedColor)], components: [] });
+                        int.update({
+                            embeds: [new EmbedBuilder()
+                                .setDescription(`<@${member.user.id}> (${member.user.tag}) has been removed from the <@&${interaction.client.config.mainServer.roles.mfmember}> and <@&${Role}> roles.`)
+                                .setColor(interaction.client.config.embedColor)
+                            ],
+                            components: []
+                        });
                     },
                     no: () => {
-                        int.update({ embeds: [new client.embed().setDescription(`Command canceled`).setColor(client.config.embedColor)], components: [] });
+                        int.update({ embeds: [new EmbedBuilder().setDescription(`Command canceled`).setColor(interaction.client.config.embedColor)], components: [] });
                     }
                 } as any)[int.customId]();
             });
         } else {
             if (hasRole(interaction, 'mffarmowner') && !hasRole(interaction, 'mfmanager') && !interaction.member.roles.cache.has(Role)) return interaction.reply('You cannot add users to a farm you do not own.');
 
-            member.roles.add([Role, client.config.mainServer.roles.mfmember]);
-            interaction.reply({ embeds: [new client.embed().setDescription(`<@${member.user.id}> (${member.user.tag}) has been given the <@&${client.config.mainServer.roles.mfmember}> and <@&${Role}> roles.`).setColor(client.config.embedColor)] });
+            member.roles.add([Role, interaction.client.config.mainServer.roles.mfmember]);
+            interaction.reply({ embeds: [new EmbedBuilder()
+                .setDescription(`<@${member.user.id}> (${member.user.tag}) has been given the <@&${interaction.client.config.mainServer.roles.mfmember}> and <@&${Role}> roles.`)
+                .setColor(interaction.client.config.embedColor)
+            ] });
         }
 	},
     data: new SlashCommandBuilder()

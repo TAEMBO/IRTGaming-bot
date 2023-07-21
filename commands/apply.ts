@@ -1,10 +1,10 @@
-import Discord, { SlashCommandBuilder } from 'discord.js';
-import YClient from '../client.js';
+import { SlashCommandBuilder } from 'discord.js';
+import { TInteraction } from '../typings.js';
 
 export default {
-	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
-        const applicationLogs = client.getChan('mpApplicationLogs');
-        const userData = await client.userLevels._content.findById(interaction.user.id);
+	async run(interaction: TInteraction) {
+        const applicationLogs = interaction.client.getChan('mpApplicationLogs');
+        const userData = await interaction.client.userLevels._content.findById(interaction.user.id);
         const eligibleTime = (Date.now() - (interaction.member.joinedTimestamp as number)) > (1000 * 60 * 60 * 24 * 14);
         const eligibleMsgs = userData?.level ? userData.level > 3 : false;
         const deniedMsgs: string[] = [];

@@ -11,9 +11,8 @@ import config from './config.json' assert { type: 'json' };
 import { hasRole, isDCStaff, LocalDatabase, log, RepeatedMessages, youNeedRole } from './utilities.js';
 import { Config, FSCache, YTCache, InviteCache, Command, Registry, LogColor } from './typings.js';
 
-export default class YClient extends Client {
+export default class YClient extends Client<true> {
     public config = config as Config;
-    public embed = Discord.EmbedBuilder;
     public registry: Registry = [];
     public fsCache: FSCache = {};
     public YTCache: YTCache = {};

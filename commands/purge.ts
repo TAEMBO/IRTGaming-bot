@@ -1,9 +1,9 @@
-import Discord, { SlashCommandBuilder } from 'discord.js';
-import YClient from '../client.js';
+import { SlashCommandBuilder } from 'discord.js';
+import { TInteraction } from '../typings.js';
 import { isDCStaff, youNeedRole } from '../utilities.js';
 
 export default {
-	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
+	async run(interaction: TInteraction) {
         const amount = interaction.options.getInteger("amount", true);
         const user = interaction.options.getUser("user");
 

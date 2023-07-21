@@ -1,3 +1,4 @@
+import { EmbedBuilder } from 'discord.js';
 import YClient from 'client.js';
 import mongoose from 'mongoose';
 import FTPClient from 'ftp';
@@ -87,7 +88,7 @@ export default class playerTimes {
 
 				if (playerDatabyUuid) { // PlayerTimes data was found with UUID
 					if (playerDatabyUuid._id !== player._attributes.lastNickname) { // PlayerTimes name does not match given name, update playerTimes data to reflect new name
-						await this.client.getChan('fsLogs').send({ embeds: [new this.client.embed()
+						await this.client.getChan('fsLogs').send({ embeds: [new EmbedBuilder()
 							.setColor(this.client.config.embedColorYellow)
 							.setTitle('Player name change')
 							.setTimestamp()

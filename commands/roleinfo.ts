@@ -1,15 +1,15 @@
-import Discord, { SlashCommandBuilder } from 'discord.js';
-import YClient from '../client.js';
+import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { TInteraction } from '../typings.js';
 
 export default {
-	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
+	async run(interaction: TInteraction) {
 		const role = interaction.options.getRole("role", true);
 		const keyPermissions = ['Administrator', 'KickMembers', 'BanMembers', 'ManageChannels', 'ManageGuild', 'ViewAuditLog', 'ManageMessages', 'ManageNicknames', 'MentionEveryone', 'UseExternalEmojis', 'ManageRoles', 'ManageEmojisAndStickers', 'ModerateMembers'];
 		const permissions = role.permissions.toArray();
 		const roleMembers = role.members.map(e =>`**${e.user.tag}**`).join("\n") || "";
         const includedPermissions = permissions.includes('Administrator') ? ['Administrator'] : permissions.filter(x => keyPermissions.includes(x));
 
-		interaction.reply({ embeds: [new client.embed()
+		interaction.reply({ embeds: [new EmbedBuilder()
 			.setTitle(`Role Info: ${role.name}`)
 			.addFields(
 				{ name: '🔹 ID', value: `\`${role.id}\``, inline: true},

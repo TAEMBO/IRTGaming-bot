@@ -1,9 +1,9 @@
-import Discord, { SlashCommandBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ComponentType } from 'discord.js';
-import YClient from '../client.js';
+import { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ComponentType } from 'discord.js';
 import ms from 'ms';
+import { TInteraction } from '../typings.js';
 
 export default {
-	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
+	async run(interaction: TInteraction) {
         function formatTime(time: number) {
             return `<t:${Math.round(time / 1000)}> (<t:${Math.round(time / 1000)}:R>)`;
         };
@@ -18,9 +18,9 @@ export default {
                 
                 if (!reminderTime) return interaction.reply({
                     ephemeral: true,
-                    embeds: [new client.embed()
+                    embeds: [new EmbedBuilder()
                         .setTitle('Incorrect timestamp')
-                        .setColor(client.config.embedColorRed)
+                        .setColor(interaction.client.config.embedColorRed)
                         .setDescription([
                             '**Format:** `[amount][quantity]`',
                             '**Quantities:**',
@@ -37,13 +37,13 @@ export default {
                 });
 
                 const timeToRemind = Date.now() + reminderTime;
-                const currentReminders = await client.reminders._content.find({ userid: interaction.user.id });
+                const currentReminders = await interaction.client.reminders._content.find({ userid: interaction.user.id });
 
                 if (currentReminders.length > 25) return interaction.reply({ content: 'You can only have up to 25 reminders at a time', ephemeral: true });
 
                 (await interaction.reply({
-                    embeds: [new client.embed()
-                        .setColor(client.config.embedColor)
+                    embeds: [new EmbedBuilder()
+                        .setColor(interaction.client.config.embedColor)
                         .setDescription([
                             'Are you sure you want to create a new reminder?',
                             `> Content: \`${reminderText}\``,
@@ -63,13 +63,13 @@ export default {
                 }).on('collect', async int => {
                     ({
                         yes: () => Promise.all([
-                            client.reminders._content.create({ userid: interaction.user.id, content: reminderText, time: timeToRemind, ch: interaction.channelId }),
+                            interaction.client.reminders._content.create({ userid: interaction.user.id, content: reminderText, time: timeToRemind, ch: interaction.channelId }),
                             int.update({
                                 components: [],
-                                embeds: [new client.embed()
+                                embeds: [new EmbedBuilder()
                                     .setTitle('Reminder set')
                                     .setDescription(`\n\`\`\`${reminderText}\`\`\`\n${formatTime(timeToRemind)}`)
-                                    .setColor(client.config.embedColor)
+                                    .setColor(interaction.client.config.embedColor)
                                 ]
                             })
                         ]),
@@ -80,7 +80,7 @@ export default {
                 });
             },
             delete: async () => {
-                const userReminders = await client.reminders._content.find({ userid: interaction.user.id });
+                const userReminders = await interaction.client.reminders._content.find({ userid: interaction.user.id });
 
                 if (!userReminders.length) return interaction.reply({ content: 'You have no active current reminders', ephemeral: true });
 
@@ -88,8 +88,8 @@ export default {
                     .setCustomId('reminders')
                     .setPlaceholder('Choose a reminder to delete');
 
-                const embed = new client.embed()
-                    .setColor(client.config.embedColor)
+                const embed = new EmbedBuilder()
+                    .setColor(interaction.client.config.embedColor)
                     .setTitle(`You have ${userReminders.length} active reminder(s)`)
                     .setFooter({ text: 'Select a reminder to delete, 60s to respond' });
 
@@ -120,8 +120,8 @@ export default {
                     const chosenReminder = userReminders[parseInt(int.values[0]) - 1];
 
                     (await int.update({
-                        embeds: [new client.embed()
-                            .setColor(client.config.embedColor)
+                        embeds: [new EmbedBuilder()
+                            .setColor(interaction.client.config.embedColor)
                             .setDescription(`Are you sure you want to delete the reminder \`${chosenReminder.content}\`?`)
                             .setFooter({ text: '60s to respond' })
                         ],
@@ -136,7 +136,7 @@ export default {
                     }).on('collect', async int => {
                         ({
                             yes: () => Promise.all([
-                                client.reminders._content.findByIdAndDelete(chosenReminder._id),
+                                interaction.client.reminders._content.findByIdAndDelete(chosenReminder._id),
                                 int.update(rplText(`Successfully deleted reminder \`${chosenReminder.content}\``))
                             ]),
                             no: () => int.update(rplText('Command manually canceled'))

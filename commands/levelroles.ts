@@ -1,12 +1,12 @@
-import Discord, { SlashCommandBuilder, AttachmentBuilder } from 'discord.js';
-import YClient from '../client.js';
+import { SlashCommandBuilder, AttachmentBuilder, EmbedBuilder } from 'discord.js';
 import fs from 'node:fs';
 import canvas from 'canvas';
+import { TInteraction } from '../typings.js';
 
 export default {
-	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
+	async run(interaction: TInteraction) {
 		const subCmd = interaction.options.getSubcommand();
-		const allData = await client.userLevels._content.find();
+		const allData = await interaction.client.userLevels._content.find();
 
 		if (subCmd === "leaderboard") {
 			const messageCountsTotal = allData.reduce((a, b) => a + b.messages, 0);
@@ -73,8 +73,8 @@ export default {
 			ctx.setLineDash([]);
 			
 			// draw points
-			ctx.strokeStyle = client.config.embedColor as string;
-			ctx.fillStyle = client.config.embedColor as string;
+			ctx.strokeStyle = interaction.client.config.embedColor;
+			ctx.fillStyle = interaction.client.config.embedColor;
 			ctx.lineWidth = 5;
 			
 			
@@ -125,12 +125,12 @@ export default {
 			
 			interaction.reply({
 				files: [new AttachmentBuilder(img.toBuffer(), { name: "dailymsgs.png" })],
-				embeds: [new client.embed()
+				embeds: [new EmbedBuilder()
 					.setTitle('Ranking leaderboard')
 					.setDescription(`A total of **${messageCountsTotal.toLocaleString('en-US')}** messages have been recorded in this server.`)
 					.addFields({ name: 'Top users by messages sent:', value: topUsers })
 					.setImage('attachment://dailymsgs.png')
-					.setColor(client.config.embedColor)]
+					.setColor(interaction.client.config.embedColor)]
 			});
 		} else if (subCmd === "view") {
 
@@ -138,7 +138,7 @@ export default {
 			const member = interaction.options.getMember("member") ?? interaction.member;
 
 			// information about users progress on level roles
-			const userData = await client.userLevels._content.findById(member.user.id);
+			const userData = await interaction.client.userLevels._content.findById(member.user.id);
 		
 			const pronounBool = (you: string, they: string) => { // takes 2 words and chooses which to use based on if user did this command on themself
 				if (interaction.user.id === member.user.id) return you || true;
@@ -148,10 +148,10 @@ export default {
 			if (!userData) return interaction.reply(`${pronounBool('You', 'They')} currently don't have a level, send some messages to level up.`);
 		
 			const index = allData.sort((a, b) => b.messages - a.messages).map(x => x._id).indexOf(member.id) + 1;
-			const memberDifference = userData.messages - client.userLevels.algorithm(userData.level);
-			const levelDifference = client.userLevels.algorithm(userData.level+1) - client.userLevels.algorithm(userData.level);
+			const memberDifference = userData.messages - interaction.client.userLevels.algorithm(userData.level);
+			const levelDifference = interaction.client.userLevels.algorithm(userData.level+1) - interaction.client.userLevels.algorithm(userData.level);
 
-			interaction.reply({ embeds: [new client.embed()
+			interaction.reply({ embeds: [new EmbedBuilder()
 				.setTitle([
 					`Level: **${userData.level}**`,
 					`Rank: **${index ? '#' + index  : 'last'}**`,
@@ -160,7 +160,7 @@ export default {
 				].join('\n'))
 				.setColor(member.displayColor)
 				.setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048 }))
-				.setAuthor({name: `Ranking for ${member.user.tag}`})
+				.setAuthor({ name: `Ranking for ${member.user.tag}` })
 			] });
 		}
 	},

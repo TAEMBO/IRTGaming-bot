@@ -1,4 +1,4 @@
-import Discord from 'discord.js';
+import Discord, { EmbedBuilder } from 'discord.js';
 import YClient from './client.js';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -18,7 +18,7 @@ function errorLog(error: Error, event: string) {
 
     client.getChan('taesTestingZone').send({
         content: `<@${client.config.devWhitelist[0]}>`,
-        embeds: [new client.embed()
+        embeds: [new EmbedBuilder()
             .setTitle(`Error Caught - ${error.message.slice(0, 240)}`)
             .setColor("#420420")
             .setDescription(`\`\`\`ansi\n${error.stack?.replaceAll(' at ', ' [31mat[37m ').replaceAll(dirname, `[33m${dirname}[37m`).slice(0, 2500)}\`\`\``)
@@ -27,8 +27,6 @@ function errorLog(error: Error, event: string) {
         ]
     });
 }
-
-client.application
 
 process.on('unhandledRejection', (error: Error) => errorLog(error, 'unhandledRejection'));
 process.on('uncaughtException', error => errorLog(error, 'uncaughtException'));
@@ -42,7 +40,7 @@ setInterval(async () => {
     const Punishments = (await client.punishments._content.find()).filter(x => x.endTime && x.endTime <= now && !x.expired);
 
     for (const reminder of Reminders) {
-    	const embed = new client.embed().setTitle('Reminder').setColor(client.config.embedColor).setDescription(`\`\`\`${reminder.content}\`\`\``);
+    	const embed = new EmbedBuilder().setTitle('Reminder').setColor(client.config.embedColor).setDescription(`\`\`\`${reminder.content}\`\`\``);
     
         client.users.send(reminder.userid, { embeds: [embed] }).catch(() => (client.channels.resolve(reminder.ch) as Discord.GuildTextBasedChannel).send({
     		content: `Reminder <@${reminder.userid}>`,

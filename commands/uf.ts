@@ -1,10 +1,9 @@
-import Discord, { SlashCommandBuilder } from 'discord.js';
-import YClient from '../client.js';
+import { SlashCommandBuilder } from 'discord.js';
 import FTPClient from 'ftp';
 import fs from 'node:fs';
 import config from '../config.json' assert { type: 'json' };
 import { isMPStaff, youNeedRole } from '../utilities.js';
-import { ServerAcroList } from '../typings.js';
+import { ServerAcroList, TInteraction } from '../typings.js';
 
 const cmdOptionChoices = Object.entries(config.fs)
     .filter(x => !x[1].isPrivate)
@@ -13,7 +12,7 @@ const cmdOptionChoices = Object.entries(config.fs)
 type PublicAcroList = Exclude<ServerAcroList, 'mf'>;
 
 export default {
-	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
+	async run(interaction: TInteraction) {
         const whitelist = ['984568108704497694', '200066407415676928'];
         const chosenServer = interaction.options.getString('server', true) as PublicAcroList;
 
@@ -24,7 +23,7 @@ export default {
                 const FTP = new FTPClient();
                 await interaction.deferReply({ ephemeral: true });
             
-                FTP.on('ready', () => FTP.get(client.config.fs[chosenServer].ftp.path + 'blockedUserIds.xml', (err, stream) => {
+                FTP.on('ready', () => FTP.get(interaction.client.config.fs[chosenServer].ftp.path + 'blockedUserIds.xml', (err, stream) => {
                     if (err) return interaction.editReply(err.message);
     
                     stream.pipe(fs.createWriteStream('../databases/blockedUserIds.xml'));
@@ -32,7 +31,7 @@ export default {
                         FTP.end();
                         interaction.editReply({ files: ['../databases/blockedUserIds.xml'] });
                     });
-                })).connect(client.config.fs[chosenServer].ftp);
+                })).connect(interaction.client.config.fs[chosenServer].ftp);
             },
             ps: () => {
                 interaction.reply({ files: ['../../../Documents/My Games/FarmingSimulator2022/blockedUserIds.xml'], ephemeral: true });

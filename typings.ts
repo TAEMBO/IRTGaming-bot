@@ -73,11 +73,16 @@ export interface InviteCache {
 export interface Command {
     commandFile: {
         default: {
-            run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">): Promise<any>;
+            run(interaction: Discord.ChatInputCommandInteraction<"cached">): Promise<any>;
             data: Omit<Discord.SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup"> | Discord.SlashCommandSubcommandsOnlyBuilder;
         };
     };
     uses: number;
+}
+
+/** `Discord.ChatInputCommandInteraction<CacheType>` */
+export interface TInteraction extends Discord.ChatInputCommandInteraction<"cached"> {
+    client: YClient;
 }
 
 /** Template for creating a config.json */

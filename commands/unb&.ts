@@ -1,7 +1,8 @@
-import Discord, { SlashCommandBuilder } from 'discord.js';
-import YClient from '../client.js';
+import { SlashCommandBuilder } from 'discord.js';
+import { TInteraction } from '../typings.js';
+
 export default {
-	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
+	async run(interaction: TInteraction) {
         const user = interaction.options.getUser("member", true);
         interaction.deferReply({ ephemeral: true }).then(() => interaction.deleteReply());
         interaction.channel?.send(`<@${user.id}> had their honorary ban revoked!`);

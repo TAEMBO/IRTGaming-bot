@@ -1,9 +1,9 @@
-import Discord, { SlashCommandBuilder } from 'discord.js';
-import YClient from '../client.js';
+import { SlashCommandBuilder } from 'discord.js';
+import { TInteraction } from '../typings.js';
 import { isDCStaff, youNeedRole } from '../utilities.js';
 
 export default {
-	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
+	async run(interaction: TInteraction) {
         const time = interaction.options.getInteger("time", true);
 
         if (!isDCStaff(interaction)) return youNeedRole(interaction, 'discordmoderator');

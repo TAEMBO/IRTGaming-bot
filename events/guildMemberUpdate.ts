@@ -1,11 +1,11 @@
-import Discord from 'discord.js';
+import Discord, { EmbedBuilder } from 'discord.js';
 import YClient from '../client.js';
 
 export default async (client: YClient, oldMember: Discord.GuildMember | Discord.PartialGuildMember, newMember: Discord.GuildMember) => {
     if (!client.config.botSwitches.logs) return;
 
     let changes = false;
-    const embed = new client.embed()
+    const embed = new EmbedBuilder()
         .setTimestamp()
         .setColor(client.config.embedColor)
         .setTitle(`Member Update: ${newMember.user.tag}`)

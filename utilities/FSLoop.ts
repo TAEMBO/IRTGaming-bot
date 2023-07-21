@@ -1,4 +1,4 @@
-import Discord from "discord.js";
+import Discord, { EmbedBuilder } from "discord.js";
 import YClient from "../client.js";
 import { xml2js } from "xml-js";
 import fs from "node:fs";
@@ -20,7 +20,7 @@ function decorators(client: YClient, player: FSLoopDSSPlayer, watchList: WatchLi
 
 export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: string, MessageID: string, serverAcro: ServerAcroList) {
     function wlEmbed(playerName: string, joinLog: boolean, wlReason?: string) {
-        const embed = new client.embed()
+        const embed = new EmbedBuilder()
             .setTitle('WatchList')
             .setDescription(`\`${playerName}\` ${joinLog ? 'joined' : 'left'} **${serverAcroUp}** at <t:${now}:t>`);
 
@@ -31,7 +31,7 @@ export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: s
     function logEmbed(player: FSLoopDSSPlayer, joinLog: boolean) {
         const playTimeHrs = Math.floor(player.uptime / 60);
         const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
-        const embed = new client.embed().setDescription(`\`${player.name}\`${decorators(client, player, watchList)} ${joinLog ? 'joined': 'left'} **${serverAcroUp}** at <t:${now}:t>`);
+        const embed = new EmbedBuilder().setDescription(`\`${player.name}\`${decorators(client, player, watchList)} ${joinLog ? 'joined': 'left'} **${serverAcroUp}** at <t:${now}:t>`);
     
         if (joinLog) {
             return embed.setColor(client.config.embedColorGreen);
@@ -40,12 +40,12 @@ export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: s
     function adminCheck() {
         for (const player of newPlayers.filter(x => oldPlayers.some(y => x.isAdmin && !y.isAdmin && y.name === x.name))) {
             if (!client.whitelist._content.includes(player.name) && !client.FMlist._content.includes(player.name)) {
-                client.getChan('juniorAdminChat').send({ embeds: [new client.embed()
+                client.getChan('juniorAdminChat').send({ embeds: [new EmbedBuilder()
                     .setTitle('UNKNOWN ADMIN LOGIN')
                     .setDescription(`\`${player.name}\` on **${serverAcroUp}** on <t:${now}>`)
                     .setColor('#ff4d00')
                 ] }); 
-            } else logChannel.send({ embeds: [new client.embed()
+            } else logChannel.send({ embeds: [new EmbedBuilder()
                 .setColor(client.config.embedColorYellow)
                 .setDescription(`\`${player.name}\`${decorators(client, player, watchList)} logged into admin on **${serverAcroUp}** at <t:${now}:t>`)
             ] });
@@ -78,7 +78,7 @@ export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: s
     }
 
     const serverAcroUp = serverAcro.toUpperCase();
-    const statsEmbed = new client.embed();
+    const statsEmbed = new EmbedBuilder();
     const statsMsgEdit = () => {
         const channel = client.channels.cache.get(ChannelID) as Discord.TextChannel | undefined;
 
@@ -108,7 +108,7 @@ export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: s
 
     const newPlayers = DSS.slots.players.filter(x=>x.isUsed);
     const oldPlayers = client.fsCache[serverAcro].players;
-    const serverStatusEmbed = (status: string) => new client.embed().setTitle(`${serverAcroUp} now ${status}`).setColor(client.config.embedColorYellow).setTimestamp();
+    const serverStatusEmbed = (status: string) => new EmbedBuilder().setTitle(`${serverAcroUp} now ${status}`).setColor(client.config.embedColorYellow).setTimestamp();
     const wlChannel = client.getChan('watchList');
     const logChannel = client.getChan('fsLogs');
     const now = Math.round(Date.now() / 1000);
@@ -170,7 +170,7 @@ export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: s
     }
 
     if (!justStarted) {
-        if (serverAcro !== 'mf') adminCheck();
+        if (!client.config.fs[serverAcro].isPrivate) adminCheck();
         
         logPlayers();
         
@@ -184,7 +184,7 @@ export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: s
 }
 
 export function FSLoopAll(client: YClient, watchList: WatchList) {
-    const embed = new client.embed().setColor(client.config.embedColor);
+    const embed = new EmbedBuilder().setColor(client.config.embedColor);
     const totalCount: number[] = [];
 
     for (const [serverAcro, server] of Object.entries(client.fsCache)) {

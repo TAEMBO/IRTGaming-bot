@@ -1,14 +1,14 @@
-import Discord, { SlashCommandBuilder } from 'discord.js';
-import YClient from '../client.js';
+import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { TInteraction } from '../typings.js';
 import { isMPStaff } from '../utilities.js';
 
 export default {
-	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
+	async run(interaction: TInteraction) {
         if (interaction.channel?.parentId !== '980947706736427019' && !isMPStaff(interaction)) return interaction.reply({ content: 'You cannot use this command here', ephemeral: true });
 
-        interaction.reply({ embeds: [new client.embed()
+        interaction.reply({ embeds: [new EmbedBuilder()
             .setTitle('MP Support - Ban Appeal')
-            .setColor(client.config.embedColor)
+            .setColor(interaction.client.config.embedColor)
             .setDescription([
                 'To appeal a ban on one of our FS servers, please provide the following information:',
                 '<:IRTDot:908818924286648350> In-game name at the time of being banned',

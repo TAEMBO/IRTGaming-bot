@@ -1,14 +1,14 @@
-import Discord, { SlashCommandBuilder, version } from 'discord.js';
-import YClient from '../client.js';
+import { SlashCommandBuilder, EmbedBuilder, version } from 'discord.js';
 import os from 'node:os';
+import { TInteraction } from '../typings.js';
 import { formatBytes, formatTime } from '../utilities.js';
 
 export default {
-	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
+	async run(interaction: TInteraction) {
 		const colunms = ['Command Name', 'Uses'];
-		const includedCommands = client.commands.filter(x => x.uses).sort((a, b) => b.uses - a.uses);
+		const includedCommands = interaction.client.commands.filter(x => x.uses).sort((a, b) => b.uses - a.uses);
 
-		if (!includedCommands.size) return interaction.reply(`No commands have been used yet.\nUptime: ${formatTime(client.uptime as number, 2, { commas: true, longNames: true })}`);
+		if (!includedCommands.size) return interaction.reply(`No commands have been used yet.\nUptime: ${formatTime(interaction.client.uptime as number, 2, { commas: true, longNames: true })}`);
         
 		const nameLength = Math.max(...includedCommands.map(x => x.commandFile.default.data.name.length), colunms[0].length) + 2;
 		const amountLength = Math.max(...includedCommands.map(x => x.uses.toString().length), colunms[1].length) + 1;
@@ -19,10 +19,10 @@ export default {
 			const count = command.uses.toString();
 			rows.push(`${name + '.'.repeat(nameLength - name.length)}${'.'.repeat(amountLength - count.length) + count}\n`);
 		});
-		const embed = new client.embed()
+		const embed = new EmbedBuilder()
 			.setTitle('Bot Statistics')
-			.setDescription(`List of commands that have been used. Total amount of commands used since last restart: **${client.commands.map(x => x.uses).reduce((a, b) => a + b, 0)}**`)
-			.setColor(client.config.embedColor);
+			.setDescription(`List of commands that have been used. Total amount of commands used since last restart: **${interaction.client.commands.map(x => x.uses).reduce((a, b) => a + b, 0)}**`)
+			.setColor(interaction.client.config.embedColor);
             
 		if (rows.join('').length > 1024) {
 			let fieldValue = '';
@@ -42,7 +42,7 @@ export default {
 				`**RAM:** ${formatBytes(process.memoryUsage().heapUsed, 2, 1000)}**/**${formatBytes(os.freemem(), 2, 1000)}`,
 				`**Version:** ${process.version}`,
 				`**Discord.js version:** v${version}`,
-				`**Uptime:** ${formatTime(client.uptime as number, 2, { commas: true, longNames: true })}`
+				`**Uptime:** ${formatTime(interaction.client.uptime as number, 2, { commas: true, longNames: true })}`
 			].join('\n') },
 			{ name: 'System', value: [
 				`**CPU:** ${os.cpus()[0].model.trim()}`,

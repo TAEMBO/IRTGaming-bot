@@ -1,12 +1,12 @@
-import Discord, { SlashCommandBuilder } from 'discord.js';
-import YClient from '../client.js';
+import { SlashCommandBuilder } from 'discord.js';
+import { TInteraction } from '../typings.js';
 import { hasRole, isDCStaff, youNeedRole } from '../utilities.js';
 
 export default {
-	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
+	async run(interaction: TInteraction) {
 		if (!isDCStaff(interaction)) return youNeedRole(interaction, 'discordmoderator');
 
-		const punishment = await client.punishments._content.findById(interaction.options.getInteger('caseid', true));
+		const punishment = await interaction.client.punishments._content.findById(interaction.options.getInteger('caseid', true));
         const reason = interaction.options.getString("reason") ?? 'Unspecified';
 
 		if (!punishment) return interaction.reply('No case found with that ID');
@@ -14,7 +14,7 @@ export default {
 
 		if (!['warn', 'mute'].includes(punishment.type) && hasRole(interaction, 'discordhelper')) return youNeedRole(interaction, 'discordmoderator');
 		
-		await client.punishments.removePunishment(punishment._id, interaction.user.id, reason, interaction);
+		await interaction.client.punishments.removePunishment(punishment._id, interaction.user.id, reason, interaction);
 	},
 	data: new SlashCommandBuilder()
 		.setName("unpunish")

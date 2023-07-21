@@ -1,9 +1,9 @@
-import Discord, { SlashCommandBuilder } from 'discord.js';
-import YClient from '../client.js';
+import { SlashCommandBuilder } from 'discord.js';
+import { TInteraction } from '../typings.js';
 
 export default {
-	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
-		client.punish(interaction, this.data.name);
+	async run(interaction: TInteraction) {
+		interaction.client.punish(interaction, this.data.name);
 	},
 	data: new SlashCommandBuilder()
 		.setName("kick")

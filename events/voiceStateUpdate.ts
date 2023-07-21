@@ -1,11 +1,11 @@
-import Discord from "discord.js";
+import Discord, { EmbedBuilder } from "discord.js";
 import YClient from '../client.js';
 
 export default async (client: YClient, oldState: Discord.VoiceState, newState: Discord.VoiceState) => {
     if (!client.config.botSwitches.logs || !newState.member) return;
 
     const channel = client.getChan('botLogs');
-    const embed = new client.embed()
+    const embed = new EmbedBuilder()
         .setTimestamp()
         .setDescription(`<@${newState.member.user.id}>\n\`${newState.member.user.id}\``)
         .setAuthor({ name: newState.member.user.tag, iconURL: newState.member.user.displayAvatarURL({ extension: 'png', size: 2048 }) });

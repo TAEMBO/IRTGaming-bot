@@ -1,10 +1,11 @@
-import Discord, { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
-import YClient from '../client.js';
+import { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import { TInteraction } from '../typings.js';
 
 export default {
-	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
-        interaction.reply({content: `Verification sent, please wait for someone to verify your subscription. You will then receive the <@&${client.config.mainServer.roles.subscriber}> role.`, ephemeral: true});
-        client.getChan('helperChat').send({
+	async run(interaction: TInteraction) {
+        interaction.reply({ content: `Verification sent, please wait for someone to verify your subscription. You will then receive the <@&${interaction.client.config.mainServer.roles.subscriber}> role.`, ephemeral: true });
+        
+        interaction.client.getChan('helperChat').send({
             content: `<@${interaction.user.id}> (${interaction.user.tag}) Subscriber role verification`,
             files: [interaction.options.getAttachment('image', true)],
             components: [new ActionRowBuilder<ButtonBuilder>().addComponents(

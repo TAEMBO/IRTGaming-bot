@@ -1,5 +1,5 @@
-import Discord, { SlashCommandBuilder } from 'discord.js';
-import YClient from '../client.js';
+import Discord, { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { TInteraction } from '../typings.js';
 
 const rpsChannels: Record<string, RpsInstance> = {};
 
@@ -10,21 +10,19 @@ class RpsInstance {
         this.message.edit({ embeds: [], content: "This rock paper scissors game has ended due to inactivity." });
         delete rpsChannels[this.message.channel.id];
     }, 60_000))();
-    constructor(public firstPlayer: Discord.User, public firstMove: string, public message: Discord.Message<boolean>) {
-
-    }
+    constructor(public firstPlayer: Discord.User, public firstMove: string, public message: Discord.Message<boolean>) { }
 }
 
 // Credits to Memw
 export default {
-	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
+	async run(interaction: TInteraction) {
         const move = interaction.options.getString("move", true);
         const Channel = interaction.channel as Discord.TextChannel;
 
         if (!rpsChannels.hasOwnProperty(Channel.id)) {
             await interaction.deferReply({ ephemeral: true }).then(() => interaction.deleteReply());
 
-            const message = await Channel.send({ embeds: [new client.embed()
+            const message = await Channel.send({ embeds: [new EmbedBuilder()
                 .setTitle("Rps game started")
                 .setDescription(`To play with <@${interaction.user.id}> run the command again.`)
                 .setFooter({ text: "You have 60 seconds to reply with another interaction." })
@@ -33,6 +31,7 @@ export default {
             rpsChannels[Channel.id] = new RpsInstance(interaction.user, move, message);
         } else if (rpsChannels.hasOwnProperty(Channel.id)) {
             let firstMove = rpsChannels[Channel.id];
+            
             if (interaction.user.id !== firstMove.firstPlayer.id) {
                 await interaction.deferReply();
                 let winner = null;
@@ -42,7 +41,7 @@ export default {
                 if (move === 'paper') if (firstMove.firstMove === 'scissors') winner = firstMove.firstPlayer; else winner = interaction.user;
                 if (move === firstMove.firstMove) winner = null;
 
-                await firstMove.message.edit({ embeds: [new client.embed()
+                await firstMove.message.edit({ embeds: [new EmbedBuilder()
                     .setTitle("Rps game ended")
                     .setDescription(`Both players sent their move.\n**${firstMove.firstPlayer.tag}:** ${firstMove.firstMove}\n**${interaction.user.tag}:** ${move}`)
                     .setFooter({ text: `This game has ended, ${winner ? `${winner.tag} won.` : `it's a tie.`}` })

@@ -1,13 +1,12 @@
 
-import Discord, { SlashCommandBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } from 'discord.js';
-import YClient from '../client.js';
+import Discord, { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } from 'discord.js';
 import puppeteer from 'puppeteer'; // Credits to Trolly for suggesting this package
 import FTPClient from 'ftp';
 import fs from 'node:fs';
 import { xml2js } from 'xml-js';
 import config from '../config.json' assert { type: 'json' };
 import { hasRole, isMPStaff, youNeedRole } from '../utilities.js';
-import type { ServerAcroList, banFormat, farmFormat } from '../typings.js';
+import type { ServerAcroList, banFormat, farmFormat, TInteraction } from '../typings.js';
 
 const cmdOptionChoices = Object.entries(config.fs)
     .filter(x => !x[1].isPrivate)
@@ -16,7 +15,7 @@ const cmdOptionChoices = Object.entries(config.fs)
 type PublicAcroList = Exclude<ServerAcroList, 'mf'>;
 
 export default {
-async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
+async run(interaction: TInteraction) {
         if (!isMPStaff(interaction)) return youNeedRole(interaction, 'mpstaff');
 
         const name = interaction.options.getString('name');
@@ -24,14 +23,14 @@ async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cac
         
         ({
             server: async () => {
-                async function checkRole(role: keyof typeof client.config.mainServer.roles) {
+                async function checkRole(role: keyof typeof interaction.client.config.mainServer.roles) {
                     if (!hasRole(interaction, role)) await youNeedRole(interaction, role);
                 }
 
                 const chosenServer = interaction.options.getString('server', true) as ServerAcroList;
                 const chosenAction = interaction.options.getString('action', true) as 'start' | 'stop' | 'restart';
 
-                if (client.config.fs[chosenServer].isPrivate && !hasRole(interaction, 'mpmanager')) {
+                if (interaction.client.config.fs[chosenServer].isPrivate && !hasRole(interaction, 'mpmanager')) {
                     await checkRole('mfmanager');
                 } else await checkRole('mpmanager');
 
@@ -46,11 +45,11 @@ async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cac
                 const browser = await puppeteer.launch();
                 const page = await browser.newPage();
     
-                if (client.fsCache[chosenServer].status === 'offline' && ['stop', 'restart'].includes(chosenAction)) return interaction.editReply('Server is already offline');
-                if (client.fsCache[chosenServer].status === 'online' && chosenAction === 'start') return interaction.editReply('Server is already online');
+                if (interaction.client.fsCache[chosenServer].status === 'offline' && ['stop', 'restart'].includes(chosenAction)) return interaction.editReply('Server is already offline');
+                if (interaction.client.fsCache[chosenServer].status === 'online' && chosenAction === 'start') return interaction.editReply('Server is already online');
     
                 try {
-                    await page.goto(client.config.fs[chosenServer].login, { timeout: 120000 });
+                    await page.goto(interaction.client.config.fs[chosenServer].login, { timeout: 120000 });
                 } catch (err: any) {
                     return interaction.editReply(err.message);
                 }
@@ -70,7 +69,7 @@ async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cac
                 setTimeout(async () => {
                     await browser.close();
                     interaction.editReply(result += `Total time taken: **${Date.now() - time}ms**`);
-                    client.getChan('fsLogs').send({ embeds: [new client.embed().setTitle(`${chosenServer} now restarting`).setColor(client.config.embedColorYellow).setTimestamp()] });
+                    interaction.client.getChan('fsLogs').send({ embeds: [new EmbedBuilder().setTitle(`${chosenServer} now restarting`).setColor(interaction.client.config.embedColorYellow).setTimestamp()] });
                 }, 2000);
             },
             mop: async () => {
@@ -79,9 +78,9 @@ async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cac
                 const chosenServer = interaction.options.getString('server', true) as PublicAcroList;
                 const chosenAction = interaction.options.getString('action', true) as 'items.xml' | 'players.xml';
                 const time = Date.now();
-                const FTPLogin = client.config.fs[chosenServer].ftp;
+                const FTPLogin = interaction.client.config.fs[chosenServer].ftp;
                 
-                if (client.fsCache[chosenServer].status === 'online') return interaction.reply(`You cannot mop files from **${chosenServer.toUpperCase()}** while it is online`);
+                if (interaction.client.fsCache[chosenServer].status === 'online') return interaction.reply(`You cannot mop files from **${chosenServer.toUpperCase()}** while it is online`);
                 
                 await interaction.deferReply();
     
@@ -98,7 +97,7 @@ async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cac
                 await interaction.deferReply();
     
                 if (chosenAction === 'dl') {
-                    FTP.on('ready', () => FTP.get(client.config.fs[chosenServer].ftp.path + 'blockedUserIds.xml', (err, stream) => {
+                    FTP.on('ready', () => FTP.get(interaction.client.config.fs[chosenServer].ftp.path + 'blockedUserIds.xml', (err, stream) => {
                         if (err) return interaction.editReply(err.message);
 
                         stream.pipe(fs.createWriteStream('../databases/blockedUserIds.xml'));
@@ -106,7 +105,7 @@ async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cac
                             FTP.end();
                             interaction.editReply({ files: ['../databases/blockedUserIds.xml'] })
                         });
-                    })).connect(client.config.fs[chosenServer].ftp);
+                    })).connect(interaction.client.config.fs[chosenServer].ftp);
                 } else {
                     if (!hasRole(interaction, 'mpmanager')) return youNeedRole(interaction, 'mpmanager');
                     
@@ -125,13 +124,13 @@ async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cac
     
                     if (!data.blockedUserIds?.user[0]?._attributes?.displayName) return interaction.editReply('Canceled: Improper file (data format)');
     
-                    FTP.on('ready', () => FTP.put(banData, client.config.fs[chosenServer].ftp.path + 'blockedUserIds.xml', error => {
+                    FTP.on('ready', () => FTP.put(banData, interaction.client.config.fs[chosenServer].ftp.path + 'blockedUserIds.xml', error => {
                         if (error) {
                             interaction.editReply(error.message);
                         } else interaction.editReply(`Successfully uploaded ban file for ${chosenServer.toUpperCase()}`);
                         
                         FTP.end();
-                    })).connect(client.config.fs[chosenServer].ftp);
+                    })).connect(interaction.client.config.fs[chosenServer].ftp);
                 }
             },
             search: async () => {
@@ -147,12 +146,12 @@ async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cac
                     } else if (key === 'timeLastConnected') {
                         const utcDate = new Date(perm);
 
-                        utcDate.setMinutes(utcDate.getMinutes() + client.config.fs[chosenServer].utcDiff);
+                        utcDate.setMinutes(utcDate.getMinutes() + interaction.client.config.fs[chosenServer].utcDiff);
                         return utcDate.toUTCString();
                     } else return perm;
                 }
 
-                FTP.on('ready', () => FTP.get(client.config.fs[chosenServer].ftp.path + 'savegame1/farms.xml', async (err, stream) => {
+                FTP.on('ready', () => FTP.get(interaction.client.config.fs[chosenServer].ftp.path + 'savegame1/farms.xml', async (err, stream) => {
                     if (err) return interaction.editReply(err.message);
 
                     const farmData = xml2js(await new Response(stream as any).text(), { compact: true }) as farmFormat;
@@ -167,14 +166,14 @@ async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cac
                         interaction.editReply('```\n' + Object.entries(playerData._attributes).map(x => x[0].padEnd(18, ' ') + permIcon(x[1], x[0])).join('\n') + '```');
                     } else interaction.editReply('No green farm data found with that name/UUID');
                     stream.once('close', () => FTP.end());
-                })).connect(client.config.fs[chosenServer].ftp);
+                })).connect(interaction.client.config.fs[chosenServer].ftp);
             },
             farms: async () => {
                 const chosenServer = interaction.options.getString('server', true) as PublicAcroList;
 
                 await interaction.deferReply();
 
-                FTP.on('ready', () => FTP.get(client.config.fs[chosenServer].ftp.path + 'savegame1/farms.xml', (err, stream) => {
+                FTP.on('ready', () => FTP.get(interaction.client.config.fs[chosenServer].ftp.path + 'savegame1/farms.xml', (err, stream) => {
                     if (err) return interaction.editReply(err.message);
 
                     stream.pipe(fs.createWriteStream('../databases/farms.xml'));
@@ -182,13 +181,13 @@ async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cac
                         FTP.end();
                         interaction.editReply({ files: ['../databases/farms.xml'] });
                     });
-                })).connect(client.config.fs[chosenServer].ftp);
+                })).connect(interaction.client.config.fs[chosenServer].ftp);
             },
             password: async () => {
                 await interaction.deferReply();
                 const chosenServer = interaction.options.getString('server', true) as PublicAcroList;
 
-                FTP.once('ready', () => FTP.get(client.config.fs[chosenServer].ftp.path + 'dedicated_server/dedicatedServerConfig.xml', async (err, stream) => {
+                FTP.once('ready', () => FTP.get(interaction.client.config.fs[chosenServer].ftp.path + 'dedicated_server/dedicatedServerConfig.xml', async (err, stream) => {
                     if (err) return interaction.editReply(err.message);
 
                     const pw = (xml2js(await new Response(stream as any).text(), { compact: true }) as any).gameserver?.settings?.game_password?._text as string | undefined;
@@ -197,7 +196,7 @@ async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cac
                         interaction.editReply(`Current password for **${chosenServer.toUpperCase()}** is \`${pw}\``);
                     } else interaction.editReply(`**${chosenServer.toUpperCase()}** doesn't currently have a password set`);
                     stream.once('close', () => FTP.end());
-                })).connect(client.config.fs[chosenServer].ftp);
+                })).connect(interaction.client.config.fs[chosenServer].ftp);
             },
             roles: async () => {
                 if (!hasRole(interaction, 'mpmanager')) return youNeedRole(interaction, 'mpmanager');
@@ -205,14 +204,14 @@ async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cac
                 const member = interaction.options.getMember("member") as Discord.GuildMember;
                 const owner = await interaction.guild.fetchOwner();
                 const roleName = interaction.options.getString("role", true) as 'trustedfarmer' | 'mpfarmmanager' | 'mpjradmin' | 'mpsradmin';
-                const Role = client.config.mainServer.roles[roleName];
+                const Role = interaction.client.config.mainServer.roles[roleName];
                 const roles = member.roles.cache.map((x, i) => i);
                 
                 if (member.roles.cache.has(Role)) {
                     (await interaction.reply({
-                        embeds: [new client.embed()
+                        embeds: [new EmbedBuilder()
                             .setDescription(`This user already has the <@&${Role}> role, do you want to remove it from them?`)
-                            .setColor(client.config.embedColor)
+                            .setColor(interaction.client.config.embedColor)
                         ],
                         fetchReply: true,
                         components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -241,21 +240,21 @@ async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cac
                                 }[roleName];
 
                                 member.edit({
-                                    roles: roles.filter(x => x !== Role && x !== client.config.mainServer.roles.mpstaff),
+                                    roles: roles.filter(x => x !== Role && x !== interaction.client.config.mainServer.roles.mpstaff),
                                     nick: (member.nickname as string).replace(slicedNick, '')
                                 });
 
                                 int.update({
-                                    embeds: [new client.embed()
+                                    embeds: [new EmbedBuilder()
                                         .setDescription(`<@${member.user.id}> has been removed from <@&${Role}>.`)
-                                        .setColor(client.config.embedColor)
+                                        .setColor(interaction.client.config.embedColor)
                                     ],
                                     components: []
                                 });
 
                                 owner.send(`**${interaction.user.tag}** has demoted **${member.user.tag}** from **${interaction.guild.roles.cache.get(Role)?.name}**`);
                             },
-                            no: () => int.update({ embeds: [new client.embed().setDescription(`Command canceled`).setColor(client.config.embedColor)], components: [] })
+                            no: () => int.update({ embeds: [new EmbedBuilder().setDescription(`Command canceled`).setColor(interaction.client.config.embedColor)], components: [] })
                         } as any)[int.customId]();
                     });
                 } else {
@@ -266,41 +265,41 @@ async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cac
                             roles.push(Role);
                         },
                         mpfarmmanager: () => {
-                            roles.push(Role, client.config.mainServer.roles.mpstaff);
+                            roles.push(Role, interaction.client.config.mainServer.roles.mpstaff);
                             newNickname = `${member.displayName.slice(0, 12)} | MP Farm Manager`;
                         },
                         mpjradmin: () => {
                             roles.push(Role);
-                            roles.splice(roles.indexOf(client.config.mainServer.roles.mpfarmmanager), 1);
+                            roles.splice(roles.indexOf(interaction.client.config.mainServer.roles.mpfarmmanager), 1);
                             newNickname = (member.nickname as string).replace('MP Farm Manager', 'MP Jr. Admin');
                         },
                         mpsradmin: () => {
                             roles.push(Role);
-                            roles.splice(roles.indexOf(client.config.mainServer.roles.mpjradmin), 1);
+                            roles.splice(roles.indexOf(interaction.client.config.mainServer.roles.mpjradmin), 1);
                             newNickname = (member.nickname as string).replace('MP Jr. Admin', 'MP Sr. Admin');
                         }
                     })[roleName]();
                     
                     member.edit({ roles, nick: newNickname });
                     owner.send(`**${interaction.user.tag}** has promoted **${member.user.tag}** to **${interaction.guild.roles.cache.get(Role)?.name}**`);
-                    interaction.reply({ embeds: [new client.embed().setDescription(`<@${member.user.id}> has been given <@&${Role}>.`).setColor(client.config.embedColor)] });
+                    interaction.reply({ embeds: [new EmbedBuilder().setDescription(`<@${member.user.id}> has been given <@&${Role}>.`).setColor(interaction.client.config.embedColor)] });
                 }
             },
             fm: () => {
-                if (client.FMlist._content.includes(name as string)) {
-                    client.FMlist.remove(name as string);
+                if (interaction.client.FMlist._content.includes(name as string)) {
+                    interaction.client.FMlist.remove(name as string);
                     interaction.reply(`Successfully removed \`${name}\``);
                 } else {
-                    client.FMlist.add(name as string);
+                    interaction.client.FMlist.add(name as string);
                     interaction.reply(`Successfully added \`${name}\``);
                 }
             },
             tf: () => {
-                if (client.TFlist._content.includes(name as string)) {
-                    client.TFlist.remove(name as string);
+                if (interaction.client.TFlist._content.includes(name as string)) {
+                    interaction.client.TFlist.remove(name as string);
                     interaction.reply(`Successfully removed \`${name}\``);
                 } else {
-                    client.TFlist.add(name as string);
+                    interaction.client.TFlist.add(name as string);
                     interaction.reply(`Successfully added \`${name}\``);
                 }
             }

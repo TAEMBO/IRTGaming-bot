@@ -1,11 +1,10 @@
-import Discord, { SlashCommandBuilder } from 'discord.js';
-import YClient from '../client.js';
+import { SlashCommandBuilder } from 'discord.js';
 import fs from 'node:fs';
 import { log } from '../utilities.js';
-import { LogColor } from '../typings.js';
+import { LogColor, TInteraction } from '../typings.js';
 
 export default {
-	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
+	async run(interaction: TInteraction) {
         const hidden: string[][] = JSON.parse(fs.readFileSync('../databases/hidden.json', 'utf8'));
         const command = interaction.options.getString('command', true);
         const hiddenCmd = hidden.find(x => x[0] === command);

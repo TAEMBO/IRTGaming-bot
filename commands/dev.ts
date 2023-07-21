@@ -1,25 +1,25 @@
-import Discord, { SlashCommandBuilder } from 'discord.js';
-import YClient from '../client.js';
+import Discord, { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import util from 'node:util';
 import { exec } from 'child_process';
 import * as utilities from '../utilities.js';
 import fs from 'node:fs';
-import { LogColor } from '../typings.js';
+import { LogColor, TInteraction } from '../typings.js';
 
 export default {
-	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
-		if (!client.config.devWhitelist.includes(interaction.user.id)) return interaction.reply('You\'re not allowed to use dev commands.');
+	async run(interaction: TInteraction) {
+		if (!interaction.client.config.devWhitelist.includes(interaction.user.id)) return interaction.reply('You\'re not allowed to use dev commands.');
         
 		({
 			eval: async () => {
                 utilities;
                 fs;
                 LogColor;
+                const { client } = interaction;
                 const code = interaction.options.getString("code", true);
                 const useAsync = Boolean(interaction.options.getBoolean("async", false));
-                const embed = new client.embed()
+                const embed = new EmbedBuilder()
                     .setTitle('__Eval__')
-                    .setColor(client.config.embedColor)
+                    .setColor(interaction.client.config.embedColor)
                     .addFields({ name: 'Input', value: `\`\`\`js\n${code.slice(0, 1010)}\n\`\`\`` });
                 let output = 'error';
 				
@@ -52,12 +52,14 @@ export default {
                 } else output = '\n' + String(output);
 
                 // Hide credentials
+                const fsObj = Object.values(client.config.fs);
+
                 for (const credential of [client.config.token]
-                    .concat(Object.values(client.config.fs).map(x => x.login))
-                    .concat(Object.values(client.config.fs).map(x => x.dss))
-                    .concat(Object.values(client.config.fs).map(x => x.csg))
-                    .concat(Object.values(client.config.fs).map(x => x.ftp.host))
-                    .concat(Object.values(client.config.fs).map(x => x.ftp.password))
+                    .concat(fsObj.map(x => x.login))
+                    .concat(fsObj.map(x => x.dss))
+                    .concat(fsObj.map(x => x.csg))
+                    .concat(fsObj.map(x => x.ftp.host))
+                    .concat(fsObj.map(x => x.ftp.password))
                 ) output = output.replace(credential, 'CREDENTIAL_LEAK');
 
                 embed.addFields({ name: 'Output', value: `\`\`\`${output.slice(0, 1016)}\n\`\`\`` });
@@ -65,14 +67,14 @@ export default {
                 interaction.reply({ embeds: [embed] }).catch(() => interaction.channel?.send({ embeds: [embed] }));
             },
             statsgraph: () => {
-                client.config.statsGraphSize = -(interaction.options.getInteger('number', true));
-                interaction.reply(`Set to \`${client.config.statsGraphSize}\``);
+                interaction.client.config.statsGraphSize = -(interaction.options.getInteger('number', true));
+                interaction.reply(`Set to \`${interaction.client.config.statsGraphSize}\``);
             },
             restart: async () => {
                 await interaction.reply('Compiling...');
 
                 exec('tsc', (error, stdout) => {
-                    if (error) return interaction.editReply(error.message);
+                    if (error) return console.log(error);
 
                     interaction.editReply('Restarting...').then(() => process.exit(-1));
                 });
@@ -111,16 +113,16 @@ export default {
                 const status = interaction.options.getString('status') as Discord.PresenceStatusData | null;
                 const type = interaction.options.getInteger('type') as Exclude<Discord.ActivityType, Discord.ActivityType.Custom> | null;
                 const name = interaction.options.getString('name');
-                const currentActivities = client.config.botPresence.activities as Discord.ActivitiesOptions[];
+                const currentActivities = interaction.client.config.botPresence.activities as Discord.ActivitiesOptions[];
 
-                if (status) client.config.botPresence.status = status;
+                if (status) interaction.client.config.botPresence.status = status;
                 if (type !== null) currentActivities[0].type = type;
                 if (name) currentActivities[0].name = name;
 
-                client.user?.setPresence(client.config.botPresence);
+                interaction.client.user?.setPresence(interaction.client.config.botPresence);
 
                 interaction.reply([
-                    `Status: **${client.config.botPresence.status}**`,
+                    `Status: **${interaction.client.config.botPresence.status}**`,
                     `Type: **${convertType(currentActivities[0].type)}**`,
                     `Name: **${currentActivities[0].name}**`
                 ].join('\n'));

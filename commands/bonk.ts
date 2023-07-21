@@ -1,16 +1,16 @@
-import Discord, { SlashCommandBuilder } from 'discord.js';
-import YClient from '../client.js';
+import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { TInteraction } from '../typings.js';
 
 export default {
-	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
+	async run(interaction: TInteraction) {
         const member = interaction.options.getMember('member');
         let reason = interaction.options.getString('reason', false);
 
         if (!member) return interaction.reply({ content: 'You cannot bonk someone who\'s not in the server!', ephemeral: true });
         if (reason?.startsWith('for ')) reason = reason.replace('for ', '');
 
-        interaction.reply({embeds: [new client.embed()
-            .setColor(client.config.embedColor)
+        interaction.reply({ embeds: [new EmbedBuilder()
+            .setColor(interaction.client.config.embedColor)
             .setTitle([
                 interaction.user.username,
                 ' bonked ',
@@ -20,7 +20,7 @@ export default {
                 '!'
             ].join(''))
             .setThumbnail('https://cdn.discordapp.com/emojis/764425143304847370.png')
-        ]});
+        ] });
 	},
 	data: new SlashCommandBuilder()
 		.setName("bonk")

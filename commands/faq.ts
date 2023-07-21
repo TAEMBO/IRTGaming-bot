@@ -1,35 +1,36 @@
-import Discord, { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
-import YClient from '../client.js';
+import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import { TInteraction } from '../typings.js';
+
 export default {
-	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
+	async run(interaction: TInteraction) {
         ({
             staff: () => interaction.reply({ components: [
                 new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder().setStyle(ButtonStyle.Link).setURL(`https://discord.com/channels/552565546089054218/852483521859551232/866257346513862687`).setLabel("Apply for MP Staff"))
             ] }),
-            troll: () => interaction.reply({ embeds: [new client.embed()
+            troll: () => interaction.reply({ embeds: [new EmbedBuilder()
                 .setTitle('Reporting trolls')
-                .setColor(client.config.embedColor)
+                .setColor(interaction.client.config.embedColor)
                 .setImage('https://cdn.discordapp.com/attachments/979863373439184966/1123088776185516032/image.png')
                 .setDescription([
-                    `If a player is causing problems on a server, don't hesitate to send a report to <#${client.config.mainServer.channels.mpPublicSilage}> or <#${client.config.mainServer.channels.mpPublicGrain}> with:`,
+                    `If a player is causing problems on a server, don't hesitate to send a report to <#${interaction.client.config.mainServer.channels.mpPublicSilage}> or <#${interaction.client.config.mainServer.channels.mpPublicGrain}> with:`,
                     '',
                     [
                         '- The name of the player',
                         '- What they are doing',
                         '- A picture or video as proof if possible',
-                        `- The <@&${client.config.mainServer.roles.mpstaff}> tag to notify staff`
+                        `- The <@&${interaction.client.config.mainServer.roles.mpstaff}> tag to notify staff`
                     ].join('\n'),
                     '',
-                    `Please do not ping or DM individual staff members, use the <@&${client.config.mainServer.roles.mpstaff}> tag as mentioned above.`,
-                    `Check ⁠<#${client.config.mainServer.channels.mpRulesAndInfo}> to see what a good reason could be for a player report.`
+                    `Please do not ping or DM individual staff members, use the <@&${interaction.client.config.mainServer.roles.mpstaff}> tag as mentioned above.`,
+                    `Check ⁠<#${interaction.client.config.mainServer.channels.mpRulesAndInfo}> to see what a good reason could be for a player report.`
                 ].join('\n'))
             ] }),
             appeal: () => interaction.reply({ components: [
                 new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder().setStyle(ButtonStyle.Link).setURL(`https://discord.com/channels/552565546089054218/825046442300145744/969893324947337246`).setLabel("Appeal an MP ban"))
             ] }),
-            todo: () => interaction.reply({ embeds: [new client.embed()
+            todo: () => interaction.reply({ embeds: [new EmbedBuilder()
                 .setTitle('To-do')
-                .setColor(client.config.embedColor)
+                .setColor(interaction.client.config.embedColor)
                 .setFooter({ text: 'Note that not every task listed might be available to do at the time, so do your due dilligence to see what needs doing' })
                 .setFields(
                     {
@@ -54,8 +55,8 @@ export default {
                     }
                 )
             ] }),
-            filters: () => interaction.reply({ embeds: [new client.embed()
-                .setColor(client.config.embedColor)
+            filters: () => interaction.reply({ embeds: [new EmbedBuilder()
+                .setColor(interaction.client.config.embedColor)
                 .setTitle('Please note that our servers may "ghost" and not show up until you\'ve refreshed your MP menu some times.')
                 .setImage('https://cdn.discordapp.com/attachments/830916009107652630/978795707681079376/unknown.png')
             ] }),

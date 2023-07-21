@@ -1,4 +1,4 @@
-import Discord from 'discord.js';
+import Discord, { EmbedBuilder } from 'discord.js';
 import YClient from '../client.js';
 import { isDCStaff, isMPStaff, log, Profanity } from '../utilities.js';
 import { APIUser, LogColor } from '../typings.js';
@@ -17,7 +17,7 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
         client.getChan('taesTestingZone').send({
             content: `DM Forward <@${client.config.devWhitelist[0]}>`,
             files: message.attachments.map(x => x.url),
-            embeds: [new client.embed()
+            embeds: [new EmbedBuilder()
                 .setTitle('Forwarded DM Message')
                 .setDescription(`<@${message.author.id}>`)
                 .setAuthor({ name: `${message.author.tag} (${message.author.id})`, iconURL: message.author.displayAvatarURL({ extension: 'png' }) })

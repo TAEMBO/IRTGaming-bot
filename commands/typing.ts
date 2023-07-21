@@ -1,8 +1,8 @@
-import Discord, { SlashCommandBuilder, ChannelType } from 'discord.js';
-import YClient from '../client.js';
+import { SlashCommandBuilder, EmbedBuilder, ChannelType } from 'discord.js';
+import { TInteraction } from '../typings.js';
 
 export default {
-	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
+	async run(interaction: TInteraction) {
 		const channel = interaction.options.getChannel('channel') ?? interaction.channel;
 
         if (!channel || channel.type === ChannelType.GuildCategory || channel.type === ChannelType.GuildForum) return interaction.reply({ content: 'Invalid channel', ephemeral: true });

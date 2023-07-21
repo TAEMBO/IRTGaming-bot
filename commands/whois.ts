@@ -1,11 +1,10 @@
 import Discord, { APIEmbedField, ActivityType, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import YClient from '../client.js';
-import { ApplicationRPC } from '../typings.js';
+import { ApplicationRPC, TInteraction } from '../typings.js';
 
 export default {
-	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
+	async run(interaction: TInteraction) {
         async function getApplicationData(id: string) {
-            const applicationData = await client.rest.get(`/applications/${id}/rpc`).catch(() => null) as ApplicationRPC | null;
+            const applicationData = await interaction.client.rest.get(`/applications/${id}/rpc`).catch(() => null) as ApplicationRPC | null;
             const fields: APIEmbedField[] = [];
 
             if (!applicationData) return;
@@ -35,13 +34,13 @@ export default {
         if (!member) {
             const user = interaction.options.getUser('member', true);
             const appData = await getApplicationData(user.id);
-            const embed = new client.embed()
+            const embed = new EmbedBuilder()
                 .setThumbnail(user.displayAvatarURL({ extension: 'png', size: 2048 }))
                 .setTitle(`${user.bot ? 'Bot' : 'User'} info: ${user.tag}`)
                 .setURL(`https://discord.com/users/${user.id}`)
                 .setDescription(`<@${user.id}>\n\`${user.id}\``)
                 .addFields({ name: `🔹 ${user.bot ? 'Bot' : 'Account'} Created`, value: `<t:${Math.round(user.createdTimestamp / 1000)}:R>` })
-                .setColor(client.config.embedColor);
+                .setColor(interaction.client.config.embedColor);
 
             if (appData) embed.addFields(...appData);
 
@@ -56,7 +55,7 @@ export default {
             titleText = 'Bot';
         } else if (member.user.id === interaction.guild.ownerId) titleText = ':crown: Server Owner';
         
-        embeds.push(new client.embed()
+        embeds.push(new EmbedBuilder()
             .setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048 }))
             .setTitle(`${titleText} info: ${member.user.tag}`)
             .setURL(`https://discord.com/users/${member.user.id}`)
@@ -93,14 +92,14 @@ export default {
 
         for (const activity of member.presence.activities) {
             if (activity.type === ActivityType.Listening && activity.details && activity.assets) {
-                embeds.push(new client.embed()
+                embeds.push(new EmbedBuilder()
                     .setAuthor({ name: activity.name, iconURL: 'https://www.freepnglogos.com/uploads/spotify-logo-png/spotify-icon-marilyn-scott-0.png' })
                     .setColor('#1DB954')
                     .setFields({ name: activity.details, value: `By: ${activity.state}\nOn: ${activity.assets.largeText}\nStarted listening <t:${Math.round(activity.createdTimestamp / 1000)}:R>` })
                     .setThumbnail(`https://i.scdn.co/image/${activity.assets.largeImage?.replace('spotify:', '')}`)
                 );
             } else if (activity.type === ActivityType.Custom) {
-                embeds.push(new client.embed()
+                embeds.push(new EmbedBuilder()
                 .setTitle(activity.name)
                     .setColor('#ffffff')
                     .setDescription([
@@ -134,7 +133,7 @@ export default {
                 if (!activityImage) activityImage = activity.assets?.largeImageURL(); // PlayStation
                 if (!activityImage) activityImage = activity.assets?.smallImageURL(); // Residual images
 
-                embeds.push(new client.embed()
+                embeds.push(new EmbedBuilder()
                     .setTitle(activity.name)
                     .setColor('#ffffff')
                     .setDescription([

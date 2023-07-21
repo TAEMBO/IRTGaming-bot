@@ -1,11 +1,11 @@
-import Discord from 'discord.js';
+import Discord, { EmbedBuilder } from 'discord.js';
 import YClient from '../client.js';
 
 export default async (client: YClient, member: Discord.GuildMember) => {
     if (!client.config.botSwitches.logs || !member.joinedTimestamp) return;
         
     const rankingData = await client.userLevels._content.findById(member.id);
-    const embed = new client.embed()
+    const embed = new EmbedBuilder()
         .setTitle(`Member Left: ${member.user.tag}`)
         .setDescription(`<@${member.user.id}>\n\`${member.user.id}\``)
         .addFields(

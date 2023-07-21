@@ -1,4 +1,4 @@
-import Discord, { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
+import Discord, { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import YClient from "../client.js";
 import { isDCStaff, isMPStaff, Profanity } from '../utilities.js';
 
@@ -20,7 +20,7 @@ export default async (client: YClient, oldMsg: Discord.Message<boolean> | Discor
 
     client.getChan('botLogs').send({
         embeds: [
-            new client.embed()
+            new EmbedBuilder()
                 .setTitle('Message Edited')
                 .setDescription(`<@${oldMsg.author.id}>\n\`${oldMsg.author.id}\``)
                 .addFields(

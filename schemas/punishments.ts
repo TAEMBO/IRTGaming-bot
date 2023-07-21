@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import Discord from 'discord.js';
+import Discord, { EmbedBuilder } from 'discord.js';
 import YClient from '../client.js';
 import ms from 'ms';
 import { formatTime } from '../utilities.js';
@@ -28,7 +28,7 @@ export default class punishments {
     constructor(private client: YClient) { }
 
 	private async makeModlogEntry(punishment: Document) {
-        const embed = new this.client.embed()
+        const embed = new EmbedBuilder()
             .setTitle(`${punishment.type[0].toUpperCase() + punishment.type.slice(1)} | Case #${punishment._id}`)
             .addFields(
             	{ name: '🔹 User', value: `${punishment.member.tag}\n<@${punishment.member._id}>\n\`${punishment.member._id}\``, inline: true },
@@ -74,7 +74,7 @@ export default class punishments {
 		const punData: Document = { type, _id: await this.createId(), member: { tag: User.tag, _id: User.id }, reason, moderator, time: now };
 		const inOrFromBoolean = ['warn', 'mute'].includes(type) ? 'in' : 'from'; // Use 'in' if the punishment doesn't remove the member from the server, eg. mute, warn
 		const auditLogReason = `${reason} | Case #${punData._id}`;
-		const embed = new this.client.embed()
+		const embed = new EmbedBuilder()
 			.setColor(this.client.config.embedColor)
 			.setTitle(`Case #${punData._id}: ${type[0].toUpperCase() + type.slice(1)}`)
 			.setDescription(`${User.tag}\n<@${User.id}>\n(\`${User.id}\`)`)
@@ -207,7 +207,7 @@ export default class punishments {
 			]);
 
 			if (interaction) {
-				return interaction.reply({ embeds: [new this.client.embed()
+				return interaction.reply({ embeds: [new EmbedBuilder()
 					.setColor(this.client.config.embedColor)
 					.setTitle(`Case #${removePunishmentData._id}: ${removePunishmentData.type[0].toUpperCase() + removePunishmentData.type.slice(1)}`)
 					.setDescription(`${User.tag}\n<@${User.id}>\n(\`${User.id}\`)`)

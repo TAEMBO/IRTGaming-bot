@@ -1,7 +1,7 @@
 import Discord, { EmbedBuilder } from 'discord.js';
 import YClient from '../client.js';
 import { isDCStaff, isMPStaff, log, Profanity } from '../utilities.js';
-import { APIUser, LogColor } from '../typings.js';
+import { APIUser } from '../typings.js';
 
 export default async (client: YClient, message: Discord.Message<boolean>) => {
     if ((!client.config.botSwitches.commands && !client.config.devWhitelist.includes(message.author.id)) || message.system || message.author.bot) return;
@@ -37,14 +37,14 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
 
     // useless staff ping mute
     if (message.mentions.roles.some(mentionedRole => mentionedRole.id === client.config.mainServer.roles.mpstaff)) {
-        log(LogColor.Purple, `${message.author.tag} mentioned staff role`);
+        log('Purple', `${message.author.tag} mentioned staff role`);
         
         message.channel.createMessageCollector({
             filter: x => isMPStaff(x.member as Discord.GuildMember) && x.content === 'y',
             max: 1,
             time: 60_000
         }).on('collect', async collected => {
-            log(LogColor.Purple, `Received "y" from ${collected.author.tag}, indicating to mute`);
+            log('Purple', `Received "y" from ${collected.author.tag}, indicating to mute`);
 
             await client.punishments.addPunishment('mute', collected.author.id, 'Automod; Misuse of staff ping', message.author, message.member, { time: '10m' });
             collected.react('✅');

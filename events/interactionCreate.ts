@@ -1,7 +1,7 @@
 import Discord from 'discord.js';
 import YClient from '../client.js';
 import { log } from '../utilities.js';
-import { Command, LogColor } from '../typings.js';
+import { Command } from '../typings.js';
 
 export default async (client: YClient, interaction: Discord.Interaction<Discord.CacheType>) => {
     if (!interaction.inGuild() || !interaction.inCachedGuild()) return;
@@ -12,7 +12,7 @@ export default async (client: YClient, interaction: Discord.Interaction<Discord.
         const subCmd = interaction.options.getSubcommand(false);
         const command = client.commands.get(interaction.commandName) as Command;
 
-        log(LogColor.White, `\x1b[32m${interaction.user.tag}\x1b[37m used \x1b[32m/${interaction.commandName} ${subCmd ?? ''}\x1b[37m in \x1b[32m#${interaction.channel?.name}`);
+        log('White', `\x1b[32m${interaction.user.tag}\x1b[37m used \x1b[32m/${interaction.commandName} ${subCmd ?? ''}\x1b[37m in \x1b[32m#${interaction.channel?.name}`);
         if (!client.config.botSwitches.commands && !client.config.devWhitelist.includes(interaction.user.id)) return interaction.reply('Commands are currently disabled.');
 
         command.commandFile.default.run(interaction);
@@ -40,6 +40,6 @@ export default async (client: YClient, interaction: Discord.Interaction<Discord.
                     interaction.message.edit({ content: interaction.message.content + '\n**Denied verification**', components: [] });
                 }
             } as any)[args[0]]();
-        } else log(LogColor.Purple, `Alternate button pressed at ${interaction.message.url}`);
+        } else log('Purple', `Alternate button pressed at ${interaction.message.url}`);
     }
 }

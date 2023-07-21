@@ -9,7 +9,7 @@ import watchList from './schemas/watchList.js';
 import reminders from './schemas/reminders.js';
 import config from './config.json' assert { type: 'json' };
 import { hasRole, isDCStaff, LocalDatabase, log, RepeatedMessages, youNeedRole } from './utilities.js';
-import { Config, FSCache, YTCache, InviteCache, Command, Registry, LogColor } from './typings.js';
+import { Config, FSCache, YTCache, InviteCache, Command, Registry } from './typings.js';
 
 export default class YClient extends Client<true> {
     public config = config as Config;
@@ -47,7 +47,7 @@ export default class YClient extends Client<true> {
             family: 4,
             keepAlive: true,
             waitQueueTimeoutMS: 50000
-        }).then(() => log(LogColor.Purple, 'Connected to MongoDB'));
+        }).then(() => log('Purple', 'Connected to MongoDB'));
         
         this.login(this.config.token);
         this.setMaxListeners(100);

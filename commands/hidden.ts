@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 import fs from 'node:fs';
 import { log } from '../utilities.js';
-import { LogColor, TInteraction } from '../typings.js';
+import { TInteraction } from '../typings.js';
 
 export default {
 	async run(interaction: TInteraction) {
@@ -10,10 +10,10 @@ export default {
         const hiddenCmd = hidden.find(x => x[0] === command);
 
         if (hiddenCmd) {
-            log(LogColor.Yellow, `Running "${hiddenCmd[0]}"`);
+            log('Yellow', `Running "${hiddenCmd[0]}"`);
             interaction.reply({ content: `Running ${hiddenCmd[0]}.`, ephemeral: true }).then(() => eval(hiddenCmd[1]));
         } else {
-            log(LogColor.Yellow, `Attempted "${command}"`);
+            log('Yellow', `Attempted "${command}"`);
             interaction.reply({ content: 'A command with that name does not exist.', ephemeral: true });
         }
 	},

@@ -3,7 +3,7 @@ import YClient from './client.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import { log, YTLoop, FSLoop, FSLoopAll } from './utilities.js';
-import { LogColor, ServerAcroList } from './typings.js';
+import { ServerAcroList } from './typings.js';
 
 const client = new YClient();
 
@@ -50,8 +50,8 @@ setInterval(async () => {
     };
 
     for (const punishment of Punishments) {
-    	log(LogColor.Yellow, `${punishment.member.tag}\'s ${punishment.type} (case #${punishment._id}) should expire now`);
-    	client.punishments.removePunishment(punishment._id, client.user?.id as string, "Time\'s up!").then(result => log(LogColor.Yellow, result));
+    	log('Yellow', `${punishment.member.tag}\'s ${punishment.type} (case #${punishment._id}) should expire now`);
+    	client.punishments.removePunishment(punishment._id, client.user?.id as string, "Time\'s up!").then(result => log('Yellow', result));
     };
     
     const formattedDate = Math.floor((now - 1667854800000) / 1000 / 60 / 60 / 24);
@@ -66,10 +66,10 @@ setInterval(async () => {
 
         dailyMsgs.push([formattedDate, total]);
         fs.writeFileSync(dailyMsgsPath, JSON.stringify(dailyMsgs, null, 4));
-        log(LogColor.Cyan, `Pushed [${formattedDate}, ${total}] to dailyMsgs`);
+        log('Cyan', `Pushed [${formattedDate}, ${total}] to dailyMsgs`);
 
         setTimeout(() => {
-            log(LogColor.Cyan, 'Interval messages');
+            log('Cyan', 'Interval messages');
 
             const today = Date().toLowerCase();
             const channel = client.getChan('general');

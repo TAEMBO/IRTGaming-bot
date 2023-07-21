@@ -3,7 +3,7 @@ import util from 'node:util';
 import { exec } from 'child_process';
 import * as utilities from '../utilities.js';
 import fs from 'node:fs';
-import { LogColor, TInteraction } from '../typings.js';
+import { TInteraction } from '../typings.js';
 
 export default {
 	async run(interaction: TInteraction) {
@@ -13,7 +13,6 @@ export default {
 			eval: async () => {
                 utilities;
                 fs;
-                LogColor;
                 const { client } = interaction;
                 const code = interaction.options.getString("code", true);
                 const useAsync = Boolean(interaction.options.getBoolean("async", false));

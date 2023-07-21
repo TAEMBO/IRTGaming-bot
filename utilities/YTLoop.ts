@@ -1,6 +1,6 @@
 import YClient from '../client.js';
 import { log } from '../utilities.js';
-import { LogColor, YTCacheFeed } from '../typings.js';
+import { YTCacheFeed } from '../typings.js';
 import { xml2js } from 'xml-js';
 
 /**
@@ -12,7 +12,7 @@ import { xml2js } from 'xml-js';
 export async function YTLoop(client: YClient, YTChannelID: string, YTChannelName: string) {
     const res = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${YTChannelID}`, {
         signal: AbortSignal.timeout(5000)
-    }).catch(() => log(LogColor.Red, `${YTChannelName} YT fail`));
+    }).catch(() => log('Red', `${YTChannelName} YT fail`));
 
     if (!res) return;
 

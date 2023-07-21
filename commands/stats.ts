@@ -4,7 +4,7 @@ import canvas from 'canvas';
 import path from 'node:path';
 import config from '../config.json' assert { type: 'json' };
 import { formatTime, isMPStaff, log } from '../utilities.js';
-import { LogColor, FSLoopDSS, ServerAcroList, TInteraction } from '../typings.js';
+import { FSLoopDSS, ServerAcroList, TInteraction } from '../typings.js';
 
 const cmdBuilderData = new SlashCommandBuilder()
     .setName("stats")
@@ -39,7 +39,7 @@ export default {
         async function FSstats() {
             const FSdss = await fetch(interaction.client.config.fs[subCmd as ServerAcroList].dss, { signal: AbortSignal.timeout(2000), headers: { 'User-Agent': 'IRTBot/Stats' } })
                 .then(res => res.json() as Promise<FSLoopDSS>)
-                .catch(() => log(LogColor.Red, `Stats ${subCmd.toUpperCase()} failed`));
+                .catch(() => log('Red', `Stats ${subCmd.toUpperCase()} failed`));
 
             if (!FSdss) return interaction.reply('Server did not respond');
 
@@ -215,7 +215,7 @@ export default {
                 const FSdss = await fetch(interaction.client.config.fs[serverAcro].dss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': 'IRTBot/StatsAll' } })
                     .then(res => res.json() as Promise<FSLoopDSS>)
                     .catch(() => {
-                        log(LogColor.Red, `Stats all; ${serverAcroUp} failed`);
+                        log('Red', `Stats all; ${serverAcroUp} failed`);
                         failedFooter.push(`Failed to fetch ${serverAcroUp}`);
                     });
                 

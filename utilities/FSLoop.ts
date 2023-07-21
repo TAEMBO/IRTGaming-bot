@@ -4,7 +4,7 @@ import { xml2js } from "xml-js";
 import fs from "node:fs";
 import path from 'node:path';
 import { formatTime, log } from '../utilities.js';
-import { LogColor, FSLoopCSG, FSLoopDSS, FSLoopDSSPlayer, ServerAcroList } from "../typings.js";
+import { FSLoopCSG, FSLoopDSS, FSLoopDSSPlayer, ServerAcroList } from "../typings.js";
 
 type WatchList = { _id: string, reason: string }[];
 
@@ -82,7 +82,7 @@ export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: s
     const statsMsgEdit = () => {
         const channel = client.channels.cache.get(ChannelID) as Discord.TextChannel | undefined;
 
-        if (!channel) return log(LogColor.Red, `FSLoop ${serverAcroUp} invalid msg`);
+        if (!channel) return log('Red', `FSLoop ${serverAcroUp} invalid msg`);
         
         channel.messages.edit(MessageID, { embeds: [statsEmbed] });
     };
@@ -90,17 +90,17 @@ export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: s
 
     const DSS = await fetch(client.config.fs[serverAcro].dss, init) // Fetch dedicated-server-stats.json
         .then(res => res.json() as Promise<FSLoopDSS>)
-        .catch(err => log(LogColor.Red, `${serverAcroUp} DSS ${err.message}`));
+        .catch(err => log('Red', `${serverAcroUp} DSS ${err.message}`));
 
     const CSG = (!DSS ? null : await fetch(client.config.fs[serverAcro].csg, init).then(async res => { // Fetch dedicated-server-savegame.html if DSS was successful
         if (res.status === 204) {
             statsEmbed.setImage('https://http.cat/204');
-            log(LogColor.Red, `${serverAcroUp} CSG empty content`);
+            log('Red', `${serverAcroUp} CSG empty content`);
         } else return (xml2js(await res.text(), { compact: true }) as any).careerSavegame as FSLoopCSG;
-    }).catch(err => log(LogColor.Red, `${serverAcroUp} CSG ${err.message}`)));
+    }).catch(err => log('Red', `${serverAcroUp} CSG ${err.message}`)));
 
     if (!DSS || !DSS.slots || !CSG) { // Blame Red
-        if (DSS && !DSS.slots) log(LogColor.Red, `${serverAcroUp} DSS undefined slots`);
+        if (DSS && !DSS.slots) log('Red', `${serverAcroUp} DSS undefined slots`);
         statsEmbed.setTitle('Host not responding').setColor(client.config.embedColorRed);
         statsMsgEdit();
         return;
@@ -205,5 +205,5 @@ export function FSLoopAll(client: YClient, watchList: WatchList) {
     client.getChan('juniorAdminChat').messages.edit(client.config.mainServer.FSLoopMsgId, {
         content: `\`\`\`js\n['${client.whitelist._content.join("', '")}']\`\`\`Updates every 30 seconds`,
         embeds: [embed.setTitle(totalCount.reduce((a, b) => a + b, 0) + ' online')]
-    }).catch(() => log(LogColor.Red, 'FSLoopAll invalid msg'));
+    }).catch(() => log('Red', 'FSLoopAll invalid msg'));
 }

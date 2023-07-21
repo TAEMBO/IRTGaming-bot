@@ -5,7 +5,7 @@ import FTPClient from 'ftp';
 import xjs from 'xml-js';
 import config from '../config.json' assert { type: 'json' };
 import { log } from '../utilities.js';
-import { LogColor, farmFormat, ServerAcroList } from '../typings.js';
+import { farmFormat, ServerAcroList } from '../typings.js';
 
 /** The object that each server will have */
 const serverObj = {
@@ -77,7 +77,7 @@ export default class playerTimes {
 		const allData = await this._content.find();
 
 		FTP.once('ready', () => FTP.get(this.client.config.fs[serverAcro].ftp.path + 'savegame1/farms.xml', async (err, stream) => {
-			log(LogColor.Yellow, `Downloaded farms.xml from ${serverAcro}, crunching...`);
+			log('Yellow', `Downloaded farms.xml from ${serverAcro}, crunching...`);
 			if (err) throw err;
             
 			const farmData = xjs.xml2js(await new Response(stream as any).text(), { compact: true }) as farmFormat;
@@ -114,7 +114,7 @@ export default class playerTimes {
 				}
 			}
             this.client.getChan('fsLogs').send(`⚠️ Name change detector ran. Iterated over ${iterationCount} changed names`);
-			log(LogColor.Yellow, 'Finished crunching farms.xml data');
+			log('Yellow', 'Finished crunching farms.xml data');
 			stream.once('close', () => FTP.end());
 		})).connect(this.client.config.fs[serverAcro].ftp);
 	}

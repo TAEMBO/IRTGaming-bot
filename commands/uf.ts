@@ -2,12 +2,20 @@ import Discord, { SlashCommandBuilder } from 'discord.js';
 import YClient from '../client.js';
 import FTPClient from 'ftp';
 import fs from 'node:fs';
+import config from '../config.json' assert { type: 'json' };
 import { isMPStaff, youNeedRole } from '../utilities.js';
+import { ServerAcroList } from '../typings.js';
+
+const cmdOptionChoices = Object.entries(config.fs)
+    .filter(x => !x[1].isPrivate)
+    .map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));
+
+type PublicAcroList = Exclude<ServerAcroList, 'mf'>;
 
 export default {
 	async run(client: YClient, interaction: Discord.ChatInputCommandInteraction<"cached">) {
         const whitelist = ['984568108704497694', '200066407415676928'];
-        const chosenServer = interaction.options.getString('server', true) as 'ps' | 'pg';
+        const chosenServer = interaction.options.getString('server', true) as PublicAcroList;
 
         if (!isMPStaff(interaction) && !whitelist.includes(interaction.user.id)) return youNeedRole(interaction, 'mpstaff');
 
@@ -37,8 +45,6 @@ export default {
         .addStringOption(x=>x
             .setName('server')
             .setDescription('The server to download bans from')
-            .addChoices(
-                { name: 'Public Silage', value: 'ps' },
-                { name: 'Public Grain', value: 'pg' })
+            .addChoices(...cmdOptionChoices)
             .setRequired(true))
 };

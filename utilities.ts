@@ -1,4 +1,3 @@
-export * from './utilities/errorLog.js';
 export * from './utilities/formatBytes.js';
 export * from './utilities/formatTime.js';
 export * from './utilities/FSLoop.js';
@@ -8,8 +7,7 @@ export * from './utilities/isDCStaff.js';
 export * from './utilities/isMPStaff.js';
 export * from './utilities/localDatabase.js';
 export * from './utilities/log.js';
-export * from './utilities/mainLoop.js';
 export * from './utilities/onMFFarms.js';
-export * from './utilities/repeatedMessage.js';
+export * from './utilities/repeatedMessages.js';
 export * from './utilities/youNeedRole.js';
 export * from './utilities/YTLoop.js';

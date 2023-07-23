@@ -18,25 +18,18 @@ export default {
 
         if (!isMPStaff(interaction) && !whitelist.includes(interaction.user.id)) return youNeedRole(interaction, 'mpstaff');
 
-        ({
-            pg: async () => {
-                const FTP = new FTPClient();
-                await interaction.deferReply({ ephemeral: true });
-            
-                FTP.on('ready', () => FTP.get(interaction.client.config.fs[chosenServer].ftp.path + 'blockedUserIds.xml', (err, stream) => {
-                    if (err) return interaction.editReply(err.message);
+        const FTP = new FTPClient();
+        await interaction.deferReply({ ephemeral: true });
+        
+        FTP.on('ready', () => FTP.get(interaction.client.config.fs[chosenServer].ftp.path + 'blockedUserIds.xml', (err, stream) => {
+            if (err) return interaction.editReply(err.message);
     
-                    stream.pipe(fs.createWriteStream('../databases/blockedUserIds.xml'));
-                    stream.once('close', ()=> {
-                        FTP.end();
-                        interaction.editReply({ files: ['../databases/blockedUserIds.xml'] });
-                    });
-                })).connect(interaction.client.config.fs[chosenServer].ftp);
-            },
-            ps: () => {
-                interaction.reply({ files: ['../../../Documents/My Games/FarmingSimulator2022/blockedUserIds.xml'], ephemeral: true });
-            }
-        })[chosenServer]();
+            stream.pipe(fs.createWriteStream('../databases/blockedUserIds.xml'));
+            stream.once('close', ()=> {
+                FTP.end();
+                interaction.editReply({ files: ['../databases/blockedUserIds.xml'] });
+            });
+        })).connect(interaction.client.config.fs[chosenServer].ftp);
 	},
 	data: new SlashCommandBuilder()
 		.setName("uf")

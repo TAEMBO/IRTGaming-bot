@@ -13,6 +13,7 @@ export default {
 			eval: async () => {
                 utilities;
                 fs;
+                const now = Date.now();
                 const { client } = interaction;
                 const code = interaction.options.getString("code", true);
                 const useAsync = Boolean(interaction.options.getBoolean("async", false));
@@ -61,7 +62,7 @@ export default {
                     .concat(fsObj.map(x => x.ftp.password))
                 ) output = output.replace(credential, 'CREDENTIAL_LEAK');
 
-                embed.addFields({ name: 'Output', value: `\`\`\`${output.slice(0, 1016)}\n\`\`\`` });
+                embed.addFields({ name: `Output • ${Date.now() - now}ms`, value: `\`\`\`${output.slice(0, 1016)}\n\`\`\`` });
 
                 interaction.reply({ embeds: [embed] }).catch(() => interaction.channel?.send({ embeds: [embed] }));
             },

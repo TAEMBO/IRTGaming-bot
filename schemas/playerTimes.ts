@@ -101,7 +101,7 @@ export default class playerTimes {
                         iterationCount++;
 						
 						await this._content.create({ _id: player._attributes.lastNickname, uuid: player._attributes.uniqueUserId, servers: playerDatabyUuid.servers })
-							.then(() => playerDatabyUuid.delete()) // New name is unoccupied, delete old name data
+							.then(() => this._content.findByIdAndDelete(playerDatabyUuid._id)) // New name is unoccupied, delete old name data
 							.catch(async () => { // New name is occupied
 								playerDatabyUuid.uuid = undefined; // Remove UUID from old name
 								await playerDatabyUuid.save();

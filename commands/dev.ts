@@ -98,7 +98,6 @@ export default {
                     }
                 });
             },
-            dz: () => interaction.reply('PC has committed iWoke:tm:').then(() => exec('start C:/WakeOnLAN/WakeOnLanC.exe -w -m Desktop')),
             presence: () => {
                 function convertType(type?: number) {
                     return {
@@ -155,9 +154,6 @@ export default {
 				.setName("number")
 				.setDescription("The number of data points to pull")
 				.setRequired(true)))
-		.addSubcommand(x=>x
-			.setName('dz')
-			.setDescription('Wheezing Over Life'))
 		.addSubcommand(x=>x
 			.setName('presence')
 			.setDescription('Update the bot\'s presence')

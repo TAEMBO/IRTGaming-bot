@@ -314,7 +314,7 @@ async run(interaction: TInteraction) {
             .addStringOption(x=>x
                 .setName('server')
                 .setDescription('The server to manage')
-                .addChoices(...cmdOptionChoices, { name: 'Multi Farm', value: 'mf' })
+                .addChoices(...Object.entries(config.fs).map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro })))
                 .setRequired(true))
             .addStringOption(x=>x
                 .setName('action')

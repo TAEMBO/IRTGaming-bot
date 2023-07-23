@@ -69,7 +69,7 @@ async run(interaction: TInteraction) {
                 setTimeout(async () => {
                     await browser.close();
                     interaction.editReply(result += `Total time taken: **${Date.now() - time}ms**`);
-                    interaction.client.getChan('fsLogs').send({ embeds: [new EmbedBuilder().setTitle(`${chosenServer} now restarting`).setColor(interaction.client.config.embedColorYellow).setTimestamp()] });
+                    interaction.client.getChan('fsLogs').send({ embeds: [new EmbedBuilder().setTitle(`${chosenServer.toUpperCase()} now restarting`).setColor(interaction.client.config.embedColorYellow).setTimestamp()] });
                 }, 2000);
             },
             mop: async () => {

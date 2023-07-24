@@ -123,30 +123,34 @@ export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: s
     };
 
     // Data crunching for stats embed
-    const Money = parseInt(CSG.statistics?.money?._text).toLocaleString('en-US') ?? null;
-    const IngameTimeHrs = Math.floor(DSS.server?.dayTime / 3600 / 1000).toString().padStart(2, '0') ?? null;
-    const IngameTimeMins = Math.floor((DSS.server?.dayTime / 60 / 1000) % 60).toString().padStart(2, '0') ?? null;
-    const Timescale = CSG.settings?.timeScale?._text?.slice(0, -5) ?? null;
-    const PlayTimeHrs = (parseInt(CSG.statistics?.playTime?._text) / 60).toFixed(2) ?? null;
-    const PlaytimeFormatted = formatTime((parseInt(CSG.statistics?.playTime?._text) * 60 * 1000), 3, { commas: true, longNames: false }) ?? null;
-    const Seasons = { '1': serverAcro === 'mf' ? 'Yes' : 'Yes 🔴', '2': 'No', '3': 'Paused 🔴' }[CSG.settings?.growthMode?._text] ?? null;
-    const AutosaveInterval = parseInt(CSG.settings?.autoSaveInterval?._text).toFixed(0) ?? null;
-    const SlotUsage = parseInt(CSG.slotSystem?._attributes?.slotUsage).toLocaleString('en-US') ?? null;
+    const money = parseInt(CSG.statistics?.money?._text).toLocaleString('en-US') ?? null;
+    const ingameTimeHrs = Math.floor(DSS.server?.dayTime / 3600 / 1000).toString().padStart(2, '0') ?? null;
+    const ingameTimeMins = Math.floor((DSS.server?.dayTime / 60 / 1000) % 60).toString().padStart(2, '0') ?? null;
+    const timescale = CSG.settings?.timeScale?._text?.slice(0, -5) ?? null;
+    const playTimeHrs = (parseInt(CSG.statistics?.playTime?._text) / 60).toFixed(2) ?? null;
+    const playtimeFormatted = formatTime((parseInt(CSG.statistics?.playTime?._text) * 60 * 1000), 3, { commas: true, longNames: false }) ?? null;
+    const seasons = {
+        '1': client.config.fs[serverAcro].isPrivate ? 'Yes' : 'Yes 🔴',
+        '2': 'No',
+        '3': 'Paused 🔴'
+    }[CSG.settings?.growthMode?._text] ?? null;
+    const autosaveInterval = parseInt(CSG.settings?.autoSaveInterval?._text).toFixed(0) ?? null;
+    const slotUsage = parseInt(CSG.slotSystem?._attributes?.slotUsage).toLocaleString('en-US') ?? null;
 
     // Stats embed
     statsEmbed.setAuthor({ name: `${DSS.slots.used}/${DSS.slots.capacity}` })
         .setColor(client.config.embedColorGreen)
         .setDescription(DSS.slots.used ? playerInfo.join('\n') : '*No players online*')
         .setFields({ name: `**Server Statistics**`, value: [
-            `**Money:** $${Money}`,
-            `**In-game time:** ${IngameTimeHrs}:${IngameTimeMins}`,
-            `**Timescale:** ${Timescale}x`,
-            `**Playtime:** ${PlayTimeHrs}hrs (${PlaytimeFormatted})`,
+            `**Money:** $${money}`,
+            `**In-game time:** ${ingameTimeHrs}:${ingameTimeMins}`,
+            `**Timescale:** ${timescale}x`,
+            `**Playtime:** ${playTimeHrs}hrs (${playtimeFormatted})`,
             `**Map:** ${DSS.server.mapName}`,
-            `**Seasonal growth:** ${Seasons}`,
-            `**Autosave interval:** ${AutosaveInterval} min`,
+            `**Seasonal growth:** ${seasons}`,
+            `**Autosave interval:** ${autosaveInterval} min`,
             `**Game version:** ${DSS.server.version}`,
-            `**Slot usage:** ${SlotUsage}`
+            `**Slot usage:** ${slotUsage}`
         ].join('\n') });
 
     if (DSS.slots.used === DSS.slots.capacity) {

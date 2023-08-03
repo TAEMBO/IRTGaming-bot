@@ -15,7 +15,7 @@ const cmdOptionChoices = Object.entries(config.fs)
 type PublicAcroList = Exclude<ServerAcroList, 'mf'>;
 
 export default {
-async run(interaction: TInteraction) {
+    async run(interaction: TInteraction) {
         if (!isMPStaff(interaction)) return youNeedRole(interaction, 'mpstaff');
 
         const name = interaction.options.getString('name');
@@ -232,17 +232,18 @@ async run(interaction: TInteraction) {
                     }).on('collect', int => {
                         ({
                             yes: () => {
-                                const slicedNick = {
-                                    trustedfarmer: '',
-                                    mpfarmmanager: ' | MP Farm Manager',
-                                    mpjradmin: ' | MP Jr. Admin',
-                                    mpsradmin: ' | MP Sr. Admin'
-                                }[roleName];
+                                if (roleName !== 'trustedfarmer') {
+                                    const slicedNick = {
+                                        mpfarmmanager: 'MP Farm Manager',
+                                        mpjradmin: 'MP Jr. Admin',
+                                        mpsradmin: 'MP Sr. Admin'
+                                    }[roleName];
 
-                                member.edit({
-                                    roles: roles.filter(x => x !== Role && x !== interaction.client.config.mainServer.roles.mpstaff),
-                                    nick: (member.nickname as string).replace(slicedNick, '')
-                                });
+                                    member.edit({
+                                        roles: roles.filter(x => x !== Role && x !== interaction.client.config.mainServer.roles.mpstaff).concat(interaction.client.config.mainServer.roles.formerstaff),
+                                        nick: (member.nickname as string).replace(slicedNick, 'Former Staff')
+                                    });
+                                } else member.roles.remove(Role);
 
                                 int.update({
                                     embeds: [new EmbedBuilder()

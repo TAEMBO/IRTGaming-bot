@@ -74,7 +74,7 @@ export default async (client: YClient) => {
     }, 5_000);
 
     // Farming Simulator stats loop
-    if (client.config.botSwitches.FSLoop) setInterval(async () => {
+    if (client.config.botSwitches.fsLoop) setInterval(async () => {
 	    const watchList = await client.watchList._content.find();
 
 	    for await (const [serverAcro, server] of Object.entries(client.config.fs)) await FSLoop(client, watchList, server.channelId, server.messageId, serverAcro as ServerAcroList);

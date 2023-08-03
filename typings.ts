@@ -89,7 +89,7 @@ export interface Config {
         automod: boolean,
         logs: boolean,
         registerCommands: boolean,
-        FSLoop: boolean,
+        fsLoop: boolean,
         ytLoop: boolean,
         autoResponses: boolean,
         buttonRoles: boolean,
@@ -132,7 +132,7 @@ export interface Config {
     mainServer: {
         /** The ID of the guild that this bot is for */
         id: string;
-        FSLoopMsgId: string;
+        fsLoopMsgId: string;
         TFListMsgId: string;
         MFFarmRoles: Array<keyof Config["mainServer"]["roles"]>;
         MPStaffRoles: Array<keyof Config["mainServer"]["roles"]>;

@@ -10,4 +10,3 @@ export * from './utilities/log.js';
 export * from './utilities/onMFFarms.js';
 export * from './utilities/repeatedMessages.js';
 export * from './utilities/youNeedRole.js';
-export * from './utilities/YTLoop.js';

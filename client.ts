@@ -15,7 +15,7 @@ export default class YClient extends Client<true> {
     public config = config as Config;
     public registry: Registry = [];
     public fsCache: FSCache = {};
-    public YTCache: YTCache = {};
+    public ytCache: YTCache = {};
     public commands = new Discord.Collection<string, Command>();
     public repeatedMessages = new RepeatedMessages(this);
     public invites = new Map<string, InviteCache>();
@@ -55,7 +55,7 @@ export default class YClient extends Client<true> {
         this.TFlist.initLoad();
         this.whitelist.initLoad();
         this.watchListPings.initLoad();
-        for (const ch of this.config.YTCacheChannels) this.YTCache[ch[0]] = null;
+        for (const ch of this.config.ytCacheChannels) this.ytCache[ch[0]] = null;
         for (const serverAcro of Object.keys(this.config.fs)) this.fsCache[serverAcro] = { players: [], status: null, lastAdmin: null };
 
         // Event handler

@@ -2,8 +2,9 @@ import Discord, { EmbedBuilder } from 'discord.js';
 import YClient from '../client.js';
 import fs from 'node:fs';
 import path from 'node:path';
-import { log, FSLoop, FSLoopAll, YTLoop } from '../utilities.js';
-import { ServerAcroList } from '../typings.js';
+import { xml2js } from 'xml-js';
+import { log, FSLoop, FSLoopAll } from '../utilities.js';
+import { ServerAcroList, YTCacheFeed } from '../typings.js';
 
 export default async (client: YClient) => {
     const guild = client.mainGuild();
@@ -81,5 +82,23 @@ export default async (client: YClient) => {
     }, 30_000);
 
     // YouTube upload nofitcations loop
-    if (client.config.botSwitches.YTLoop) setInterval(() => client.config.YTCacheChannels.forEach(ch => YTLoop(client, ch[0], ch[1])), 300_000);
+    if (client.config.botSwitches.ytLoop) setInterval(async () => {
+        for await (const [chanId, chanName] of client.config.ytCacheChannels) {
+            const res = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${chanId}`, {
+                signal: AbortSignal.timeout(5000)
+            }).catch(() => log('Red', `${chanName} YT fail`));
+    
+            if (!res) return;
+    
+            const Data = xml2js(await res.text(), { compact: true }) as YTCacheFeed;
+            const latestVid = Data.feed.entry[0];
+    
+            if (!client.ytCache[chanId]) return client.ytCache[chanId] = latestVid['yt:videoId']._text;
+    
+            if (Data.feed.entry[1]['yt:videoId']._text === client.ytCache[chanId]) {
+                client.ytCache[chanId] = latestVid['yt:videoId']._text;
+                client.getChan('videosAndLiveStreams').send(`**${chanName}** just uploaded a new video!\n${latestVid.link._attributes.href}`);
+            }
+        }
+    }, 300_000);
 }

@@ -90,7 +90,7 @@ export interface Config {
         logs: boolean,
         registerCommands: boolean,
         FSLoop: boolean,
-        YTLoop: boolean,
+        ytLoop: boolean,
         autoResponses: boolean,
         buttonRoles: boolean,
     },
@@ -128,7 +128,7 @@ export interface Config {
     /** A list of channel IDs that automod does not apply to */
     whitelistedCh: Array<string>;
     /** `Array<[ChannelID, ChannelName]>` */
-    YTCacheChannels: Array<Array<string>>,
+    ytCacheChannels: Array<Array<string>>,
     mainServer: {
         /** The ID of the guild that this bot is for */
         id: string;

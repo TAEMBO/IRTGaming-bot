@@ -45,7 +45,6 @@ export default class YClient extends Client<true> {
             serverSelectionTimeoutMS: 5000,
             socketTimeoutMS: 45000,
             family: 4,
-            keepAlive: true,
             waitQueueTimeoutMS: 50000
         }).then(() => log('Purple', 'Connected to MongoDB'));
         
@@ -62,12 +61,16 @@ export default class YClient extends Client<true> {
         // Event handler
         for await (const file of fs.readdirSync(path.resolve('./events'))) {
             const eventFile = await import(`./events/${file}`);
-            this.on(file.replace('.js', ''), async (...args) => eventFile.default(this, ...args));
+
+            file.startsWith('ready')
+                ? this.once(file.replace('.js', ''), async (...args) => eventFile.default(this, ...args))
+                : this.on(file.replace('.js', ''), async (...args) => eventFile.default(this, ...args));
         }
 
         // Command handler
         for await (const file of fs.readdirSync(path.resolve('./commands'))) {
             const commandFile: Command["commandFile"] = await import(`./commands/${file}`);
+
             this.commands.set(commandFile.default.data.name, { commandFile, uses: 0 });
             this.registry.push(commandFile.default.data.toJSON());
         }

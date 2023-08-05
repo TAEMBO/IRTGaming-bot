@@ -5,20 +5,19 @@ import FTPClient from 'ftp';
 import fs from 'node:fs';
 import { xml2js } from 'xml-js';
 import config from '../config.json' assert { type: 'json' };
-import { hasRole, isMPStaff, youNeedRole } from '../utilities.js';
-import type { ServerAcroList, banFormat, farmFormat, TInteraction } from '../typings.js';
+import { FSServers, hasRole, isMPStaff, youNeedRole } from '../utilities.js';
+import type { banFormat, farmFormat, TInteraction } from '../typings.js';
 
 const cmdOptionChoices = Object.entries(config.fs)
     .filter(x => !x[1].isPrivate)
     .map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));
-
-type PublicAcroList = Exclude<ServerAcroList, 'mf'>;
 
 export default {
     async run(interaction: TInteraction) {
         if (!isMPStaff(interaction)) return youNeedRole(interaction, 'mpstaff');
 
         const name = interaction.options.getString('name');
+        const fsServers = new FSServers(interaction.client.config.fs);
         const FTP = new FTPClient();
         
         ({
@@ -27,7 +26,7 @@ export default {
                     if (!hasRole(interaction, role)) await youNeedRole(interaction, role);
                 }
 
-                const chosenServer = interaction.options.getString('server', true) as ServerAcroList;
+                const chosenServer = interaction.options.getString('server', true);
                 const chosenAction = interaction.options.getString('action', true) as 'start' | 'stop' | 'restart';
 
                 if (interaction.client.config.fs[chosenServer].isPrivate && !hasRole(interaction, 'mpmanager')) {
@@ -66,6 +65,7 @@ export default {
     
                 await page.waitForSelector(serverSelector);
                 await page.click(serverSelector);
+
                 setTimeout(async () => {
                     await browser.close();
                     interaction.editReply(result += `Total time taken: **${Date.now() - time}ms**`);
@@ -75,10 +75,10 @@ export default {
             mop: async () => {
                 if (!hasRole(interaction, 'mpmanager')) return youNeedRole(interaction, 'mpmanager');
 
-                const chosenServer = interaction.options.getString('server', true) as PublicAcroList;
+                const chosenServer = interaction.options.getString('server', true);
                 const chosenAction = interaction.options.getString('action', true) as 'items.xml' | 'players.xml';
                 const time = Date.now();
-                const FTPLogin = interaction.client.config.fs[chosenServer].ftp;
+                const FTPLogin = fsServers.getPublicOne(chosenServer).ftp;
                 
                 if (interaction.client.fsCache[chosenServer].status === 'online') return interaction.reply(`You cannot mop files from **${chosenServer.toUpperCase()}** while it is online`);
                 
@@ -91,13 +91,13 @@ export default {
                 })).connect(FTPLogin);
             },
             bans: async () => {
-                const chosenServer = interaction.options.getString('server', true) as PublicAcroList;
+                const chosenServer = interaction.options.getString('server', true);
                 const chosenAction = interaction.options.getString('action', true) as 'dl' | 'ul';
     
                 await interaction.deferReply();
     
                 if (chosenAction === 'dl') {
-                    FTP.on('ready', () => FTP.get(interaction.client.config.fs[chosenServer].ftp.path + 'blockedUserIds.xml', (err, stream) => {
+                    FTP.on('ready', () => FTP.get(fsServers.getPublicOne(chosenServer).ftp.path + 'blockedUserIds.xml', (err, stream) => {
                         if (err) return interaction.editReply(err.message);
 
                         stream.pipe(fs.createWriteStream('../databases/blockedUserIds.xml'));
@@ -105,7 +105,7 @@ export default {
                             FTP.end();
                             interaction.editReply({ files: ['../databases/blockedUserIds.xml'] })
                         });
-                    })).connect(interaction.client.config.fs[chosenServer].ftp);
+                    })).connect(fsServers.getPublicOne(chosenServer).ftp);
                 } else {
                     if (!hasRole(interaction, 'mpmanager')) return youNeedRole(interaction, 'mpmanager');
                     
@@ -124,18 +124,18 @@ export default {
     
                     if (!data.blockedUserIds?.user[0]?._attributes?.displayName) return interaction.editReply('Canceled: Improper file (data format)');
     
-                    FTP.on('ready', () => FTP.put(banData, interaction.client.config.fs[chosenServer].ftp.path + 'blockedUserIds.xml', error => {
+                    FTP.on('ready', () => FTP.put(banData, fsServers.getPublicOne(chosenServer).ftp.path + 'blockedUserIds.xml', error => {
                         if (error) {
                             interaction.editReply(error.message);
                         } else interaction.editReply(`Successfully uploaded ban file for ${chosenServer.toUpperCase()}`);
                         
                         FTP.end();
-                    })).connect(interaction.client.config.fs[chosenServer].ftp);
+                    })).connect(fsServers.getPublicOne(chosenServer).ftp);
                 }
             },
             search: async () => {
                 await interaction.deferReply();
-                const chosenServer = interaction.options.getString('server', true) as PublicAcroList;
+                const chosenServer = interaction.options.getString('server', true);
                 const name = interaction.options.getString('name', true);
 
                 function permIcon(perm: string, key: string) {
@@ -146,12 +146,12 @@ export default {
                     } else if (key === 'timeLastConnected') {
                         const utcDate = new Date(perm);
 
-                        utcDate.setMinutes(utcDate.getMinutes() + interaction.client.config.fs[chosenServer].utcDiff);
+                        utcDate.setMinutes(utcDate.getMinutes() + fsServers.getPublicOne(chosenServer).utcDiff);
                         return utcDate.toUTCString();
                     } else return perm;
                 }
 
-                FTP.on('ready', () => FTP.get(interaction.client.config.fs[chosenServer].ftp.path + 'savegame1/farms.xml', async (err, stream) => {
+                FTP.on('ready', () => FTP.get(fsServers.getPublicOne(chosenServer).ftp.path + 'savegame1/farms.xml', async (err, stream) => {
                     if (err) return interaction.editReply(err.message);
 
                     const farmData = xml2js(await new Response(stream as any).text(), { compact: true }) as farmFormat;
@@ -166,14 +166,14 @@ export default {
                         interaction.editReply('```\n' + Object.entries(playerData._attributes).map(x => x[0].padEnd(18, ' ') + permIcon(x[1], x[0])).join('\n') + '```');
                     } else interaction.editReply('No green farm data found with that name/UUID');
                     stream.once('close', () => FTP.end());
-                })).connect(interaction.client.config.fs[chosenServer].ftp);
+                })).connect(fsServers.getPublicOne(chosenServer).ftp);
             },
             farms: async () => {
-                const chosenServer = interaction.options.getString('server', true) as PublicAcroList;
+                const chosenServer = interaction.options.getString('server', true);
 
                 await interaction.deferReply();
 
-                FTP.on('ready', () => FTP.get(interaction.client.config.fs[chosenServer].ftp.path + 'savegame1/farms.xml', (err, stream) => {
+                FTP.on('ready', () => FTP.get(fsServers.getPublicOne(chosenServer).ftp.path + 'savegame1/farms.xml', (err, stream) => {
                     if (err) return interaction.editReply(err.message);
 
                     stream.pipe(fs.createWriteStream('../databases/farms.xml'));
@@ -181,13 +181,13 @@ export default {
                         FTP.end();
                         interaction.editReply({ files: ['../databases/farms.xml'] });
                     });
-                })).connect(interaction.client.config.fs[chosenServer].ftp);
+                })).connect(fsServers.getPublicOne(chosenServer).ftp);
             },
             password: async () => {
                 await interaction.deferReply();
-                const chosenServer = interaction.options.getString('server', true) as PublicAcroList;
+                const chosenServer = interaction.options.getString('server', true);
 
-                FTP.once('ready', () => FTP.get(interaction.client.config.fs[chosenServer].ftp.path + 'dedicated_server/dedicatedServerConfig.xml', async (err, stream) => {
+                FTP.once('ready', () => FTP.get(fsServers.getPublicOne(chosenServer).ftp.path + 'dedicated_server/dedicatedServerConfig.xml', async (err, stream) => {
                     if (err) return interaction.editReply(err.message);
 
                     const pw = (xml2js(await new Response(stream as any).text(), { compact: true }) as any).gameserver?.settings?.game_password?._text as string | undefined;
@@ -196,7 +196,7 @@ export default {
                         interaction.editReply(`Current password for **${chosenServer.toUpperCase()}** is \`${pw}\``);
                     } else interaction.editReply(`**${chosenServer.toUpperCase()}** doesn't currently have a password set`);
                     stream.once('close', () => FTP.end());
-                })).connect(interaction.client.config.fs[chosenServer].ftp);
+                })).connect(fsServers.getPublicOne(chosenServer).ftp);
             },
             roles: async () => {
                 if (!hasRole(interaction, 'mpmanager')) return youNeedRole(interaction, 'mpmanager');

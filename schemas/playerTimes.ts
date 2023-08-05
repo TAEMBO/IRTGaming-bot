@@ -4,8 +4,8 @@ import mongoose from 'mongoose';
 import FTPClient from 'ftp';
 import xjs from 'xml-js';
 import config from '../config.json' assert { type: 'json' };
-import { log } from '../utilities.js';
-import { farmFormat, ServerAcroList } from '../typings.js';
+import { FSServers, log } from '../utilities.js';
+import { farmFormat } from '../typings.js';
 
 /** The object that each server will have */
 const serverObj = {
@@ -17,10 +17,10 @@ const serverObj = {
 const serverSchema = new mongoose.Schema(serverObj, { _id: false });
 
 /** The base object for all servers */
-const serversObj = {} as Record<ServerAcroList, { type: typeof serverSchema }>;
+const serversObj = {} as Record<string, { type: typeof serverSchema }>;
 
 // Populate the base object with all server schemas by referencing config
-for (const serverAcro of Object.keys(config.fs) as ServerAcroList[]) serversObj[serverAcro] = { type: serverSchema };
+for (const serverAcro of Object.keys(config.fs) as string[]) serversObj[serverAcro] = { type: serverSchema };
 
 const Model = mongoose.model('playerTimes', new mongoose.Schema({
     _id: { type: String, required: true },
@@ -52,7 +52,7 @@ export default class playerTimes {
 	 * @param serverAcro The lowercase acronym for the server to add the time to, a string
 	 * @returns The MongoDB document for the player, a Promise
 	 */
-	async addPlayerTime(playerName: string, playerTime: number, serverAcro: ServerAcroList) {
+	async addPlayerTime(playerName: string, playerTime: number, serverAcro: string) {
 		const now = Math.round(Date.now() / 1000);
 		const playerData = await this._content.findById(playerName);
 
@@ -72,11 +72,12 @@ export default class playerTimes {
 			}
 		});
 	}
-	async fetchFarmData(serverAcro: ServerAcroList) {
+	async fetchFarmData(serverAcro: string) {
 		const FTP = new FTPClient();
 		const allData = await this._content.find();
+        const fsServers = new FSServers(this.client.config.fs);
 
-		FTP.once('ready', () => FTP.get(this.client.config.fs[serverAcro].ftp.path + 'savegame1/farms.xml', async (err, stream) => {
+		FTP.once('ready', () => FTP.get(fsServers.getPublicOne(serverAcro).ftp.path + 'savegame1/farms.xml', async (err, stream) => {
 			log('Yellow', `Downloaded farms.xml from ${serverAcro}, crunching...`);
 			if (err) throw err;
             
@@ -116,6 +117,6 @@ export default class playerTimes {
             this.client.getChan('fsLogs').send(`⚠️ Name change detector ran. Iterated over ${iterationCount} changed names`);
 			log('Yellow', 'Finished crunching farms.xml data');
 			stream.once('close', () => FTP.end());
-		})).connect(this.client.config.fs[serverAcro].ftp);
+		})).connect(fsServers.getPublicOne(serverAcro).ftp);
 	}
 }

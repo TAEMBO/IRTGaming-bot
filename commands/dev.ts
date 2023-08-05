@@ -52,14 +52,16 @@ export default {
                 } else output = '\n' + String(output);
 
                 // Hide credentials
-                const fsObj = Object.values(client.config.fs);
+                const fsServers = new utilities.FSServers(interaction.client.config.fs);
+                const fsPub = fsServers.getPublicAll();
+                const fsObj = fsServers.values();
 
                 for (const credential of [client.config.token]
                     .concat(fsObj.map(x => x.login))
                     .concat(fsObj.map(x => x.dss))
                     .concat(fsObj.map(x => x.csg))
-                    .concat(fsObj.map(x => x.ftp.host))
-                    .concat(fsObj.map(x => x.ftp.password))
+                    .concat(fsPub.map(x => x[1].ftp.host))
+                    .concat(fsPub.map(x => x[1].ftp.password))
                 ) output = output.replace(credential, 'CREDENTIAL_LEAK');
 
                 embed.addFields({ name: `Output • ${Date.now() - now}ms`, value: `\`\`\`${output.slice(0, 1016)}\n\`\`\`` });

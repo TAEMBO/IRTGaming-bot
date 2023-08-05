@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { xml2js } from 'xml-js';
 import { log, FSLoop, FSLoopAll } from '../utilities.js';
-import { ServerAcroList, YTCacheFeed } from '../typings.js';
+import { YTCacheFeed } from '../typings.js';
 
 export default async (client: YClient) => {
     const guild = client.mainGuild();
@@ -77,7 +77,7 @@ export default async (client: YClient) => {
     if (client.config.botSwitches.fsLoop) setInterval(async () => {
 	    const watchList = await client.watchList._content.find();
 
-	    for await (const [serverAcro, server] of Object.entries(client.config.fs)) await FSLoop(client, watchList, server.channelId, server.messageId, serverAcro as ServerAcroList);
+	    for await (const [serverAcro, server] of Object.entries(client.config.fs)) await FSLoop(client, watchList, server.channelId, server.messageId, serverAcro);
 	    FSLoopAll(client, watchList);
     }, 30_000);
 

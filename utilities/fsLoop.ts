@@ -4,7 +4,7 @@ import { xml2js } from "xml-js";
 import fs from "node:fs";
 import path from 'node:path';
 import { formatTime, log } from '../utilities.js';
-import { FSLoopCSG, FSLoopDSS, FSLoopDSSPlayer, ServerAcroList } from "../typings.js";
+import { FSLoopCSG, FSLoopDSS, FSLoopDSSPlayer } from "../typings.js";
 
 type WatchList = { _id: string, reason: string }[];
 
@@ -20,7 +20,7 @@ function decorators(client: YClient, player: FSLoopDSSPlayer, watchList: WatchLi
     return decorators;
 }
 
-export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: string, MessageID: string, serverAcro: ServerAcroList) {
+export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: string, MessageID: string, serverAcro: string) {
     function wlEmbed(playerName: string, joinLog: boolean, wlReason?: string) {
         const embed = new EmbedBuilder()
             .setTitle('WatchList')
@@ -106,20 +106,24 @@ export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: s
     const slotUsage = parseInt(csg.slotSystem?._attributes?.slotUsage).toLocaleString('en-US') ?? null;
 
     // Stats embed
-    statsEmbed.setAuthor({ name: `${dss.slots.used}/${dss.slots.capacity}` })
+    statsEmbed
+        .setAuthor({ name: `${dss.slots.used}/${dss.slots.capacity}` })
         .setColor(client.config.embedColorGreen)
         .setDescription(dss.slots.used ? playerInfo.join('\n') : '*No players online*')
-        .setFields({ name: `**Server Statistics**`, value: [
-            `**Money:** $${money}`,
-            `**In-game time:** ${ingameTimeHrs}:${ingameTimeMins}`,
-            `**Timescale:** ${timescale}x`,
-            `**Playtime:** ${playTimeHrs}hrs (${playtimeFormatted})`,
-            `**Map:** ${dss.server.mapName}`,
-            `**Seasonal growth:** ${seasons}`,
-            `**Autosave interval:** ${autosaveInterval} min`,
-            `**Game version:** ${dss.server.version}`,
-            `**Slot usage:** ${slotUsage}`
-        ].join('\n') });
+        .setFields({
+            name: `**Server Statistics**`,
+            value: [
+                `**Money:** $${money}`,
+                `**In-game time:** ${ingameTimeHrs}:${ingameTimeMins}`,
+                `**Timescale:** ${timescale}x`,
+                `**Playtime:** ${playTimeHrs}hrs (${playtimeFormatted})`,
+                `**Map:** ${dss.server.mapName}`,
+                `**Seasonal growth:** ${seasons}`,
+                `**Autosave interval:** ${autosaveInterval} min`,
+                `**Game version:** ${dss.server.version}`,
+                `**Slot usage:** ${slotUsage}`
+            ].join('\n')
+        });
 
     if (dss.slots.used === dss.slots.capacity) {
         statsEmbed.setColor(client.config.embedColorRed);

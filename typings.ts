@@ -30,8 +30,6 @@ export interface APIUser {
     banner_color: string | null;
 };
 
-export type ServerAcroList = keyof typeof config.fs;
-
 export type GuildMemberOrInt = Discord.GuildMember | Discord.ChatInputCommandInteraction<"cached">;
 
 export type RepeatedMessagesData = Record<string, {
@@ -72,6 +70,45 @@ export interface TInteraction extends Discord.ChatInputCommandInteraction<"cache
     client: YClient;
 }
 
+/** The base object data that is always present */
+export interface FSServerBase {
+    /** The unabbreviated name of this server */
+    fullName: string;
+    /** The channel ID for this server's stats embed, used in FSLoop */
+    channelId: string;
+    /** The message ID for this server's stats embed, used in FSLoop */
+    messageId: string;
+    /** The dedicated server panel login for this server */
+    login: string;
+    /** The Link XML URL for this server (w/ .json extension) */
+    dss: string;
+    /** The Link Savegame File (careerSavegame) URL */
+    csg: string;
+}
+/** Additional object data if this server is public */
+export interface FSServerPublic {
+    /** Whether or not this server is a private server with a password */
+    isPrivate: false;
+    /** The time zone difference between this server's location and UTC in minutes */
+    utcDiff: number;
+    /** An array of activities that can be done on this server */
+    todo: string[];
+    /** The FTP details for this server */
+    ftp: {
+        host: string;
+        user: string;
+        password: string;
+        /** The path to navigate to the game's profile folder */
+        path: string;
+    };
+}
+/** Additional object data if this server is private */
+export interface FSServerPrivate {
+    /** Whether or not this server is a private server with a password */
+    isPrivate: true;
+}
+export type FSServer = FSServerBase & (FSServerPrivate | FSServerPublic);
+
 /** Template for creating a config.json */
 export interface Config {
     /** The Discord bot client token */
@@ -95,32 +132,7 @@ export interface Config {
         buttonRoles: boolean,
     },
     /** An object for managing and communicating with Farming Simulator servers, keyed by their abbreviated acronym */
-    fs: Record<ServerAcroList, {
-        /** The unabbreviated name of the server */
-        fullName: string;
-        /** Whether or not the server is a public server with no password */
-        isPrivate: boolean;
-        /** The time zone difference between the server's location and UTC in minutes */
-        utcDiff: number;
-        /** The channel ID for the server's stats embed, used in FSLoop */
-        channelId: string;
-        /** The message ID for the server's stats embed, used in FSLoop */
-        messageId: string;
-        /** The dedicated server panel login for the server */
-        login: string;
-        /** The Link XML URL for the server (w/ .json extension) */
-        dss: string;
-        /** The Link Savegame File (careerSavegame) URL */
-        csg: string;
-        /** The FTP details for the server */
-        ftp: {
-            host: string;
-            user: string;
-            password: string;
-            /** The path to navigate to the game's profile folder */
-            path: string;
-        };
-    }>;
+    fs: Record<string, FSServer>;
     /** A list of user IDs that are considered developers of this bot */
     devWhitelist: Array<string>,
     /** A list of channel IDs that messageUpdate and messageDelete logs do not apply to  */

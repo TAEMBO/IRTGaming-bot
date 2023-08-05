@@ -4,7 +4,7 @@ import canvas from 'canvas';
 import path from 'node:path';
 import config from '../config.json' assert { type: 'json' };
 import { formatTime, isMPStaff, log } from '../utilities.js';
-import { FSLoopDSS, ServerAcroList, TInteraction } from '../typings.js';
+import { FSLoopDSS, TInteraction } from '../typings.js';
 
 const cmdBuilderData = new SlashCommandBuilder()
     .setName("stats")
@@ -25,7 +25,7 @@ for (const [serverAcro, { fullName }] of Object.entries(config.fs)) cmdBuilderDa
 
 export default {
 	async run(interaction: TInteraction) {
-        const subCmd = interaction.options.getSubcommand() as ServerAcroList | 'all' | 'playertimes';
+        const subCmd = interaction.options.getSubcommand();
         const blacklistedChannels = [interaction.client.config.mainServer.channels.mpPublicSilage, interaction.client.config.mainServer.channels.mpPublicGrain];
 
         if (blacklistedChannels.includes(interaction.channelId) && !isMPStaff(interaction)) return interaction.reply({
@@ -37,7 +37,7 @@ export default {
         });
 
         async function FSstats() {
-            const FSdss = await fetch(interaction.client.config.fs[subCmd as ServerAcroList].dss, { signal: AbortSignal.timeout(2000), headers: { 'User-Agent': 'IRTBot/Stats' } })
+            const FSdss = await fetch(interaction.client.config.fs[subCmd].dss, { signal: AbortSignal.timeout(2000), headers: { 'User-Agent': 'IRTBot/Stats' } })
                 .then(res => res.json() as Promise<FSLoopDSS>)
                 .catch(() => log('Red', `Stats ${subCmd.toUpperCase()} failed`));
 
@@ -210,7 +210,7 @@ export default {
             const totalCount: number[] = [];
             const watchList = await interaction.client.watchList._content.find();
 
-            async function FSstatsAll(serverAcro: ServerAcroList) {
+            async function FSstatsAll(serverAcro: string) {
                 const serverAcroUp = serverAcro.toUpperCase();
                 const FSdss = await fetch(interaction.client.config.fs[serverAcro].dss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': 'IRTBot/StatsAll' } })
                     .then(res => res.json() as Promise<FSLoopDSS>)
@@ -240,7 +240,7 @@ export default {
                 embed.addFields({ name: `${FSdss.server.name.replace('! ! IRTGaming | ', '')} - ${serverSlots}`, value: playerInfo.join("\n"), inline: true });
             }
 
-            for await (const serverAcro of Object.keys(interaction.client.config.fs)) await FSstatsAll(serverAcro as ServerAcroList);
+            for await (const serverAcro of Object.keys(interaction.client.config.fs)) await FSstatsAll(serverAcro);
 
             embed.setTitle(`All Servers: ${totalCount.reduce((a, b) => a + b, 0)} online`).setFooter(failedFooter.length ? { text: failedFooter.join(', ') } : null);
             interaction.editReply({ embeds: [embed] });

@@ -13,7 +13,7 @@ export default {
                 .setColor(interaction.client.config.embedColor)
                 .setImage('https://cdn.discordapp.com/attachments/979863373439184966/1123088776185516032/image.png')
                 .setDescription([
-                    `If a player is causing problems on a server, don't hesitate to send a report to <#${interaction.client.config.mainServer.channels.mpPublicSilage}> or <#${interaction.client.config.mainServer.channels.mpPublicGrain}> with:`,
+                    `If a player is causing problems on a server, don't hesitate to send a report to ${new FSServers(interaction.client.config.fs).getPublicAll().map(([_, x]) => `<#t${x.channelId}>`).join(' or ')} with:`,
                     '',
                     [
                         '- The name of the player',

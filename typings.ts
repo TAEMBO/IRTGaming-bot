@@ -134,11 +134,13 @@ export interface Config {
     /** An object for managing and communicating with Farming Simulator servers, keyed by their abbreviated acronym */
     fs: Record<string, FSServer>;
     /** A list of user IDs that are considered developers of this bot */
-    devWhitelist: Array<string>,
-    /** A list of channel IDs that messageUpdate and messageDelete logs do not apply to  */
-    blacklistedCh: Array<string>,
-    /** A list of channel IDs that automod does not apply to */
-    whitelistedCh: Array<string>;
+    devWhitelist: Array<string>;
+    whitelist: {
+        /** A list of channel IDs that automod does not apply to */
+        bannedWords: string[];
+        /** A list of channel IDs that logs do not emit for */
+        logs: string[];
+    };
     /** `Array<[ChannelID, ChannelName]>` */
     ytCacheChannels: Array<Array<string>>,
     mainServer: {

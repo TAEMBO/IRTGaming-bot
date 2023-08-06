@@ -52,7 +52,9 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
     }
 
     // RepeatedMessages
-    if (client.config.botSwitches.automod && !isDCStaff(message.member as Discord.GuildMember) && !client.config.whitelistedCh.includes(message.channel.id)) {
+    const isWhitelisted = client.config.whitelist.bannedWords.some(x => [message.channelId, message.channel.parentId].includes(x));
+
+    if (client.config.botSwitches.automod && !isDCStaff(message.member as Discord.GuildMember) && !isWhitelisted) {
         if (profanity.hasProfanity(client.bannedWords._content)) { // Banned words
             automodded = true;
 

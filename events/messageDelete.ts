@@ -1,8 +1,13 @@
-import Discord, { ChannelType, EmbedBuilder } from 'discord.js';
+import Discord, { EmbedBuilder } from 'discord.js';
 import YClient from '../client.js';
 
 export default async (client: YClient, message: Discord.Message<boolean> | Discord.PartialMessage) => {
-    if (!client.config.botSwitches.logs || message.partial || message.author.bot || client.config.blacklistedCh.includes(message.channel.id) || message.channel.type === ChannelType.DM) return;
+    if (
+        !client.config.botSwitches.logs
+        || !message.inGuild()
+        || message.author.bot
+        || client.config.whitelist.logs.some(x => [message.channelId, message.channel.parentId ?? ''].includes(x))
+    ) return;
 
     const embed = new EmbedBuilder()
         .setTitle('Message Deleted')

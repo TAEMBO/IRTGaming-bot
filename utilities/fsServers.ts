@@ -31,6 +31,14 @@ export class FSServers {
     public getPublicAll() {
         return this.entries().filter(x => !x[1].isPrivate) as [string, FSServerBase & FSServerPublic][];
     }
+    
+    /**
+     * 
+     * @returns An array of all public server names
+     */
+    public getPublicNames() {
+        return this.getPublicAll().map(([_, x]) => x.fullName);
+    }
 
     /**
      * @param serverAcro The server to index for
@@ -45,6 +53,14 @@ export class FSServers {
      */
     public getPrivateAll() {
         return this.entries().filter(x => x[1].isPrivate) as [string, FSServerBase & FSServerPrivate][];
+    }
+
+    /**
+     * 
+     * @returns An array of all private server names
+     */
+    public getPrivateNames() {
+        return this.getPrivateAll().map(([_, x]) => x.fullName);
     }
 
     /**

@@ -1,5 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { TInteraction } from '../typings.js';
+import { FSServers } from '../utilities.js';
 
 export default {
 	async run(interaction: TInteraction) {
@@ -25,39 +26,19 @@ export default {
                     `Check ⁠<#${interaction.client.config.mainServer.channels.mpRulesAndInfo}> to see what a good reason could be for a player report.`
                 ].join('\n'))
             ] }),
-            appeal: () => interaction.reply({ components: [
-                new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder().setStyle(ButtonStyle.Link).setURL(`https://discord.com/channels/552565546089054218/825046442300145744/969893324947337246`).setLabel("Appeal an MP ban"))
-            ] }),
+            appeal: () => interaction.reply([
+                "If you would like to appeal your ban on our MP servers",
+                "head to <#825046442300145744> and open an [MP Support](https://discord.com/channels/552565546089054218/825046442300145744/969893324947337246) ticket to privately discuss it with MP Staff."
+            ].join(', ')),
             todo: () => interaction.reply({ embeds: [new EmbedBuilder()
                 .setTitle('To-do')
                 .setColor(interaction.client.config.embedColor)
-                .setFooter({ text: 'Note that not every task listed might be available to do at the time, so do your due dilligence to see what needs doing' })
-                .setFields(
-                    {
-                        name: 'Public Silage',
-                        value: [
-                            '- Harvest corn',
-                            '- Replant fields',
-                            '- Cut grass in any area that has grown grass',
-                            '- Pick up cut grass',
-                            '- Sell silage from bunkers at the sell point located at field 7',
-                            '- Tidy up the yard'
-                        ].join('\n')
-                    },
-                    {
-                        name: 'Public Grain',
-                        value: [
-                            '- Harvest crops on fields',
-                            '- Bale straw to be picked up and sold at sell points such as the yard or Animal Dealer',
-                            '- Sell grain from trailers at sell points such as Straig Lager or Supermarket',
-                            '- Tidy up the yard'
-                        ].join('\n')
-                    }
-                )
+                .setFooter({ text: 'Note that not every task listed might be available to do at the time, so do your due dilligence to see what needs doing in the moment.' })
+                .setFields(...new FSServers(interaction.client.config.fs).getPublicAll().map(([_, x]) => ({ name: x.fullName, value: '- ' + x.todo.join('\n- ') })))
             ] }),
             filters: () => interaction.reply({ embeds: [new EmbedBuilder()
                 .setColor(interaction.client.config.embedColor)
-                .setTitle('Please note that our servers may "ghost" and not show up until you\'ve refreshed your MP menu some times.')
+                .setTitle('Please note that servers may "ghost" and not show up until you\'ve refreshed your MP menu several times.')
                 .setImage('https://cdn.discordapp.com/attachments/830916009107652630/978795707681079376/unknown.png')
             ] }),
             equipment: () => interaction.reply([

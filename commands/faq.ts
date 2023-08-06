@@ -42,11 +42,11 @@ export default {
                 .setImage('https://cdn.discordapp.com/attachments/830916009107652630/978795707681079376/unknown.png')
             ] }),
             equipment: () => interaction.reply([
-                'Buying more equipment on our servers will sometimes have a negative impact',
-                'Every piece of equipment takes up a certain amount of slots',
-                'We need to maintain an acceptable amount of slots in order to keep our server accessible to console players',
-                'More vehicles and implements also contribute to the file sizes of the servers causing more server lag'
-            ].join('. ')),
+                'Purchasing new equipment can cause large impacts, including:',
+                '- Increased slot amounts',
+                '- Increased file sizes, causing larger amounts of lag',
+                'Therefore, we try to refrain from purchasing any new equipment.'
+            ].join('\n')),
             passwords: () => interaction.reply([
                 'We run multiple farms for each of our public servers to aid managing them',
                 'Players who join our servers will only ever need to join the green farm, labeled with our Discord invite link, which should never have a password set on it',

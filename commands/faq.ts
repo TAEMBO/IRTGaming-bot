@@ -4,6 +4,8 @@ import { FSServers } from '../utilities.js';
 
 export default {
 	async run(interaction: TInteraction) {
+        const fsServers = new FSServers(interaction.client.config.fs);
+
         ({
             staff: () => interaction.reply({ components: [
                 new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder().setStyle(ButtonStyle.Link).setURL(`https://discord.com/channels/552565546089054218/852483521859551232/866257346513862687`).setLabel("Apply for MP Staff"))
@@ -13,7 +15,7 @@ export default {
                 .setColor(interaction.client.config.embedColor)
                 .setImage('https://cdn.discordapp.com/attachments/979863373439184966/1123088776185516032/image.png')
                 .setDescription([
-                    `If a player is causing problems on a server, don't hesitate to send a report to ${new FSServers(interaction.client.config.fs).getPublicAll().map(([_, x]) => `<#${x.channelId}>`).join(' or ')} with:`,
+                    `If a player is causing problems on a server, don't hesitate to send a report to ${fsServers.getPublicAll().map(([_, x]) => `<#${x.channelId}>`).join(' or ')} with:`,
                     '',
                     [
                         '- The name of the player',
@@ -34,7 +36,7 @@ export default {
                 .setTitle('To-do')
                 .setColor(interaction.client.config.embedColor)
                 .setFooter({ text: 'Note that not every task listed might be available to do at the time, so do your due dilligence to see what needs doing in the moment.' })
-                .setFields(...new FSServers(interaction.client.config.fs).getPublicAll().map(([_, x]) => ({ name: x.fullName, value: '- ' + x.todo.join('\n- ') })))
+                .setFields(...fsServers.getPublicAll().map(([_, x]) => ({ name: x.fullName, value: '- ' + x.todo.join('\n- ') })))
             ] }),
             filters: () => interaction.reply({ embeds: [new EmbedBuilder()
                 .setColor(interaction.client.config.embedColor)

@@ -34,11 +34,12 @@ export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: s
     function logEmbed(player: FSLoopDSSPlayer, joinLog: boolean) {
         const playTimeHrs = Math.floor(player.uptime / 60);
         const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
-        const embed = new EmbedBuilder().setDescription(`\`${player.name}\`${decorators(client, player, watchList)} ${joinLog ? 'joined': 'left'} **${serverAcroUp}** at <t:${now}:t>`);
-    
-        if (joinLog) {
-            return embed.setColor(client.config.embedColorGreen);
-        } else return embed.setColor(client.config.embedColorRed).setFooter({ text: `Playtime: ${playTimeHrs}:${playTimeMins}` });
+        const embed = new EmbedBuilder()
+            .setDescription(`\`${player.name}\`${decorators(client, player, watchList)} ${joinLog ? 'joined' : 'left'} **${serverAcroUp}** at <t:${now}:t>`)
+            .setColor(joinLog ? client.config.embedColorGreen : client.config.embedColorRed)
+            .setFooter(player.uptime ? { text: `Playtime: ${playTimeHrs}:${playTimeMins}` } : null);
+
+        return embed;
     }
 
     const serverAcroUp = serverAcro.toUpperCase();
@@ -108,6 +109,7 @@ export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: s
     // Stats embed
     statsEmbed
         .setAuthor({ name: `${dss.slots.used}/${dss.slots.capacity}` })
+        .setTitle(dss.server.name ? null : 'Server is offline')
         .setColor(client.config.embedColorGreen)
         .setDescription(dss.slots.used ? playerInfo.join('\n') : '*No players online*')
         .setFields({
@@ -174,7 +176,7 @@ export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: s
     // Filter for players joining
     let playerObj;
 
-    if (!oldPlayers.length && (client.uptime as number) > 33000) {
+    if (!oldPlayers.length && client.uptime > 33_000) {
         playerObj = newPlayers;
     } else if (oldPlayers.length) playerObj = newPlayers.filter(y => !oldPlayers.some(z => z.name === y.name));
     

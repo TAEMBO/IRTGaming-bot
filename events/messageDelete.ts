@@ -4,6 +4,7 @@ import YClient from '../client.js';
 export default async (client: YClient, message: Discord.Message<boolean> | Discord.PartialMessage) => {
     if (
         !client.config.botSwitches.logs
+        || message.partial
         || !message.inGuild()
         || message.author.bot
         || client.config.whitelist.logs.some(x => [message.channelId, message.channel.parentId ?? ''].includes(x))

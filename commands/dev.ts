@@ -17,6 +17,7 @@ export default {
                 const { client } = interaction;
                 const code = interaction.options.getString("code", true);
                 const useAsync = Boolean(interaction.options.getBoolean("async", false));
+                const fsServers = new utilities.FSServers(interaction.client.config.fs);
                 const embed = new EmbedBuilder()
                     .setTitle('__Eval__')
                     .setColor(interaction.client.config.embedColor)
@@ -52,7 +53,6 @@ export default {
                 } else output = '\n' + String(output);
 
                 // Hide credentials
-                const fsServers = new utilities.FSServers(interaction.client.config.fs);
                 const fsPub = fsServers.getPublicAll();
                 const fsObj = fsServers.values();
 

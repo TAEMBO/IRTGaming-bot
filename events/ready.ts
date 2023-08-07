@@ -1,4 +1,3 @@
-import Discord, { EmbedBuilder } from 'discord.js';
 import YClient from '../client.js';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -8,12 +7,22 @@ import { YTCacheFeed } from '../typings.js';
 
 export default async (client: YClient) => {
     const guild = client.mainGuild();
+    const now = Date.now();
+
 
     if (client.config.botSwitches.registerCommands) guild.commands.set(client.registry)
         .then(() => log('Purple', 'Slash commands registered'))
         .catch(e => log('Red', 'Couldn\'t register commands: ', e));
         
     for (const [code, inv] of await guild.invites.fetch()) client.invites.set(code, { uses: inv.uses, creator: inv.inviter?.id });
+
+    for (const reminder of await client.reminders._content.find()) client.reminders.setExec(reminder._id, reminder.time < now ? 0 : reminder.time - now);
+
+    for (const punishment of await client.punishments._content.find()) {
+        if (!punishment.endTime || punishment.expired) continue;
+
+        client.punishments.setExec(punishment._id, punishment.endTime < now ? 0 : punishment.endTime - now);
+    }
 
     await client.getChan('taesTestingZone').send([
         ':warning: Bot restarted :warning:',
@@ -26,27 +35,9 @@ export default async (client: YClient) => {
     // Reminders, dailyMsgs, and punishments loop
     setInterval(async () => {
         const now = Date.now();
-        const Reminders = (await client.reminders._content.find()).filter(x => now > x.time);
-        const Punishments = (await client.punishments._content.find()).filter(x => x.endTime && x.endTime <= now && !x.expired);
-
-        for (const reminder of Reminders) {
-        	const embed = new EmbedBuilder().setTitle('Reminder').setColor(client.config.embedColor).setDescription(`\`\`\`${reminder.content}\`\`\``);
-        
-            client.users.send(reminder.userid, { embeds: [embed] }).catch(() => (client.channels.resolve(reminder.ch) as Discord.GuildTextBasedChannel).send({
-        		content: `Reminder <@${reminder.userid}>`,
-        		embeds: [embed.setFooter({ text: 'Failed to DM' })]
-        	}));
-        	await client.reminders._content.findByIdAndDelete(reminder._id);
-        };
-
-        for (const punishment of Punishments) {
-        	log('Yellow', `${punishment.member.tag}\'s ${punishment.type} (case #${punishment._id}) should expire now`);
-        	client.punishments.removePunishment(punishment._id, client.user?.id as string, "Time\'s up!").then(result => log('Yellow', result));
-        };
-
         const formattedDate = Math.floor((now - 1667854800000) / 1000 / 60 / 60 / 24);
         const dailyMsgsPath = path.resolve('../databases/dailyMsgs.json');
-        const dailyMsgs: number[][] = JSON.parse(fs.readFileSync(dailyMsgsPath, 'utf8'));
+        const dailyMsgs: [number, number][] = JSON.parse(fs.readFileSync(dailyMsgsPath, 'utf8'));
 
         if (!dailyMsgs.some(x => x[0] === formattedDate)) {
             const yesterday = dailyMsgs.find(x => x[0] === formattedDate - 1) ?? [formattedDate - 1, 0];
@@ -71,7 +62,7 @@ export default async (client: YClient) => {
                 } else channel.send('<:IRT_RollSee:908055712368853002>');
             }, 7_200_000); // 2 hour timeout, account for time zone differences
         }
-    }, 5_000);
+    }, 10_000);
 
     // Farming Simulator stats loop
     if (client.config.botSwitches.fsLoop) setInterval(async () => {

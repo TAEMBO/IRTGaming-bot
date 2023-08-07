@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import Discord, { EmbedBuilder } from 'discord.js';
 import YClient from '../client.js';
 import ms from 'ms';
-import { formatTime } from '../utilities.js';
+import { formatTime, log } from '../utilities.js';
 
 const Model = mongoose.model('punishments', new mongoose.Schema({
     _id: { type: Number, required: true },
@@ -20,12 +20,25 @@ const Model = mongoose.model('punishments', new mongoose.Schema({
     duration: { type: Number }
 }, { versionKey: false }));
 
-type Document =  ReturnType<typeof Model.castObject>;
+type Document = ReturnType<typeof Model.castObject>;
 
 export default class punishments {
     public _content = Model;
 
     constructor(private client: YClient) { }
+
+    public setExec(_id: number, timeout: number) {
+        setTimeout(async() => {
+            if (timeout > 2_147_483_647) return this.setExec(_id, timeout - 2_147_483_647);
+            
+            const punishment = await this._content.findById(_id);
+
+            if (!punishment) return;
+
+            log('Yellow', `${punishment.member.tag}\'s ${punishment.type} (case #${punishment._id}) should expire now`);
+        	this.removePunishment(punishment._id, this.client.user.id, "Time\'s up!").then(result => log('Yellow', result));
+        }, timeout > 2_147_483_647 ? 2_147_483_647 : timeout);
+    }
 
 	private async makeModlogEntry(punishment: Document) {
         const embed = new EmbedBuilder()
@@ -45,6 +58,7 @@ export default class punishments {
 		
         if (punishment.cancels) {
             const cancels = await this._content.findById(punishment.cancels);
+
             embed.addFields({ name: '🔹 Overwrites', value: `This case overwrites Case #${cancels?._id} \`${cancels?.reason}\`` });
         }
     
@@ -67,7 +81,17 @@ export default class punishments {
 		}[type];
 	}
 
-	public async addPunishment(type: string, moderator: string, reason: string, User: Discord.User, GuildMember: Discord.GuildMember | null, options: { time?: string, interaction?: Discord.ChatInputCommandInteraction<"cached">}) {
+	public async addPunishment(
+        type: string,
+        moderator: string,
+        reason: string,
+        User: Discord.User,
+        GuildMember: Discord.GuildMember | null,
+        options: {
+            time?: string,
+            interaction?: Discord.ChatInputCommandInteraction<"cached">
+        }
+    ) {
 		const { time, interaction } = options;
 		const now = Date.now();
 		const guild = this.client.mainGuild();
@@ -83,8 +107,12 @@ export default class punishments {
 		let timeInMillis: number | null;
 		let DM;
 
-		if (type === "mute") {
-			timeInMillis = time ? ms(time) : 2419140000; // Timeouts have a limit of 4 weeks
+		if (type === "mute") {       
+            const parsedTime = time ? ms(time) : 2_073_600_000;
+
+            if (parsedTime > 2_073_600_000) return interaction?.editReply('You cannot mute someone for longer than 24 days.');
+
+			timeInMillis = parsedTime;
 		} else timeInMillis = time ? ms(time) : null;
 
 		const durationText = timeInMillis ? ` for ${formatTime(timeInMillis, 4, { longNames: true, commas: true })}` : '';
@@ -147,6 +175,8 @@ export default class punishments {
 				this.makeModlogEntry(punData),
 				this._content.create(punData)
 			]);
+
+            if (punData.endTime) this.setExec(punData._id, punData.endTime - Date.now());
 
 			if (interaction) {
 				return interaction.editReply({ embeds: [embed] });

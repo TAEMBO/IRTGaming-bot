@@ -28,7 +28,7 @@ export default class YClient extends Client<true> {
     public punishments = new punishments(this);
     public watchList = new watchList();
     public playerTimes = new playerTimes(this);
-    public reminders = new reminders();
+    public reminders = new reminders(this);
 
     constructor() {
         super({

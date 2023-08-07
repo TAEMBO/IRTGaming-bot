@@ -36,6 +36,11 @@ export default {
                     ]
                 });
 
+                if (reminderTime < 10_000) return interaction.reply({
+                    ephemeral: true,
+                    content: 'You cannot set a reminder to expire in less than 10 seconds.'
+                });
+
                 const timeToRemind = Date.now() + reminderTime;
                 const currentReminders = await interaction.client.reminders._content.find({ userid: interaction.user.id });
 
@@ -62,8 +67,10 @@ export default {
                     time: 60_000
                 }).on('collect', async int => {
                     ({
-                        yes: () => Promise.all([
-                            interaction.client.reminders._content.create({ userid: interaction.user.id, content: reminderText, time: timeToRemind, ch: interaction.channelId }),
+                        yes: async () => {
+                            const reminder = await interaction.client.reminders._content.create({ userid: interaction.user.id, content: reminderText, time: timeToRemind, ch: interaction.channelId });
+
+                            interaction.client.reminders.setExec(reminder._id, timeToRemind - Date.now());
                             int.update({
                                 components: [],
                                 embeds: [new EmbedBuilder()
@@ -71,8 +78,8 @@ export default {
                                     .setDescription(`\n\`\`\`${reminderText}\`\`\`\n${formatTime(timeToRemind)}`)
                                     .setColor(interaction.client.config.embedColor)
                                 ]
-                            })
-                        ]),
+                            });
+                        },
                         no: () => int.update(rplText('Command manually canceled'))
                     } as any)[int.customId]();
                 }).on('end', ints => {

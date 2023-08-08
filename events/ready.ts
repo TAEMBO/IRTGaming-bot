@@ -3,14 +3,16 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { xml2js } from 'xml-js';
 import { log, FSLoop, FSLoopAll } from '../utilities.js';
-import { YTCacheFeed } from '../typings.js';
+import type { YTCacheFeed } from '../typings.js';
 
 export default async (client: YClient) => {
     const guild = client.mainGuild();
+    const dailyMsgsPath = path.resolve('../databases/dailyMsgs.json');
+    const dailyMsgs: [number, number][] = JSON.parse(fs.readFileSync(dailyMsgsPath, 'utf8'));
     const now = Date.now();
 
 
-    if (client.config.botSwitches.registerCommands) guild.commands.set(client.registry)
+    if (client.config.botSwitches.registerCommands) await guild.commands.set(client.registry)
         .then(() => log('Purple', 'Slash commands registered'))
         .catch(e => log('Red', 'Couldn\'t register commands: ', e));
         
@@ -30,14 +32,11 @@ export default async (client: YClient) => {
         `\`\`\`json\n${JSON.stringify(client.config.botSwitches, null, 1).slice(1, -1)}\`\`\``
     ].join('\n'));
 
-    log('Blue', `Bot active as ${client.user?.tag}`);
+    log('Blue', `Bot active as ${client.user.tag}`);
 
-    // Reminders, dailyMsgs, and punishments loop
+    // DailyMsgs loop
     setInterval(async () => {
-        const now = Date.now();
-        const formattedDate = Math.floor((now - 1667854800000) / 1000 / 60 / 60 / 24);
-        const dailyMsgsPath = path.resolve('../databases/dailyMsgs.json');
-        const dailyMsgs: [number, number][] = JSON.parse(fs.readFileSync(dailyMsgsPath, 'utf8'));
+        const formattedDate = Math.floor((Date.now() - 1667854800000) / 1000 / 60 / 60 / 24);
 
         if (!dailyMsgs.some(x => x[0] === formattedDate)) {
             const yesterday = dailyMsgs.find(x => x[0] === formattedDate - 1) ?? [formattedDate - 1, 0];

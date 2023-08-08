@@ -8,19 +8,18 @@ import { FSLoopCSG, FSLoopDSS, FSLoopDSSPlayer } from "../typings.js";
 
 type WatchList = { _id: string, reason: string }[];
 
-function decorators(client: YClient, player: FSLoopDSSPlayer, watchList: WatchList, publicLoc?: boolean) {
-    const inWl = watchList?.some(x => x._id === player.name);
-    let decorators = player.isAdmin ? ':detective:' : ''; // Tag for if player is admin
-
-    decorators += client.FMlist._content.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
-    decorators += client.TFlist._content.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
-    decorators += (client.whitelist._content.includes(player.name) && !publicLoc) ? ':white_circle:' : ''; // Tag for if player is on whitelist and location is not public
-    decorators += inWl ? ':no_entry:' : ''; // Tag for if player is on watchList
-
-    return decorators;
-}
-
 export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: string, MessageID: string, serverAcro: string) {
+    function decorators(player: FSLoopDSSPlayer, publicLoc?: boolean) {
+        let decorators = player.isAdmin ? ':detective:' : ''; // Tag for if player is admin
+    
+        decorators += client.FMlist._content.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
+        decorators += client.TFlist._content.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
+        decorators += (client.whitelist._content.includes(player.name) && !publicLoc) ? ':white_circle:' : ''; // Tag for if player is on whitelist and location is not public
+        decorators += watchList?.some(x => x._id === player.name) ? ':no_entry:' : ''; // Tag for if player is on watchList
+    
+        return decorators;
+    }
+
     function wlEmbed(playerName: string, joinLog: boolean, wlReason?: string) {
         const embed = new EmbedBuilder()
             .setTitle('WatchList')
@@ -35,7 +34,7 @@ export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: s
         const playTimeHrs = Math.floor(player.uptime / 60);
         const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
         const embed = new EmbedBuilder()
-            .setDescription(`\`${player.name}\`${decorators(client, player, watchList)} ${joinLog ? 'joined' : 'left'} **${serverAcroUp}** at <t:${now}:t>`)
+            .setDescription(`\`${player.name}\`${decorators(player)} ${joinLog ? 'joined' : 'left'} **${serverAcroUp}** at <t:${now}:t>`)
             .setColor(joinLog ? client.config.embedColorGreen : client.config.embedColorRed)
             .setFooter(player.uptime ? { text: `Playtime: ${playTimeHrs}:${playTimeMins}` } : null);
 
@@ -88,7 +87,7 @@ export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: s
         const playTimeHrs = Math.floor(player.uptime / 60);
         const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
 
-        playerInfo.push(`\`${player.name}\` ${decorators(client, player, watchList, true)} **|** ${playTimeHrs}:${playTimeMins}`);
+        playerInfo.push(`\`${player.name}\` ${decorators(player, true)} **|** ${playTimeHrs}:${playTimeMins}`);
     };
 
     // Data crunching for stats embed
@@ -158,7 +157,7 @@ export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: s
             ] }); 
         } else logChannel.send({ embeds: [new EmbedBuilder()
             .setColor(client.config.embedColorYellow)
-            .setDescription(`\`${player.name}\`${decorators(client, player, watchList)} logged into admin on **${serverAcroUp}** at <t:${now}:t>`)
+            .setDescription(`\`${player.name}\`${decorators(player)} logged into admin on **${serverAcroUp}** at <t:${now}:t>`)
         ] });
     }
     
@@ -214,8 +213,18 @@ export function FSLoopAll(client: YClient, watchList: WatchList) {
         for (const player of server.players) {
             const playTimeHrs = Math.floor(player.uptime / 60);
             const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
+            const decorators = (() => {
+                let decorators = player.isAdmin ? ':detective:' : ''; // Tag for if player is admin
+            
+                decorators += client.FMlist._content.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
+                decorators += client.TFlist._content.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
+                decorators += client.whitelist._content.includes(player.name) ? ':white_circle:' : ''; // Tag for if player is on whitelist
+                decorators += watchList.some(x => x._id === player.name) ? ':no_entry:' : ''; // Tag for if player is on watchList
+            
+                return decorators;
+            })();
 
-            playerInfo.push(`\`${player.name}\` ${decorators(client, player, watchList)} **|** ${playTimeHrs}:${playTimeMins}`);
+            playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
         }
         
         if (playerInfo.length) embed.addFields({ name: `${serverAcro.toUpperCase()} - ${serverSlots}/16`, value: playerInfo.join('\n') });

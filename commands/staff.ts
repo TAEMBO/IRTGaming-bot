@@ -1,4 +1,4 @@
-import Discord, { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { TInteraction } from '../typings.js';
 import { hasRole, isMPStaff } from '../utilities.js';
 
@@ -9,14 +9,14 @@ export default {
         ({
             mp: async () => {
                 const staff = {
-                    mp_manager: (await interaction.guild.roles.fetch(allRoles.mpmanager) as Discord.Role).members.map(e=>e.toString()).join("\n") || "None",
-                    mp_sr_admin: (await interaction.guild.roles.fetch(allRoles.mpsradmin) as Discord.Role).members.filter(x=>!hasRole(x, 'mpmanager')).map(e=>e.toString()).join("\n") || "None",
-                    mp_jr_admin: (await interaction.guild.roles.fetch(allRoles.mpjradmin) as Discord.Role).members.map(e=>e.toString()).join("\n") || "None",
-                    mp_farm_manager: (await interaction.guild.roles.fetch(allRoles.mpfarmmanager) as Discord.Role).members.map(e=>e.toString()).join("\n") || "None",
-                    mp_trusted_farmer: (await interaction.guild.roles.fetch(allRoles.trustedfarmer) as Discord.Role).members.filter(x=>!isMPStaff(x)).map(e=>e.toString()).join("\n") || "None"
+                    mp_manager: interaction.guild.roles.cache.get(allRoles.mpmanager)?.members.map(x => x.toString()).join("\n") || "None",
+                    mp_sr_admin: interaction.guild.roles.cache.get(allRoles.mpsradmin)?.members.map(x => x.toString()).join("\n") || "None",
+                    mp_jr_admin: interaction.guild.roles.cache.get(allRoles.mpjradmin)?.members.map(x => x.toString()).join("\n") || "None",
+                    mp_farm_manager: interaction.guild.roles.cache.get(allRoles.mpfarmmanager)?.members.map(x => x.toString()).join("\n") || "None",
+                    mp_trusted_farmer: interaction.guild.roles.cache.get(allRoles.trustedfarmer)?.members.filter(x => !isMPStaff(x)).map(x => x.toString()).join("\n") || "None"
                 };
          
-                interaction.reply({embeds: [new EmbedBuilder()
+                interaction.reply({ embeds: [new EmbedBuilder()
                     .setTitle('__MP Staff Members__')
                     .setColor(interaction.client.config.embedColor)
                     .setDescription([
@@ -31,25 +31,26 @@ export default {
                         `<@&${allRoles.trustedfarmer}>`,
                         `${staff.mp_trusted_farmer}`
                     ].join('\n'))
-                ]});
+                ] });
             },
             fs: () => {
-                interaction.reply({embeds: [new EmbedBuilder()
+                interaction.reply({ embeds: [new EmbedBuilder()
                     .setTitle('__MP Staff Usernames__')
                     .setColor(interaction.client.config.embedColor)
                     .addFields(
                         { name: 'Farm Managers :farmer:', value: `\`${interaction.client.FMlist._content.join("\`\n\`")}\`` },
-                        { name: 'Trusted Farmers :angel:', value: `\`${interaction.client.TFlist._content.join("\`\n\`")}\`` })
-                ]});
+                        { name: 'Trusted Farmers :angel:', value: `\`${interaction.client.TFlist._content.join("\`\n\`")}\`` }
+                    )
+                ] });
             },
             discord: async () => {
                 const staff = {
-                    admin: (await interaction.guild.roles.fetch(allRoles.admin) as Discord.Role).members.map(e=>e.toString()).join("\n") || "None",
-                    moderator: (await interaction.guild.roles.fetch(allRoles.discordmoderator) as Discord.Role).members.filter(x=>!hasRole(x, 'admin')).map(e=>e.toString()).join("\n") || "None",
-                    helper: (await interaction.guild.roles.fetch(allRoles.discordhelper) as Discord.Role).members.map(e=>e.toString()).join("\n") || "None"
+                    admin: interaction.guild.roles.cache.get(allRoles.admin)?.members.map(x => x.toString()).join("\n") || "None",
+                    moderator: interaction.guild.roles.cache.get(allRoles.discordmoderator)?.members.filter(x => !hasRole(x, 'admin')).map(x => x.toString()).join("\n") || "None",
+                    helper: interaction.guild.roles.cache.get(allRoles.discordhelper)?.members.map(x => x.toString()).join("\n") || "None"
                 };
          
-                interaction.reply({embeds: [new EmbedBuilder()
+                interaction.reply({ embeds: [new EmbedBuilder()
                     .setTitle('__Discord Staff Members__')
                     .setColor(interaction.client.config.embedColor)
                     .setDescription([
@@ -60,7 +61,7 @@ export default {
                         `<@&${allRoles.discordhelper}>`,
                         `${staff.helper}`
                     ].join('\n'))
-                ]});
+                ] });
             }
         } as any)[interaction.options.getSubcommand()]();
     },

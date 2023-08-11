@@ -48,7 +48,7 @@ export default {
                 if (interaction.client.fsCache[chosenServer].status === 'online' && chosenAction === 'start') return interaction.editReply('Server is already online');
     
                 try {
-                    await page.goto(interaction.client.config.fs[chosenServer].login, { timeout: 120000 });
+                    await page.goto(interaction.client.config.fs[chosenServer].login, { timeout: 120_000 });
                 } catch (err: any) {
                     return interaction.editReply(err.message);
                 }
@@ -69,7 +69,7 @@ export default {
                 setTimeout(async () => {
                     await browser.close();
                     interaction.editReply(result += `Total time taken: **${Date.now() - time}ms**`);
-                    interaction.client.getChan('fsLogs').send({ embeds: [new EmbedBuilder().setTitle(`${chosenServer.toUpperCase()} now restarting`).setColor(interaction.client.config.embedColorYellow).setTimestamp()] });
+                    if (chosenAction === 'restart') interaction.client.getChan('fsLogs').send({ embeds: [new EmbedBuilder().setTitle(`${chosenServer.toUpperCase()} now restarting`).setColor(interaction.client.config.embedColorYellow).setTimestamp()] });
                 }, 2000);
             },
             mop: async () => {

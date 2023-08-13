@@ -5,6 +5,7 @@ import { FSServers } from '../utilities.js';
 export default {
 	async run(interaction: TInteraction) {
         const fsServers = new FSServers(interaction.client.config.fs);
+        const isFromTicket = interaction.channel?.parentId === interaction.client.config.mainServer.categories.activeTickets;
 
         ({
             staff: () => interaction.reply({ components: [
@@ -15,16 +16,16 @@ export default {
                 .setColor(interaction.client.config.embedColor)
                 .setImage('https://cdn.discordapp.com/attachments/979863373439184966/1123088776185516032/image.png')
                 .setDescription([
-                    `If a player is causing problems on a server, don't hesitate to send a report to ${fsServers.getPublicAll().map(([_, x]) => `<#${x.channelId}>`).join(' or ')} with:`,
+                    `If a player is causing problems on a server, ${isFromTicket ? 'let us know' : `don't hesitate to send a report to ${fsServers.getPublicAll().map(([_, x]) => `<#${x.channelId}>`).join(' or ')}`} with:`,
                     '',
                     [
                         '- The name of the player',
                         '- What they are doing',
                         '- A picture or video as proof if possible',
-                        `- The <@&${interaction.client.config.mainServer.roles.mpstaff}> tag to notify staff`
+                        isFromTicket ? '' : `- The <@&${interaction.client.config.mainServer.roles.mpstaff}> tag to notify staff`
                     ].join('\n'),
                     '',
-                    `Please do not ping or DM individual staff members, use the <@&${interaction.client.config.mainServer.roles.mpstaff}> tag as mentioned above.`,
+                    `Please do not ping or DM individual staff members${isFromTicket ? '' : `, use the <@&${interaction.client.config.mainServer.roles.mpstaff}> tag as mentioned above`}.`,
                     `Check ⁠<#${interaction.client.config.mainServer.channels.mpRulesAndInfo}> to see what a good reason could be for a player report.`
                 ].join('\n'))
             ] }),

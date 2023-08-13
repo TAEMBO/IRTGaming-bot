@@ -153,6 +153,7 @@ export interface Config {
         DCStaffRoles: Array<keyof Config["mainServer"]["roles"]>;
         roles: Record<keyof typeof config.mainServer.roles, string>;
         channels: Record<keyof typeof config.mainServer.channels, string>;
+        categories: Record<keyof typeof config.mainServer.categories, string>;
     }
 }
 

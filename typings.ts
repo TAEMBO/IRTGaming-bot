@@ -147,7 +147,6 @@ export interface Config {
         /** The ID of the guild that this bot is for */
         id: string;
         fsLoopMsgId: string;
-        TFListMsgId: string;
         MFFarmRoles: Array<keyof Config["mainServer"]["roles"]>;
         MPStaffRoles: Array<keyof Config["mainServer"]["roles"]>;
         DCStaffRoles: Array<keyof Config["mainServer"]["roles"]>;

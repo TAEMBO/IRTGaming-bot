@@ -58,19 +58,17 @@ export default {
                 result += `Server: **${chosenServer.toUpperCase()}**\n`;
                 result += `Action: **${chosenAction}**\n`;
 
-                if (chosenAction === 'stop') {
+                if (chosenAction !== 'start') {
                     const uptimeText = await page.evaluate(() => document.querySelector("span.monitorHead")?.textContent);
                     result += `Uptime before stopping: **${uptimeText}**\n`;
                 };
     
                 await page.waitForSelector(serverSelector);
                 await page.click(serverSelector);
+                await browser.close();
 
-                setTimeout(async () => {
-                    await browser.close();
-                    interaction.editReply(result += `Total time taken: **${Date.now() - time}ms**`);
-                    if (chosenAction === 'restart') interaction.client.getChan('fsLogs').send({ embeds: [new EmbedBuilder().setTitle(`${chosenServer.toUpperCase()} now restarting`).setColor(interaction.client.config.embedColorYellow).setTimestamp()] });
-                }, 2000);
+                interaction.editReply(result += `Total time taken: **${Date.now() - time}ms**`);
+                if (chosenAction === 'restart') interaction.client.getChan('fsLogs').send({ embeds: [new EmbedBuilder().setTitle(`${chosenServer.toUpperCase()} now restarting`).setColor(interaction.client.config.embedColorYellow).setTimestamp()] });
             },
             mop: async () => {
                 if (!hasRole(interaction, 'mpmanager')) return youNeedRole(interaction, 'mpmanager');
@@ -267,6 +265,7 @@ export default {
                         },
                         mpfarmmanager: () => {
                             roles.push(Role, interaction.client.config.mainServer.roles.mpstaff);
+                            roles.splice(roles.indexOf(interaction.client.config.mainServer.roles.trustedfarmer), 1);
                             newNickname = `${member.displayName.slice(0, 12)} | MP Farm Manager`;
                         },
                         mpjradmin: () => {

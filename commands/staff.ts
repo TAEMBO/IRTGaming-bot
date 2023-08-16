@@ -1,19 +1,25 @@
-import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { SlashCommandBuilder, EmbedBuilder, GuildMember } from 'discord.js';
 import { TInteraction } from '../typings.js';
-import { hasRole, isMPStaff } from '../utilities.js';
+import { hasRole } from '../utilities.js';
 
 export default {
 	async run(interaction: TInteraction) {
         const allRoles = interaction.client.config.mainServer.roles;
 
+        function sortMembers(a: GuildMember, b: GuildMember) {
+            if (a.displayName.toLowerCase() < b.displayName.toLowerCase()) return -1;
+            if (a.displayName.toLowerCase() > b.displayName.toLowerCase()) return 1;
+            return 0;
+        };
+        
         ({
             mp: async () => {
                 const staff = {
-                    mp_manager: interaction.guild.roles.cache.get(allRoles.mpmanager)?.members.map(x => x.toString()).join("\n") || "None",
-                    mp_sr_admin: interaction.guild.roles.cache.get(allRoles.mpsradmin)?.members.map(x => x.toString()).join("\n") || "None",
-                    mp_jr_admin: interaction.guild.roles.cache.get(allRoles.mpjradmin)?.members.map(x => x.toString()).join("\n") || "None",
-                    mp_farm_manager: interaction.guild.roles.cache.get(allRoles.mpfarmmanager)?.members.map(x => x.toString()).join("\n") || "None",
-                    mp_trusted_farmer: interaction.guild.roles.cache.get(allRoles.trustedfarmer)?.members.filter(x => !isMPStaff(x)).map(x => x.toString()).join("\n") || "None"
+                    mp_manager: interaction.guild.roles.cache.get(allRoles.mpmanager)?.members.sort(sortMembers),
+                    mp_sr_admin: interaction.guild.roles.cache.get(allRoles.mpsradmin)?.members.sort(sortMembers),
+                    mp_jr_admin: interaction.guild.roles.cache.get(allRoles.mpjradmin)?.members.sort(sortMembers),
+                    mp_farm_manager: interaction.guild.roles.cache.get(allRoles.mpfarmmanager)?.members.sort(sortMembers),
+                    mp_trusted_farmer: interaction.guild.roles.cache.get(allRoles.trustedfarmer)?.members.sort(sortMembers)
                 };
          
                 interaction.reply({ embeds: [new EmbedBuilder()
@@ -21,15 +27,15 @@ export default {
                     .setColor(interaction.client.config.embedColor)
                     .setDescription([
                         `<@&${allRoles.mpmanager}>`,
-                        `${staff.mp_manager}\n`,
+                        `${staff.mp_manager?.map(x => x.toString()).join("\n") || "None"}\n`,
                         `<@&${allRoles.mpsradmin}>`,
-                        `${staff.mp_sr_admin}\n`,
+                        `${staff.mp_sr_admin?.map(x => x.toString()).join("\n") || "None"}\n`,
                         `<@&${allRoles.mpjradmin}>`,
-                        `${staff.mp_jr_admin}\n`,
+                        `${staff.mp_jr_admin?.map(x => x.toString()).join("\n") || "None"}\n`,
                         `<@&${allRoles.mpfarmmanager}>`,
-                        `${staff.mp_farm_manager}\n`,
+                        `${staff.mp_farm_manager?.map(x => x.toString()).join("\n") || "None"}\n`,
                         `<@&${allRoles.trustedfarmer}>`,
-                        `${staff.mp_trusted_farmer}`
+                        `${staff.mp_trusted_farmer?.map(x => x.toString()).join("\n") || "None"}`
                     ].join('\n'))
                 ] });
             },
@@ -45,9 +51,9 @@ export default {
             },
             discord: async () => {
                 const staff = {
-                    admin: interaction.guild.roles.cache.get(allRoles.admin)?.members.map(x => x.toString()).join("\n") || "None",
-                    moderator: interaction.guild.roles.cache.get(allRoles.discordmoderator)?.members.filter(x => !hasRole(x, 'admin')).map(x => x.toString()).join("\n") || "None",
-                    helper: interaction.guild.roles.cache.get(allRoles.discordhelper)?.members.map(x => x.toString()).join("\n") || "None"
+                    admin: interaction.guild.roles.cache.get(allRoles.admin)?.members,
+                    moderator: interaction.guild.roles.cache.get(allRoles.discordmoderator)?.members.filter(x => !hasRole(x, 'admin')),
+                    helper: interaction.guild.roles.cache.get(allRoles.discordhelper)?.members
                 };
          
                 interaction.reply({ embeds: [new EmbedBuilder()
@@ -55,11 +61,11 @@ export default {
                     .setColor(interaction.client.config.embedColor)
                     .setDescription([
                         `<@&${allRoles.admin}>`,
-                        `${staff.admin}\n`,
+                        `${staff.admin?.map(x => x.toString()).join("\n") || "None"}\n`,
                         `<@&${allRoles.discordmoderator}>`,
-                        `${staff.moderator}\n`,
+                        `${staff.moderator?.map(x => x.toString()).join("\n") || "None"}\n`,
                         `<@&${allRoles.discordhelper}>`,
-                        `${staff.helper}`
+                        `${staff.helper?.map(x => x.toString()).join("\n") || "None"}`
                     ].join('\n'))
                 ] });
             }

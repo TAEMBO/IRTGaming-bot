@@ -69,9 +69,9 @@ export default class YClient extends Client<true> {
 
         // Command handler
         for await (const file of fs.readdirSync(path.resolve('./commands'))) {
-            const commandFile: Command["commandFile"] = await import(`./commands/${file}`);
+            const commandFile: { default: Omit<Command, 'uses'> }  = await import(`./commands/${file}`);
 
-            this.commands.set(commandFile.default.data.name, { commandFile, uses: 0 });
+            this.commands.set(commandFile.default.data.name, {  uses: 0, ...commandFile.default });
             this.registry.push(commandFile.default.data.toJSON());
         }
     }

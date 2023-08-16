@@ -56,12 +56,8 @@ export interface InviteCache {
 }
 
 export interface Command {
-    commandFile: {
-        default: {
-            run(interaction: Discord.ChatInputCommandInteraction<"cached">): Promise<any>;
-            data: Omit<Discord.SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup"> | Discord.SlashCommandSubcommandsOnlyBuilder;
-        };
-    };
+    run(interaction: Discord.ChatInputCommandInteraction<"cached">): Promise<any>;
+    data: Omit<Discord.SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup"> | Discord.SlashCommandSubcommandsOnlyBuilder;
     uses: number;
 }
 

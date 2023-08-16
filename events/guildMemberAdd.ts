@@ -10,7 +10,7 @@ export default async (client: YClient, member: Discord.GuildMember) => {
     const usedInvite = newInvites.find(inv => client.invites.get(inv.code)?.uses as number < (inv.uses as number));
     const evadingCase = await client.punishments._content.findOne({ 'member._id': member.user.id, type: 'detain', expired: undefined });
 
-    newInvites.forEach(inv => client.invites.set(inv.code, { uses: inv.uses, creator: inv.inviter?.id }));
+    for (const [code, inv] of newInvites) client.invites.set(code, { uses: inv.uses, creator: inv.inviter?.id });
  
     client.getChan('botLogs').send({ embeds: [new EmbedBuilder()
         .setTitle(`Member Joined: ${member.user.tag}`)

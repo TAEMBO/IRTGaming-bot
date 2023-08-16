@@ -175,7 +175,7 @@ export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: s
     // Filter for players joining
     let playerObj;
 
-    if (!oldPlayers.length && client.uptime > 33_000) {
+    if (!oldPlayers.length && client.uptime > 50_000) {
         playerObj = newPlayers;
     } else if (oldPlayers.length) playerObj = newPlayers.filter(y => !oldPlayers.some(z => z.name === y.name));
     

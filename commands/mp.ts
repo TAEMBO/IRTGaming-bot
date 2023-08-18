@@ -67,8 +67,10 @@ export default {
                 await page.click(serverSelector);
                 await browser.close();
 
-                interaction.editReply(result += `Total time taken: **${Date.now() - time}ms**`);
-                if (chosenAction === 'restart') interaction.client.getChan('fsLogs').send({ embeds: [new EmbedBuilder().setTitle(`${chosenServer.toUpperCase()} now restarting`).setColor(interaction.client.config.embedColorYellow).setTimestamp()] });
+                setTimeout(() => {
+                    interaction.editReply(result += `Total time taken: **${Date.now() - time}ms**`);
+                    if (chosenAction === 'restart') interaction.client.getChan('fsLogs').send({ embeds: [new EmbedBuilder().setTitle(`${chosenServer.toUpperCase()} now restarting`).setColor(interaction.client.config.embedColorYellow).setTimestamp()] });
+                }, 1_000);
             },
             mop: async () => {
                 if (!hasRole(interaction, 'mpmanager')) return youNeedRole(interaction, 'mpmanager');
@@ -203,7 +205,7 @@ export default {
                 const owner = await interaction.guild.fetchOwner();
                 const roleName = interaction.options.getString("role", true) as 'trustedfarmer' | 'mpfarmmanager' | 'mpjradmin' | 'mpsradmin';
                 const Role = interaction.client.config.mainServer.roles[roleName];
-                const roles = member.roles.cache.map((x, i) => i);
+                const roles = member.roles.cache.map((_, i) => i);
                 
                 if (member.roles.cache.has(Role)) {
                     (await interaction.reply({

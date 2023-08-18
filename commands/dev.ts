@@ -11,7 +11,6 @@ export default {
         
 		({
 			eval: async () => {
-                utilities;
                 fs;
                 const now = Date.now();
                 const { client } = interaction;
@@ -27,7 +26,12 @@ export default {
                 try {
                     output = await eval(useAsync ? `(async () => { ${code} })()` : code);
                 } catch (err: any) {
-                    embed.setColor('#ff0000').addFields({ name: 'Output', value: `\`\`\`\n${err}\n\`\`\`` });
+                    function colorCode(err: any): string {
+                        const dirname = process.cwd().replaceAll('\\', '/');
+
+                        return err.stack.replaceAll(' at ', ' [31mat[37m ').replaceAll(dirname, `[33m${dirname}[37m`);
+                    }
+                    embed.setColor('#ff0000').addFields({ name: `Output • ${err.message.slice(0, 245)}`, value: `\`\`\`ansi\n${colorCode(err)}\n\`\`\`` });
 
                     await interaction.reply({ embeds: [embed] }).catch(() => interaction.channel?.send({ embeds: [embed] }));
 
@@ -39,7 +43,7 @@ export default {
                         const dirname = process.cwd().replaceAll('\\', '/');
 
                         msg.reply({
-                            content: `\`\`\`ansi\n${err.stack.replaceAll(' at ', ' [31mat[37m ').replaceAll(dirname, `[33m${dirname}[37m`)}\n\`\`\``,
+                            content: `\`\`\`ansi\n${colorCode(err)}\n\`\`\``,
                             allowedMentions: { repliedUser: false }
                         });
                     });
@@ -75,7 +79,7 @@ export default {
             restart: async () => {
                 await interaction.reply('Compiling...');
 
-                exec('tsc', (error, stdout) => {
+                exec('tsc', (error, _) => {
                     if (error) return console.log(error);
 
                     interaction.editReply('Restarting...').then(() => process.exit(-1));
@@ -87,17 +91,15 @@ export default {
                 exec('git pull', async (error, stdout) => {
                     if (error) return interaction.editReply(`Pull failed:\n\`\`\`${error.message}\`\`\``);
 
-                    if (stdout.includes('Already up to date')) {
-                        interaction.editReply(`Pull aborted:\nUp-to-date`);
-                    } else {
-                        await interaction.editReply('Compiling...');
+                    if (stdout.includes('Already up to date')) return interaction.editReply(`Pull aborted:\nUp-to-date`);
 
-                        exec('tsc', (error, stdout) => {
-                            if (error) return interaction.editReply(error.message);
+                    await interaction.editReply('Compiling...');
 
-                            interaction.editReply('Restarting...').then(() => process.exit(-1));
-                        });
-                    }
+                    exec('tsc', (error, _) => {
+                        if (error) return interaction.editReply(error.message);
+
+                        interaction.editReply('Restarting...').then(() => process.exit(-1));
+                    });
                 });
             },
             presence: () => {

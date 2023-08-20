@@ -2,7 +2,7 @@ import YClient from '../client.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import { xml2js } from 'xml-js';
-import { log, FSLoop, FSLoopAll } from '../utilities.js';
+import { log, fsLoop, fsLoopAll } from '../utilities.js';
 import type { YTCacheFeed } from '../typings.js';
 
 export default async (client: YClient) => {
@@ -67,8 +67,8 @@ export default async (client: YClient) => {
     if (client.config.botSwitches.fsLoop) setInterval(async () => {
 	    const watchList = await client.watchList._content.find();
 
-	    for await (const [serverAcro, server] of Object.entries(client.config.fs)) await FSLoop(client, watchList, server.channelId, server.messageId, serverAcro);
-	    FSLoopAll(client, watchList);
+	    for await (const [serverAcro, server] of Object.entries(client.config.fs)) await fsLoop(client, watchList, server.channelId, server.messageId, serverAcro);
+	    fsLoopAll(client, watchList);
     }, 30_000);
 
     // YouTube upload nofitcations loop

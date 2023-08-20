@@ -8,7 +8,7 @@ import { FSLoopCSG, FSLoopDSS, FSLoopDSSPlayer } from "../typings.js";
 
 type WatchList = { _id: string, reason: string }[];
 
-export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: string, MessageID: string, serverAcro: string) {
+export async function fsLoop(client: YClient, watchList: WatchList, ChannelID: string, MessageID: string, serverAcro: string) {
     function decorators(player: FSLoopDSSPlayer, publicLoc?: boolean) {
         let decorators = player.isAdmin ? ':detective:' : ''; // Tag for if player is admin
     
@@ -201,7 +201,7 @@ export async function FSLoop(client: YClient, watchList: WatchList, ChannelID: s
     client.fsCache[serverAcro].players = newPlayers;
 }
 
-export function FSLoopAll(client: YClient, watchList: WatchList) {
+export function fsLoopAll(client: YClient, watchList: WatchList) {
     const embed = new EmbedBuilder().setColor(client.config.embedColor);
     const totalCount: number[] = [];
 

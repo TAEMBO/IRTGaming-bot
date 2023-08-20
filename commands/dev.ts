@@ -26,17 +26,11 @@ export default {
                 try {
                     output = await eval(useAsync ? `(async () => { ${code} })()` : code);
                 } catch (err: any) {
-                    function colorCode(err: any): string {
-                        const dirname = process.cwd().replaceAll('\\', '/');
-
-                        return err.stack.replaceAll(' at ', ' [31mat[37m ').replaceAll(dirname, `[33m${dirname}[37m`);
-                    }
-
                     embed
                         .setColor('#ff0000')
                         .addFields({
                             name: `Output • ${err.message.slice(0, 245)}`,
-                            value: `\`\`\`ansi\n${colorCode(err).slice(0, 1010)}\n\`\`\``
+                            value: `\`\`\`\n${err.slice(0, 1010)}\n\`\`\``
                         });
 
                     await interaction.reply({ embeds: [embed] }).catch(() => interaction.channel?.send({ embeds: [embed] }));
@@ -47,7 +41,7 @@ export default {
                         time: 60_000
                     }).on('collect', msg => {
                         msg.reply({
-                            content: `\`\`\`ansi\n${colorCode(err)}\n\`\`\``,
+                            content: `\`\`\`\n${err}\n\`\`\``,
                             allowedMentions: { repliedUser: false }
                         });
                     });

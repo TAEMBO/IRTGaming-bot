@@ -5,13 +5,18 @@ const client = new YClient();
 
 console.log(client.config.botSwitches);
 console.log(client.config.devWhitelist);
+console.log(Object.keys(client.config.fs));
 
 /** Error handler */
-function errorLog(error: Error, event: string) {
+function errorLog(error: Error) {
     if (['Request aborted', 'getaddrinfo ENOTFOUND discord.com'].includes(error.message)) return;
 
     const dirname = process.cwd().replaceAll('\\', '/');
     const channel = client.getChan('taesTestingZone');
+    const formattedErr = error.stack
+        ?.replaceAll(' at ', ' [31mat[37m ')
+        .replaceAll(dirname, `[33m${dirname}[37m`)
+        .slice(0, 2500);
 
     if (!channel) return console.log(error);
 
@@ -20,14 +25,13 @@ function errorLog(error: Error, event: string) {
         embeds: [new EmbedBuilder()
             .setTitle(`Error Caught - ${error.message.slice(0, 240)}`)
             .setColor("#420420")
-            .setDescription(`\`\`\`ansi\n${error.stack?.replaceAll(' at ', ' [31mat[37m ').replaceAll(dirname, `[33m${dirname}[37m`).slice(0, 2500)}\`\`\``)
+            .setDescription(`\`\`\`ansi\n${formattedErr}\`\`\``)
             .setTimestamp()
-            .setFooter({ text: event })
         ]
     });
 }
 
-process.on('unhandledRejection', (error: Error) => errorLog(error, 'unhandledRejection'));
-process.on('uncaughtException', error => errorLog(error, 'uncaughtException'));
-process.on('error', error => errorLog(error, 'process-error'));
-client.on('error', error => errorLog(error, 'client-error'));
+process.on('unhandledRejection', errorLog);
+process.on('uncaughtException', errorLog);
+process.on('error', errorLog);
+client.on('error', errorLog);

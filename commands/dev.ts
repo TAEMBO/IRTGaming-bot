@@ -31,7 +31,13 @@ export default {
 
                         return err.stack.replaceAll(' at ', ' [31mat[37m ').replaceAll(dirname, `[33m${dirname}[37m`);
                     }
-                    embed.setColor('#ff0000').addFields({ name: `Output • ${err.message.slice(0, 245)}`, value: `\`\`\`ansi\n${colorCode(err)}\n\`\`\`` });
+
+                    embed
+                        .setColor('#ff0000')
+                        .addFields({
+                            name: `Output • ${err.message.slice(0, 245)}`,
+                            value: `\`\`\`ansi\n${colorCode(err).slice(0, 1010)}\n\`\`\``
+                        });
 
                     await interaction.reply({ embeds: [embed] }).catch(() => interaction.channel?.send({ embeds: [embed] }));
 
@@ -40,8 +46,6 @@ export default {
                         max: 1,
                         time: 60_000
                     }).on('collect', msg => {
-                        const dirname = process.cwd().replaceAll('\\', '/');
-
                         msg.reply({
                             content: `\`\`\`ansi\n${colorCode(err)}\n\`\`\``,
                             allowedMentions: { repliedUser: false }
@@ -108,13 +112,14 @@ export default {
                         0: 'Playing',
                         2: 'Listening to',
                         3: 'Watching',
+                        4: 'Custom',
                         5: 'Competing in',
                         default: undefined
                     }[type ?? 'default'];
                 }
 
                 const status = interaction.options.getString('status') as Discord.PresenceStatusData | null;
-                const type = interaction.options.getInteger('type') as Exclude<Discord.ActivityType, Discord.ActivityType.Custom> | null;
+                const type = interaction.options.getInteger('type') as Discord.ActivityType | null;
                 const name = interaction.options.getString('name');
                 const currentActivities = interaction.client.config.botPresence.activities as Discord.ActivitiesOptions[];
 
@@ -133,51 +138,52 @@ export default {
         } as any)[interaction.options.getSubcommand()]();
 	},
 	data: new SlashCommandBuilder()
-		.setName("dev")
-		.setDescription("Run bot-dev-only commands")
-		.addSubcommand(x=>x
-			.setName('eval')
-			.setDescription('Execute code within the bot')
-			.addStringOption(x=>x
-				.setName("code")
-				.setDescription("The code to execute")
-				.setRequired(true))
-			.addBooleanOption(x=>x
-				.setName('async')
-				.setDescription('Whether to wrap the code in an async block or not')))
-		.addSubcommand(x=>x
-			.setName('restart')
-			.setDescription('Restart the bot'))
-		.addSubcommand(x=>x
-			.setName('update')
-			.setDescription('Pull from GitHub repository to live bot'))
-		.addSubcommand(x=>x
-			.setName('statsgraph')
-			.setDescription('Edit the number of data points pulled')
-			.addIntegerOption(x=>x
-				.setName("number")
-				.setDescription("The number of data points to pull")
-				.setRequired(true)))
-		.addSubcommand(x=>x
-			.setName('presence')
-			.setDescription('Update the bot\'s presence')
-			.addIntegerOption(x=>x
-				.setName('type')
-				.setDescription('The activity type to set')
-				.addChoices(
-					{ name: 'Playing', value: Discord.ActivityType.Playing },
-					{ name: 'Listening', value: Discord.ActivityType.Listening },
-					{ name: 'Watching', value: Discord.ActivityType.Watching },
-					{ name: 'Competing', value: Discord.ActivityType.Competing }))
-			.addStringOption(x=>x
-				.setName('name')
-				.setDescription('The activity name to set'))
-			.addStringOption(x=>x
-				.setName('status')
-				.setDescription('The status to set')
-				.addChoices(
-					{ name: 'Online', value: Discord.PresenceUpdateStatus.Online },
-					{ name: 'Idle', value: Discord.PresenceUpdateStatus.Idle },
-					{ name: 'DND', value: Discord.PresenceUpdateStatus.DoNotDisturb },
-					{ name: 'Invisible', value: Discord.PresenceUpdateStatus.Invisible })))
+        .setName("dev")
+        .setDescription("Run bot-dev-only commands")
+        .addSubcommand(x=>x
+            .setName('eval')
+            .setDescription('Execute code within the bot')
+            .addStringOption(x=>x
+                .setName("code")
+                .setDescription("The code to execute")
+                .setRequired(true))
+            .addBooleanOption(x=>x
+                .setName('async')
+                .setDescription('Whether to wrap the code in an async block or not')))
+        .addSubcommand(x=>x
+            .setName('restart')
+            .setDescription('Restart the bot'))
+        .addSubcommand(x=>x
+            .setName('update')
+            .setDescription('Pull from GitHub repository to live bot'))
+        .addSubcommand(x=>x
+            .setName('statsgraph')
+            .setDescription('Edit the number of data points pulled')
+            .addIntegerOption(x=>x
+                .setName("number")
+                .setDescription("The number of data points to pull")
+                .setRequired(true)))
+        .addSubcommand(x=>x
+            .setName('presence')
+            .setDescription('Update the bot\'s presence')
+            .addIntegerOption(x=>x
+                .setName('type')
+                .setDescription('The activity type to set')
+                .addChoices(
+                    { name: 'Playing', value: Discord.ActivityType.Playing },
+                    { name: 'Listening to', value: Discord.ActivityType.Listening },
+                    { name: 'Watching', value: Discord.ActivityType.Watching },
+                    { name: 'Custom', value: Discord.ActivityType.Custom },
+                    { name: 'Competing in', value: Discord.ActivityType.Competing }))
+            .addStringOption(x=>x
+                .setName('name')
+                .setDescription('The activity name to set'))
+            .addStringOption(x=>x
+                .setName('status')
+                .setDescription('The status to set')
+                .addChoices(
+                    { name: 'Online', value: Discord.PresenceUpdateStatus.Online },
+                    { name: 'Idle', value: Discord.PresenceUpdateStatus.Idle },
+                    { name: 'DND', value: Discord.PresenceUpdateStatus.DoNotDisturb },
+                    { name: 'Invisible', value: Discord.PresenceUpdateStatus.Invisible })))
 };

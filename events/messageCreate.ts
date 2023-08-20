@@ -1,7 +1,6 @@
 import Discord, { EmbedBuilder } from 'discord.js';
 import YClient from '../client.js';
 import { isDCStaff, isMPStaff, log, Profanity } from '../utilities.js';
-import { APIUser } from '../typings.js';
 
 export default async (client: YClient, message: Discord.Message<boolean>) => {
     if ((!client.config.botSwitches.commands && !client.config.devWhitelist.includes(message.author.id)) || message.system || message.author.bot) return;
@@ -88,15 +87,8 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
 
 	if (morningMsgs.some(x => msg.includes(x)) && message.channel.id === client.config.mainServer.channels.general) {
         const randomEl = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
-        const User = await client.rest.get(`/users/${message.author.id}`).catch(() => null) as APIUser | null;
-        const person = (() => {
-            if (message.member.displayName === message.author.username) {
-                return User?.display_name ?? message.author.username;
-            } else {
-                const hasStaffTag = message.member.displayName.indexOf(' | ') < 0 ? false : true;
-                return message.member.displayName.slice(0, hasStaffTag ? message.member.displayName.indexOf(' | ') : undefined).replace('[LOA] ', '');
-            }
-        })();
+        const staffTag = message.member.displayName.indexOf(' | ') < 0 ? undefined : message.member.displayName.indexOf(' | ');
+        const person = message.member.displayName.slice(0, staffTag).replace('[LOA] ', '');
         const mornRes1 = [`Wakey wakey ${person}! `, `Morning ${person}! `, `Why good morning ${person}! `, `Rise and shine ${person}! `, `Up and at 'em ${person}! `];
         const mornRes2 = [
             'Here, take a pancake or two 🥞',

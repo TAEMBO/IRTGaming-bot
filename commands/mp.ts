@@ -8,16 +8,14 @@ import config from '../config.json' assert { type: 'json' };
 import { FSServers, hasRole, isMPStaff, youNeedRole } from '../utilities.js';
 import type { banFormat, farmFormat, TInteraction } from '../typings.js';
 
-const cmdOptionChoices = Object.entries(config.fs)
-    .filter(x => !x[1].isPrivate)
-    .map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));
+const fsServers = new FSServers(config.fs);
+const cmdOptionChoices = fsServers.getPublicAll().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));
 
 export default {
     async run(interaction: TInteraction) {
         if (!isMPStaff(interaction)) return youNeedRole(interaction, 'mpstaff');
 
         const name = interaction.options.getString('name');
-        const fsServers = new FSServers(interaction.client.config.fs);
         const FTP = new FTPClient();
         
         ({
@@ -316,7 +314,7 @@ export default {
             .addStringOption(x=>x
                 .setName('server')
                 .setDescription('The server to manage')
-                .addChoices(...Object.entries(config.fs).map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro })))
+                .addChoices(...fsServers.entries().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro })))
                 .setRequired(true))
             .addStringOption(x=>x
                 .setName('action')

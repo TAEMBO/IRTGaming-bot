@@ -78,17 +78,20 @@ export default async (client: YClient) => {
                 signal: AbortSignal.timeout(5000)
             }).catch(() => log('Red', `${chanName} YT fail`));
     
-            if (!res) return;
+            if (!res) continue;
     
             const Data = xml2js(await res.text(), { compact: true }) as YTCacheFeed;
             const latestVid = Data.feed.entry[0];
     
-            if (!client.ytCache[chanId]) return client.ytCache[chanId] = latestVid['yt:videoId']._text;
-    
-            if (Data.feed.entry[1]['yt:videoId']._text === client.ytCache[chanId]) {
+            if (!client.ytCache[chanId]) {
                 client.ytCache[chanId] = latestVid['yt:videoId']._text;
-                client.getChan('videosAndLiveStreams').send(`**${chanName}** just uploaded a new video!\n${latestVid.link._attributes.href}`);
+                continue;
             }
+    
+            if (Data.feed.entry[1]['yt:videoId']._text !== client.ytCache[chanId]) continue;
+            
+            client.ytCache[chanId] = latestVid['yt:videoId']._text;
+            client.getChan('videosAndLiveStreams').send(`**${chanName}** just uploaded a new video!\n${latestVid.link._attributes.href}`);
         }
     }, 300_000);
 }

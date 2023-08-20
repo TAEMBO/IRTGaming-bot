@@ -1,8 +1,9 @@
+import config from '../config.json' assert { type: 'json' };
 import { Config, FSServerBase, FSServerPrivate, FSServerPublic } from "../typings.js";
 
 /** A manager for object data for all Farming Simulator servers */
 export class FSServers {
-    constructor(public data: Config['fs']) { }
+    constructor(public data: Config['fs'] | typeof config.fs) { }
 
     /**
      * @returns An array of server acronyms

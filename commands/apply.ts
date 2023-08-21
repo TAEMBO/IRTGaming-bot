@@ -4,7 +4,7 @@ import { TInteraction } from '../typings.js';
 export default {
 	async run(interaction: TInteraction) {
         const applicationLogs = interaction.client.getChan('mpApplicationLogs');
-        const userData = await interaction.client.userLevels._content.findById(interaction.user.id);
+        const userData = await interaction.client.userLevels.data.findById(interaction.user.id);
         const eligibleTime = (Date.now() - (interaction.member.joinedTimestamp as number)) > (1000 * 60 * 60 * 24 * 14);
         const eligibleMsgs = userData?.level ? userData.level > 3 : false;
         const deniedMsgs: string[] = [];

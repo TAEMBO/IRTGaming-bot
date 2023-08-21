@@ -8,7 +8,7 @@ export default {
         
 		const word = interaction.options.getString("word", true);
 
-		if (!interaction.client.bannedWords._content.includes(word)) {
+		if (!interaction.client.bannedWords.data.includes(word)) {
 			interaction.client.bannedWords.add(word);
 			interaction.reply('Successfully added to bannedWords list');
 		} else interaction.reply('That word is already added');

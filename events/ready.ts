@@ -18,9 +18,9 @@ export default async (client: YClient) => {
         
     for (const [code, inv] of await guild.invites.fetch()) client.invites.set(code, { uses: inv.uses, creator: inv.inviter?.id });
 
-    for (const reminder of await client.reminders._content.find()) client.reminders.setExec(reminder._id, reminder.time < now ? 0 : reminder.time - now);
+    for (const reminder of await client.reminders.data.find()) client.reminders.setExec(reminder._id, reminder.time < now ? 0 : reminder.time - now);
 
-    for (const punishment of await client.punishments._content.find()) {
+    for (const punishment of await client.punishments.data.find()) {
         if (!punishment.endTime || punishment.expired) continue;
 
         client.punishments.setExec(punishment._id, punishment.endTime < now ? 0 : punishment.endTime - now);
@@ -40,7 +40,7 @@ export default async (client: YClient) => {
 
         if (!dailyMsgs.some(x => x[0] === formattedDate)) {
             const yesterday = dailyMsgs.find(x => x[0] === formattedDate - 1) ?? [formattedDate - 1, 0];
-            let total = (await client.userLevels._content.find()).reduce((a, b) => a + b.messages, 0); // sum of all users
+            let total = (await client.userLevels.data.find()).reduce((a, b) => a + b.messages, 0); // sum of all users
 
             if (total < yesterday[1]) total = yesterday[1]; // messages went down
 
@@ -65,7 +65,7 @@ export default async (client: YClient) => {
 
     // Farming Simulator stats loop
     if (client.config.botSwitches.fsLoop) setInterval(async () => {
-	    const watchList = await client.watchList._content.find();
+	    const watchList = await client.watchList.data.find();
 
 	    for await (const [serverAcro, server] of Object.entries(client.config.fs)) await fsLoop(client, watchList, server.channelId, server.messageId, serverAcro);
 	    fsLoopAll(client, watchList);

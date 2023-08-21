@@ -54,7 +54,7 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
     const isWhitelisted = client.config.whitelist.bannedWords.some(x => [message.channelId, message.channel.parentId].includes(x));
 
     if (client.config.botSwitches.automod && !isDCStaff(message.member as Discord.GuildMember) && !isWhitelisted) {
-        if (profanity.hasProfanity(client.bannedWords._content)) { // Banned words
+        if (profanity.hasProfanity(client.bannedWords.data)) { // Banned words
             automodded = true;
 
             await message.reply('That word is banned here.').then(msg => {

@@ -167,7 +167,7 @@ export default {
             ctx.fillText('time ->', tx, ty);
 
             const playerInfo: string[] = [];
-            const watchList = await interaction.client.watchList._content.find();
+            const watchList = await interaction.client.watchList.data.find();
             let Color = interaction.client.config.embedColorGreen;
         
             if (FSdss.slots.used === FSdss.slots.capacity) {
@@ -179,8 +179,8 @@ export default {
                 const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
                 const inWl = watchList.some(x => x._id === player.name);
                 let decorators = player.isAdmin ? ':detective:' : ''; // Tag for if player is admin
-                decorators += interaction.client.FMlist._content.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
-                decorators += interaction.client.TFlist._content.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
+                decorators += interaction.client.fmList.data.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
+                decorators += interaction.client.tfList.data.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
                 decorators += inWl ? '⛔' : ''; // Tag for if player is on watchList
         
                 playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
@@ -207,7 +207,7 @@ export default {
             const embed = new EmbedBuilder().setColor(interaction.client.config.embedColor);
             const failedFooter: string[] = [];
             const totalCount: number[] = [];
-            const watchList = await interaction.client.watchList._content.find();
+            const watchList = await interaction.client.watchList.data.find();
 
             async function FSstatsAll(serverAcro: string) {
                 const serverAcroUp = serverAcro.toUpperCase();
@@ -229,8 +229,8 @@ export default {
                     const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
                     const inWl = watchList.some(x => x._id === player.name);
                     let decorators = player.isAdmin ? ':detective:' : ''; // Tag for if player is admin
-                    decorators += interaction.client.FMlist._content.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
-                    decorators += interaction.client.TFlist._content.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
+                    decorators += interaction.client.fmList.data.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
+                    decorators += interaction.client.tfList.data.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
                     decorators += inWl ? '⛔' : ''; // Tag for if player is on watchList
         
                     playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
@@ -244,14 +244,14 @@ export default {
             embed.setTitle(`All Servers: ${totalCount.reduce((a, b) => a + b, 0)} online`).setFooter(failedFooter.length ? { text: failedFooter.join(', ') } : null);
             interaction.editReply({ embeds: [embed] });
         } else if (subCmd === 'playertimes') {
-            interaction.client.playerTimes._content.find().then(playersData => {
+            interaction.client.playerTimes.data.find().then(playersData => {
                 const sortedData = playersData.sort((a, b) => interaction.client.playerTimes.getTimeData(b).reduce((x, y) => x + y[1].time, 0) - interaction.client.playerTimes.getTimeData(a).reduce((x, y) => x + y[1].time, 0));
                 const player = interaction.options.getString('name');
 
                 const leaderboard = (data: typeof sortedData, isFirstField: boolean) => data.map((x, i) => [
                     `**${i + (isFirstField ? 1 : 26)}.** \`${x._id}\``,
-                    interaction.client.FMlist._content.includes(x._id) ? ':farmer:' : '',
-                    interaction.client.TFlist._content.includes(x._id) ? ':angel:' : '',
+                    interaction.client.fmList.data.includes(x._id) ? ':farmer:' : '',
+                    interaction.client.tfList.data.includes(x._id) ? ':angel:' : '',
                     ' - ',
                     formatTime((interaction.client.playerTimes.getTimeData(x).reduce((x, y) => x + y[1].time, 0) * 60 * 1000), 3, { commas: true, longNames: false })
                 ].join('')).join('\n');
@@ -272,7 +272,7 @@ export default {
                             new EmbedBuilder()
                                 .setColor(interaction.client.config.embedColor)
                                 .setTitle([
-                                    `Player - \`${playerData._id}\`${interaction.client.FMlist._content.includes(playerData._id) ? ':farmer:' : ''}${interaction.client.TFlist._content.includes(playerData._id) ? ':angel:' : ''}`,
+                                    `Player - \`${playerData._id}\`${interaction.client.fmList.data.includes(playerData._id) ? ':farmer:' : ''}${interaction.client.tfList.data.includes(playerData._id) ? ':angel:' : ''}`,
                                     `Leaderboard position - **#${sortedData.indexOf(playerData) + 1}**`,
                                     `Total time - **${formatTime(playerTimeDataTotal * 60 * 1000, 5, { commas: true, longNames: false })}**`,
                                     (isMPStaff(interaction) && playerData.uuid) ? `UUID: \`${playerData.uuid}\`` : ''

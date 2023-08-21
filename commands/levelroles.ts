@@ -6,7 +6,7 @@ import { TInteraction } from '../typings.js';
 export default {
 	async run(interaction: TInteraction) {
 		const subCmd = interaction.options.getSubcommand();
-		const allData = await interaction.client.userLevels._content.find();
+		const allData = await interaction.client.userLevels.data.find();
 
 		if (subCmd === "leaderboard") {
 			const messageCountsTotal = allData.reduce((a, b) => a + b.messages, 0);
@@ -138,7 +138,7 @@ export default {
 			const member = interaction.options.getMember("member") ?? interaction.member;
 
 			// information about users progress on level roles
-			const userData = await interaction.client.userLevels._content.findById(member.user.id);
+			const userData = await interaction.client.userLevels.data.findById(member.user.id);
 		
 			const pronounBool = (you: string, they: string) => { // takes 2 words and chooses which to use based on if user did this command on themself
 				if (interaction.user.id === member.user.id) return you || true;

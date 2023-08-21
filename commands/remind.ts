@@ -42,7 +42,7 @@ export default {
                 });
 
                 const timeToRemind = Date.now() + reminderTime;
-                const currentReminders = await interaction.client.reminders._content.find({ userid: interaction.user.id });
+                const currentReminders = await interaction.client.reminders.data.find({ userid: interaction.user.id });
 
                 if (currentReminders.length > 25) return interaction.reply({ content: 'You can only have up to 25 reminders at a time', ephemeral: true });
 
@@ -68,7 +68,7 @@ export default {
                 }).on('collect', async int => {
                     ({
                         yes: async () => {
-                            const reminder = await interaction.client.reminders._content.create({ userid: interaction.user.id, content: reminderText, time: timeToRemind, ch: interaction.channelId });
+                            const reminder = await interaction.client.reminders.data.create({ userid: interaction.user.id, content: reminderText, time: timeToRemind, ch: interaction.channelId });
 
                             interaction.client.reminders.setExec(reminder._id, timeToRemind - Date.now());
                             int.update({
@@ -87,7 +87,7 @@ export default {
                 });
             },
             delete: async () => {
-                const userReminders = await interaction.client.reminders._content.find({ userid: interaction.user.id });
+                const userReminders = await interaction.client.reminders.data.find({ userid: interaction.user.id });
 
                 if (!userReminders.length) return interaction.reply({ content: 'You have no active current reminders', ephemeral: true });
 
@@ -143,7 +143,7 @@ export default {
                     }).on('collect', async int => {
                         ({
                             yes: () => Promise.all([
-                                interaction.client.reminders._content.findByIdAndDelete(chosenReminder._id),
+                                interaction.client.reminders.data.findByIdAndDelete(chosenReminder._id),
                                 int.update(rplText(`Successfully deleted reminder \`${chosenReminder.content}\``))
                             ]),
                             no: () => int.update(rplText('Command manually canceled'))

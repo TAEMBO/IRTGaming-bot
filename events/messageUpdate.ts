@@ -16,7 +16,7 @@ export default async (client: YClient, oldMsg: Discord.Message<boolean> | Discor
     const msg = newMsg.content.replaceAll('\n', ' ').toLowerCase();
     const profanity = new Profanity(msg);
 
-    if (profanity.hasProfanity(client.bannedWords._content) && (!isMPStaff(newMsg.member) && !isDCStaff(newMsg.member))) newMsg.delete();
+    if (profanity.hasProfanity(client.bannedWords.data) && (!isMPStaff(newMsg.member) && !isDCStaff(newMsg.member))) newMsg.delete();
 
     let oldContent = oldMsg.content;
     let newContent = newMsg.content;

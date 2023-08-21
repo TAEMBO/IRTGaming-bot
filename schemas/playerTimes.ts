@@ -22,16 +22,16 @@ const serversObj = {} as Record<string, { type: typeof serverSchema }>;
 // Populate the base object with all server schemas by referencing config
 for (const serverAcro of Object.keys(config.fs) as string[]) serversObj[serverAcro] = { type: serverSchema };
 
-const Model = mongoose.model('playerTimes', new mongoose.Schema({
+const model = mongoose.model('playerTimes', new mongoose.Schema({
     _id: { type: String, required: true },
 	uuid: { type: String },
 	servers: { required: true, type: new mongoose.Schema(serversObj, { _id: false }) }
 }, { versionKey: false }));
 
-type Document = ReturnType<typeof Model.castObject>;
+type Document = ReturnType<typeof model.castObject>;
 
-export default class playerTimes {
-	public _content = Model;
+export default class PlayerTimes {
+	public data = model;
 
 	constructor(private client: YClient) { }
     
@@ -54,7 +54,7 @@ export default class playerTimes {
 	 */
 	async addPlayerTime(playerName: string, playerTime: number, serverAcro: string) {
 		const now = Math.round(Date.now() / 1000);
-		const playerData = await this._content.findById(playerName);
+		const playerData = await this.data.findById(playerName);
 
 		if (playerData) {
 			playerData.servers[serverAcro] = {
@@ -62,7 +62,7 @@ export default class playerTimes {
 				lastOn: now
 			};
 			return await playerData.save();
-		} else return await this._content.create({
+		} else return await this.data.create({
 			_id: playerName,
 			servers: {
 				[serverAcro]: {
@@ -74,7 +74,7 @@ export default class playerTimes {
 	}
 	async fetchFarmData(serverAcro: string) {
 		const FTP = new FTPClient();
-		const allData = await this._content.find();
+		const allData = await this.data.find();
         const fsServers = new FSServers(this.client.config.fs);
 
 		FTP.once('ready', () => FTP.get(fsServers.getPublicOne(serverAcro).ftp.path + 'savegame1/farms.xml', async (err, stream) => {
@@ -101,17 +101,17 @@ export default class playerTimes {
 						] });
                         iterationCount++;
 						
-						await this._content.create({ _id: player._attributes.lastNickname, uuid: player._attributes.uniqueUserId, servers: playerDatabyUuid.servers })
-							.then(() => this._content.findByIdAndDelete(playerDatabyUuid._id)) // New name is unoccupied, delete old name data
+						await this.data.create({ _id: player._attributes.lastNickname, uuid: player._attributes.uniqueUserId, servers: playerDatabyUuid.servers })
+							.then(() => this.data.findByIdAndDelete(playerDatabyUuid._id)) // New name is unoccupied, delete old name data
 							.catch(async () => { // New name is occupied
 								playerDatabyUuid.uuid = undefined; // Remove UUID from old name
 								await playerDatabyUuid.save();
-								await this._content.findByIdAndUpdate(player._attributes.lastNickname, { uuid: player._attributes.uniqueUserId }, { new: true }); // Add UUID to new name
+								await this.data.findByIdAndUpdate(player._attributes.lastNickname, { uuid: player._attributes.uniqueUserId }, { new: true }); // Add UUID to new name
 							});
 					}
 				} else { // No playerTimes data was found with UUID
 					const playerDataByName = allData.find(x => x._id === player._attributes.lastNickname);
-					if (playerDataByName && !playerDataByName.uuid) await this._content.findByIdAndUpdate(player._attributes.lastNickname, { uuid: player._attributes.uniqueUserId }, { new: true });
+					if (playerDataByName && !playerDataByName.uuid) await this.data.findByIdAndUpdate(player._attributes.lastNickname, { uuid: player._attributes.uniqueUserId }, { new: true });
 				}
 			}
             this.client.getChan('fsLogs').send(`⚠️ Name change detector ran. Iterated over ${iterationCount} changed names`);

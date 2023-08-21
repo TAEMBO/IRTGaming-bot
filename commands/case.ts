@@ -10,12 +10,12 @@ export default {
 
 		({
 			view: async () => {
-				const punishment = await interaction.client.punishments._content.findById(caseid);
+				const punishment = await interaction.client.punishments.data.findById(caseid);
 
 				if (!punishment) return interaction.reply('A case with that ID wasn\'t found!');
 
-				const cancelledBy = punishment.expired ? await interaction.client.punishments._content.findOne({ cancels: punishment.id }) : null;
-				const cancels = punishment.cancels ? await interaction.client.punishments._content.findOne({ _id: punishment.cancels }) : null;
+				const cancelledBy = punishment.expired ? await interaction.client.punishments.data.findOne({ cancels: punishment.id }) : null;
+				const cancels = punishment.cancels ? await interaction.client.punishments.data.findOne({ _id: punishment.cancels }) : null;
 				const embed = new EmbedBuilder()
 					.setTitle(`${punishment.type[0].toUpperCase() + punishment.type.slice(1)} | Case #${punishment.id}`)
 					.addFields(
@@ -36,8 +36,8 @@ export default {
 				const user = interaction.options.getUser("user", true);
                 const pageNumber = interaction.options.getInteger("page") ?? 1;
 				const [punishments, userPunishmentsData] = await Promise.all([
-					interaction.client.punishments._content.find(),
-					interaction.client.punishments._content.find({ "member._id": user.id })
+					interaction.client.punishments.data.find(),
+					interaction.client.punishments.data.find({ "member._id": user.id })
 				]);
 				const userPunishments = userPunishmentsData.sort((a, b) => a.time - b.time).map(punishment => {
 					return {
@@ -64,7 +64,7 @@ export default {
 			update: async () => {
 				const reason = interaction.options.getString('reason', true);
 
-				await interaction.client.punishments._content.findByIdAndUpdate(caseid, { reason });
+				await interaction.client.punishments.data.findByIdAndUpdate(caseid, { reason });
 				interaction.reply({embeds: [new EmbedBuilder().setColor(interaction.client.config.embedColor).setTitle(`Case #${caseid} updated`).setDescription(`**New reason:** ${reason}`)]});
 			}
 		} as any)[interaction.options.getSubcommand()]();

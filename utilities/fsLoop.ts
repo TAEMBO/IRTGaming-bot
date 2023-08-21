@@ -12,9 +12,9 @@ export async function fsLoop(client: YClient, watchList: WatchList, ChannelID: s
     function decorators(player: FSLoopDSSPlayer, publicLoc?: boolean) {
         let decorators = player.isAdmin ? ':detective:' : ''; // Tag for if player is admin
     
-        decorators += client.FMlist._content.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
-        decorators += client.TFlist._content.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
-        decorators += (client.whitelist._content.includes(player.name) && !publicLoc) ? ':white_circle:' : ''; // Tag for if player is on whitelist and location is not public
+        decorators += client.fmList.data.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
+        decorators += client.tfList.data.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
+        decorators += (client.whitelist.data.includes(player.name) && !publicLoc) ? ':white_circle:' : ''; // Tag for if player is on whitelist and location is not public
         decorators += watchList?.some(x => x._id === player.name) ? ':no_entry:' : ''; // Tag for if player is on watchList
     
         return decorators;
@@ -149,7 +149,7 @@ export async function fsLoop(client: YClient, watchList: WatchList, ChannelID: s
     if (justStarted) return;
     
     if (!client.config.fs[serverAcro].isPrivate) for (const player of newPlayers.filter(x => oldPlayers.some(y => x.isAdmin && !y.isAdmin && y.name === x.name))) {
-        if (!client.whitelist._content.includes(player.name) && !client.FMlist._content.includes(player.name)) {
+        if (!client.whitelist.data.includes(player.name) && !client.fmList.data.includes(player.name)) {
             client.getChan('juniorAdminChat').send({ embeds: [new EmbedBuilder()
                 .setTitle('UNKNOWN ADMIN LOGIN')
                 .setDescription(`\`${player.name}\` on **${serverAcroUp}** on <t:${now}>`)
@@ -183,7 +183,7 @@ export async function fsLoop(client: YClient, watchList: WatchList, ChannelID: s
         const inWl = watchList.find(y => y._id === player.name);
 
         if (inWl) {
-            const filterWLPings = client.watchListPings._content.filter(x => !client.mainGuild().members.cache.get(x)?.roles.cache.has(client.config.mainServer.roles.loa));
+            const filterWLPings = client.watchListPings.data.filter(x => !client.mainGuild().members.cache.get(x)?.roles.cache.has(client.config.mainServer.roles.loa));
 
             wlChannel.send({ content: filterWLPings.map(x=>`<@${x}>`).join(" "), embeds: [wlEmbed(inWl._id, true, inWl.reason)] });
         }
@@ -216,9 +216,9 @@ export function fsLoopAll(client: YClient, watchList: WatchList) {
             const decorators = (() => {
                 let decorators = player.isAdmin ? ':detective:' : ''; // Tag for if player is admin
             
-                decorators += client.FMlist._content.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
-                decorators += client.TFlist._content.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
-                decorators += client.whitelist._content.includes(player.name) ? ':white_circle:' : ''; // Tag for if player is on whitelist
+                decorators += client.fmList.data.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
+                decorators += client.tfList.data.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
+                decorators += client.whitelist.data.includes(player.name) ? ':white_circle:' : ''; // Tag for if player is on whitelist
                 decorators += watchList.some(x => x._id === player.name) ? ':no_entry:' : ''; // Tag for if player is on watchList
             
                 return decorators;
@@ -231,7 +231,7 @@ export function fsLoopAll(client: YClient, watchList: WatchList) {
     }
 
     client.getChan('juniorAdminChat').messages.edit(client.config.mainServer.fsLoopMsgId, {
-        content: `\`\`\`js\n['${client.whitelist._content.join("', '")}']\`\`\`Updates every 30 seconds`,
+        content: `\`\`\`js\n['${client.whitelist.data.join("', '")}']\`\`\`Updates every 30 seconds`,
         embeds: [embed.setTitle(totalCount.reduce((a, b) => a + b, 0) + ' online')]
     }).catch(() => log('Red', 'FSLoopAll invalid msg'));
 }

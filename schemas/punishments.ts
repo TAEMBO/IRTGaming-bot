@@ -4,7 +4,7 @@ import YClient from '../client.js';
 import ms from 'ms';
 import { formatTime, log } from '../utilities.js';
 
-const Model = mongoose.model('punishments', new mongoose.Schema({
+const model = mongoose.model('punishments', new mongoose.Schema({
     _id: { type: Number, required: true },
     type: { type: String, required: true },
     member: { required: true, type: new mongoose.Schema({
@@ -20,10 +20,10 @@ const Model = mongoose.model('punishments', new mongoose.Schema({
     duration: { type: Number }
 }, { versionKey: false }));
 
-type Document = ReturnType<typeof Model.castObject>;
+type Document = ReturnType<typeof model.castObject>;
 
-export default class punishments {
-    public _content = Model;
+export default class Punishments {
+    public data = model;
 
     constructor(private client: YClient) { }
 
@@ -31,7 +31,7 @@ export default class punishments {
         setTimeout(async() => {
             if (timeout > 2_147_483_647) return this.setExec(_id, timeout - 2_147_483_647);
             
-            const punishment = await this._content.findById(_id);
+            const punishment = await this.data.findById(_id);
 
             if (!punishment) return;
 
@@ -57,7 +57,7 @@ export default class punishments {
         );
 		
         if (punishment.cancels) {
-            const cancels = await this._content.findById(punishment.cancels);
+            const cancels = await this.data.findById(punishment.cancels);
 
             embed.addFields({ name: '🔹 Overwrites', value: `This case overwrites Case #${cancels?._id} \`${cancels?.reason}\`` });
         }
@@ -66,7 +66,7 @@ export default class punishments {
     };
 
     private async createId() {
-        return Math.max(...(await this._content.find()).map(x => x._id), 0) + 1;
+        return Math.max(...(await this.data.find()).map(x => x._id), 0) + 1;
     }
 
     /** Get past tense form of punishment type */
@@ -173,7 +173,7 @@ export default class punishments {
 		} else { // Punishment was successful
 			await Promise.all([
 				this.makeModlogEntry(punData),
-				this._content.create(punData)
+				this.data.create(punData)
 			]);
 
             if (punData.endTime) this.setExec(punData._id, punData.endTime - Date.now());
@@ -187,7 +187,7 @@ export default class punishments {
 
 	public async removePunishment(caseId: number, moderator: string, reason: string, interaction?: Discord.ChatInputCommandInteraction<"cached">) {
 		const now = Date.now();
-		const punishment = await this._content.findById(caseId);
+		const punishment = await this.data.findById(caseId);
 
 		if (!punishment) return;
 
@@ -218,7 +218,7 @@ export default class punishments {
                 if (GuildMember) {
                     GuildMember.send(`You've been unmuted in ${guild.name}.`).catch((err: Error) => console.log(err.message));
                     return await GuildMember.timeout(null, auditLogReason).catch((err: Error) => err.message);
-                } else await this._content.findByIdAndUpdate(caseId, { expired: true }, { new: true });
+                } else await this.data.findByIdAndUpdate(caseId, { expired: true }, { new: true });
             },
             warn: () => {
                 removePunishmentData.type = 'removeOtherPunishment';
@@ -231,8 +231,8 @@ export default class punishments {
 			} else return punResult;
 		} else { // Unpunish was successful
 			await Promise.all([
-				this._content.findByIdAndUpdate(caseId, { expired: true }, { new: true }),
-				this._content.create(removePunishmentData),
+				this.data.findByIdAndUpdate(caseId, { expired: true }, { new: true }),
+				this.data.create(removePunishmentData),
 				this.makeModlogEntry(removePunishmentData)
 			]);
 

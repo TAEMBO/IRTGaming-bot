@@ -8,7 +8,7 @@ export default async (client: YClient, member: Discord.GuildMember) => {
     
     const newInvites = await member.guild.invites.fetch();
     const usedInvite = newInvites.find(inv => client.invites.get(inv.code)?.uses as number < (inv.uses as number));
-    const evadingCase = await client.punishments._content.findOne({ 'member._id': member.user.id, type: 'detain', expired: undefined });
+    const evadingCase = await client.punishments.data.findOne({ 'member._id': member.user.id, type: 'detain', expired: undefined });
 
     for (const [code, inv] of newInvites) client.invites.set(code, { uses: inv.uses, creator: inv.inviter?.id });
  

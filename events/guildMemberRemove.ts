@@ -4,7 +4,7 @@ import YClient from '../client.js';
 export default async (client: YClient, member: Discord.GuildMember) => {
     if (!client.config.botSwitches.logs || !member.joinedTimestamp) return;
         
-    const rankingData = await client.userLevels._content.findById(member.id);
+    const rankingData = await client.userLevels.data.findById(member.id);
     const embed = new EmbedBuilder()
         .setTitle(`Member Left: ${member.user.tag}`)
         .setDescription(`<@${member.user.id}>\n\`${member.user.id}\``)
@@ -22,5 +22,5 @@ export default async (client: YClient, member: Discord.GuildMember) => {
     
     client.getChan('leaveLogs').send(`**${member.user.tag}** left the server.`);
 
-    await client.userLevels._content.findByIdAndDelete(member.id);
+    await client.userLevels.data.findByIdAndDelete(member.id);
 }

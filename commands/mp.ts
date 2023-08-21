@@ -286,20 +286,20 @@ export default {
                 }
             },
             fm: () => {
-                if (interaction.client.FMlist._content.includes(name as string)) {
-                    interaction.client.FMlist.remove(name as string);
+                if (interaction.client.fmList.data.includes(name as string)) {
+                    interaction.client.fmList.remove(name as string);
                     interaction.reply(`Successfully removed \`${name}\``);
                 } else {
-                    interaction.client.FMlist.add(name as string);
+                    interaction.client.fmList.add(name as string);
                     interaction.reply(`Successfully added \`${name}\``);
                 }
             },
             tf: () => {
-                if (interaction.client.TFlist._content.includes(name as string)) {
-                    interaction.client.TFlist.remove(name as string);
+                if (interaction.client.tfList.data.includes(name as string)) {
+                    interaction.client.tfList.remove(name as string);
                     interaction.reply(`Successfully removed \`${name}\``);
                 } else {
-                    interaction.client.TFlist.add(name as string);
+                    interaction.client.tfList.add(name as string);
                     interaction.reply(`Successfully added \`${name}\``);
                 }
             }

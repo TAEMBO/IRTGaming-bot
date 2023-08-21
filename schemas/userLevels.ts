@@ -1,19 +1,19 @@
 import mongoose from 'mongoose';
 import YClient from '../client.js';
 
-const Model = mongoose.model('userLevels', new mongoose.Schema({
+const model = mongoose.model('userLevels', new mongoose.Schema({
     _id: { type: String },
     messages: { type: Number, required: true },
     level: { type: Number, required: true }
 }, { versionKey: false }));
 
-export default class userLevels {
-    public _content = Model;
+export default class UserLevels {
+    public data = model;
 
     constructor(private client: YClient) { }
     
     public async incrementUser(userid: string) {
-        const userData = await this._content.findById(userid);
+        const userData = await this.data.findById(userid);
         
         if (userData) {
             userData.messages++;
@@ -27,7 +27,7 @@ export default class userLevels {
                 this.client.getChan('botCommands').send(`Well done <@${userid}>, you made it to **level ${userData.level}**!`);
             }
             await userData.save();
-        } else await this._content.create({ _id: userid, messages: 1, level: 0 });
+        } else await this.data.create({ _id: userid, messages: 1, level: 0 });
     }
     public algorithm(level: number) {
         return level * level * 15;

@@ -2,11 +2,11 @@ import Discord, { Client, GatewayIntentBits, Partials } from "discord.js";
 import fs from "node:fs";
 import path from 'node:path';
 import mongoose from "mongoose";
-import userLevels from './schemas/userLevels.js';
-import punishments from './schemas/punishments.js';
-import playerTimes from './schemas/playerTimes.js';
-import watchList from './schemas/watchList.js';
-import reminders from './schemas/reminders.js';
+import UserLevels from './schemas/userLevels.js';
+import Punishments from './schemas/punishments.js';
+import PlayerTimes from './schemas/playerTimes.js';
+import WatchList from './schemas/watchList.js';
+import Reminders from './schemas/reminders.js';
 import config from './config.json' assert { type: 'json' };
 import { hasRole, isDCStaff, LocalDatabase, log, RepeatedMessages, youNeedRole } from './utilities.js';
 import { Config, FSCache, YTCache, InviteCache, Command, Registry } from './typings.js';
@@ -20,15 +20,15 @@ export default class YClient extends Client<true> {
     public repeatedMessages = new RepeatedMessages(this);
     public invites = new Map<string, InviteCache>();
     public bannedWords = new LocalDatabase<string>('bannedWords');
-    public TFlist = new LocalDatabase<string>('TFlist');
-    public FMlist = new LocalDatabase<string>('FMlist');
+    public tfList = new LocalDatabase<string>('TFlist');
+    public fmList = new LocalDatabase<string>('FMlist');
     public whitelist = new LocalDatabase<string>('adminWhitelist');
     public watchListPings = new LocalDatabase<string>('watchListPings');
-    public userLevels = new userLevels(this);
-    public punishments = new punishments(this);
-    public watchList = new watchList();
-    public playerTimes = new playerTimes(this);
-    public reminders = new reminders(this);
+    public userLevels = new UserLevels(this);
+    public punishments = new Punishments(this);
+    public watchList = new WatchList();
+    public playerTimes = new PlayerTimes(this);
+    public reminders = new Reminders(this);
 
     constructor() {
         super({
@@ -51,8 +51,8 @@ export default class YClient extends Client<true> {
         this.login(this.config.token);
         this.setMaxListeners(100);
         this.bannedWords.initLoad();
-        this.FMlist.initLoad();
-        this.TFlist.initLoad();
+        this.fmList.initLoad();
+        this.tfList.initLoad();
         this.whitelist.initLoad();
         this.watchListPings.initLoad();
         for (const ch of this.config.ytCacheChannels) this.ytCache[ch[0]] = null;

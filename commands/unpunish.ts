@@ -6,7 +6,7 @@ export default {
 	async run(interaction: TInteraction) {
 		if (!isDCStaff(interaction)) return youNeedRole(interaction, 'discordmoderator');
 
-		const punishment = await interaction.client.punishments._content.findById(interaction.options.getInteger('caseid', true));
+		const punishment = await interaction.client.punishments.data.findById(interaction.options.getInteger('caseid', true));
         const reason = interaction.options.getString("reason") ?? 'Unspecified';
 
 		if (!punishment) return interaction.reply('No case found with that ID');

@@ -44,8 +44,8 @@ export default {
                     .setTitle('__MP Staff Usernames__')
                     .setColor(interaction.client.config.embedColor)
                     .addFields(
-                        { name: 'Farm Managers :farmer:', value: `\`${interaction.client.FMlist._content.join("\`\n\`")}\`` },
-                        { name: 'Trusted Farmers :angel:', value: `\`${interaction.client.TFlist._content.join("\`\n\`")}\`` }
+                        { name: 'Farm Managers :farmer:', value: `\`${interaction.client.fmList.data.join("\`\n\`")}\`` },
+                        { name: 'Trusted Farmers :angel:', value: `\`${interaction.client.tfList.data.join("\`\n\`")}\`` }
                     )
                 ] });
             },

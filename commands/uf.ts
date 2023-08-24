@@ -5,15 +5,12 @@ import config from '../config.json' assert { type: 'json' };
 import { FSServers, isMPStaff, youNeedRole } from '../utilities.js';
 import { TInteraction } from '../typings.js';
 
-const cmdOptionChoices = Object.entries(config.fs)
-    .filter(x => !x[1].isPrivate)
-    .map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));
+const fsServers = new FSServers(config.fs);
 
 export default {
 	async run(interaction: TInteraction) {
         const whitelist = ['984568108704497694', '200066407415676928'];
         const chosenServer = interaction.options.getString('server', true);
-        const fsServers = new FSServers(interaction.client.config.fs);
 
         if (!isMPStaff(interaction) && !whitelist.includes(interaction.user.id)) return youNeedRole(interaction, 'mpstaff');
 
@@ -36,6 +33,6 @@ export default {
         .addStringOption(x=>x
             .setName('server')
             .setDescription('The server to download bans from')
-            .addChoices(...cmdOptionChoices)
+            .addChoices(...fsServers.getPublicAll().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro })))
             .setRequired(true))
 };

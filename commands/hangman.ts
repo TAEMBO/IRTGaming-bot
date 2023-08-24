@@ -3,8 +3,6 @@ import { TInteraction } from '../typings.js';
 
 export default {
 	async run(interaction: TInteraction) {
-		const channel = interaction.channel as Discord.TextChannel;
-
 		await interaction.reply({ content: 'Game started!', ephemeral: true });
 
 		let hiddenLetters = true;
@@ -43,7 +41,7 @@ export default {
 		function guessLetter(letter: string) {
 			latestActivity = Date.now();
 
-			if (guesses.includes(letter)) return channel.send('That letter has been guessed already.');
+			if (guesses.includes(letter)) return interaction.channel?.send('That letter has been guessed already.');
 
 			guesses.push(letter);
 

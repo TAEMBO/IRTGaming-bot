@@ -3,7 +3,7 @@ import YClient from '../client.js';
 import { isDCStaff, isMPStaff, log, Profanity } from '../utilities.js';
 
 export default async (client: YClient, message: Discord.Message<boolean>) => {
-    if ((!client.config.botSwitches.commands && !client.config.devWhitelist.includes(message.author.id)) || message.system || message.author.bot) return;
+    if ((!client.config.botSwitches.commands && !client.config.devWhitelist.includes(message.author.id)) || message.system || message.author.bot || !message.member) return;
     //   ^^^     Bot is set to ignore commands and non-dev sent a message, ignore the message.      ^^^
 
     const msg = message.content.replaceAll('\n', ' ').toLowerCase();
@@ -11,7 +11,9 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
     const profanity = new Profanity(msg);
 
     if (!message.inGuild()) {
-        const guildMemberObject = client.mainGuild().members.cache.get(message.author.id) as Discord.GuildMember;
+        const member = client.mainGuild().members.cache.get(message.author.id);
+
+        if (!member) return;
 
         client.getChan('taesTestingZone').send({
             content: `DM Forward <@${client.config.devWhitelist[0]}>`,
@@ -24,7 +26,7 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
                 .setTimestamp()
                 .setFields(
                     { name: 'Message Content', value: message.content.length > 1024 ? message.content.slice(0, 1000) + '...' : message.content + '\u200b' },
-                    { name: 'Roles:', value: guildMemberObject.roles.cache.size > 1 ? guildMemberObject.roles.cache.filter(x => x.id !== client.config.mainServer.id).sort((a, b) => b.position - a.position).map(x => x).join(guildMemberObject.roles.cache.size > 4 ? ' ' : '\n').slice(0, 1024) : 'None' })
+                    { name: 'Roles:', value: member.roles.cache.size > 1 ? member.roles.cache.filter(x => x.id !== client.config.mainServer.id).sort((a, b) => b.position - a.position).map(x => x).join(member.roles.cache.size > 4 ? ' ' : '\n').slice(0, 1024) : 'None' })
             ]
         });
 
@@ -34,8 +36,8 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
     /** Message has been moderated against and deleted */
     let automodded = false;
 
-    // useless staff ping mute
-    if (message.mentions.roles.some(mentionedRole => mentionedRole.id === client.config.mainServer.roles.mpstaff)) {
+    // Misuse of staff ping
+    if (message.mentions.roles.some(role => role.id === client.config.mainServer.roles.mpstaff)) {
         log('Purple', `${message.author.tag} mentioned staff role`);
         
         message.channel.createMessageCollector({
@@ -53,7 +55,7 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
     // RepeatedMessages
     const isWhitelisted = client.config.whitelist.bannedWords.some(x => [message.channelId, message.channel.parentId].includes(x));
 
-    if (client.config.botSwitches.automod && !isDCStaff(message.member as Discord.GuildMember) && !isWhitelisted) {
+    if (client.config.botSwitches.automod && !isDCStaff(message.member) && !isWhitelisted) {
         if (profanity.hasProfanity(client.bannedWords.data)) { // Banned words
             automodded = true;
 
@@ -62,7 +64,7 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
                 setTimeout(() => msg.delete(), 5_000);
             });
             await client.repeatedMessages.increment(message, 30_000, 4, 'bw', { time: '30m', reason: 'Banned words' });
-        } else if (msg.includes("discord.gg/") && !isMPStaff(message.member as Discord.GuildMember)) { // Discord advertisement
+        } else if (msg.includes("discord.gg/") && !isMPStaff(message.member)) { // Discord advertisement
             const inviteURL = message.content.split(' ').find(x => x.includes('discord.gg/')) as string;
             const validInvite = await client.fetchInvite(inviteURL).catch(() => null);
 
@@ -80,7 +82,7 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
 
     if (automodded) return;
     if (message.channel.id !== client.config.mainServer.channels.spamZone) client.userLevels.incrementUser(message.author.id);
-    if (!client.config.botSwitches.autoResponses || !message.member) return;
+    if (!client.config.botSwitches.autoResponses) return;
 
     // Morning message systen
     const morningMsgs = ['morning all', 'morning everyone', 'morning guys', 'morning people'];

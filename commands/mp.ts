@@ -15,8 +15,8 @@ export default {
     async run(interaction: TInteraction) {
         if (!isMPStaff(interaction)) return youNeedRole(interaction, 'mpstaff');
 
-        const name = interaction.options.getString('name');
         const FTP = new FTPClient();
+        const now = Date.now();
         
         ({
             server: async () => {
@@ -38,7 +38,6 @@ export default {
                 }
 
                 const serverSelector = `[name="${chosenAction}_server"]`;
-                const time = Date.now();
                 const browser = await puppeteer.launch();
                 const page = await browser.newPage();
     
@@ -50,7 +49,7 @@ export default {
                 } catch (err: any) {
                     return interaction.editReply(err.message);
                 }
-                await interaction.editReply(`Connected to dedi panel for **${chosenServer.toUpperCase()}** after **${Date.now() - time}ms**...`);
+                await interaction.editReply(`Connected to dedi panel for **${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**...`);
     
                 let result = 'Dedi panel closed, result:\n';
                 result += `Server: **${chosenServer.toUpperCase()}**\n`;
@@ -66,7 +65,7 @@ export default {
                 await browser.close();
 
                 setTimeout(() => {
-                    interaction.editReply(result += `Total time taken: **${Date.now() - time}ms**`);
+                    interaction.editReply(result += `Total time taken: **${Date.now() - now}ms**`);
                     if (chosenAction === 'restart') interaction.client.getChan('fsLogs').send({ embeds: [new EmbedBuilder().setTitle(`${chosenServer.toUpperCase()} now restarting`).setColor(interaction.client.config.embedColorYellow).setTimestamp()] });
                 }, 1_000);
             },
@@ -75,7 +74,6 @@ export default {
 
                 const chosenServer = interaction.options.getString('server', true);
                 const chosenAction = interaction.options.getString('action', true) as 'items.xml' | 'players.xml';
-                const time = Date.now();
                 const FTPLogin = fsServers.getPublicOne(chosenServer).ftp;
                 
                 if (interaction.client.fsCache[chosenServer].status === 'online') return interaction.reply(`You cannot mop files from **${chosenServer.toUpperCase()}** while it is online`);
@@ -84,7 +82,7 @@ export default {
     
                 FTP.on('ready', () => FTP.delete(FTPLogin.path + `savegame1/${chosenAction}`, async (err) => {
                     if (err) return interaction.editReply(err.message);
-                    await interaction.editReply(`Successfully deleted **${chosenAction}** from **${chosenServer.toUpperCase()}** after **${Date.now() - time}ms**`);
+                    await interaction.editReply(`Successfully deleted **${chosenAction}** from **${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**`);
                     FTP.end();
                 })).connect(FTPLogin);
             },
@@ -125,7 +123,7 @@ export default {
                     FTP.on('ready', () => FTP.put(banData, fsServers.getPublicOne(chosenServer).ftp.path + 'blockedUserIds.xml', error => {
                         if (error) {
                             interaction.editReply(error.message);
-                        } else interaction.editReply(`Successfully uploaded ban file for ${chosenServer.toUpperCase()}`);
+                        } else interaction.editReply(`Successfully uploaded ban file for ${chosenServer.toUpperCase()} after **${Date.now() - now}ms**`);
                         
                         FTP.end();
                     })).connect(fsServers.getPublicOne(chosenServer).ftp);
@@ -199,7 +197,10 @@ export default {
             roles: async () => {
                 if (!hasRole(interaction, 'mpmanager')) return youNeedRole(interaction, 'mpmanager');
 
-                const member = interaction.options.getMember("member") as Discord.GuildMember;
+                const member = interaction.options.getMember("member");
+
+                if (!member) return interaction.reply({ content: 'You need to select a member that is in this server', ephemeral: true });
+
                 const owner = await interaction.guild.fetchOwner();
                 const roleName = interaction.options.getString("role", true) as 'trustedfarmer' | 'mpfarmmanager' | 'mpjradmin' | 'mpsradmin';
                 const Role = interaction.client.config.mainServer.roles[roleName];
@@ -239,7 +240,7 @@ export default {
 
                                     member.edit({
                                         roles: roles.filter(x => x !== Role && x !== interaction.client.config.mainServer.roles.mpstaff).concat(interaction.client.config.mainServer.roles.formerstaff),
-                                        nick: (member.nickname as string).replace(slicedNick, 'Former Staff')
+                                        nick: member.nickname?.replace(slicedNick, 'Former Staff')
                                     });
                                 } else member.roles.remove(Role);
 
@@ -271,12 +272,12 @@ export default {
                         mpjradmin: () => {
                             roles.push(Role);
                             roles.splice(roles.indexOf(interaction.client.config.mainServer.roles.mpfarmmanager), 1);
-                            newNickname = (member.nickname as string).replace('MP Farm Manager', 'MP Jr. Admin');
+                            newNickname = member.nickname?.replace('MP Farm Manager', 'MP Jr. Admin');
                         },
                         mpsradmin: () => {
                             roles.push(Role);
                             roles.splice(roles.indexOf(interaction.client.config.mainServer.roles.mpjradmin), 1);
-                            newNickname = (member.nickname as string).replace('MP Jr. Admin', 'MP Sr. Admin');
+                            newNickname = member.nickname?.replace('MP Jr. Admin', 'MP Sr. Admin');
                         }
                     })[roleName]();
                     
@@ -286,20 +287,24 @@ export default {
                 }
             },
             fm: () => {
-                if (interaction.client.fmList.data.includes(name as string)) {
-                    interaction.client.fmList.remove(name as string);
+                const name = interaction.options.getString('name', true);
+
+                if (interaction.client.fmList.data.includes(name)) {
+                    interaction.client.fmList.remove(name);
                     interaction.reply(`Successfully removed \`${name}\``);
                 } else {
-                    interaction.client.fmList.add(name as string);
+                    interaction.client.fmList.add(name);
                     interaction.reply(`Successfully added \`${name}\``);
                 }
             },
             tf: () => {
-                if (interaction.client.tfList.data.includes(name as string)) {
-                    interaction.client.tfList.remove(name as string);
+                const name = interaction.options.getString('name', true);
+
+                if (interaction.client.tfList.data.includes(name)) {
+                    interaction.client.tfList.remove(name);
                     interaction.reply(`Successfully removed \`${name}\``);
                 } else {
-                    interaction.client.tfList.add(name as string);
+                    interaction.client.tfList.add(name);
                     interaction.reply(`Successfully added \`${name}\``);
                 }
             }

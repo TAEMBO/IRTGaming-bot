@@ -1,4 +1,4 @@
-import Discord, { SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder } from 'discord.js';
 import { TInteraction } from '../typings.js';
 import { isDCStaff, youNeedRole } from '../utilities.js';
 
@@ -6,7 +6,9 @@ export default {
 	async run(interaction: TInteraction) {
 		if (!isDCStaff(interaction)) return youNeedRole(interaction, 'discordmoderator');
 
-        const member = interaction.options.getMember('member') as Discord.GuildMember;
+        const member = interaction.options.getMember('member');
+
+        if (!member) return interaction.reply({ content: 'You need to select a member that is in this server', ephemeral: true });
 
         await interaction.client.getChan('counting').permissionOverwrites.edit(member.user.id, { SendMessages: false });
         interaction.reply(`<@${member.user.id}>'s perm to send messages in <#${interaction.client.config.mainServer.channels.counting}> has been removed`);

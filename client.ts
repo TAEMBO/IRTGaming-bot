@@ -32,8 +32,23 @@ export default class YClient extends Client<true> {
 
     constructor() {
         super({
-            intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration, GatewayIntentBits.GuildInvites, GatewayIntentBits.GuildPresences, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildVoiceStates],
-            partials: [Partials.Channel, Partials.Message, Partials.Reaction],
+            intents: [
+                GatewayIntentBits.Guilds,
+                GatewayIntentBits.GuildMembers,
+                GatewayIntentBits.GuildModeration,
+                GatewayIntentBits.GuildInvites,
+                GatewayIntentBits.GuildPresences,
+                GatewayIntentBits.GuildMessages,
+                GatewayIntentBits.GuildMessageReactions,
+                GatewayIntentBits.DirectMessages,
+                GatewayIntentBits.MessageContent,
+                GatewayIntentBits.GuildVoiceStates
+            ],
+            partials: [
+                Partials.Channel,
+                Partials.Message,
+                Partials.Reaction
+            ],
             presence: config.botPresence as Discord.PresenceData
         });
         this.init();
@@ -85,7 +100,15 @@ export default class YClient extends Client<true> {
     }
 
     /**
-     * @returns The main Guild that this bot is made for
+     * Get a role via config
+     * @param role 
+     */
+    public getRole(role: keyof typeof this.config.mainServer.roles) {
+        return this.mainGuild().roles.cache.get(this.config.mainServer.roles[role]) as Discord.Role;
+    }
+
+    /**
+     * @returns The main guild that this bot is made for
      */
     public mainGuild() {
         return this.guilds.cache.get(this.config.mainServer.id) as Discord.Guild;
@@ -100,13 +123,13 @@ export default class YClient extends Client<true> {
     
         const time = interaction.options.getString('time') ?? undefined;
         const reason = interaction.options.getString('reason') ?? 'Unspecified';
-        const GuildMember = interaction.options.getMember('member');
-        const User = interaction.options.getUser('member', true);
+        const guildMember = interaction.options.getMember('member');
+        const user = interaction.options.getUser('member', true);
     
-        if (interaction.user.id === User.id) return interaction.reply(`You cannot ${type} yourself.`);
-        if (!GuildMember && type !== 'ban') return interaction.reply(`You cannot ${type} someone who is not in the server.`);
+        if (interaction.user.id === user.id) return interaction.reply(`You cannot ${type} yourself.`);
+        if (!guildMember && type !== 'ban') return interaction.reply(`You cannot ${type} someone who is not in the server.`);
     
         await interaction.deferReply();
-        await this.punishments.addPunishment(type, interaction.user.id, reason, User, GuildMember, { time, interaction });
+        await this.punishments.addPunishment(type, interaction.user.id, reason, user, guildMember, { time, interaction });
     }
 }

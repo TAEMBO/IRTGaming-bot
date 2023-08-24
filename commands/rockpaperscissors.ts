@@ -17,20 +17,19 @@ class RpsInstance {
 export default {
 	async run(interaction: TInteraction) {
         const move = interaction.options.getString("move", true);
-        const Channel = interaction.channel as Discord.TextChannel;
 
-        if (!rpsChannels.hasOwnProperty(Channel.id)) {
+        if (!rpsChannels.hasOwnProperty(interaction.channelId)) {
             await interaction.deferReply({ ephemeral: true }).then(() => interaction.deleteReply());
 
-            const message = await Channel.send({ embeds: [new EmbedBuilder()
+            const message = await interaction.channel?.send({ embeds: [new EmbedBuilder()
                 .setTitle("Rps game started")
                 .setDescription(`To play with <@${interaction.user.id}> run the command again.`)
                 .setFooter({ text: "You have 60 seconds to reply with another interaction." })
             ] });
 
-            rpsChannels[Channel.id] = new RpsInstance(interaction.user, move, message);
-        } else if (rpsChannels.hasOwnProperty(Channel.id)) {
-            let firstMove = rpsChannels[Channel.id];
+            rpsChannels[interaction.channelId] = new RpsInstance(interaction.user, move, message as NonNullable<typeof message>);
+        } else if (rpsChannels.hasOwnProperty(interaction.channelId)) {
+            let firstMove = rpsChannels[interaction.channelId];
             
             if (interaction.user.id !== firstMove.firstPlayer.id) {
                 await interaction.deferReply();
@@ -47,7 +46,7 @@ export default {
                     .setFooter({ text: `This game has ended, ${winner ? `${winner.tag} won.` : `it's a tie.`}` })
                 ] });
 
-                delete rpsChannels[Channel.id];
+                delete rpsChannels[interaction.channelId];
                 await interaction.deleteReply();
             } else interaction.reply("You can't play with yourself.");
         } else interaction.reply({ content: "You can't start 2 different games in the same channel, go to another channel or wait for the current game to end.", ephemeral: true });

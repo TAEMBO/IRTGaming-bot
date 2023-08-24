@@ -51,8 +51,8 @@ export default {
             },
             discord: async () => {
                 const staff = {
-                    admin: interaction.guild.roles.cache.get(allRoles.admin)?.members,
-                    moderator: interaction.guild.roles.cache.get(allRoles.discordmoderator)?.members.filter(x => !hasRole(x, 'admin')),
+                    admin: interaction.guild.roles.cache.get(allRoles.discordadmin)?.members,
+                    moderator: interaction.guild.roles.cache.get(allRoles.discordmoderator)?.members.filter(x => !hasRole(x, 'discordadmin')),
                     helper: interaction.guild.roles.cache.get(allRoles.discordhelper)?.members
                 };
          
@@ -60,7 +60,7 @@ export default {
                     .setTitle('__Discord Staff Members__')
                     .setColor(interaction.client.config.embedColor)
                     .setDescription([
-                        `<@&${allRoles.admin}>`,
+                        `<@&${allRoles.discordadmin}>`,
                         `${staff.admin?.map(x => x.toString()).join("\n") || "None"}\n`,
                         `<@&${allRoles.discordmoderator}>`,
                         `${staff.moderator?.map(x => x.toString()).join("\n") || "None"}\n`,

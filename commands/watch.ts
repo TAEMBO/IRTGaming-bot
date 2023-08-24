@@ -7,18 +7,21 @@ export default {
 	async run(interaction: TInteraction) {
         if (!isMPStaff(interaction.member)) return youNeedRole(interaction, "mpstaff");
 
-        const name = interaction.options.getString('username', false) as string;
-        const wlData = await interaction.client.watchList.data.findById(name);
-
         ({
             add: async () => {
                 const reason = interaction.options.getString('reason', true);
+                const name = interaction.options.getString('username', true);
+                const wlData = await interaction.client.watchList.data.findById(name);
+
                 if (!wlData) {
                     await interaction.client.watchList.data.create({ _id: name, reason });
                     interaction.reply(`Successfully added \`${name}\` with reason \`${reason}\``);
                 } else interaction.reply(`\`${name}\` already exists for reason \`${wlData.reason}\``);
             },
             remove: async () => {
+                const name = interaction.options.getString('username', true);
+                const wlData = await interaction.client.watchList.data.findById(name);
+
                 if (wlData) {
                     await interaction.client.watchList.data.findByIdAndDelete(name);
                     interaction.reply(`Successfully removed \`${name}\` from watchList`);

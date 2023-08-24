@@ -26,7 +26,7 @@ export class RepeatedMessages {
     
             if (spammedMessage) {
                 delete this.data[msg.author.id];
-                await this.client.punishments.addPunishment('mute', (this.client.user?.id as string), `Automod; ${muteOpt?.reason}`, msg.author, msg.member, { time: muteOpt?.time });
+                await this.client.punishments.addPunishment('mute', this.client.user.id, `Automod; ${muteOpt?.reason}`, msg.author, msg.member, { time: muteOpt?.time });
             }
         } else {
             this.data[msg.author.id] = { data: new Discord.Collection(), timeout: setTimeout(() => delete this.data[msg.author.id], thresholdTime) };

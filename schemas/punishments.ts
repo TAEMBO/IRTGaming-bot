@@ -153,7 +153,8 @@ export default class Punishments {
                 if (GuildMember?.communicationDisabledUntil) {
                     return 'Member is already muted.';
                 } else return await GuildMember?.timeout(timeInMillis, auditLogReason).catch((err: Error) => err.message);
-            }
+            },
+            warn: () => { }
         } as any)[type]();
 
 		// If type was softban and it was successful, continue with softban (unban)

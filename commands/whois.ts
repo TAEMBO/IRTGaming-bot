@@ -33,6 +33,7 @@ export default {
 
         if (!member) {
             const user = interaction.options.getUser('member', true);
+            await user.fetch();
             const appData = await getApplicationData(user.id);
             const embed = new EmbedBuilder()
                 .setThumbnail(user.displayAvatarURL({ extension: 'png', size: 2048 }))
@@ -40,7 +41,8 @@ export default {
                 .setURL(`https://discord.com/users/${user.id}`)
                 .setDescription(`<@${user.id}>\n\`${user.id}\``)
                 .addFields({ name: `🔹 ${user.bot ? 'Bot' : 'Account'} Created`, value: `<t:${Math.round(user.createdTimestamp / 1000)}:R>` })
-                .setColor(interaction.client.config.embedColor);
+                .setColor(interaction.client.config.embedColor)
+                .setImage(user.bannerURL({ extension: 'png', size: 1024 }) ?? null);
 
             if (appData) embed.addFields(...appData);
 
@@ -95,12 +97,12 @@ export default {
                 embeds.push(new EmbedBuilder()
                     .setAuthor({ name: activity.name, iconURL: 'https://www.freepnglogos.com/uploads/spotify-logo-png/spotify-icon-marilyn-scott-0.png' })
                     .setColor('#1DB954')
-                    .setFields({ name: activity.details, value: `By: ${activity.state}\nOn: ${activity.assets.largeText}\nStarted listening <t:${Math.round(activity.createdTimestamp / 1000)}:R>` })
+                    .setFields({ name: activity.details, value: `by ${activity.state}\non ${activity.assets.largeText}\nStarted listening <t:${Math.round(activity.createdTimestamp / 1000)}:R>` })
                     .setThumbnail(`https://i.scdn.co/image/${activity.assets.largeImage?.replace('spotify:', '')}`)
                 );
             } else if (activity.type === ActivityType.Custom) {
                 embeds.push(new EmbedBuilder()
-                .setTitle(activity.name)
+                    .setTitle(activity.name)
                     .setColor('#ffffff')
                     .setDescription([
                         activity.emoji ? `**Emoji name:** ${activity.emoji.name}`: '',

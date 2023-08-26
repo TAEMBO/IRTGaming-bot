@@ -65,11 +65,7 @@ export default class YClient extends Client<true> {
         
         this.login(this.config.token);
         this.setMaxListeners(100);
-        this.bannedWords.initLoad();
-        this.fmList.initLoad();
-        this.tfList.initLoad();
-        this.whitelist.initLoad();
-        this.watchListPings.initLoad();
+        
         for (const ch of this.config.ytCacheChannels) this.ytCache[ch[0]] = null;
         for (const serverAcro of Object.keys(this.config.fs)) this.fsCache[serverAcro] = { players: [], status: null, lastAdmin: null };
 

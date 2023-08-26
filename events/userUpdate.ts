@@ -1,5 +1,6 @@
 import Discord, { EmbedBuilder } from 'discord.js';
 import YClient from '../client.js';
+import { formatUser } from '../utilities.js';
 
 export default async (client: YClient, oldUser: Discord.User | Discord.PartialUser, newUser: Discord.User) => {
     if (!client.config.botSwitches.logs || oldUser.tag === newUser.tag) return;
@@ -8,7 +9,7 @@ export default async (client: YClient, oldUser: Discord.User | Discord.PartialUs
         .setTimestamp()
         .setColor(client.config.embedColor)
         .setTitle(`User Update: ${newUser.tag}`)
-        .setDescription(`<@${newUser.id}>\n\`${newUser.id}\``)
+        .setDescription(formatUser(newUser))
         .setThumbnail(newUser.displayAvatarURL({ extension: 'png', size: 2048 }))
         .setFields(
             { name: '🔹 Old Tag', value: `\`\`\`${oldUser.tag}\`\`\`` },

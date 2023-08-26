@@ -1,5 +1,6 @@
 export * from './utilities/formatBytes.js';
 export * from './utilities/formatTime.js';
+export * from './utilities/formatUser.js';
 export * from './utilities/fsLoop.js';
 export * from './utilities/fsServers.js';
 export * from './utilities/profanity.js';

@@ -1,5 +1,6 @@
 import Discord, { EmbedBuilder } from 'discord.js';
 import YClient from '../client.js';
+import { formatUser } from '../utilities.js';
 
 export default async (client: YClient, member: Discord.GuildMember) => {
     if (!client.config.botSwitches.logs || member.partial) return;
@@ -14,7 +15,7 @@ export default async (client: YClient, member: Discord.GuildMember) => {
  
     client.getChan('botLogs').send({ embeds: [new EmbedBuilder()
         .setTitle(`Member Joined: ${member.user.tag}`)
-        .setDescription(`<@${member.user.id}>\n\`${member.user.id}\``)
+        .setDescription(formatUser(member.user))
         .setFields(
             { name: '🔹 Account Created', value: `<t:${Math.round(member.user.createdTimestamp / 1000)}:R>` },
             { name: '🔹 Invite Data', value: usedInvite ? `Invite: \`${usedInvite.code}\`\nCreated by: **${usedInvite.inviter?.tag}**` : 'No data found' })

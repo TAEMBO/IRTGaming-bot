@@ -3,7 +3,7 @@ import YClient from '../client.js';
 import { isDCStaff, isMPStaff, log, Profanity } from '../utilities.js';
 
 export default async (client: YClient, message: Discord.Message<boolean>) => {
-    if ((!client.config.botSwitches.commands && !client.config.devWhitelist.includes(message.author.id)) || message.system || message.author.bot || !message.member) return;
+    if ((!client.config.botSwitches.commands && !client.config.devWhitelist.includes(message.author.id)) || message.system || message.author.bot) return;
     //   ^^^     Bot is set to ignore commands and non-dev sent a message, ignore the message.      ^^^
 
     const msg = message.content.replaceAll('\n', ' ').toLowerCase();
@@ -41,7 +41,7 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
         log('Purple', `${message.author.tag} mentioned staff role`);
         
         message.channel.createMessageCollector({
-            filter: x => isMPStaff(x.member as Discord.GuildMember) && x.content === 'y',
+            filter: x => isMPStaff(x) && x.content === 'y',
             max: 1,
             time: 60_000
         }).on('collect', async collected => {
@@ -55,7 +55,7 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
     // RepeatedMessages
     const isWhitelisted = client.config.whitelist.bannedWords.some(x => [message.channelId, message.channel.parentId].includes(x));
 
-    if (client.config.botSwitches.automod && !isDCStaff(message.member) && !isWhitelisted) {
+    if (client.config.botSwitches.automod && !isDCStaff(message) && !isWhitelisted) {
         if (profanity.hasProfanity(client.bannedWords.data)) { // Banned words
             automodded = true;
 
@@ -64,7 +64,7 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
                 setTimeout(() => msg.delete(), 5_000);
             });
             await client.repeatedMessages.increment(message, 30_000, 4, 'bw', { time: '30m', reason: 'Banned words' });
-        } else if (msg.includes("discord.gg/") && !isMPStaff(message.member)) { // Discord advertisement
+        } else if (msg.includes("discord.gg/") && !isMPStaff(message)) { // Discord advertisement
             const inviteURL = message.content.split(' ').find(x => x.includes('discord.gg/')) as string;
             const validInvite = await client.fetchInvite(inviteURL).catch(() => null);
 
@@ -89,8 +89,8 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
 
 	if (morningMsgs.some(x => msg.includes(x)) && message.channel.id === client.config.mainServer.channels.general) {
         const randomEl = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
-        const staffTag = message.member.displayName.indexOf(' | ') < 0 ? undefined : message.member.displayName.indexOf(' | ');
-        const person = message.member.displayName.slice(0, staffTag).replace('[LOA] ', '');
+        const staffTag = message.member?.displayName.indexOf(' | ') ?? NaN < 0 ? undefined : message.member?.displayName.indexOf(' | ');
+        const person = message.member?.displayName.slice(0, staffTag).replace('[LOA] ', '');
         const mornRes1 = [`Wakey wakey ${person}! `, `Morning ${person}! `, `Why good morning ${person}! `, `Rise and shine ${person}! `, `Up and at 'em ${person}! `];
         const mornRes2 = [
             'Here, take a pancake or two 🥞',

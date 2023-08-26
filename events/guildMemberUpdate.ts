@@ -1,5 +1,6 @@
 import Discord, { EmbedBuilder } from 'discord.js';
 import YClient from '../client.js';
+import { formatUser } from '../utilities.js';
 
 export default async (client: YClient, oldMember: Discord.GuildMember | Discord.PartialGuildMember, newMember: Discord.GuildMember) => {
     if (!client.config.botSwitches.logs) return;
@@ -9,7 +10,7 @@ export default async (client: YClient, oldMember: Discord.GuildMember | Discord.
         .setTimestamp()
         .setColor(client.config.embedColor)
         .setTitle(`Member Update: ${newMember.user.tag}`)
-        .setDescription(`<@${newMember.user.id}>\n\`${newMember.user.id}\``)
+        .setDescription(formatUser(newMember.user))
         .setThumbnail(newMember.user.displayAvatarURL({ extension: 'png', size: 2048 }));
 
     // Nickname changes

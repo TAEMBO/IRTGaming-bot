@@ -1,5 +1,6 @@
 import Discord, { EmbedBuilder } from 'discord.js';
 import YClient from '../client.js';
+import { formatUser } from '../utilities.js';
 
 export default async (client: YClient, member: Discord.GuildMember) => {
     if (!client.config.botSwitches.logs || !member.joinedTimestamp) return;
@@ -7,7 +8,7 @@ export default async (client: YClient, member: Discord.GuildMember) => {
     const rankingData = await client.userLevels.data.findById(member.id);
     const embed = new EmbedBuilder()
         .setTitle(`Member Left: ${member.user.tag}`)
-        .setDescription(`<@${member.user.id}>\n\`${member.user.id}\``)
+        .setDescription(formatUser(member.user))
         .addFields(
             { name: '🔹 Account Created', value: `<t:${Math.round(member.user.createdTimestamp / 1000)}:R>` },
             { name: '🔹 Joined server', value: `<t:${Math.round(member.joinedTimestamp / 1000)}:R>` },

@@ -1,5 +1,6 @@
 import Discord, { APIEmbedField, ActivityType, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { ApplicationRPC, TInteraction } from '../typings.js';
+import { formatUser } from '../utilities.js';
 
 export default {
 	async run(interaction: TInteraction) {
@@ -39,7 +40,7 @@ export default {
                 .setThumbnail(user.displayAvatarURL({ extension: 'png', size: 2048 }))
                 .setTitle(`${user.bot ? 'Bot' : 'User'} info: ${user.tag}`)
                 .setURL(`https://discord.com/users/${user.id}`)
-                .setDescription(`<@${user.id}>\n\`${user.id}\``)
+                .setDescription(formatUser(user))
                 .addFields({ name: `🔹 ${user.bot ? 'Bot' : 'Account'} Created`, value: `<t:${Math.round(user.createdTimestamp / 1000)}:R>` })
                 .setColor(interaction.client.config.embedColor)
                 .setImage(user.bannerURL({ extension: 'png', size: 1024 }) ?? null);
@@ -61,7 +62,7 @@ export default {
             .setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048 }))
             .setTitle(`${titleText} info: ${member.user.tag}`)
             .setURL(`https://discord.com/users/${member.user.id}`)
-            .setDescription(`<@${member.user.id}>\n\`${member.user.id}\``)
+            .setDescription(formatUser(member.user))
             .addFields(
                 { name: '🔹 Account created', value: `<t:${Math.round(member.user.createdTimestamp / 1000)}:R>` },
                 { name: '🔹 Joined server', value: `<t:${Math.round(member.joinedTimestamp as number / 1000)}:R>` },

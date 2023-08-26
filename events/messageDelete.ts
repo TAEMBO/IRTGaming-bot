@@ -1,5 +1,6 @@
 import Discord, { EmbedBuilder } from 'discord.js';
 import YClient from '../client.js';
+import { formatUser } from '../utilities.js';
 
 export default async (client: YClient, message: Discord.Message<boolean> | Discord.PartialMessage) => {
     if (
@@ -12,7 +13,7 @@ export default async (client: YClient, message: Discord.Message<boolean> | Disco
 
     const embed = new EmbedBuilder()
         .setTitle('Message Deleted')
-        .setDescription(`<@${message.author.id}>\n\`${message.author.id}\``)
+        .setDescription(formatUser(message.author))
         .setAuthor({ name: message.author.tag, iconURL: message.author.displayAvatarURL({ extension: 'png', size: 128 }) })
         .setColor(client.config.embedColorRed)
         .setTimestamp()

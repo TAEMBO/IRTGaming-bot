@@ -1,11 +1,10 @@
 import Discord, { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import YClient from "../client.js";
-import { isDCStaff, isMPStaff, Profanity } from '../utilities.js';
+import { formatUser, isDCStaff, isMPStaff, Profanity } from '../utilities.js';
 
 export default async (client: YClient, oldMsg: Discord.Message<boolean> | Discord.PartialMessage, newMsg: Discord.Message<boolean> | Discord.PartialMessage) => {
     if (
         !client.config.botSwitches.logs
-        || !newMsg.member
         || !oldMsg.content
         || newMsg.content === oldMsg.content
         || !newMsg.inGuild()
@@ -16,7 +15,7 @@ export default async (client: YClient, oldMsg: Discord.Message<boolean> | Discor
     const msg = newMsg.content.replaceAll('\n', ' ').toLowerCase();
     const profanity = new Profanity(msg);
 
-    if (profanity.hasProfanity(client.bannedWords.data) && (!isMPStaff(newMsg.member) && !isDCStaff(newMsg.member))) newMsg.delete();
+    if (profanity.hasProfanity(client.bannedWords.data) && (!isMPStaff(newMsg) && !isDCStaff(newMsg))) newMsg.delete();
 
     let oldContent = oldMsg.content;
     let newContent = newMsg.content;
@@ -30,7 +29,7 @@ export default async (client: YClient, oldMsg: Discord.Message<boolean> | Discor
         embeds: [
             new EmbedBuilder()
                 .setTitle('Message Edited')
-                .setDescription(`<@${newMsg.author.id}>\n\`${newMsg.author.id}\``)
+                .setDescription(formatUser(newMsg.author))
                 .addFields(
                     { name: '🔹 Old Content', value: `\`\`\`ansi\n${oldContent.slice(0, 1000)}\n\`\`\`` },
                     { name: '🔹 New Content', value: `\`\`\`ansi\n${newContent.slice(0, 1000)}\n\`\`\`` },

@@ -21,7 +21,7 @@ export default {
                     .setTitle('__Eval__')
                     .setColor(interaction.client.config.embedColor)
                     .addFields({ name: 'Input', value: `\`\`\`js\n${code.slice(0, 1010)}\n\`\`\`` });
-                let output = 'error';
+                let output: any = 'error';
 				
                 try {
                     output = await eval(useAsync ? `(async () => { ${code} })()` : code);
@@ -29,8 +29,8 @@ export default {
                     embed
                         .setColor('#ff0000')
                         .addFields({
-                            name: `Output • ${err.message.slice(0, 245)}`,
-                            value: `\`\`\`\n${err.slice(0, 1010)}\n\`\`\``
+                            name: `Output • ${Date.now() - now}ms`,
+                            value: `\`\`\`\n${err}\n\`\`\``
                         });
 
                     await interaction.reply({ embeds: [embed] }).catch(() => interaction.channel?.send({ embeds: [embed] }));
@@ -41,7 +41,7 @@ export default {
                         time: 60_000
                     }).on('collect', msg => {
                         msg.reply({
-                            content: `\`\`\`\n${err}\n\`\`\``,
+                            content: `\`\`\`\n${err.stack}\n\`\`\``,
                             allowedMentions: { repliedUser: false }
                         });
                     });

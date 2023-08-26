@@ -1,16 +1,16 @@
 import config from '../config.json' assert { type: 'json' };
-import { Config, GuildMemberOrInt } from '../typings.js';
+import { Config, GuildMemberIntOrMsg } from '../typings.js';
 
 /**
- * @param guildMemberOrInt A GuildMember or Interaction
- * @returns An array of MF farms that the GuildMember is a member of
+ * @param guildMemberOrInt A GuildMember, Interaction, or Message
+ * @returns An array of MF farm role IDs that the GuildMember is a member of
  */
-export function onMFFarms(guildMemberOrInt: GuildMemberOrInt) {
-    return (config as Config).mainServer.MFFarmRoles
+export function onMFFarms(guildMemberIntOrMsg: GuildMemberIntOrMsg) {
+    return (config as Config).mainServer.mfFarmRoles
         .map(x => config.mainServer.roles[x])
         .filter(x => {
-            if ('roles' in guildMemberOrInt) {
-                return guildMemberOrInt.roles.cache.has(x);
-            } else return guildMemberOrInt.member.roles.cache.has(x);
+            if ('roles' in guildMemberIntOrMsg) {
+                return guildMemberIntOrMsg.roles.cache.has(x);
+            } else return guildMemberIntOrMsg.member?.roles.cache.has(x);
         });
 }

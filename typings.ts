@@ -15,7 +15,7 @@ export interface ApplicationRPC {
     tags?: string[];
 };
 
-export type GuildMemberOrInt = Discord.GuildMember | Discord.ChatInputCommandInteraction<"cached">;
+export type GuildMemberIntOrMsg = Discord.GuildMember | Discord.ChatInputCommandInteraction<"cached"> | Discord.Message;
 
 export type RepeatedMessagesData = Record<string, {
     data: Discord.Collection<number, {
@@ -48,7 +48,7 @@ export interface Command {
 
 /** `Discord.ChatInputCommandInteraction<CacheType>` */
 export interface TInteraction extends Discord.ChatInputCommandInteraction<"cached"> {
-    client: YClient;
+    readonly client: YClient;
 }
 
 /** The base object data that is always present */
@@ -123,14 +123,14 @@ export interface Config {
         logs: string[];
     };
     /** `Array<[ChannelID, ChannelName]>` */
-    ytCacheChannels: Array<Array<string>>,
+    ytCacheChannels: string[][],
     mainServer: {
         /** The ID of the guild that this bot is for */
         id: string;
         fsLoopMsgId: string;
-        MFFarmRoles: Array<keyof Config["mainServer"]["roles"]>;
-        MPStaffRoles: Array<keyof Config["mainServer"]["roles"]>;
-        DCStaffRoles: Array<keyof Config["mainServer"]["roles"]>;
+        mfFarmRoles: Array<keyof Config["mainServer"]["roles"]>;
+        mpStaffRoles: Array<keyof Config["mainServer"]["roles"]>;
+        dcStaffRoles: Array<keyof Config["mainServer"]["roles"]>;
         roles: Record<keyof typeof config.mainServer.roles, string>;
         channels: Record<keyof typeof config.mainServer.channels, string>;
         categories: Record<keyof typeof config.mainServer.categories, string>;
@@ -152,7 +152,7 @@ export interface FSLoopDSS {
     slots: {
         capacity: number,
         used: number,
-        players: Array<FSLoopDSSPlayer>
+        players: FSLoopDSSPlayer[]
     }
 }
 

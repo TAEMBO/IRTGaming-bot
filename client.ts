@@ -12,23 +12,23 @@ import { hasRole, isDCStaff, LocalDatabase, log, RepeatedMessages, youNeedRole }
 import { Config, FSCache, YTCache, InviteCache, Command, Registry } from './typings.js';
 
 export default class YClient extends Client<true> {
-    public config = config as Config;
-    public registry: Registry = [];
-    public fsCache: FSCache = {};
-    public ytCache: YTCache = {};
-    public commands = new Discord.Collection<string, Command>();
-    public repeatedMessages = new RepeatedMessages(this);
-    public invites = new Map<string, InviteCache>();
-    public bannedWords = new LocalDatabase<string>('bannedWords');
-    public tfList = new LocalDatabase<string>('TFlist');
-    public fmList = new LocalDatabase<string>('FMlist');
-    public whitelist = new LocalDatabase<string>('adminWhitelist');
-    public watchListPings = new LocalDatabase<string>('watchListPings');
-    public userLevels = new UserLevels(this);
-    public punishments = new Punishments(this);
-    public watchList = new WatchList();
-    public playerTimes = new PlayerTimes(this);
-    public reminders = new Reminders(this);
+    public readonly config = config as Config;
+    public readonly registry: Registry = [];
+    public readonly fsCache: FSCache = {};
+    public readonly ytCache: YTCache = {};
+    public readonly commands = new Discord.Collection<string, Command>();
+    public readonly repeatedMessages = new RepeatedMessages(this);
+    public readonly invites = new Map<string, InviteCache>();
+    public readonly bannedWords = new LocalDatabase<string>('bannedWords');
+    public readonly tfList = new LocalDatabase<string>('TFlist');
+    public readonly fmList = new LocalDatabase<string>('FMlist');
+    public readonly whitelist = new LocalDatabase<string>('adminWhitelist');
+    public readonly watchListPings = new LocalDatabase<string>('watchListPings');
+    public readonly userLevels = new UserLevels(this);
+    public readonly punishments = new Punishments(this);
+    public readonly watchList = new WatchList();
+    public readonly playerTimes = new PlayerTimes(this);
+    public readonly reminders = new Reminders(this);
 
     constructor() {
         super({

@@ -262,24 +262,23 @@ export default {
                     if (playerData) {
                         const playerTimeData = interaction.client.playerTimes.getTimeData(playerData);
                         const playerTimeDataTotal = playerTimeData.reduce((x, y) => x + y[1].time, 0);
-                        const formattedTimeData = playerTimeData.map(([serverAcro, timeData]) => [
-                            `> **${serverAcro.toUpperCase()}**`,
-                            `> - Time - ${formatTime(timeData.time * 60 * 1000, 5, { commas: true, longNames: false })}`,
-                            `> - Last on - ${interaction.client.fsCache[serverAcro]?.players?.some(x => x.name === playerData._id) ? 'Right now' : `<t:${timeData.lastOn}:R>`}`
-                        ].join('\n'));
+                        const formattedTimeData = playerTimeData.map(([serverAcro, timeData]) => ({
+                            name: serverAcro.toUpperCase(),
+                            value: [
+                                `Time - ${formatTime(timeData.time * 60 * 1000, 5, { commas: true, longNames: false })}`,
+                                `Last on - ${interaction.client.fsCache[serverAcro]?.players?.some(x => x.name === playerData._id) ? 'Right now' : `<t:${timeData.lastOn}:R>`}`
+                            ].join('\n')
+                        }));
 
-                        interaction.reply({ embeds: [
-                            new EmbedBuilder()
-                                .setColor(interaction.client.config.embedColor)
-                                .setTitle([
-                                    `Player - \`${playerData._id}\`${interaction.client.fmList.data.includes(playerData._id) ? ':farmer:' : ''}${interaction.client.tfList.data.includes(playerData._id) ? ':angel:' : ''}`,
-                                    `Leaderboard position - **#${sortedData.indexOf(playerData) + 1}**`,
-                                    `Total time - **${formatTime(playerTimeDataTotal * 60 * 1000, 5, { commas: true, longNames: false })}**`,
-                                    (isMPStaff(interaction) && playerData.uuid) ? `UUID: \`${playerData.uuid}\`` : ''
-                                ].join('\n')),
-                            new EmbedBuilder()
-                                .setColor(interaction.client.config.embedColor)
-                                .setTitle(`Server times\n${formattedTimeData.join('\n')}`)
+                        interaction.reply({ embeds: [new EmbedBuilder()
+                            .setColor(interaction.client.config.embedColor)
+                            .setTitle([
+                                `Player - \`${playerData._id}\`${interaction.client.fmList.data.includes(playerData._id) ? ':farmer:' : ''}${interaction.client.tfList.data.includes(playerData._id) ? ':angel:' : ''}`,
+                                `Leaderboard position - **#${sortedData.indexOf(playerData) + 1}**`,
+                                `Total time - **${formatTime(playerTimeDataTotal * 60 * 1000, 5, { commas: true, longNames: false })}**`,
+                                (isMPStaff(interaction) && playerData.uuid) ? `UUID: \`${playerData.uuid}\`` : ''
+                            ].join('\n'))
+                            .setFields(formattedTimeData)
                         ] });
                     } else interaction.reply('No data found with that name. [Find out why.](https://canary.discord.com/channels/552565546089054218/552583841936834560/1087422094519836792)');
 

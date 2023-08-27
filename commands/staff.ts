@@ -1,6 +1,5 @@
 import { SlashCommandBuilder, EmbedBuilder, GuildMember } from 'discord.js';
 import { TInteraction } from '../typings.js';
-import { hasRole } from '../utilities.js';
 
 export default {
 	async run(interaction: TInteraction) {
@@ -52,7 +51,7 @@ export default {
             discord: async () => {
                 const staff = {
                     admin: interaction.guild.roles.cache.get(allRoles.discordadmin)?.members,
-                    moderator: interaction.guild.roles.cache.get(allRoles.discordmoderator)?.members.filter(x => !hasRole(x, 'discordadmin')),
+                    moderator: interaction.guild.roles.cache.get(allRoles.discordmoderator)?.members,
                     helper: interaction.guild.roles.cache.get(allRoles.discordhelper)?.members
                 };
          

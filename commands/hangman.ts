@@ -13,6 +13,9 @@ export default {
 		const phrase = interaction.options.getString("phrase", true).toLowerCase();
 		const wordOrPhrase = phrase.includes(' ') ? 'phrase' : 'word';
 		const botMsg = await interaction.followUp({ content: `A hangman game has been started by *${interaction.user.tag}*!\nAnyone can guess letters${phrase.includes(' ') ? ', a word, or the full phrase': ' or the full word'} by doing \`guess [letter${phrase.includes(' ') ? ', word, or phrase' : ' or word'}]\`\nThe ${wordOrPhrase} is:\n\`\`\`\n${hidePhrase()}\n\`\`\``, fetchReply: true });
+        const guessCollector = interaction.channel?.createMessageCollector();
+
+        await interaction.deleteReply();
 
 		function phraseUpdate() {
 			const hideWordResult = hidePhrase();
@@ -20,12 +23,13 @@ export default {
 
 			if (!hiddenLetters) {
 				text = `The whole ${wordOrPhrase} has been revealed! The hangman game ends with the ${wordOrPhrase} being:\n\`\`\`\n${phrase}\n\`\`\``;
-				guessCollector.stop();
+				guessCollector?.stop();
 				clearInterval(interval);
 			}
 
 			botMsg.reply({ content: text, allowedMentions: { repliedUser: false } });
 		}
+
 		function hidePhrase() {
 			hiddenLetters = false;
 
@@ -38,6 +42,7 @@ export default {
 				}
 			}).join(' ');
 		}
+
 		function guessLetter(letter: string) {
 			latestActivity = Date.now();
 
@@ -53,6 +58,7 @@ export default {
 
 			phraseUpdate();
 		}
+
 		function guessWord(text: string) {
 			latestActivity = Date.now();
 
@@ -67,33 +73,8 @@ export default {
 			guessedWordsIndices.push(...guessedTextCharIndices.map(x => x + guessedTextStartIndex));
 			phraseUpdate();
 		}
-		const guessCollector = (interaction.channel as Discord.TextChannel).createMessageCollector();
 
-		guessCollector.on('collect', guessMessage => {
-			if (guessMessage.author.bot) return;
-			if (guessMessage.content.toLowerCase().startsWith('guess')) {
-				const guess = guessMessage.content.slice(6).toLowerCase();
-
-				if (!guess || !guess.length) {
-					guessMessage.reply({ content: 'You\'re using the \`guess\` command wrong. Get good.', allowedMentions: { repliedUser: false } });
-					return;
-				}
-
-				if (guess.length) {
-					guessWord(guess);
-				} else guessLetter(guess);
-			}
-		});
-
-		const interval = setInterval(() => {
-			if (Date.now() > (latestActivity + 60_000)) {
-				botMsg.reply({ content: 'The hangman game has ended due to inactivity.', allowedMentions: { repliedUser: false } });
-				guessCollector.stop();
-				clearInterval(interval);
-			}
-		}, 5000);
-
-		function checkFouls(isWord: boolean) {
+        function checkFouls(isWord: boolean) {
 			const stages = [
 				[
 					'      ',
@@ -156,11 +137,35 @@ export default {
 
 			if (fouls === 7) {
 				loseText = `\nThe poor fella got hung. You lost the game. The ${wordOrPhrase} was:\n\`\`\`\n${phrase}\n\`\`\``;
-				guessCollector.stop();
+				guessCollector?.stop();
 				clearInterval(interval);
 			}
 			botMsg.reply({ content: `The ${wordOrPhrase} doesn\'t include that ${isWord ? 'piece of text' : 'letter'}.\nAn incorrect guess leads to the addition of things to the drawing. It now looks like this:\n\`\`\`\n${stages[fouls - 1].join('\n')}\n\`\`\`` + loseText, allowedMentions: { repliedUser: false } });
 		}
+
+		guessCollector?.on('collect', guessMessage => {
+			if (guessMessage.author.bot) return;
+			if (guessMessage.content.toLowerCase().startsWith('guess')) {
+				const guess = guessMessage.content.slice(6).toLowerCase();
+
+				if (!guess || !guess.length) {
+					guessMessage.reply({ content: 'You\'re using the \`guess\` command wrong. Get good.', allowedMentions: { repliedUser: false } });
+					return;
+				}
+
+				if (guess.length > 1) {
+					guessWord(guess);
+				} else guessLetter(guess);
+			}
+		});
+
+		const interval = setInterval(() => {
+			if (Date.now() > (latestActivity + 120_000)) {
+				botMsg.reply({ content: 'The hangman game has ended due to inactivity.', allowedMentions: { repliedUser: false } });
+				guessCollector?.stop();
+				clearInterval(interval);
+			}
+		}, 5000);
 	},
 	data: new SlashCommandBuilder()
 		.setName("hangman")

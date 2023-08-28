@@ -49,6 +49,7 @@ export interface Command {
 /** `Discord.ChatInputCommandInteraction<CacheType>` */
 export interface TInteraction extends Discord.ChatInputCommandInteraction<"cached"> {
     readonly client: YClient;
+    channel: Discord.GuildTextBasedChannel;
 }
 
 /** The base object data that is always present */

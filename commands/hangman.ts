@@ -74,7 +74,7 @@ export default {
 			if (guessMessage.content.toLowerCase().startsWith('guess')) {
 				const guess = guessMessage.content.slice(6).toLowerCase();
 
-				if (!guess || guess.length) {
+				if (!guess || !guess.length) {
 					guessMessage.reply({ content: 'You\'re using the \`guess\` command wrong. Get good.', allowedMentions: { repliedUser: false } });
 					return;
 				}
@@ -86,8 +86,8 @@ export default {
 		});
 
 		const interval = setInterval(() => {
-			if (Date.now() > (latestActivity + 60000)) {
-				botMsg.reply({content: 'The hangman game has ended due to inactivity.', allowedMentions: {repliedUser: false}});
+			if (Date.now() > (latestActivity + 60_000)) {
+				botMsg.reply({ content: 'The hangman game has ended due to inactivity.', allowedMentions: { repliedUser: false } });
 				guessCollector.stop();
 				clearInterval(interval);
 			}

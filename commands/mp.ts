@@ -26,6 +26,12 @@ export default {
 
                 const chosenServer = interaction.options.getString('server', true);
                 const chosenAction = interaction.options.getString('action', true) as 'start' | 'stop' | 'restart';
+                const serverStatusMsg = (status: string) => interaction.client.getChan('fsLogs').send({ embeds: [new EmbedBuilder()
+                    .setTitle(`${chosenServer.toUpperCase()} now ${status}`)
+                    .setColor(interaction.client.config.embedColorYellow)
+                    .setTimestamp()
+                    .setFooter({ text: '\u200b', iconURL: interaction.user.displayAvatarURL() })
+                ] });
 
                 if (interaction.client.config.fs[chosenServer].isPrivate && !hasRole(interaction, 'mpmanager')) {
                     await checkRole('mfmanager');
@@ -41,6 +47,7 @@ export default {
                 const browser = await puppeteer.launch();
                 const page = await browser.newPage();
     
+                if (interaction.client.fsCache[chosenServer].status === null) return interaction.editReply('Cache not populated, retry in 30 seconds');
                 if (interaction.client.fsCache[chosenServer].status === 'offline' && ['stop', 'restart'].includes(chosenAction)) return interaction.editReply('Server is already offline');
                 if (interaction.client.fsCache[chosenServer].status === 'online' && chosenAction === 'start') return interaction.editReply('Server is already online');
     
@@ -51,49 +58,70 @@ export default {
                 }
                 await interaction.editReply(`Connected to dedi panel for **${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**...`);
     
-                let result = 'Dedi panel closed, result:\n';
-                result += `Server: **${chosenServer.toUpperCase()}**\n`;
-                result += `Action: **${chosenAction}**\n`;
+                let result = 'Successfully ';
 
-                if (chosenAction !== 'start') {
-                    const uptimeText = await page.evaluate(() => document.querySelector("span.monitorHead")?.textContent);
-                    result += `Uptime before stopping: **${uptimeText}**\n`;
-                };
+                ({
+                    start: () => {
+                        result += 'started ';
+                        serverStatusMsg('online');
+
+                        interaction.client.fsCache[chosenServer].status = 'online';
+                    },
+                    stop: async () => {
+                        result += 'stopped ';
+                        serverStatusMsg('offline');
+
+                        interaction.client.fsCache[chosenServer].status = 'offline';
+
+                        const uptimeText = await page.evaluate(() => document.querySelector("span.monitorHead")?.textContent);
+                        result += `. Uptime before stopping: **${uptimeText}**`;
+
+                    },
+                    restart: async () => {
+                        result += 'restarted ';
+                        serverStatusMsg('restarting');
+
+                        const uptimeText = await page.evaluate(() => document.querySelector("span.monitorHead")?.textContent);
+                        result += `. Uptime before restarting: **${uptimeText}**`;
+                    }
+                })[chosenAction]();
     
                 await page.waitForSelector(serverSelector);
                 await page.click(serverSelector);
-                await browser.close();
 
-                setTimeout(() => {
-                    interaction.editReply(result += `Total time taken: **${Date.now() - now}ms**`);
-                    if (chosenAction === 'restart') interaction.client.getChan('fsLogs').send({ embeds: [new EmbedBuilder().setTitle(`${chosenServer.toUpperCase()} now restarting`).setColor(interaction.client.config.embedColorYellow).setTimestamp()] });
-                }, 1_000);
+                result += `**${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**`;
+
+                interaction.editReply(result);
+                
+                setTimeout(() => browser.close(), 10_000);
             },
             mop: async () => {
                 if (!hasRole(interaction, 'mpmanager')) return youNeedRole(interaction, 'mpmanager');
 
                 const chosenServer = interaction.options.getString('server', true);
                 const chosenAction = interaction.options.getString('action', true) as 'items.xml' | 'players.xml';
-                const FTPLogin = fsServers.getPublicOne(chosenServer).ftp;
+                const ftpLogin = fsServers.getPublicOne(chosenServer).ftp;
                 
                 if (interaction.client.fsCache[chosenServer].status === 'online') return interaction.reply(`You cannot mop files from **${chosenServer.toUpperCase()}** while it is online`);
                 
                 await interaction.deferReply();
     
-                FTP.on('ready', () => FTP.delete(FTPLogin.path + `savegame1/${chosenAction}`, async (err) => {
+                FTP.on('ready', () => FTP.delete(ftpLogin.path + `savegame1/${chosenAction}`, async (err) => {
                     if (err) return interaction.editReply(err.message);
+
                     await interaction.editReply(`Successfully deleted **${chosenAction}** from **${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**`);
                     FTP.end();
-                })).connect(FTPLogin);
+                })).connect(ftpLogin);
             },
             bans: async () => {
                 const chosenServer = interaction.options.getString('server', true);
                 const chosenAction = interaction.options.getString('action', true) as 'dl' | 'ul';
+                const ftpLogin = fsServers.getPublicOne(chosenServer).ftp;
     
                 await interaction.deferReply();
     
                 if (chosenAction === 'dl') {
-                    FTP.on('ready', () => FTP.get(fsServers.getPublicOne(chosenServer).ftp.path + 'blockedUserIds.xml', (err, stream) => {
+                    FTP.on('ready', () => FTP.get(ftpLogin.path + 'blockedUserIds.xml', (err, stream) => {
                         if (err) return interaction.editReply(err.message);
 
                         stream.pipe(fs.createWriteStream('../databases/blockedUserIds.xml'));
@@ -101,7 +129,7 @@ export default {
                             FTP.end();
                             interaction.editReply({ files: ['../databases/blockedUserIds.xml'] })
                         });
-                    })).connect(fsServers.getPublicOne(chosenServer).ftp);
+                    })).connect(ftpLogin);
                 } else {
                     if (!hasRole(interaction, 'mpmanager')) return youNeedRole(interaction, 'mpmanager');
                     
@@ -120,19 +148,20 @@ export default {
     
                     if (!data.blockedUserIds?.user[0]?._attributes?.displayName) return interaction.editReply('Canceled: Improper file (data format)');
     
-                    FTP.on('ready', () => FTP.put(banData, fsServers.getPublicOne(chosenServer).ftp.path + 'blockedUserIds.xml', error => {
+                    FTP.on('ready', () => FTP.put(banData, ftpLogin.path + 'blockedUserIds.xml', error => {
                         if (error) {
                             interaction.editReply(error.message);
                         } else interaction.editReply(`Successfully uploaded ban file for ${chosenServer.toUpperCase()} after **${Date.now() - now}ms**`);
                         
                         FTP.end();
-                    })).connect(fsServers.getPublicOne(chosenServer).ftp);
+                    })).connect(ftpLogin);
                 }
             },
             search: async () => {
                 await interaction.deferReply();
                 const chosenServer = interaction.options.getString('server', true);
                 const name = interaction.options.getString('name', true);
+                const ftpLogin = fsServers.getPublicOne(chosenServer).ftp;
 
                 function permIcon(perm: string, key: string) {
                     if (perm === 'true') {
@@ -147,11 +176,10 @@ export default {
                     } else return perm;
                 }
 
-                FTP.on('ready', () => FTP.get(fsServers.getPublicOne(chosenServer).ftp.path + 'savegame1/farms.xml', async (err, stream) => {
+                FTP.on('ready', () => FTP.get(ftpLogin.path + 'savegame1/farms.xml', async (err, stream) => {
                     if (err) return interaction.editReply(err.message);
 
                     const farmData = xml2js(await new Response(stream as any).text(), { compact: true }) as farmFormat;
-
                     const playerData = farmData.farms.farm[0].players.player.find(x => {
                         if (name.length === 44) {
                             return x._attributes.uniqueUserId === name;
@@ -161,15 +189,17 @@ export default {
                     if (playerData) {
                         interaction.editReply('```\n' + Object.entries(playerData._attributes).map(x => x[0].padEnd(18, ' ') + permIcon(x[1], x[0])).join('\n') + '```');
                     } else interaction.editReply('No green farm data found with that name/UUID');
-                    stream.once('close', () => FTP.end());
-                })).connect(fsServers.getPublicOne(chosenServer).ftp);
+
+                    stream.once('close', FTP.end);
+                })).connect(ftpLogin);
             },
             farms: async () => {
                 const chosenServer = interaction.options.getString('server', true);
+                const ftpLogin = fsServers.getPublicOne(chosenServer).ftp;
 
                 await interaction.deferReply();
 
-                FTP.on('ready', () => FTP.get(fsServers.getPublicOne(chosenServer).ftp.path + 'savegame1/farms.xml', (err, stream) => {
+                FTP.on('ready', () => FTP.get(ftpLogin.path + 'savegame1/farms.xml', (err, stream) => {
                     if (err) return interaction.editReply(err.message);
 
                     stream.pipe(fs.createWriteStream('../databases/farms.xml'));
@@ -177,13 +207,14 @@ export default {
                         FTP.end();
                         interaction.editReply({ files: ['../databases/farms.xml'] });
                     });
-                })).connect(fsServers.getPublicOne(chosenServer).ftp);
+                })).connect(ftpLogin);
             },
             password: async () => {
                 await interaction.deferReply();
                 const chosenServer = interaction.options.getString('server', true);
+                const ftpLogin = fsServers.getPublicOne(chosenServer).ftp;
 
-                FTP.once('ready', () => FTP.get(fsServers.getPublicOne(chosenServer).ftp.path + 'dedicated_server/dedicatedServerConfig.xml', async (err, stream) => {
+                FTP.once('ready', () => FTP.get(ftpLogin.path + 'dedicated_server/dedicatedServerConfig.xml', async (err, stream) => {
                     if (err) return interaction.editReply(err.message);
 
                     const pw = (xml2js(await new Response(stream as any).text(), { compact: true }) as any).gameserver?.settings?.game_password?._text as string | undefined;
@@ -191,8 +222,9 @@ export default {
                     if (pw) {
                         interaction.editReply(`Current password for **${chosenServer.toUpperCase()}** is \`${pw}\``);
                     } else interaction.editReply(`**${chosenServer.toUpperCase()}** doesn't currently have a password set`);
-                    stream.once('close', () => FTP.end());
-                })).connect(fsServers.getPublicOne(chosenServer).ftp);
+
+                    stream.once('close', FTP.end);
+                })).connect(ftpLogin);
             },
             roles: async () => {
                 if (!hasRole(interaction, 'mpmanager')) return youNeedRole(interaction, 'mpmanager');

@@ -59,6 +59,7 @@ export default {
                 await interaction.editReply(`Connected to dedi panel for **${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**...`);
     
                 let result = 'Successfully ';
+                let uptimeText: string | null | undefined;
 
                 ({
                     start: () => {
@@ -73,7 +74,7 @@ export default {
 
                         interaction.client.fsCache[chosenServer].status = 'offline';
 
-                        const uptimeText = await page.evaluate(() => document.querySelector("span.monitorHead")?.textContent);
+                        uptimeText = await page.evaluate(() => document.querySelector("span.monitorHead")?.textContent);
                         result += `. Uptime before stopping: **${uptimeText}**`;
 
                     },
@@ -81,7 +82,7 @@ export default {
                         result += 'restarted ';
                         serverStatusMsg('restarting');
 
-                        const uptimeText = await page.evaluate(() => document.querySelector("span.monitorHead")?.textContent);
+                        uptimeText = await page.evaluate(() => document.querySelector("span.monitorHead")?.textContent);
                         result += `. Uptime before restarting: **${uptimeText}**`;
                     }
                 })[chosenAction]();
@@ -90,6 +91,8 @@ export default {
                 await page.click(serverSelector);
 
                 result += `**${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**`;
+
+                if (uptimeText) result += uptimeText;
 
                 interaction.editReply(result);
                 

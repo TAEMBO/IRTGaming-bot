@@ -1,14 +1,14 @@
 import Discord, { EmbedBuilder } from 'discord.js';
-import YClient from '../client.js';
 import { formatUser } from '../utilities.js';
+import { TClient } from '../typings.js';
 
-export default async (client: YClient, oldMember: Discord.GuildMember | Discord.PartialGuildMember, newMember: Discord.GuildMember) => {
-    if (!client.config.botSwitches.logs) return;
+export default async (oldMember: TClient<Discord.GuildMember | Discord.PartialGuildMember>, newMember: TClient<Discord.GuildMember>) => {
+    if (!newMember.client.config.botSwitches.logs) return;
 
     let changes = false;
     const embed = new EmbedBuilder()
         .setTimestamp()
-        .setColor(client.config.embedColor)
+        .setColor(newMember.client.config.embedColor)
         .setTitle(`Member Update: ${newMember.user.tag}`)
         .setDescription(formatUser(newMember.user))
         .setThumbnail(newMember.user.displayAvatarURL({ extension: 'png', size: 2048 }));
@@ -24,7 +24,7 @@ export default async (client: YClient, oldMember: Discord.GuildMember | Discord.
     // Role changes
     const newRoles = newMember.roles.cache.filter((x, i) => !oldMember.roles.cache.has(i));
     const oldRoles = oldMember.roles.cache.filter((x, i) => !newMember.roles.cache.has(i));
-    const boosterRole = client.config.mainServer.roles.legendarynitrobooster;
+    const boosterRole = newMember.client.config.mainServer.roles.legendarynitrobooster;
 
     if ((newRoles.size || oldRoles.size) && ((Date.now() - (newMember.joinedTimestamp as number)) > 5000)) {
         if (newRoles.size) embed.addFields({ name: '🔹 Roles Added', value: newRoles.map(x=>x.toString()).join(' ') });
@@ -33,7 +33,7 @@ export default async (client: YClient, oldMember: Discord.GuildMember | Discord.
         changes = true;
     }
     
-    if (changes) client.getChan('botLogs').send({ embeds: [embed] });
+    if (changes) newMember.client.getChan('botLogs').send({ embeds: [embed] });
 
-    if (oldRoles.has(boosterRole) || newRoles.has(boosterRole)) client.getChan('boostLogs').send({ embeds: [embed] });
+    if (oldRoles.has(boosterRole) || newRoles.has(boosterRole)) newMember.client.getChan('boostLogs').send({ embeds: [embed] });
 }

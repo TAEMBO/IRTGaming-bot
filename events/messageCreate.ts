@@ -1,9 +1,9 @@
 import Discord, { EmbedBuilder } from 'discord.js';
-import YClient from '../client.js';
 import { isDCStaff, isMPStaff, log, Profanity } from '../utilities.js';
+import { TClient } from '../typings.js';
 
-export default async (client: YClient, message: Discord.Message<boolean>) => {
-    if ((!client.config.botSwitches.commands && !client.config.devWhitelist.includes(message.author.id)) || message.system || message.author.bot) return;
+export default async (message: TClient<Discord.Message<boolean>>) => {
+    if ((!message.client.config.botSwitches.commands && !message.client.config.devWhitelist.includes(message.author.id)) || message.system || message.author.bot) return;
     //   ^^^     Bot is set to ignore commands and non-dev sent a message, ignore the message.      ^^^
 
     const msg = message.content.replaceAll('\n', ' ').toLowerCase();
@@ -11,22 +11,22 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
     const profanity = new Profanity(msg);
 
     if (!message.inGuild()) {
-        const member = client.mainGuild().members.cache.get(message.author.id);
+        const member = message.client.mainGuild().members.cache.get(message.author.id);
 
         if (!member) return;
 
-        client.getChan('taesTestingZone').send({
-            content: `DM Forward <@${client.config.devWhitelist[0]}>`,
+        message.client.getChan('taesTestingZone').send({
+            content: `DM Forward <@${message.client.config.devWhitelist[0]}>`,
             files: message.attachments.map(x => x.url),
             embeds: [new EmbedBuilder()
                 .setTitle('Forwarded DM Message')
                 .setDescription(`<@${message.author.id}>`)
                 .setAuthor({ name: `${message.author.tag} (${message.author.id})`, iconURL: message.author.displayAvatarURL({ extension: 'png' }) })
-                .setColor(client.config.embedColor)
+                .setColor(message.client.config.embedColor)
                 .setTimestamp()
                 .setFields(
                     { name: 'Message Content', value: message.content.length > 1024 ? message.content.slice(0, 1000) + '...' : message.content + '\u200b' },
-                    { name: 'Roles:', value: member.roles.cache.size > 1 ? member.roles.cache.filter(x => x.id !== client.config.mainServer.id).sort((a, b) => b.position - a.position).map(x => x).join(member.roles.cache.size > 4 ? ' ' : '\n').slice(0, 1024) : 'None' })
+                    { name: 'Roles:', value: member.roles.cache.size > 1 ? member.roles.cache.filter(x => x.id !== message.client.config.mainServer.id).sort((a, b) => b.position - a.position).map(x => x).join(member.roles.cache.size > 4 ? ' ' : '\n').slice(0, 1024) : 'None' })
             ]
         });
 
@@ -37,7 +37,7 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
     let automodded = false;
 
     // Misuse of staff ping
-    if (message.mentions.roles.some(role => role.id === client.config.mainServer.roles.mpstaff)) {
+    if (message.mentions.roles.some(role => role.id === message.client.config.mainServer.roles.mpstaff)) {
         log('Purple', `${message.author.tag} mentioned staff role`);
         
         message.channel.createMessageCollector({
@@ -47,47 +47,47 @@ export default async (client: YClient, message: Discord.Message<boolean>) => {
         }).on('collect', async collected => {
             log('Purple', `Received "y" from ${collected.author.tag}, indicating to mute`);
 
-            await client.punishments.addPunishment('mute', collected.author.id, 'Automod; Misuse of staff ping', message.author, message.member, { time: '10m' });
+            await message.client.punishments.addPunishment('mute', collected.author.id, 'Automod; Misuse of staff ping', message.author, message.member, { time: '10m' });
             collected.react('✅');
         });
     }
 
     // RepeatedMessages
-    const isWhitelisted = client.config.whitelist.bannedWords.some(x => [message.channelId, message.channel.parentId].includes(x));
+    const isWhitelisted = message.client.config.whitelist.bannedWords.some(x => [message.channelId, message.channel.parentId].includes(x));
 
-    if (client.config.botSwitches.automod && !isDCStaff(message) && !isWhitelisted) {
-        if (profanity.hasProfanity(client.bannedWords.data)) { // Banned words
+    if (message.client.config.botSwitches.automod && !isDCStaff(message) && !isWhitelisted) {
+        if (profanity.hasProfanity(message.client.bannedWords.data)) { // Banned words
             automodded = true;
 
             await message.reply('That word is banned here.').then(msg => {
                 message.delete();
                 setTimeout(() => msg.delete(), 5_000);
             });
-            await client.repeatedMessages.increment(message, 30_000, 4, 'bw', { time: '30m', reason: 'Banned words' });
+            await message.client.repeatedMessages.increment(message, 30_000, 4, 'bw', { time: '30m', reason: 'Banned words' });
         } else if (msg.includes("discord.gg/") && !isMPStaff(message)) { // Discord advertisement
             const inviteURL = message.content.split(' ').find(x => x.includes('discord.gg/')) as string;
-            const validInvite = await client.fetchInvite(inviteURL).catch(() => null);
+            const validInvite = await message.client.fetchInvite(inviteURL).catch(() => null);
 
-            if (validInvite && validInvite.guild?.id !== client.config.mainServer.id) {
+            if (validInvite && validInvite.guild?.id !== message.client.config.mainServer.id) {
                 automodded = true;
 
                 await message.reply("No advertising other Discord servers.").then(msg => {
                     message.delete();
                     setTimeout(() => msg.delete(), 10_000);
                 });
-                await client.repeatedMessages.increment(message, 60_000, 2, 'adv', { time: '1h', reason: 'Discord advertisement' });
+                await message.client.repeatedMessages.increment(message, 60_000, 2, 'adv', { time: '1h', reason: 'Discord advertisement' });
             }
         }
     }
 
     if (automodded) return;
-    if (message.channel.id !== client.config.mainServer.channels.spamZone) client.userLevels.incrementUser(message.author.id);
-    if (!client.config.botSwitches.autoResponses) return;
+    if (message.channel.id !== message.client.config.mainServer.channels.spamZone) message.client.userLevels.incrementUser(message.author.id);
+    if (!message.client.config.botSwitches.autoResponses) return;
 
     // Morning message systen
     const morningMsgs = ['morning all', 'morning everyone', 'morning guys', 'morning people'];
 
-	if (morningMsgs.some(x => msg.includes(x)) && message.channel.id === client.config.mainServer.channels.general) {
+	if (morningMsgs.some(x => msg.includes(x)) && message.channel.id === message.client.config.mainServer.channels.general) {
         const randomEl = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
         const staffTag = message.member?.displayName.indexOf(' | ') ?? NaN < 0 ? undefined : message.member?.displayName.indexOf(' | ');
         const person = message.member?.displayName.slice(0, staffTag).replace('[LOA] ', '');

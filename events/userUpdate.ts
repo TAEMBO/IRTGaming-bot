@@ -1,13 +1,13 @@
 import Discord, { EmbedBuilder } from 'discord.js';
-import YClient from '../client.js';
 import { formatUser } from '../utilities.js';
+import { TClient } from '../typings.js';
 
-export default async (client: YClient, oldUser: Discord.User | Discord.PartialUser, newUser: Discord.User) => {
-    if (!client.config.botSwitches.logs || oldUser.tag === newUser.tag) return;
+export default async (oldUser: TClient<Discord.User | Discord.PartialUser>, newUser: TClient<Discord.User>) => {
+    if (!newUser.client.config.botSwitches.logs || oldUser.tag === newUser.tag) return;
 
-    client.getChan('botLogs').send({ embeds: [new EmbedBuilder()
+    newUser.client.getChan('botLogs').send({ embeds: [new EmbedBuilder()
         .setTimestamp()
-        .setColor(client.config.embedColor)
+        .setColor(newUser.client.config.embedColor)
         .setTitle(`User Update: ${newUser.tag}`)
         .setDescription(formatUser(newUser))
         .setThumbnail(newUser.displayAvatarURL({ extension: 'png', size: 2048 }))

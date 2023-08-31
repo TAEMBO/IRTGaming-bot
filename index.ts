@@ -1,11 +1,12 @@
 import { EmbedBuilder } from 'discord.js';
 import YClient from './client.js';
+import fs from 'node:fs';
+import path from 'node:path';
+import mongoose from 'mongoose';
+import { log } from './utilities.js';
+import { Command } from './typings.js';
 
 const client = new YClient();
-
-console.log(client.config.botSwitches);
-console.log(client.config.devWhitelist);
-console.log(Object.keys(client.config.fs));
 
 /** Error handler */
 function errorLog(error: Error) {
@@ -29,6 +30,38 @@ function errorLog(error: Error) {
             .setTimestamp()
         ]
     });
+}
+
+mongoose.set('strictQuery', true).connect(client.config.mongoURL, {
+    autoIndex: true,
+    serverSelectionTimeoutMS: 5_000,
+    socketTimeoutMS: 45_000,
+    family: 4,
+    waitQueueTimeoutMS: 50_000
+}).then(() => log('Purple', 'Connected to MongoDB'));
+
+client.login(client.config.token);
+client.setMaxListeners(100);
+console.log(client.config.botSwitches);
+console.log(client.config.devWhitelist);
+console.log(Object.keys(client.config.fs));
+
+for (const [chanId, _] of client.config.ytCacheChannels) client.ytCache[chanId] = null;
+for (const serverAcro of Object.keys(client.config.fs)) client.fsCache[serverAcro] = { players: [], status: null, lastAdmin: null };
+
+// Event handler
+for await (const file of fs.readdirSync(path.resolve('./events'))) {
+    const eventFile = await import(`./events/${file}`);
+
+    client.on(file.replace('.js', ''), eventFile.default);
+}
+
+// Command handler
+for await (const file of fs.readdirSync(path.resolve('./commands'))) {
+    const commandFile: { default: Omit<Command, 'uses'> }  = await import(`./commands/${file}`);
+
+    client.commands.set(commandFile.default.data.name, {  uses: 0, ...commandFile.default });
+    client.registry.push(commandFile.default.data.toJSON());
 }
 
 process.on('unhandledRejection', errorLog);

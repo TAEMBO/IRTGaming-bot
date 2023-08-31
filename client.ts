@@ -1,14 +1,11 @@
 import Discord, { Client, GatewayIntentBits, Partials } from "discord.js";
-import fs from "node:fs";
-import path from 'node:path';
-import mongoose from "mongoose";
 import UserLevels from './schemas/userLevels.js';
 import Punishments from './schemas/punishments.js';
 import PlayerTimes from './schemas/playerTimes.js';
 import WatchList from './schemas/watchList.js';
 import Reminders from './schemas/reminders.js';
 import config from './config.json' assert { type: 'json' };
-import { hasRole, isDCStaff, LocalDatabase, log, RepeatedMessages, youNeedRole } from './utilities.js';
+import { hasRole, isDCStaff, LocalDatabase, RepeatedMessages, youNeedRole } from './utilities.js';
 import { Config, FSCache, YTCache, InviteCache, Command, Registry } from './typings.js';
 
 export default class YClient extends Client<true> {
@@ -51,45 +48,11 @@ export default class YClient extends Client<true> {
             ],
             presence: config.botPresence as Discord.PresenceData
         });
-        this.init();
-    }
-
-    private async init() {
-        await mongoose.set('strictQuery', true).connect(this.config.mongoURL, {
-            autoIndex: true,
-            serverSelectionTimeoutMS: 5000,
-            socketTimeoutMS: 45000,
-            family: 4,
-            waitQueueTimeoutMS: 50000
-        }).then(() => log('Purple', 'Connected to MongoDB'));
-        
-        this.login(this.config.token);
-        this.setMaxListeners(100);
-        
-        for (const ch of this.config.ytCacheChannels) this.ytCache[ch[0]] = null;
-        for (const serverAcro of Object.keys(this.config.fs)) this.fsCache[serverAcro] = { players: [], status: null, lastAdmin: null };
-
-        // Event handler
-        for await (const file of fs.readdirSync(path.resolve('./events'))) {
-            const eventFile = await import(`./events/${file}`);
-
-            file.startsWith('ready')
-                ? this.once(file.replace('.js', ''), async (...args) => eventFile.default(this, ...args))
-                : this.on(file.replace('.js', ''), async (...args) => eventFile.default(this, ...args));
-        }
-
-        // Command handler
-        for await (const file of fs.readdirSync(path.resolve('./commands'))) {
-            const commandFile: { default: Omit<Command, 'uses'> }  = await import(`./commands/${file}`);
-
-            this.commands.set(commandFile.default.data.name, {  uses: 0, ...commandFile.default });
-            this.registry.push(commandFile.default.data.toJSON());
-        }
     }
 
     /**
      * Get a text channel via config
-     * @param channel 
+     * @param channel
      */
     public getChan(channel: keyof typeof this.config.mainServer.channels) {
         return this.channels.cache.get(this.config.mainServer.channels[channel]) as Discord.TextChannel;
@@ -97,7 +60,7 @@ export default class YClient extends Client<true> {
 
     /**
      * Get a role via config
-     * @param role 
+     * @param role
      */
     public getRole(role: keyof typeof this.config.mainServer.roles) {
         return this.mainGuild().roles.cache.get(this.config.mainServer.roles[role]) as Discord.Role;

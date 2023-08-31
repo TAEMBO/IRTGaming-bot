@@ -47,121 +47,122 @@ export interface Command {
 }
 
 /** `Discord.ChatInputCommandInteraction<CacheType>` */
-export interface TInteraction extends Discord.ChatInputCommandInteraction<"cached"> {
+export type TInteraction = TClient<Discord.ChatInputCommandInteraction<"cached">>
+  
+export type TClient<T> = T & {
     readonly client: YClient;
-    channel: NonNullable<Discord.ChatInputCommandInteraction<"cached">['channel']>;
-}
+};
 
 /** The base object data that is always present */
 export interface FSServerBase {
     /** The unabbreviated name of this server */
-    fullName: string;
+    readonly fullName: string;
     /** The channel ID for this server's stats embed, used in FSLoop */
-    channelId: string;
+    readonly channelId: string;
     /** The message ID for this server's stats embed, used in FSLoop */
-    messageId: string;
+    readonly messageId: string;
     /** The dedicated server panel login for this server */
-    login: string;
+    readonly login: string;
     /** The Link XML URL for this server (w/ .json extension) */
-    dss: string;
+    readonly dss: string;
     /** The Link Savegame File (careerSavegame) URL */
-    csg: string;
+    readonly csg: string;
 }
 /** Additional object data if this server is public */
 export interface FSServerPublic {
     /** Whether or not this server is a private server with a password */
-    isPrivate: false;
+    readonly isPrivate: false;
     /** The time zone difference between this server's location and UTC in minutes */
-    utcDiff: number;
+    readonly utcDiff: number;
     /** An array of activities that can be done on this server */
-    todo: string[];
+    readonly todo: string[];
     /** The FTP details for this server */
-    ftp: {
-        host: string;
-        user: string;
-        password: string;
+    readonly ftp: {
+        readonly host: string;
+        readonly user: string;
+        readonly password: string;
         /** The path to navigate to the game's profile folder */
-        path: string;
+        readonly path: string;
     };
 }
 /** Additional object data if this server is private */
 export interface FSServerPrivate {
     /** Whether or not this server is a private server with a password */
-    isPrivate: true;
+    readonly isPrivate: true;
 }
 export type FSServer = FSServerBase & (FSServerPrivate | FSServerPublic);
 
 /** Template for creating a config.json */
 export interface Config {
     /** The Discord bot client token */
-    token: string,
+    readonly token: string;
     /** The URL for connecting to a MongoDB server */
-    mongoURL: string,
-    embedColor: `#${string}`,
-    embedColorGreen: `#${string}`,
-    embedColorRed: `#${string}`,
-    embedColorYellow: `#${string}`,
-    statsGraphSize: number,
-    botPresence: Discord.PresenceData,
-    botSwitches: {
-        commands: boolean,
-        automod: boolean,
-        logs: boolean,
-        registerCommands: boolean,
-        fsLoop: boolean,
-        ytLoop: boolean,
-        autoResponses: boolean,
-        buttonRoles: boolean,
-    },
+    readonly mongoURL: string;
+    readonly embedColor: `#${string}`;
+    readonly embedColorGreen: `#${string}`;
+    readonly embedColorRed: `#${string}`;
+    readonly embedColorYellow: `#${string}`;
+    statsGraphSize: number;
+    readonly botPresence: Discord.PresenceData;
+    readonly botSwitches: {
+        readonly commands: boolean;
+        readonly automod: boolean;
+        readonly logs: boolean;
+        readonly registerCommands: boolean;
+        readonly fsLoop: boolean;
+        readonly ytLoop: boolean;
+        readonly autoResponses: boolean;
+        readonly buttonRoles: boolean;
+    };
     /** An object for managing and communicating with Farming Simulator servers, keyed by their abbreviated acronym */
-    fs: Record<string, FSServer>;
+    readonly fs: Record<string, FSServer>;
     /** A list of user IDs that are considered developers of this bot */
-    devWhitelist: Array<string>;
-    whitelist: {
+    readonly devWhitelist: Array<string>;
+    readonly whitelist: {
         /** A list of channel IDs that automod does not apply to */
-        bannedWords: string[];
+        readonly bannedWords: string[];
         /** A list of channel IDs that logs do not emit for */
-        logs: string[];
+        readonly logs: string[];
     };
     /** `Array<[ChannelID, ChannelName]>` */
-    ytCacheChannels: string[][],
-    mainServer: {
+    readonly ytCacheChannels: string[][];
+    readonly mainServer: {
         /** The ID of the guild that this bot is for */
-        id: string;
-        fsLoopMsgId: string;
-        mfFarmRoles: Array<keyof Config["mainServer"]["roles"]>;
-        mpStaffRoles: Array<keyof Config["mainServer"]["roles"]>;
-        dcStaffRoles: Array<keyof Config["mainServer"]["roles"]>;
-        roles: Record<keyof typeof config.mainServer.roles, string>;
-        channels: Record<keyof typeof config.mainServer.channels, string>;
-        categories: Record<keyof typeof config.mainServer.categories, string>;
-    }
+        readonly id: string;
+        readonly fsLoopMsgId: string;
+        readonly mfFarmRoles: Array<keyof Config["mainServer"]["roles"]>;
+        readonly mpStaffRoles: Array<keyof Config["mainServer"]["roles"]>;
+        readonly dcStaffRoles: Array<keyof Config["mainServer"]["roles"]>;
+        readonly roles: Record<keyof typeof config.mainServer.roles, string>;
+        readonly channels: Record<keyof typeof config.mainServer.channels, string>;
+        readonly categories: Record<keyof typeof config.mainServer.categories, string>;
+    };
 }
 
 export interface FSLoopDSS {
-    server: {
-        dayTime: number,
-        game: string,
-        mapName: string,
-        mapSize: number,
-        mapOverviewFilename: string,
-        money: number,
-        name: string,
-        server: string,
-        version: string
-    },
-    slots: {
-        capacity: number,
-        used: number,
-        players: FSLoopDSSPlayer[]
-    }
+    readonly server: {
+        readonly dayTime: number;
+        readonly game: string;
+        readonly mapName: string;
+        readonly mapSize: number;
+        readonly mapOverviewFilename: string;
+        readonly money: number;
+        readonly name: string;
+        readonly server: string;
+        readonly version: string;
+    };
+    readonly slots: {
+        readonly capacity: number;
+        readonly used: number;
+        readonly players: FSLoopDSSPlayer[];
+    };
 }
 
 export interface FSLoopDSSPlayer {
-    isUsed: boolean,
-    isAdmin: boolean,
-    uptime: number,
-    name: string
+    readonly isUsed: boolean;
+    readonly isAdmin: boolean;
+    readonly uptime: number;
+    readonly name: string;
 }
 
 export interface FSLoopCSG {

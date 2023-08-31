@@ -1,4 +1,4 @@
 import Discord from 'discord.js';
-import YClient from '../client.js';
+import { TClient } from '../typings.js';
 
-export default async (client: YClient, invite: Discord.Invite) => client.invites.delete(invite.code);
+export default async (invite: TClient<Discord.Invite>) => invite.client.invites.delete(invite.code);

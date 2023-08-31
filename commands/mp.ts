@@ -75,7 +75,6 @@ export default {
                         interaction.client.fsCache[chosenServer].status = 'offline';
 
                         uptimeText = await page.evaluate(() => document.querySelector("span.monitorHead")?.textContent);
-                        result += `. Uptime before stopping: **${uptimeText}**`;
 
                     },
                     restart: async () => {
@@ -83,7 +82,6 @@ export default {
                         serverStatusMsg('restarting');
 
                         uptimeText = await page.evaluate(() => document.querySelector("span.monitorHead")?.textContent);
-                        result += `. Uptime before restarting: **${uptimeText}**`;
                     }
                 })[chosenAction]();
     
@@ -92,7 +90,7 @@ export default {
 
                 result += `**${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**`;
 
-                if (uptimeText) result += uptimeText;
+                if (uptimeText) result += `. Uptime before restarting: **${uptimeText}**`;
 
                 interaction.editReply(result);
                 

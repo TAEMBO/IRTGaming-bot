@@ -5,7 +5,7 @@ import FTPClient from 'ftp';
 import fs from 'node:fs';
 import { xml2js } from 'xml-js';
 import config from '../config.json' assert { type: 'json' };
-import { FSServers, hasRole, isMPStaff, youNeedRole } from '../utilities.js';
+import { FSServers, hasRole, isMPStaff, stringifyStream, youNeedRole } from '../utilities.js';
 import type { banFormat, farmFormat, TInteraction } from '../typings.js';
 
 const fsServers = new FSServers(config.fs);
@@ -179,7 +179,7 @@ export default {
                 FTP.on('ready', () => FTP.get(ftpLogin.path + 'savegame1/farms.xml', async (err, stream) => {
                     if (err) return interaction.editReply(err.message);
 
-                    const farmData = xml2js(await new Response(stream as any).text(), { compact: true }) as farmFormat;
+                    const farmData = xml2js(await stringifyStream(stream), { compact: true }) as farmFormat;
                     const playerData = farmData.farms.farm[0].players.player.find(x => {
                         if (name.length === 44) {
                             return x._attributes.uniqueUserId === name;
@@ -217,7 +217,7 @@ export default {
                 FTP.once('ready', () => FTP.get(ftpLogin.path + 'dedicated_server/dedicatedServerConfig.xml', async (err, stream) => {
                     if (err) return interaction.editReply(err.message);
 
-                    const pw = (xml2js(await new Response(stream as any).text(), { compact: true }) as any).gameserver?.settings?.game_password?._text as string | undefined;
+                    const pw = (xml2js(await stringifyStream(stream), { compact: true }) as any).gameserver?.settings?.game_password?._text as string | undefined;
 
                     if (pw) {
                         interaction.editReply(`Current password for **${chosenServer.toUpperCase()}** is \`${pw}\``);

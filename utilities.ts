@@ -11,4 +11,5 @@ export * from './utilities/localDatabase.js';
 export * from './utilities/log.js';
 export * from './utilities/onMFFarms.js';
 export * from './utilities/repeatedMessages.js';
+export * from './utilities/stringifyStream.js';
 export * from './utilities/youNeedRole.js';

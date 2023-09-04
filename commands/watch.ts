@@ -1,6 +1,5 @@
-import { SlashCommandBuilder } from 'discord.js';
-import fs from 'node:fs';
-import { TInteraction } from '../typings.js';
+import { SlashCommandBuilder, AttachmentBuilder } from 'discord.js';
+import { Index, TInteraction } from '../typings.js';
 import { isMPStaff, youNeedRole } from '../utilities.js';
 
 export default {
@@ -28,10 +27,9 @@ export default {
                 } else interaction.reply(`\`${name}\` doesn't exist on watchList`);
             },
             view: async () => {
-                fs.writeFileSync('../databases/watchListCache.json', JSON.stringify(await interaction.client.watchList.data.find(), null, 2));
-                interaction.reply({ files: ['../databases/watchListCache.json'] });
+                interaction.reply({ files: [new AttachmentBuilder(Buffer.from(JSON.stringify(await interaction.client.watchList.data.find(), null, 2)), { name: 'watchListCache.json' })] });
             }
-        } as any)[interaction.options.getSubcommand()]();
+        } as Index)[interaction.options.getSubcommand()]();
     },
     data: new SlashCommandBuilder()
         .setName("watch")

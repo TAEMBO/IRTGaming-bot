@@ -1,12 +1,11 @@
 
-import Discord, { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } from 'discord.js';
+import Discord, { SlashCommandBuilder, AttachmentBuilder, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } from 'discord.js';
 import puppeteer from 'puppeteer'; // Credits to Trolly for suggesting this package
 import FTPClient from 'ftp';
-import fs from 'node:fs';
 import { xml2js } from 'xml-js';
 import config from '../config.json' assert { type: 'json' };
 import { FSServers, hasRole, isMPStaff, stringifyStream, youNeedRole } from '../utilities.js';
-import type { banFormat, farmFormat, TInteraction } from '../typings.js';
+import type { banFormat, farmFormat, Index, TInteraction } from '../typings.js';
 
 const fsServers = new FSServers(config.fs);
 const cmdOptionChoices = fsServers.getPublicAll().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));
@@ -37,19 +36,17 @@ export default {
                     await checkRole('mfmanager');
                 } else await checkRole('mpmanager');
 
-                try {
-                    await interaction.deferReply();
-                } catch (err) {
-                    return;
-                }
+                if (interaction.replied) return;
+
+                await interaction.deferReply();
+    
+                if (!interaction.client.fsCache[chosenServer].status) return interaction.editReply('Cache not populated, retry in 30 seconds');
+                if (interaction.client.fsCache[chosenServer].status === 'offline' && ['stop', 'restart'].includes(chosenAction)) return interaction.editReply('Server is already offline');
+                if (interaction.client.fsCache[chosenServer].status === 'online' && chosenAction === 'start') return interaction.editReply('Server is already online');
 
                 const serverSelector = `[name="${chosenAction}_server"]`;
                 const browser = await puppeteer.launch();
                 const page = await browser.newPage();
-    
-                if (interaction.client.fsCache[chosenServer].status === null) return interaction.editReply('Cache not populated, retry in 30 seconds');
-                if (interaction.client.fsCache[chosenServer].status === 'offline' && ['stop', 'restart'].includes(chosenAction)) return interaction.editReply('Server is already offline');
-                if (interaction.client.fsCache[chosenServer].status === 'online' && chosenAction === 'start') return interaction.editReply('Server is already online');
     
                 try {
                     await page.goto(interaction.client.config.fs[chosenServer].login, { timeout: 120_000 });
@@ -61,7 +58,7 @@ export default {
                 let result = 'Successfully ';
                 let uptimeText: string | null | undefined;
 
-                ({
+                await ({
                     start: () => {
                         result += 'started ';
                         serverStatusMsg('online');
@@ -74,23 +71,26 @@ export default {
 
                         interaction.client.fsCache[chosenServer].status = 'offline';
 
-                        uptimeText = await page.evaluate(() => document.querySelector("span.monitorHead")?.textContent);
+                        const uptime = await page.evaluate(() => document.querySelector("span.monitorHead")?.textContent);
+
+                        uptimeText = `. Uptime before stopping: **${uptime}**`;
 
                     },
                     restart: async () => {
                         result += 'restarted ';
                         serverStatusMsg('restarting');
 
-                        uptimeText = await page.evaluate(() => document.querySelector("span.monitorHead")?.textContent);
+                        const uptime = await page.evaluate(() => document.querySelector("span.monitorHead")?.textContent);
+
+                        uptimeText = `. Uptime before restarting: **${uptime}**`;
                     }
                 })[chosenAction]();
     
-                await page.waitForSelector(serverSelector);
-                await page.click(serverSelector);
+                await page.waitForSelector(serverSelector).then(x => x?.click());
 
                 result += `**${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**`;
 
-                if (uptimeText) result += `. Uptime before restarting: **${uptimeText}**`;
+                if (uptimeText) result += uptimeText;
 
                 interaction.editReply(result);
                 
@@ -122,14 +122,11 @@ export default {
                 await interaction.deferReply();
     
                 if (chosenAction === 'dl') {
-                    FTP.on('ready', () => FTP.get(ftpLogin.path + 'blockedUserIds.xml', (err, stream) => {
+                    FTP.on('ready', () => FTP.get(ftpLogin.path + 'blockedUserIds.xml', async (err, stream) => {
                         if (err) return interaction.editReply(err.message);
 
-                        stream.pipe(fs.createWriteStream('../databases/blockedUserIds.xml'));
-                        stream.once('close', () => {
-                            FTP.end();
-                            interaction.editReply({ files: ['../databases/blockedUserIds.xml'] })
-                        });
+                        interaction.editReply({ files: [new AttachmentBuilder(Buffer.from(await stringifyStream(stream)), { name: 'blockedUserIds.xml' })] });
+                        stream.once('close', FTP.end);
                     })).connect(ftpLogin);
                 } else {
                     if (!hasRole(interaction, 'mpmanager')) return youNeedRole(interaction, 'mpmanager');
@@ -200,14 +197,11 @@ export default {
 
                 await interaction.deferReply();
 
-                FTP.on('ready', () => FTP.get(ftpLogin.path + 'savegame1/farms.xml', (err, stream) => {
+                FTP.on('ready', () => FTP.get(ftpLogin.path + 'savegame1/farms.xml', async (err, stream) => {
                     if (err) return interaction.editReply(err.message);
 
-                    stream.pipe(fs.createWriteStream('../databases/farms.xml'));
-                    stream.once('close', () => {
-                        FTP.end();
-                        interaction.editReply({ files: ['../databases/farms.xml'] });
-                    });
+                    interaction.editReply({ files: [new AttachmentBuilder(Buffer.from(await stringifyStream(stream)), { name: 'farms.xml' })] });
+                    stream.once('close', FTP.end);
                 })).connect(ftpLogin);
             },
             password: async () => {
@@ -288,7 +282,7 @@ export default {
                                 owner.send(`**${interaction.user.tag}** has demoted **${member.user.tag}** from **${interaction.guild.roles.cache.get(Role)?.name}**`);
                             },
                             no: () => int.update({ embeds: [new EmbedBuilder().setDescription(`Command canceled`).setColor(interaction.client.config.embedColor)], components: [] })
-                        } as any)[int.customId]();
+                        } as Index)[int.customId]();
                     });
                 } else {
                     let newNickname: string | undefined;
@@ -341,7 +335,7 @@ export default {
                     interaction.reply(`Successfully added \`${name}\``);
                 }
             }
-        } as any)[interaction.options.getSubcommand()]();
+        } as Index)[interaction.options.getSubcommand()]();
 	},
     data: new SlashCommandBuilder()
         .setName("mp")

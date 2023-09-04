@@ -35,6 +35,8 @@ export type YTCache = Record<string, string | null>;
 
 export type Registry = Discord.ApplicationCommandDataResolvable[];
 
+export type Index = Record<string, () => any>;
+
 export interface InviteCache {
     uses: number | null,
     creator: string | undefined

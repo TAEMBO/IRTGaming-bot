@@ -25,12 +25,6 @@ export default {
 
                 const chosenServer = interaction.options.getString('server', true);
                 const chosenAction = interaction.options.getString('action', true) as 'start' | 'stop' | 'restart';
-                const serverStatusMsg = (status: string) => interaction.client.getChan('fsLogs').send({ embeds: [new EmbedBuilder()
-                    .setTitle(`${chosenServer.toUpperCase()} now ${status}`)
-                    .setColor(interaction.client.config.embedColorYellow)
-                    .setTimestamp()
-                    .setFooter({ text: '\u200b', iconURL: interaction.user.displayAvatarURL() })
-                ] });
 
                 if (interaction.client.config.fs[chosenServer].isPrivate && !hasRole(interaction, 'mpmanager')) {
                     await checkRole('mfmanager');
@@ -53,6 +47,7 @@ export default {
                 } catch (err: any) {
                     return interaction.editReply(err.message);
                 }
+                
                 await interaction.editReply(`Connected to dedi panel for **${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**...`);
     
                 let result = 'Successfully ';
@@ -61,15 +56,9 @@ export default {
                 await ({
                     start: () => {
                         result += 'started ';
-                        serverStatusMsg('online');
-
-                        interaction.client.fsCache[chosenServer].status = 'online';
                     },
                     stop: async () => {
                         result += 'stopped ';
-                        serverStatusMsg('offline');
-
-                        interaction.client.fsCache[chosenServer].status = 'offline';
 
                         const uptime = await page.evaluate(() => document.querySelector("span.monitorHead")?.textContent);
 
@@ -78,7 +67,12 @@ export default {
                     },
                     restart: async () => {
                         result += 'restarted ';
-                        serverStatusMsg('restarting');
+                        interaction.client.getChan('fsLogs').send({ embeds: [new EmbedBuilder()
+                            .setTitle(`${chosenServer.toUpperCase()} now restarting`)
+                            .setColor(interaction.client.config.embedColorYellow)
+                            .setTimestamp()
+                            .setFooter({ text: '\u200b', iconURL: interaction.user.displayAvatarURL() })
+                        ] });
 
                         const uptime = await page.evaluate(() => document.querySelector("span.monitorHead")?.textContent);
 

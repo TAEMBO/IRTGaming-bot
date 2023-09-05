@@ -168,60 +168,62 @@ export interface FSLoopDSSPlayer {
 }
 
 export interface FSLoopCSG {
-    settings: {
-        savegameName: { _text: string },
-        creationDate: { _text: string },
-        mapId: { _text: string },
-        mapTitle: { _text: string },
-        saveDateFormatted: { _text: string },
-        saveDate: { _text: string },
-        resetVehicles: { _text: "true" | "false" },
-        trafficEnabled: { _text: "true" | "false" },
-        stopAndGoBraking: { _text: "true" | "false" },
-        trailerFillLimit: { _text: "true" | "false" },
-        automaticMotorStartEnabled: { _text: "true" | "false" },
-        growthMode: { _text: "1" | "2" | "3" },
-        fixedSeasonalVisuals: { _text: string },
-        plannedDaysPerPeriod: { _text: string },
-        fruitDestruction: { _text: "true" | "fase" },
-        plowingRequiredEnabled: { _text: "true" | "fase" },
-        stonesEnabled: { _text: "true" | "false" },
-        weedsEnabled: { _text: "true" | "false" },
-        limeRequired: { _text: "true" | "false" },
-        isSnowEnabled: { _text: "true" | "false" },
-        fuelUsage: { _text: string },
-        helperBuyFuel: { _text: "true" | "false" },
-        helperBuySeeds: { _text: "true" | "false" },
-        helperBuyFertilizer: { _text: "true" | "false" },
-        helperSlurrySource: { _text: string },
-        helperManureSource: { _text: string },
-        densityMapRevision: { _text: string },
-        terrainTextureRevision: { _text: string },
-        terrainLodTextureRevision: { _text: string },
-        splitShapesRevision: { _text: string },
-        tipCollisionRevision: { _text: string },
-        placementCollisionRevision: { _text: string },
-        navigationCollisionRevision: { _text: string },
-        mapDensityMapRevision: { _text: string },
-        mapTerrainTextureRevision: { _text: string },
-        mapTerrainLodTextureRevision: { _text: string },
-        mapSplitShapesRevision: { _text: string },
-        mapTipCollisionRevision: { _text: string },
-        mapPlacementCollisionRevision: { _text: string },
-        mapNavigationCollisionRevision: { _text: string },
-        difficulty: { _text: string },
-        economicDifficulty: { _text: string },
-        dirtInterval: { _text: string },
-        timeScale: { _text: string },
-        autoSaveInterval: { _text: string }
-    }
-    statistics: {
-        money: { _text: string }
-        playTime: { _text: string }
-    }
-    slotSystem: {
-        _attributes: {
-            slotUsage: string
+    careerSavegame: {
+        settings: {
+            savegameName: { _text: string },
+            creationDate: { _text: string },
+            mapId: { _text: string },
+            mapTitle: { _text: string },
+            saveDateFormatted: { _text: string },
+            saveDate: { _text: string },
+            resetVehicles: { _text: "true" | "false" },
+            trafficEnabled: { _text: "true" | "false" },
+            stopAndGoBraking: { _text: "true" | "false" },
+            trailerFillLimit: { _text: "true" | "false" },
+            automaticMotorStartEnabled: { _text: "true" | "false" },
+            growthMode: { _text: "1" | "2" | "3" },
+            fixedSeasonalVisuals: { _text: string },
+            plannedDaysPerPeriod: { _text: string },
+            fruitDestruction: { _text: "true" | "fase" },
+            plowingRequiredEnabled: { _text: "true" | "fase" },
+            stonesEnabled: { _text: "true" | "false" },
+            weedsEnabled: { _text: "true" | "false" },
+            limeRequired: { _text: "true" | "false" },
+            isSnowEnabled: { _text: "true" | "false" },
+            fuelUsage: { _text: string },
+            helperBuyFuel: { _text: "true" | "false" },
+            helperBuySeeds: { _text: "true" | "false" },
+            helperBuyFertilizer: { _text: "true" | "false" },
+            helperSlurrySource: { _text: string },
+            helperManureSource: { _text: string },
+            densityMapRevision: { _text: string },
+            terrainTextureRevision: { _text: string },
+            terrainLodTextureRevision: { _text: string },
+            splitShapesRevision: { _text: string },
+            tipCollisionRevision: { _text: string },
+            placementCollisionRevision: { _text: string },
+            navigationCollisionRevision: { _text: string },
+            mapDensityMapRevision: { _text: string },
+            mapTerrainTextureRevision: { _text: string },
+            mapTerrainLodTextureRevision: { _text: string },
+            mapSplitShapesRevision: { _text: string },
+            mapTipCollisionRevision: { _text: string },
+            mapPlacementCollisionRevision: { _text: string },
+            mapNavigationCollisionRevision: { _text: string },
+            difficulty: { _text: string },
+            economicDifficulty: { _text: string },
+            dirtInterval: { _text: string },
+            timeScale: { _text: string },
+            autoSaveInterval: { _text: string }
+        }
+        statistics: {
+            money: { _text: string }
+            playTime: { _text: string }
+        }
+        slotSystem: {
+            _attributes: {
+                slotUsage: string
+            }
         }
     }
 }

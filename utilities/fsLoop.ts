@@ -59,9 +59,11 @@ export async function fsLoop(client: YClient, watchList: WatchList, ChannelID: s
 
     const csg = !dss ? null : await fetch(client.config.fs[serverAcro].csg, init) // Fetch dedicated-server-savegame.html if DSS was successful
         .then(async res => {
-            if (res.status === 204) {
-                statsEmbed.setImage('https://http.cat/204');
-            } else return (xml2js(await res.text(), { compact: true }) as any).careerSavegame as FSLoopCSG;
+            if (res.status !== 204) {
+                const { careerSavegame } = xml2js(await res.text(), { compact: true }) as FSLoopCSG;
+
+                return careerSavegame;
+            } else statsEmbed.setImage('https://http.cat/204');
         })
         .catch(err => log('Red', `${serverAcroUp} CSG ${err.message}`));
 

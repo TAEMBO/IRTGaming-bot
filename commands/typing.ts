@@ -1,11 +1,9 @@
-import { SlashCommandBuilder, ChannelType } from 'discord.js';
+import { SlashCommandBuilder, ChannelType, TextChannel } from 'discord.js';
 import { TInteraction } from '../typings.js';
 
 export default {
 	async run(interaction: TInteraction) {
-		const channel = interaction.options.getChannel('channel') ?? interaction.channel;
-
-        if (!channel || channel.type === ChannelType.GuildCategory || channel.type === ChannelType.GuildForum) return interaction.reply({ content: 'Invalid channel', ephemeral: true });
+		const channel = interaction.options.getChannel('channel') as TextChannel ?? interaction.channel;
         
         channel.sendTyping();
         interaction.reply({ content: `Sent typing status to <#${channel.id}>`, ephemeral: true });
@@ -16,5 +14,6 @@ export default {
         .addChannelOption(x=>x
             .setName('channel')
             .setDescription('Optional channel to troll')
+            .addChannelTypes(ChannelType.GuildText)
             .setRequired(false))
 };

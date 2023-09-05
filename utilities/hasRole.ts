@@ -2,7 +2,7 @@ import config from '../config.json' assert { type: 'json' };
 import { GuildMemberIntOrMsg } from '../typings.js';
 
 /**
- * @param guildMemberOrInt A GuildMember or Interaction
+ * @param guildMemberOrInt A GuildMember, Interaction, or Message
  * @param role The role to check for
  * @returns Whether the GuildMember has the given role or not
  */

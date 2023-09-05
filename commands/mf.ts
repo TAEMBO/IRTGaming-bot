@@ -140,6 +140,6 @@ export default {
             .setDescription('Manage MF farm owners')
             .addUserOption(x=>x
                 .setName('member')
-                .setDescription('THe member to add or remove the MF Farm Owner role from')
+                .setDescription('The member to add or remove the MF Farm Owner role from')
                 .setRequired(true)))
 };

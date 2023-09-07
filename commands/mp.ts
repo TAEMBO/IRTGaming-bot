@@ -219,18 +219,19 @@ export default {
                 if (!hasRole(interaction, 'mpmanager')) return youNeedRole(interaction, 'mpmanager');
 
                 const member = interaction.options.getMember("member");
+                const mainRoles = interaction.client.config.mainServer.roles;
 
                 if (!member) return interaction.reply({ content: 'You need to select a member that is in this server', ephemeral: true });
 
                 const owner = await interaction.guild.fetchOwner();
                 const roleName = interaction.options.getString("role", true) as 'trustedfarmer' | 'mpfarmmanager' | 'mpjradmin' | 'mpsradmin';
-                const Role = interaction.client.config.mainServer.roles[roleName];
+                const roleId = mainRoles[roleName];
                 const roles = member.roles.cache.map((_, i) => i);
                 
-                if (member.roles.cache.has(Role)) {
+                if (member.roles.cache.has(roleId)) {
                     (await interaction.reply({
                         embeds: [new EmbedBuilder()
-                            .setDescription(`This user already has the <@&${Role}> role, do you want to remove it from them?`)
+                            .setDescription(`This user already has the <@&${roleId}> role, do you want to remove it from them?`)
                             .setColor(interaction.client.config.embedColor)
                         ],
                         fetchReply: true,
@@ -260,22 +261,30 @@ export default {
                                     }[roleName];
 
                                     member.edit({
-                                        roles: roles.filter(x => x !== Role && x !== interaction.client.config.mainServer.roles.mpstaff).concat(interaction.client.config.mainServer.roles.formerstaff),
+                                        roles: roles.filter(x => x !== roleId && x !== mainRoles.mpstaff).concat([mainRoles.formerstaff, mainRoles.trustedfarmer]),
                                         nick: member.nickname?.replace(slicedNick, 'Former Staff')
                                     });
-                                } else member.roles.remove(Role);
+                                } else member.roles.remove(roleId);
 
                                 int.update({
                                     embeds: [new EmbedBuilder()
-                                        .setDescription(`<@${member.user.id}> has been removed from <@&${Role}>.`)
+                                        .setDescription(`<@${member.user.id}> has been removed from <@&${roleId}>.`)
                                         .setColor(interaction.client.config.embedColor)
                                     ],
                                     components: []
                                 });
 
-                                owner.send(`**${interaction.user.tag}** has demoted **${member.user.tag}** from **${interaction.guild.roles.cache.get(Role)?.name}**`);
+                                owner.send(`**${interaction.user.tag}** has demoted **${member.user.tag}** from **${interaction.client.getRole(roleName).name}**`);
                             },
-                            no: () => int.update({ embeds: [new EmbedBuilder().setDescription(`Command canceled`).setColor(interaction.client.config.embedColor)], components: [] })
+                            no: () => {
+                                int.update({
+                                    embeds: [new EmbedBuilder()
+                                        .setDescription(`Command canceled`)
+                                        .setColor(interaction.client.config.embedColor)
+                                    ],
+                                    components: []
+                                });
+                            }
                         } as Index)[int.customId]();
                     });
                 } else {
@@ -283,28 +292,28 @@ export default {
 
                     ({
                         trustedfarmer: () => {
-                            roles.push(Role);
+                            roles.push(roleId);
                         },
                         mpfarmmanager: () => {
-                            roles.push(Role, interaction.client.config.mainServer.roles.mpstaff);
-                            roles.splice(roles.indexOf(interaction.client.config.mainServer.roles.trustedfarmer), 1);
+                            roles.push(roleId, mainRoles.mpstaff);
+                            roles.splice(roles.indexOf(mainRoles.trustedfarmer), 1);
                             newNickname = `${member.displayName.slice(0, 12)} | MP Farm Manager`;
                         },
                         mpjradmin: () => {
-                            roles.push(Role);
-                            roles.splice(roles.indexOf(interaction.client.config.mainServer.roles.mpfarmmanager), 1);
+                            roles.push(roleId);
+                            roles.splice(roles.indexOf(mainRoles.mpfarmmanager), 1);
                             newNickname = member.nickname?.replace('MP Farm Manager', 'MP Jr. Admin');
                         },
                         mpsradmin: () => {
-                            roles.push(Role);
-                            roles.splice(roles.indexOf(interaction.client.config.mainServer.roles.mpjradmin), 1);
+                            roles.push(roleId);
+                            roles.splice(roles.indexOf(mainRoles.mpjradmin), 1);
                             newNickname = member.nickname?.replace('MP Jr. Admin', 'MP Sr. Admin');
                         }
                     })[roleName]();
                     
                     member.edit({ roles, nick: newNickname });
-                    owner.send(`**${interaction.user.tag}** has promoted **${member.user.tag}** to **${interaction.guild.roles.cache.get(Role)?.name}**`);
-                    interaction.reply({ embeds: [new EmbedBuilder().setDescription(`<@${member.user.id}> has been given <@&${Role}>.`).setColor(interaction.client.config.embedColor)] });
+                    owner.send(`**${interaction.user.tag}** has promoted **${member.user.tag}** to **${interaction.client.getRole(roleName).name}**`);
+                    interaction.reply({ embeds: [new EmbedBuilder().setDescription(`<@${member.user.id}> has been given <@&${roleId}>.`).setColor(interaction.client.config.embedColor)] });
                 }
             },
             fm: () => {

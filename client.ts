@@ -6,11 +6,10 @@ import WatchList from './schemas/watchList.js';
 import Reminders from './schemas/reminders.js';
 import config from './config.json' assert { type: 'json' };
 import { LocalDatabase, RepeatedMessages } from './utilities.js';
-import { Config, FSCache, YTCache, InviteCache, Command, Registry } from './typings.js';
+import { Config, FSCache, YTCache, InviteCache, Command } from './typings.js';
 
 export default class YClient extends Client<true> {
     public readonly config = config as Config;
-    public readonly registry: Registry = [];
     public readonly fsCache: FSCache = {};
     public readonly ytCache: YTCache = {};
     public readonly commands = new Discord.Collection<string, Command>();

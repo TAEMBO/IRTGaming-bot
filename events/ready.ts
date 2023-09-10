@@ -12,7 +12,7 @@ export default async (client: YClient) => {
     const now = Date.now();
 
 
-    if (client.config.botSwitches.registerCommands) await guild.commands.set(client.registry)
+    if (client.config.botSwitches.registerCommands) await guild.commands.set(client.commands.map(x => x.data.toJSON()))
         .then(() => log('Purple', 'Slash commands registered'))
         .catch(e => log('Red', 'Couldn\'t register commands: ', e));
         

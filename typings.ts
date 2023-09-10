@@ -33,8 +33,6 @@ export type FSCache = Record<string, {
 
 export type YTCache = Record<string, string | null>;
 
-export type Registry = Discord.ApplicationCommandDataResolvable[];
-
 export type Index = Record<string, () => any>;
 
 export interface InviteCache {
@@ -43,7 +41,7 @@ export interface InviteCache {
 }
 
 export interface Command {
-    run(interaction: Discord.ChatInputCommandInteraction<"cached">): Promise<any>;
+    run(interaction: TInteraction): Promise<any>;
     data: Omit<Discord.SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup"> | Discord.SlashCommandSubcommandsOnlyBuilder;
     uses: number;
 }

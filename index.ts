@@ -7,6 +7,7 @@ import { log } from './utilities.js';
 import { Command } from './typings.js';
 
 const client = new YClient();
+const fsKeys = Object.keys(client.config.fs);
 
 /** Error handler */
 function errorLog(error: Error) {
@@ -44,24 +45,23 @@ client.login(client.config.token);
 client.setMaxListeners(100);
 console.log(client.config.botSwitches);
 console.log(client.config.devWhitelist);
-console.log(Object.keys(client.config.fs));
+console.log(fsKeys);
 
 for (const [chanId, _] of client.config.ytCacheChannels) client.ytCache[chanId] = null;
-for (const serverAcro of Object.keys(client.config.fs)) client.fsCache[serverAcro] = { players: [], status: null, lastAdmin: null };
-
-// Event handler
-for await (const file of fs.readdirSync(path.resolve('./events'))) {
-    const eventFile = await import(`./events/${file}`);
-
-    client.on(file.replace('.js', ''), eventFile.default);
-}
+for (const serverAcro of fsKeys) client.fsCache[serverAcro] = { players: [], status: null, lastAdmin: null };
 
 // Command handler
 for await (const file of fs.readdirSync(path.resolve('./commands'))) {
     const commandFile: { default: Omit<Command, 'uses'> }  = await import(`./commands/${file}`);
 
     client.commands.set(commandFile.default.data.name, {  uses: 0, ...commandFile.default });
-    client.registry.push(commandFile.default.data.toJSON());
+}
+
+// Event handler
+for await (const file of fs.readdirSync(path.resolve('./events'))) {
+    const eventFile = await import(`./events/${file}`);
+
+    client.on(file.replace('.js', ''), eventFile.default);
 }
 
 process.on('unhandledRejection', errorLog);

@@ -1,9 +1,10 @@
 import { SlashCommandBuilder } from 'discord.js';
+import { punish } from '../utilities.js';
 import { TInteraction } from '../typings.js';
 
 export default {
 	async run(interaction: TInteraction) {
-		interaction.client.punish(interaction, this.data.name);
+		punish(interaction, this.data.name);
 	},
 	data: new SlashCommandBuilder()
 		.setName("kick")

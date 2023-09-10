@@ -15,7 +15,7 @@ export interface ApplicationRPC {
     tags?: string[];
 };
 
-export type GuildMemberIntOrMsg = Discord.GuildMember | Discord.ChatInputCommandInteraction<"cached"> | Discord.Message;
+export type GuildMemberIntOrMsg = Discord.GuildMember | TInteraction | Discord.Message;
 
 export type RepeatedMessagesData = Record<string, {
     data: Discord.Collection<number, {
@@ -38,8 +38,8 @@ export type Registry = Discord.ApplicationCommandDataResolvable[];
 export type Index = Record<string, () => any>;
 
 export interface InviteCache {
-    uses: number | null,
-    creator: string | undefined
+    uses: number | null;
+    creator?: string;
 }
 
 export interface Command {
@@ -49,8 +49,9 @@ export interface Command {
 }
 
 /** `Discord.ChatInputCommandInteraction<CacheType>` */
-export type TInteraction = TClient<Discord.ChatInputCommandInteraction<"cached">>
-  
+export type TInteraction = TClient<Discord.ChatInputCommandInteraction<"cached">>;
+
+/** Append custom client property to a class instance */
 export type TClient<T> = T & {
     readonly client: YClient;
 };

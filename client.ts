@@ -5,7 +5,7 @@ import PlayerTimes from './schemas/playerTimes.js';
 import WatchList from './schemas/watchList.js';
 import Reminders from './schemas/reminders.js';
 import config from './config.json' assert { type: 'json' };
-import { hasRole, isDCStaff, LocalDatabase, RepeatedMessages, youNeedRole } from './utilities.js';
+import { LocalDatabase, RepeatedMessages } from './utilities.js';
 import { Config, FSCache, YTCache, InviteCache, Command, Registry } from './typings.js';
 
 export default class YClient extends Client<true> {
@@ -67,28 +67,9 @@ export default class YClient extends Client<true> {
     }
 
     /**
-     * @returns The main guild that this bot is made for
+     * Get the main guild this client is designed for
      */
     public mainGuild() {
         return this.guilds.cache.get(this.config.mainServer.id) as Discord.Guild;
-    }
-
-    /**
-     * @param interaction 
-     * @param type The type of punishment this is
-     */
-    public async punish(interaction: Discord.ChatInputCommandInteraction<"cached">, type: string) {
-        if ((!isDCStaff(interaction.member)) || (!['warn', 'mute'].includes(type) && hasRole(interaction, 'discordhelper'))) return youNeedRole(interaction, 'discordmoderator');
-    
-        const time = interaction.options.getString('time') ?? undefined;
-        const reason = interaction.options.getString('reason') ?? 'Unspecified';
-        const guildMember = interaction.options.getMember('member');
-        const user = interaction.options.getUser('member', true);
-    
-        if (interaction.user.id === user.id) return interaction.reply(`You cannot ${type} yourself.`);
-        if (!guildMember && type !== 'ban') return interaction.reply(`You cannot ${type} someone who is not in the server.`);
-    
-        await interaction.deferReply();
-        await this.punishments.addPunishment(type, interaction.user.id, reason, user, guildMember, { time, interaction });
     }
 }

@@ -3,6 +3,7 @@ import Discord, { EmbedBuilder } from 'discord.js';
 import YClient from '../client.js';
 import ms from 'ms';
 import { formatTime, log } from '../utilities.js';
+import { Index, TInteraction } from '../typings.js';
 
 const model = mongoose.model('punishments', new mongoose.Schema({
     _id: { type: Number, required: true },
@@ -85,23 +86,23 @@ export default class Punishments {
         type: string,
         moderator: string,
         reason: string,
-        User: Discord.User,
-        GuildMember: Discord.GuildMember | null,
+        user: Discord.User,
+        guildMember: Discord.GuildMember | null,
         options: {
-            time?: string,
-            interaction?: Discord.ChatInputCommandInteraction<"cached">
+            time?: string
+            interaction?: TInteraction
         }
     ) {
 		const { time, interaction } = options;
 		const now = Date.now();
 		const guild = this.client.mainGuild();
-		const punData: Document = { type, _id: await this.createId(), member: { tag: User.tag, _id: User.id }, reason, moderator, time: now };
+		const punData: Document = { type, _id: await this.createId(), member: { tag: user.tag, _id: user.id }, reason, moderator, time: now };
 		const inOrFromBoolean = ['warn', 'mute'].includes(type) ? 'in' : 'from'; // Use 'in' if the punishment doesn't remove the member from the server, eg. mute, warn
 		const auditLogReason = `${reason} | Case #${punData._id}`;
 		const embed = new EmbedBuilder()
 			.setColor(this.client.config.embedColor)
 			.setTitle(`Case #${punData._id}: ${type[0].toUpperCase() + type.slice(1)}`)
-			.setDescription(`${User.tag}\n<@${User.id}>\n(\`${User.id}\`)`)
+			.setDescription(`${user.tag}\n<@${user.id}>\n(\`${user.id}\`)`)
 			.addFields({ name: 'Reason', value: reason });
 		let punResult: Discord.User | Discord.GuildMember | string | null | undefined;
 		let timeInMillis: number | null;
@@ -120,9 +121,9 @@ export default class Punishments {
 		// Add field for duration if time is specified
 		if (timeInMillis) embed.addFields({ name: 'Duration', value: durationText });
 
-		if (GuildMember) {
+		if (guildMember) {
 			try {
-				DM = await GuildMember.send(`You've been ${this.getTense(type)} ${inOrFromBoolean} ${guild.name}${durationText} for reason \`${reason}\` (case #${punData._id})`);
+				DM = await guildMember.send(`You've been ${this.getTense(type)} ${inOrFromBoolean} ${guild.name}${durationText} for reason \`${reason}\` (case #${punData._id})`);
 			} catch (err: any) {
 				embed.setFooter({ text: 'Failed to DM member of punishment' });
 			}
@@ -130,35 +131,35 @@ export default class Punishments {
 
         punResult = await ({
             ban: async () => {
-                const banned = await guild.bans.fetch(User).catch(() => null);
+                const banned = await guild.bans.fetch(user).catch(() => null);
 
                 if (banned) {
                     return 'User is already banned.';
-                } else return await guild.bans.create(User, { reason: auditLogReason }).catch((err: Error) => err.message);
+                } else return await guild.bans.create(user, { reason: auditLogReason }).catch((err: Error) => err.message);
             },
             softban: async () => {
-                const banned = await guild.bans.fetch(User).catch(() => null);
+                const banned = await guild.bans.fetch(user).catch(() => null);
 
                 if (banned) {
                     return 'User is already banned.';
-                } else return await guild.bans.create(User, { reason: auditLogReason, deleteMessageSeconds: 86400 }).catch((err: Error) => err.message);
+                } else return await guild.bans.create(user, { reason: auditLogReason, deleteMessageSeconds: 86_400 }).catch((err: Error) => err.message);
             },
             kick: async () => {
-                return await GuildMember?.kick(auditLogReason).catch((err: Error) => err.message);
+                return await guildMember?.kick(auditLogReason).catch((err: Error) => err.message);
             },
             detain: async () => {
-                return await GuildMember?.roles.add(this.client.config.mainServer.roles.detained, auditLogReason).catch((err: Error) => err.message);
+                return await guildMember?.roles.add(this.client.config.mainServer.roles.detained, auditLogReason).catch((err: Error) => err.message);
             },
             mute: async () => {
-                if (GuildMember?.communicationDisabledUntil) {
+                if (guildMember?.communicationDisabledUntil) {
                     return 'Member is already muted.';
-                } else return await GuildMember?.timeout(timeInMillis, auditLogReason).catch((err: Error) => err.message);
+                } else return await guildMember?.timeout(timeInMillis, auditLogReason).catch((err: Error) => err.message);
             },
             warn: () => { }
-        } as any)[type]();
+        } as Index)[type]();
 
 		// If type was softban and it was successful, continue with softban (unban)
-		if (type === 'softban' && typeof punResult !== 'string') punResult = await guild.bans.remove(User.id, auditLogReason).catch((err: Error) => err.message);
+		if (type === 'softban' && typeof punResult !== 'string') punResult = await guild.bans.remove(user, auditLogReason).catch((err: Error) => err.message);
 
 		if (timeInMillis && ['mute', 'ban'].includes(type)) { // If type is mute or ban, specify duration and endTime
 			punData.endTime = now + timeInMillis;

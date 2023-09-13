@@ -1,13 +1,12 @@
-import config from '../config.json' assert { type: 'json' };
-import { Config, GuildMemberIntOrMsg } from '../typings.js';
+import { GuildMemberIntOrMsg, TClient } from '../typings.js';
 
 /**
  * @param guildMemberOrInt A GuildMember, Interaction, or Message
  * @returns Whether the GuildMember is an MP Staff member or not
  */
 export function isMPStaff(guildMemberIntOrMsg: GuildMemberIntOrMsg) {
-    return (config as Config).mainServer.mpStaffRoles
-        .map(x => config.mainServer.roles[x])
+    return (guildMemberIntOrMsg as TClient<typeof guildMemberIntOrMsg>).client.config.mainServer.mpStaffRoles
+        .map(x => (guildMemberIntOrMsg as TClient<typeof guildMemberIntOrMsg>).client.config.mainServer.roles[x])
         .some(x => {
             if ('roles' in guildMemberIntOrMsg) {
                 return guildMemberIntOrMsg.roles.cache.has(x);

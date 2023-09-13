@@ -1,7 +1,7 @@
 import Discord, { EmbedBuilder } from 'discord.js';
 import { TClient } from '../typings.js';
 
-export default async (messages: TClient<Discord.Collection<string, Discord.Message<boolean>>>, channel: TClient<Discord.GuildTextBasedChannel>) => {
+export default async (messages: Discord.Collection<string, TClient<Discord.Message<boolean>>>, channel: TClient<Discord.GuildTextBasedChannel>) => {
     if (!channel.client.config.botSwitches.logs) return;
 
     channel.client.getChan('botLogs').send({ embeds: [new EmbedBuilder()

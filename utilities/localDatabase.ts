@@ -6,7 +6,7 @@ export class LocalDatabase<T> {
     /** The path for this LocalDatabase's JSON file */
     private readonly _path: string;
     /** The content for this LocalDatabase */
-    public readonly data: T[] = [];
+    public readonly data: T[];
 
     constructor(fileName: string) {
         this._path = path.resolve(`../databases/${fileName}.json`);
@@ -30,7 +30,7 @@ export class LocalDatabase<T> {
     }
 
     /** Saves the data to JSON */
-    public save() {
+    private save() {
         fs.writeFileSync(this._path, JSON.stringify(this.data, null, 4));
 
         return this;

@@ -68,3 +68,4 @@ process.on('unhandledRejection', errorLog);
 process.on('uncaughtException', errorLog);
 process.on('error', errorLog);
 client.on('error', errorLog);
+client.on('intErr', errorLog);

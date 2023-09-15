@@ -297,7 +297,7 @@ export default {
                         mpfarmmanager: () => {
                             roles.push(roleId, mainRoles.mpstaff);
                             roles.splice(roles.indexOf(mainRoles.trustedfarmer), 1);
-                            newNickname = `${member.displayName.slice(0, 12)} | MP Farm Manager`;
+                            newNickname = `${member.displayName.slice(0, 14)} | MP Farm Manager`;
                         },
                         mpjradmin: () => {
                             roles.push(roleId);

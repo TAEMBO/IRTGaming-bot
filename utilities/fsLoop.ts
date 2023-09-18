@@ -8,7 +8,7 @@ import { FSLoopCSG, FSLoopDSS, FSLoopDSSPlayer } from "../typings.js";
 
 type WatchList = { _id: string, reason: string }[];
 
-export async function fsLoop(client: YClient, watchList: WatchList, ChannelID: string, MessageID: string, serverAcro: string) {
+export async function fsLoop(client: YClient, watchList: WatchList, chanId: string, msgId: string, serverAcro: string) {
     function decorators(player: FSLoopDSSPlayer, publicLoc?: boolean) {
         let decorators = player.isAdmin ? ':detective:' : ''; // Tag for if player is admin
     
@@ -44,9 +44,9 @@ export async function fsLoop(client: YClient, watchList: WatchList, ChannelID: s
     const serverAcroUp = serverAcro.toUpperCase();
     const statsEmbed = new EmbedBuilder();
     const statsMsgEdit = () => {
-        const channel = client.channels.cache.get(ChannelID) as Discord.TextChannel | undefined;
+        const channel = client.channels.cache.get(chanId) as Discord.TextChannel | undefined;
         
-        channel?.messages?.edit(MessageID, { embeds: [statsEmbed] }).catch(() => log('Red', `FSLoop ${serverAcroUp} invalid msg`));
+        channel?.messages?.edit(msgId, { embeds: [statsEmbed] }).catch(() => log('Red', `FSLoop ${serverAcroUp} invalid msg`));
     };
     const init = {
         signal: AbortSignal.timeout(7000),
@@ -82,7 +82,7 @@ export async function fsLoop(client: YClient, watchList: WatchList, ChannelID: s
     const wlChannel = client.getChan('watchList');
     const logChannel = client.getChan('fsLogs');
     const now = Math.round(Date.now() / 1000);
-    const playerInfo: Array<string> = [];
+    const playerInfo: string[] = [];
     let justStarted = false;
 
     for (const player of newPlayers) {
@@ -175,11 +175,15 @@ export async function fsLoop(client: YClient, watchList: WatchList, ChannelID: s
     };
 
     // Filter for players joining
-    let playerObj;
+    const playerObj = (() => {
+        if (!oldPlayers.length) return;
 
-    if (!oldPlayers.length && client.uptime > 50_000) {
-        playerObj = newPlayers;
-    } else if (oldPlayers.length) playerObj = newPlayers.filter(y => !oldPlayers.some(z => z.name === y.name));
+        if (client.uptime > 50_000) {
+            return newPlayers;
+        } else {
+            return newPlayers.filter(x => !oldPlayers.some(y => y.name === x.name));
+        }
+    })();
     
     if (playerObj) for (const player of playerObj) {
         const inWl = watchList.find(y => y._id === player.name);
@@ -193,6 +197,7 @@ export async function fsLoop(client: YClient, watchList: WatchList, ChannelID: s
         logChannel.send({ embeds: [logEmbed(player, true)] });
     };
     
+    // Push graph data point
     const data: number[] = JSON.parse(fs.readFileSync(path.resolve(`../databases/${serverAcroUp}PlayerData.json`), 'utf8'));
 
     data.push(dss.slots.used);

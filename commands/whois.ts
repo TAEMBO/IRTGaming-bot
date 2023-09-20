@@ -1,4 +1,4 @@
-import Discord, { APIEmbedField, ActivityType, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import Discord, { APIEmbedField, ActivityType, EmbedBuilder, SlashCommandBuilder, escapeItalic } from 'discord.js';
 import { ApplicationRPC, TInteraction } from '../typings.js';
 import { formatUser } from '../utilities.js';
 
@@ -38,7 +38,7 @@ export default {
             const appData = await getApplicationData(user.id);
             const embed = new EmbedBuilder()
                 .setThumbnail(user.displayAvatarURL({ extension: 'png', size: 2048 }))
-                .setTitle(`${user.bot ? 'Bot' : 'User'} info: ${user.tag}`)
+                .setTitle(`${user.bot ? 'Bot' : 'User'} info: ${escapeItalic(user.tag)}`)
                 .setURL(`https://discord.com/users/${user.id}`)
                 .setDescription(formatUser(user))
                 .addFields({ name: `🔹 ${user.bot ? 'Bot' : 'Account'} Created`, value: `<t:${Math.round(user.createdTimestamp / 1000)}:R>` })
@@ -52,15 +52,19 @@ export default {
 
         await member.user.fetch();
         const embeds: EmbedBuilder[] = [];
-        let titleText = 'Member';
-        
-        if (member.user.bot) {
-            titleText = 'Bot';
-        } else if (member.user.id === interaction.guild.ownerId) titleText = ':crown: Server Owner';
+        const titleText = (() => {
+            if (member.user.bot) {
+                return 'Bot';
+            } else if (member.user.id === interaction.guild.ownerId) {
+                return ':crown: Server Owner';
+            } else {
+                return 'Member';
+            }
+        })();
         
         embeds.push(new EmbedBuilder()
             .setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048 }))
-            .setTitle(`${titleText} info: ${member.user.tag}`)
+            .setTitle(`${titleText} info: ${escapeItalic(member.user.tag)}`)
             .setURL(`https://discord.com/users/${member.user.id}`)
             .setDescription(formatUser(member.user))
             .addFields(

@@ -19,7 +19,7 @@ export default {
         if (!msgs) return interaction.reply({ content: 'Failed to fetch messages', ephemeral: true });
 
         try {
-            await interaction.channel?.bulkDelete(msgs);
+            await interaction.channel?.bulkDelete(msgs, true);
         } catch (err: any) {
             return interaction.reply({ content: err.message, ephemeral: true });
         }

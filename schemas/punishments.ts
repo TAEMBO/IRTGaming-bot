@@ -106,7 +106,6 @@ export default class Punishments {
 			.addFields({ name: 'Reason', value: reason });
 		let punResult: Discord.User | Discord.GuildMember | string | null | undefined;
 		let timeInMillis: number | null;
-		let DM;
 
 		if (type === "mute") {       
             const parsedTime = time ? ms(time) : 2_073_600_000;
@@ -121,13 +120,12 @@ export default class Punishments {
 		// Add field for duration if time is specified
 		if (timeInMillis) embed.addFields({ name: 'Duration', value: durationText });
 
-		if (guildMember) {
-			try {
-				DM = await guildMember.send(`You've been ${this.getTense(type)} ${inOrFromBoolean} ${guild.name}${durationText} for reason \`${reason}\` (case #${punData._id})`);
-			} catch (err: any) {
-				embed.setFooter({ text: 'Failed to DM member of punishment' });
-			}
-		}
+        const dm = await guildMember?.send(`You've been ${this.getTense(type)} ${inOrFromBoolean} ${guild.name}${durationText} for reason \`${reason}\` (case #${punData._id})`)
+            .catch(() =>{
+                embed.setFooter({ text: 'Failed to DM member of punishment' });
+                
+                return null;
+            });
 
         punResult = await ({
             ban: async () => {
@@ -167,7 +165,7 @@ export default class Punishments {
 		}
 
 		if (typeof punResult === 'string') { // Punishment was unsuccessful
-			DM?.delete();
+			dm?.delete();
             
 			if (interaction) {
 				return interaction.editReply(punResult);
@@ -191,7 +189,11 @@ export default class Punishments {
 		const now = Date.now();
 		const punishment = await this.data.findById(caseId);
 
-		if (!punishment) return;
+		if (!punishment) {
+            return interaction
+                ? interaction.reply(`Case #${caseId} not found`)
+                : log('Red', `Case #${caseId} not found in punishment removal`);
+        };
 
 		const guild = this.client.mainGuild();
 		const auditLogReason = `${reason} | Case #${punishment._id}`;

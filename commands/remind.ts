@@ -1,15 +1,53 @@
-import { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ComponentType } from 'discord.js';
+import { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ComponentType, StringSelectMenuInteraction, ButtonInteraction } from 'discord.js';
 import ms from 'ms';
-import { TInteraction } from '../typings.js';
+import { Index, TInteraction } from '../typings.js';
 
 export default {
 	async run(interaction: TInteraction) {
         function formatTime(time: number) {
             return `<t:${Math.round(time / 1000)}> (<t:${Math.round(time / 1000)}:R>)`;
         };
+
         function rplText(content: string) {
             return { content, embeds: [], components: [] };
         };
+
+        async function promptDeletion(
+            reminder: ReturnType<typeof interaction.client.reminders.data.castObject>,
+            int: StringSelectMenuInteraction<"cached"> | TInteraction
+        ) {
+            const intOptions = {
+                embeds: [new EmbedBuilder()
+                    .setColor(interaction.client.config.embedColor)
+                    .setDescription(`Are you sure you want to delete the reminder \`${reminder.content}\`?`)
+                    .setFooter({ text: '60s to respond' })
+                ],
+                components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
+                    new ButtonBuilder().setCustomId('yes').setStyle(ButtonStyle.Success).setLabel("Confirm"),
+                    new ButtonBuilder().setCustomId('no').setStyle(ButtonStyle.Danger).setLabel("Cancel")
+                )]
+            }; 
+
+            (await (int.isChatInputCommand()
+                ? int.reply(intOptions)
+                : int.update(intOptions)
+            )).createMessageComponentCollector({
+                filter: x => x.user.id === interaction.user.id,
+                max: 1,
+                time: 60_000,
+                componentType: ComponentType.Button
+            }).on('collect', async int => {
+                ({
+                    yes: () => Promise.all([
+                        interaction.client.reminders.data.findByIdAndDelete(reminder),
+                        int.update(rplText(`Successfully deleted reminder \`${reminder.content}\``))
+                    ]),
+                    no: () => int.update(rplText('Command manually canceled'))
+                } as Index)[int.customId]();
+            }).on('end', ints => {
+                if (!ints.size) interaction.editReply(rplText('No response given, command canceled'));
+            });
+        }
 
         ({
             create: async () => {
@@ -64,7 +102,8 @@ export default {
                 })).createMessageComponentCollector({
                     filter: x => x.user.id === interaction.user.id,
                     max: 1,
-                    time: 60_000
+                    time: 60_000,
+                    componentType: ComponentType.Button
                 }).on('collect', async int => {
                     ({
                         yes: async () => {
@@ -81,7 +120,7 @@ export default {
                             });
                         },
                         no: () => int.update(rplText('Command manually canceled'))
-                    } as any)[int.customId]();
+                    } as Index)[int.customId]();
                 }).on('end', ints => {
                     if (!ints.size) interaction.editReply(rplText('No response given, command canceled'));
                 });
@@ -89,73 +128,51 @@ export default {
             delete: async () => {
                 const userReminders = await interaction.client.reminders.data.find({ userid: interaction.user.id });
 
-                if (!userReminders.length) return interaction.reply({ content: 'You have no active current reminders', ephemeral: true });
+                if (userReminders.length === 0)  {
+                    interaction.reply({ content: 'You have no active current reminders', ephemeral: true });
+                } else if (userReminders.length === 1) {
+                    promptDeletion(userReminders[0], interaction);
+                } else {
+                    const selectMenu = new StringSelectMenuBuilder()
+                        .setCustomId('reminders')
+                        .setPlaceholder('Choose a reminder to delete');
 
-                const selectMenu = new StringSelectMenuBuilder()
-                    .setCustomId('reminders')
-                    .setPlaceholder('Choose a reminder to delete');
+                    const embed = new EmbedBuilder()
+                        .setColor(interaction.client.config.embedColor)
+                        .setTitle(`You have ${userReminders.length} active reminder(s)`)
+                        .setFooter({ text: 'Select a reminder to delete, 60s to respond' });
 
-                const embed = new EmbedBuilder()
-                    .setColor(interaction.client.config.embedColor)
-                    .setTitle(`You have ${userReminders.length} active reminder(s)`)
-                    .setFooter({ text: 'Select a reminder to delete, 60s to respond' });
+                    for (const [i, x] of userReminders.entries()) {
+                        const index = (i + 1).toString();
 
-                for (const [i, x] of userReminders.entries()) {
-                    const index = (i + 1).toString();
-
-                    selectMenu.addOptions(new StringSelectMenuOptionBuilder().setLabel(`#${index}`).setValue(index));
+                        selectMenu.addOptions(new StringSelectMenuOptionBuilder().setLabel(`#${index}`).setValue(index));
                     
-                    embed.addFields({
-                        name: `#${index}`,
-                        value: [
-                            `> Content: \`${x.content}\``,
-                            `> Time to remind: ${formatTime(x.time)}`
-                        ].join('\n')
-                    });
-                }
+                        embed.addFields({
+                            name: `#${index}`,
+                            value: [
+                                `> Content: \`${x.content}\``,
+                                `> Time to remind: ${formatTime(x.time)}`
+                            ].join('\n')
+                        });
+                    }
 
-                (await interaction.reply({
-                    embeds: [embed],
-                    ephemeral: true,
-                    components: [new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selectMenu)]
-                })).createMessageComponentCollector({
-                    filter: x => x.user.id === interaction.user.id,
-                    max: 1,
-                    time: 60_000,
-                    componentType: ComponentType.StringSelect
-                }).on('collect', async int => {
-                    const chosenReminder = userReminders[parseInt(int.values[0]) - 1];
-
-                    (await int.update({
-                        embeds: [new EmbedBuilder()
-                            .setColor(interaction.client.config.embedColor)
-                            .setDescription(`Are you sure you want to delete the reminder \`${chosenReminder.content}\`?`)
-                            .setFooter({ text: '60s to respond' })
-                        ],
-                        components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
-                            new ButtonBuilder().setCustomId('yes').setStyle(ButtonStyle.Success).setLabel("Confirm"),
-                            new ButtonBuilder().setCustomId('no').setStyle(ButtonStyle.Danger).setLabel("Cancel")
-                        )]
+                    (await interaction.reply({
+                        embeds: [embed],
+                        ephemeral: true,
+                        components: [new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selectMenu)]
                     })).createMessageComponentCollector({
                         filter: x => x.user.id === interaction.user.id,
                         max: 1,
-                        time: 60_000
+                        time: 60_000,
+                        componentType: ComponentType.StringSelect
                     }).on('collect', async int => {
-                        ({
-                            yes: () => Promise.all([
-                                interaction.client.reminders.data.findByIdAndDelete(chosenReminder._id),
-                                int.update(rplText(`Successfully deleted reminder \`${chosenReminder.content}\``))
-                            ]),
-                            no: () => int.update(rplText('Command manually canceled'))
-                        } as any)[int.customId]();
+                        promptDeletion(userReminders[parseInt(int.values[0]) - 1], int);
                     }).on('end', ints => {
                         if (!ints.size) interaction.editReply(rplText('No response given, command canceled'));
                     });
-                }).on('end', ints => {
-                    if (!ints.size) interaction.editReply(rplText('No response given, command canceled'));
-                });
+                }
             }
-        } as any)[interaction.options.getSubcommand()]();
+        } as Index)[interaction.options.getSubcommand()]();
       },
       data: new SlashCommandBuilder()
         .setName('remind')

@@ -50,7 +50,7 @@ export async function fsLoop(client: YClient, watchList: WatchList, chanId: stri
     };
     const init = {
         signal: AbortSignal.timeout(7000),
-        headers: { 'User-Agent': 'IRTBot/FSLoop' }
+        headers: { 'User-Agent': `${client.config.userAgentHeader}/FSLoop` }
     };
 
     const dss = await fetch(client.config.fs[serverAcro].dss, init) // Fetch dedicated-server-stats.json

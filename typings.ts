@@ -99,6 +99,7 @@ export interface Config {
     readonly token: string;
     /** The URL for connecting to a MongoDB server */
     readonly mongoURL: string;
+    readonly userAgentHeader: string;
     readonly embedColor: `#${string}`;
     readonly embedColorGreen: `#${string}`;
     readonly embedColorRed: `#${string}`;

@@ -75,7 +75,8 @@ export default async (client: YClient) => {
     if (client.config.botSwitches.ytLoop) setInterval(async () => {
         for await (const [chanId, chanName] of client.config.ytCacheChannels) {
             const res = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${chanId}`, {
-                signal: AbortSignal.timeout(5000)
+                signal: AbortSignal.timeout(5000),
+                headers: { 'User-Agent': `${client.config.userAgentHeader}/YTLoop` }
             }).catch(() => log('Red', `${chanName} YT fail`));
     
             if (!res) continue;

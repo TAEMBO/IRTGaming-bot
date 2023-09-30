@@ -36,7 +36,7 @@ export default {
         });
 
         async function FSstats() {
-            const FSdss = await fetch(interaction.client.config.fs[subCmd].dss, { signal: AbortSignal.timeout(2000), headers: { 'User-Agent': 'IRTBot/Stats' } })
+            const FSdss = await fetch(interaction.client.config.fs[subCmd].dss, { signal: AbortSignal.timeout(2000), headers: { 'User-Agent': `${interaction.client.config.userAgentHeader}/Stats` } })
                 .then(res => res.json() as Promise<FSLoopDSS>)
                 .catch(() => log('Red', `Stats ${subCmd.toUpperCase()} failed`));
 
@@ -211,7 +211,7 @@ export default {
 
             async function FSstatsAll(serverAcro: string) {
                 const serverAcroUp = serverAcro.toUpperCase();
-                const FSdss = await fetch(interaction.client.config.fs[serverAcro].dss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': 'IRTBot/StatsAll' } })
+                const FSdss = await fetch(interaction.client.config.fs[serverAcro].dss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': `${interaction.client.config.userAgentHeader}/StatsAll` } })
                     .then(res => res.json() as Promise<FSLoopDSS>)
                     .catch(() => {
                         log('Red', `Stats all; ${serverAcroUp} failed`);

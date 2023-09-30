@@ -167,61 +167,61 @@ export interface FSLoopDSSPlayer {
 }
 
 export interface FSLoopCSG {
-    careerSavegame: {
-        settings: {
-            savegameName: { _text: string },
-            creationDate: { _text: string },
-            mapId: { _text: string },
-            mapTitle: { _text: string },
-            saveDateFormatted: { _text: string },
-            saveDate: { _text: string },
-            resetVehicles: { _text: "true" | "false" },
-            trafficEnabled: { _text: "true" | "false" },
-            stopAndGoBraking: { _text: "true" | "false" },
-            trailerFillLimit: { _text: "true" | "false" },
-            automaticMotorStartEnabled: { _text: "true" | "false" },
-            growthMode: { _text: "1" | "2" | "3" },
-            fixedSeasonalVisuals: { _text: string },
-            plannedDaysPerPeriod: { _text: string },
-            fruitDestruction: { _text: "true" | "fase" },
-            plowingRequiredEnabled: { _text: "true" | "fase" },
-            stonesEnabled: { _text: "true" | "false" },
-            weedsEnabled: { _text: "true" | "false" },
-            limeRequired: { _text: "true" | "false" },
-            isSnowEnabled: { _text: "true" | "false" },
-            fuelUsage: { _text: string },
-            helperBuyFuel: { _text: "true" | "false" },
-            helperBuySeeds: { _text: "true" | "false" },
-            helperBuyFertilizer: { _text: "true" | "false" },
-            helperSlurrySource: { _text: string },
-            helperManureSource: { _text: string },
-            densityMapRevision: { _text: string },
-            terrainTextureRevision: { _text: string },
-            terrainLodTextureRevision: { _text: string },
-            splitShapesRevision: { _text: string },
-            tipCollisionRevision: { _text: string },
-            placementCollisionRevision: { _text: string },
-            navigationCollisionRevision: { _text: string },
-            mapDensityMapRevision: { _text: string },
-            mapTerrainTextureRevision: { _text: string },
-            mapTerrainLodTextureRevision: { _text: string },
-            mapSplitShapesRevision: { _text: string },
-            mapTipCollisionRevision: { _text: string },
-            mapPlacementCollisionRevision: { _text: string },
-            mapNavigationCollisionRevision: { _text: string },
-            difficulty: { _text: string },
-            economicDifficulty: { _text: string },
-            dirtInterval: { _text: string },
-            timeScale: { _text: string },
-            autoSaveInterval: { _text: string }
+    readonly careerSavegame: {
+        readonly settings?: {
+            readonly savegameName: { readonly _text: string },
+            readonly creationDate: { readonly _text: string },
+            readonly mapId: { readonly _text: string },
+            readonly mapTitle: { readonly _text: string },
+            readonly saveDateFormatted: { readonly _text: string },
+            readonly saveDate: { readonly _text: string },
+            readonly resetVehicles: { readonly _text: "true" | "false" },
+            readonly trafficEnabled: { readonly _text: "true" | "false" },
+            readonly stopAndGoBraking: { readonly _text: "true" | "false" },
+            readonly trailerFillLimit: { readonly _text: "true" | "false" },
+            readonly automaticMotorStartEnabled: { readonly _text: "true" | "false" },
+            readonly growthMode: { readonly _text: "1" | "2" | "3" },
+            readonly fixedSeasonalVisuals: { readonly _text: string },
+            readonly plannedDaysPerPeriod: { readonly _text: string },
+            readonly fruitDestruction: { readonly _text: "true" | "fase" },
+            readonly plowingRequiredEnabled: { readonly _text: "true" | "fase" },
+            readonly stonesEnabled: { readonly _text: "true" | "false" },
+            readonly weedsEnabled: { readonly _text: "true" | "false" },
+            readonly limeRequired: { readonly _text: "true" | "false" },
+            readonly isSnowEnabled: { readonly _text: "true" | "false" },
+            readonly fuelUsage: { readonly _text: string },
+            readonly helperBuyFuel: { readonly _text: "true" | "false" },
+            readonly helperBuySeeds: { readonly _text: "true" | "false" },
+            readonly helperBuyFertilizer: { readonly _text: "true" | "false" },
+            readonly helperSlurrySource: { readonly _text: string },
+            readonly helperManureSource: { readonly _text: string },
+            readonly densityMapRevision: { readonly _text: string },
+            readonly terrainTextureRevision: { readonly _text: string },
+            readonly terrainLodTextureRevision: { readonly _text: string },
+            readonly splitShapesRevision: { readonly _text: string },
+            readonly tipCollisionRevision: { readonly _text: string },
+            readonly placementCollisionRevision: { readonly _text: string },
+            readonly navigationCollisionRevision: { readonly _text: string },
+            readonly mapDensityMapRevision: { readonly _text: string },
+            readonly mapTerrainTextureRevision: { readonly _text: string },
+            readonly mapTerrainLodTextureRevision: { readonly _text: string },
+            readonly mapSplitShapesRevision: { readonly _text: string },
+            readonly mapTipCollisionRevision: { readonly _text: string },
+            readonly mapPlacementCollisionRevision: { readonly _text: string },
+            readonly mapNavigationCollisionRevision: { readonly _text: string },
+            readonly difficulty: { readonly _text: string },
+            readonly economicDifficulty: { readonly _text: string },
+            readonly dirtInterval: { readonly _text: string },
+            readonly timeScale: { readonly _text: string },
+            readonly autoSaveInterval: { readonly _text: string }
         }
-        statistics: {
-            money: { _text: string }
-            playTime: { _text: string }
+        readonly statistics: {
+            readonly money: { readonly _text: string }
+            readonly playTime: { readonly _text: string }
         }
-        slotSystem: {
-            _attributes: {
-                slotUsage: string
+        readonly slotSystem: {
+            readonly _attributes: {
+                readonly slotUsage: string
             }
         }
     }

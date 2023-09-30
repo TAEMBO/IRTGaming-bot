@@ -43,10 +43,10 @@ export async function fsLoop(client: YClient, watchList: WatchList, chanId: stri
 
     const serverAcroUp = serverAcro.toUpperCase();
     const statsEmbed = new EmbedBuilder();
-    const statsMsgEdit = () => {
+    const statsMsgEdit = async () => {
         const channel = client.channels.cache.get(chanId) as Discord.TextChannel | undefined;
         
-        channel?.messages?.edit(msgId, { embeds: [statsEmbed] }).catch(() => log('Red', `FSLoop ${serverAcroUp} invalid msg`));
+        await channel?.messages?.edit(msgId, { embeds: [statsEmbed] }).catch(() => log('Red', `FSLoop ${serverAcroUp} invalid msg`));
     };
     const init = {
         signal: AbortSignal.timeout(7000),
@@ -71,7 +71,7 @@ export async function fsLoop(client: YClient, watchList: WatchList, chanId: stri
         if (dss && !dss.slots) log('Red', `${serverAcroUp} DSS undefined slots`);
 
         statsEmbed.setTitle('Host not responding').setColor(client.config.embedColorRed);
-        statsMsgEdit();
+        await statsMsgEdit();
 
         return;
     }
@@ -93,38 +93,78 @@ export async function fsLoop(client: YClient, watchList: WatchList, chanId: stri
     };
 
     // Data crunching for stats embed
-    const money = parseInt(csg.statistics?.money?._text).toLocaleString('en-US') ?? null;
-    const ingameTimeHrs = Math.floor(dss.server?.dayTime / 3600 / 1000).toString().padStart(2, '0') ?? null;
-    const ingameTimeMins = Math.floor((dss.server?.dayTime / 60 / 1000) % 60).toString().padStart(2, '0') ?? null;
-    const timescale = csg.settings?.timeScale?._text?.slice(0, -5) ?? null;
-    const playTimeHrs = (parseInt(csg.statistics?.playTime?._text) / 60).toFixed(2) ?? null;
-    const playtimeFormatted = formatTime((parseInt(csg.statistics?.playTime?._text) * 60 * 1000), 3, { commas: true, longNames: false }) ?? null;
-    const seasons = {
-        '1': client.config.fs[serverAcro].isPrivate ? 'Yes' : 'Yes 🔴',
-        '2': 'No',
-        '3': 'Paused 🔴'
-    }[csg.settings?.growthMode?._text] ?? null;
-    const autosaveInterval = parseInt(csg.settings?.autoSaveInterval?._text).toFixed(0) ?? null;
-    const slotUsage = parseInt(csg.slotSystem?._attributes?.slotUsage).toLocaleString('en-US') ?? null;
+    const stats = {
+        money: (() => {
+            const num = parseInt(csg.statistics?.money?._text);
+
+            return Number.isNaN(num) ? "`unavailable`" : num.toLocaleString('en-US');
+        })(),
+        ingameTime: (() => {
+            return dss.server.dayTime
+                ? [
+                    Math.floor(dss.server?.dayTime / 3600 / 1000).toString().padStart(2, "0"),
+                    ":",
+                    Math.floor((dss.server?.dayTime / 60 / 1000) % 60).toString().padStart(2, '0')
+                ].join('')
+                : "`unavailable`";
+        })(),
+        timescale: (() => {
+            return csg.settings?.timeScale._text
+                ? parseFloat(csg.settings.timeScale._text) + "x"
+                : "`unavailable`";
+        })(),
+        playTime: (() => {
+            const time = parseInt(csg.statistics.playTime._text);
+
+            return time
+                ? [
+                    (time / 60).toLocaleString("en-US"),
+                    "hrs (",
+                    formatTime(time * 60 * 1000, 3, { commas: true, longNames: false }),
+                    ")"
+                ].join('')
+                : "`unavailable`";
+        })(),
+        seasons: (() => {
+            return csg.settings?.growthMode._text
+                ? {
+                    '1': client.config.fs[serverAcro].isPrivate ? 'Yes' : 'Yes 🔴',
+                    '2': 'No',
+                    '3': 'Paused 🔴',
+                    undefined: ""
+                }[csg.settings?.growthMode?._text]
+                : "`unavailable`";
+        })(),
+        autosaveInterval: (() => {
+            return csg.settings?.autoSaveInterval._text
+                ? parseInt(csg.settings?.autoSaveInterval._text).toFixed(0) + " min"
+                : "`unavailable`";
+        })(),
+        slotUsage: (() => {
+            const num = parseInt(csg.slotSystem?._attributes?.slotUsage);
+
+            return Number.isNaN(num) ? "`unavailable`" : num.toLocaleString('en-US');
+        })()
+    } as const;
 
     // Stats embed
     statsEmbed
         .setAuthor({ name: `${dss.slots.used}/${dss.slots.capacity}` })
         .setTitle(dss.server.name ? null : 'Server is offline')
         .setColor(client.config.embedColorGreen)
-        .setDescription(dss.slots.used ? playerInfo.join('\n') : '*No players online*')
+        .setDescription(dss.slots.used ? playerInfo.join('\n') : dss.server.name ? '*No players online*' : null)
         .setFields({
             name: `**Server Statistics**`,
             value: [
-                `**Money:** $${money}`,
-                `**In-game time:** ${ingameTimeHrs}:${ingameTimeMins}`,
-                `**Timescale:** ${timescale}x`,
-                `**Playtime:** ${playTimeHrs}hrs (${playtimeFormatted})`,
-                `**Map:** ${dss.server.mapName}`,
-                `**Seasonal growth:** ${seasons}`,
-                `**Autosave interval:** ${autosaveInterval} min`,
-                `**Game version:** ${dss.server.version}`,
-                `**Slot usage:** ${slotUsage}`
+                `**Money:** $${stats.money}`,
+                `**In-game time:** ${stats.ingameTime}`,
+                `**Timescale:** ${stats.timescale}`,
+                `**Playtime:** ${stats.playTime}`,
+                `**Map name:** ${dss.server.mapName || "`unavailable`"}`,
+                `**Seasonal growth:** ${stats.seasons}`,
+                `**Autosave interval:** ${stats.autosaveInterval}`,
+                `**Game version:** ${dss.server.version || "`unavailable`"}`,
+                `**Slot usage:** ${stats.slotUsage}`
             ].join('\n')
         });
 
@@ -132,16 +172,16 @@ export async function fsLoop(client: YClient, watchList: WatchList, chanId: stri
         statsEmbed.setColor(client.config.embedColorRed);
     } else if (dss.slots.used > 9) statsEmbed.setColor(client.config.embedColorYellow);
 
-    statsMsgEdit();
+    await statsMsgEdit();
     
     // Logs
     if (!dss.server.name) {
-        if (client.fsCache[serverAcro].status === 'online') logChannel.send({ embeds: [serverStatusEmbed('offline')] });
+        if (client.fsCache[serverAcro].status === 'online') await logChannel.send({ embeds: [serverStatusEmbed('offline')] });
 
         client.fsCache[serverAcro].status = 'offline';
     } else {
         if (client.fsCache[serverAcro].status === 'offline') {
-            logChannel.send({ embeds: [serverStatusEmbed('online')] });
+            await logChannel.send({ embeds: [serverStatusEmbed('online')] });
             justStarted = true;
         }
 
@@ -152,12 +192,12 @@ export async function fsLoop(client: YClient, watchList: WatchList, chanId: stri
     
     if (!client.config.fs[serverAcro].isPrivate) for (const player of newPlayers.filter(x => oldPlayers.some(y => x.isAdmin && !y.isAdmin && y.name === x.name))) {
         if (!client.whitelist.data.includes(player.name) && !client.fmList.data.includes(player.name)) {
-            client.getChan('juniorAdminChat').send({ embeds: [new EmbedBuilder()
+            await client.getChan('juniorAdminChat').send({ embeds: [new EmbedBuilder()
                 .setTitle('UNKNOWN ADMIN LOGIN')
                 .setDescription(`\`${player.name}\` on **${serverAcroUp}** on <t:${now}>`)
                 .setColor('#ff4d00')
             ] }); 
-        } else logChannel.send({ embeds: [new EmbedBuilder()
+        } else await logChannel.send({ embeds: [new EmbedBuilder()
             .setColor(client.config.embedColorYellow)
             .setDescription(`\`${player.name}\`${decorators(player)} logged into admin on **${serverAcroUp}** at <t:${now}:t>`)
         ] });
@@ -167,11 +207,11 @@ export async function fsLoop(client: YClient, watchList: WatchList, chanId: stri
     for (const player of oldPlayers.filter(x => !newPlayers.some(y => y.name === x.name))) {
         const inWl = watchList.find(x => x._id === player.name);
 
-        if (inWl) wlChannel.send({ embeds: [wlEmbed(inWl._id, false)] });
+        if (inWl) await wlChannel.send({ embeds: [wlEmbed(inWl._id, false)] });
         
         if (player.uptime) client.playerTimes.addPlayerTime(player.name, player.uptime, serverAcro);
         
-        logChannel.send({ embeds: [logEmbed(player, false)] });
+        await logChannel.send({ embeds: [logEmbed(player, false)] });
     };
 
     // Filter for players joining
@@ -191,10 +231,10 @@ export async function fsLoop(client: YClient, watchList: WatchList, chanId: stri
         if (inWl) {
             const filterWLPings = client.watchListPings.data.filter(x => !client.mainGuild().members.cache.get(x)?.roles.cache.has(client.config.mainServer.roles.loa));
 
-            wlChannel.send({ content: filterWLPings.map(x=>`<@${x}>`).join(" "), embeds: [wlEmbed(inWl._id, true, inWl.reason)] });
+            await wlChannel.send({ content: filterWLPings.map(x => `<@${x}>`).join(" "), embeds: [wlEmbed(inWl._id, true, inWl.reason)] });
         }
 
-        logChannel.send({ embeds: [logEmbed(player, true)] });
+        await logChannel.send({ embeds: [logEmbed(player, true)] });
     };
     
     // Push graph data point

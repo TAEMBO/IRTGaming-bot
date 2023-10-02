@@ -34,7 +34,9 @@ export default {
 
         if (!member) {
             const user = interaction.options.getUser('member', true);
-            await user.fetch();
+
+            await user.fetch(true);
+
             const appData = await getApplicationData(user.id);
             const embed = new EmbedBuilder()
                 .setThumbnail(user.displayAvatarURL({ extension: 'png', size: 2048 }))
@@ -50,7 +52,8 @@ export default {
             return await interaction.reply({ embeds: [embed] });
         }
 
-        await member.user.fetch();
+        await member.user.fetch(true);
+        
         const embeds: EmbedBuilder[] = [];
         const titleText = (() => {
             if (member.user.bot) {

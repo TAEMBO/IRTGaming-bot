@@ -1,8 +1,8 @@
-import Discord, { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder, Message } from 'discord.js';
 import { isDCStaff, isMPStaff, log, Profanity } from '../utilities.js';
 import { TClient } from '../typings.js';
 
-export default async (message: TClient<Discord.Message<boolean>>) => {
+export default async (message: TClient<Message<boolean>>) => {
     if ((!message.client.config.botSwitches.commands && !message.client.config.devWhitelist.includes(message.author.id)) || message.system || message.author.bot) return;
     //   ^^^     Bot is set to ignore commands and non-dev sent a message, ignore the message.      ^^^
 

@@ -1,4 +1,4 @@
-import Discord from 'discord.js';
+import { Message, Collection } from 'discord.js';
 import YClient from '../client.js';
 import { RepeatedMessagesData } from '../typings.js';
 
@@ -7,7 +7,7 @@ export class RepeatedMessages {
 
     constructor(private client: YClient) { }
 
-    public async increment(msg: Discord.Message<boolean>, thresholdTime: number, thresholdAmt: number, type: string, muteOpt?: { time?: string, reason?: string }) {
+    public async increment(msg: Message<boolean>, thresholdTime: number, thresholdAmt: number, type: string, muteOpt?: { time?: string, reason?: string }) {
         if (this.data[msg.author.id]) {
             // Add this message to the list
             this.data[msg.author.id].data.set(msg.createdTimestamp, { type, channel: msg.channel.id });
@@ -29,7 +29,7 @@ export class RepeatedMessages {
                 await this.client.punishments.addPunishment('mute', this.client.user.id, `Automod; ${muteOpt?.reason}`, msg.author, msg.member, { time: muteOpt?.time });
             }
         } else {
-            this.data[msg.author.id] = { data: new Discord.Collection(), timeout: setTimeout(() => delete this.data[msg.author.id], thresholdTime) };
+            this.data[msg.author.id] = { data: new Collection(), timeout: setTimeout(() => delete this.data[msg.author.id], thresholdTime) };
             this.data[msg.author.id].data.set(msg.createdTimestamp, { type, channel: msg.channel.id });
         }
     }

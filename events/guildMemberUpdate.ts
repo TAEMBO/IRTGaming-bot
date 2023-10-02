@@ -1,8 +1,8 @@
-import Discord, { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder, GuildMember, PartialGuildMember } from 'discord.js';
 import { formatUser } from '../utilities.js';
 import { TClient } from '../typings.js';
 
-export default async (oldMember: TClient<Discord.GuildMember | Discord.PartialGuildMember>, newMember: TClient<Discord.GuildMember>) => {
+export default async (oldMember: TClient<GuildMember | PartialGuildMember>, newMember: TClient<GuildMember>) => {
     if (!newMember.client.config.botSwitches.logs) return;
 
     let changes = false;

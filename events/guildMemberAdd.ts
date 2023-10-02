@@ -1,8 +1,8 @@
-import Discord, { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder, GuildMember } from 'discord.js';
 import { formatUser } from '../utilities.js';
 import { TClient } from '../typings.js';
 
-export default async (member: TClient<Discord.GuildMember>) => {
+export default async (member: TClient<GuildMember>) => {
     if (!member.client.config.botSwitches.logs || member.partial) return;
 
     await member.roles.add(member.client.config.mainServer.roles.member).catch(() => null);

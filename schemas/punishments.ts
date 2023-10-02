@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import Discord, { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder, User, GuildMember } from 'discord.js';
 import YClient from '../client.js';
 import ms from 'ms';
 import { formatTime, log } from '../utilities.js';
@@ -86,8 +86,8 @@ export default class Punishments {
         type: string,
         moderator: string,
         reason: string,
-        user: Discord.User,
-        guildMember: Discord.GuildMember | null,
+        user: User,
+        guildMember: GuildMember | null,
         options: {
             time?: string
             interaction?: TInteraction
@@ -104,7 +104,7 @@ export default class Punishments {
 			.setTitle(`Case #${punData._id}: ${type[0].toUpperCase() + type.slice(1)}`)
 			.setDescription(`${user.tag}\n<@${user.id}>\n(\`${user.id}\`)`)
 			.addFields({ name: 'Reason', value: reason });
-		let punResult: Discord.User | Discord.GuildMember | string | null | undefined;
+		let punResult: User | GuildMember | string | null | undefined;
 		let timeInMillis: number | null;
 
 		if (type === "mute") {       
@@ -185,7 +185,7 @@ export default class Punishments {
 	}
 
 
-	public async removePunishment(caseId: number, moderator: string, reason: string, interaction?: Discord.ChatInputCommandInteraction<"cached">) {
+	public async removePunishment(caseId: number, moderator: string, reason: string, interaction?: TInteraction) {
 		const now = Date.now();
 		const punishment = await this.data.findById(caseId);
 
@@ -203,7 +203,7 @@ export default class Punishments {
 			this.createId()
 		]);
 		let removePunishmentData: PunishmentsDocument = { type: `un${punishment.type}`, _id, cancels: punishment._id, member: punishment.member, reason, moderator, time: now };
-        let punResult: Discord.User | Discord.GuildMember | string | null | undefined;
+        let punResult: User | GuildMember | string | null | undefined;
 
         punResult = await ({
             ban: async () => {

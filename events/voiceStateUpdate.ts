@@ -1,8 +1,8 @@
-import Discord, { EmbedBuilder } from "discord.js";
+import { EmbedBuilder, VoiceState } from "discord.js";
 import { formatUser } from '../utilities.js';
 import { TClient } from '../typings.js';
 
-export default async (oldState: TClient<Discord.VoiceState>, newState: TClient<Discord.VoiceState>) => {
+export default async (oldState: TClient<VoiceState>, newState: TClient<VoiceState>) => {
     if (!newState.client.config.botSwitches.logs || !newState.member) return;
 
     const channel = newState.client.getChan('botLogs');
@@ -17,14 +17,14 @@ export default async (oldState: TClient<Discord.VoiceState>, newState: TClient<D
             .setColor(newState.client.config.embedColorGreen)
             .addFields({ name: '🔹 Channel', value: `<#${newState.channelId}>` });
 
-            await channel.send({ embeds: [embed] });
+        await channel.send({ embeds: [embed] });
     } else if (oldState.channelId && !newState.channelId) { // Left VC
         embed
             .setTitle('Member Left VC')
             .setColor(newState.client.config.embedColorRed)
             .addFields({ name: '🔹 Channel', value: `<#${oldState.channelId}>` });
 
-            await channel.send({ embeds: [embed] });
+        await channel.send({ embeds: [embed] });
     } else if (oldState.channelId && newState.channelId && newState.channelId !== oldState.channelId) { // Moved VC
         embed
             .setTitle('Member Moved VC')
@@ -34,6 +34,6 @@ export default async (oldState: TClient<Discord.VoiceState>, newState: TClient<D
                 { name: '🔹 New Channel', value: `<#${newState.channelId}>` }
             );
             
-            await channel.send({ embeds: [embed] });
+        await channel.send({ embeds: [embed] });
     }
 }

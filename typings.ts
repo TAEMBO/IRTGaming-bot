@@ -1,5 +1,5 @@
 import YClient from './client.js';
-import Discord from 'discord.js';
+import { GuildMember, Message, Collection, SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder, ChatInputCommandInteraction, PresenceData} from 'discord.js';
 import config from './config.json' assert { type: 'json' };
 
 export * from './schemas/playerTimes.js';
@@ -21,14 +21,14 @@ export interface ApplicationRPC {
     tags?: string[];
 };
 
-export type GuildMemberIntOrMsg = Discord.GuildMember | TInteraction | Discord.Message;
+export type GuildMemberIntOrMsg = GuildMember | TInteraction | Message;
 
 export type Prettify<T> = {
     [K in keyof T]: T[K];
 } & {};
 
 export type RepeatedMessagesData = Record<string, {
-    data: Discord.Collection<number, {
+    data: Collection<number, {
         type: string;
         channel: string;
     }>;
@@ -52,12 +52,12 @@ export interface InviteCache {
 
 export interface Command {
     run(interaction: TInteraction): Promise<any>;
-    data: Omit<Discord.SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup"> | Discord.SlashCommandSubcommandsOnlyBuilder;
+    data: Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup"> | SlashCommandSubcommandsOnlyBuilder;
     uses: number;
 }
 
 /** `Discord.ChatInputCommandInteraction<CacheType>` */
-export type TInteraction = TClient<Discord.ChatInputCommandInteraction<"cached">>;
+export type TInteraction = TClient<ChatInputCommandInteraction<"cached">>;
 
 /** Append custom client property to a class instance */
 export type TClient<T> = T & {
@@ -115,7 +115,7 @@ export interface Config {
     readonly embedColorRed: `#${string}`;
     readonly embedColorYellow: `#${string}`;
     statsGraphSize: number;
-    readonly botPresence: Discord.PresenceData;
+    readonly botPresence: PresenceData;
     readonly botSwitches: {
         readonly commands: boolean;
         readonly automod: boolean;

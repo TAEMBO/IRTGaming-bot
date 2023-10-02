@@ -1,8 +1,8 @@
-import Discord, { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder, User, PartialUser } from 'discord.js';
 import { formatUser } from '../utilities.js';
 import { TClient } from '../typings.js';
 
-export default async (oldUser: TClient<Discord.User | Discord.PartialUser>, newUser: TClient<Discord.User>) => {
+export default async (oldUser: TClient<User | PartialUser>, newUser: TClient<User>) => {
     if (!newUser.client.config.botSwitches.logs || oldUser.tag === newUser.tag) return;
 
     await newUser.client.getChan('botLogs').send({ embeds: [new EmbedBuilder()

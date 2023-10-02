@@ -1,4 +1,4 @@
-import Discord, { EmbedBuilder } from "discord.js";
+import { EmbedBuilder, TextChannel } from "discord.js";
 import YClient from "../client.js";
 import { xml2js } from "xml-js";
 import fs from "node:fs";
@@ -42,7 +42,7 @@ export async function fsLoop(client: YClient, watchList: WatchListDocument[], ch
     const serverAcroUp = serverAcro.toUpperCase();
     const statsEmbed = new EmbedBuilder();
     const statsMsgEdit = async () => {
-        const channel = client.channels.cache.get(chanId) as Discord.TextChannel | undefined;
+        const channel = client.channels.cache.get(chanId) as TextChannel | undefined;
         
         await channel?.messages?.edit(msgId, { embeds: [statsEmbed] }).catch(() => log('Red', `FSLoop ${serverAcroUp} invalid msg`));
     };

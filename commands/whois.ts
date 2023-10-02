@@ -1,4 +1,4 @@
-import Discord, { APIEmbedField, ActivityType, EmbedBuilder, SlashCommandBuilder, escapeItalic } from 'discord.js';
+import { APIEmbedField, ActivityType, EmbedBuilder, SlashCommandBuilder, ClientPresenceStatus, ApplicationFlagsBitField, escapeItalic } from 'discord.js';
 import { ApplicationRPC, TInteraction } from '../typings.js';
 import { formatUser } from '../utilities.js';
 
@@ -14,14 +14,14 @@ export default {
 
             if (applicationData.tags?.length) fields.push({ name: '🔹 Bot tags', value: applicationData.tags.map(x => `\`${x}\``).join() });
 
-            if (applicationData.flags) fields.push({ name: '🔹 Bot flags', value: new Discord.ApplicationFlagsBitField(applicationData.flags).toArray().map(x => `\`${x}\``).join() });
+            if (applicationData.flags) fields.push({ name: '🔹 Bot flags', value: new ApplicationFlagsBitField(applicationData.flags).toArray().map(x => `\`${x}\``).join() });
 
             fields.push({ name: '🔹 Bot is public', value: applicationData.bot_public ? 'Yes' : 'No' });
 
             return fields;
         }
         
-        function convertStatus(status?: Discord.ClientPresenceStatus) {
+        function convertStatus(status?: ClientPresenceStatus) {
             return {
                 idle: "🟡",
                 dnd: "🔴",

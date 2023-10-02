@@ -1,4 +1,4 @@
-import Discord, { SlashCommandBuilder, EmbedBuilder, codeBlock } from 'discord.js';
+import Discord, { SlashCommandBuilder, EmbedBuilder, PresenceStatusData, ActivityType, ActivitiesOptions, PresenceUpdateStatus, codeBlock } from 'discord.js';
 import util from 'node:util';
 import { exec } from 'child_process';
 import * as utilities from '../utilities.js';
@@ -11,7 +11,7 @@ export default {
         
 		await ({
 			async eval() {
-                fs;
+                fs; Discord; // Imports possibly used in eval
                 const now = Date.now();
                 const { client } = interaction;
                 const code = interaction.options.getString("code", true);
@@ -113,10 +113,10 @@ export default {
                     }[type ?? 'default'];
                 }
 
-                const status = interaction.options.getString('status') as Discord.PresenceStatusData | null;
-                const type = interaction.options.getInteger('type') as Discord.ActivityType | null;
+                const status = interaction.options.getString('status') as PresenceStatusData | null;
+                const type = interaction.options.getInteger('type') as ActivityType | null;
                 const name = interaction.options.getString('name');
-                const currentActivities = interaction.client.config.botPresence.activities as Discord.ActivitiesOptions[];
+                const currentActivities = interaction.client.config.botPresence.activities as ActivitiesOptions[];
 
                 if (status) interaction.client.config.botPresence.status = status;
                 if (type !== null) currentActivities[0].type = type;
@@ -165,11 +165,11 @@ export default {
                 .setName('type')
                 .setDescription('The activity type to set')
                 .addChoices(
-                    { name: 'Playing', value: Discord.ActivityType.Playing },
-                    { name: 'Listening to', value: Discord.ActivityType.Listening },
-                    { name: 'Watching', value: Discord.ActivityType.Watching },
-                    { name: 'Custom', value: Discord.ActivityType.Custom },
-                    { name: 'Competing in', value: Discord.ActivityType.Competing }))
+                    { name: 'Playing', value: ActivityType.Playing },
+                    { name: 'Listening to', value: ActivityType.Listening },
+                    { name: 'Watching', value: ActivityType.Watching },
+                    { name: 'Custom', value: ActivityType.Custom },
+                    { name: 'Competing in', value: ActivityType.Competing }))
             .addStringOption(x => x
                 .setName('name')
                 .setDescription('The activity name to set'))
@@ -177,8 +177,8 @@ export default {
                 .setName('status')
                 .setDescription('The status to set')
                 .addChoices(
-                    { name: 'Online', value: Discord.PresenceUpdateStatus.Online },
-                    { name: 'Idle', value: Discord.PresenceUpdateStatus.Idle },
-                    { name: 'DND', value: Discord.PresenceUpdateStatus.DoNotDisturb },
-                    { name: 'Invisible', value: Discord.PresenceUpdateStatus.Invisible })))
+                    { name: 'Online', value: PresenceUpdateStatus.Online },
+                    { name: 'Idle', value: PresenceUpdateStatus.Idle },
+                    { name: 'DND', value: PresenceUpdateStatus.DoNotDisturb },
+                    { name: 'Invisible', value: PresenceUpdateStatus.Invisible })))
 };

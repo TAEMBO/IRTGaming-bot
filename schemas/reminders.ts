@@ -1,4 +1,4 @@
-import Discord, { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder, GuildTextBasedChannel } from 'discord.js';
 import mongoose from 'mongoose';
 import YClient from '../client.js';
 
@@ -28,7 +28,7 @@ export default class Reminders {
             const embed = new EmbedBuilder().setTitle('Reminder').setColor(this.client.config.embedColor).setDescription(`\`\`\`${reminder.content}\`\`\``);
         
             await this.client.users.send(reminder.userid, { embeds: [embed] })
-                .catch(() => (this.client.channels.resolve(reminder.ch) as Discord.GuildTextBasedChannel).send({
+                .catch(() => (this.client.channels.resolve(reminder.ch) as GuildTextBasedChannel).send({
         		    content: `Reminder <@${reminder.userid}>`,
         		    embeds: [embed.setFooter({ text: 'Failed to DM' })]
         	    }));

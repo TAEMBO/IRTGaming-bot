@@ -1,8 +1,8 @@
-import Discord from 'discord.js';
+import { Interaction } from 'discord.js';
 import { log } from '../utilities.js';
 import { Command, Index, TClient } from '../typings.js';
 
-export default async (interaction: TClient<Discord.Interaction<"cached">>) => {
+export default async (interaction: TClient<Interaction<"cached">>) => {
     if (!interaction.inGuild() || !interaction.inCachedGuild()) return;
 
     if (interaction.isChatInputCommand()) {

@@ -1,4 +1,4 @@
-import Discord, { Client, GatewayIntentBits, Partials } from "discord.js";
+import { Client, GatewayIntentBits, Partials, Collection, PresenceData, TextChannel, Role, Guild } from "discord.js";
 import UserLevels from './schemas/userLevels.js';
 import Punishments from './schemas/punishments.js';
 import PlayerTimes from './schemas/playerTimes.js';
@@ -12,7 +12,7 @@ export default class YClient extends Client<true> {
     public readonly config = config as Config;
     public readonly fsCache: FSCache = {};
     public readonly ytCache: YTCache = {};
-    public readonly commands = new Discord.Collection<string, Command>();
+    public readonly commands = new Collection<string, Command>();
     public readonly repeatedMessages = new RepeatedMessages(this);
     public readonly invites = new Map<string, InviteCache>();
     public readonly bannedWords = new LocalDatabase<string>('bannedWords');
@@ -45,7 +45,7 @@ export default class YClient extends Client<true> {
                 Partials.Message,
                 Partials.Reaction
             ],
-            presence: config.botPresence as Discord.PresenceData
+            presence: config.botPresence as PresenceData
         });
     }
 
@@ -54,7 +54,7 @@ export default class YClient extends Client<true> {
      * @param channel
      */
     public getChan(channel: keyof typeof this.config.mainServer.channels) {
-        return this.channels.cache.get(this.config.mainServer.channels[channel]) as Discord.TextChannel;
+        return this.channels.cache.get(this.config.mainServer.channels[channel]) as TextChannel;
     }
 
     /**
@@ -62,13 +62,13 @@ export default class YClient extends Client<true> {
      * @param role
      */
     public getRole(role: keyof typeof this.config.mainServer.roles) {
-        return this.mainGuild().roles.cache.get(this.config.mainServer.roles[role]) as Discord.Role;
+        return this.mainGuild().roles.cache.get(this.config.mainServer.roles[role]) as Role;
     }
 
     /**
      * Get the main guild this client is designed for
      */
     public mainGuild() {
-        return this.guilds.cache.get(this.config.mainServer.id) as Discord.Guild;
+        return this.guilds.cache.get(this.config.mainServer.id) as Guild;
     }
 }

@@ -12,13 +12,13 @@ const cmdOptionChoices = fsServers.getPublicAll().map(([serverAcro, { fullName }
 
 export default {
     async run(interaction: TInteraction) {
-        if (!isMPStaff(interaction)) return youNeedRole(interaction, 'mpstaff');
+        if (!isMPStaff(interaction)) return await youNeedRole(interaction, 'mpstaff');
 
         const FTP = new FTPClient();
         const now = Date.now();
         
-        ({
-            server: async () => {
+        await ({
+            async server() {
                 async function checkRole(role: keyof typeof interaction.client.config.mainServer.roles) {
                     if (!hasRole(interaction, role)) await youNeedRole(interaction, role);
                 }
@@ -34,9 +34,9 @@ export default {
 
                 await interaction.deferReply();
     
-                if (!interaction.client.fsCache[chosenServer].status) return interaction.editReply('Cache not populated, retry in 30 seconds');
-                if (interaction.client.fsCache[chosenServer].status === 'offline' && ['stop', 'restart'].includes(chosenAction)) return interaction.editReply('Server is already offline');
-                if (interaction.client.fsCache[chosenServer].status === 'online' && chosenAction === 'start') return interaction.editReply('Server is already online');
+                if (!interaction.client.fsCache[chosenServer].status) return await interaction.editReply('Cache not populated, retry in 30 seconds');
+                if (interaction.client.fsCache[chosenServer].status === 'offline' && ['stop', 'restart'].includes(chosenAction)) return await interaction.editReply('Server is already offline');
+                if (interaction.client.fsCache[chosenServer].status === 'online' && chosenAction === 'start') return await interaction.editReply('Server is already online');
 
                 const serverSelector = `[name="${chosenAction}_server"]`;
                 const browser = await puppeteer.launch();
@@ -45,7 +45,7 @@ export default {
                 try {
                     await page.goto(interaction.client.config.fs[chosenServer].login, { timeout: 120_000 });
                 } catch (err: any) {
-                    return interaction.editReply(err.message);
+                    return await interaction.editReply(err.message);
                 }
                 
                 await interaction.editReply(`Connected to dedi panel for **${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**...`);
@@ -54,10 +54,10 @@ export default {
                 let uptimeText: string | null | undefined;
 
                 await ({
-                    start: () => {
+                    start() {
                         result += 'started ';
                     },
-                    stop: async () => {
+                    async stop() {
                         result += 'stopped ';
 
                         const uptime = await page.evaluate(() => document.querySelector("span.monitorHead")?.textContent);
@@ -65,9 +65,9 @@ export default {
                         uptimeText = `. Uptime before stopping: **${uptime}**`;
 
                     },
-                    restart: async () => {
+                    async restart() {
                         result += 'restarted ';
-                        interaction.client.getChan('fsLogs').send({ embeds: [new EmbedBuilder()
+                        await interaction.client.getChan('fsLogs').send({ embeds: [new EmbedBuilder()
                             .setTitle(`${chosenServer.toUpperCase()} now restarting`)
                             .setColor(interaction.client.config.embedColorYellow)
                             .setTimestamp()
@@ -86,29 +86,29 @@ export default {
 
                 if (uptimeText) result += uptimeText;
 
-                interaction.editReply(result);
+                await interaction.editReply(result);
                 
                 setTimeout(() => browser.close(), 10_000);
             },
-            mop: async () => {
-                if (!hasRole(interaction, 'mpmanager')) return youNeedRole(interaction, 'mpmanager');
+            async mop() {
+                if (!hasRole(interaction, 'mpmanager')) return await youNeedRole(interaction, 'mpmanager');
 
                 const chosenServer = interaction.options.getString('server', true);
                 const chosenAction = interaction.options.getString('action', true) as 'items.xml' | 'players.xml';
                 const ftpLogin = fsServers.getPublicOne(chosenServer).ftp;
                 
-                if (interaction.client.fsCache[chosenServer].status === 'online') return interaction.reply(`You cannot mop files from **${chosenServer.toUpperCase()}** while it is online`);
+                if (interaction.client.fsCache[chosenServer].status === 'online') return await interaction.reply(`You cannot mop files from **${chosenServer.toUpperCase()}** while it is online`);
                 
                 await interaction.deferReply();
     
                 FTP.on('ready', () => FTP.delete(ftpLogin.path + `savegame1/${chosenAction}`, async (err) => {
-                    if (err) return interaction.editReply(err.message);
+                    if (err) return await interaction.editReply(err.message);
 
                     await interaction.editReply(`Successfully deleted **${chosenAction}** from **${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**`);
                     FTP.end();
                 })).connect(ftpLogin);
             },
-            bans: async () => {
+            async bans() {
                 const chosenServer = interaction.options.getString('server', true);
                 const chosenAction = interaction.options.getString('action', true) as 'dl' | 'ul';
                 const ftpLogin = fsServers.getPublicOne(chosenServer).ftp;
@@ -117,40 +117,40 @@ export default {
     
                 if (chosenAction === 'dl') {
                     FTP.on('ready', () => FTP.get(ftpLogin.path + 'blockedUserIds.xml', async (err, stream) => {
-                        if (err) return interaction.editReply(err.message);
+                        if (err) return await interaction.editReply(err.message);
 
-                        interaction.editReply({ files: [new AttachmentBuilder(Buffer.from(await stringifyStream(stream)), { name: 'blockedUserIds.xml' })] });
+                        await interaction.editReply({ files: [new AttachmentBuilder(Buffer.from(await stringifyStream(stream)), { name: 'blockedUserIds.xml' })] });
                         stream.once('close', FTP.end);
                     })).connect(ftpLogin);
                 } else {
-                    if (!hasRole(interaction, 'mpmanager')) return youNeedRole(interaction, 'mpmanager');
+                    if (!hasRole(interaction, 'mpmanager')) return await youNeedRole(interaction, 'mpmanager');
                     
                     let data: banFormat;
                     const banAttachment = interaction.options.getAttachment('bans');
 
-                    if (!banAttachment) return interaction.editReply(`Canceled: A ban file must be supplied`);
+                    if (!banAttachment) return await interaction.editReply(`Canceled: A ban file must be supplied`);
     
                     const banData = await (await fetch(banAttachment.url)).text();
 
                     try {
                         data = xml2js(banData, { compact: true }) as banFormat;
                     } catch (err) {
-                        return interaction.editReply(`Canceled: Improper file (not XML)`);
+                        return await interaction.editReply(`Canceled: Improper file (not XML)`);
                     }
     
-                    if (!data.blockedUserIds?.user[0]?._attributes?.displayName) return interaction.editReply('Canceled: Improper file (data format)');
+                    if (!data.blockedUserIds?.user[0]?._attributes?.displayName) return await interaction.editReply('Canceled: Improper file (data format)');
     
-                    FTP.on('ready', () => FTP.put(banData, ftpLogin.path + 'blockedUserIds.xml', error => {
+                    FTP.on('ready', () => FTP.put(banData, ftpLogin.path + 'blockedUserIds.xml', async error => {
                         if (error) {
-                            interaction.editReply(error.message);
-                        } else interaction.editReply(`Successfully uploaded ban file for ${chosenServer.toUpperCase()} after **${Date.now() - now}ms**`);
+                            await interaction.editReply(error.message);
+                        } else await interaction.editReply(`Successfully uploaded ban file for ${chosenServer.toUpperCase()} after **${Date.now() - now}ms**`);
                         
                         FTP.end();
                     })).connect(ftpLogin);
                 }
             },
-            search: async () => {
-                await interaction.deferReply();
+            async search() {
+                interaction.deferReply();
                 const chosenServer = interaction.options.getString('server', true);
                 const name = interaction.options.getString('name', true);
                 const ftpLogin = fsServers.getPublicOne(chosenServer).ftp;
@@ -169,7 +169,7 @@ export default {
                 }
 
                 FTP.on('ready', () => FTP.get(ftpLogin.path + 'savegame1/farms.xml', async (err, stream) => {
-                    if (err) return interaction.editReply(err.message);
+                    if (err) return await interaction.editReply(err.message);
 
                     const farmData = xml2js(await stringifyStream(stream), { compact: true }) as farmFormat;
                     const playerData = farmData.farms.farm[0].players.player.find(x => {
@@ -179,49 +179,62 @@ export default {
                     });
 
                     if (playerData) {
-                        interaction.editReply('```\n' + Object.entries(playerData._attributes).map(x => x[0].padEnd(18, ' ') + permIcon(x[1], x[0])).join('\n') + '```');
-                    } else interaction.editReply('No green farm data found with that name/UUID');
+                        await interaction.editReply('```\n' + Object.entries(playerData._attributes).map(x => x[0].padEnd(18, ' ') + permIcon(x[1], x[0])).join('\n') + '```');
+                    } else await interaction.editReply('No green farm data found with that name/UUID');
 
                     stream.once('close', FTP.end);
                 })).connect(ftpLogin);
             },
-            farms: async () => {
+            async pair() {
+                const uuid = interaction.options.getString('uuid', true);
+                const user = interaction.options.getUser('user', true);
+                const playerData = await interaction.client.playerTimes.data.findOne({ uuid });
+
+                if (!playerData) return await interaction.reply('No playerTimes data found with that UUID');
+
+                playerData.discordid = user.id;
+
+                await playerData.save();
+
+                await interaction.reply(`Successfully paired Discord account ${user.tag} to in-game UUID ${playerData.uuid} (${playerData._id})`);
+            },
+            async farms() {
                 const chosenServer = interaction.options.getString('server', true);
                 const ftpLogin = fsServers.getPublicOne(chosenServer).ftp;
 
                 await interaction.deferReply();
 
                 FTP.on('ready', () => FTP.get(ftpLogin.path + 'savegame1/farms.xml', async (err, stream) => {
-                    if (err) return interaction.editReply(err.message);
+                    if (err) return await interaction.editReply(err.message);
 
-                    interaction.editReply({ files: [new AttachmentBuilder(Buffer.from(await stringifyStream(stream)), { name: 'farms.xml' })] });
+                    await interaction.editReply({ files: [new AttachmentBuilder(Buffer.from(await stringifyStream(stream)), { name: 'farms.xml' })] });
                     stream.once('close', FTP.end);
                 })).connect(ftpLogin);
             },
-            password: async () => {
+            async password() {
                 await interaction.deferReply();
                 const chosenServer = interaction.options.getString('server', true);
                 const ftpLogin = fsServers.getPublicOne(chosenServer).ftp;
 
                 FTP.once('ready', () => FTP.get(ftpLogin.path + 'dedicated_server/dedicatedServerConfig.xml', async (err, stream) => {
-                    if (err) return interaction.editReply(err.message);
+                    if (err) return await interaction.editReply(err.message);
 
                     const pw = (xml2js(await stringifyStream(stream), { compact: true }) as any).gameserver?.settings?.game_password?._text as string | undefined;
 
                     if (pw) {
-                        interaction.editReply(`Current password for **${chosenServer.toUpperCase()}** is \`${pw}\``);
-                    } else interaction.editReply(`**${chosenServer.toUpperCase()}** doesn't currently have a password set`);
+                        await interaction.editReply(`Current password for **${chosenServer.toUpperCase()}** is \`${pw}\``);
+                    } else await interaction.editReply(`**${chosenServer.toUpperCase()}** doesn't currently have a password set`);
 
                     stream.once('close', FTP.end);
                 })).connect(ftpLogin);
             },
-            roles: async () => {
-                if (!hasRole(interaction, 'mpmanager')) return youNeedRole(interaction, 'mpmanager');
+            async roles() {
+                if (!hasRole(interaction, 'mpmanager')) return await youNeedRole(interaction, 'mpmanager');
 
                 const member = interaction.options.getMember("member");
                 const mainRoles = interaction.client.config.mainServer.roles;
 
-                if (!member) return interaction.reply({ content: 'You need to select a member that is in this server', ephemeral: true });
+                if (!member) return await interaction.reply({ content: 'You need to select a member that is in this server', ephemeral: true });
 
                 const owner = await interaction.guild.fetchOwner();
                 const roleName = interaction.options.getString("role", true) as 'trustedfarmer' | 'mpfarmmanager' | 'mpjradmin' | 'mpsradmin';
@@ -250,9 +263,9 @@ export default {
                         max: 1,
                         time: 30_000,
                         componentType: Discord.ComponentType.Button
-                    }).on('collect', int => {
-                        ({
-                            yes: () => {
+                    }).on('collect', async int => {
+                        await ({
+                            async yes() {
                                 if (roleName !== 'trustedfarmer') {
                                     const slicedNick = {
                                         mpfarmmanager: 'MP Farm Manager',
@@ -260,13 +273,13 @@ export default {
                                         mpsradmin: 'MP Sr. Admin'
                                     }[roleName];
 
-                                    member.edit({
+                                    await member.edit({
                                         roles: roles.filter(x => x !== roleId && x !== mainRoles.mpstaff).concat([mainRoles.formerstaff, mainRoles.trustedfarmer]),
                                         nick: member.nickname?.replace(slicedNick, 'Former Staff')
                                     });
-                                } else member.roles.remove(roleId);
+                                } else await member.roles.remove(roleId);
 
-                                int.update({
+                                await int.update({
                                     embeds: [new EmbedBuilder()
                                         .setDescription(`<@${member.user.id}> has been removed from <@&${roleId}>.`)
                                         .setColor(interaction.client.config.embedColor)
@@ -274,10 +287,10 @@ export default {
                                     components: []
                                 });
 
-                                owner.send(`**${interaction.user.tag}** has demoted **${member.user.tag}** from **${interaction.client.getRole(roleName).name}**`);
+                                await owner.send(`**${interaction.user.tag}** has demoted **${member.user.tag}** from **${interaction.client.getRole(roleName).name}**`);
                             },
-                            no: () => {
-                                int.update({
+                            async no() {
+                                await int.update({
                                     embeds: [new EmbedBuilder()
                                         .setDescription(`Command canceled`)
                                         .setColor(interaction.client.config.embedColor)
@@ -291,51 +304,51 @@ export default {
                     let newNickname: string | undefined;
 
                     ({
-                        trustedfarmer: () => {
+                        trustedfarmer() {
                             roles.push(roleId);
                         },
-                        mpfarmmanager: () => {
+                        mpfarmmanager() {
                             roles.push(roleId, mainRoles.mpstaff);
                             roles.splice(roles.indexOf(mainRoles.trustedfarmer), 1);
                             newNickname = `${member.displayName.slice(0, 14)} | MP Farm Manager`;
                         },
-                        mpjradmin: () => {
+                        mpjradmin() {
                             roles.push(roleId);
                             roles.splice(roles.indexOf(mainRoles.mpfarmmanager), 1);
                             newNickname = member.nickname?.replace('MP Farm Manager', 'MP Jr. Admin');
                         },
-                        mpsradmin: () => {
+                        mpsradmin() {
                             roles.push(roleId);
                             roles.splice(roles.indexOf(mainRoles.mpjradmin), 1);
                             newNickname = member.nickname?.replace('MP Jr. Admin', 'MP Sr. Admin');
                         }
                     })[roleName]();
                     
-                    member.edit({ roles, nick: newNickname });
-                    owner.send(`**${interaction.user.tag}** has promoted **${member.user.tag}** to **${interaction.client.getRole(roleName).name}**`);
-                    interaction.reply({ embeds: [new EmbedBuilder().setDescription(`<@${member.user.id}> has been given <@&${roleId}>.`).setColor(interaction.client.config.embedColor)] });
+                    await member.edit({ roles, nick: newNickname });
+                    await owner.send(`**${interaction.user.tag}** has promoted **${member.user.tag}** to **${interaction.client.getRole(roleName).name}**`);
+                    await interaction.reply({ embeds: [new EmbedBuilder().setDescription(`<@${member.user.id}> has been given <@&${roleId}>.`).setColor(interaction.client.config.embedColor)] });
                 }
             },
-            fm: () => {
+            async fm() {
                 const name = interaction.options.getString('name', true);
 
                 if (interaction.client.fmList.data.includes(name)) {
                     interaction.client.fmList.remove(name);
-                    interaction.reply(`Successfully removed \`${name}\``);
+                    await interaction.reply(`Successfully removed \`${name}\``);
                 } else {
                     interaction.client.fmList.add(name);
-                    interaction.reply(`Successfully added \`${name}\``);
+                    await interaction.reply(`Successfully added \`${name}\``);
                 }
             },
-            tf: () => {
+            async tf() {
                 const name = interaction.options.getString('name', true);
 
                 if (interaction.client.tfList.data.includes(name)) {
                     interaction.client.tfList.remove(name);
-                    interaction.reply(`Successfully removed \`${name}\``);
+                    await interaction.reply(`Successfully removed \`${name}\``);
                 } else {
                     interaction.client.tfList.add(name);
-                    interaction.reply(`Successfully added \`${name}\``);
+                    await interaction.reply(`Successfully added \`${name}\``);
                 }
             }
         } as Index)[interaction.options.getSubcommand()]();
@@ -404,6 +417,17 @@ export default {
             .addStringOption(x=>x
                 .setName('name')
                 .setDescription('The name of the player to search for')
+                .setRequired(true)))
+        .addSubcommand(x => x
+            .setName('pair')
+            .setDescription('Manually pair a UUID with a Discord account for informational purposes')
+            .addStringOption(x => x
+                .setName('uuid')
+                .setDescription('The UUID of the in-game player')
+                .setRequired(true))
+            .addUserOption(x => x
+                .setName('user')
+                .setDescription('The Discord account to pair with the in-game player')
                 .setRequired(true)))
         .addSubcommand(x=>x
             .setName('farms')

@@ -22,6 +22,7 @@ for (const serverAcro of Object.keys(config.fs)) serversObj[serverAcro] = { type
 const model = mongoose.model('playerTimes', new mongoose.Schema({
     _id: { type: String, required: true },
 	uuid: { type: String },
+    discordid: { type: String },
 	servers: { type: serversObj, required: true, _id: false }
 }, { versionKey: false }));
 

@@ -250,7 +250,6 @@ export default {
                 const player = interaction.options.getString('name');
 
                 const leaderboard = (data: PlayerTimesDocument[], isFirstField: boolean) => data.map((x, i) => [
-                    x.servers.ps.time,
                     `**${i + (isFirstField ? 1 : 26)}.** \`${x._id}\``,
                     interaction.client.fmList.data.includes(x._id) ? ':farmer:' : '',
                     interaction.client.tfList.data.includes(x._id) ? ':angel:' : '',
@@ -278,7 +277,8 @@ export default {
                                 `Player - \`${playerData._id}\`${interaction.client.fmList.data.includes(playerData._id) ? ':farmer:' : ''}${interaction.client.tfList.data.includes(playerData._id) ? ':angel:' : ''}`,
                                 `Leaderboard position - **#${sortedData.indexOf(playerData) + 1}**`,
                                 `Total time - **${formatTime(playerTimeDataTotal * 60 * 1000, 5, { commas: true, longNames: false })}**`,
-                                (isMPStaff(interaction) && playerData.uuid) ? `UUID: \`${playerData.uuid}\`` : ''
+                                (isMPStaff(interaction) && playerData.uuid) ? `UUID: \`${playerData.uuid}\`` : '',
+                                playerData.discordid ? `Discord user ID - \`${playerData.discordid}\`` : '',
                             ].join('\n'))
                             .setFields(formattedTimeData)
                         ] });

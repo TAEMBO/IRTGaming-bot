@@ -23,6 +23,10 @@ export interface ApplicationRPC {
 
 export type GuildMemberIntOrMsg = Discord.GuildMember | TInteraction | Discord.Message;
 
+export type Prettify<T> = {
+    [K in keyof T]: T[K];
+} & {};
+
 export type RepeatedMessagesData = Record<string, {
     data: Discord.Collection<number, {
         type: string;

@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import mongoose from 'mongoose';
 import { log } from './utilities.js';
-import { Command } from './typings.js';
+import { Command, Prettify } from './typings.js';
 
 const client = new YClient();
 const fsKeys = Object.keys(client.config.fs);
@@ -52,7 +52,7 @@ for (const serverAcro of fsKeys) client.fsCache[serverAcro] = { players: [], sta
 
 // Command handler
 for await (const file of fs.readdirSync(path.resolve('./commands'))) {
-    const commandFile: { default: Omit<Command, 'uses'> }  = await import(`./commands/${file}`);
+    const commandFile: { default: Prettify<Omit<Command, 'uses'>> }  = await import(`./commands/${file}`);
 
     client.commands.set(commandFile.default.data.name, {  uses: 0, ...commandFile.default });
 }

@@ -144,14 +144,16 @@ export default {
 	async run(interaction: TInteraction) {
 		if (interaction.options.getSubcommand() === 'help') {
 			const wantedQuantity = Object.keys(quantities).find(x => x === interaction.options.getString("type"));
+
 			if (wantedQuantity) {
 				const units = quantities[wantedQuantity];
-				interaction.reply({ embeds: [new EmbedBuilder()
+
+				await interaction.reply({ embeds: [new EmbedBuilder()
 					.setTitle(`Convert help: ${wantedQuantity}`)
 					.setDescription(`This quantity comprises ${units.length} units, which are:\n\n${units.sort((a, b) => a.name.localeCompare(b.name)).map(unit => `**${unit.name[0].toUpperCase() + unit.name.slice(1)}** (${unit.short.map(x => `\`${x}\``).join(', ')})`).join('\n')}`)
 					.setColor(interaction.client.config.embedColor)
 				] });
-			} else interaction.reply({ embeds: [new EmbedBuilder()
+			} else await interaction.reply({ embeds: [new EmbedBuilder()
 				.setTitle('Convert help')
 				.setColor(interaction.client.config.embedColor)	
 				.setDescription(`To convert something, you add **amount** and **unit** combinations to the end of the command. The syntax for an amount and unit combination is \`[amount][unit symbol]\`. Amount and unit combinations are called **arguments**. Arguments are divided into **starters** and a **target unit**. Starters are the starting values that you want to convert to the target unit. A conversion command consists of one or many starters, separated with a comma (\`,\`) in case there are many. After starters comes the target unit, which must have a greater-than sign (\`>\`) or the word "to" before it. The argument(s) after the \`>\` (or "to"), called the target unit, must not include an amount. It is just a **unit symbol**. Because you cannot convert fruits into lengths, all starters and the target unit must be of the same **quantity**.`)
@@ -203,7 +205,7 @@ export default {
 			}
 
 			if (interaction.replied) return;
-			if (!starters[0]) return interaction.reply('You must convert _something._ Your message has 0 starters.');
+			if (!starters[0]) return await interaction.reply('You must convert _something._ Your message has 0 starters.');
 
 			const target = await (async () => {
 				const targetPortion = interaction.options.getString('target', true);
@@ -239,30 +241,33 @@ export default {
 			})();
 
 			if (interaction.replied) return;
-			if (!target) return interaction.reply('You must convert _to_ something. Your message doesn\'t have a (valid) target unit.').catch();
+			if (!target) return await interaction.reply('You must convert _to_ something. Your message doesn\'t have a (valid) target unit.').catch();
 
 			// check that all starters and target are the same quantity
 			const usedQuantities = new Set([target.quantity, ...starters.map(x => x?.quantity as string)]);
 			const numeratorQuantities = new Set([target.unit.numeratorQuantity, ...starters.map(x => x?.unit?.numeratorQuantity)]);
 			const denominatorQuantities = new Set([target.unit.denominatorQuantity, ...starters.map(x => x?.unit?.denominatorQuantity)]);
 
-			if (usedQuantities.size > 1 || numeratorQuantities.size > 1 || denominatorQuantities.size > 1) return interaction.reply(`All starting units and the target unit must be of the same quantity. The quantities you used were \`${[...usedQuantities, ...numeratorQuantities, ...denominatorQuantities].filter(x => x)}\``);
+			if (usedQuantities.size > 1 || numeratorQuantities.size > 1 || denominatorQuantities.size > 1) return await interaction.reply(`All starting units and the target unit must be of the same quantity. The quantities you used were \`${[...usedQuantities, ...numeratorQuantities, ...denominatorQuantities].filter(x => x)}\``);
+
 			const quantity = [...usedQuantities][0];
 
 			// get absolute value: sum of all starters (starter amount * starter unit value)
 			let absolute: number;
+
 			if (starters[0]?.unit?.tempMath) {
 				absolute = starters.map(starter => eval(starter?.unit?.tempMath?.toBase)).reduce((a, b) => a + b, 0);
 			} else absolute = starters.map(starter => (starter?.amount ?? 0) * (starter?.unit.value ?? 0)).reduce((a, b) => a + b, 0);
 
 			// multiply absolute by the value of the target unit
 			let amountInTarget: number;
+
 			if (starters[0]?.unit.tempMath) {
 				amountInTarget = eval(target.unit.tempMath?.toSelf as string);
 			} else amountInTarget = absolute / target.unit.value;
 
 			// display amount and target unit symbol
-			interaction.reply({ embeds: [new EmbedBuilder()
+			await interaction.reply({ embeds: [new EmbedBuilder()
 				.setTitle(`${quantity[0].toUpperCase() + quantity.slice(1)} conversion`)
 				.setColor(interaction.client.config.embedColor)
 				.addFields(
@@ -274,21 +279,21 @@ export default {
 	data: new SlashCommandBuilder()
 		.setName("convert")
 		.setDescription("Use many starting amounts and units by attaching amounts and units of the same quantity with a comma")
-		.addSubcommand(x=>x
+		.addSubcommand(x => x
 			.setName("help")
 			.setDescription("Shows you how to use the command.")
-			.addStringOption(x=>x
+			.addStringOption(x => x
 				.setName("type")
 				.setDescription("The type of conversion.")
 				.setRequired(false)))
-		.addSubcommand(x=>x
+		.addSubcommand(x => x
 			.setName("convert")
 			.setDescription("Convert one quantity to another")
-			.addStringOption(x=>x
+			.addStringOption(x => x
 				.setName("starter")
 				.setDescription("The starting quantity(s)")
 				.setRequired(true))
-			.addStringOption(x=>x
+			.addStringOption(x => x
 				.setName('target')
 				.setDescription('The target quantity')
 				.setRequired(true)))

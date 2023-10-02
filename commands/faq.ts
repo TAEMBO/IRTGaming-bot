@@ -1,13 +1,13 @@
 import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
-import { TInteraction } from '../typings.js';
 import { FSServers } from '../utilities.js';
+import { Index, TInteraction } from '../typings.js';
 
 export default {
 	async run(interaction: TInteraction) {
         const fsServers = new FSServers(interaction.client.config.fs);
         const isFromTicket = interaction.channel?.parentId === interaction.client.config.mainServer.categories.activeTickets;
 
-        ({
+        await ({
             staff: () => interaction.reply({ components: [
                 new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder().setStyle(ButtonStyle.Link).setURL(`https://discord.com/channels/552565546089054218/852483521859551232/866257346513862687`).setLabel("Apply for MP Staff"))
             ] }),
@@ -62,12 +62,12 @@ export default {
                 'This however is not the actual terrain formation on the server, and thus has no affect on where you can drive around',
                 'These are simply visual glitches that are only seen on your end, so don\'t fret that the server was possibly griefed!'
             ].join('. '))
-        } as any)[interaction.options.getString('questions', true)]();
+        } as Index)[interaction.options.getString('questions', true)]();
     },
     data: new SlashCommandBuilder()
         .setName('faq')
         .setDescription('Frequently asked questions')
-        .addStringOption(x=>x
+        .addStringOption(x => x
             .setName('questions')
             .setDescription('A list of answers to frequently asked questions')
             .addChoices(

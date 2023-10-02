@@ -17,14 +17,14 @@ export default async (oldState: TClient<Discord.VoiceState>, newState: TClient<D
             .setColor(newState.client.config.embedColorGreen)
             .addFields({ name: '🔹 Channel', value: `<#${newState.channelId}>` });
 
-        channel.send({ embeds: [embed] });
+            await channel.send({ embeds: [embed] });
     } else if (oldState.channelId && !newState.channelId) { // Left VC
         embed
             .setTitle('Member Left VC')
             .setColor(newState.client.config.embedColorRed)
             .addFields({ name: '🔹 Channel', value: `<#${oldState.channelId}>` });
 
-        channel.send({ embeds: [embed] });
+            await channel.send({ embeds: [embed] });
     } else if (oldState.channelId && newState.channelId && newState.channelId !== oldState.channelId) { // Moved VC
         embed
             .setTitle('Member Moved VC')
@@ -34,6 +34,6 @@ export default async (oldState: TClient<Discord.VoiceState>, newState: TClient<D
                 { name: '🔹 New Channel', value: `<#${newState.channelId}>` }
             );
             
-        channel.send({ embeds: [embed] });
+            await channel.send({ embeds: [embed] });
     }
 }

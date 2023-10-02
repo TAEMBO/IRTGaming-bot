@@ -1,12 +1,14 @@
-import { SlashCommandBuilder, ChannelType, TextChannel } from 'discord.js';
+import { SlashCommandBuilder, ChannelType } from 'discord.js';
 import { TInteraction } from '../typings.js';
 
 export default {
 	async run(interaction: TInteraction) {
-		const channel = interaction.options.getChannel('channel') as TextChannel ?? interaction.channel;
+		const channel = interaction.options.getChannel('channel', false, [ChannelType.GuildText]) ?? interaction.channel;
+
+        if (!channel) return await interaction.reply({ content: 'No channel found', ephemeral: true });
         
-        channel.sendTyping();
-        interaction.reply({ content: `Sent typing status to <#${channel.id}>`, ephemeral: true });
+        await channel.sendTyping();
+        await interaction.reply({ content: `Sent typing status to <#${channel.id}>`, ephemeral: true });
 	},
 	data: new SlashCommandBuilder()
 		.setName("typing")

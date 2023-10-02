@@ -1,18 +1,19 @@
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { TInteraction } from '../typings.js';
 import { formatTime, isDCStaff, youNeedRole } from '../utilities.js';
+import { Index } from '../typings.js';
 
 export default {
 	async run(interaction: TInteraction) {
-		if (!isDCStaff(interaction)) return youNeedRole(interaction, 'discordmoderator');
+		if (!isDCStaff(interaction)) return await youNeedRole(interaction, 'discordmoderator');
 
 		const caseid = interaction.options.getInteger("id");
 
-		({
-			view: async () => {
+		await ({
+			async view() {
 				const punishment = await interaction.client.punishments.data.findById(caseid);
 
-				if (!punishment) return interaction.reply('A case with that ID wasn\'t found!');
+				if (!punishment) return await interaction.reply('A case with that ID wasn\'t found!');
 
 				const cancelledBy = punishment.expired ? await interaction.client.punishments.data.findOne({ cancels: punishment.id }) : null;
 				const cancels = punishment.cancels ? await interaction.client.punishments.data.findOne({ _id: punishment.cancels }) : null;
@@ -30,15 +31,13 @@ export default {
 				if (punishment.expired) embed.addFields({ name: '🔹 Expired', value: `This case has been overwritten by Case #${cancelledBy?.id} for reason \`${cancelledBy?.reason}\`` });
 				if (punishment.cancels) embed.addFields({ name: '🔹 Overwrites', value: `This case overwrites Case #${cancels?.id} \`${cancels?.reason}\`` });
 
-				interaction.reply({ embeds: [embed] });
+				await interaction.reply({ embeds: [embed] });
 			},
-			member: async () => {
+			async member() {
 				const user = interaction.options.getUser("user", true);
                 const pageNumber = interaction.options.getInteger("page") ?? 1;
-				const [punishments, userPunishmentsData] = await Promise.all([
-					interaction.client.punishments.data.find(),
-					interaction.client.punishments.data.find({ "member._id": user.id })
-				]);
+				const punishments = await interaction.client.punishments.data.find();
+                const userPunishmentsData = punishments.filter(x => x.member._id === user.id); 
 				const userPunishments = userPunishmentsData.sort((a, b) => a.time - b.time).map(punishment => {
 					return {
 						name: `${punishment.type[0].toUpperCase() + punishment.type.slice(1)} | Case #${punishment.id}`,
@@ -51,9 +50,9 @@ export default {
 					}
 				});
 
-				if (!userPunishments || !userPunishments.length) return interaction.reply('No punishments found with that user ID');
+				if (!userPunishments || !userPunishments.length) return await interaction.reply('No punishments found with that user ID');
 
-				interaction.reply({ embeds: [new EmbedBuilder()
+				await interaction.reply({ embeds: [new EmbedBuilder()
 					.setTitle(`Punishments for ${user.tag}`)
 					.setDescription(`<@${user.id}>\n\`${user.id}\``)
 					.setFooter({ text: `${userPunishments.length} total punishments. Viewing page ${pageNumber} out of ${Math.ceil(userPunishments.length / 25)}.` })
@@ -61,43 +60,43 @@ export default {
 					.addFields(userPunishments.slice((pageNumber - 1) * 25, pageNumber * 25))
 				] });
 			},
-			update: async () => {
+			async update() {
 				const reason = interaction.options.getString('reason', true);
 
 				await interaction.client.punishments.data.findByIdAndUpdate(caseid, { reason });
-				interaction.reply({embeds: [new EmbedBuilder().setColor(interaction.client.config.embedColor).setTitle(`Case #${caseid} updated`).setDescription(`**New reason:** ${reason}`)]});
+				await interaction.reply({ embeds: [new EmbedBuilder().setColor(interaction.client.config.embedColor).setTitle(`Case #${caseid} updated`).setDescription(`**New reason:** ${reason}`)] });
 			}
-		} as any)[interaction.options.getSubcommand()]();
+		} as Index)[interaction.options.getSubcommand()]();
 	},
 	data: new SlashCommandBuilder()
 		.setName("case")
 		.setDescription("Views a member's cases, or a single case ID.")
-		.addSubcommand(x=>x
+		.addSubcommand(x => x
 			.setName("view")
 			.setDescription("Views a single case ID")
-			.addIntegerOption(x=>x
+			.addIntegerOption(x => x
 				.setName("id")
 				.setDescription("The ID of the case.")
 				.setRequired(true)))
-		.addSubcommand(x=>x
+		.addSubcommand(x => x
 			.setName("member")
 			.setDescription("Views all a members cases")
-			.addUserOption(x=>x
+			.addUserOption(x => x
 				.setName("user")
 				.setDescription("The user whomm's punishments you want to view.")
 				.setRequired(true))
-			.addIntegerOption(x=>x
+			.addIntegerOption(x => x
 				.setName("page")
 				.setDescription("The page number.")
 				.setRequired(false)))
-		.addSubcommand(x=>x
+		.addSubcommand(x => x
 			.setName("update")
 			.setDescription("Updates a cases reason.")
-			.addIntegerOption(x=>x
+			.addIntegerOption(x => x
 				.setName("id")
 				.setDescription("The ID Of The Case To Update.")
 				.setRequired(true))
-			.addStringOption(x=>x
+			.addStringOption(x => x
 				.setName("reason")
 				.setDescription("The New Reason For The Case.")
 				.setRequired(true)))

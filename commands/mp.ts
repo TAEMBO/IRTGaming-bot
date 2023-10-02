@@ -1,5 +1,5 @@
 
-import Discord, { SlashCommandBuilder, AttachmentBuilder, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } from 'discord.js';
+import { SlashCommandBuilder, AttachmentBuilder, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, ComponentType } from 'discord.js';
 import puppeteer from 'puppeteer'; // Credits to Trolly for suggesting this package
 import FTPClient from 'ftp';
 import { xml2js } from 'xml-js';
@@ -262,7 +262,7 @@ export default {
                         filter: x => x.user.id === interaction.user.id,
                         max: 1,
                         time: 30_000,
-                        componentType: Discord.ComponentType.Button
+                        componentType: ComponentType.Button
                     }).on('collect', async int => {
                         await ({
                             async yes() {
@@ -356,15 +356,15 @@ export default {
     data: new SlashCommandBuilder()
         .setName("mp")
         .setDescription("All things multiplayer-related")
-        .addSubcommand(x=>x
+        .addSubcommand(x => x
             .setName('server')
             .setDescription('Turn a given server on or off')
-            .addStringOption(x=>x
+            .addStringOption(x => x
                 .setName('server')
                 .setDescription('The server to manage')
                 .addChoices(...fsServers.entries().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro })))
                 .setRequired(true))
-            .addStringOption(x=>x
+            .addStringOption(x => x
                 .setName('action')
                 .setDescription('Start or stop the given server')
                 .addChoices(
@@ -372,49 +372,49 @@ export default {
                     { name: 'Stop', value: 'stop' },
                     { name: 'Restart', value: 'restart' })
                 .setRequired(true)))
-        .addSubcommand(x=>x
+        .addSubcommand(x => x
             .setName('mop')
             .setDescription('Mop a file from a given server')
-            .addStringOption(x=>x
+            .addStringOption(x => x
                 .setName('server')
                 .setDescription('The server to manage')
                 .addChoices(...cmdOptionChoices)
                 .setRequired(true))
-            .addStringOption(x=>x
+            .addStringOption(x => x
                 .setName('action')
                 .setDescription('The action to perform on the given server')
                 .addChoices(
                     { name: 'Mop players.xml', value: 'players.xml' },
                     { name: 'Mop items.xml', value: 'items.xml' })
                 .setRequired(true)))
-        .addSubcommand(x=>x
+        .addSubcommand(x => x
             .setName('bans')
             .setDescription('Manage ban lists for servers')
-            .addStringOption(x=>x
+            .addStringOption(x => x
                 .setName('server')
                 .setDescription('The server to manage')
                 .addChoices(...cmdOptionChoices)
                 .setRequired(true))
-            .addStringOption(x=>x
+            .addStringOption(x => x
                 .setName('action')
                 .setDescription('To download or upload a ban file')
                 .addChoices(
                     { name: 'Download', value: 'dl' },
                     { name: 'Upload', value: 'ul' })
                 .setRequired(true))
-            .addAttachmentOption(x=>x
+            .addAttachmentOption(x => x
                 .setName('bans')
                 .setDescription('The ban file if uploading')
                 .setRequired(false)))
-        .addSubcommand(x=>x
+        .addSubcommand(x => x
             .setName('search')
             .setDescription('Fetch farm data for a player')
-            .addStringOption(x=>x
+            .addStringOption(x => x
                 .setName('server')
                 .setDescription('The server to search on')
                 .addChoices(...cmdOptionChoices)
                 .setRequired(true))
-            .addStringOption(x=>x
+            .addStringOption(x => x
                 .setName('name')
                 .setDescription('The name of the player to search for')
                 .setRequired(true)))
@@ -429,30 +429,30 @@ export default {
                 .setName('user')
                 .setDescription('The Discord account to pair with the in-game player')
                 .setRequired(true)))
-        .addSubcommand(x=>x
+        .addSubcommand(x => x
             .setName('farms')
             .setDescription('Download farms.xml from a server')
-            .addStringOption(x=>x
+            .addStringOption(x => x
                 .setName('server')
                 .setDescription('The server to fetch from')
                 .addChoices(...cmdOptionChoices)
                 .setRequired(true)))
-        .addSubcommand(x=>x
+        .addSubcommand(x => x
             .setName('password')
             .setDescription('Fetch the game password for a given server')
-            .addStringOption(x=>x
+            .addStringOption(x => x
                 .setName('server')
                 .setDescription('The server to fetch from')
                 .addChoices(...cmdOptionChoices)
                 .setRequired(true)))
-        .addSubcommand(x=>x
+        .addSubcommand(x => x
             .setName('roles')
             .setDescription('Give or take MP Staff roles')
-            .addUserOption(x=>x
+            .addUserOption(x => x
                 .setName("member")
                 .setDescription("The member to add or remove the role from")
                 .setRequired(true))
-            .addStringOption(x=>x
+            .addStringOption(x => x
                 .setName("role")
                 .setDescription("the role to add or remove")
                 .addChoices(
@@ -461,17 +461,17 @@ export default {
                     { name: 'Junior Admin', value: 'mpjradmin' },
                     { name: 'Senior Admin', value: 'mpsradmin' })
                 .setRequired(true)))
-        .addSubcommand(x=>x
+        .addSubcommand(x => x
             .setName('fm')
             .setDescription('Add or remove player names in FM list')
-            .addStringOption(x=>x
+            .addStringOption(x => x
                 .setName('name')
                 .setDescription('The player name to add or remove')
                 .setRequired(true)))
-        .addSubcommand(x=>x
+        .addSubcommand(x => x
             .setName('tf')
             .setDescription('Add or remove player names in TF list')
-            .addStringOption(x=>x
+            .addStringOption(x => x
                 .setName('name')
                 .setDescription('The player name to add or remove')
                 .setRequired(true)))

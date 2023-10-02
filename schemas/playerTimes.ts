@@ -114,7 +114,8 @@ export default class PlayerTimes {
 					if (playerDataByName && !playerDataByName.uuid) await this.data.findByIdAndUpdate(player._attributes.lastNickname, { uuid: player._attributes.uniqueUserId }, { new: true });
 				}
 			}
-            this.client.getChan('fsLogs').send(`⚠️ Name change detector ran. Iterated over ${iterationCount} changed names`);
+            
+            await this.client.getChan('fsLogs').send(`⚠️ Name change detector ran. Iterated over ${iterationCount} changed names`);
 			log('Yellow', 'Finished crunching farms.xml data');
 			stream.once('close', () => FTP.end());
 		})).connect(fsServers.getPublicOne(serverAcro).ftp);

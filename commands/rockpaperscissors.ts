@@ -1,16 +1,17 @@
-import Discord, { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { SlashCommandBuilder, EmbedBuilder, User, Message } from 'discord.js';
 import { TInteraction } from '../typings.js';
 
 const rpsChannels: Record<string, RpsInstance> = {};
 
 class RpsInstance {
-    to = (() => setTimeout(() => {
+    to = (async () => setTimeout(async () => {
         if (!rpsChannels.hasOwnProperty(this.message.channelId)) return;
         
-        this.message.edit({ embeds: [], content: "This rock paper scissors game has ended due to inactivity." });
+        await this.message.edit({ embeds: [], content: "This rock paper scissors game has ended due to inactivity." });
         delete rpsChannels[this.message.channel.id];
     }, 60_000))();
-    constructor(public firstPlayer: Discord.User, public firstMove: string, public message: Discord.Message<boolean>) { }
+
+    constructor(public firstPlayer: User, public firstMove: string, public message: Message<boolean>) { }
 }
 
 // Credits to Memw
@@ -48,13 +49,13 @@ export default {
 
                 delete rpsChannels[interaction.channelId];
                 await interaction.deleteReply();
-            } else interaction.reply("You can't play with yourself.");
-        } else interaction.reply({ content: "You can't start 2 different games in the same channel, go to another channel or wait for the current game to end.", ephemeral: true });
+            } else await interaction.reply("You can't play with yourself.");
+        } else await interaction.reply({ content: "You can't start 2 different games in the same channel, go to another channel or wait for the current game to end.", ephemeral: true });
     },
     data: new SlashCommandBuilder()
         .setName("rps")
         .setDescription("Start a rock paper scissors game.")
-        .addStringOption(x=>x
+        .addStringOption(x => x
 			.setName("move")
 			.setDescription("Your move")
 			.addChoices(

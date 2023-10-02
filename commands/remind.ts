@@ -37,7 +37,7 @@ export default {
                 time: 60_000,
                 componentType: ComponentType.Button
             }).on('collect', async int => {
-                ({
+                await ({
                     yes: () => Promise.all([
                         interaction.client.reminders.data.findByIdAndDelete(reminder),
                         int.update(rplText(`Successfully deleted reminder \`${reminder.content}\``))
@@ -49,12 +49,12 @@ export default {
             });
         }
 
-        ({
-            create: async () => {
+        await ({
+            async create() {
                 const reminderText = interaction.options.getString("what", true);
                 const reminderTime = ms(interaction.options.getString("when", true)) as number | undefined;
                 
-                if (!reminderTime) return interaction.reply({
+                if (!reminderTime) return await interaction.reply({
                     ephemeral: true,
                     embeds: [new EmbedBuilder()
                         .setTitle('Incorrect timestamp')
@@ -74,7 +74,7 @@ export default {
                     ]
                 });
 
-                if (reminderTime < 10_000) return interaction.reply({
+                if (reminderTime < 10_000) return await interaction.reply({
                     ephemeral: true,
                     content: 'You cannot set a reminder to expire in less than 10 seconds.'
                 });
@@ -82,7 +82,7 @@ export default {
                 const timeToRemind = Date.now() + reminderTime;
                 const currentReminders = await interaction.client.reminders.data.find({ userid: interaction.user.id });
 
-                if (currentReminders.length > 25) return interaction.reply({ content: 'You can only have up to 25 reminders at a time', ephemeral: true });
+                if (currentReminders.length > 25) return await interaction.reply({ content: 'You can only have up to 25 reminders at a time', ephemeral: true });
 
                 (await interaction.reply({
                     embeds: [new EmbedBuilder()
@@ -105,12 +105,12 @@ export default {
                     time: 60_000,
                     componentType: ComponentType.Button
                 }).on('collect', async int => {
-                    ({
-                        yes: async () => {
+                    await ({
+                        async yes() {
                             const reminder = await interaction.client.reminders.data.create({ userid: interaction.user.id, content: reminderText, time: timeToRemind, ch: interaction.channelId });
 
                             interaction.client.reminders.setExec(reminder._id, timeToRemind - Date.now());
-                            int.update({
+                            await int.update({
                                 components: [],
                                 embeds: [new EmbedBuilder()
                                     .setTitle('Reminder set')
@@ -125,13 +125,13 @@ export default {
                     if (!ints.size) interaction.editReply(rplText('No response given, command canceled'));
                 });
             },
-            delete: async () => {
+            async delete() {
                 const userReminders = await interaction.client.reminders.data.find({ userid: interaction.user.id });
 
                 if (userReminders.length === 0)  {
-                    interaction.reply({ content: 'You have no active current reminders', ephemeral: true });
+                    await interaction.reply({ content: 'You have no active current reminders', ephemeral: true });
                 } else if (userReminders.length === 1) {
-                    promptDeletion(userReminders[0], interaction);
+                    await promptDeletion(userReminders[0], interaction);
                 } else {
                     const selectMenu = new StringSelectMenuBuilder()
                         .setCustomId('reminders')
@@ -177,18 +177,18 @@ export default {
       data: new SlashCommandBuilder()
         .setName('remind')
         .setDescription('Manage reminders')
-        .addSubcommand(x=>x
+        .addSubcommand(x => x
             .setName('create')
             .setDescription('Create a reminder')
-            .addStringOption(x=>x
+            .addStringOption(x => x
                 .setName('what')
                 .setDescription('The reminder itself')
                 .setRequired(true))
-            .addStringOption(x=>x
+            .addStringOption(x => x
                 .setName('when')
                 .setDescription('The time to remind from now. Do "help" to see format')
                 .setRequired(true)))
-        .addSubcommand(x=>x
+        .addSubcommand(x => x
             .setName('delete')
             .setDescription('Delete an active reminder'))
 };

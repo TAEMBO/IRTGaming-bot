@@ -1,16 +1,16 @@
-import Discord, { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import Discord, { SlashCommandBuilder, EmbedBuilder, codeBlock } from 'discord.js';
 import util from 'node:util';
 import { exec } from 'child_process';
 import * as utilities from '../utilities.js';
 import fs from 'node:fs';
-import { TInteraction } from '../typings.js';
+import { Index, TInteraction } from '../typings.js';
 
 export default {
 	async run(interaction: TInteraction) {
-		if (!interaction.client.config.devWhitelist.includes(interaction.user.id)) return interaction.reply('You\'re not allowed to use dev commands.');
+		if (!interaction.client.config.devWhitelist.includes(interaction.user.id)) return await interaction.reply('You\'re not allowed to use dev commands.');
         
-		({
-			eval: async () => {
+		await ({
+			async eval() {
                 fs;
                 const now = Date.now();
                 const { client } = interaction;
@@ -39,8 +39,8 @@ export default {
                         filter: x => x.content === 'stack' && x.author.id === interaction.user.id,
                         max: 1,
                         time: 60_000
-                    }).on('collect', msg => {
-                        msg.reply({
+                    }).on('collect', async msg => {
+                        await msg.reply({
                             content: `\`\`\`\n${err.stack}\n\`\`\``,
                             allowedMentions: { repliedUser: false }
                         });
@@ -68,39 +68,40 @@ export default {
 
                 embed.addFields({ name: `Output • ${Date.now() - now}ms`, value: `\`\`\`${output.slice(0, 1016)}\n\`\`\`` });
 
-                interaction.reply({ embeds: [embed] }).catch(() => interaction.channel?.send({ embeds: [embed] }));
+                await interaction.reply({ embeds: [embed] }).catch(() => interaction.channel?.send({ embeds: [embed] }));
             },
-            statsgraph: () => {
+            async statsgraph() {
                 interaction.client.config.statsGraphSize = -(interaction.options.getInteger('number', true));
-                interaction.reply(`Set to \`${interaction.client.config.statsGraphSize}\``);
+
+                await interaction.reply(`Set to \`${interaction.client.config.statsGraphSize}\``);
             },
-            restart: async () => {
+            async restart() {
                 await interaction.reply('Compiling...');
 
-                exec('tsc', (error, _) => {
-                    if (error) return console.log(error);
+                exec('tsc', async (error, stdout) => {
+                    if (error) return await interaction.editReply(codeBlock(stdout.slice(0, 2000)));
 
-                    interaction.editReply('Restarting...').then(() => process.exit(-1));
+                    await interaction.editReply('Restarting...').then(() => process.exit(-1));
                 });
             },
-            update: async () => {
+            async update() {
                 await interaction.reply('Pulling from repo...');
 
                 exec('git pull', async (error, stdout) => {
-                    if (error) return interaction.editReply(`Pull failed:\n\`\`\`${error.message}\`\`\``);
+                    if (error) return await interaction.editReply(`Pull failed:\n\`\`\`${error.message}\`\`\``);
 
-                    if (stdout.includes('Already up to date')) return interaction.editReply(`Pull aborted:\nUp-to-date`);
+                    if (stdout.includes('Already up to date')) return await interaction.editReply(`Pull aborted:\nUp-to-date`);
 
                     await interaction.editReply('Compiling...');
 
-                    exec('tsc', (error, _) => {
-                        if (error) return interaction.editReply(error.message);
+                    exec('tsc', async (error, _) => {
+                        if (error) return await interaction.editReply(error.message);
 
-                        interaction.editReply('Restarting...').then(() => process.exit(-1));
+                        await interaction.editReply('Restarting...').then(() => process.exit(-1));
                     });
                 });
             },
-            presence: () => {
+            async presence() {
                 function convertType(type?: number) {
                     return {
                         0: 'Playing',
@@ -123,44 +124,44 @@ export default {
 
                 interaction.client.user?.setPresence(interaction.client.config.botPresence);
 
-                interaction.reply([
+                await interaction.reply([
                     `Status: **${interaction.client.config.botPresence.status}**`,
                     `Type: **${convertType(currentActivities[0].type)}**`,
                     `Name: **${currentActivities[0].name}**`
                 ].join('\n'));
             }
-        } as any)[interaction.options.getSubcommand()]();
+        } as Index)[interaction.options.getSubcommand()]();
 	},
 	data: new SlashCommandBuilder()
         .setName("dev")
         .setDescription("Run bot-dev-only commands")
-        .addSubcommand(x=>x
+        .addSubcommand(x => x
             .setName('eval')
             .setDescription('Execute code within the bot')
-            .addStringOption(x=>x
+            .addStringOption(x => x
                 .setName("code")
                 .setDescription("The code to execute")
                 .setRequired(true))
-            .addBooleanOption(x=>x
+            .addBooleanOption(x => x
                 .setName('async')
                 .setDescription('Whether to wrap the code in an async block or not')))
-        .addSubcommand(x=>x
+        .addSubcommand(x => x
             .setName('restart')
             .setDescription('Restart the bot'))
-        .addSubcommand(x=>x
+        .addSubcommand(x => x
             .setName('update')
             .setDescription('Pull from GitHub repository to live bot'))
-        .addSubcommand(x=>x
+        .addSubcommand(x => x
             .setName('statsgraph')
             .setDescription('Edit the number of data points pulled')
-            .addIntegerOption(x=>x
+            .addIntegerOption(x => x
                 .setName("number")
                 .setDescription("The number of data points to pull")
                 .setRequired(true)))
-        .addSubcommand(x=>x
+        .addSubcommand(x => x
             .setName('presence')
             .setDescription('Update the bot\'s presence')
-            .addIntegerOption(x=>x
+            .addIntegerOption(x => x
                 .setName('type')
                 .setDescription('The activity type to set')
                 .addChoices(
@@ -169,10 +170,10 @@ export default {
                     { name: 'Watching', value: Discord.ActivityType.Watching },
                     { name: 'Custom', value: Discord.ActivityType.Custom },
                     { name: 'Competing in', value: Discord.ActivityType.Competing }))
-            .addStringOption(x=>x
+            .addStringOption(x => x
                 .setName('name')
                 .setDescription('The activity name to set'))
-            .addStringOption(x=>x
+            .addStringOption(x => x
                 .setName('status')
                 .setDescription('The status to set')
                 .addChoices(

@@ -10,7 +10,7 @@ const client = new YClient();
 const fsKeys = Object.keys(client.config.fs);
 
 /** Error handler */
-function errorLog(error: Error) {
+async function errorLog(error: Error) {
     if (['Request aborted', 'getaddrinfo ENOTFOUND discord.com'].includes(error.message)) return;
 
     const dirname = process.cwd().replaceAll('\\', '/');
@@ -22,7 +22,7 @@ function errorLog(error: Error) {
 
     if (!channel) return console.log(error);
 
-    channel.send({
+    await channel.send({
         content: `<@${client.config.devWhitelist[0]}>`,
         embeds: [new EmbedBuilder()
             .setTitle(`Error Caught - ${error.message.slice(0, 240)}`)
@@ -33,7 +33,7 @@ function errorLog(error: Error) {
     });
 }
 
-mongoose.set('strictQuery', true).connect(client.config.mongoURL, {
+await mongoose.set('strictQuery', true).connect(client.config.mongoURL, {
     autoIndex: true,
     serverSelectionTimeoutMS: 5_000,
     socketTimeoutMS: 45_000,
@@ -41,7 +41,6 @@ mongoose.set('strictQuery', true).connect(client.config.mongoURL, {
     waitQueueTimeoutMS: 50_000
 }).then(() => log('Purple', 'Connected to MongoDB'));
 
-client.login(client.config.token);
 client.setMaxListeners(100);
 console.log(client.config.botSwitches);
 console.log(client.config.devWhitelist);
@@ -63,6 +62,8 @@ for await (const file of fs.readdirSync(path.resolve('./events'))) {
 
     client.on(file.replace('.js', ''), eventFile.default);
 }
+
+await client.login(client.config.token);
 
 process.on('unhandledRejection', errorLog);
 process.on('uncaughtException', errorLog);

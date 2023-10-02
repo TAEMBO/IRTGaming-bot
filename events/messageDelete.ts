@@ -25,5 +25,5 @@ export default async (message: TClient<Discord.Message<boolean> | Discord.Partia
         { name: '🔹 Sent', value: `<t:${Math.round(message.createdTimestamp / 1000)}:R>` }
     );
 
-    message.client.getChan('botLogs').send({ embeds: [embed], files: message.attachments.map(x => x.url) });
+    await message.client.getChan('botLogs').send({ embeds: [embed], files: message.attachments.map(x => x.url) });
 } 

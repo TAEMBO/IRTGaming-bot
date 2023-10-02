@@ -4,7 +4,7 @@ import { hasRole, isMPStaff, youNeedRole } from '../utilities.js';
 
 export default {
 	async run(interaction: TInteraction) {
-        if (!isMPStaff(interaction)) return youNeedRole(interaction, "mpstaff");
+        if (!isMPStaff(interaction)) return await youNeedRole(interaction, "mpstaff");
 
         const roles = interaction.member.roles.cache.map((x, i) => i);
         const configRoles = interaction.client.config.mainServer.roles;
@@ -17,7 +17,7 @@ export default {
                 nick: `[LOA] ${interaction.member.nickname}`
             }).catch(() => interaction.member.roles.set(takenRoles));
 
-            interaction.reply({ content: 'LOA status set', ephemeral: true });
+            await interaction.reply({ content: 'LOA status set', ephemeral: true });
         } else {
             const returnedRoles = (() => {
                 if (hasRole(interaction, 'mpmanager')) {
@@ -30,7 +30,7 @@ export default {
                 nick: interaction.member.nickname?.replaceAll('[LOA] ', '')
             }).catch(() => interaction.member.roles.set(returnedRoles));
 
-            interaction.reply({ content: 'LOA status removed', ephemeral: true });
+            await interaction.reply({ content: 'LOA status removed', ephemeral: true });
         }
 	},
 	data: new SlashCommandBuilder()

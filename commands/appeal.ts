@@ -4,11 +4,11 @@ import { FSServers, isMPStaff } from '../utilities.js';
 
 export default {
 	async run(interaction: TInteraction) {
-        if (interaction.channel?.parentId !== interaction.client.config.mainServer.categories.activeTickets && !isMPStaff(interaction)) return interaction.reply({ content: 'You cannot use this command here', ephemeral: true });
+        if (interaction.channel?.parentId !== interaction.client.config.mainServer.categories.activeTickets && !isMPStaff(interaction)) return await interaction.reply({ content: 'You cannot use this command here', ephemeral: true });
 
         const fsServers = new FSServers(interaction.client.config.fs);
 
-        interaction.reply({ embeds: [new EmbedBuilder()
+        await interaction.reply({ embeds: [new EmbedBuilder()
             .setTitle('MP Support - Ban Appeal')
             .setColor(interaction.client.config.embedColor)
             .setDescription([

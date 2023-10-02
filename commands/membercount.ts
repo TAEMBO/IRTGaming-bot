@@ -3,7 +3,7 @@ import { TInteraction } from '../typings.js';
 
 export default {
 	async run(interaction: TInteraction) {
-		interaction.reply(`**${interaction.guild.name}** has **${interaction.guild.memberCount.toLocaleString()}** members.`);
+		await interaction.reply(`**${interaction.guild.name}** has **${interaction.guild.memberCount.toLocaleString()}** members.`);
 	},
 	data: new SlashCommandBuilder()
 		.setName("membercount")

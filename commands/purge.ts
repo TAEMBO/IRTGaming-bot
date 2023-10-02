@@ -7,8 +7,8 @@ export default {
         const amount = interaction.options.getInteger("amount", true);
         const user = interaction.options.getUser("user");
 
-		if (!isDCStaff(interaction)) return youNeedRole(interaction, 'discordmoderator');
-		if (amount > 100) return interaction.reply({ content: 'Discord\'s API limits purging up to 100 messages.', ephemeral: true });
+		if (!isDCStaff(interaction)) return await youNeedRole(interaction, 'discordmoderator');
+		if (amount > 100) return await interaction.reply({ content: 'Discord\'s API limits purging up to 100 messages.', ephemeral: true });
 
         const msgs = await (async () => {
             if (user) {
@@ -16,24 +16,20 @@ export default {
             } else return await interaction.channel?.messages.fetch({ limit: amount });
         })();
 
-        if (!msgs) return interaction.reply({ content: 'Failed to fetch messages', ephemeral: true });
+        if (!msgs) return await interaction.reply({ content: 'Failed to fetch messages', ephemeral: true });
 
-        try {
-            await interaction.channel?.bulkDelete(msgs, true);
-        } catch (err: any) {
-            return interaction.reply({ content: err.message, ephemeral: true });
-        }
+        await interaction.channel?.bulkDelete(msgs, true);
 
-        interaction.reply({ content: `Successfully deleted ${msgs.size} messages${user ? ` from ${user}` : ''}.`, ephemeral: true });
+        await interaction.reply({ content: `Successfully deleted ${msgs.size} messages${user ? ` from ${user}` : ''}.`, ephemeral: true });
 	},
 	data: new SlashCommandBuilder()
 		.setName("purge")
 		.setDescription("Purges messages in this channel")
-		.addIntegerOption(x=>x
+		.addIntegerOption(x => x
 			.setName("amount")
 			.setDescription("The amount of messages to purge")
 			.setRequired(true))
-		.addUserOption(x=>x
+		.addUserOption(x => x
 			.setName("user")
 			.setDescription("The user to purge messages from")
 			.setRequired(false))

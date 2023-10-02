@@ -27,13 +27,13 @@ export default async (oldMember: TClient<Discord.GuildMember | Discord.PartialGu
     const boosterRole = newMember.client.config.mainServer.roles.legendarynitrobooster;
 
     if ((newRoles.size || oldRoles.size) && ((Date.now() - (newMember.joinedTimestamp as number)) > 5000)) {
-        if (newRoles.size) embed.addFields({ name: '🔹 Roles Added', value: newRoles.map(x=>x.toString()).join(' ') });
-        if (oldRoles.size) embed.addFields({ name: '🔹 Roles Removed', value: oldRoles.map(x=>x.toString()).join(' ') });
+        if (newRoles.size) embed.addFields({ name: '🔹 Roles Added', value: newRoles.map(x => x.toString()).join(' ') });
+        if (oldRoles.size) embed.addFields({ name: '🔹 Roles Removed', value: oldRoles.map(x => x.toString()).join(' ') });
 
         changes = true;
     }
     
-    if (changes) newMember.client.getChan('botLogs').send({ embeds: [embed] });
+    if (changes) await newMember.client.getChan('botLogs').send({ embeds: [embed] });
 
-    if (oldRoles.has(boosterRole) || newRoles.has(boosterRole)) newMember.client.getChan('boostLogs').send({ embeds: [embed] });
+    if (oldRoles.has(boosterRole) || newRoles.has(boosterRole)) await newMember.client.getChan('boostLogs').send({ embeds: [embed] });
 }

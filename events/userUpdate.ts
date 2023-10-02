@@ -5,7 +5,7 @@ import { TClient } from '../typings.js';
 export default async (oldUser: TClient<Discord.User | Discord.PartialUser>, newUser: TClient<Discord.User>) => {
     if (!newUser.client.config.botSwitches.logs || oldUser.tag === newUser.tag) return;
 
-    newUser.client.getChan('botLogs').send({ embeds: [new EmbedBuilder()
+    await newUser.client.getChan('botLogs').send({ embeds: [new EmbedBuilder()
         .setTimestamp()
         .setColor(newUser.client.config.embedColor)
         .setTitle(`User Update: ${newUser.tag}`)

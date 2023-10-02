@@ -19,9 +19,9 @@ export default async (member: TClient<Discord.GuildMember>) => {
 
     if (rankingData && rankingData.messages) embed.addFields({ name: '🔹 Ranking Total', value: rankingData.messages.toLocaleString('en-US'), inline: true });
 
-    member.client.getChan('botLogs').send({ embeds: [embed] });
+    await member.client.getChan('botLogs').send({ embeds: [embed] });
     
-    member.client.getChan('leaveLogs').send(`**${member.user.tag}** left the server.`);
+    await member.client.getChan('leaveLogs').send(`**${member.user.tag}** left the server.`);
 
     await member.client.userLevels.data.findByIdAndDelete(member.id);
 }

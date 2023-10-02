@@ -9,7 +9,7 @@ export default {
 		const roleMembers = role.members.map(e =>`**${e.user.tag}**`).join("\n") || "";
         const includedPermissions = permissions.includes('Administrator') ? ['Administrator'] : permissions.filter(x => keyPermissions.includes(x));
 
-		interaction.reply({ embeds: [new EmbedBuilder()
+		await interaction.reply({ embeds: [new EmbedBuilder()
 			.setTitle(`Role Info: ${role.name}`)
 			.addFields(
 				{ name: '🔹 ID', value: `\`${role.id}\``, inline: true},
@@ -29,7 +29,7 @@ export default {
 	data: new SlashCommandBuilder()
 		.setName("roleinfo")
 		.setDescription("Get information about a role")
-		.addRoleOption(x=>x
+		.addRoleOption(x => x
 			.setName("role")
 			.setDescription("The role to get information on")
 			.setRequired(true))

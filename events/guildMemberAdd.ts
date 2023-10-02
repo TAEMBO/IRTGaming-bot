@@ -13,7 +13,7 @@ export default async (member: TClient<Discord.GuildMember>) => {
 
     for (const [code, inv] of newInvites) member.client.invites.set(code, { uses: inv.uses, creator: inv.inviter?.id });
  
-    member.client.getChan('botLogs').send({ embeds: [new EmbedBuilder()
+    await member.client.getChan('botLogs').send({ embeds: [new EmbedBuilder()
         .setTitle(`Member Joined: ${member.user.tag}`)
         .setDescription(formatUser(member.user))
         .setFields(
@@ -24,5 +24,5 @@ export default async (member: TClient<Discord.GuildMember>) => {
         .setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048 }))
     ] });
 
-    if (evadingCase) member.roles.add(member.client.config.mainServer.roles.detained);
+    if (evadingCase) await member.roles.add(member.client.config.mainServer.roles.detained);
 }

@@ -6,10 +6,10 @@ export default {
         const member = interaction.options.getMember('member');
         let reason = interaction.options.getString('reason', false);
 
-        if (!member) return interaction.reply({ content: 'You cannot bonk someone who\'s not in the server!', ephemeral: true });
+        if (!member) return await interaction.reply({ content: 'You cannot bonk someone who\'s not in the server!', ephemeral: true });
         if (reason?.startsWith('for ')) reason = reason.replace('for ', '');
 
-        interaction.reply({ embeds: [new EmbedBuilder()
+        await interaction.reply({ embeds: [new EmbedBuilder()
             .setColor(interaction.client.config.embedColor)
             .setTitle([
                 interaction.user.username,
@@ -25,11 +25,11 @@ export default {
 	data: new SlashCommandBuilder()
 		.setName("bonk")
 		.setDescription("Bonk someone")
-		.addUserOption(x=>x
+		.addUserOption(x => x
 			.setName("member")
 			.setDescription("The member to bonk")
 			.setRequired(true))
-        .addStringOption(x=>x
+        .addStringOption(x => x
             .setName('reason')
             .setDescription('The reason for bonking the member')
             .setRequired(false))

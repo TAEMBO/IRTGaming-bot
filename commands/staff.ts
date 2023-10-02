@@ -9,7 +9,7 @@ export default {
             return 0;
         };
         
-        ({
+        await ({
             async mp() {
                 const staff = {
                     mp_manager: interaction.client.getRole('mpmanager'),
@@ -19,7 +19,7 @@ export default {
                     mp_trusted_farmer: interaction.client.getRole('trustedfarmer')
                 };
          
-                interaction.reply({ embeds: [new EmbedBuilder()
+                await interaction.reply({ embeds: [new EmbedBuilder()
                     .setTitle('__MP Staff Members__')
                     .setColor(interaction.client.config.embedColor)
                     .setDescription([
@@ -41,7 +41,7 @@ export default {
                 ] });
             },
             async fs() {
-                interaction.reply({ embeds: [new EmbedBuilder()
+                await interaction.reply({ embeds: [new EmbedBuilder()
                     .setTitle('__MP Staff Usernames__')
                     .setColor(interaction.client.config.embedColor)
                     .addFields(
@@ -57,7 +57,7 @@ export default {
                     helper: interaction.client.getRole('discordhelper')
                 };
          
-                interaction.reply({ embeds: [new EmbedBuilder()
+                await interaction.reply({ embeds: [new EmbedBuilder()
                     .setTitle('__Discord Staff Members__')
                     .setColor(interaction.client.config.embedColor)
                     .setDescription([
@@ -75,7 +75,7 @@ export default {
             async mc() {
                 const staff = interaction.client.getRole('irtmcstaff');
 
-                interaction.reply({ embeds: [new EmbedBuilder()
+                await interaction.reply({ embeds: [new EmbedBuilder()
                     .setTitle('__IRTMC Staff Members__')
                     .setColor(interaction.client.config.embedColor)
                     .setDescription(`${staff.toString()}\n${staff.members.sort(sortMembers).map(x => x.toString()).join("\n") || "None"}`)

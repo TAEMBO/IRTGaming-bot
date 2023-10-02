@@ -8,7 +8,7 @@ export default {
 		const colunms = ['Command Name', 'Uses'];
 		const includedCommands = interaction.client.commands.filter(x => x.uses).sort((a, b) => b.uses - a.uses);
 
-		if (!includedCommands.size) return interaction.reply(`No commands have been used yet.\nUptime: ${formatTime(interaction.client.uptime as number, 2, { commas: true, longNames: true })}`);
+		if (!includedCommands.size) return await interaction.reply(`No commands have been used yet.\nUptime: ${formatTime(interaction.client.uptime as number, 2, { commas: true, longNames: true })}`);
         
 		const nameLength = Math.max(...includedCommands.map(x => x.data.name.length), colunms[0].length) + 2;
 		const amountLength = Math.max(...includedCommands.map(x => x.uses.toString().length), colunms[1].length) + 1;
@@ -52,7 +52,8 @@ export default {
 				`**Uptime:** ${formatTime((os.uptime() * 1000), 2, { commas: true, longNames: true })}`
 			].join('\n') }
 		);
-		interaction.reply({ embeds: [embed] });
+        
+		await interaction.reply({ embeds: [embed] });
 	},
 	data: new SlashCommandBuilder()
 		.setName("statistics")

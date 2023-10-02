@@ -29,7 +29,7 @@ export default class Punishments {
     constructor(private client: YClient) { }
 
     public setExec(_id: number, timeout: number) {
-        setTimeout(async() => {
+        setTimeout(async () => {
             if (timeout > 2_147_483_647) return this.setExec(_id, timeout - 2_147_483_647);
             
             const punishment = await this.data.findById(_id);
@@ -37,7 +37,7 @@ export default class Punishments {
             if (!punishment) return;
 
             log('Yellow', `${punishment.member.tag}\'s ${punishment.type} (case #${punishment._id}) should expire now`);
-        	this.removePunishment(punishment._id, this.client.user.id, "Time\'s up!").then(result => log('Yellow', result));
+        	await this.removePunishment(punishment._id, this.client.user.id, "Time\'s up!").then(result => log('Yellow', result));
         }, timeout > 2_147_483_647 ? 2_147_483_647 : timeout);
     }
 
@@ -63,7 +63,7 @@ export default class Punishments {
             embed.addFields({ name: '🔹 Overwrites', value: `This case overwrites Case #${cancels?._id} \`${cancels?.reason}\`` });
         }
     
-        this.client.getChan('staffReports').send({ embeds: [embed] });
+        await this.client.getChan('staffReports').send({ embeds: [embed] });
     };
 
     private async createId() {
@@ -110,7 +110,7 @@ export default class Punishments {
 		if (type === "mute") {       
             const parsedTime = time ? ms(time) : 2_073_600_000;
 
-            if (parsedTime > 2_073_600_000) return interaction?.editReply('You cannot mute someone for longer than 24 days.');
+            if (parsedTime > 2_073_600_000) return await interaction?.editReply('You cannot mute someone for longer than 24 days.');
 
 			timeInMillis = parsedTime;
 		} else timeInMillis = time ? ms(time) : null;
@@ -165,10 +165,10 @@ export default class Punishments {
 		}
 
 		if (typeof punResult === 'string') { // Punishment was unsuccessful
-			dm?.delete();
+			await dm?.delete();
             
 			if (interaction) {
-				return interaction.editReply(punResult);
+				return await interaction.editReply(punResult);
 			} else return punResult;
 		} else { // Punishment was successful
 			await Promise.all([
@@ -179,7 +179,7 @@ export default class Punishments {
             if (punData.endTime) this.setExec(punData._id, punData.endTime - Date.now());
 
 			if (interaction) {
-				return interaction.editReply({ embeds: [embed] });
+				return await interaction.editReply({ embeds: [embed] });
 			} else return punResult;
 		}
 	}
@@ -191,7 +191,7 @@ export default class Punishments {
 
 		if (!punishment) {
             return interaction
-                ? interaction.reply(`Case #${caseId} not found`)
+                ? await interaction.reply(`Case #${caseId} not found`)
                 : log('Red', `Case #${caseId} not found in punishment removal`);
         };
 
@@ -231,7 +231,7 @@ export default class Punishments {
 
 		if (typeof punResult === 'string') { // Unpunish was unsuccessful
 			if (interaction) {
-				return interaction.reply(punResult);
+				return await interaction.reply(punResult);
 			} else return punResult;
 		} else { // Unpunish was successful
 			await Promise.all([
@@ -241,7 +241,7 @@ export default class Punishments {
 			]);
 
 			if (interaction) {
-				return interaction.reply({ embeds: [new EmbedBuilder()
+				return await interaction.reply({ embeds: [new EmbedBuilder()
 					.setColor(this.client.config.embedColor)
 					.setTitle(`Case #${removePunishmentData._id}: ${removePunishmentData.type[0].toUpperCase() + removePunishmentData.type.slice(1)}`)
 					.setDescription(`${User.tag}\n<@${User.id}>\n(\`${User.id}\`)`)

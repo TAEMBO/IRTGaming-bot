@@ -15,7 +15,7 @@ export default async (message: TClient<Discord.Message<boolean>>) => {
 
         if (!member) return;
 
-        message.client.getChan('taesTestingZone').send({
+        return await message.client.getChan('taesTestingZone').send({
             content: `DM Forward <@${message.client.config.devWhitelist[0]}>`,
             files: message.attachments.map(x => x.url),
             embeds: [new EmbedBuilder()
@@ -29,8 +29,6 @@ export default async (message: TClient<Discord.Message<boolean>>) => {
                     { name: 'Roles:', value: member.roles.cache.size > 1 ? member.roles.cache.filter(x => x.id !== message.client.config.mainServer.id).sort((a, b) => b.position - a.position).map(x => x).join(member.roles.cache.size > 4 ? ' ' : '\n').slice(0, 1024) : 'None' })
             ]
         });
-
-        return;
     }
 
     /** Message has been moderated against and deleted */
@@ -48,7 +46,7 @@ export default async (message: TClient<Discord.Message<boolean>>) => {
             log('Purple', `Received "y" from ${collected.author.tag}, indicating to mute`);
 
             await message.client.punishments.addPunishment('mute', collected.author.id, 'Automod; Misuse of staff ping', message.author, message.member, { time: '10m' });
-            collected.react('✅');
+            await collected.react('✅');
         });
     }
 
@@ -59,9 +57,9 @@ export default async (message: TClient<Discord.Message<boolean>>) => {
         if (profanity.hasProfanity(message.client.bannedWords.data)) { // Banned words
             automodded = true;
 
-            await message.reply('That word is banned here.').then(msg => {
-                message.delete();
-                setTimeout(() => msg.delete(), 5_000);
+            await message.reply('That word is banned here.').then(async msg => {
+                await message.delete();
+                setTimeout(async () => await msg.delete(), 5_000);
             });
             await message.client.repeatedMessages.increment(message, 30_000, 4, 'bw', { time: '30m', reason: 'Banned words' });
         } else if (msg.includes("discord.gg/") && !isMPStaff(message)) { // Discord advertisement
@@ -71,9 +69,9 @@ export default async (message: TClient<Discord.Message<boolean>>) => {
             if (validInvite && validInvite.guild?.id !== message.client.config.mainServer.id) {
                 automodded = true;
 
-                await message.reply("No advertising other Discord servers.").then(msg => {
-                    message.delete();
-                    setTimeout(() => msg.delete(), 10_000);
+                await message.reply("No advertising other Discord servers.").then(async msg => {
+                    await message.delete();
+                    setTimeout(async () => await msg.delete(), 10_000);
                 });
                 await message.client.repeatedMessages.increment(message, 60_000, 2, 'adv', { time: '1h', reason: 'Discord advertisement' });
             }
@@ -81,7 +79,7 @@ export default async (message: TClient<Discord.Message<boolean>>) => {
     }
 
     if (automodded) return;
-    if (message.channel.id !== message.client.config.mainServer.channels.spamZone) message.client.userLevels.incrementUser(message.author.id);
+    if (message.channel.id !== message.client.config.mainServer.channels.spamZone) await message.client.userLevels.incrementUser(message.author.id);
     if (!message.client.config.botSwitches.autoResponses) return;
 
     // Morning message systen
@@ -114,20 +112,18 @@ export default async (message: TClient<Discord.Message<boolean>>) => {
             ''
         ];
 
-        message.reply({
+        await message.reply({
             content: randomEl(mornRes1) + randomEl(mornRes2),
             allowedMentions: { repliedUser: false }
         });
     }
 
     // Auto responses
-    if (msg.includes('giants moment')) message.react('™️');
+    if (msg.includes('giants moment')) await message.react('™️');
 	
-    if (msg.includes('sync sim')) message.react(':IRT_SyncSim22:929440249577365525');
+    if (msg.includes('sync sim')) await message.react(':IRT_SyncSim22:929440249577365525');
 	
-    if (msg.includes('smoker')) message.react('🚭');
+    if (msg.includes("forgor")) await message.react("💀");
 	
-    if (msg.includes("forgor")) message.react("💀");
-	
-    if (msgarr.includes('69')) message.react(':IRT_Noice:611558357643558974');
+    if (msgarr.includes('69')) await message.react(':IRT_Noice:611558357643558974');
 }

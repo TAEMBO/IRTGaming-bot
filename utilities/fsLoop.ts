@@ -246,7 +246,7 @@ export async function fsLoop(client: YClient, watchList: WatchListDocument[], ch
     client.fsCache[serverAcro].players = newPlayers;
 }
 
-export function fsLoopAll(client: YClient, watchList: WatchListDocument[]) {
+export async function fsLoopAll(client: YClient, watchList: WatchListDocument[]) {
     const embed = new EmbedBuilder().setColor(client.config.embedColor);
     const totalCount: number[] = [];
 
@@ -275,7 +275,7 @@ export function fsLoopAll(client: YClient, watchList: WatchListDocument[]) {
         if (playerInfo.length) embed.addFields({ name: `${serverAcro.toUpperCase()} - ${serverSlots}/16`, value: playerInfo.join('\n') });
     }
 
-    client.getChan('juniorAdminChat').messages.edit(client.config.mainServer.fsLoopMsgId, {
+    await client.getChan('juniorAdminChat').messages.edit(client.config.mainServer.fsLoopMsgId, {
         content: `\`\`\`js\n['${client.whitelist.data.join("', '")}']\`\`\`Updates every 30 seconds`,
         embeds: [embed.setTitle(totalCount.reduce((a, b) => a + b, 0) + ' online')]
     }).catch(() => log('Red', 'FSLoopAll invalid msg'));

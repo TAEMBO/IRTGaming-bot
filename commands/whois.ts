@@ -47,7 +47,7 @@ export default {
 
             if (appData) embed.addFields(...appData);
 
-            return interaction.reply({ embeds: [embed] });
+            return await interaction.reply({ embeds: [embed] });
         }
 
         await member.user.fetch();
@@ -82,10 +82,10 @@ export default {
 
             if (appData) embeds[0].addFields(...appData);
 
-            return interaction.reply({ embeds });
+            return await interaction.reply({ embeds });
         }
 
-        if (!member.presence) return interaction.reply({ embeds });
+        if (!member.presence) return await interaction.reply({ embeds });
 
         embeds[0].addFields({
             name: `🔹 Status: ${member.presence.status}`,
@@ -155,12 +155,12 @@ export default {
             }
         }
         
-        interaction.reply({ embeds });
+        await interaction.reply({ embeds });
     },
     data: new SlashCommandBuilder()
         .setName("whois")
         .setDescription("Get info on a member or user")
-        .addUserOption(x=>x
+        .addUserOption(x => x
             .setName("member")
             .setDescription("The member or user to get info on")
             .setRequired(true))

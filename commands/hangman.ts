@@ -1,4 +1,4 @@
-import Discord, { SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder } from 'discord.js';
 import { TInteraction } from '../typings.js';
 
 export default {
@@ -17,7 +17,7 @@ export default {
 
         await interaction.deleteReply();
 
-		function phraseUpdate() {
+		async function phraseUpdate() {
 			const hideWordResult = hidePhrase();
 			let text = `A part of the ${wordOrPhrase} has been revealed, this is what it looks like now:\n\`\`\`\n${hideWordResult}\n\`\`\``;
 
@@ -27,7 +27,7 @@ export default {
 				clearInterval(interval);
 			}
 
-			botMsg.reply({ content: text, allowedMentions: { repliedUser: false } });
+			await botMsg.reply({ content: text, allowedMentions: { repliedUser: false } });
 		}
 
 		function hidePhrase() {
@@ -43,10 +43,10 @@ export default {
 			}).join(' ');
 		}
 
-		function guessLetter(letter: string) {
+		async function guessLetter(letter: string) {
 			latestActivity = Date.now();
 
-			if (guesses.includes(letter)) return interaction.channel?.send('That letter has been guessed already.');
+			if (guesses.includes(letter)) return await interaction.channel?.send('That letter has been guessed already.');
 
 			guesses.push(letter);
 
@@ -56,10 +56,10 @@ export default {
 				return;
 			}
 
-			phraseUpdate();
+			await phraseUpdate();
 		}
 
-		function guessWord(text: string) {
+		async function guessWord(text: string) {
 			latestActivity = Date.now();
 
 			if (!phrase.includes(text)) {
@@ -71,10 +71,10 @@ export default {
 			const guessedTextStartIndex = phrase.indexOf(text);
 			const guessedTextCharIndices = Array.from(Array(text.length).keys());
 			guessedWordsIndices.push(...guessedTextCharIndices.map(x => x + guessedTextStartIndex));
-			phraseUpdate();
+			await phraseUpdate();
 		}
 
-        function checkFouls(isWord: boolean) {
+        async function checkFouls(isWord: boolean) {
 			const stages = [
 				[
 					'      ',
@@ -140,28 +140,28 @@ export default {
 				guessCollector?.stop();
 				clearInterval(interval);
 			}
-			botMsg.reply({ content: `The ${wordOrPhrase} doesn\'t include that ${isWord ? 'piece of text' : 'letter'}.\nAn incorrect guess leads to the addition of things to the drawing. It now looks like this:\n\`\`\`\n${stages[fouls - 1].join('\n')}\n\`\`\`` + loseText, allowedMentions: { repliedUser: false } });
+			await botMsg.reply({ content: `The ${wordOrPhrase} doesn\'t include that ${isWord ? 'piece of text' : 'letter'}.\nAn incorrect guess leads to the addition of things to the drawing. It now looks like this:\n\`\`\`\n${stages[fouls - 1].join('\n')}\n\`\`\`` + loseText, allowedMentions: { repliedUser: false } });
 		}
 
-		guessCollector?.on('collect', guessMessage => {
+		guessCollector?.on('collect', async guessMessage => {
 			if (guessMessage.author.bot) return;
 			if (guessMessage.content.toLowerCase().startsWith('guess')) {
 				const guess = guessMessage.content.slice(6).toLowerCase();
 
 				if (!guess || !guess.length) {
-					guessMessage.reply({ content: 'You\'re using the \`guess\` command wrong. Get good.', allowedMentions: { repliedUser: false } });
+					await guessMessage.reply({ content: 'You\'re using the \`guess\` command wrong. Get good.', allowedMentions: { repliedUser: false } });
 					return;
 				}
 
 				if (guess.length > 1) {
-					guessWord(guess);
+					await guessWord(guess);
 				} else guessLetter(guess);
 			}
 		});
 
-		const interval = setInterval(() => {
+		const interval = setInterval(async () => {
 			if (Date.now() > (latestActivity + 120_000)) {
-				botMsg.reply({ content: 'The hangman game has ended due to inactivity.', allowedMentions: { repliedUser: false } });
+				await botMsg.reply({ content: 'The hangman game has ended due to inactivity.', allowedMentions: { repliedUser: false } });
 				guessCollector?.stop();
 				clearInterval(interval);
 			}
@@ -170,7 +170,7 @@ export default {
 	data: new SlashCommandBuilder()
 		.setName("hangman")
 		.setDescription("Starts a game of hangman!")
-		.addStringOption(x=>x
+		.addStringOption(x => x
 			.setName("phrase")
 			.setDescription("The word or phrase for members to guess")
 			.setRequired(true))

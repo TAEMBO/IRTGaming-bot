@@ -11,16 +11,16 @@ export default {
 
         if (hiddenCmd) {
             log('Yellow', `Running "${hiddenCmd[0]}"`);
-            interaction.reply({ content: `Running ${hiddenCmd[0]}.`, ephemeral: true }).then(() => eval(hiddenCmd[1]));
+            await interaction.reply({ content: `Running ${hiddenCmd[0]}.`, ephemeral: true }).then(() => eval(hiddenCmd[1]));
         } else {
             log('Yellow', `Attempted "${command}"`);
-            interaction.reply({ content: 'A command with that name does not exist.', ephemeral: true });
+            await interaction.reply({ content: 'A command with that name does not exist.', ephemeral: true });
         }
 	},
     data: new SlashCommandBuilder()
         .setName("hidden")
         .setDescription("Run hidden commands")
-        .addStringOption(x=>x
+        .addStringOption(x => x
             .setName('command')
             .setDescription('The name of the hidden command')
             .setRequired(true))

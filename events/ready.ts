@@ -48,17 +48,17 @@ export default async (client: YClient) => {
             fs.writeFileSync(dailyMsgsPath, JSON.stringify(dailyMsgs, null, 4));
             log('Cyan', `Pushed [${formattedDate}, ${total}] to dailyMsgs`);
 
-            setTimeout(() => {
+            setTimeout(async () => {
                 log('Cyan', 'Interval messages');
 
                 const today = Date().toLowerCase();
                 const channel = client.getChan('general');
             
                 if (today.startsWith('fri')) {
-                    channel.send('It\'s the weekend! <a:IRT_FrogClap:722536810399662160>');
+                    await channel.send('It\'s the weekend! <a:IRT_FrogClap:722536810399662160>');
                 } else if (today.startsWith('sun')) {
-                    channel.send('Oh no! It\'s Monday... <:IRT_FrogBans:605519995761590273>');
-                } else channel.send('<:IRT_RollSee:908055712368853002>');
+                    await channel.send('Oh no! It\'s Monday... <:IRT_FrogBans:605519995761590273>');
+                } else await channel.send('<:IRT_RollSee:908055712368853002>');
             }, 7_200_000); // 2 hour timeout, account for time zone differences
         }
     }, 10_000);

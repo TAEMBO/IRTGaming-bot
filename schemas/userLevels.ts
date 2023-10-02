@@ -30,7 +30,7 @@ export default class UserLevels {
                 }
             } else if (userData.messages >= this.algorithm(userData.level + 1)) {
                 userData.level++
-                this.client.getChan('botCommands').send(`Well done <@${userid}>, you made it to **level ${userData.level}**!`);
+                await this.client.getChan('botCommands').send(`Well done <@${userid}>, you made it to **level ${userData.level}**!`);
             }
             await userData.save();
         } else await this.data.create({ _id: userid, messages: 1, level: 0 });

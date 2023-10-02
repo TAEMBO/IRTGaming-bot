@@ -27,7 +27,7 @@ export default class Reminders {
 
             const embed = new EmbedBuilder().setTitle('Reminder').setColor(this.client.config.embedColor).setDescription(`\`\`\`${reminder.content}\`\`\``);
         
-            this.client.users.send(reminder.userid, { embeds: [embed] })
+            await this.client.users.send(reminder.userid, { embeds: [embed] })
                 .catch(() => (this.client.channels.resolve(reminder.ch) as Discord.GuildTextBasedChannel).send({
         		    content: `Reminder <@${reminder.userid}>`,
         		    embeds: [embed.setFooter({ text: 'Failed to DM' })]

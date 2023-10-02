@@ -123,7 +123,7 @@ export default {
 
 			const topUsers = allData.sort((a, b) => b.messages - a.messages).slice(0, 10).map((x, i) => `\`${i + 1}.\` <@${x._id}>: ${x.messages.toLocaleString('en-US')}`).join('\n');
 			
-			interaction.reply({
+			await interaction.reply({
 				files: [new AttachmentBuilder(img.toBuffer(), { name: "dailymsgs.png" })],
 				embeds: [new EmbedBuilder()
 					.setTitle('Ranking leaderboard')
@@ -145,13 +145,13 @@ export default {
 				else return they || false;
 			};
 
-			if (!userData) return interaction.reply(`${pronounBool('You', 'They')} currently don't have a level, send some messages to level up.`);
+			if (!userData) return await interaction.reply(`${pronounBool('You', 'They')} currently don't have a level, send some messages to level up.`);
 		
 			const index = allData.sort((a, b) => b.messages - a.messages).map(x => x._id).indexOf(member.id) + 1;
 			const memberDifference = userData.messages - interaction.client.userLevels.algorithm(userData.level);
 			const levelDifference = interaction.client.userLevels.algorithm(userData.level+1) - interaction.client.userLevels.algorithm(userData.level);
 
-			interaction.reply({ embeds: [new EmbedBuilder()
+			await interaction.reply({ embeds: [new EmbedBuilder()
 				.setTitle([
 					`Level: **${userData.level}**`,
 					`Rank: **${index ? '#' + index  : 'last'}**`,
@@ -167,14 +167,14 @@ export default {
 	data: new SlashCommandBuilder()
 	    .setName("rank")
 	    .setDescription("Ranking system")
-	    .addSubcommand(x=>x
+	    .addSubcommand(x => x
 	    	.setName("view")
 	    	.setDescription("View your or another member's ranking information")
-	    	.addUserOption(x=>x
+	    	.addUserOption(x => x
 	    		.setName("member")
 	    		.setDescription("Member whose rank to view")
 	    		.setRequired(false)))
-	    .addSubcommand(x=>x
+	    .addSubcommand(x => x
 	    	.setName("leaderboard")
 	    	.setDescription("View top 10 users"))
 };

@@ -1,9 +1,11 @@
 import mongoose from 'mongoose';
 
 const model = mongoose.model('watchList', new mongoose.Schema({
-    _id: { type: String },
+    _id: { type: String, required: true },
     reason: { type: String, required: true }
 }, { versionKey: false }));
+
+export type WatchListDocument = ReturnType<typeof model.castObject>;
 
 export default class WatchList {
     public data = model;

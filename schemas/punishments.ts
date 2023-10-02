@@ -8,10 +8,10 @@ import { Index, TInteraction } from '../typings.js';
 const model = mongoose.model('punishments', new mongoose.Schema({
     _id: { type: Number, required: true },
     type: { type: String, required: true },
-    member: { required: true, type: new mongoose.Schema({
+    member: { required: true, type: {
         _id: { type: String, required: true },
-        tag: { type: String, required: true }
-    }) },
+        tag: { type: String, required: true },
+    } },
     moderator: { type: String, required: true },
     expired: { type: Boolean },
     time: { type: Number, required: true },
@@ -21,7 +21,7 @@ const model = mongoose.model('punishments', new mongoose.Schema({
     duration: { type: Number }
 }, { versionKey: false }));
 
-type Document = ReturnType<typeof model.castObject>;
+export type PunishmentsDocument = ReturnType<typeof model.castObject>;
 
 export default class Punishments {
     public data = model;
@@ -41,7 +41,7 @@ export default class Punishments {
         }, timeout > 2_147_483_647 ? 2_147_483_647 : timeout);
     }
 
-	private async makeModlogEntry(punishment: Document) {
+	private async makeModlogEntry(punishment: PunishmentsDocument) {
         const embed = new EmbedBuilder()
             .setTitle(`${punishment.type[0].toUpperCase() + punishment.type.slice(1)} | Case #${punishment._id}`)
             .addFields(
@@ -96,7 +96,7 @@ export default class Punishments {
 		const { time, interaction } = options;
 		const now = Date.now();
 		const guild = this.client.mainGuild();
-		const punData: Document = { type, _id: await this.createId(), member: { tag: user.tag, _id: user.id }, reason, moderator, time: now };
+		const punData: PunishmentsDocument = { type, _id: await this.createId(), member: { tag: user.tag, _id: user.id }, reason, moderator, time: now };
 		const inOrFromBoolean = ['warn', 'mute'].includes(type) ? 'in' : 'from'; // Use 'in' if the punishment doesn't remove the member from the server, eg. mute, warn
 		const auditLogReason = `${reason} | Case #${punData._id}`;
 		const embed = new EmbedBuilder()
@@ -202,7 +202,7 @@ export default class Punishments {
 			guild.members.fetch(punishment.member._id).catch(() => null),
 			this.createId()
 		]);
-		let removePunishmentData: Document = { type: `un${punishment.type}`, _id, cancels: punishment._id, member: punishment.member, reason, moderator, time: now };
+		let removePunishmentData: PunishmentsDocument = { type: `un${punishment.type}`, _id, cancels: punishment._id, member: punishment.member, reason, moderator, time: now };
         let punResult: Discord.User | Discord.GuildMember | string | null | undefined;
 
         punResult = await ({

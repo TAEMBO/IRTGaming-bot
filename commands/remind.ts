@@ -1,6 +1,6 @@
-import { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ComponentType, StringSelectMenuInteraction, ButtonInteraction } from 'discord.js';
+import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ComponentType, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, StringSelectMenuInteraction } from 'discord.js';
 import ms from 'ms';
-import { Index, TInteraction } from '../typings.js';
+import { Index, TInteraction, RemindersDocument } from '../typings.js';
 
 export default {
 	async run(interaction: TInteraction) {
@@ -13,7 +13,7 @@ export default {
         };
 
         async function promptDeletion(
-            reminder: ReturnType<typeof interaction.client.reminders.data.castObject>,
+            reminder: RemindersDocument,
             int: StringSelectMenuInteraction<"cached"> | TInteraction
         ) {
             const intOptions = {
@@ -26,7 +26,7 @@ export default {
                     new ButtonBuilder().setCustomId('yes').setStyle(ButtonStyle.Success).setLabel("Confirm"),
                     new ButtonBuilder().setCustomId('no').setStyle(ButtonStyle.Danger).setLabel("Cancel")
                 )]
-            }; 
+            };
 
             (await (int.isChatInputCommand()
                 ? int.reply(intOptions)

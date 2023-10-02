@@ -4,11 +4,9 @@ import { xml2js } from "xml-js";
 import fs from "node:fs";
 import path from 'node:path';
 import { formatTime, log } from '../utilities.js';
-import { FSLoopCSG, FSLoopDSS, FSLoopDSSPlayer } from "../typings.js";
+import { FSLoopCSG, FSLoopDSS, FSLoopDSSPlayer, WatchListDocument } from "../typings.js";
 
-type WatchList = { _id: string, reason: string }[];
-
-export async function fsLoop(client: YClient, watchList: WatchList, chanId: string, msgId: string, serverAcro: string) {
+export async function fsLoop(client: YClient, watchList: WatchListDocument[], chanId: string, msgId: string, serverAcro: string) {
     function decorators(player: FSLoopDSSPlayer, publicLoc?: boolean) {
         let decorators = player.isAdmin ? ':detective:' : ''; // Tag for if player is admin
     
@@ -248,7 +246,7 @@ export async function fsLoop(client: YClient, watchList: WatchList, chanId: stri
     client.fsCache[serverAcro].players = newPlayers;
 }
 
-export function fsLoopAll(client: YClient, watchList: WatchList) {
+export function fsLoopAll(client: YClient, watchList: WatchListDocument[]) {
     const embed = new EmbedBuilder().setColor(client.config.embedColor);
     const totalCount: number[] = [];
 

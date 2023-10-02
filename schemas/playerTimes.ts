@@ -1,10 +1,10 @@
 import { EmbedBuilder } from 'discord.js';
-import YClient from 'client.js';
+import YClient from '../client.js';
 import mongoose from 'mongoose';
 import FTPClient from 'ftp';
 import xjs from 'xml-js';
 import config from '../config.json' assert { type: 'json' };
-import { FSServers, log } from '../utilities.js';
+import { FSServers, log, stringifyStream } from '../utilities.js';
 import { farmFormat } from '../typings.js';
 
 /** The object that each server will have */
@@ -13,22 +13,19 @@ const serverObj = {
 	lastOn: { type: Number, required: true }
 };
 
-/** The schema containing the server's object */
-const serverSchema = new mongoose.Schema(serverObj, { _id: false });
+/** The base object to contain all server object data */
+const serversObj: Record<string, { type: typeof serverObj, _id: boolean }> = {};
 
-/** The base object for all servers */
-const serversObj = {} as Record<string, { type: typeof serverSchema }>;
-
-// Populate the base object with all server schemas by referencing config
-for (const serverAcro of Object.keys(config.fs) as string[]) serversObj[serverAcro] = { type: serverSchema };
+// Populate the base object with all server objects by referencing config
+for (const serverAcro of Object.keys(config.fs)) serversObj[serverAcro] = { type: serverObj, _id: false };
 
 const model = mongoose.model('playerTimes', new mongoose.Schema({
     _id: { type: String, required: true },
 	uuid: { type: String },
-	servers: { required: true, type: new mongoose.Schema(serversObj, { _id: false }) }
+	servers: { type: serversObj, required: true, _id: false }
 }, { versionKey: false }));
 
-type Document = ReturnType<typeof model.castObject>;
+export type PlayerTimesDocument = ReturnType<typeof model.castObject>;
 
 export default class PlayerTimes {
 	public data = model;
@@ -40,11 +37,12 @@ export default class PlayerTimes {
 	 * @param data The MongoDB document for the player
 	 * @returns An array of all server time objects from the player, with the first element for each being the server's acronym
 	 */
-	getTimeData(data: Document) {
+	public getTimeData(data: PlayerTimesDocument) {
 		return (Object.entries(Object.values(data.servers)[3]) as unknown) as [string, {
             [key in keyof typeof serverObj]: number;
         }][];
 	}
+
 	/**
 	 * Add server-specific time to a player's data.
 	 * @param playerName The name of the player, a string
@@ -52,7 +50,7 @@ export default class PlayerTimes {
 	 * @param serverAcro The lowercase acronym for the server to add the time to, a string
 	 * @returns The MongoDB document for the player, a Promise
 	 */
-	async addPlayerTime(playerName: string, playerTime: number, serverAcro: string) {
+	public async addPlayerTime(playerName: string, playerTime: number, serverAcro: string) {
 		const now = Math.round(Date.now() / 1000);
 		const playerData = await this.data.findById(playerName);
 
@@ -72,7 +70,8 @@ export default class PlayerTimes {
 			}
 		});
 	}
-	async fetchFarmData(serverAcro: string) {
+
+	public async fetchFarmData(serverAcro: string) {
 		const FTP = new FTPClient();
 		const allData = await this.data.find();
         const fsServers = new FSServers(this.client.config.fs);
@@ -81,7 +80,7 @@ export default class PlayerTimes {
 			log('Yellow', `Downloaded farms.xml from ${serverAcro}, crunching...`);
 			if (err) throw err;
             
-			const farmData = xjs.xml2js(await new Response(stream as any).text(), { compact: true }) as farmFormat;
+			const farmData = xjs.xml2js(await stringifyStream(stream), { compact: true }) as farmFormat;
             let iterationCount = 0;
 
 			for await (const player of farmData.farms.farm[0].players.player) {

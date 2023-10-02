@@ -3,9 +3,10 @@ import fs from 'node:fs';
 import canvas from 'canvas';
 import path from 'node:path';
 import config from '../config.json' assert { type: 'json' };
-import { formatTime, isMPStaff, log } from '../utilities.js';
-import { FSLoopDSS, TInteraction } from '../typings.js';
+import { FSServers, formatTime, isMPStaff, log } from '../utilities.js';
+import { FSLoopDSS, TInteraction, PlayerTimesDocument } from '../typings.js';
 
+const fsServers = new FSServers(config.fs);
 const cmdBuilderData = new SlashCommandBuilder()
     .setName("stats")
     .setDescription("Gets info on an FS22 server")
@@ -21,7 +22,7 @@ const cmdBuilderData = new SlashCommandBuilder()
             .setRequired(false)));
 
 // Dynamically manage subcommands via FSCacheServers data
-for (const [serverAcro, { fullName }] of Object.entries(config.fs)) cmdBuilderData.addSubcommand(x => x.setName(serverAcro).setDescription(`${fullName} server stats`));
+for (const [serverAcro, { fullName }] of fsServers.entries()) cmdBuilderData.addSubcommand(x => x.setName(serverAcro).setDescription(`${fullName} server stats`));
 
 export default {
 	async run(interaction: TInteraction) {
@@ -239,7 +240,7 @@ export default {
                 embed.addFields({ name: `${FSdss.server.name.replace('! ! IRTGaming | ', '')} - ${serverSlots}`, value: playerInfo.join("\n"), inline: true });
             }
 
-            for await (const serverAcro of Object.keys(interaction.client.config.fs)) await FSstatsAll(serverAcro);
+            for await (const serverAcro of fsServers.keys()) await FSstatsAll(serverAcro);
 
             embed.setTitle(`All Servers: ${totalCount.reduce((a, b) => a + b, 0)} online`).setFooter(failedFooter.length ? { text: failedFooter.join(', ') } : null);
             interaction.editReply({ embeds: [embed] });
@@ -248,7 +249,8 @@ export default {
                 const sortedData = playersData.sort((a, b) => interaction.client.playerTimes.getTimeData(b).reduce((x, y) => x + y[1].time, 0) - interaction.client.playerTimes.getTimeData(a).reduce((x, y) => x + y[1].time, 0));
                 const player = interaction.options.getString('name');
 
-                const leaderboard = (data: typeof sortedData, isFirstField: boolean) => data.map((x, i) => [
+                const leaderboard = (data: PlayerTimesDocument[], isFirstField: boolean) => data.map((x, i) => [
+                    x.servers.ps.time,
                     `**${i + (isFirstField ? 1 : 26)}.** \`${x._id}\``,
                     interaction.client.fmList.data.includes(x._id) ? ':farmer:' : '',
                     interaction.client.tfList.data.includes(x._id) ? ':angel:' : '',

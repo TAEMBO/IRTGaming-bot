@@ -2,6 +2,12 @@ import YClient from './client.js';
 import Discord from 'discord.js';
 import config from './config.json' assert { type: 'json' };
 
+export * from './schemas/playerTimes.js';
+export * from './schemas/punishments.js';
+export * from './schemas/reminders.js';
+export * from './schemas/userLevels.js';
+export * from './schemas/watchList.js';
+
 export interface ApplicationRPC {
     bot_public: boolean;
     bot_require_code_grant: boolean;

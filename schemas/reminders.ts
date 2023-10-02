@@ -9,6 +9,8 @@ const model = mongoose.model('reminders', new mongoose.Schema({
 	ch: { type: String, required: true }
 }, { versionKey: false }));
 
+export type RemindersDocument = ReturnType<typeof model.castObject>;
+
 export default class Reminders {
 	public data = model;
     

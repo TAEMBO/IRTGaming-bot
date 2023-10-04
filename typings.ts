@@ -1,5 +1,5 @@
 import YClient from './client.js';
-import { GuildMember, Message, Collection, SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder, ChatInputCommandInteraction, PresenceData} from 'discord.js';
+import { GuildMember, Message, Collection, SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder, ChatInputCommandInteraction, PresenceData, GuildTextBasedChannel } from 'discord.js';
 import config from './config.json' assert { type: 'json' };
 
 export * from './schemas/playerTimes.js';
@@ -51,13 +51,16 @@ export interface InviteCache {
 }
 
 export interface Command {
-    run(interaction: TInteraction): Promise<any>;
+    run(interaction: ChatInputCommandInteraction<"cached">): Promise<any>;
     data: Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup"> | SlashCommandSubcommandsOnlyBuilder;
     uses: number;
 }
 
 /** `Discord.ChatInputCommandInteraction<CacheType>` */
-export type TInteraction = TClient<ChatInputCommandInteraction<"cached">>;
+export interface TInteraction extends ChatInputCommandInteraction<"cached"> {
+    readonly client: YClient;
+    channel: NonNullable<GuildTextBasedChannel>;
+};
 
 /** Append custom client property to a class instance */
 export type TClient<T> = T & {

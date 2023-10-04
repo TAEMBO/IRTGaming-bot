@@ -25,5 +25,5 @@ export default async (message: TClient<Message<boolean> | PartialMessage>) => {
         { name: '🔹 Sent', value: `<t:${Math.round(message.createdTimestamp / 1000)}:R>` }
     );
 
-    await message.client.getChan('botLogs').send({ embeds: [embed], files: message.attachments.toJSON() });
+    await message.client.getChan('botLogs').send({ embeds: [embed], files: message.attachments.map(x => x) });
 } 

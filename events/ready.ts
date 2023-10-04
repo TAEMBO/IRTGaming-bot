@@ -15,6 +15,8 @@ export default async (client: YClient) => {
     if (client.config.botSwitches.registerCommands) await guild.commands.set(client.commands.map(x => x.data.toJSON()))
         .then(() => log('Purple', 'Slash commands registered'))
         .catch(e => log('Red', 'Couldn\'t register commands: ', e));
+
+    await guild.members.fetch();
         
     for (const [code, inv] of await guild.invites.fetch()) client.invites.set(code, { uses: inv.uses, creator: inv.inviter?.id });
 

@@ -1,4 +1,4 @@
-import Discord, { SlashCommandBuilder, EmbedBuilder, PresenceStatusData, ActivityType, ActivitiesOptions, PresenceUpdateStatus, codeBlock } from 'discord.js';
+import Discord, { SlashCommandBuilder, EmbedBuilder, PresenceStatusData, ActivityType, ActivitiesOptions, PresenceUpdateStatus, codeBlock, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } from 'discord.js';
 import util from 'node:util';
 import { exec } from 'child_process';
 import * as utilities from '../utilities.js';
@@ -33,17 +33,26 @@ export default {
                             value: `\`\`\`\n${err}\n\`\`\``
                         });
 
-                    await interaction.reply({ embeds: [embed] }).catch(() => interaction.channel?.send({ embeds: [embed] }));
+                    const msgPayload = {
+                        embeds: [embed],
+                        components: [new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder().setCustomId('stack').setStyle(ButtonStyle.Primary).setLabel('Stack'))],
+                        fetchReply: true as true
+                    };
 
-                    interaction.channel?.createMessageCollector({
-                        filter: x => x.content === 'stack' && x.author.id === interaction.user.id,
+                    const msg = await interaction.reply(msgPayload).catch(() => interaction.channel.send(msgPayload));
+
+                    msg.createMessageComponentCollector({
+                        filter: x => x.user.id === interaction.user.id,
                         max: 1,
-                        time: 60_000
-                    }).on('collect', async msg => {
-                        await msg.reply({
+                        time: 60_000,
+                        componentType: ComponentType.Button
+                    }).on('collect', async int => {
+                        await int.reply({
                             content: `\`\`\`\n${err.stack}\n\`\`\``,
                             allowedMentions: { repliedUser: false }
                         });
+                    }).on('end', async ints => {
+                        await msg.edit({ embeds: msg.embeds, components: [] });
                     });
                     
                     return;

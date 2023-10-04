@@ -6,12 +6,13 @@ export default {
 	async run(interaction: TInteraction) {
         const fsServers = new FSServers(interaction.client.config.fs);
         const isFromTicket = interaction.channel?.parentId === interaction.client.config.mainServer.categories.activeTickets;
+        const content = interaction.options.getUser('user', false)?.toString();
 
         await ({
-            staff: () => interaction.reply({ components: [
+            staff: () => interaction.reply({ content, components: [
                 new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder().setStyle(ButtonStyle.Link).setURL(`https://discord.com/channels/552565546089054218/852483521859551232/866257346513862687`).setLabel("Apply for MP Staff"))
             ] }),
-            troll: () => interaction.reply({ embeds: [new EmbedBuilder()
+            troll: () => interaction.reply({ content, embeds: [new EmbedBuilder()
                 .setTitle('Reporting trolls')
                 .setColor(interaction.client.config.embedColor)
                 .setImage('https://cdn.discordapp.com/attachments/979863373439184966/1123088776185516032/image.png')
@@ -26,42 +27,45 @@ export default {
                     ].join('\n'),
                     '',
                     `Please do not ping or DM individual staff members${isFromTicket ? '' : `, use the <@&${interaction.client.config.mainServer.roles.mpstaff}> tag as mentioned above`}.`,
-                    `Check ⁠<#${interaction.client.config.mainServer.channels.mpRulesAndInfo}> to see what a good reason could be for a player report.`
+                    `Check <#${interaction.client.config.mainServer.channels.mpRulesAndInfo}> to see what a good reason could be for a player report.`
                 ].join('\n'))
             ] }),
             appeal: () => interaction.reply([
-                "If you would like to appeal your ban on our MP servers",
+                `${content} `, 
+                "If you would like to appeal your ban on our MP servers, ",
                 "head to <#825046442300145744> and open an [MP Support](https://discord.com/channels/552565546089054218/825046442300145744/969893324947337246) ticket to privately discuss it with MP Staff."
-            ].join(', ')),
-            todo: () => interaction.reply({ embeds: [new EmbedBuilder()
+            ].join('')),
+            todo: () => interaction.reply({ content, embeds: [new EmbedBuilder()
                 .setTitle('To-do')
                 .setColor(interaction.client.config.embedColor)
                 .setFooter({ text: 'Note that not every task listed might be available to do at the time, so do your due dilligence to see what needs doing in the moment.' })
                 .setFields(...fsServers.getPublicAll().map(([_, x]) => ({ name: x.fullName, value: '- ' + x.todo.join('\n- ') })))
             ] }),
-            filters: () => interaction.reply({ embeds: [new EmbedBuilder()
+            filters: () => interaction.reply({ content, embeds: [new EmbedBuilder()
                 .setColor(interaction.client.config.embedColor)
                 .setTitle('Please note that servers may "ghost" and not show up until you\'ve refreshed your MP menu several times.')
                 .setImage('https://cdn.discordapp.com/attachments/830916009107652630/978795707681079376/unknown.png')
             ] }),
             equipment: () => interaction.reply([
+                content, 
                 'Purchasing new equipment can cause large impacts, including:',
                 '- Increased slot amounts',
                 '- Increased file sizes, causing larger amounts of lag',
                 'Therefore, we try to refrain from purchasing any new equipment.'
             ].join('\n')),
             passwords: () => interaction.reply([
-                'We run multiple farms for each of our public servers to aid managing them',
-                'Players who join our servers will only ever need to join the green farm, labeled with our Discord invite link, which should never have a password set on it',
-                'All other farms contain "Staff" in their name, indicating that no one except staff should ever need to access them',
-                '',
+                content, 
+                'We run multiple farms for each of our public servers to aid managing them. ',
+                'Players who join our servers will only ever need to join the green farm, labeled with our Discord invite link, which should never have a password set on it. ',
+                'All other farms contain "Staff" in their name, indicating that no one except staff should ever need to access them. ',
                 'If one of our public servers are locked, the password to them can be found in their respective channel\'s pinned messages. Note that we may not use that password at all times.'
-            ].join('. ')),
+            ].join('')),
             terrain: () => interaction.reply([
-                'When you join one of our servers, you may encounter terrain with jagged edges or extreme deformations into the ground',
-                'This however is not the actual terrain formation on the server, and thus has no affect on where you can drive around',
+                content, 
+                'When you join one of our servers, you may encounter terrain with jagged edges or extreme deformations into the ground. ',
+                'This however is not the actual terrain formation on the server, and thus has no affect on where you can drive around. ',
                 'These are simply visual glitches that are only seen on your end, so don\'t fret that the server was possibly griefed!'
-            ].join('. '))
+            ].join(''))
         } as Index)[interaction.options.getString('questions', true)]();
     },
     data: new SlashCommandBuilder()
@@ -80,4 +84,7 @@ export default {
                 { name: 'Getting passwords', value: 'passwords' },
                 { name: 'Terrain glitches', value: 'terrain' })
             .setRequired(true))
+        .addUserOption(x => x
+            .setName('user')
+            .setDescription('The optional user to notify of with this FAQ'))
 };

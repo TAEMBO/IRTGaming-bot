@@ -34,6 +34,8 @@ export default async (interaction: TClient<Interaction<"cached">>) => {
                     : await interaction.reply(errMsg); // Interaction not replied to or deferred
         }
     } else if (interaction.isButton()) {
+        if (!interaction.customId.includes('-')) return;
+
         const args = interaction.customId.split('-');
 
         await ({

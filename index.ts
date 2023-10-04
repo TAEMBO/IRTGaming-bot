@@ -41,6 +41,7 @@ await mongoose.set('strictQuery', true).connect(client.config.mongoURL, {
     waitQueueTimeoutMS: 50_000
 }).then(() => log('Purple', 'Connected to MongoDB'));
 
+Error.stackTraceLimit = 25;
 client.setMaxListeners(100);
 console.log(client.config.botSwitches);
 console.log(client.config.devWhitelist);

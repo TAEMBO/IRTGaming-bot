@@ -97,20 +97,16 @@ export async function fsLoop(client: YClient, watchList: WatchListDocument[], ch
 
             return Number.isNaN(num) ? "`unavailable`" : num.toLocaleString('en-US');
         })(),
-        ingameTime: (() => {
-            return dss.server.dayTime
-                ? [
-                    Math.floor(dss.server?.dayTime / 3600 / 1000).toString().padStart(2, "0"),
-                    ":",
-                    Math.floor((dss.server?.dayTime / 60 / 1000) % 60).toString().padStart(2, '0')
-                ].join('')
-                : "`unavailable`";
-        })(),
-        timescale: (() => {
-            return csg.settings?.timeScale._text
-                ? parseFloat(csg.settings.timeScale._text) + "x"
-                : "`unavailable`";
-        })(),
+        ingameTime: dss.server.dayTime
+            ? [
+                Math.floor(dss.server?.dayTime / 3600 / 1000).toString().padStart(2, "0"),
+                ":",
+                Math.floor((dss.server?.dayTime / 60 / 1000) % 60).toString().padStart(2, '0')
+            ].join('')
+            : "`unavailable`",
+        timescale: csg.settings?.timeScale._text
+            ? parseFloat(csg.settings.timeScale._text) + "x"
+            : "`unavailable`",
         playTime: (() => {
             const time = parseInt(csg.statistics.playTime._text);
 
@@ -123,21 +119,17 @@ export async function fsLoop(client: YClient, watchList: WatchListDocument[], ch
                 ].join('')
                 : "`unavailable`";
         })(),
-        seasons: (() => {
-            return csg.settings?.growthMode._text
-                ? {
-                    '1': client.config.fs[serverAcro].isPrivate ? 'Yes' : 'Yes 🔴',
-                    '2': 'No',
-                    '3': 'Paused 🔴',
-                    undefined: ""
-                }[csg.settings?.growthMode?._text]
-                : "`unavailable`";
-        })(),
-        autosaveInterval: (() => {
-            return csg.settings?.autoSaveInterval._text
-                ? parseInt(csg.settings?.autoSaveInterval._text).toFixed(0) + " min"
-                : "`unavailable`";
-        })(),
+        seasons: csg.settings?.growthMode._text
+            ? {
+                '1': client.config.fs[serverAcro].isPrivate ? 'Yes' : 'Yes 🔴',
+                '2': 'No',
+                '3': 'Paused 🔴',
+                undefined: ""
+            }[csg.settings?.growthMode?._text]
+            : "`unavailable`",
+        autosaveInterval: csg.settings?.autoSaveInterval._text
+            ? parseInt(csg.settings?.autoSaveInterval._text).toFixed(0) + " min"
+            : "`unavailable`",
         slotUsage: (() => {
             const num = parseInt(csg.slotSystem?._attributes?.slotUsage);
 
@@ -207,7 +199,7 @@ export async function fsLoop(client: YClient, watchList: WatchListDocument[], ch
 
         if (inWl) await wlChannel.send({ embeds: [wlEmbed(inWl._id, false)] });
         
-        if (player.uptime) client.playerTimes.addPlayerTime(player.name, player.uptime, serverAcro);
+        if (player.uptime) await client.playerTimes.addPlayerTime(player.name, player.uptime, serverAcro);
         
         await logChannel.send({ embeds: [logEmbed(player, false)] });
     };
@@ -253,21 +245,18 @@ export async function fsLoopAll(client: YClient, watchList: WatchListDocument[])
     for (const [serverAcro, server] of Object.entries(client.fsCache)) {
         const playerInfo: string[] = [];
         const serverSlots = server.players.length;
+
         totalCount.push(serverSlots);
 
         for (const player of server.players) {
             const playTimeHrs = Math.floor(player.uptime / 60);
             const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
-            const decorators = (() => {
-                let decorators = player.isAdmin ? ':detective:' : ''; // Tag for if player is admin
+            let decorators = player.isAdmin ? ':detective:' : ''; // Tag for if player is admin
             
-                decorators += client.fmList.data.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
-                decorators += client.tfList.data.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
-                decorators += client.whitelist.data.includes(player.name) ? ':white_circle:' : ''; // Tag for if player is on whitelist
-                decorators += watchList.some(x => x._id === player.name) ? ':no_entry:' : ''; // Tag for if player is on watchList
-            
-                return decorators;
-            })();
+            decorators += client.fmList.data.includes(player.name) ? ':farmer:' : ''; // Tag for if player is FM
+            decorators += client.tfList.data.includes(player.name) ? ':angel:' : ''; // Tag for if player is TF
+            decorators += client.whitelist.data.includes(player.name) ? ':white_circle:' : ''; // Tag for if player is on whitelist
+            decorators += watchList.some(x => x._id === player.name) ? ':no_entry:' : ''; // Tag for if player is on watchList
 
             playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
         }

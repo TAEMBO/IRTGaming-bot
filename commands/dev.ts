@@ -1,4 +1,16 @@
-import Discord, { SlashCommandBuilder, EmbedBuilder, PresenceStatusData, ActivityType, ActivitiesOptions, PresenceUpdateStatus, codeBlock, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } from 'discord.js';
+import Discord, {
+    SlashCommandBuilder,
+    EmbedBuilder,
+    PresenceStatusData,
+    ActivityType,
+    ActivitiesOptions,
+    PresenceUpdateStatus,
+    codeBlock,
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    ComponentType
+} from 'discord.js';
 import util from 'node:util';
 import { exec } from 'child_process';
 import * as utilities from '../utilities.js';

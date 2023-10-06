@@ -206,12 +206,10 @@ export async function fsLoop(client: YClient, watchList: WatchListDocument[], ch
 
     // Filter for players joining
     const playerObj = (() => {
-        if (!oldPlayers.length) return;
-
-        if (client.uptime > 50_000) {
-            return newPlayers;
-        } else {
+        if (oldPlayers.length) {
             return newPlayers.filter(x => !oldPlayers.some(y => y.name === x.name));
+        } else if (client.uptime > 50_000) {
+            return newPlayers;
         }
     })();
     

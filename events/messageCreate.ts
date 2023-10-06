@@ -54,27 +54,49 @@ export default async (message: TClient<Message<boolean>>) => {
     const isWhitelisted = message.client.config.whitelist.bannedWords.some(x => [message.channelId, message.channel.parentId].includes(x));
 
     if (message.client.config.botSwitches.automod && !isDCStaff(message) && !isWhitelisted) {
-        if (profanity.hasProfanity(message.client.bannedWords.data)) { // Banned words
+        if (profanity.hasProfanity(message.client.bannedWords.data)) {
             automodded = true;
 
-            await message.reply('That word is banned here.').then(async msg => {
-                await message.delete();
-                setTimeout(async () => await msg.delete(), 5_000);
+            const msg = await message.reply("That word is banned here.");
+
+            await message.delete();
+            setTimeout(async () => await msg.delete(), 10_000);
+
+            await message.client.repeatedMessages.increment(message, {
+                thresholdTime: 30_000,
+                thresholdAmt: 4,
+                identifier: "bw",
+                muteTime: "30m",
+                muteReason: "Banned words"
             });
-            await message.client.repeatedMessages.increment(message, 30_000, 4, 'bw', { time: '30m', reason: 'Banned words' });
-        } else if (msg.includes("discord.gg/") && !isMPStaff(message)) { // Discord advertisement
+        } else if (msg.includes("discord.gg/") && !isMPStaff(message)) {
             const inviteURL = message.content.split(' ').find(x => x.includes('discord.gg/')) as string;
             const validInvite = await message.client.fetchInvite(inviteURL).catch(() => null);
 
             if (validInvite && validInvite.guild?.id !== message.client.config.mainServer.id) {
                 automodded = true;
 
-                await message.reply("No advertising other Discord servers.").then(async msg => {
-                    await message.delete();
-                    setTimeout(async () => await msg.delete(), 10_000);
+                const msg = await message.reply("No advertising other Discord servers.");
+
+                await message.delete();
+                setTimeout(async () => await msg.delete(), 10_000);
+
+                await message.client.repeatedMessages.increment(message, {
+                    thresholdTime: 60_000,
+                    thresholdAmt: 2,
+                    identifier: "adv",
+                    muteTime: "1h",
+                    muteReason: "Discord advertisement"
                 });
-                await message.client.repeatedMessages.increment(message, 60_000, 2, 'adv', { time: '1h', reason: 'Discord advertisement' });
             }
+        } else if (message.channelId !== message.client.config.mainServer.channels.spamZone && !isMPStaff(message)) {
+            await message.client.repeatedMessages.increment(message, {
+                thresholdTime: 5_000,
+                thresholdAmt: 5,
+                identifier: "spam",
+                muteTime: "1h",
+                muteReason: "Repeated messages"
+            });
         }
     }
 

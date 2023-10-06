@@ -1,36 +1,59 @@
 import { Message, Collection } from 'discord.js';
 import YClient from '../client.js';
-import { RepeatedMessagesData } from '../typings.js';
+import { RepeatedMessagesData, RepeatedMessagesEntry, RepeatedMessagesIdentifiers } from '../typings.js';
 
 export class RepeatedMessages {
     private data: RepeatedMessagesData = {};
 
     constructor(private client: YClient) { }
 
-    public async increment(msg: Message<boolean>, thresholdTime: number, thresholdAmt: number, type: string, muteOpt?: { time?: string, reason?: string }) {
-        if (this.data[msg.author.id]) {
-            // Add this message to the list
-            this.data[msg.author.id].data.set(msg.createdTimestamp, { type, channel: msg.channel.id });
+    public async increment(
+        msg: Message<true>,
+        options: {
+            thresholdTime: number;
+            thresholdAmt: number;
+            identifier:RepeatedMessagesIdentifiers;
+            muteTime: string;
+            muteReason: string;
+        }
+    ) {
+        const userData = this.data[msg.author.id];
+
+        if (!userData) {
+            this.data[msg.author.id] = {
+                entries: new Collection<number, RepeatedMessagesEntry>().set(msg.createdTimestamp, {
+                    identifier: options.identifier,
+                    channel: msg.channel.id,
+                    msg: msg.id
+                }),
+                timeout: setTimeout(() => delete this.data[msg.author.id], options.thresholdTime)
+            };
+
+            return;
+        }
+
+        // Add this message to the list
+        userData.entries.set(msg.createdTimestamp, { identifier: options.identifier, channel: msg.channel.id, msg: msg.id });
     
-            // Reset timeout
-            clearTimeout(this.data[msg.author.id].timeout);
-            this.data[msg.author.id].timeout = setTimeout(() => delete this.data[msg.author.id], thresholdTime);
+        // Reset timeout
+        clearTimeout(userData.timeout);
+        userData.timeout = setTimeout(() => delete this.data[msg.author.id], options.thresholdTime);
     
-            // Message mustve been sent after (now - threshold), so purge those that were sent earlier
-            this.data[msg.author.id].data = this.data[msg.author.id].data.filter((x, i) => i >= Date.now() - thresholdTime);
+        // Message mustve been sent after (now - threshold), so purge those that were sent earlier
+        userData.entries = userData.entries.filter((x, i) => i >= Date.now() - options.thresholdTime);
     
-            // A spammed message is one that has been sent within the threshold parameters
-            const spammedMessage = this.data[msg.author.id].data.find(x => {
-                return this.data[msg.author.id].data.filter(y => x.type === y.type).size >= thresholdAmt;
-            });
+        // A spammed message is one that has been sent within the threshold parameters
+        const spammedMessage = userData.entries.find(x => {
+            return userData.entries.filter(y => x.identifier === y.identifier).size >= options.thresholdAmt;
+        });
     
-            if (spammedMessage) {
-                delete this.data[msg.author.id];
-                await this.client.punishments.addPunishment('mute', this.client.user.id, `Automod; ${muteOpt?.reason}`, msg.author, msg.member, { time: muteOpt?.time });
-            }
-        } else {
-            this.data[msg.author.id] = { data: new Collection(), timeout: setTimeout(() => delete this.data[msg.author.id], thresholdTime) };
-            this.data[msg.author.id].data.set(msg.createdTimestamp, { type, channel: msg.channel.id });
+        if (spammedMessage) {
+            delete this.data[msg.author.id];
+            await this.client.punishments.addPunishment('mute', this.client.user.id, `Automod; ${options.muteReason}`, msg.author, msg.member, { time: options.muteTime });
+
+            const spamMsgIds = userData.entries.filter(x => x.identifier === "spam").map(x => x.msg);
+
+            if (spamMsgIds) await msg.channel.bulkDelete(spamMsgIds);
         }
     }
 }

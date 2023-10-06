@@ -1,5 +1,14 @@
 import YClient from './client.js';
-import { GuildMember, Message, Collection, SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder, ChatInputCommandInteraction, PresenceData, GuildTextBasedChannel } from 'discord.js';
+import {
+    GuildMember,
+    Message,
+    Collection,
+    SlashCommandBuilder,
+    SlashCommandSubcommandsOnlyBuilder,
+    ChatInputCommandInteraction,
+    PresenceData,
+    GuildTextBasedChannel
+} from 'discord.js';
 import config from './config.json' assert { type: 'json' };
 
 export * from './schemas/playerTimes.js';
@@ -27,11 +36,16 @@ export type Prettify<T> = {
     [K in keyof T]: T[K];
 } & {};
 
+export type RepeatedMessagesIdentifiers = 'bw' | 'adv' | 'spam';
+
+export interface RepeatedMessagesEntry {
+    identifier: RepeatedMessagesIdentifiers;
+    channel: string;
+    msg: string;
+}
+
 export type RepeatedMessagesData = Record<string, {
-    data: Collection<number, {
-        type: string;
-        channel: string;
-    }>;
+    entries: Collection<number, RepeatedMessagesEntry>;
     timeout: NodeJS.Timeout;
 }>;
 

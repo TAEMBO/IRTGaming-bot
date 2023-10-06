@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, Partials, Collection, PresenceData, TextChannel, Role, Guild } from "discord.js";
+import { Client, GatewayIntentBits, Partials, Options, Collection, PresenceData, TextChannel, Role, Guild } from "discord.js";
 import UserLevels from './schemas/userLevels.js';
 import Punishments from './schemas/punishments.js';
 import PlayerTimes from './schemas/playerTimes.js';
@@ -45,7 +45,11 @@ export default class YClient extends Client<true> {
                 Partials.Message,
                 Partials.Reaction
             ],
-            presence: config.botPresence as PresenceData
+            presence: config.botPresence as PresenceData,
+            makeCache: Options.cacheWithLimits({
+                ...Options.DefaultMakeCacheSettings,
+                GuildMessageManager: 500
+            })
         });
     }
 

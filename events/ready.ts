@@ -70,7 +70,7 @@ export default async (client: YClient) => {
 	    const watchList = await client.watchList.data.find();
 
 	    for await (const [serverAcro, server] of Object.entries(client.config.fs)) await fsLoop(client, watchList, server.channelId, server.messageId, serverAcro);
-	    fsLoopAll(client, watchList);
+	    await fsLoopAll(client, watchList);
     }, 30_000);
 
     // YouTube upload nofitcations loop

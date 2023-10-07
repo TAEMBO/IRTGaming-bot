@@ -225,14 +225,11 @@ export async function fsLoop(client: YClient, watchList: WatchListDocument[], ch
         await logChannel.send({ embeds: [logEmbed(player, true)] });
     };
     
-    // Push graph data point
-    const data: number[] = JSON.parse(fs.readFileSync(path.resolve(`../databases/${serverAcroUp}PlayerData.json`), 'utf8'));
+    // Update cache
+    if (client.fsCache[serverAcro].graphPoints.length >= 120) client.fsCache[serverAcro].graphPoints.shift();
+    if (dss.slots.players.some(x => x.isAdmin)) client.fsCache[serverAcro].lastAdmin = now * 1000;
 
-    data.push(dss.slots.used);
-    fs.writeFileSync(path.resolve(`../databases/${serverAcroUp}PlayerData.json`), JSON.stringify(data));
-
-    if (dss.slots.players.some(x=>x.isAdmin)) client.fsCache[serverAcro].lastAdmin = Date.now();
-
+    client.fsCache[serverAcro].graphPoints.push(dss.slots.used);
     client.fsCache[serverAcro].players = newPlayers;
 }
 

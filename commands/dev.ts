@@ -59,10 +59,7 @@ export default {
                         time: 60_000,
                         componentType: ComponentType.Button
                     }).on('collect', async int => {
-                        await int.reply({
-                            content: `\`\`\`\n${err.stack}\n\`\`\``,
-                            allowedMentions: { repliedUser: false }
-                        });
+                        await int.reply(`\`\`\`\n${err.stack}\n\`\`\``);
                     }).on('end', async ints => {
                         await msg.edit({ embeds: msg.embeds, components: [] });
                     });
@@ -90,11 +87,6 @@ export default {
                 embed.addFields({ name: `Output • ${Date.now() - now}ms`, value: `\`\`\`${output.slice(0, 1016)}\n\`\`\`` });
 
                 await interaction.reply({ embeds: [embed] }).catch(() => interaction.channel?.send({ embeds: [embed] }));
-            },
-            async statsgraph() {
-                interaction.client.config.statsGraphSize = -(interaction.options.getInteger('number', true));
-
-                await interaction.reply(`Set to \`${interaction.client.config.statsGraphSize}\``);
             },
             async restart() {
                 await interaction.reply('Compiling...');
@@ -172,13 +164,6 @@ export default {
         .addSubcommand(x => x
             .setName('update')
             .setDescription('Pull from GitHub repository to live bot'))
-        .addSubcommand(x => x
-            .setName('statsgraph')
-            .setDescription('Edit the number of data points pulled')
-            .addIntegerOption(x => x
-                .setName("number")
-                .setDescription("The number of data points to pull")
-                .setRequired(true)))
         .addSubcommand(x => x
             .setName('presence')
             .setDescription('Update the bot\'s presence')

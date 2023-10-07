@@ -52,6 +52,7 @@ export type FSCache = Record<string, {
     players: FSLoopDSSPlayer[];
     status: "online" | "offline" | null;
     lastAdmin: number | null;
+    graphPoints: number[];
 }>;
 
 export type YTCache = Record<string, string | null>;
@@ -130,7 +131,6 @@ export interface Config {
     readonly embedColorGreen: `#${string}`;
     readonly embedColorRed: `#${string}`;
     readonly embedColorYellow: `#${string}`;
-    statsGraphSize: number;
     readonly botPresence: PresenceData;
     readonly botSwitches: {
         readonly commands: boolean;

@@ -7,7 +7,6 @@ import {
     SlashCommandSubcommandsOnlyBuilder,
     ChatInputCommandInteraction,
     PresenceData,
-    GuildTextBasedChannel
 } from 'discord.js';
 import config from './config.json' assert { type: 'json' };
 
@@ -73,7 +72,7 @@ export interface Command {
 /** `Discord.ChatInputCommandInteraction<CacheType>` */
 export interface TInteraction extends ChatInputCommandInteraction<"cached"> {
     readonly client: YClient;
-    channel: NonNullable<GuildTextBasedChannel>;
+    channel: NonNullable<ChatInputCommandInteraction<"cached">["channel"]>;
 };
 
 /** Append custom client property to a class instance */

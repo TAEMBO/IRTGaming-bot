@@ -111,7 +111,7 @@ export default {
                             `Leaderboard position - **#${sortedData.indexOf(playerData) + 1}**`,
                             `Total time - **${formatTime(playerTimeDataTotal * 60 * 1000, 5, { commas: true, longNames: false })}**`,
                             (isMPStaff(interaction.member) && playerData.uuid) ? `UUID: \`${playerData.uuid}\`` : '',
-                            playerData.discordid ? `Discord user ID - \`${playerData.discordid}\`` : '',
+                            (isMPStaff(interaction.member) && playerData.discordid) ? `Discord user ID - \`${playerData.discordid}\`` : '',
                         ].join('\n'))
                         .setFields(formattedTimeData)
                     ] });

@@ -28,7 +28,7 @@ export default {
 	async run(interaction: TInteraction) {
         const subCmd = interaction.options.getSubcommand();
 
-        if (interaction.channel?.parentId === interaction.client.config.mainServer.categories.fs22PublicMP && !isMPStaff(interaction)) return await interaction.reply({
+        if (interaction.channel?.parentId === interaction.client.config.mainServer.categories.fs22PublicMP && !isMPStaff(interaction.member)) return await interaction.reply({
             content: [
                 'This command has [restrictions](https://discord.com/channels/552565546089054218/891791005098053682/991799952084828170) set',
                 ` please use <#${interaction.client.config.mainServer.channels.botCommands}> for \`/stats\` commands.`
@@ -110,7 +110,7 @@ export default {
                             `Player - \`${playerData._id}\`${interaction.client.fmList.data.includes(playerData._id) ? ':farmer:' : ''}${interaction.client.tfList.data.includes(playerData._id) ? ':angel:' : ''}`,
                             `Leaderboard position - **#${sortedData.indexOf(playerData) + 1}**`,
                             `Total time - **${formatTime(playerTimeDataTotal * 60 * 1000, 5, { commas: true, longNames: false })}**`,
-                            (isMPStaff(interaction) && playerData.uuid) ? `UUID: \`${playerData.uuid}\`` : '',
+                            (isMPStaff(interaction.member) && playerData.uuid) ? `UUID: \`${playerData.uuid}\`` : '',
                             playerData.discordid ? `Discord user ID - \`${playerData.discordid}\`` : '',
                         ].join('\n'))
                         .setFields(formattedTimeData)

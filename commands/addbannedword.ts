@@ -4,7 +4,7 @@ import { isDCStaff, youNeedRole } from '../utilities.js';
 
 export default {
 	async run(interaction: TInteraction) {
-		if (!isDCStaff(interaction) && !interaction.client.config.devWhitelist.includes(interaction.member.id)) return await youNeedRole(interaction, 'discordmoderator');
+		if (!isDCStaff(interaction.member) && !interaction.client.config.devWhitelist.includes(interaction.member.id)) return await youNeedRole(interaction, 'discordmoderator');
         
 		const word = interaction.options.getString("word", true);
 

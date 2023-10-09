@@ -39,7 +39,7 @@ export default async (message: TClient<Message<boolean>>) => {
         log('Purple', `${message.author.tag} mentioned staff role`);
         
         message.channel.createMessageCollector({
-            filter: x => isMPStaff(x) && x.content === 'y',
+            filter: x => isMPStaff(x.member) && x.content === 'y',
             max: 1,
             time: 60_000
         }).on('collect', async collected => {
@@ -53,7 +53,7 @@ export default async (message: TClient<Message<boolean>>) => {
     // RepeatedMessages
     const isWhitelisted = message.client.config.whitelist.bannedWords.some(x => [message.channelId, message.channel.parentId].includes(x));
 
-    if (message.client.config.botSwitches.automod && !isDCStaff(message) && !isWhitelisted) {
+    if (message.client.config.botSwitches.automod && !isDCStaff(message.member) && !isWhitelisted) {
         if (profanity.hasProfanity(message.client.bannedWords.data)) {
             automodded = true;
 
@@ -69,7 +69,7 @@ export default async (message: TClient<Message<boolean>>) => {
                 muteTime: "30m",
                 muteReason: "Banned words"
             });
-        } else if (msg.includes("discord.gg/") && !isMPStaff(message)) {
+        } else if (msg.includes("discord.gg/") && !isMPStaff(message.member)) {
             const inviteURL = message.content.split(' ').find(x => x.includes('discord.gg/')) as string;
             const validInvite = await message.client.fetchInvite(inviteURL).catch(() => null);
 
@@ -89,7 +89,7 @@ export default async (message: TClient<Message<boolean>>) => {
                     muteReason: "Discord advertisement"
                 });
             }
-        } else if (message.channelId !== message.client.config.mainServer.channels.spamZone && !isMPStaff(message)) {
+        } else if (message.channelId !== message.client.config.mainServer.channels.spamZone && !isMPStaff(message.member)) {
             await message.client.repeatedMessages.increment(message, {
                 thresholdTime: 5_000,
                 thresholdAmt: 5,

@@ -5,7 +5,7 @@ import { Index } from '../typings.js';
 
 export default {
 	async run(interaction: TInteraction) {
-		if (!isDCStaff(interaction)) return await youNeedRole(interaction, 'discordmoderator');
+		if (!isDCStaff(interaction.member)) return await youNeedRole(interaction, 'discordmoderator');
 
 		const caseid = interaction.options.getInteger("id");
 

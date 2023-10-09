@@ -4,7 +4,7 @@ import { hasRole, isMPStaff, youNeedRole } from '../utilities.js';
 
 export default {
 	async run(interaction: TInteraction) {
-        if (!isMPStaff(interaction)) return await youNeedRole(interaction, "mpstaff");
+        if (!isMPStaff(interaction.member)) return await youNeedRole(interaction, "mpstaff");
 
         const roles = interaction.member.roles.cache.map((x, i) => i);
         const configRoles = interaction.client.config.mainServer.roles;
@@ -20,7 +20,7 @@ export default {
             await interaction.reply({ content: 'LOA status set', ephemeral: true });
         } else {
             const returnedRoles = (() => {
-                if (hasRole(interaction, 'mpmanager')) {
+                if (hasRole(interaction.member, 'mpmanager')) {
                     return roles.filter(x => x !== configRoles.loa).concat([configRoles.mpstaff, configRoles.mpmanagement]);
                 } else return roles.filter(x => x !== configRoles.loa).concat([configRoles.mpstaff]);
             })();

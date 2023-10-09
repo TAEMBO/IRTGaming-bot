@@ -12,7 +12,7 @@ export default {
         const whitelist = ['984568108704497694', '200066407415676928'];
         const chosenServer = interaction.options.getString('server', true);
 
-        if (!isMPStaff(interaction) && !whitelist.includes(interaction.user.id)) return await youNeedRole(interaction, 'mpstaff');
+        if (!isMPStaff(interaction.member) && !whitelist.includes(interaction.user.id)) return await youNeedRole(interaction, 'mpstaff');
 
         const FTP = new FTPClient();
         await interaction.deferReply({ ephemeral: true });

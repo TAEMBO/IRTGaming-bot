@@ -15,7 +15,7 @@ export default async (oldMsg: TClient<Message<boolean> | PartialMessage>, newMsg
     const msg = newMsg.content.replaceAll('\n', ' ').toLowerCase();
     const profanity = new Profanity(msg);
 
-    if (profanity.hasProfanity(newMsg.client.bannedWords.data) && (!isMPStaff(newMsg) && !isDCStaff(newMsg))) await newMsg.delete();
+    if (profanity.hasProfanity(newMsg.client.bannedWords.data) && (!isMPStaff(newMsg.member) && !isDCStaff(newMsg.member))) await newMsg.delete();
 
     let oldContent = oldMsg.content;
     let newContent = newMsg.content;

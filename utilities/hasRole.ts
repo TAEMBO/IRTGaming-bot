@@ -1,12 +1,13 @@
-import { Config, GuildMemberIntOrMsg, TClient } from '../typings.js';
+import { GuildMember } from 'discord.js';
+import { Config, TClient } from '../typings.js';
 
 /**
- * @param guildMemberOrInt A GuildMember, Interaction, or Message
+ * @param guildMember The member to check
  * @param role The role to check for
  * @returns Whether the GuildMember has the given role or not
  */
-export function hasRole(guildMemberIntOrMsg: GuildMemberIntOrMsg, role: keyof Config["mainServer"]["roles"]) {
-    if ('roles' in guildMemberIntOrMsg) {
-        return guildMemberIntOrMsg.roles.cache.has((guildMemberIntOrMsg as TClient<typeof guildMemberIntOrMsg>).client.config.mainServer.roles[role]);
-    } else return Boolean(guildMemberIntOrMsg.member?.roles.cache.has((guildMemberIntOrMsg as TClient<typeof guildMemberIntOrMsg>).client.config.mainServer.roles[role]));
+export function hasRole(guildMember: GuildMember | null, role: keyof Config["mainServer"]["roles"]) {
+    if (!guildMember) return false;
+
+    return guildMember.roles.cache.has((guildMember as TClient<typeof guildMember>).client.config.mainServer.roles[role]);
 }

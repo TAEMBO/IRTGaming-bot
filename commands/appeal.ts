@@ -4,7 +4,7 @@ import { FSServers, isMPStaff } from '../utilities.js';
 
 export default {
 	async run(interaction: TInteraction) {
-        if (interaction.channel?.parentId !== interaction.client.config.mainServer.categories.activeTickets && !isMPStaff(interaction)) return await interaction.reply({ content: 'You cannot use this command here', ephemeral: true });
+        if (interaction.channel?.parentId !== interaction.client.config.mainServer.categories.activeTickets && !isMPStaff(interaction.member)) return await interaction.reply({ content: 'You cannot use this command here', ephemeral: true });
 
         const fsServers = new FSServers(interaction.client.config.fs);
 

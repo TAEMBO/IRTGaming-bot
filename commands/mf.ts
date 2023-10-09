@@ -7,7 +7,7 @@ export default {
 	async run(interaction: TInteraction) {
         await ({
             async farms() {
-                if (!hasRole(interaction, 'mpmanager') && !hasRole(interaction, 'mfmanager') && !hasRole(interaction, 'mffarmowner')) return await youNeedRole(interaction, "mffarmowner");
+                if (!hasRole(interaction.member, 'mpmanager') && !hasRole(interaction.member, 'mfmanager') && !hasRole(interaction.member, 'mffarmowner')) return await youNeedRole(interaction, "mffarmowner");
 
                 const member = interaction.options.getMember("member");
                 const Role = interaction.client.config.mainServer.roles[interaction.options.getString("role", true) as keyof typeof interaction.client.config.mainServer.roles];
@@ -16,7 +16,7 @@ export default {
                 if (!member) return await interaction.reply({ content: 'You need to select a member that\'s in this server', ephemeral: true });
 
                 if (member.roles.cache.has(Role)) {
-                    if (!hasRole(interaction, 'mfmanager') && hasRole(interaction, 'mffarmowner') && !interaction.member.roles.cache.has(Role)) return await interaction.reply('You cannot remove users from a farm you do not own.');
+                    if (!hasRole(interaction.member, 'mfmanager') && hasRole(interaction.member, 'mffarmowner') && !interaction.member.roles.cache.has(Role)) return await interaction.reply('You cannot remove users from a farm you do not own.');
                     
                     (await interaction.reply({
                         embeds: [new EmbedBuilder()
@@ -53,7 +53,7 @@ export default {
                         } as Index)[int.customId]();
                     });
                 } else {
-                    if (hasRole(interaction, 'mffarmowner') && !hasRole(interaction, 'mfmanager') && !interaction.member.roles.cache.has(Role)) return await interaction.reply('You cannot add users to a farm you do not own.');
+                    if (hasRole(interaction.member, 'mffarmowner') && !hasRole(interaction.member, 'mfmanager') && !interaction.member.roles.cache.has(Role)) return await interaction.reply('You cannot add users to a farm you do not own.');
         
                     await member.roles.add([Role, interaction.client.config.mainServer.roles.mfmember]);
                     await interaction.reply({ embeds: [new EmbedBuilder()

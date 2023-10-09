@@ -6,7 +6,7 @@ export default {
 	async run(interaction: TInteraction) {
         const time = interaction.options.getInteger("time", true);
 
-        if (!isDCStaff(interaction)) return await youNeedRole(interaction, 'discordmoderator');
+        if (!isDCStaff(interaction.member)) return await youNeedRole(interaction, 'discordmoderator');
         if (time > 21600) return await interaction.reply('The slowmode limit is 6 hours (\`21600\` seconds).');
 
         await interaction.channel?.setRateLimitPerUser(time, `Done by ${interaction.user.tag}`);

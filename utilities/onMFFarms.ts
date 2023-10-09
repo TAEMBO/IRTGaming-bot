@@ -1,15 +1,14 @@
-import { GuildMemberIntOrMsg, TClient } from '../typings.js';
+import { GuildMember } from 'discord.js';
+import { TClient } from '../typings.js';
 
 /**
- * @param guildMemberOrInt A GuildMember, Interaction, or Message
+ * @param guildMember The member to check
  * @returns An array of MF farm role IDs that the GuildMember is a member of
  */
-export function onMFFarms(guildMemberIntOrMsg: GuildMemberIntOrMsg) {
-    return (guildMemberIntOrMsg as TClient<typeof guildMemberIntOrMsg>).client.config.mainServer.mfFarmRoles
-        .map(x => (guildMemberIntOrMsg as TClient<typeof guildMemberIntOrMsg>).client.config.mainServer.roles[x])
-        .filter(x => {
-            if ('roles' in guildMemberIntOrMsg) {
-                return guildMemberIntOrMsg.roles.cache.has(x);
-            } else return guildMemberIntOrMsg.member?.roles.cache.has(x);
-        });
+export function onMFFarms(guildMember: GuildMember | null) {
+    if (!guildMember) return [];
+
+    return (guildMember as TClient<typeof guildMember>).client.config.mainServer.mfFarmRoles
+        .map(x => (guildMember as TClient<typeof guildMember>).client.config.mainServer.roles[x])
+        .filter(x => guildMember.roles.cache.has(x));
 }

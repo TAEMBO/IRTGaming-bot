@@ -1,15 +1,14 @@
-import { GuildMemberIntOrMsg, TClient } from '../typings.js';
+import { GuildMember } from 'discord.js';
+import { TClient } from '../typings.js';
 
 /**
- * @param guildMemberOrInt A GuildMember, Interaction, or Message
+ * @param guildMember The member to check
  * @returns Whether the GuildMember is an MP Staff member or not
  */
-export function isMPStaff(guildMemberIntOrMsg: GuildMemberIntOrMsg) {
-    return (guildMemberIntOrMsg as TClient<typeof guildMemberIntOrMsg>).client.config.mainServer.mpStaffRoles
-        .map(x => (guildMemberIntOrMsg as TClient<typeof guildMemberIntOrMsg>).client.config.mainServer.roles[x])
-        .some(x => {
-            if ('roles' in guildMemberIntOrMsg) {
-                return guildMemberIntOrMsg.roles.cache.has(x);
-            } else return guildMemberIntOrMsg.member?.roles.cache.has(x);
-        });
+export function isMPStaff(guildMember: GuildMember | null) {
+    if (!guildMember) return false;
+
+    return (guildMember as TClient<typeof guildMember>).client.config.mainServer.mpStaffRoles
+        .map(x => (guildMember as TClient<typeof guildMember>).client.config.mainServer.roles[x])
+        .some(x => guildMember.roles.cache.has(x));
 }

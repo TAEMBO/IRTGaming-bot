@@ -12,7 +12,7 @@ const cmdOptionChoices = fsServers.getPublicAll().map(([serverAcro, { fullName }
 
 export default {
     async run(interaction: TInteraction) {
-        if (!isMPStaff(interaction)) return await youNeedRole(interaction, 'mpstaff');
+        if (!isMPStaff(interaction.member)) return await youNeedRole(interaction, 'mpstaff');
 
         const FTP = new FTPClient();
         const now = Date.now();
@@ -20,13 +20,13 @@ export default {
         await ({
             async server() {
                 async function checkRole(role: keyof typeof interaction.client.config.mainServer.roles) {
-                    if (!hasRole(interaction, role)) await youNeedRole(interaction, role);
+                    if (!hasRole(interaction.member, role)) await youNeedRole(interaction, role);
                 }
 
                 const chosenServer = interaction.options.getString('server', true);
                 const chosenAction = interaction.options.getString('action', true) as 'start' | 'stop' | 'restart';
 
-                if (interaction.client.config.fs[chosenServer].isPrivate && !hasRole(interaction, 'mpmanager')) {
+                if (interaction.client.config.fs[chosenServer].isPrivate && !hasRole(interaction.member, 'mpmanager')) {
                     await checkRole('mfmanager');
                 } else await checkRole('mpmanager');
 
@@ -91,7 +91,7 @@ export default {
                 setTimeout(() => browser.close(), 10_000);
             },
             async mop() {
-                if (!hasRole(interaction, 'mpmanager')) return await youNeedRole(interaction, 'mpmanager');
+                if (!hasRole(interaction.member, 'mpmanager')) return await youNeedRole(interaction, 'mpmanager');
 
                 const chosenServer = interaction.options.getString('server', true);
                 const chosenAction = interaction.options.getString('action', true) as 'items.xml' | 'players.xml';
@@ -123,7 +123,7 @@ export default {
                         stream.once('close', FTP.end);
                     })).connect(ftpLogin);
                 } else {
-                    if (!hasRole(interaction, 'mpmanager')) return await youNeedRole(interaction, 'mpmanager');
+                    if (!hasRole(interaction.member, 'mpmanager')) return await youNeedRole(interaction, 'mpmanager');
                     
                     let data: banFormat;
                     const banAttachment = interaction.options.getAttachment('bans');
@@ -229,7 +229,7 @@ export default {
                 })).connect(ftpLogin);
             },
             async roles() {
-                if (!hasRole(interaction, 'mpmanager')) return await youNeedRole(interaction, 'mpmanager');
+                if (!hasRole(interaction.member, 'mpmanager')) return await youNeedRole(interaction, 'mpmanager');
 
                 const member = interaction.options.getMember("member");
                 const mainRoles = interaction.client.config.mainServer.roles;

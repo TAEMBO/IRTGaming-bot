@@ -7,7 +7,7 @@ export default {
         const amount = interaction.options.getInteger("amount", true);
         const user = interaction.options.getUser("user");
 
-		if (!isDCStaff(interaction)) return await youNeedRole(interaction, 'discordmoderator');
+		if (!isDCStaff(interaction.member)) return await youNeedRole(interaction, 'discordmoderator');
 		if (amount > 100) return await interaction.reply({ content: 'Discord\'s API limits purging up to 100 messages.', ephemeral: true });
 
         const msgs = await (async () => {

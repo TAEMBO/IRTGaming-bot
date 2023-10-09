@@ -29,8 +29,6 @@ export interface ApplicationRPC {
     tags?: string[];
 };
 
-export type GuildMemberIntOrMsg = GuildMember | TInteraction | Message;
-
 export type Prettify<T> = {
     [K in keyof T]: T[K];
 } & {};

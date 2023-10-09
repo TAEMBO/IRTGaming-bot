@@ -4,7 +4,7 @@ import { isDCStaff, youNeedRole } from '../utilities.js';
 
 export default {
 	async run(interaction: TInteraction) {
-		if (!isDCStaff(interaction)) return await youNeedRole(interaction, 'discordmoderator');
+		if (!isDCStaff(interaction.member)) return await youNeedRole(interaction, 'discordmoderator');
 
         const member = interaction.options.getMember('member');
 

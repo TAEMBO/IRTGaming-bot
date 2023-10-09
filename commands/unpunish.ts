@@ -4,7 +4,7 @@ import { hasRole, isDCStaff, youNeedRole } from '../utilities.js';
 
 export default {
 	async run(interaction: TInteraction) {
-		if (!isDCStaff(interaction)) return await youNeedRole(interaction, 'discordmoderator');
+		if (!isDCStaff(interaction.member)) return await youNeedRole(interaction, 'discordmoderator');
 
 		const punishment = await interaction.client.punishments.data.findById(interaction.options.getInteger('caseid', true));
         const reason = interaction.options.getString("reason") ?? 'Unspecified';
@@ -12,7 +12,7 @@ export default {
 		if (!punishment) return await interaction.reply('No case found with that ID');
 		if (punishment.expired) return await interaction.reply('That case has already been overwritten');
 
-		if (!['warn', 'mute'].includes(punishment.type) && hasRole(interaction, 'discordhelper')) return await youNeedRole(interaction, 'discordmoderator');
+		if (!['warn', 'mute'].includes(punishment.type) && hasRole(interaction.member, 'discordhelper')) return await youNeedRole(interaction, 'discordmoderator');
 		
 		await interaction.client.punishments.removePunishment(punishment._id, interaction.user.id, reason, interaction);
 	},

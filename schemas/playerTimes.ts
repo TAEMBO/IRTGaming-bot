@@ -106,7 +106,7 @@ export default class PlayerTimes {
 							.catch(async () => { // New name is occupied
 								playerDatabyUuid.uuid = undefined; // Remove UUID from old name
 								await playerDatabyUuid.save();
-								await this.data.findByIdAndUpdate(player._attributes.lastNickname, { uuid: player._attributes.uniqueUserId }, { new: true }); // Add UUID to new name
+								await this.data.findByIdAndUpdate(player._attributes.lastNickname, { uuid: player._attributes.uniqueUserId, discordid: playerDatabyUuid.discordid }, { new: true }); // Add UUID to new name
 							});
 					}
 				} else { // No playerTimes data was found with UUID

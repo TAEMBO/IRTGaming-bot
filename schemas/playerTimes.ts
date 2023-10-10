@@ -89,14 +89,21 @@ export default class PlayerTimes {
 
 				if (playerDatabyUuid) { // PlayerTimes data was found with UUID
 					if (playerDatabyUuid._id !== player._attributes.lastNickname) { // PlayerTimes name does not match given name, update playerTimes data to reflect new name
+                        const decorators = (name: string) => {
+                            return [
+                                this.client.fmList.data.includes(name) ? ':farmer:' : '', // Tag for if player is FM
+                                this.client.tfList.data.includes(name) ? ':angel:' : '' // Tag for if player is TF
+                            ].join('');
+                        }
+
 						await this.client.getChan('fsLogs').send({ embeds: [new EmbedBuilder()
 							.setColor(this.client.config.embedColorYellow)
 							.setTitle('Player name change')
 							.setTimestamp()
 							.setDescription([
 								`**UUID:** \`${playerDatabyUuid.uuid}\``,
-								`**Old name:** ${playerDatabyUuid._id}`,
-								`**New name:** ${player._attributes.lastNickname}`
+								`**Old name:** ${playerDatabyUuid._id} ${decorators(playerDatabyUuid._id)}`,
+								`**New name:** ${player._attributes.lastNickname} ${decorators(player._attributes.lastNickname)}`
 							].join('\n'))
 						] });
                         iterationCount++;

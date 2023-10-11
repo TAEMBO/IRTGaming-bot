@@ -94,13 +94,14 @@ export default class Punishments {
         }
     ) {
 		const { time, interaction } = options;
+        const { client } = this;
 		const now = Date.now();
-		const guild = this.client.mainGuild();
+		const guild = client.mainGuild();
 		const punData: PunishmentsDocument = { type, _id: await this.createId(), member: { tag: user.tag, _id: user.id }, reason, moderator, time: now };
 		const inOrFromBoolean = ['warn', 'mute'].includes(type) ? 'in' : 'from'; // Use 'in' if the punishment doesn't remove the member from the server, eg. mute, warn
 		const auditLogReason = `${reason} | Case #${punData._id}`;
 		const embed = new EmbedBuilder()
-			.setColor(this.client.config.embedColor)
+			.setColor(client.config.embedColor)
 			.setTitle(`Case #${punData._id}: ${type[0].toUpperCase() + type.slice(1)}`)
 			.setDescription(`${user.tag}\n<@${user.id}>\n(\`${user.id}\`)`)
 			.addFields({ name: 'Reason', value: reason });
@@ -128,27 +129,28 @@ export default class Punishments {
             });
 
         punResult = await ({
-            ban: async () => {
+            async ban() {
                 const banned = await guild.bans.fetch(user).catch(() => null);
 
                 if (banned) {
                     return 'User is already banned.';
                 } else return await guild.bans.create(user, { reason: auditLogReason }).catch((err: Error) => err.message);
             },
-            softban: async () => {
+            async softban() {
                 const banned = await guild.bans.fetch(user).catch(() => null);
 
                 if (banned) {
                     return 'User is already banned.';
                 } else return await guild.bans.create(user, { reason: auditLogReason, deleteMessageSeconds: 86_400 }).catch((err: Error) => err.message);
             },
-            kick: async () => {
+            async kick() {
                 return await guildMember?.kick(auditLogReason).catch((err: Error) => err.message);
             },
-            detain: async () => {
-                return await guildMember?.roles.add(this.client.config.mainServer.roles.detained, auditLogReason).catch((err: Error) => err.message);
+            async detain() {
+                await guildMember?.voice.disconnect();
+                return await guildMember?.roles.add(client.config.mainServer.roles.detained, auditLogReason).catch((err: Error) => err.message);
             },
-            mute: async () => {
+            async mute() {
                 if (guildMember?.communicationDisabledUntil) {
                     return 'Member is already muted.';
                 } else return await guildMember?.timeout(timeInMillis, auditLogReason).catch((err: Error) => err.message);

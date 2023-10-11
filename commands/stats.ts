@@ -52,7 +52,7 @@ export default {
                         failedFooter.push(`Failed to fetch ${serverAcroUp}`);
                     });
                 
-                if (!FSdss || !FSdss.slots.used) return;
+                if (!FSdss || !FSdss.slots.used) continue;
 
                 totalCount.push(FSdss.slots.used);
                 const playerInfo: string[] = [];

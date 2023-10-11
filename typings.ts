@@ -1,12 +1,10 @@
 import YClient from './client.js';
 import {
-    GuildMember,
-    Message,
     Collection,
     SlashCommandBuilder,
     SlashCommandSubcommandsOnlyBuilder,
     ChatInputCommandInteraction,
-    PresenceData,
+    PresenceData
 } from 'discord.js';
 import config from './config.json' assert { type: 'json' };
 

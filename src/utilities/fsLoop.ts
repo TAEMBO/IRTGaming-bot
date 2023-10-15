@@ -1,8 +1,6 @@
 import { EmbedBuilder, TextChannel } from "discord.js";
 import YClient from "../client.js";
 import { xml2js } from "xml-js";
-import fs from "node:fs";
-import path from 'node:path';
 import { formatTime, log } from '../utilities.js';
 import { FSLoopCSG, FSLoopDSS, FSLoopDSSPlayer, WatchListDocument } from "../typings.js";
 

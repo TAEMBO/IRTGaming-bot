@@ -253,7 +253,7 @@ export async function fsLoopAll(client: YClient, watchList: WatchListDocument[])
             decorators += client.whitelist.data.includes(player.name) ? ':white_circle:' : ''; // Tag for if player is on whitelist
             decorators += watchList.some(x => x._id === player.name) ? ':no_entry:' : ''; // Tag for if player is on watchList
 
-            playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
+            playerInfo.push(`\`${player.name.slice(0, 46)}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
         }
         
         if (playerInfo.length) embed.addFields({ name: `${serverAcro.toUpperCase()} - ${serverSlots}/16`, value: playerInfo.join('\n') });

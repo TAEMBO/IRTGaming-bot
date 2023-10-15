@@ -1,6 +1,6 @@
 import { EmbedBuilder, GuildTextBasedChannel } from 'discord.js';
 import mongoose from 'mongoose';
-import YClient from '../client.js';
+import type TClient from '../client.js';
 
 const model = mongoose.model('reminders', new mongoose.Schema({
     userid: { type: String, required: true },
@@ -14,7 +14,7 @@ export type RemindersDocument = ReturnType<typeof model.castObject>;
 export default class Reminders {
 	public data = model;
     
-	constructor(private client: YClient) { }
+	constructor(private client: TClient) { }
 
 
     public setExec(_id: mongoose.Types.ObjectId, timeout: number) {

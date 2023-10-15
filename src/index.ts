@@ -1,12 +1,12 @@
 import { EmbedBuilder } from 'discord.js';
-import YClient from './client.js';
+import TClient from './client.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import mongoose from 'mongoose';
 import { log } from './utilities.js';
 import { Command, Prettify } from './typings.js';
 
-const client = new YClient();
+const client = new TClient();
 const fsKeys = Object.keys(client.config.fs);
 
 /** Error handler */

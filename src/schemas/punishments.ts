@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { EmbedBuilder, User, GuildMember } from 'discord.js';
-import YClient from '../client.js';
+import type TClient from '../client.js';
 import ms from 'ms';
 import { formatTime, log } from '../utilities.js';
 import { Index, TInteraction } from '../typings.js';
@@ -26,7 +26,7 @@ export type PunishmentsDocument = ReturnType<typeof model.castObject>;
 export default class Punishments {
     public data = model;
 
-    constructor(private client: YClient) { }
+    constructor(private client: TClient) { }
 
     public setExec(_id: number, timeout: number) {
         setTimeout(async () => {

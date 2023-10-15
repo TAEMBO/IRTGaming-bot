@@ -1,11 +1,11 @@
-import YClient from '../client.js';
+import type TClient from '../client.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import { xml2js } from 'xml-js';
 import { log, fsLoop, fsLoopAll } from '../utilities.js';
 import type { YTCacheFeed } from '../typings.js';
 
-export default async (client: YClient) => {
+export default async (client: TClient) => {
     const guild = client.mainGuild();
     const dailyMsgsPath = path.resolve('../databases/dailyMsgs.json');
     const dailyMsgs: [number, number][] = JSON.parse(fs.readFileSync(dailyMsgsPath, 'utf8'));

@@ -1,8 +1,7 @@
 import { EmbedBuilder, VoiceState } from "discord.js";
 import { formatUser } from '../utilities.js';
-import { TClient } from '../typings.js';
 
-export default async (oldState: TClient<VoiceState>, newState: TClient<VoiceState>) => {
+export default async (oldState: VoiceState, newState: VoiceState) => {
     if (!newState.client.config.botSwitches.logs || !newState.member) return;
 
     const channel = newState.client.getChan('botLogs');

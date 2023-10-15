@@ -1,8 +1,8 @@
 import { Interaction } from 'discord.js';
 import { log } from '../utilities.js';
-import { Command, Index, TClient } from '../typings.js';
+import { Command, Index } from '../typings.js';
 
-export default async (interaction: TClient<Interaction<"cached">>) => {
+export default async (interaction: Interaction<"cached">) => {
     if (!interaction.inGuild() || !interaction.inCachedGuild()) return;
 
     if (interaction.isChatInputCommand()) {
@@ -11,6 +11,8 @@ export default async (interaction: TClient<Interaction<"cached">>) => {
 
             return await msg.edit(`Websocket: \`${interaction.client.ws.ping}\`ms\nBot: \`${msg.createdTimestamp - interaction.createdTimestamp}\`ms`);
         }
+
+        interaction.client.user.username
         
         const subCmd = interaction.options.getSubcommand(false);
         const command = interaction.client.commands.get(interaction.commandName) as Command;

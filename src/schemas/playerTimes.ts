@@ -1,5 +1,5 @@
 import { EmbedBuilder } from 'discord.js';
-import YClient from '../client.js';
+import TClient from '../client.js';
 import mongoose from 'mongoose';
 import FTPClient from 'ftp';
 import xjs from 'xml-js';
@@ -31,7 +31,7 @@ export type PlayerTimesDocument = ReturnType<typeof model.castObject>;
 export default class PlayerTimes {
 	public data = model;
 
-	constructor(private client: YClient) { }
+	constructor(private client: TClient) { }
     
 	/**
 	 * Retrieve an array-ified form of a player's server time data.

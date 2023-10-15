@@ -1,5 +1,5 @@
 import { GuildMember } from 'discord.js';
-import { Config, TClient } from '../typings.js';
+import { Config } from '../typings.js';
 
 /**
  * @param guildMember The member to check
@@ -9,5 +9,5 @@ import { Config, TClient } from '../typings.js';
 export function hasRole(guildMember: GuildMember | null, role: keyof Config["mainServer"]["roles"]) {
     if (!guildMember) return false;
 
-    return guildMember.roles.cache.has((guildMember as TClient<typeof guildMember>).client.config.mainServer.roles[role]);
+    return guildMember.roles.cache.has(guildMember.client.config.mainServer.roles[role]);
 }

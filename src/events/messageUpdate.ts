@@ -1,8 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, Message, PartialMessage } from "discord.js";
 import { formatUser, isDCStaff, isMPStaff, Profanity } from '../utilities.js';
-import { TClient } from '../typings.js';
 
-export default async (oldMsg: TClient<Message<boolean> | PartialMessage>, newMsg: TClient<Message<boolean> | PartialMessage>) => {
+export default async (oldMsg: Message<boolean> | PartialMessage, newMsg: Message<boolean> | PartialMessage) => {
     if (
         !newMsg.client.config.botSwitches.logs
         || !oldMsg.content

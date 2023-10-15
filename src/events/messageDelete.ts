@@ -1,8 +1,7 @@
 import { EmbedBuilder, Message, PartialMessage } from 'discord.js';
 import { formatUser } from '../utilities.js';
-import { TClient } from '../typings.js';
 
-export default async (message: TClient<Message<boolean> | PartialMessage>) => {
+export default async (message: Message<boolean> | PartialMessage) => {
     if (
         !message.client.config.botSwitches.logs
         || message.partial

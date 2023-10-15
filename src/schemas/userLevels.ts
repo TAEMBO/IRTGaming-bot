@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import YClient from '../client.js';
+import type TClient from '../client.js';
 
 const model = mongoose.model('userLevels', new mongoose.Schema({
     _id: { type: String, required: true },
@@ -12,7 +12,7 @@ export type UserLevelsDocument = ReturnType<typeof model.castObject>;
 export default class UserLevels {
     public data = model;
 
-    constructor(private client: YClient) { }
+    constructor(private client: TClient) { }
     
     /**
      * Increment a user's userLevels data, or create a document for them if one not found

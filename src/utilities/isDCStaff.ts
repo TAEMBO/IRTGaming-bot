@@ -1,5 +1,4 @@
 import { GuildMember } from 'discord.js';
-import { TClient } from '../typings.js';
 
 /**
  * @param guildMember The member to check
@@ -8,7 +7,7 @@ import { TClient } from '../typings.js';
 export function isDCStaff(guildMember: GuildMember | null) {
     if (!guildMember) return false;
 
-    return (guildMember as TClient<typeof guildMember>).client.config.mainServer.dcStaffRoles
-        .map(x => (guildMember as TClient<typeof guildMember>).client.config.mainServer.roles[x])
+    return guildMember.client.config.mainServer.dcStaffRoles
+        .map(x => guildMember.client.config.mainServer.roles[x])
         .some(x => guildMember.roles.cache.has(x));
 }

@@ -1,11 +1,11 @@
 import { Message, Collection } from 'discord.js';
-import YClient from '../client.js';
+import type TClient from '../client.js';
 import { RepeatedMessagesData, RepeatedMessagesEntry, RepeatedMessagesIdentifiers } from '../typings.js';
 
 export class RepeatedMessages {
     private data: RepeatedMessagesData = {};
 
-    constructor(private client: YClient) { }
+    constructor(private client: TClient) { }
 
     public async increment(
         msg: Message<true>,

@@ -1,10 +1,10 @@
 import { EmbedBuilder, TextChannel } from "discord.js";
-import YClient from "../client.js";
+import type TClient from "../client.js";
 import { xml2js } from "xml-js";
 import { formatTime, log } from '../utilities.js';
 import { FSLoopCSG, FSLoopDSS, FSLoopDSSPlayer, WatchListDocument } from "../typings.js";
 
-export async function fsLoop(client: YClient, watchList: WatchListDocument[], chanId: string, msgId: string, serverAcro: string) {
+export async function fsLoop(client: TClient, watchList: WatchListDocument[], chanId: string, msgId: string, serverAcro: string) {
     function decorators(player: FSLoopDSSPlayer, publicLoc?: boolean) {
         let decorators = player.isAdmin ? ':detective:' : ''; // Tag for if player is admin
     
@@ -230,7 +230,7 @@ export async function fsLoop(client: YClient, watchList: WatchListDocument[], ch
     client.fsCache[serverAcro].players = newPlayers;
 }
 
-export async function fsLoopAll(client: YClient, watchList: WatchListDocument[]) {
+export async function fsLoopAll(client: TClient, watchList: WatchListDocument[]) {
     const embed = new EmbedBuilder().setColor(client.config.embedColor);
     const totalCount: number[] = [];
 

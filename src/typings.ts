@@ -1,4 +1,3 @@
-import YClient from './client.js';
 import {
     Collection,
     SlashCommandBuilder,
@@ -25,7 +24,7 @@ export interface ApplicationRPC {
     name: string;
     summary: string;
     tags?: string[];
-};
+}
 
 export type Prettify<T> = {
     [K in keyof T]: T[K];
@@ -68,14 +67,9 @@ export interface Command {
 
 /** `Discord.ChatInputCommandInteraction<CacheType>` */
 export interface TInteraction extends ChatInputCommandInteraction<"cached"> {
-    readonly client: YClient;
     channel: NonNullable<ChatInputCommandInteraction<"cached">["channel"]>;
-};
+}
 
-/** Append custom client property to a class instance */
-export type TClient<T> = T & {
-    readonly client: YClient;
-};
 
 /** The base object data that is always present */
 export interface FSServerBase {

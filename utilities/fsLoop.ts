@@ -124,7 +124,6 @@ export async function fsLoop(client: YClient, watchList: WatchListDocument[], ch
                 '1': client.config.fs[serverAcro].isPrivate ? 'Yes' : 'Yes 🔴',
                 '2': 'No',
                 '3': 'Paused 🔴',
-                undefined: ""
             }[csg.settings?.growthMode?._text]
             : "`unavailable`",
         autosaveInterval: csg.settings?.autoSaveInterval._text

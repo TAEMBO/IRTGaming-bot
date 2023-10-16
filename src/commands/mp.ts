@@ -150,7 +150,7 @@ export default {
                 }
             },
             async search() {
-                interaction.deferReply();
+                await interaction.deferReply();
                 const chosenServer = interaction.options.getString('server', true);
                 const name = interaction.options.getString('name', true);
                 const ftpLogin = fsServers.getPublicOne(chosenServer).ftp;

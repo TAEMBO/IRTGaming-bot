@@ -11,6 +11,8 @@ const fsKeys = Object.keys(client.config.fs);
 
 /** Error handler */
 async function errorLog(error: Error) {
+    console.error(error);
+
     if (['Request aborted', 'getaddrinfo ENOTFOUND discord.com'].includes(error.message)) return;
 
     const dirname = process.cwd().replaceAll('\\', '/');
@@ -20,7 +22,7 @@ async function errorLog(error: Error) {
         .replaceAll(dirname, `[33m${dirname}[37m`)
         .slice(0, 2500);
 
-    if (!channel) return console.log(error);
+    if (!channel) return;
 
     await channel.send({
         content: `<@${client.config.devWhitelist[0]}>`,

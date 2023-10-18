@@ -11,8 +11,6 @@ export default async (interaction: Interaction<"cached">) => {
 
             return await msg.edit(`Websocket: \`${interaction.client.ws.ping}\`ms\nBot: \`${msg.createdTimestamp - interaction.createdTimestamp}\`ms`);
         }
-
-        interaction.client.user.username
         
         const subCmd = interaction.options.getSubcommand(false);
         const command = interaction.client.commands.get(interaction.commandName) as Command;

@@ -1,5 +1,3 @@
-import moment from 'moment';
-
 enum LogColor {
     Black = "\x1b[30m",
     Red = "\x1b[31m",
@@ -19,5 +17,5 @@ enum LogColor {
  * @param data The data to be logged
  */
 export function log(color: keyof typeof LogColor, ...data: any[]) {
-    console.log(`${LogColor[color]}[${moment().format('HH:mm:ss')}]`, ...data);
+    console.log(`${LogColor[color]}[${(new Date()).toLocaleString("en-GB")}]`, ...data);
 }

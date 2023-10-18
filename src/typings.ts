@@ -54,9 +54,9 @@ export type YTCache = Record<string, string | null>;
 
 export type Index = Record<string, () => any>;
 
-export interface InviteCache {
-    uses: number | null;
-    creator?: string;
+export interface CachedInvite {
+    uses: number;
+    creator: string;
 }
 
 export interface Command {

@@ -1,3 +1,3 @@
 import { Invite } from 'discord.js';
 
-export default async (invite: Invite) => invite.client.invites.set(invite.code, { uses: invite.uses, creator: invite.inviter?.id });
+export default async (invite: Invite) => invite.client.inviteCache.set(invite.code, { uses: invite.uses ?? 0, creator: invite.inviter?.id ?? "UNKNOWN" });

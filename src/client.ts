@@ -6,7 +6,7 @@ import WatchList from './schemas/watchList.js';
 import Reminders from './schemas/reminders.js';
 import config from './config.json' assert { type: 'json' };
 import { LocalDatabase, RepeatedMessages } from './utilities.js';
-import { Config, FSCache, YTCache, InviteCache, Command } from './typings.js';
+import { Config, FSCache, YTCache, CachedInvite, Command } from './typings.js';
 
 declare module "discord.js" {
     interface Client {
@@ -15,7 +15,7 @@ declare module "discord.js" {
         readonly ytCache: YTCache;
         readonly commands: Collection<string, Command>;
         readonly repeatedMessages: RepeatedMessages;
-        readonly invites: Map<string, InviteCache>;
+        readonly inviteCache: Collection<string, CachedInvite>;
         readonly bannedWords: LocalDatabase<string>;
         readonly tfList: LocalDatabase<string>;
         readonly fmList: LocalDatabase<string>;
@@ -49,7 +49,7 @@ export default class TClient extends Client<true> {
     public readonly ytCache: YTCache = {};
     public readonly commands = new Collection<string, Command>();
     public readonly repeatedMessages = new RepeatedMessages(this);
-    public readonly invites = new Map<string, InviteCache>();
+    public readonly inviteCache = new Collection<string, CachedInvite>();
     public readonly bannedWords = new LocalDatabase<string>('bannedWords');
     public readonly tfList = new LocalDatabase<string>('TFlist');
     public readonly fmList = new LocalDatabase<string>('FMlist');

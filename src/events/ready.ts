@@ -18,7 +18,7 @@ export default async (client: TClient) => {
 
     await guild.members.fetch();
         
-    for (const [code, inv] of await guild.invites.fetch()) client.invites.set(code, { uses: inv.uses, creator: inv.inviter?.id });
+    for (const [code, inv] of await guild.invites.fetch()) client.inviteCache.set(code, { uses: inv.uses ?? 0, creator: inv.inviter?.id ?? "UNKNOWN" });
 
     for (const reminder of await client.reminders.data.find()) client.reminders.setExec(reminder._id, reminder.time < now ? 0 : reminder.time - now);
 

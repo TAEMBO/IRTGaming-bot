@@ -21,7 +21,7 @@ const cmdBuilderData = new SlashCommandBuilder()
             .setDescription("The in-game name of the player to get stats for")
             .setRequired(false)));
 
-// Dynamically manage subcommands via FSCacheServers data
+// Dynamically manage subcommands via fs data
 for (const [serverAcro, { fullName }] of fsServers.entries()) cmdBuilderData.addSubcommand(x => x.setName(serverAcro).setDescription(`${fullName} server stats`));
 
 export default {
@@ -45,20 +45,20 @@ export default {
 
             for await (const serverAcro of fsServers.keys()) {
                 const serverAcroUp = serverAcro.toUpperCase();
-                const FSdss = await fetch(interaction.client.config.fs[serverAcro].dss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': `${interaction.client.config.userAgentHeader}/StatsAll` } })
+                const dss = await fetch(interaction.client.config.fs[serverAcro].dss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': `${interaction.client.config.userAgentHeader}/StatsAll` } })
                     .then(res => res.json() as Promise<FSLoopDSS>)
                     .catch(() => {
                         log('Red', `Stats all; ${serverAcroUp} failed`);
                         failedFooter.push(`Failed to fetch ${serverAcroUp}`);
                     });
                 
-                if (!FSdss || !FSdss.slots.used) continue;
+                if (!dss || !dss.slots || !dss.slots.used) continue;
 
-                totalCount.push(FSdss.slots.used);
+                totalCount.push(dss.slots.used);
                 const playerInfo: string[] = [];
-                const serverSlots = `${FSdss.slots.used}/${FSdss.slots.capacity}`;
+                const serverSlots = `${dss.slots.used}/${dss.slots.capacity}`;
 
-                for (const player of FSdss.slots.players.filter(x => x.isUsed)) {
+                for (const player of dss.slots.players.filter(x => x.isUsed)) {
                     const playTimeHrs = Math.floor(player.uptime / 60);
                     const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
                     const inWl = watchList.some(x => x._id === player.name);
@@ -70,7 +70,7 @@ export default {
                     playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
                 };
 
-                embed.addFields({ name: `${FSdss.server.name.replace('! ! IRTGaming | ', '')} - ${serverSlots}`, value: playerInfo.join("\n"), inline: true });
+                embed.addFields({ name: `${dss.server.name.replace('! ! IRTGaming | ', '')} - ${serverSlots}`, value: playerInfo.join("\n"), inline: true });
 
             }
 
@@ -127,11 +127,11 @@ export default {
         } else {
             if (interaction.client.uptime < 60_000) return await interaction.reply({ content: 'Please await another 60 seconds before using this command', ephemeral: true });
 
-            const FSdss = await fetch(interaction.client.config.fs[subCmd].dss, { signal: AbortSignal.timeout(2000), headers: { 'User-Agent': `${interaction.client.config.userAgentHeader}/Stats` } })
+            const dss = await fetch(interaction.client.config.fs[subCmd].dss, { signal: AbortSignal.timeout(2000), headers: { 'User-Agent': `${interaction.client.config.userAgentHeader}/Stats` } })
                 .then(res => res.json() as Promise<FSLoopDSS>)
                 .catch(() => log('Red', `Stats ${subCmd.toUpperCase()} failed`));
 
-            if (!FSdss) return await interaction.reply('Server did not respond');
+            if (!dss || !dss.slots) return await interaction.reply('Server did not respond');
 
             const data = interaction.client.fsCache[subCmd].graphPoints;
         
@@ -284,16 +284,16 @@ export default {
             const playerInfo: string[] = [];
             const watchList = await interaction.client.watchList.data.find();
             const color = (() => {
-                if (FSdss.slots.used === FSdss.slots.capacity) {
+                if (dss.slots.used === dss.slots.capacity) {
                     return interaction.client.config.embedColorRed;
-                } else if (FSdss.slots.used > 9) {
+                } else if (dss.slots.used > 9) {
                     return interaction.client.config.embedColorYellow;
                 } else {
                     return interaction.client.config.embedColorGreen;
                 }
             })();
         
-            for (const player of FSdss.slots.players.filter(x => x.isUsed)) {
+            for (const player of dss.slots.players.filter(x => x.isUsed)) {
                 const playTimeHrs = Math.floor(player.uptime / 60);
                 const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
                 const inWl = watchList.some(x => x._id === player.name);
@@ -306,17 +306,17 @@ export default {
                 playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
             };
 
-            const serverSlots = `${FSdss.slots.used}/${FSdss.slots.capacity}`;
-            const serverTimeHrs = Math.floor(FSdss.server.dayTime / 3600 / 1000).toString().padStart(2, '0');
-            const serverTimeMins = Math.floor((FSdss.server.dayTime / 60 / 1000) % 60).toString().padStart(2, '0');
+            const serverSlots = `${dss.slots.used}/${dss.slots.capacity}`;
+            const serverTimeHrs = Math.floor(dss.server.dayTime / 3600 / 1000).toString().padStart(2, '0');
+            const serverTimeMins = Math.floor((dss.server.dayTime / 60 / 1000) % 60).toString().padStart(2, '0');
             const embed = new EmbedBuilder()
                 .setAuthor({ name: `${serverSlots} - ${serverTimeHrs}:${serverTimeMins}` })
-                .setTitle(FSdss.server.name || 'Offline')
-                .setDescription(FSdss.slots.used ? playerInfo.join("\n"): '*No players online*')
+                .setTitle(dss.server.name || 'Offline')
+                .setDescription(dss.slots.used ? playerInfo.join("\n"): '*No players online*')
                 .setImage('attachment://FSStats.png')
                 .setColor(color);
 
-            if (!FSdss.slots.players.some(x => x.isAdmin) && interaction.client.fsCache[subCmd].lastAdmin) embed.setTimestamp(interaction.client.fsCache[subCmd].lastAdmin).setFooter({ text: 'Admin last on' });
+            if (!dss.slots.players.some(x => x.isAdmin) && interaction.client.fsCache[subCmd].lastAdmin) embed.setTimestamp(interaction.client.fsCache[subCmd].lastAdmin).setFooter({ text: 'Admin last on' });
         
             await interaction.reply({ embeds: [embed], files: [new AttachmentBuilder(img.toBuffer(), { name: "FSStats.png" })] });
         };

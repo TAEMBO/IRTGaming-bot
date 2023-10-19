@@ -30,6 +30,9 @@ export type Prettify<T> = {
     [K in keyof T]: T[K];
 } & {};
 
+export type Empty<T> = {
+    [K in keyof T]: undefined;
+}
 export type RepeatedMessagesIdentifiers = 'bw' | 'adv' | 'spam';
 
 export interface RepeatedMessagesEntry {
@@ -157,24 +160,30 @@ export interface Config {
     };
 }
 
-export interface FSLoopDSS {
-    readonly server: {
-        readonly dayTime: number;
-        readonly game: string;
-        readonly mapName: string;
-        readonly mapSize: number;
-        readonly mapOverviewFilename: string;
-        readonly money: number;
-        readonly name: string;
-        readonly server: string;
-        readonly version: string;
-    };
-    readonly slots: {
-        readonly capacity: number;
-        readonly used: number;
-        readonly players: FSLoopDSSPlayer[];
-    };
+interface FSLoopDSSServer {
+    readonly dayTime: number;
+    readonly game: string;
+    readonly mapName: string;
+    readonly mapSize: number;
+    readonly mapOverviewFilename: string;
+    readonly money: number;
+    readonly name: string;
+    readonly server: string;
+    readonly version: string;
 }
+
+interface FSLoopDSSSlots {
+    readonly capacity: number;
+    readonly used: number;
+    readonly players: FSLoopDSSPlayer[];
+}
+
+interface FSLoopDSSObject {
+    readonly server: FSLoopDSSServer;
+    readonly slots: FSLoopDSSSlots;
+}
+
+export type FSLoopDSS = FSLoopDSSObject | Empty<FSLoopDSSObject>;
 
 export interface FSLoopDSSPlayer {
     readonly isUsed: boolean;

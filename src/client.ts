@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, Partials, Options, Collection, PresenceData, TextChannel, Role, Guild } from "discord.js";
+import { Client, GatewayIntentBits, Partials, Options, Collection, PresenceData, TextChannel, Role, Guild, ApplicationCommandOptionType } from "discord.js";
 import UserLevels from './schemas/userLevels.js';
 import Punishments from './schemas/punishments.js';
 import PlayerTimes from './schemas/playerTimes.js';
@@ -40,6 +40,13 @@ declare module "discord.js" {
          * Get the main guild this client is designed for
          */
         mainGuild(): Guild;
+
+        /**
+         * Get the mention of a given slash command
+         * @param name The name of the command
+         * @param subcommand The optional subcommand to add
+         */
+        getCommandMention(name: string, subcommand?: string): `</${string}${string}:${string}>` | null;
     }
 }
 
@@ -98,5 +105,17 @@ export default class TClient extends Client<true> {
 
     public mainGuild() {
         return this.guilds.cache.get(this.config.mainServer.id) as Guild;
+    }
+
+    public getCommandMention(name: string, subcommand?: string) {
+        const cmd = this.mainGuild().commands.cache.find(x => x.name === name);
+
+        if (!cmd) return null;
+
+        const subCmd = cmd.options.find(x => x.type === ApplicationCommandOptionType.Subcommand && x.name === subcommand);
+
+        if (subcommand && !subCmd) return null;
+
+        return `</${cmd.name}${!subcommand ? "" : " " + subCmd?.name}:${cmd.id}>` as const;
     }
 }

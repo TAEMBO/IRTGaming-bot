@@ -28,10 +28,13 @@ export default {
 	async run(interaction: TInteraction) {
         const subCmd = interaction.options.getSubcommand();
 
-        if (interaction.channel?.parentId === interaction.client.config.mainServer.categories.fs22PublicMP && !isMPStaff(interaction.member)) return await interaction.reply({
+        if ((
+            interaction.channel?.parentId === interaction.client.config.mainServer.categories.fs22PublicMP
+            || interaction.channelId === interaction.client.config.mainServer.channels.mfPublicChat
+        ) && !isMPStaff(interaction.member)) return await interaction.reply({
             content: [
                 'This command has [restrictions](https://discord.com/channels/552565546089054218/891791005098053682/991799952084828170) set',
-                ` please use <#${interaction.client.config.mainServer.channels.botCommands}> for \`/stats\` commands.`
+                ` please use <#${interaction.client.config.mainServer.channels.botCommands}> for ${interaction.client.getCommandMention("stats")} commands.`
             ].join(),
             ephemeral: true
         });

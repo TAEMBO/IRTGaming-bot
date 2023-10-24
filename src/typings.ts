@@ -1,11 +1,52 @@
 import { Collection, SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder, ChatInputCommandInteraction, PresenceData } from 'discord.js';
 import config from './config.json' assert { type: 'json' };
+import TClient from './client.js';
+import { RepeatedMessages, LocalDatabase } from './utilities.js';
+import { PlayerTimes, Punishments, Reminders, UserLevels, WatchList } from "./schemas.js";
 
-export * from './schemas/playerTimes.js';
-export * from './schemas/punishments.js';
-export * from './schemas/reminders.js';
-export * from './schemas/userLevels.js';
-export * from './schemas/watchList.js';
+export * from "./schemas.js";
+
+declare module "discord.js" {
+    interface Client {
+        readonly config: Config;
+        readonly fsCache: FSCache;
+        readonly ytCache: YTCache;
+        readonly commands: Collection<string, Command>;
+        readonly repeatedMessages: RepeatedMessages;
+        readonly inviteCache: Collection<string, CachedInvite>;
+        readonly bannedWords: LocalDatabase<string>;
+        readonly tfList: LocalDatabase<string>;
+        readonly fmList: LocalDatabase<string>;
+        readonly whitelist: LocalDatabase<string>;
+        readonly watchListPings: LocalDatabase<string>;
+        readonly userLevels: UserLevels;
+        readonly punishments: Punishments;
+        readonly watchList: WatchList;
+        readonly playerTimes: PlayerTimes;
+        readonly reminders: Reminders;
+        /**
+         * Get a text channel via config
+         * @param channel
+         */
+        getChan(...args: Parameters<TClient["getChan"]>): ReturnType<TClient["getChan"]>;
+        /**
+         * Get a role via config
+         * @param role 
+         */
+        getRole(...args: Parameters<TClient["getRole"]>): ReturnType<TClient["getRole"]>;
+        /**
+         * Get the main guild this client is designed for
+         */
+        mainGuild(): ReturnType<TClient["mainGuild"]>;
+
+        /**
+         * Get the mention of a given slash command
+         * @param name The name of the command
+         * @param subcommand The optional subcommand to add
+         */
+        getCommandMention(...args: Parameters<TClient["getCommandMention"]>): ReturnType<TClient["getCommandMention"]>;
+    }
+}
 
 export interface ApplicationRPC {
     bot_public: boolean;

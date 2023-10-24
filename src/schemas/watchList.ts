@@ -7,7 +7,7 @@ const model = mongoose.model('watchList', new mongoose.Schema({
 
 export type WatchListDocument = ReturnType<typeof model.castObject>;
 
-export default class WatchList {
+export class WatchList {
     public data = model;
     
     constructor() { }

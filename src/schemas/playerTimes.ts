@@ -28,7 +28,7 @@ const model = mongoose.model('playerTimes', new mongoose.Schema({
 
 export type PlayerTimesDocument = ReturnType<typeof model.castObject>;
 
-export default class PlayerTimes {
+export class PlayerTimes {
 	public data = model;
 
 	constructor(private client: TClient) { }

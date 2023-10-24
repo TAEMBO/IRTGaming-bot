@@ -1,54 +1,8 @@
 import { Client, GatewayIntentBits, Partials, Options, Collection, PresenceData, TextChannel, Role, Guild, ApplicationCommandOptionType } from "discord.js";
-import UserLevels from './schemas/userLevels.js';
-import Punishments from './schemas/punishments.js';
-import PlayerTimes from './schemas/playerTimes.js';
-import WatchList from './schemas/watchList.js';
-import Reminders from './schemas/reminders.js';
+import { PlayerTimes, Punishments, Reminders, UserLevels, WatchList } from "./schemas.js";
 import config from './config.json' assert { type: 'json' };
 import { LocalDatabase, RepeatedMessages } from './utilities.js';
 import { Config, FSCache, YTCache, CachedInvite, Command } from './typings.js';
-
-declare module "discord.js" {
-    interface Client {
-        readonly config: Config;
-        readonly fsCache: FSCache;
-        readonly ytCache: YTCache;
-        readonly commands: Collection<string, Command>;
-        readonly repeatedMessages: RepeatedMessages;
-        readonly inviteCache: Collection<string, CachedInvite>;
-        readonly bannedWords: LocalDatabase<string>;
-        readonly tfList: LocalDatabase<string>;
-        readonly fmList: LocalDatabase<string>;
-        readonly whitelist: LocalDatabase<string>;
-        readonly watchListPings: LocalDatabase<string>;
-        readonly userLevels: UserLevels;
-        readonly punishments: Punishments;
-        readonly watchList: WatchList;
-        readonly playerTimes: PlayerTimes;
-        readonly reminders: Reminders;
-        /**
-         * Get a text channel via config
-         * @param channel
-         */
-        getChan(channel: keyof Config["mainServer"]["channels"]): TextChannel;
-        /**
-         * Get a role via config
-         * @param role 
-         */
-        getRole(role: keyof Config["mainServer"]["roles"]): Role;
-        /**
-         * Get the main guild this client is designed for
-         */
-        mainGuild(): Guild;
-
-        /**
-         * Get the mention of a given slash command
-         * @param name The name of the command
-         * @param subcommand The optional subcommand to add
-         */
-        getCommandMention(name: string, subcommand?: string): `</${string}${string}:${string}>` | null;
-    }
-}
 
 export default class TClient extends Client<true> {
     public readonly config = config as Config;
@@ -116,6 +70,6 @@ export default class TClient extends Client<true> {
 
         if (subcommand && !subCmd) return null;
 
-        return `</${cmd.name}${!subcommand ? "" : " " + subCmd?.name}:${cmd.id}>` as const;
+        return `</${cmd.name}${subcommand ? "" : " " + subCmd?.name}:${cmd.id}>` as const;
     }
 }

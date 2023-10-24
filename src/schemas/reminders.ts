@@ -11,7 +11,7 @@ const model = mongoose.model('reminders', new mongoose.Schema({
 
 export type RemindersDocument = ReturnType<typeof model.castObject>;
 
-export default class Reminders {
+export class Reminders {
 	public data = model;
     
 	constructor(private client: TClient) { }

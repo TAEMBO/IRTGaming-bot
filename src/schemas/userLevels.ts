@@ -9,7 +9,7 @@ const model = mongoose.model('userLevels', new mongoose.Schema({
 
 export type UserLevelsDocument = ReturnType<typeof model.castObject>;
 
-export default class UserLevels {
+export class UserLevels {
     public data = model;
 
     constructor(private client: TClient) { }

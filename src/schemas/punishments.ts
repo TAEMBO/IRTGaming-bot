@@ -23,7 +23,7 @@ const model = mongoose.model('punishments', new mongoose.Schema({
 
 export type PunishmentsDocument = ReturnType<typeof model.castObject>;
 
-export default class Punishments {
+export class Punishments {
     public data = model;
 
     constructor(private client: TClient) { }

@@ -1,4 +1,16 @@
-import { Client, GatewayIntentBits, Partials, Options, Collection, PresenceData, TextChannel, Role, Guild, ApplicationCommandOptionType } from "discord.js";
+import {
+    Client,
+    GatewayIntentBits,
+    Partials,
+    Options,
+    Collection,
+    PresenceData,
+    TextChannel,
+    Role,
+    Guild,
+    ApplicationCommandOptionType,
+    EmbedBuilder
+} from "discord.js";
 import { PlayerTimes, Punishments, Reminders, UserLevels, WatchList } from "./schemas.js";
 import config from './config.json' assert { type: 'json' };
 import { LocalDatabase, RepeatedMessages } from './utilities.js';
@@ -71,5 +83,30 @@ export default class TClient extends Client<true> {
         if (subcommand && !subCmd) return null;
 
         return `</${cmd.name}${subcommand ? "" : " " + subCmd?.name}:${cmd.id}>` as const;
+    }
+
+    public async errorLog(error: Error) {
+        console.error(error);
+    
+        if (['Request aborted', 'getaddrinfo ENOTFOUND discord.com'].includes(error.message)) return;
+    
+        const dirname = process.cwd().replaceAll('\\', '/');
+        const channel = this.getChan('taesTestingZone');
+        const formattedErr = error.stack
+            ?.replaceAll(' at ', ' [31mat[37m ')
+            .replaceAll(dirname, `[33m${dirname}[37m`)
+            .slice(0, 2500);
+    
+        if (!channel) return;
+    
+        await channel.send({
+            content: `<@${this.config.devWhitelist[0]}>`,
+            embeds: [new EmbedBuilder()
+                .setTitle(`Error Caught - ${error.message.slice(0, 240)}`)
+                .setColor("#420420")
+                .setDescription(`\`\`\`ansi\n${formattedErr}\`\`\``)
+                .setTimestamp()
+            ]
+        });
     }
 }

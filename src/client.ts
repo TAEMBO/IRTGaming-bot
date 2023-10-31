@@ -6,8 +6,6 @@ import {
     Collection,
     PresenceData,
     TextChannel,
-    Role,
-    Guild,
     ApplicationCommandOptionType,
     EmbedBuilder
 } from "discord.js";
@@ -61,16 +59,28 @@ export default class TClient extends Client<true> {
         });
     }
 
-    public getChan(channel: keyof typeof this.config.mainServer.channels) {
-        return this.channels.cache.get(this.config.mainServer.channels[channel]) as TextChannel;
+    public getChan(channelName: keyof typeof this.config.mainServer.channels) {
+        const channel = this.channels.cache.get(this.config.mainServer.channels[channelName]);
+
+        if (!(channel instanceof TextChannel)) throw new Error(`Config channel not of instance TextChannel: ${channelName}`);
+
+        return channel;
     }
 
-    public getRole(role: keyof typeof this.config.mainServer.roles) {
-        return this.mainGuild().roles.cache.get(this.config.mainServer.roles[role]) as Role;
+    public getRole(roleName: keyof typeof this.config.mainServer.roles) {
+        const role = this.mainGuild().roles.cache.get(this.config.mainServer.roles[roleName]);
+
+        if (!role) throw new Error(`Config role not found: ${roleName}`);
+
+        return role;
     }
 
     public mainGuild() {
-        return this.guilds.cache.get(this.config.mainServer.id) as Guild;
+        const guild = this.guilds.cache.get(this.config.mainServer.id);
+
+        if (!guild) throw new Error("Config guild not found");
+
+        return guild;
     }
 
     public getCommandMention(name: string, subcommand?: string) {

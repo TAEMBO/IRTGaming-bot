@@ -26,12 +26,12 @@ declare module "discord.js" {
         readonly reminders: Reminders;
         /**
          * Get a text channel via config
-         * @param channel
+         * @param channelName
          */
         getChan(...args: Parameters<TClient["getChan"]>): ReturnType<TClient["getChan"]>;
         /**
          * Get a role via config
-         * @param role 
+         * @param roleName
          */
         getRole(...args: Parameters<TClient["getRole"]>): ReturnType<TClient["getRole"]>;
         /**

@@ -1,10 +1,6 @@
 import Discord, {
     SlashCommandBuilder,
     EmbedBuilder,
-    PresenceStatusData,
-    ActivityType,
-    ActivitiesOptions,
-    PresenceUpdateStatus,
     codeBlock,
     ActionRowBuilder,
     ButtonBuilder,
@@ -32,7 +28,7 @@ export default {
                 const embed = new EmbedBuilder()
                     .setTitle('__Eval__')
                     .setColor(interaction.client.config.embedColor)
-                    .addFields({ name: 'Input', value: `\`\`\`js\n${code.slice(0, 1010)}\n\`\`\`` });
+                    .addFields({ name: 'Input', value: codeBlock("js", code.slice(0, 1010)) });
                 let output: any = 'error';
 				
                 try {
@@ -42,7 +38,7 @@ export default {
                         .setColor('#ff0000')
                         .addFields({
                             name: `Output • ${Date.now() - now}ms`,
-                            value: `\`\`\`\n${err}\n\`\`\``
+                            value: codeBlock(err)
                         });
 
                     const msgPayload = {
@@ -59,7 +55,7 @@ export default {
                         time: 60_000,
                         componentType: ComponentType.Button
                     }).on('collect', async int => {
-                        await int.reply(`\`\`\`\n${err.stack}\n\`\`\``);
+                        await int.reply(codeBlock(err.stack));
                     }).on('end', async ints => {
                         await msg.edit({ embeds: msg.embeds, components: [] });
                     });
@@ -84,9 +80,9 @@ export default {
                     .concat(fsPub.map(x => x[1].ftp.password))
                 ) output = output.replace(credential, 'CREDENTIAL_LEAK');
 
-                embed.addFields({ name: `Output • ${Date.now() - now}ms`, value: `\`\`\`${output.slice(0, 1016)}\n\`\`\`` });
+                embed.addFields({ name: `Output • ${Date.now() - now}ms`, value: codeBlock(output.slice(0, 1016)) });
 
-                await interaction.reply({ embeds: [embed] }).catch(() => interaction.channel?.send({ embeds: [embed] }));
+                await interaction.reply({ embeds: [embed] }).catch(() => interaction.channel.send({ embeds: [embed] }));
             },
             async restart() {
                 await interaction.reply('Compiling...');
@@ -113,35 +109,6 @@ export default {
                         await interaction.editReply('Restarting...').then(() => process.exit(-1));
                     });
                 });
-            },
-            async presence() {
-                function convertType(type?: number) {
-                    return {
-                        0: 'Playing',
-                        2: 'Listening to',
-                        3: 'Watching',
-                        4: 'Custom',
-                        5: 'Competing in',
-                        default: undefined
-                    }[type ?? 'default'];
-                }
-
-                const status = interaction.options.getString('status') as PresenceStatusData | null;
-                const type = interaction.options.getInteger('type') as ActivityType | null;
-                const name = interaction.options.getString('name');
-                const currentActivities = interaction.client.config.botPresence.activities as ActivitiesOptions[];
-
-                if (status) interaction.client.config.botPresence.status = status;
-                if (type !== null) currentActivities[0].type = type;
-                if (name) currentActivities[0].name = name;
-
-                interaction.client.user?.setPresence(interaction.client.config.botPresence);
-
-                await interaction.reply([
-                    `Status: **${interaction.client.config.botPresence.status}**`,
-                    `Type: **${convertType(currentActivities[0].type)}**`,
-                    `Name: **${currentActivities[0].name}**`
-                ].join('\n'));
             }
         } as Index)[interaction.options.getSubcommand()]();
 	},
@@ -164,27 +131,4 @@ export default {
         .addSubcommand(x => x
             .setName('update')
             .setDescription('Pull from GitHub repository to live bot'))
-        .addSubcommand(x => x
-            .setName('presence')
-            .setDescription('Update the bot\'s presence')
-            .addIntegerOption(x => x
-                .setName('type')
-                .setDescription('The activity type to set')
-                .addChoices(
-                    { name: 'Playing', value: ActivityType.Playing },
-                    { name: 'Listening to', value: ActivityType.Listening },
-                    { name: 'Watching', value: ActivityType.Watching },
-                    { name: 'Custom', value: ActivityType.Custom },
-                    { name: 'Competing in', value: ActivityType.Competing }))
-            .addStringOption(x => x
-                .setName('name')
-                .setDescription('The activity name to set'))
-            .addStringOption(x => x
-                .setName('status')
-                .setDescription('The status to set')
-                .addChoices(
-                    { name: 'Online', value: PresenceUpdateStatus.Online },
-                    { name: 'Idle', value: PresenceUpdateStatus.Idle },
-                    { name: 'DND', value: PresenceUpdateStatus.DoNotDisturb },
-                    { name: 'Invisible', value: PresenceUpdateStatus.Invisible })))
 };

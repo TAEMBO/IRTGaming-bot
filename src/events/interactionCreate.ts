@@ -1,8 +1,8 @@
 import { Interaction } from 'discord.js';
-import { log } from '../utilities.js';
+import { hasRole, log, onMFFarms } from '../utilities.js';
 import { Command, Index } from '../typings.js';
 
-export default async (interaction: Interaction<"cached">) => {
+export default async (interaction: Interaction) => {
     if (!interaction.inGuild() || !interaction.inCachedGuild()) return;
 
     if (interaction.isChatInputCommand()) {
@@ -62,6 +62,21 @@ export default async (interaction: Interaction<"cached">) => {
                 } as Index)[args[1]]();
             }
         } as Index)[args[0]]();
+    } else if (interaction.isAutocomplete()) {
+        await ({
+            async mf() {
+                const displayedRoles = (() => {
+                    if (hasRole(interaction.member, 'mpmanager') || hasRole(interaction.member, 'mfmanager')) {
+                        return interaction.client.config.mainServer.mfFarmRoles.map(x => interaction.client.getRole(x));
+                    } else if (hasRole(interaction.member, 'mffarmowner')) {
+                        return interaction.client.config.mainServer.mfFarmRoles.map(x => interaction.client.getRole(x)).filter(x => onMFFarms(interaction.member).some(y => x.id === y));
+                    } else {
+                        return [];
+                    }
+                })();
 
+                await interaction.respond(displayedRoles.map(({ name, id }) => ({ name, value: id })));
+            }
+        } as Index)[interaction.commandName]();
     }
 }

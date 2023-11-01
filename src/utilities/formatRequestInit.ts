@@ -1,4 +1,4 @@
-import { USER_AGENT_HEADER } from "../config.json" assert { type: "json" };
+import config from "../config.json" assert { type: "json" };
 
 /**
  * Create a request init object for making fetches with
@@ -8,6 +8,6 @@ import { USER_AGENT_HEADER } from "../config.json" assert { type: "json" };
 export function formatRequestInit<S extends string>(timeout: number, identifier: S) {
     return {
         signal: AbortSignal.timeout(timeout),
-        headers: { 'User-Agent': `${USER_AGENT_HEADER}/${identifier}` as const }
+        headers: { 'User-Agent': `${config.USER_AGENT_HEADER}/${identifier}` as const }
     };
 }

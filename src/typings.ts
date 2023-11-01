@@ -160,47 +160,47 @@ export type FSServer = FSServerPrivate | FSServerPublic;
 /** Structure of config.json */
 export interface Config {
     /** The Discord bot client token */
-    readonly token: string;
-    /** The URL for connecting to a MongoDB server */
-    readonly mongoURL: string;
-    readonly userAgentHeader: string;
-    readonly embedColor: `#${string}`;
-    readonly embedColorGreen: `#${string}`;
-    readonly embedColorRed: `#${string}`;
-    readonly embedColorYellow: `#${string}`;
-    readonly botPresence: PresenceData;
-    readonly botSwitches: {
-        readonly commands: boolean;
-        readonly automod: boolean;
-        readonly logs: boolean;
-        readonly registerCommands: boolean;
-        readonly fsLoop: boolean;
-        readonly ytLoop: boolean;
-        readonly autoResponses: boolean;
-        readonly buttonRoles: boolean;
+    readonly TOKEN: string,
+    /** The URI for connecting to a MongoDB server */
+    readonly MONGO_URI: string,
+    readonly USER_AGENT_HEADER: string,
+    readonly EMBED_COLOR: `#${string}`,
+    readonly EMBED_COLOR_GREEN: `#${string}`,
+    readonly EMBED_COLOR_RED: `#${string}`,
+    readonly EMBED_COLOR_YELLOW: `#${string}`,
+    botPresence: PresenceData;
+    botSwitches: {
+        commands: boolean;
+        automod: boolean;
+        logs: boolean;
+        registerCommands: boolean;
+        fsLoop: boolean;
+        ytLoop: boolean;
+        autoResponses: boolean;
+        buttonRoles: boolean;
     };
     /** An object for managing and communicating with Farming Simulator servers, keyed by their abbreviated acronym */
-    readonly fs: Record<string, FSServer>;
+    fs: Record<string, FSServer>;
     /** A list of user IDs that are considered developers of this bot */
-    readonly devWhitelist: Array<string>;
-    readonly whitelist: {
+    devWhitelist: Array<string>;
+    whitelist: {
         /** A list of channel IDs that automod does not apply to */
-        readonly bannedWords: string[];
+        bannedWords: string[];
         /** A list of channel IDs that logs do not emit for */
-        readonly logs: string[];
+        logs: string[];
     };
     /** `Array<[ChannelID, ChannelName]>` */
-    readonly ytCacheChannels: string[][];
-    readonly mainServer: {
+    ytCacheChannels: string[][];
+    mainServer: {
         /** The ID of the guild that this bot is for */
-        readonly id: string;
-        readonly fsLoopMsgId: string;
-        readonly mfFarmRoles: Array<keyof Config["mainServer"]["roles"]>;
-        readonly mpStaffRoles: Array<keyof Config["mainServer"]["roles"]>;
-        readonly dcStaffRoles: Array<keyof Config["mainServer"]["roles"]>;
-        readonly roles: Record<keyof typeof config.mainServer.roles, string>;
-        readonly channels: Record<keyof typeof config.mainServer.channels, string>;
-        readonly categories: Record<keyof typeof config.mainServer.categories, string>;
+        id: string;
+        fsLoopMsgId: string;
+        mfFarmRoles: Array<keyof Config["mainServer"]["roles"]>;
+        mpStaffRoles: Array<keyof Config["mainServer"]["roles"]>;
+        dcStaffRoles: Array<keyof Config["mainServer"]["roles"]>;
+        roles: Record<keyof typeof config.mainServer.roles, string>;
+        channels: Record<keyof typeof config.mainServer.channels, string>;
+        categories: Record<keyof typeof config.mainServer.categories, string>;
     };
 }
 

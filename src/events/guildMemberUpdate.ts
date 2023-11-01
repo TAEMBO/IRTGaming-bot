@@ -7,7 +7,7 @@ export default async (oldMember: GuildMember | PartialGuildMember, newMember: Gu
     let changes = false;
     const embed = new EmbedBuilder()
         .setTimestamp()
-        .setColor(newMember.client.config.embedColor)
+        .setColor(newMember.client.config.EMBED_COLOR)
         .setTitle(`Member Update: ${newMember.user.tag}`)
         .setDescription(formatUser(newMember.user))
         .setThumbnail(newMember.user.displayAvatarURL({ extension: 'png', size: 2048 }));

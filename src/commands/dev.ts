@@ -27,7 +27,7 @@ export default {
                 const fsServers = new utilities.FSServers(interaction.client.config.fs);
                 const embed = new EmbedBuilder()
                     .setTitle('__Eval__')
-                    .setColor(interaction.client.config.embedColor)
+                    .setColor(interaction.client.config.EMBED_COLOR)
                     .addFields({ name: 'Input', value: codeBlock("js", code.slice(0, 1010)) });
                 let output: any = 'error';
 				
@@ -72,7 +72,7 @@ export default {
                 const fsPub = fsServers.getPublicAll();
                 const fsObj = fsServers.values();
 
-                for (const credential of [client.config.token]
+                for (const credential of [client.config.TOKEN]
                     .concat(fsObj.map(x => x.login))
                     .concat(fsObj.map(x => x.dss))
                     .concat(fsObj.map(x => x.csg))

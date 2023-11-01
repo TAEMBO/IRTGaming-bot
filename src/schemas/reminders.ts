@@ -25,7 +25,7 @@ export class Reminders {
 
             if (!reminder) return;
 
-            const embed = new EmbedBuilder().setTitle('Reminder').setColor(this.client.config.embedColor).setDescription(`\`\`\`${reminder.content}\`\`\``);
+            const embed = new EmbedBuilder().setTitle('Reminder').setColor(this.client.config.EMBED_COLOR).setDescription(`\`\`\`${reminder.content}\`\`\``);
         
             await this.client.users.send(reminder.userid, { embeds: [embed] })
                 .catch(() => (this.client.channels.resolve(reminder.ch) as GuildTextBasedChannel).send({

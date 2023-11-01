@@ -31,7 +31,7 @@ export type PlayerTimesDocument = ReturnType<typeof model.castObject>;
 export class PlayerTimes {
 	public data = model;
 
-	constructor(private client: TClient) { }
+	constructor(private readonly client: TClient) { }
     
 	/**
 	 * Retrieve an array-ified form of a player's server time data.
@@ -97,7 +97,7 @@ export class PlayerTimes {
                         }
 
 						await this.client.getChan('fsLogs').send({ embeds: [new EmbedBuilder()
-							.setColor(this.client.config.embedColorYellow)
+							.setColor(this.client.config.EMBED_COLOR_YELLOW)
 							.setTitle('Player name change')
 							.setTimestamp()
 							.setDescription([

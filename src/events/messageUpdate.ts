@@ -34,7 +34,7 @@ export default async (oldMsg: Message<boolean> | PartialMessage, newMsg: Message
                     { name: '🔹 New Content', value: `\`\`\`ansi\n${newContent.slice(0, 1000)}\n\`\`\`` },
                     { name: '🔹 Channel', value: oldMsg.channel.toString() })
                 .setAuthor({ name: newMsg.author.tag, iconURL: newMsg.author.displayAvatarURL({ extension: 'png', size: 128 }) })
-                .setColor(newMsg.client.config.embedColor)
+                .setColor(newMsg.client.config.EMBED_COLOR)
                 .setTimestamp()
         ],
         components: [

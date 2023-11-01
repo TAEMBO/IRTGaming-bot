@@ -21,7 +21,7 @@ export default {
                     (await interaction.reply({
                         embeds: [new EmbedBuilder()
                             .setDescription(`This member already has the <@&${Role}> role, do you want to remove it from them?`)
-                            .setColor(interaction.client.config.embedColor)
+                            .setColor(interaction.client.config.EMBED_COLOR)
                         ],
                         fetchReply: true, 
                         components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -42,13 +42,13 @@ export default {
                                 await int.update({
                                     embeds: [new EmbedBuilder()
                                         .setDescription(`<@${member.user.id}> (${member.user.tag}) has been removed from the <@&${interaction.client.config.mainServer.roles.mfmember}> and <@&${Role}> roles.`)
-                                        .setColor(interaction.client.config.embedColor)
+                                        .setColor(interaction.client.config.EMBED_COLOR)
                                     ],
                                     components: []
                                 });
                             },
                             async no() {
-                                await int.update({ embeds: [new EmbedBuilder().setDescription('Command canceled').setColor(interaction.client.config.embedColor)], components: [] });
+                                await int.update({ embeds: [new EmbedBuilder().setDescription('Command canceled').setColor(interaction.client.config.EMBED_COLOR)], components: [] });
                             }
                         } as Index)[int.customId]();
                     });
@@ -58,7 +58,7 @@ export default {
                     await member.roles.add([Role, interaction.client.config.mainServer.roles.mfmember]);
                     await interaction.reply({ embeds: [new EmbedBuilder()
                         .setDescription(`<@${member.user.id}> (${member.user.tag}) has been given the <@&${interaction.client.config.mainServer.roles.mfmember}> and <@&${Role}> roles.`)
-                        .setColor(interaction.client.config.embedColor)
+                        .setColor(interaction.client.config.EMBED_COLOR)
                     ] });
                 }
             },
@@ -73,7 +73,7 @@ export default {
                     (await interaction.reply({
                         embeds: [new EmbedBuilder()
                             .setDescription(`This member already has the <@&${interaction.client.config.mainServer.roles.mffarmowner}> role, do you want to remove it from them?`)
-                            .setColor(interaction.client.config.embedColor)
+                            .setColor(interaction.client.config.EMBED_COLOR)
                         ],
                         ephemeral: true,
                         components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -92,12 +92,12 @@ export default {
 
                                 await int.update({ embeds: [new EmbedBuilder()
                                     .setDescription(`<#${member.user.id}> (${member.user.tag}) has been removed from the <@&${interaction.client.config.mainServer.roles.mffarmowner}> role`)
-                                    .setColor(interaction.client.config.embedColor)
+                                    .setColor(interaction.client.config.EMBED_COLOR)
                                 ] });
 
                             },
                             async no() {
-                                await int.update({ embeds: [new EmbedBuilder().setDescription('Command canceled').setColor(interaction.client.config.embedColor)], components: [] });
+                                await int.update({ embeds: [new EmbedBuilder().setDescription('Command canceled').setColor(interaction.client.config.EMBED_COLOR)], components: [] });
                             }
                         } as Index)[int.customId]();
                     })
@@ -105,7 +105,7 @@ export default {
                     await member.roles.add(interaction.client.config.mainServer.roles.mffarmowner);
                     await interaction.reply({ embeds: [new EmbedBuilder()
                         .setDescription(`<@${member.user.id}> (${member.user.tag}) has been given the <@&${interaction.client.config.mainServer.roles.mffarmowner}> role`)
-                        .setColor(interaction.client.config.embedColor)
+                        .setColor(interaction.client.config.EMBED_COLOR)
                     ] });
                 }
             }

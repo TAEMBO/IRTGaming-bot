@@ -151,11 +151,11 @@ export default {
 				await interaction.reply({ embeds: [new EmbedBuilder()
 					.setTitle(`Convert help: ${wantedQuantity}`)
 					.setDescription(`This quantity comprises ${units.length} units, which are:\n\n${units.sort((a, b) => a.name.localeCompare(b.name)).map(unit => `**${unit.name[0].toUpperCase() + unit.name.slice(1)}** (${unit.short.map(x => `\`${x}\``).join(', ')})`).join('\n')}`)
-					.setColor(interaction.client.config.embedColor)
+					.setColor(interaction.client.config.EMBED_COLOR)
 				] });
 			} else await interaction.reply({ embeds: [new EmbedBuilder()
 				.setTitle('Convert help')
-				.setColor(interaction.client.config.embedColor)	
+				.setColor(interaction.client.config.EMBED_COLOR)	
 				.setDescription(`To convert something, you add **amount** and **unit** combinations to the end of the command. The syntax for an amount and unit combination is \`[amount][unit symbol]\`. Amount and unit combinations are called **arguments**. Arguments are divided into **starters** and a **target unit**. Starters are the starting values that you want to convert to the target unit. A conversion command consists of one or many starters, separated with a comma (\`,\`) in case there are many. After starters comes the target unit, which must have a greater-than sign (\`>\`) or the word "to" before it. The argument(s) after the \`>\` (or "to"), called the target unit, must not include an amount. It is just a **unit symbol**. Because you cannot convert fruits into lengths, all starters and the target unit must be of the same **quantity**.`)
 				.addFields(
 					{ name: 'Supported Quantities', value: Object.keys(quantities).map(x => x[0].toUpperCase() + x.slice(1)).join(', ') + `\n\nTo learn more about a quantity and its units and unit symbols,\ndo \`/convert help [quantity]\``},
@@ -269,7 +269,7 @@ export default {
 			// display amount and target unit symbol
 			await interaction.reply({ embeds: [new EmbedBuilder()
 				.setTitle(`${quantity[0].toUpperCase() + quantity.slice(1)} conversion`)
-				.setColor(interaction.client.config.embedColor)
+				.setColor(interaction.client.config.EMBED_COLOR)
 				.addFields(
                     { name: 'Starting amount', value: `${starters.map(x => `${x?.amount.toLocaleString('en-US')} ${x?.unit.short[0]}`).join(', ')}`, inline: true },
                     { name: 'Converted amount', value: `${amountInTarget.toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' ' + target.unit.short[0]}`, inline: true })

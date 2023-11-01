@@ -24,7 +24,7 @@ export default {
 						{ name: '🔹 Moderator', value: `<@${punishment.moderator}> \`${punishment.moderator}\``, inline: true },
 						{ name: '\u200b', value: '\u200b', inline: true },
 						{ name: '🔹 Reason', value: `\`${punishment.reason || 'unspecified'}\``, inline: true })
-					.setColor(interaction.client.config.embedColor)
+					.setColor(interaction.client.config.EMBED_COLOR)
 					.setTimestamp(punishment.time);
 
 				if (punishment.duration) embed.addFields({ name: '🔹 Duration', value: formatTime(punishment.duration, 100), inline: true }, { name: '\u200b', value: '\u200b', inline: true });
@@ -56,7 +56,7 @@ export default {
 					.setTitle(`Punishments for ${user.tag}`)
 					.setDescription(`<@${user.id}>\n\`${user.id}\``)
 					.setFooter({ text: `${userPunishments.length} total punishments. Viewing page ${pageNumber} out of ${Math.ceil(userPunishments.length / 25)}.` })
-					.setColor(interaction.client.config.embedColor)
+					.setColor(interaction.client.config.EMBED_COLOR)
 					.addFields(userPunishments.slice((pageNumber - 1) * 25, pageNumber * 25))
 				] });
 			},
@@ -64,7 +64,7 @@ export default {
 				const reason = interaction.options.getString('reason', true);
 
 				await interaction.client.punishments.data.findByIdAndUpdate(caseid, { reason });
-				await interaction.reply({ embeds: [new EmbedBuilder().setColor(interaction.client.config.embedColor).setTitle(`Case #${caseid} updated`).setDescription(`**New reason:** ${reason}`)] });
+				await interaction.reply({ embeds: [new EmbedBuilder().setColor(interaction.client.config.EMBED_COLOR).setTitle(`Case #${caseid} updated`).setDescription(`**New reason:** ${reason}`)] });
 			}
 		} as Index)[interaction.options.getSubcommand()]();
 	},

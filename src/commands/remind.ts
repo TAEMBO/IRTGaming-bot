@@ -18,7 +18,7 @@ export default {
         ) {
             const intOptions = {
                 embeds: [new EmbedBuilder()
-                    .setColor(interaction.client.config.embedColor)
+                    .setColor(interaction.client.config.EMBED_COLOR)
                     .setDescription(`Are you sure you want to delete the reminder \`${reminder.content}\`?`)
                     .setFooter({ text: '60s to respond' })
                 ],
@@ -58,7 +58,7 @@ export default {
                     ephemeral: true,
                     embeds: [new EmbedBuilder()
                         .setTitle('Incorrect timestamp')
-                        .setColor(interaction.client.config.embedColorRed)
+                        .setColor(interaction.client.config.EMBED_COLOR)
                         .setDescription([
                             '**Format:** `[amount][quantity]`',
                             '**Quantities:**',
@@ -86,7 +86,7 @@ export default {
 
                 (await interaction.reply({
                     embeds: [new EmbedBuilder()
-                        .setColor(interaction.client.config.embedColor)
+                        .setColor(interaction.client.config.EMBED_COLOR)
                         .setDescription([
                             'Are you sure you want to create a new reminder?',
                             `> Content: \`${reminderText}\``,
@@ -115,7 +115,7 @@ export default {
                                 embeds: [new EmbedBuilder()
                                     .setTitle('Reminder set')
                                     .setDescription(`\n\`\`\`${reminderText}\`\`\`\n${formatTime(timeToRemind)}`)
-                                    .setColor(interaction.client.config.embedColor)
+                                    .setColor(interaction.client.config.EMBED_COLOR)
                                 ]
                             });
                         },
@@ -138,7 +138,7 @@ export default {
                         .setPlaceholder('Choose a reminder to delete');
 
                     const embed = new EmbedBuilder()
-                        .setColor(interaction.client.config.embedColor)
+                        .setColor(interaction.client.config.EMBED_COLOR)
                         .setTitle(`You have ${userReminders.length} active reminder(s)`)
                         .setFooter({ text: 'Select a reminder to delete, 60s to respond' });
 

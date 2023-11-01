@@ -69,7 +69,7 @@ export default {
                         result += 'restarted ';
                         await interaction.client.getChan('fsLogs').send({ embeds: [new EmbedBuilder()
                             .setTitle(`${chosenServer.toUpperCase()} now restarting`)
-                            .setColor(interaction.client.config.embedColorYellow)
+                            .setColor(interaction.client.config.EMBED_COLOR_YELLOW)
                             .setTimestamp()
                             .setFooter({ text: '\u200b', iconURL: interaction.user.displayAvatarURL() })
                         ] });
@@ -245,7 +245,7 @@ export default {
                     (await interaction.reply({
                         embeds: [new EmbedBuilder()
                             .setDescription(`This user already has the <@&${roleId}> role, do you want to remove it from them?`)
-                            .setColor(interaction.client.config.embedColor)
+                            .setColor(interaction.client.config.EMBED_COLOR)
                         ],
                         fetchReply: true,
                         components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -282,7 +282,7 @@ export default {
                                 await int.update({
                                     embeds: [new EmbedBuilder()
                                         .setDescription(`<@${member.user.id}> has been removed from <@&${roleId}>.`)
-                                        .setColor(interaction.client.config.embedColor)
+                                        .setColor(interaction.client.config.EMBED_COLOR)
                                     ],
                                     components: []
                                 });
@@ -293,7 +293,7 @@ export default {
                                 await int.update({
                                     embeds: [new EmbedBuilder()
                                         .setDescription(`Command canceled`)
-                                        .setColor(interaction.client.config.embedColor)
+                                        .setColor(interaction.client.config.EMBED_COLOR)
                                     ],
                                     components: []
                                 });
@@ -326,7 +326,7 @@ export default {
                     
                     await member.edit({ roles, nick: newNickname });
                     await owner.send(`**${interaction.user.tag}** has promoted **${member.user.tag}** to **${interaction.client.getRole(roleName).name}**`);
-                    await interaction.reply({ embeds: [new EmbedBuilder().setDescription(`<@${member.user.id}> has been given <@&${roleId}>.`).setColor(interaction.client.config.embedColor)] });
+                    await interaction.reply({ embeds: [new EmbedBuilder().setDescription(`<@${member.user.id}> has been given <@&${roleId}>.`).setColor(interaction.client.config.EMBED_COLOR)] });
                 }
             },
             async fm() {

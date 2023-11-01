@@ -73,8 +73,8 @@ export default {
 			ctx.setLineDash([]);
 			
 			// draw points
-			ctx.strokeStyle = interaction.client.config.embedColor;
-			ctx.fillStyle = interaction.client.config.embedColor;
+			ctx.strokeStyle = interaction.client.config.EMBED_COLOR;
+			ctx.fillStyle = interaction.client.config.EMBED_COLOR;
 			ctx.lineWidth = 5;
 			
 			
@@ -130,7 +130,7 @@ export default {
 					.setDescription(`A total of **${messageCountsTotal.toLocaleString('en-US')}** messages have been recorded in this server.`)
 					.addFields({ name: 'Top users by messages sent:', value: topUsers })
 					.setImage('attachment://dailymsgs.png')
-					.setColor(interaction.client.config.embedColor)]
+					.setColor(interaction.client.config.EMBED_COLOR)]
 			});
 		} else if (subCmd === "view") {
 

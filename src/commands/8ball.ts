@@ -11,7 +11,7 @@ export default {
         const Randomanswer = Math.floor(Math.random() * answers.length);
         
         await interaction.reply({ embeds: [new EmbedBuilder()
-            .setColor(interaction.client.config.embedColor)
+            .setColor(interaction.client.config.EMBED_COLOR)
             .setTitle('8Ball')
             .setDescription(`> ${question}\n\n**${answers[Randomanswer]}**`)
         ] });

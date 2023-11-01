@@ -14,7 +14,7 @@ export default async (message: Message<boolean> | PartialMessage) => {
         .setTitle('Message Deleted')
         .setDescription(formatUser(message.author))
         .setAuthor({ name: message.author.tag, iconURL: message.author.displayAvatarURL({ extension: 'png', size: 128 }) })
-        .setColor(message.client.config.embedColorRed)
+        .setColor(message.client.config.EMBED_COLOR_RED)
         .setTimestamp()
 
     if (message.content.length) embed.addFields({ name: '🔹 Content', value: `\`\`\`\n${message.content.slice(0, 1000)}\n\`\`\`` });

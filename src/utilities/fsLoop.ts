@@ -22,8 +22,8 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], ch
             .setDescription(`\`${playerName}\` ${joinLog ? 'joined' : 'left'} **${serverAcroUp}** at <t:${now}:t>`);
 
         if (joinLog) {
-            return embed.setColor(client.config.embedColorGreen).setFooter({ text: `Reason: ${wlReason}` });
-        } else return embed.setColor(client.config.embedColorRed);
+            return embed.setColor(client.config.EMBED_COLOR_GREEN).setFooter({ text: `Reason: ${wlReason}` });
+        } else return embed.setColor(client.config.EMBED_COLOR_RED);
     }
 
     function logEmbed(player: FSLoopDSSPlayer, joinLog: boolean) {
@@ -31,7 +31,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], ch
         const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
         const embed = new EmbedBuilder()
             .setDescription(`\`${player.name}\`${decorators(player)} ${joinLog ? 'joined' : 'left'} **${serverAcroUp}** at <t:${now}:t>`)
-            .setColor(joinLog ? client.config.embedColorGreen : client.config.embedColorRed)
+            .setColor(joinLog ? client.config.EMBED_COLOR_GREEN : client.config.EMBED_COLOR_RED)
             .setFooter(player.uptime ? { text: `Playtime: ${playTimeHrs}:${playTimeMins}` } : null);
 
         return embed;
@@ -46,7 +46,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], ch
     };
     const init = {
         signal: AbortSignal.timeout(7000),
-        headers: { 'User-Agent': `${client.config.userAgentHeader}/FSLoop` }
+        headers: { 'User-Agent': `${client.config.USER_AGENT_HEADER}/FSLoop` }
     };
 
     const dss = await fetch(client.config.fs[serverAcro].dss, init) // Fetch dedicated-server-stats.json
@@ -66,7 +66,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], ch
     if (!dss || !dss.slots || !csg) {
         if (dss && !dss.slots) log('Red', `${serverAcroUp} DSS undefined slots`);
 
-        statsEmbed.setTitle('Host not responding').setColor(client.config.embedColorRed);
+        statsEmbed.setTitle('Host not responding').setColor(client.config.EMBED_COLOR_RED);
         await statsMsgEdit();
 
         return;
@@ -74,7 +74,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], ch
 
     const newPlayers = dss.slots.players.filter(x=>x.isUsed);
     const oldPlayers = client.fsCache[serverAcro].players;
-    const serverStatusEmbed = (status: string) => new EmbedBuilder().setTitle(`${serverAcroUp} now ${status}`).setColor(client.config.embedColorYellow).setTimestamp();
+    const serverStatusEmbed = (status: string) => new EmbedBuilder().setTitle(`${serverAcroUp} now ${status}`).setColor(client.config.EMBED_COLOR_YELLOW).setTimestamp();
     const wlChannel = client.getChan('watchList');
     const logChannel = client.getChan('fsLogs');
     const now = Math.round(Date.now() / 1000);
@@ -138,7 +138,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], ch
     statsEmbed
         .setAuthor({ name: `${dss.slots.used}/${dss.slots.capacity}` })
         .setTitle(dss.server.name ? null : 'Server is offline')
-        .setColor(client.config.embedColorGreen)
+        .setColor(client.config.EMBED_COLOR_GREEN)
         .setDescription(dss.slots.used ? playerInfo.join('\n') : dss.server.name ? '*No players online*' : null)
         .setFields({
             name: `**Server Statistics**`,
@@ -156,8 +156,8 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], ch
         });
 
     if (dss.slots.used === dss.slots.capacity) {
-        statsEmbed.setColor(client.config.embedColorRed);
-    } else if (dss.slots.used > 9) statsEmbed.setColor(client.config.embedColorYellow);
+        statsEmbed.setColor(client.config.EMBED_COLOR_RED);
+    } else if (dss.slots.used > 9) statsEmbed.setColor(client.config.EMBED_COLOR_YELLOW);
 
     await statsMsgEdit();
     
@@ -185,7 +185,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], ch
                 .setColor('#ff4d00')
             ] }); 
         } else await logChannel.send({ embeds: [new EmbedBuilder()
-            .setColor(client.config.embedColorYellow)
+            .setColor(client.config.EMBED_COLOR_YELLOW)
             .setDescription(`\`${player.name}\`${decorators(player)} logged into admin on **${serverAcroUp}** at <t:${now}:t>`)
         ] });
     }
@@ -231,7 +231,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], ch
 }
 
 export async function fsLoopAll(client: TClient, watchList: WatchListDocument[]) {
-    const embed = new EmbedBuilder().setColor(client.config.embedColor);
+    const embed = new EmbedBuilder().setColor(client.config.EMBED_COLOR);
     const totalCount: number[] = [];
 
     for (const [serverAcro, server] of Object.entries(client.fsCache)) {

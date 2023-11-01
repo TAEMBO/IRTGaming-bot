@@ -14,7 +14,7 @@ export default {
             ] }),
             troll: () => interaction.reply({ content, embeds: [new EmbedBuilder()
                 .setTitle('Reporting trolls')
-                .setColor(interaction.client.config.embedColor)
+                .setColor(interaction.client.config.EMBED_COLOR)
                 .setImage('https://cdn.discordapp.com/attachments/979863373439184966/1123088776185516032/image.png')
                 .setDescription([
                     `If a player is causing problems on a server, ${isFromTicket ? 'let us know' : `don't hesitate to send a report to ${fsServers.getPublicAll().map(([_, x]) => `<#${x.channelId}>`).join(' or ')}`} with:`,
@@ -37,12 +37,12 @@ export default {
             ].join('')),
             todo: () => interaction.reply({ content, embeds: [new EmbedBuilder()
                 .setTitle('To-do')
-                .setColor(interaction.client.config.embedColor)
+                .setColor(interaction.client.config.EMBED_COLOR)
                 .setFooter({ text: 'Note that not every task listed might be available to do at the time, so do your due dilligence to see what needs doing in the moment.' })
                 .setFields(...fsServers.getPublicAll().map(([_, x]) => ({ name: x.fullName, value: '- ' + x.todo.join('\n- ') })))
             ] }),
             filters: () => interaction.reply({ content, embeds: [new EmbedBuilder()
-                .setColor(interaction.client.config.embedColor)
+                .setColor(interaction.client.config.EMBED_COLOR)
                 .setTitle('Please note that servers may "ghost" and not show up until you\'ve refreshed your MP menu several times.')
                 .setImage('https://cdn.discordapp.com/attachments/830916009107652630/978795707681079376/unknown.png')
             ] }),

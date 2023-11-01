@@ -78,7 +78,7 @@ export default async (client: TClient) => {
         for await (const [chanId, chanName] of client.config.ytCacheChannels) {
             const res = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${chanId}`, {
                 signal: AbortSignal.timeout(5000),
-                headers: { 'User-Agent': `${client.config.userAgentHeader}/YTLoop` }
+                headers: { 'User-Agent': `${client.config.USER_AGENT_HEADER}/YTLoop` }
             }).catch(() => log('Red', `${chanName} YT fail`));
     
             if (!res) continue;

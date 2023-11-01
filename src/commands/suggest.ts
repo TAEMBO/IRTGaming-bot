@@ -12,7 +12,7 @@ export default {
             .setTitle(`Community Idea:`)
             .setDescription(suggestion)
             .setTimestamp()
-            .setColor(interaction.client.config.embedColor)
+            .setColor(interaction.client.config.EMBED_COLOR)
         ], fetchReply: true });
 
         await msg.react('✅');

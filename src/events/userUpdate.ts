@@ -6,7 +6,7 @@ export default async (oldUser: User | PartialUser, newUser: User) => {
 
     await newUser.client.getChan('botLogs').send({ embeds: [new EmbedBuilder()
         .setTimestamp()
-        .setColor(newUser.client.config.embedColor)
+        .setColor(newUser.client.config.EMBED_COLOR)
         .setTitle(`User Update: ${newUser.tag}`)
         .setDescription(formatUser(newUser))
         .setThumbnail(newUser.displayAvatarURL({ extension: 'png', size: 2048 }))

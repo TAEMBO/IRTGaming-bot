@@ -21,7 +21,7 @@ export default {
          
                 await interaction.reply({ embeds: [new EmbedBuilder()
                     .setTitle('__MP Staff Members__')
-                    .setColor(interaction.client.config.embedColor)
+                    .setColor(interaction.client.config.EMBED_COLOR)
                     .setDescription([
                         staff.mp_manager.toString(),
                         staff.mp_manager.members.sort(sortMembers).map(x => x.toString()).join("\n") || "None",
@@ -43,7 +43,7 @@ export default {
             async fs() {
                 await interaction.reply({ embeds: [new EmbedBuilder()
                     .setTitle('__MP Staff Usernames__')
-                    .setColor(interaction.client.config.embedColor)
+                    .setColor(interaction.client.config.EMBED_COLOR)
                     .addFields(
                         { name: 'Farm Managers :farmer:', value: `\`${interaction.client.fmList.data.join("\`\n\`")}\`` },
                         { name: 'Trusted Farmers :angel:', value: `\`${interaction.client.tfList.data.join("\`\n\`")}\`` }
@@ -59,7 +59,7 @@ export default {
          
                 await interaction.reply({ embeds: [new EmbedBuilder()
                     .setTitle('__Discord Staff Members__')
-                    .setColor(interaction.client.config.embedColor)
+                    .setColor(interaction.client.config.EMBED_COLOR)
                     .setDescription([
                         staff.admin.toString(),
                         staff.admin.members.sort(sortMembers).map(x => x.toString()).join("\n") || "None",
@@ -77,7 +77,7 @@ export default {
 
                 await interaction.reply({ embeds: [new EmbedBuilder()
                     .setTitle('__IRTMC Staff Members__')
-                    .setColor(interaction.client.config.embedColor)
+                    .setColor(interaction.client.config.EMBED_COLOR)
                     .setDescription(`${staff.toString()}\n${staff.members.sort(sortMembers).map(x => x.toString()).join("\n") || "None"}`)
                 ] });
             }

@@ -10,7 +10,7 @@ export default {
 
         await interaction.reply({ embeds: [new EmbedBuilder()
             .setTitle('MP Support - Ban Appeal')
-            .setColor(interaction.client.config.embedColor)
+            .setColor(interaction.client.config.EMBED_COLOR)
             .setDescription([
                 'To appeal a ban on one of our MP servers, please provide the following information:',
                 '- In-game name at the time of being banned',

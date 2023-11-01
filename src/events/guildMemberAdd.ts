@@ -13,7 +13,7 @@ export default async (member: GuildMember) => {
     const embed = new EmbedBuilder()
         .setTitle(`Member Joined: ${member.user.tag}`)
         .setDescription(formatUser(member.user))
-        .setColor(member.client.config.embedColorGreen)
+        .setColor(member.client.config.EMBED_COLOR_GREEN)
         .setTimestamp()
         .setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048 }))
         .setFields({ name: "🔹 Account Created", value: `<t:${Math.round(member.user.createdTimestamp / 1_000)}:R>` });

@@ -24,7 +24,7 @@ export default {
 		const embed = new EmbedBuilder()
 			.setTitle('Bot Statistics')
 			.setDescription(`List of commands that have been used. Total amount of commands used since last restart: **${interaction.client.commands.map(x => x.uses).reduce((a, b) => a + b, 0)}**`)
-			.setColor(interaction.client.config.embedColor);
+			.setColor(interaction.client.config.EMBED_COLOR);
             
 		if (rows.join('').length > 1024) {
 			let fieldValue = '';

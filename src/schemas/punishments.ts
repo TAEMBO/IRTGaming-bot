@@ -49,7 +49,7 @@ export class Punishments {
             	{ name: '🔹 Moderator', value: `<@${punishment.moderator}> \`${punishment.moderator}\``, inline: true },
             	{ name: '\u200b', value: '\u200b', inline: true },
             	{ name: '🔹 Reason', value: `\`${punishment.reason}\``, inline: true })
-            .setColor(this.client.config.embedColor)
+            .setColor(this.client.config.EMBED_COLOR)
             .setTimestamp(punishment.time);
 
         if (punishment.duration) embed.addFields(
@@ -101,7 +101,7 @@ export class Punishments {
 		const inOrFromBoolean = ['warn', 'mute'].includes(type) ? 'in' : 'from'; // Use 'in' if the punishment doesn't remove the member from the server, eg. mute, warn
 		const auditLogReason = `${reason} | Case #${punData._id}`;
 		const embed = new EmbedBuilder()
-			.setColor(client.config.embedColor)
+			.setColor(client.config.EMBED_COLOR)
 			.setTitle(`Case #${punData._id}: ${type[0].toUpperCase() + type.slice(1)}`)
 			.setDescription(`${user.tag}\n<@${user.id}>\n(\`${user.id}\`)`)
 			.addFields({ name: 'Reason', value: reason });
@@ -244,7 +244,7 @@ export class Punishments {
 
 			if (interaction) {
 				return await interaction.reply({ embeds: [new EmbedBuilder()
-					.setColor(this.client.config.embedColor)
+					.setColor(this.client.config.EMBED_COLOR)
 					.setTitle(`Case #${removePunishmentData._id}: ${removePunishmentData.type[0].toUpperCase() + removePunishmentData.type.slice(1)}`)
 					.setDescription(`${User.tag}\n<@${User.id}>\n(\`${User.id}\`)`)
 					.addFields(

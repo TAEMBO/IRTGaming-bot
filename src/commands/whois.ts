@@ -44,7 +44,7 @@ export default {
                 .setURL(`https://discord.com/users/${user.id}`)
                 .setDescription(formatUser(user))
                 .addFields({ name: `🔹 ${user.bot ? 'Bot' : 'Account'} Created`, value: `<t:${Math.round(user.createdTimestamp / 1000)}:R>` })
-                .setColor(interaction.client.config.embedColor)
+                .setColor(interaction.client.config.EMBED_COLOR)
                 .setImage(user.bannerURL({ extension: 'png', size: 1024 }) ?? null);
 
             if (appData) embed.addFields(...appData);

@@ -41,14 +41,14 @@ export default {
 
         if (subCmd === 'all') {
             await interaction.deferReply();
-            const embed = new EmbedBuilder().setColor(interaction.client.config.embedColor);
+            const embed = new EmbedBuilder().setColor(interaction.client.config.EMBED_COLOR);
             const failedFooter: string[] = [];
             const totalCount: number[] = [];
             const watchList = await interaction.client.watchList.data.find();
 
             for await (const serverAcro of fsServers.keys()) {
                 const serverAcroUp = serverAcro.toUpperCase();
-                const dss = await fetch(interaction.client.config.fs[serverAcro].dss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': `${interaction.client.config.userAgentHeader}/StatsAll` } })
+                const dss = await fetch(interaction.client.config.fs[serverAcro].dss, { signal: AbortSignal.timeout(4000), headers: { 'User-Agent': `${interaction.client.config.USER_AGENT_HEADER}/StatsAll` } })
                     .then(res => res.json() as Promise<FSLoopDSS>)
                     .catch(() => {
                         log('Red', `Stats all; ${serverAcroUp} failed`);
@@ -108,7 +108,7 @@ export default {
                     }));
 
                     await interaction.reply({ embeds: [new EmbedBuilder()
-                        .setColor(interaction.client.config.embedColor)
+                        .setColor(interaction.client.config.EMBED_COLOR)
                         .setTitle([
                             `Player - \`${playerData._id}\`${interaction.client.fmList.data.includes(playerData._id) ? ':farmer:' : ''}${interaction.client.tfList.data.includes(playerData._id) ? ':angel:' : ''}`,
                             `Leaderboard position - **#${sortedData.indexOf(playerData) + 1}**`,
@@ -121,7 +121,7 @@ export default {
                 } else await interaction.reply('No data found with that name. [Find out why.](https://canary.discord.com/channels/552565546089054218/552583841936834560/1087422094519836792)');
 
             } else await interaction.reply({ embeds: [new EmbedBuilder()
-                .setColor(interaction.client.config.embedColor)
+                .setColor(interaction.client.config.EMBED_COLOR)
                 .setDescription(`Top 50 players with the most time spent on IRTGaming FS22 servers since\n<t:1685602800>`)
                 .addFields(
                     { name: '\u200b', value: leaderboard(sortedData.slice(0, 25), true), inline: true },
@@ -130,7 +130,7 @@ export default {
         } else {
             if (interaction.client.uptime < 60_000) return await interaction.reply({ content: 'Please await another 60 seconds before using this command', ephemeral: true });
 
-            const dss = await fetch(interaction.client.config.fs[subCmd].dss, { signal: AbortSignal.timeout(2000), headers: { 'User-Agent': `${interaction.client.config.userAgentHeader}/Stats` } })
+            const dss = await fetch(interaction.client.config.fs[subCmd].dss, { signal: AbortSignal.timeout(2000), headers: { 'User-Agent': `${interaction.client.config.USER_AGENT_HEADER}/Stats` } })
                 .then(res => res.json() as Promise<FSLoopDSS>)
                 .catch(() => log('Red', `Stats ${subCmd.toUpperCase()} failed`));
 
@@ -211,9 +211,9 @@ export default {
             
             const gradient = ctx.createLinearGradient(0, graphOrigin[1], 0, graphOrigin[1] + graphSize[1]);
 
-            gradient.addColorStop(1 / 16, interaction.client.config.embedColorRed);
-            gradient.addColorStop(5 / 16, interaction.client.config.embedColorYellow);
-            gradient.addColorStop(12 / 16, interaction.client.config.embedColorGreen);
+            gradient.addColorStop(1 / 16, interaction.client.config.EMBED_COLOR_RED);
+            gradient.addColorStop(5 / 16, interaction.client.config.EMBED_COLOR_YELLOW);
+            gradient.addColorStop(12 / 16, interaction.client.config.EMBED_COLOR_GREEN);
             
             let lastCoords: number[] = [];
 
@@ -288,11 +288,11 @@ export default {
             const watchList = await interaction.client.watchList.data.find();
             const color = (() => {
                 if (dss.slots.used === dss.slots.capacity) {
-                    return interaction.client.config.embedColorRed;
+                    return interaction.client.config.EMBED_COLOR_RED;
                 } else if (dss.slots.used > 9) {
-                    return interaction.client.config.embedColorYellow;
+                    return interaction.client.config.EMBED_COLOR_YELLOW;
                 } else {
-                    return interaction.client.config.embedColorGreen;
+                    return interaction.client.config.EMBED_COLOR_GREEN;
                 }
             })();
         

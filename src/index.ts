@@ -8,7 +8,7 @@ import { Command, Prettify } from './typings.js';
 const client = new TClient();
 const fsKeys = Object.keys(client.config.fs);
 
-await mongoose.set('strictQuery', true).connect(client.config.mongoURL, {
+await mongoose.set('strictQuery', true).connect(client.config.MONGO_URI, {
     autoIndex: true,
     serverSelectionTimeoutMS: 5_000,
     socketTimeoutMS: 45_000,
@@ -35,7 +35,7 @@ for await (const file of fs.readdirSync(path.resolve('./commands'))) {
 // Event handler
 for await (const file of fs.readdirSync(path.resolve('./events'))) client.on(file.replace('.js', ''), (await import(`./events/${file}`)).default);
 
-await client.login(client.config.token);
+await client.login(client.config.TOKEN);
 
 process.on('unhandledRejection', client.errorLog);
 process.on('uncaughtException', client.errorLog);

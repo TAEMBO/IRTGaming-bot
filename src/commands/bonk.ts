@@ -10,7 +10,7 @@ export default {
         if (reason?.startsWith('for ')) reason = reason.replace('for ', '');
 
         await interaction.reply({ embeds: [new EmbedBuilder()
-            .setColor(interaction.client.config.embedColor)
+            .setColor(interaction.client.config.EMBED_COLOR)
             .setTitle([
                 interaction.user.username,
                 ' bonked ',

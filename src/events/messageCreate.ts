@@ -21,7 +21,7 @@ export default async (message: Message<boolean>) => {
                 .setTitle('Forwarded DM Message')
                 .setDescription(`<@${message.author.id}>`)
                 .setAuthor({ name: `${message.author.tag} (${message.author.id})`, iconURL: message.author.displayAvatarURL({ extension: 'png' }) })
-                .setColor(message.client.config.embedColor)
+                .setColor(message.client.config.EMBED_COLOR)
                 .setTimestamp()
                 .setFields(
                     { name: 'Message Content', value: message.content.length > 1024 ? message.content.slice(0, 1000) + '...' : message.content + '\u200b' },

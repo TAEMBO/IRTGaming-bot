@@ -2,7 +2,7 @@ import type TClient from '../client.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import { xml2js } from 'xml-js';
-import { log, fsLoop, fsLoopAll } from '../utilities.js';
+import { log, fsLoop, fsLoopAll, formatRequestInit } from '../utilities.js';
 import type { YTCacheFeed } from '../typings.js';
 
 export default async (client: TClient) => {
@@ -76,10 +76,7 @@ export default async (client: TClient) => {
     // YouTube upload nofitcations loop
     if (client.config.botSwitches.ytLoop) setInterval(async () => {
         for await (const [chanId, chanName] of client.config.ytCacheChannels) {
-            const res = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${chanId}`, {
-                signal: AbortSignal.timeout(5000),
-                headers: { 'User-Agent': `${client.config.USER_AGENT_HEADER}/YTLoop` }
-            }).catch(() => log('Red', `${chanName} YT fail`));
+            const res = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${chanId}`, formatRequestInit(5_000, "YTLoop")).catch(() => log('Red', `${chanName} YT fail`));
     
             if (!res) continue;
     

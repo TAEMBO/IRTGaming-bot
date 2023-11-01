@@ -1,7 +1,7 @@
 import { EmbedBuilder, TextChannel } from "discord.js";
 import type TClient from "../client.js";
 import { xml2js } from "xml-js";
-import { formatTime, log } from '../utilities.js';
+import { formatRequestInit, formatTime, log } from '../utilities.js';
 import { FSLoopCSG, FSLoopDSS, FSLoopDSSPlayer, WatchListDocument } from "../typings.js";
 
 export async function fsLoop(client: TClient, watchList: WatchListDocument[], chanId: string, msgId: string, serverAcro: string) {
@@ -44,10 +44,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], ch
         
         await channel?.messages?.edit(msgId, { embeds: [statsEmbed] }).catch(() => log('Red', `FSLoop ${serverAcroUp} invalid msg`));
     };
-    const init = {
-        signal: AbortSignal.timeout(7000),
-        headers: { 'User-Agent': `${client.config.USER_AGENT_HEADER}/FSLoop` }
-    };
+    const init = formatRequestInit(7_000, "FSLoop");
 
     const dss = await fetch(client.config.fs[serverAcro].dss, init) // Fetch dedicated-server-stats.json
         .then(res => res.json() as Promise<FSLoopDSS>)

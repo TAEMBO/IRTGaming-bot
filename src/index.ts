@@ -41,4 +41,3 @@ process.on('unhandledRejection', client.errorLog);
 process.on('uncaughtException', client.errorLog);
 process.on('error', client.errorLog);
 client.on('error', client.errorLog);
-client.on('intErr', client.errorLog);

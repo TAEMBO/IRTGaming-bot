@@ -22,10 +22,10 @@ export default async (interaction: Interaction<"cached">) => {
         try {
             await command.run(interaction);
             command.uses++;
-        } catch (err) {
+        } catch (err: any) {
             const errMsg = ":warning: An error occurred while running this command, bot developer(s) notified of matter";
 
-            interaction.client.emit('intErr', err);
+            await interaction.client.errorLog(err);
 
             interaction.replied
                 ? await interaction.followUp(errMsg) // Interaction replied to

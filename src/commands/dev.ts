@@ -80,7 +80,7 @@ export default {
                     .concat(fsPub.map(x => x[1].ftp.password))
                 ) output = output.replace(credential, 'CREDENTIAL_LEAK');
 
-                embed.addFields({ name: `Output • ${Date.now() - now}ms`, value: codeBlock(output.slice(0, 1016)) });
+                embed.addFields({ name: `Output • ${Date.now() - now}ms`, value: `\`\`\`${output.slice(0, 1016)}\n\`\`\`` });
 
                 await interaction.reply({ embeds: [embed] }).catch(() => interaction.channel.send({ embeds: [embed] }));
             },

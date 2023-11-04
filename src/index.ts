@@ -4,6 +4,7 @@ import path from 'node:path';
 import mongoose from 'mongoose';
 import { log } from './utilities.js';
 import { Command, Prettify } from './typings.js';
+import { EmbedBuilder } from 'discord.js';
 
 const client = new TClient();
 const fsKeys = Object.keys(client.config.fs);
@@ -37,7 +38,33 @@ for await (const file of fs.readdirSync(path.resolve('./events'))) client.on(fil
 
 await client.login(client.config.TOKEN);
 
-process.on('unhandledRejection', client.errorLog);
-process.on('uncaughtException', client.errorLog);
-process.on('error', client.errorLog);
-client.on('error', client.errorLog);
+function errorLog(error: Error) {
+    console.error(error);
+
+    if (['Request aborted', 'getaddrinfo ENOTFOUND discord.com'].includes(error.message)) return;
+
+    const dirname = process.cwd().replaceAll('\\', '/');
+    const channel = client.getChan('taesTestingZone');
+    const formattedErr = error.stack
+        ?.replaceAll(' at ', ' [31mat[37m ')
+        .replaceAll(dirname, `[33m${dirname}[37m`)
+        .slice(0, 2500);
+
+    if (!channel) return;
+
+    channel.send({
+        content: `<@${client.config.devWhitelist[0]}>`,
+        embeds: [new EmbedBuilder()
+            .setTitle(`Error Caught - ${error.message.slice(0, 240)}`)
+            .setColor("#420420")
+            .setDescription(`\`\`\`ansi\n${formattedErr}\`\`\``)
+            .setTimestamp()
+        ]
+    });
+}
+
+process.on('unhandledRejection', errorLog);
+process.on('uncaughtException', errorLog);
+process.on('error', errorLog);
+client.on('error', errorLog);
+client.on('intErr', errorLog)

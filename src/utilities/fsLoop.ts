@@ -174,8 +174,8 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], ch
 
     if (justStarted) return;
     
-    if (!client.config.fs[serverAcro].isPrivate) for (const player of newPlayers.filter(x => oldPlayers.some(y => x.isAdmin && !y.isAdmin && y.name === x.name))) {
-        if (!client.whitelist.data.includes(player.name) && !client.fmList.data.includes(player.name)) {
+    for (const player of newPlayers.filter(x => oldPlayers.some(y => x.isAdmin && !y.isAdmin && y.name === x.name))) {
+        if (!client.whitelist.data.includes(player.name) && !client.fmList.data.includes(player.name) && !client.config.fs[serverAcro].isPrivate) {
             await client.getChan('juniorAdminChat').send({ embeds: [new EmbedBuilder()
                 .setTitle('UNKNOWN ADMIN LOGIN')
                 .setDescription(`\`${player.name}\` on **${serverAcroUp}** on <t:${now}>`)
@@ -183,7 +183,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], ch
             ] }); 
         } else await logChannel.send({ embeds: [new EmbedBuilder()
             .setColor(client.config.EMBED_COLOR_YELLOW)
-            .setDescription(`\`${player.name}\`${decorators(player)} logged into admin on **${serverAcroUp}** at <t:${now}:t>`)
+            .setDescription(`\`${player.name}\`${decorators(player)} logged in as admin on **${serverAcroUp}** at <t:${now}:t>`)
         ] });
     }
     

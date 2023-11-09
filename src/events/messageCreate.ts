@@ -138,13 +138,4 @@ export default async (message: Message<boolean>) => {
             allowedMentions: { repliedUser: false }
         });
     }
-
-    // Auto responses
-    if (msg.includes('giants moment')) await message.react('™️');
-	
-    if (msg.includes('sync sim')) await message.react(':IRT_SyncSim22:929440249577365525');
-	
-    if (msg.includes("forgor")) await message.react("💀");
-	
-    if (msgarr.includes('69')) await message.react(':IRT_Noice:611558357643558974');
 }

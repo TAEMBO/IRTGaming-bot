@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, EmbedBuilder, AttachmentBuilder } from 'discord.js';
 import canvas from 'canvas';
 import config from '../config.json' assert { type: 'json' };
-import { FSServers, formatRequestInit, formatTime, isMPStaff, log } from '../utilities.js';
+import { FSServers, formatRequestInit, formatTime, getFSURL, isMPStaff, log } from '../utilities.js';
 import { FSLoopDSS, TInteraction, PlayerTimesDocument } from '../typings.js';
 
 const fsServers = new FSServers(config.fs);
@@ -44,9 +44,9 @@ export default {
             const totalCount: number[] = [];
             const watchList = await interaction.client.watchList.data.find();
 
-            for await (const serverAcro of fsServers.keys()) {
+            for await (const [serverAcro, server] of fsServers.entries()) {
                 const serverAcroUp = serverAcro.toUpperCase();
-                const dss = await fetch(interaction.client.config.fs[serverAcro].dss, formatRequestInit(4_000, "StatsAll"))
+                const dss = await fetch(getFSURL(server, "dss"), formatRequestInit(4_000, "StatsAll"))
                     .then(res => res.json() as Promise<FSLoopDSS>)
                     .catch(() => {
                         log('Red', `Stats all; ${serverAcroUp} failed`);
@@ -128,7 +128,7 @@ export default {
         } else {
             if (interaction.client.uptime < 60_000) return await interaction.reply({ content: 'Please await another 60 seconds before using this command', ephemeral: true });
 
-            const dss = await fetch(interaction.client.config.fs[subCmd].dss, formatRequestInit(2_000, "Stats"))
+            const dss = await fetch(getFSURL(interaction.client.config.fs[subCmd], "dss"), formatRequestInit(2_000, "Stats"))
                 .then(res => res.json() as Promise<FSLoopDSS>)
                 .catch(() => log('Red', `Stats ${subCmd.toUpperCase()} failed`));
 

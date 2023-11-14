@@ -4,7 +4,7 @@ import puppeteer from 'puppeteer'; // Credits to Trolly for suggesting this pack
 import FTPClient from 'ftp';
 import { xml2js } from 'xml-js';
 import config from '../config.json' assert { type: 'json' };
-import { FSServers, hasRole, isMPStaff, stringifyStream, youNeedRole } from '../utilities.js';
+import { FSServers, getFSURL, hasRole, isMPStaff, stringifyStream, youNeedRole } from '../utilities.js';
 import type { banFormat, farmFormat, Index, TInteraction } from '../typings.js';
 
 const fsServers = new FSServers(config.fs);
@@ -43,7 +43,7 @@ export default {
                 const page = await browser.newPage();
     
                 try {
-                    await page.goto(interaction.client.config.fs[chosenServer].login, { timeout: 120_000 });
+                    await page.goto(getFSURL(interaction.client.config.fs[chosenServer], "login"), { timeout: 120_000 });
                 } catch (err: any) {
                     return await interaction.editReply(err.message);
                 }

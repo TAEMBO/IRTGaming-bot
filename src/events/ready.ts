@@ -2,10 +2,11 @@ import type TClient from '../client.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import { xml2js } from 'xml-js';
-import { log, fsLoop, fsLoopAll, formatRequestInit } from '../utilities.js';
+import { log, fsLoop, fsLoopAll, FSServers, formatRequestInit } from '../utilities.js';
 import type { YTCacheFeed } from '../typings.js';
 
 export default async (client: TClient) => {
+    const fsServers = new FSServers(client.config.fs);
     const guild = client.mainGuild();
     const dailyMsgsPath = path.resolve('../databases/dailyMsgs.json');
     const dailyMsgs: [number, number][] = JSON.parse(fs.readFileSync(dailyMsgsPath, 'utf8'));
@@ -69,7 +70,7 @@ export default async (client: TClient) => {
     if (client.config.toggles.fsLoop) setInterval(async () => {
 	    const watchList = await client.watchList.data.find();
 
-	    for await (const [serverAcro, server] of Object.entries(client.config.fs)) await fsLoop(client, watchList, server.channelId, server.messageId, serverAcro);
+	    for await (const [serverAcro, server] of fsServers.entries()) await fsLoop(client, watchList, server, serverAcro);
 	    await fsLoopAll(client, watchList);
     }, 30_000);
 

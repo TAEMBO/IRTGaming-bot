@@ -110,19 +110,21 @@ export interface TInteraction extends ChatInputCommandInteraction<"cached"> {
 
 
 /** The base object data that is always present */
-export interface FSServerBase {
+interface FSServerBase {
     /** The unabbreviated name of this server */
     readonly fullName: string;
     /** The channel ID for this server's stats embed, used in FSLoop */
     readonly channelId: string;
     /** The message ID for this server's stats embed, used in FSLoop */
     readonly messageId: string;
-    /** The dedicated server panel login for this server */
-    readonly login: string;
-    /** The Link XML URL for this server (w/ .json extension) */
-    readonly dss: string;
-    /** The Link Savegame File (careerSavegame) URL */
-    readonly csg: string;
+    /** The username to login to the server's panel */
+    readonly username: string;
+    /** The password to login to the server's panel */
+    readonly password: string;
+    /** The address to access the server's API & webserver panel (e.g. `192.168.0.1:8080` or `example.com`) */
+    readonly address: string;
+    /** The API code to gain access to the API for the server (e.g. `a1b2c3d4e5f6g7h8i9`) */
+    readonly code: string;
     /** Whether or not this server is a private server with a password */
     readonly isPrivate: boolean;
 }
@@ -154,14 +156,14 @@ export type FSServer = FSServerPrivate | FSServerPublic;
 /** Structure of config.json */
 export interface Config {
     /** The Discord bot client token */
-    readonly TOKEN: string,
+    readonly TOKEN: string;
     /** The URI for connecting to a MongoDB server */
-    readonly MONGO_URI: string,
-    readonly USER_AGENT_HEADER: string,
-    readonly EMBED_COLOR: `#${string}`,
-    readonly EMBED_COLOR_GREEN: `#${string}`,
-    readonly EMBED_COLOR_RED: `#${string}`,
-    readonly EMBED_COLOR_YELLOW: `#${string}`,
+    readonly MONGO_URI: string;
+    readonly USER_AGENT_HEADER: string;
+    readonly EMBED_COLOR: `#${string}`;
+    readonly EMBED_COLOR_GREEN: `#${string}`;
+    readonly EMBED_COLOR_RED: `#${string}`;
+    readonly EMBED_COLOR_YELLOW: `#${string}`;
     botPresence: PresenceData;
     toggles: {
         commands: boolean;

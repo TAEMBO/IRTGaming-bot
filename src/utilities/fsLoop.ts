@@ -1,10 +1,10 @@
 import { EmbedBuilder, TextChannel } from "discord.js";
 import type TClient from "../client.js";
 import { xml2js } from "xml-js";
-import { formatRequestInit, formatTime, log } from '../utilities.js';
-import { FSLoopCSG, FSLoopDSS, FSLoopDSSPlayer, WatchListDocument } from "../typings.js";
+import { formatRequestInit, formatTime, getFSURL, log } from '../utilities.js';
+import { FSLoopCSG, FSLoopDSS, FSLoopDSSPlayer, FSServer, WatchListDocument } from "../typings.js";
 
-export async function fsLoop(client: TClient, watchList: WatchListDocument[], chanId: string, msgId: string, serverAcro: string) {
+export async function fsLoop(client: TClient, watchList: WatchListDocument[], server: FSServer, serverAcro: string) {
     function decorators(player: FSLoopDSSPlayer, publicLoc?: boolean) {
         let decorators = player.isAdmin ? ':detective:' : ''; // Tag for if player is admin
     
@@ -40,17 +40,17 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], ch
     const serverAcroUp = serverAcro.toUpperCase();
     const statsEmbed = new EmbedBuilder();
     const statsMsgEdit = async () => {
-        const channel = client.channels.cache.get(chanId) as TextChannel | undefined;
+        const channel = client.channels.cache.get(server.channelId) as TextChannel | undefined;
         
-        await channel?.messages?.edit(msgId, { embeds: [statsEmbed] }).catch(() => log('Red', `FSLoop ${serverAcroUp} invalid msg`));
+        await channel?.messages?.edit(server.messageId, { embeds: [statsEmbed] }).catch(() => log('Red', `FSLoop ${serverAcroUp} invalid msg`));
     };
     const init = formatRequestInit(7_000, "FSLoop");
 
-    const dss = await fetch(client.config.fs[serverAcro].dss, init) // Fetch dedicated-server-stats.json
+    const dss = await fetch(getFSURL(server, "dss"), init) // Fetch dedicated-server-stats.json
         .then(res => res.json() as Promise<FSLoopDSS>)
         .catch(err => log('Red', `${serverAcroUp} DSS ${err.message}`));
 
-    const csg = !dss ? null : await fetch(client.config.fs[serverAcro].csg, init) // Fetch dedicated-server-savegame.html if DSS was successful
+    const csg = !dss ? null : await fetch(getFSURL(server, "csg"), init) // Fetch dedicated-server-savegame.html if DSS was successful
         .then(async res => {
             if (res.status !== 204) {
                 const { careerSavegame } = xml2js(await res.text(), { compact: true }) as FSLoopCSG;

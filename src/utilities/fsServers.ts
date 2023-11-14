@@ -1,5 +1,5 @@
 import config from '../config.json' assert { type: 'json' };
-import { Config, FSServer, FSServerBase, FSServerPrivate, FSServerPublic, Prettify } from "../typings.js";
+import { Config, FSServer, FSServerPrivate, FSServerPublic, Prettify } from "../typings.js";
 
 /** A manager for object data for all Farming Simulator servers */
 export class FSServers {
@@ -34,7 +34,6 @@ export class FSServers {
     }
     
     /**
-     * 
      * @returns An array of all public server names
      */
     public getPublicNames() {
@@ -57,7 +56,6 @@ export class FSServers {
     }
 
     /**
-     * 
      * @returns An array of all private server names
      */
     public getPrivateNames() {

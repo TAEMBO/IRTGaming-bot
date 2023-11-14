@@ -5,6 +5,7 @@ export * from './utilities/formatTime.js';
 export * from './utilities/formatUser.js';
 export * from './utilities/fsLoop.js';
 export * from './utilities/fsServers.js';
+export * from './utilities/getFSURL.js';
 export * from './utilities/hasRole.js';
 export * from './utilities/isDCStaff.js';
 export * from './utilities/isMPStaff.js';

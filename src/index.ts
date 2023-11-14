@@ -19,7 +19,7 @@ await mongoose.set('strictQuery', true).connect(client.config.MONGO_URI, {
 
 Error.stackTraceLimit = 25;
 client.setMaxListeners(100);
-console.log(client.config.botSwitches);
+console.log(client.config.toggles);
 console.log(client.config.devWhitelist);
 console.log(fsKeys);
 
@@ -67,4 +67,4 @@ process.on('unhandledRejection', errorLog);
 process.on('uncaughtException', errorLog);
 process.on('error', errorLog);
 client.on('error', errorLog);
-client.on('intErr', errorLog)
+client.on('intErr', errorLog);

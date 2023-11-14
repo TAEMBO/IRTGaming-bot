@@ -3,7 +3,7 @@ import { formatUser, isDCStaff, isMPStaff, Profanity } from '../utilities.js';
 
 export default async (oldMsg: Message<boolean> | PartialMessage, newMsg: Message<boolean> | PartialMessage) => {
     if (
-        !newMsg.client.config.botSwitches.logs
+        !newMsg.client.config.toggles.logs
         || !oldMsg.content
         || newMsg.content === oldMsg.content
         || !newMsg.inGuild()

@@ -12,7 +12,7 @@ export default async (client: TClient) => {
     const now = Date.now();
 
 
-    if (client.config.botSwitches.registerCommands) await guild.commands.set(client.commands.map(x => x.data.toJSON()))
+    if (client.config.toggles.registerCommands) await guild.commands.set(client.commands.map(x => x.data.toJSON()))
         .then(() => log('Purple', 'Slash commands registered'))
         .catch(e => log('Red', 'Couldn\'t register commands: ', e));
 
@@ -31,7 +31,7 @@ export default async (client: TClient) => {
     await client.getChan('taesTestingZone').send([
         ':warning: Bot restarted :warning:',
         `<@${client.config.devWhitelist[0]}>`,
-        `\`\`\`json\n${JSON.stringify(client.config.botSwitches, null, 1).slice(1, -1)}\`\`\``
+        `\`\`\`json\n${JSON.stringify(client.config.toggles, null, 1).slice(1, -1)}\`\`\``
     ].join('\n'));
 
     log('Blue', `Bot active as ${client.user.tag}`);
@@ -66,7 +66,7 @@ export default async (client: TClient) => {
     }, 10_000);
 
     // Farming Simulator stats loop
-    if (client.config.botSwitches.fsLoop) setInterval(async () => {
+    if (client.config.toggles.fsLoop) setInterval(async () => {
 	    const watchList = await client.watchList.data.find();
 
 	    for await (const [serverAcro, server] of Object.entries(client.config.fs)) await fsLoop(client, watchList, server.channelId, server.messageId, serverAcro);
@@ -74,7 +74,7 @@ export default async (client: TClient) => {
     }, 30_000);
 
     // YouTube upload nofitcations loop
-    if (client.config.botSwitches.ytLoop) setInterval(async () => {
+    if (client.config.toggles.ytLoop) setInterval(async () => {
         for await (const [chanId, chanName] of client.config.ytCacheChannels) {
             const res = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${chanId}`, formatRequestInit(5_000, "YTLoop")).catch(() => log('Red', `${chanName} YT fail`));
     

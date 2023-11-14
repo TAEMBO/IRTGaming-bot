@@ -2,7 +2,7 @@ import { EmbedBuilder, Message } from 'discord.js';
 import { isDCStaff, isMPStaff, log, Profanity } from '../utilities.js';
 
 export default async (message: Message<boolean>) => {
-    if ((!message.client.config.botSwitches.commands && !message.client.config.devWhitelist.includes(message.author.id)) || message.system || message.author.bot) return;
+    if ((!message.client.config.toggles.commands && !message.client.config.devWhitelist.includes(message.author.id)) || message.system || message.author.bot) return;
     //   ^^^     Bot is set to ignore commands and non-dev sent a message, ignore the message.      ^^^
 
     const msg = message.content.replaceAll('\n', ' ').toLowerCase();
@@ -52,7 +52,7 @@ export default async (message: Message<boolean>) => {
     // RepeatedMessages
     const isWhitelisted = message.client.config.whitelist.bannedWords.some(x => [message.channelId, message.channel.parentId].includes(x));
 
-    if (message.client.config.botSwitches.automod && !isDCStaff(message.member) && !isWhitelisted) {
+    if (message.client.config.toggles.automod && !isDCStaff(message.member) && !isWhitelisted) {
         if (profanity.hasProfanity(message.client.bannedWords.data)) {
             automodded = true;
 
@@ -101,7 +101,7 @@ export default async (message: Message<boolean>) => {
 
     if (automodded) return;
     if (message.channel.id !== message.client.config.mainServer.channels.spamZone) await message.client.userLevels.incrementUser(message.author.id);
-    if (!message.client.config.botSwitches.autoResponses) return;
+    if (!message.client.config.toggles.autoResponses) return;
 
     // Morning message systen
     const morningMsgs = ['morning all', 'morning everyone', 'morning guys', 'morning people'];

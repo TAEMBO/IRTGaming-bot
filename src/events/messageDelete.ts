@@ -3,7 +3,7 @@ import { formatUser } from '../utilities.js';
 
 export default async (message: Message<boolean> | PartialMessage) => {
     if (
-        !message.client.config.botSwitches.logs
+        !message.client.config.toggles.logs
         || message.partial
         || !message.inGuild()
         || message.author.bot

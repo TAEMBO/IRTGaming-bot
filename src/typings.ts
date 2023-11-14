@@ -163,7 +163,7 @@ export interface Config {
     readonly EMBED_COLOR_RED: `#${string}`,
     readonly EMBED_COLOR_YELLOW: `#${string}`,
     botPresence: PresenceData;
-    botSwitches: {
+    toggles: {
         commands: boolean;
         automod: boolean;
         logs: boolean;

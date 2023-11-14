@@ -2,7 +2,7 @@ import { EmbedBuilder, VoiceState } from "discord.js";
 import { formatUser } from '../utilities.js';
 
 export default async (oldState: VoiceState, newState: VoiceState) => {
-    if (!newState.client.config.botSwitches.logs || !newState.member) return;
+    if (!newState.client.config.toggles.logs || !newState.member) return;
 
     const channel = newState.client.getChan('botLogs');
     const embed = new EmbedBuilder()

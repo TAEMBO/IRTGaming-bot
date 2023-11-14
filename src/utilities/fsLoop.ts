@@ -257,4 +257,6 @@ export async function fsLoopAll(client: TClient, watchList: WatchListDocument[])
         content: `\`\`\`js\n['${client.whitelist.data.join("', '")}']\`\`\`Updates every 30 seconds`,
         embeds: [embed.setTitle(totalCount.reduce((a, b) => a + b, 0) + ' online')]
     }).catch(() => log('Red', 'FSLoopAll invalid msg'));
+
+    client.shard?.ids
 }

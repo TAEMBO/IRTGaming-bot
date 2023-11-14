@@ -2,7 +2,7 @@ import { EmbedBuilder, User, PartialUser } from 'discord.js';
 import { formatUser } from '../utilities.js';
 
 export default async (oldUser: User | PartialUser, newUser: User) => {
-    if (!newUser.client.config.botSwitches.logs || oldUser.tag === newUser.tag) return;
+    if (!newUser.client.config.toggles.logs || oldUser.tag === newUser.tag) return;
 
     await newUser.client.getChan('botLogs').send({ embeds: [new EmbedBuilder()
         .setTimestamp()

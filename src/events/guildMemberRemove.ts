@@ -2,7 +2,7 @@ import { EmbedBuilder, GuildMember } from 'discord.js';
 import { formatUser } from '../utilities.js';
 
 export default async (member: GuildMember) => {
-    if (!member.client.config.botSwitches.logs || !member.joinedTimestamp) return;
+    if (!member.client.config.toggles.logs || !member.joinedTimestamp) return;
         
     const rankingData = await member.client.userLevels.data.findById(member.id);
     const embed = new EmbedBuilder()

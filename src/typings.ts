@@ -164,6 +164,11 @@ export interface Config {
     readonly EMBED_COLOR_GREEN: `#${string}`;
     readonly EMBED_COLOR_RED: `#${string}`;
     readonly EMBED_COLOR_YELLOW: `#${string}`;
+    /** Unix timestamp used for calculating when each day for daily msgs loop to be called */
+    readonly DAILY_MSGS_TIMESTAMP: number;
+    readonly DAILY_MSGS_DEFAULT: `<${"a" | ""}:${string}:${string}>`;
+    readonly DAILY_MSGS_MONDAY: `<${"a" | ""}:${string}:${string}>`;
+    readonly DAILY_MSGS_WEEKEND: `<${"a" | ""}:${string}:${string}>`;
     botPresence: PresenceData;
     toggles: {
         commands: boolean;

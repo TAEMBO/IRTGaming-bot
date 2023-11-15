@@ -12,7 +12,6 @@ export default async (client: TClient) => {
     const dailyMsgs: [number, number][] = JSON.parse(fs.readFileSync(dailyMsgsPath, 'utf8'));
     const now = Date.now();
 
-
     if (client.config.toggles.registerCommands) await guild.commands.set(client.commands.map(x => x.data.toJSON()))
         .then(() => log('Purple', 'Slash commands registered'))
         .catch(e => log('Red', 'Couldn\'t register commands: ', e));
@@ -39,31 +38,26 @@ export default async (client: TClient) => {
 
     // DailyMsgs loop
     setInterval(async () => {
-        const formattedDate = Math.floor((Date.now() - 1667854800000) / 1000 / 60 / 60 / 24);
+        const formattedDate = Math.floor((Date.now() - client.config.DAILY_MSGS_TIMESTAMP) / 1000 / 60 / 60 / 24);
 
-        if (!dailyMsgs.some(x => x[0] === formattedDate)) {
-            const yesterday = dailyMsgs.find(x => x[0] === formattedDate - 1) ?? [formattedDate - 1, 0];
-            let total = (await client.userLevels.data.find()).reduce((a, b) => a + b.messages, 0); // sum of all users
+        if (dailyMsgs.some(x => x[0] === formattedDate)) return;
 
-            if (total < yesterday[1]) total = yesterday[1]; // messages went down
+        const today = Date().toLowerCase();
+        const channel = client.getChan('general');
+        const yesterday = dailyMsgs.find(x => x[0] === formattedDate - 1) ?? [formattedDate - 1, 0];
+        let total = (await client.userLevels.data.find()).reduce((a, b) => a + b.messages, 0); // sum of all users
 
-            dailyMsgs.push([formattedDate, total]);
-            fs.writeFileSync(dailyMsgsPath, JSON.stringify(dailyMsgs, null, 4));
-            log('Cyan', `Pushed [${formattedDate}, ${total}] to dailyMsgs`);
+        if (total < yesterday[1]) total = yesterday[1]; // messages went down
 
-            setTimeout(async () => {
-                log('Cyan', 'Interval messages');
-
-                const today = Date().toLowerCase();
-                const channel = client.getChan('general');
-            
-                if (today.startsWith('fri')) {
-                    await channel.send('It\'s the weekend! <a:IRT_FrogClap:722536810399662160>');
-                } else if (today.startsWith('sun')) {
-                    await channel.send('Oh no! It\'s Monday... <:IRT_FrogBans:605519995761590273>');
-                } else await channel.send('<:IRT_RollSee:908055712368853002>');
-            }, 7_200_000); // 2 hour timeout, account for time zone differences
-        }
+        dailyMsgs.push([formattedDate, total]);
+        fs.writeFileSync(dailyMsgsPath, JSON.stringify(dailyMsgs, null, 4));
+        log('Cyan', `Pushed [${formattedDate}, ${total}] to dailyMsgs`);
+    
+        if (today.startsWith('fri')) {
+            await channel.send(`Weekend begins! ${client.config.DAILY_MSGS_WEEKEND}`);
+        } else if (today.startsWith('sun')) {
+            await channel.send(`It's back to Monday... ${client.config.DAILY_MSGS_MONDAY}`);
+        } else await channel.send(client.config.DAILY_MSGS_DEFAULT);
     }, 10_000);
 
     // Farming Simulator stats loop
@@ -74,7 +68,7 @@ export default async (client: TClient) => {
 	    await fsLoopAll(client, watchList);
     }, 30_000);
 
-    // YouTube upload nofitcations loop
+    // YouTube upload notifications loop
     if (client.config.toggles.ytLoop) setInterval(async () => {
         for await (const [chanId, chanName] of client.config.ytCacheChannels) {
             const res = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${chanId}`, formatRequestInit(5_000, "YTLoop")).catch(() => log('Red', `${chanName} YT fail`));

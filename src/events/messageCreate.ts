@@ -6,7 +6,6 @@ export default async (message: Message<boolean>) => {
     //   ^^^     Bot is set to ignore commands and non-dev sent a message, ignore the message.      ^^^
 
     const msg = message.content.replaceAll('\n', ' ').toLowerCase();
-    const msgarr = msg.split(' ');
     const profanity = new Profanity(msg);
 
     if (!message.inGuild()) {
@@ -100,13 +99,20 @@ export default async (message: Message<boolean>) => {
     }
 
     if (automodded) return;
-    if (message.channel.id !== message.client.config.mainServer.channels.spamZone) await message.client.userLevels.incrementUser(message.author.id);
+    if (message.channelId !== message.client.config.mainServer.channels.spamZone) await message.client.userLevels.incrementUser(message.author.id);
     if (!message.client.config.toggles.autoResponses) return;
 
-    // Morning message systen
-    const morningMsgs = ['morning all', 'morning everyone', 'morning guys', 'morning people'];
+    // MF mod voting
+    if (message.channelId === message.client.config.mainServer.channels.mfModSuggestions && message.content.startsWith("http")) {
+        await message.react(":IRT_Upvote:764965325342244915");
+        await message.react(":IRT_Downvote:764965659423408148");
+    }
 
-	if (morningMsgs.some(x => msg.includes(x)) && message.channel.id === message.client.config.mainServer.channels.general) {
+    // Morning message system
+	if (
+        ['morning all', 'morning everyone', 'morning guys', 'morning people'].some(x => msg.includes(x))
+        && message.channelId === message.client.config.mainServer.channels.general
+    ) {
         const randomEl = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
         const staffTag = message.member?.displayName.indexOf(' | ') ?? NaN < 0 ? undefined : message.member?.displayName.indexOf(' | ');
         const person = message.member?.displayName.slice(0, staffTag).replace('[LOA] ', '');

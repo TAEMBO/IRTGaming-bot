@@ -31,7 +31,7 @@ export type PlayerTimesDocument = ReturnType<typeof model.castObject>;
 export class PlayerTimes {
 	public data = model;
 
-	constructor(private readonly client: TClient) { }
+	constructor(private readonly _client: TClient) { }
     
 	/**
 	 * Retrieve an array-ified form of a player's server time data.
@@ -75,10 +75,11 @@ export class PlayerTimes {
 	public async fetchFarmData(serverAcro: string) {
 		const FTP = new FTPClient();
 		const allData = await this.data.find();
-        const fsServers = new FSServers(this.client.config.fs);
+        const fsServers = new FSServers(this._client.config.fs);
 
 		FTP.once('ready', () => FTP.get(fsServers.getPublicOne(serverAcro).ftp.path + 'savegame1/farms.xml', async (err, stream) => {
 			log('Yellow', `Downloaded farms.xml from ${serverAcro}, crunching...`);
+            
 			if (err) throw err;
             
 			const farmData = xjs.xml2js(await stringifyStream(stream), { compact: true }) as farmFormat;
@@ -91,13 +92,13 @@ export class PlayerTimes {
 					if (playerDatabyUuid._id !== player._attributes.lastNickname) { // PlayerTimes name does not match given name, update playerTimes data to reflect new name
                         const decorators = (name: string) => {
                             return [
-                                this.client.fmList.data.includes(name) ? ':farmer:' : '', // Tag for if player is FM
-                                this.client.tfList.data.includes(name) ? ':angel:' : '' // Tag for if player is TF
+                                this._client.fmList.data.includes(name) ? ':farmer:' : '', // Tag for if player is FM
+                                this._client.tfList.data.includes(name) ? ':angel:' : '' // Tag for if player is TF
                             ].join('');
                         }
 
-						await this.client.getChan('fsLogs').send({ embeds: [new EmbedBuilder()
-							.setColor(this.client.config.EMBED_COLOR_YELLOW)
+						await this._client.getChan('fsLogs').send({ embeds: [new EmbedBuilder()
+							.setColor(this._client.config.EMBED_COLOR_YELLOW)
 							.setTitle('Player name change')
 							.setTimestamp()
 							.setDescription([
@@ -106,6 +107,7 @@ export class PlayerTimes {
 								`**New name:** ${player._attributes.lastNickname} ${decorators(player._attributes.lastNickname)}`
 							].join('\n'))
 						] });
+
                         iterationCount++;
 						
 						await this.data.create({ _id: player._attributes.lastNickname, uuid: player._attributes.uniqueUserId, servers: playerDatabyUuid.servers })
@@ -118,11 +120,13 @@ export class PlayerTimes {
 					}
 				} else { // No playerTimes data was found with UUID
 					const playerDataByName = allData.find(x => x._id === player._attributes.lastNickname);
+
 					if (playerDataByName && !playerDataByName.uuid) await this.data.findByIdAndUpdate(player._attributes.lastNickname, { uuid: player._attributes.uniqueUserId }, { new: true });
 				}
 			}
             
-            await this.client.getChan('fsLogs').send(`⚠️ Name change detector ran. Iterated over ${iterationCount} changed names`);
+            await this._client.getChan('fsLogs').send(`⚠️ Name change detector ran. Iterated over ${iterationCount} changed names`);
+
 			log('Yellow', 'Finished crunching farms.xml data');
 			stream.once('close', () => FTP.end());
 		})).connect(fsServers.getPublicOne(serverAcro).ftp);

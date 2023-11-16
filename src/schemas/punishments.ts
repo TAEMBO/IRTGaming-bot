@@ -26,7 +26,7 @@ export type PunishmentsDocument = ReturnType<typeof model.castObject>;
 export class Punishments {
     public data = model;
 
-    constructor(private client: TClient) { }
+    constructor(private readonly _client: TClient) { }
 
     public setExec(_id: number, timeout: number) {
         setTimeout(async () => {
@@ -37,7 +37,7 @@ export class Punishments {
             if (!punishment) return;
 
             log('Yellow', `${punishment.member.tag}\'s ${punishment.type} (case #${punishment._id}) should expire now`);
-        	await this.removePunishment(punishment._id, this.client.user.id, "Time\'s up!").then(result => log('Yellow', result));
+        	await this.removePunishment(punishment._id, this._client.user.id, "Time\'s up!").then(result => log('Yellow', result));
         }, timeout > 2_147_483_647 ? 2_147_483_647 : timeout);
     }
 
@@ -49,7 +49,7 @@ export class Punishments {
             	{ name: '🔹 Moderator', value: `<@${punishment.moderator}> \`${punishment.moderator}\``, inline: true },
             	{ name: '\u200b', value: '\u200b', inline: true },
             	{ name: '🔹 Reason', value: `\`${punishment.reason}\``, inline: true })
-            .setColor(this.client.config.EMBED_COLOR)
+            .setColor(this._client.config.EMBED_COLOR)
             .setTimestamp(punishment.time);
 
         if (punishment.duration) embed.addFields(
@@ -63,7 +63,7 @@ export class Punishments {
             embed.addFields({ name: '🔹 Overwrites', value: `This case overwrites Case #${cancels?._id} \`${cancels?.reason}\`` });
         }
     
-        await this.client.getChan('staffReports').send({ embeds: [embed] });
+        await this._client.getChan('staffReports').send({ embeds: [embed] });
     };
 
     private async createId() {
@@ -94,14 +94,14 @@ export class Punishments {
         }
     ) {
 		const { time, interaction } = options;
-        const { client } = this;
+        const { _client } = this;
 		const now = Date.now();
-		const guild = client.mainGuild();
+		const guild = _client.mainGuild();
 		const punData: PunishmentsDocument = { type, _id: await this.createId(), member: { tag: user.tag, _id: user.id }, reason, moderator, time: now };
 		const inOrFromBoolean = ['warn', 'mute'].includes(type) ? 'in' : 'from'; // Use 'in' if the punishment doesn't remove the member from the server, eg. mute, warn
 		const auditLogReason = `${reason} | Case #${punData._id}`;
 		const embed = new EmbedBuilder()
-			.setColor(client.config.EMBED_COLOR)
+			.setColor(_client.config.EMBED_COLOR)
 			.setTitle(`Case #${punData._id}: ${type[0].toUpperCase() + type.slice(1)}`)
 			.setDescription(`${user.tag}\n<@${user.id}>\n(\`${user.id}\`)`)
 			.addFields({ name: 'Reason', value: reason });
@@ -148,7 +148,7 @@ export class Punishments {
             },
             async detain() {
                 await guildMember?.voice.disconnect();
-                return await guildMember?.roles.add(client.config.mainServer.roles.detained, auditLogReason).catch((err: Error) => err.message);
+                return await guildMember?.roles.add(_client.config.mainServer.roles.detained, auditLogReason).catch((err: Error) => err.message);
             },
             async mute() {
                 if (guildMember?.communicationDisabledUntil) {
@@ -197,10 +197,10 @@ export class Punishments {
                 : log('Red', `Case #${caseId} not found in punishment removal`);
         };
 
-		const guild = this.client.mainGuild();
+		const guild = this._client.mainGuild();
 		const auditLogReason = `${reason} | Case #${punishment._id}`;
 		const [User, GuildMember, _id] = await Promise.all([
-			this.client.users.fetch(punishment.member._id),
+			this._client.users.fetch(punishment.member._id),
 			guild.members.fetch(punishment.member._id).catch(() => null),
 			this.createId()
 		]);
@@ -218,7 +218,7 @@ export class Punishments {
                 removePunishmentData.type = 'removeOtherPunishment';
             },
             detain: async () => {
-                return await GuildMember?.roles.remove(this.client.config.mainServer.roles.detained, auditLogReason).catch((err: Error) => err.message);
+                return await GuildMember?.roles.remove(this._client.config.mainServer.roles.detained, auditLogReason).catch((err: Error) => err.message);
             },
             mute: async () => {
                 if (GuildMember) {
@@ -244,7 +244,7 @@ export class Punishments {
 
 			if (interaction) {
 				return await interaction.reply({ embeds: [new EmbedBuilder()
-					.setColor(this.client.config.EMBED_COLOR)
+					.setColor(this._client.config.EMBED_COLOR)
 					.setTitle(`Case #${removePunishmentData._id}: ${removePunishmentData.type[0].toUpperCase() + removePunishmentData.type.slice(1)}`)
 					.setDescription(`${User.tag}\n<@${User.id}>\n(\`${User.id}\`)`)
 					.addFields(

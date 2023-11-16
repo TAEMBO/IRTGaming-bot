@@ -5,7 +5,7 @@
 export class Profanity {
     private loopCount = 0;
 
-    constructor(private text: string) { }
+    constructor(private _text: string) { }
     
     private allPossibleCases(arr: string[][]) {
         this.loopCount++;
@@ -27,7 +27,7 @@ export class Profanity {
      * @returns An array of each word of the text with all words parsed for possibly profanity
      */
     public getProfanity() {
-        this.text = this.text.replace(/[^a-zA-Z\s]/g, "");
+        this._text = this._text.replace(/[^a-zA-Z\s]/g, "");
 
         for (const [regExp, str] of new Map([
             [/!/g, "i"],
@@ -43,9 +43,9 @@ export class Profanity {
             [/9/g, "g"],
             [/6/g, "b"],
             [/8/g, "b"]
-        ])) this.text = this.text.replace(regExp, str);
+        ])) this._text = this._text.replace(regExp, str);
     
-        return this.text
+        return this._text
             .split(' ')
             .map(word => {
                 if (/(.)\1{1,}/.test(word) && word.length > 3) {

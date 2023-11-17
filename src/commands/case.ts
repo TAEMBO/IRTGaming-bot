@@ -1,12 +1,10 @@
-import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } from 'discord.js';
 import { TInteraction } from '../typings.js';
-import { formatTime, isDCStaff, youNeedRole } from '../utilities.js';
+import { formatTime } from '../utilities.js';
 import { Index } from '../typings.js';
 
 export default {
 	async run(interaction: TInteraction) {
-		if (!isDCStaff(interaction.member)) return await youNeedRole(interaction, 'discordmoderator');
-
 		const caseid = interaction.options.getInteger("id");
 
 		await ({
@@ -100,4 +98,5 @@ export default {
 				.setName("reason")
 				.setDescription("The New Reason For The Case.")
 				.setRequired(true)))
+        .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
 };

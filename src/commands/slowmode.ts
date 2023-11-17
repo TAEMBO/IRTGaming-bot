@@ -1,15 +1,11 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { TInteraction } from '../typings.js';
-import { isDCStaff, youNeedRole } from '../utilities.js';
 
 export default {
 	async run(interaction: TInteraction) {
         const time = interaction.options.getInteger("time", true);
 
-        if (!isDCStaff(interaction.member)) return await youNeedRole(interaction, 'discordmoderator');
-        if (time > 21600) return await interaction.reply('The slowmode limit is 6 hours (\`21600\` seconds).');
-
-        await interaction.channel?.setRateLimitPerUser(time, `Done by ${interaction.user.tag}`);
+        await interaction.channel.setRateLimitPerUser(time, `Done by ${interaction.user.tag}`);
 
         if (!time) {
             await interaction.reply('Slowmode removed.');
@@ -21,5 +17,7 @@ export default {
         .addIntegerOption(x => x
             .setName("time")
             .setDescription("The time amount for the slowmode")
-            .setRequired(true))
+            .setRequired(true)
+            .setMaxValue(21600))
+        .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
 };

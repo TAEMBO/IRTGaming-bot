@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { punish } from '../utilities.js';
 import { TInteraction } from '../typings.js';
 
@@ -21,4 +21,5 @@ export default {
 			.setName("reason")
 			.setDescription("The reason for banning the member")
 			.setRequired(false))
+        .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
 };

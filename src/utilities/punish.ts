@@ -1,4 +1,4 @@
-import { hasRole, isDCStaff, youNeedRole } from '../utilities.js';
+import { hasRole, youNeedRole } from '../utilities.js';
 import { TInteraction } from '../typings.js';
 
 /**
@@ -6,7 +6,7 @@ import { TInteraction } from '../typings.js';
  * @param type The type of punishment this is
  */
 export async function punish(interaction: TInteraction, type: string) {
-    if ((!isDCStaff(interaction.member)) || (!['warn', 'mute'].includes(type) && hasRole(interaction.member, 'discordhelper'))) return await youNeedRole(interaction, 'discordstaff');
+    if (!['warn', 'mute'].includes(type) && hasRole(interaction.member, 'discordhelper')) return await youNeedRole(interaction, 'discordstaff');
 
     const time = interaction.options.getString('time') ?? undefined;
     const reason = interaction.options.getString('reason') ?? 'Unspecified';

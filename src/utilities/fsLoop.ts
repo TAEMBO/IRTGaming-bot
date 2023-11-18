@@ -61,7 +61,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
         .catch(err => log('Red', `${serverAcroUp} CSG ${err.message}`));
 
     if (!dss || !dss.slots || !csg) {
-        if (dss && !dss.slots) log('Red', `${serverAcroUp} DSS undefined slots`);
+        if (dss && !dss.slots) log('Red', `${serverAcroUp} DSS empty object`);
 
         statsEmbed.setTitle('Host not responding').setColor(client.config.EMBED_COLOR_RED);
         await statsMsgEdit();
@@ -257,6 +257,4 @@ export async function fsLoopAll(client: TClient, watchList: WatchListDocument[])
         content: `\`\`\`js\n['${client.whitelist.data.join("', '")}']\`\`\`Updates every 30 seconds`,
         embeds: [embed.setTitle(totalCount.reduce((a, b) => a + b, 0) + ' online')]
     }).catch(() => log('Red', 'FSLoopAll invalid msg'));
-
-    client.shard?.ids
 }

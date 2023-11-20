@@ -75,7 +75,7 @@ export default {
 
             }
 
-            embed.setTitle(`All Servers: ${totalCount.reduce((a, b) => a + b, 0)} online`).setFooter(failedFooter.length ? { text: failedFooter.join(', ') } : null);
+            embed.setTitle(`All Servers: ${totalCount.reduce((a, b) => a + b, 0)} players online`).setFooter(failedFooter.length ? { text: failedFooter.join(', ') } : null);
 
             await interaction.editReply({ embeds: [embed] });
         } else if (subCmd === 'playertimes') {

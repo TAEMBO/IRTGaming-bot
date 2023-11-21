@@ -9,6 +9,8 @@ export default async (member: GuildMember) => {
     const newInvites = await member.guild.invites.fetch();
     const usedInvite = newInvites.find(inv => (member.client.inviteCache.get(inv.code)?.uses ?? 0) < (inv.uses ?? 0));
     const evadingCase = await member.client.punishments.data.findOne({ 'member._id': member.user.id, type: 'detain', expired: undefined });
+
+    for (const [code, inv] of newInvites) member.client.inviteCache.set(code, { uses: inv.uses ?? 0, creator: inv.inviter?.id ?? "UNKNOWN" });
  
     const embed = new EmbedBuilder()
         .setTitle(`Member Joined: ${member.user.tag}`)

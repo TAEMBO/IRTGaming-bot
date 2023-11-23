@@ -56,6 +56,7 @@ export default {
                 if (!dss || !dss.slots || !dss.slots.used) continue;
 
                 totalCount.push(dss.slots.used);
+                
                 const playerInfo: string[] = [];
                 const serverSlots = `${dss.slots.used}/${dss.slots.capacity}`;
 
@@ -71,7 +72,7 @@ export default {
                     playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
                 };
 
-                embed.addFields({ name: `${dss.server.name.replace('! ! IRTGaming | ', '')} - ${serverSlots}`, value: playerInfo.join("\n"), inline: true });
+                embed.addFields({ name: `${server.fullName} - ${serverSlots}`, value: playerInfo.join("\n"), inline: true });
 
             }
 

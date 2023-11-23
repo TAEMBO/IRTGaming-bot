@@ -31,7 +31,8 @@ export default {
                 ].join('\n'))
             ] }),
             appeal: () => interaction.reply([
-                `${content} `, 
+                `${content} `,
+                '\n',
                 "If you would like to appeal your ban on our MP servers, ",
                 "head to <#825046442300145744> and open an [MP Support](https://discord.com/channels/552565546089054218/825046442300145744/969893324947337246) ticket to privately discuss it with MP Staff."
             ].join('')),
@@ -55,13 +56,15 @@ export default {
             ].join('\n')),
             passwords: () => interaction.reply([
                 content, 
+                '\n',
                 'We run multiple farms for each of our public servers to aid managing them. ',
                 'Players who join our servers will only ever need to join the green farm, labeled with our Discord invite link, which should never have a password set on it. ',
                 'All other farms contain "Staff" in their name, indicating that no one except staff should ever need to access them. ',
                 'If one of our public servers are locked, the password to them can be found in their respective channel\'s pinned messages. Note that we may not use that password at all times.'
             ].join('')),
             terrain: () => interaction.reply([
-                content, 
+                content,
+                '\n',
                 'When you join one of our servers, you may encounter terrain with jagged edges or extreme deformations into the ground. ',
                 'This however is not the actual terrain formation on the server, and thus has no affect on where you can drive around. ',
                 'These are simply visual glitches that are only seen on your end, so don\'t fret that the server was possibly griefed!'

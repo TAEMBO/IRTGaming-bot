@@ -1,7 +1,7 @@
 import { EmbedBuilder, Message, PartialMessage } from 'discord.js';
 import { formatUser } from '../utilities.js';
 
-export default async (message: Message<boolean> | PartialMessage) => {
+export default async (message: Message | PartialMessage) => {
     if (
         !message.client.config.toggles.logs
         || message.partial

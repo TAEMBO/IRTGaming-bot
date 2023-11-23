@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, Message, PartialMessage } from "discord.js";
 import { formatUser, isDCStaff, isMPStaff, Profanity } from '../utilities.js';
 
-export default async (oldMsg: Message<boolean> | PartialMessage, newMsg: Message<boolean> | PartialMessage) => {
+export default async (oldMsg: Message | PartialMessage, newMsg: Message | PartialMessage) => {
     if (
         !newMsg.client.config.toggles.logs
         || !oldMsg.content

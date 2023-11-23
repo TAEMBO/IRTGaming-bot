@@ -1,7 +1,7 @@
-import { EmbedBuilder, GuildMember } from 'discord.js';
+import { EmbedBuilder, GuildMember, PartialGuildMember } from 'discord.js';
 import { formatUser } from '../utilities.js';
 
-export default async (member: GuildMember) => {
+export default async (member: GuildMember | PartialGuildMember) => {
     if (!member.client.config.toggles.logs || !member.joinedTimestamp) return;
         
     const rankingData = await member.client.userLevels.data.findById(member.id);

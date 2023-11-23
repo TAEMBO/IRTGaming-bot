@@ -22,6 +22,7 @@ export default {
                     .setDescription(`Are you sure you want to delete the reminder \`${reminder.content}\`?`)
                     .setFooter({ text: '60s to respond' })
                 ],
+                ephemeral: true,
                 components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
                     new ButtonBuilder().setCustomId('yes').setStyle(ButtonStyle.Success).setLabel("Confirm"),
                     new ButtonBuilder().setCustomId('no').setStyle(ButtonStyle.Danger).setLabel("Cancel")

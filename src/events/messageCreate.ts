@@ -1,35 +1,12 @@
-import { EmbedBuilder, Message } from 'discord.js';
+import { Message } from 'discord.js';
 import { isDCStaff, isMPStaff, log, Profanity } from '../utilities.js';
 
-export default async (message: Message) => {
+export default async (message: Message<true>) => {
     if ((!message.client.config.toggles.commands && !message.client.config.devWhitelist.includes(message.author.id)) || message.system || message.author.bot) return;
     //   ^^^     Bot is set to ignore commands and non-dev sent a message, ignore the message.      ^^^
 
     const msg = message.content.replaceAll('\n', ' ').toLowerCase();
     const profanity = new Profanity(msg);
-
-    if (!message.inGuild()) {
-        const member = message.client.mainGuild().members.cache.get(message.author.id);
-
-        if (!member) return;
-
-        return await message.client.getChan('taesTestingZone').send({
-            content: `DM Forward <@${message.client.config.devWhitelist[0]}>`,
-            files: message.attachments.map(x => x.url),
-            embeds: [new EmbedBuilder()
-                .setTitle('Forwarded DM Message')
-                .setDescription(`<@${message.author.id}>`)
-                .setAuthor({ name: `${message.author.tag} (${message.author.id})`, iconURL: message.author.displayAvatarURL({ extension: 'png' }) })
-                .setColor(message.client.config.EMBED_COLOR)
-                .setTimestamp()
-                .setFields(
-                    { name: 'Message Content', value: message.content.length > 1024 ? message.content.slice(0, 1000) + '...' : message.content + '\u200b' },
-                    { name: 'Roles:', value: member.roles.cache.size > 1 ? member.roles.cache.filter(x => x.id !== message.client.config.mainServer.id).sort((a, b) => b.position - a.position).map(x => x).join(member.roles.cache.size > 4 ? ' ' : '\n').slice(0, 1024) : 'None' })
-            ]
-        });
-    }
-
-    /** Message has been moderated against and deleted */
     let automodded = false;
 
     // Misuse of staff ping

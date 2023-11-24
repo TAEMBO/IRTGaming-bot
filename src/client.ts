@@ -41,7 +41,6 @@ export default class TClient extends Client<true> {
                 GatewayIntentBits.GuildPresences,
                 GatewayIntentBits.GuildMessages,
                 GatewayIntentBits.GuildMessageReactions,
-                GatewayIntentBits.DirectMessages,
                 GatewayIntentBits.MessageContent,
                 GatewayIntentBits.GuildVoiceStates
             ],

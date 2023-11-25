@@ -229,7 +229,7 @@ export class Punishments {
             warn: () => {
                 removePunishmentData.type = 'removeOtherPunishment';
             }
-        } as any)[punishment.type]();
+        } as Index)[punishment.type]();
 
 		if (typeof punResult === 'string') { // Unpunish was unsuccessful
 			if (interaction) {

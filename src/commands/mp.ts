@@ -5,7 +5,7 @@ import FTPClient from 'ftp';
 import { xml2js } from 'xml-js';
 import config from '../config.json' assert { type: 'json' };
 import { FSServers, getFSURL, hasRole, isMPStaff, stringifyStream, youNeedRole } from '../utilities.js';
-import type { banFormat, farmFormat, Index, TInteraction } from '../typings.js';
+import type { banFormat, DedicatedServerConfig, farmFormat, Index, TInteraction } from '../typings.js';
 
 const fsServers = new FSServers(config.fs);
 const cmdOptionChoices = fsServers.getPublicAll().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));
@@ -213,13 +213,14 @@ export default {
             },
             async password() {
                 await interaction.deferReply();
+
                 const chosenServer = interaction.options.getString('server', true);
                 const ftpLogin = fsServers.getPublicOne(chosenServer).ftp;
 
                 FTP.once('ready', () => FTP.get(ftpLogin.path + 'dedicated_server/dedicatedServerConfig.xml', async (err, stream) => {
                     if (err) return await interaction.editReply(err.message);
 
-                    const pw = (xml2js(await stringifyStream(stream), { compact: true }) as any).gameserver?.settings?.game_password?._text as string | undefined;
+                    const pw = (xml2js(await stringifyStream(stream), { compact: true }) as DedicatedServerConfig).gameserver.settings.game_password._text;
 
                     if (pw) {
                         await interaction.editReply(`Current password for **${chosenServer.toUpperCase()}** is \`${pw}\``);

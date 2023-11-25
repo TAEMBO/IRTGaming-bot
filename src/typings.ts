@@ -218,8 +218,8 @@ interface FSLoopDSSServer {
 }
 
 interface FSLoopDSSSlots {
-    readonly capacity: number;
-    readonly used: number;
+    readonly capacity: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
+    readonly used: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
     readonly players: FSLoopDSSPlayer[];
 }
 
@@ -416,7 +416,7 @@ interface greenFarm {
     };
 }
 interface staffFarm {
-    readonly _attributes: greenFarm["_attributes"] & { readonly password: string; };
+    readonly _attributes: Prettify<greenFarm["_attributes"] & { readonly password: string; }>;
     readonly players?: {
         readonly player: farmPlayer[] | farmPlayer;
     };
@@ -425,24 +425,46 @@ interface staffFarm {
 interface farmPlayer {
     readonly _attributes: {
         readonly uniqueUserId: string;
-        readonly farmManager: "false" | "true";
+        readonly farmManager: "true" | "false";
         readonly lastNickname: string;
         readonly timeLastConnected: string;
-        readonly buyVehicle: "false" | "true";
-        readonly sellVehicle: "false" | "true";
-        readonly buyPlaceable: "false" | "true";
-        readonly sellPlaceable: "false" | "true";
-        readonly manageContracts: "false" | "true";
-        readonly radeAnimals: "false" | "true";
-        readonly createFields: "false" | "true";
-        readonly landscaping: "false" | "true";
-        readonly hireAssistant: "false" | "true";
-        readonly resetVehicle: "false" | "true";
-        readonly manageProductions: "false" | "true";
-        readonly cutTrees: "false" | "true";
-        readonly manageRights: "false" | "true";
-        readonly transferMoney: "false" | "true";
-        readonly updateFarm: "false" | "true";
-        readonly manageContracting: "false" | "true";
+        readonly buyVehicle: "true" | "false";
+        readonly sellVehicle: "true" | "false";
+        readonly buyPlaceable: "true" | "false";
+        readonly sellPlaceable: "true" | "false";
+        readonly manageContracts: "true" | "false";
+        readonly radeAnimals: "true" | "false";
+        readonly createFields: "true" | "false";
+        readonly landscaping: "true" | "false";
+        readonly hireAssistant: "true" | "false";
+        readonly resetVehicle: "true" | "false";
+        readonly manageProductions: "true" | "false";
+        readonly cutTrees: "true" | "false";
+        readonly manageRights: "true" | "false";
+        readonly transferMoney: "true" | "false";
+        readonly updateFarm: "true" | "false";
+        readonly manageContracting: "true" | "false";
+    };
+}
+
+export interface DedicatedServerConfig {
+    readonly gameserver: {
+        readonly settings: {
+            readonly game_name: { readonly _text: string; };
+            readonly admin_password: { readonly _text?: string; };
+            readonly game_password: { readonly _text?: string; };
+            readonly savegame_index: { readonly _text: "1" | "2" | "3"| "4"| "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "13" | "14" | "15" | "16" | "18" | "19" | "20"; };
+            readonly max_player: { readonly _text: "2" | "3"| "4"| "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "13" | "14" | "15" | "16"; };
+            readonly port: { readonly _text: string; };
+            readonly language: { readonly _text: "en" | "de" | "jp" | "pl" | "cz" | "fr" | "es" | "ru" | "it" | "pt" | "hu" | "nl" | "cs" | "ct" | "br" | "tr" | "ro" | "kr" | "da" | "fi" | "no" | "sv"; };
+            readonly auto_save_interval: { readonly _text: `${string}.000000`; };
+            readonly stats_interval: { readonly _text: `${string}.000000`; };
+            readonly use_upnp: { readonly _text: "true" | "false"; };
+            readonly crossplay_allowed: { readonly _text: "true" | "false"; };
+            readonly difficulty: { readonly _text: "2" | "3"; };
+            readonly pause_game_if_empty: { readonly _text: "1" | "2"; };
+            readonly mapID: { readonly _text: string; };
+            readonly mapFilename: { readonly _text: string; };
+        };
     };
 }

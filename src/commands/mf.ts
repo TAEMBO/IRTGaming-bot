@@ -107,6 +107,19 @@ export default {
                         .setColor(interaction.client.config.EMBED_COLOR)
                     ] });
                 }
+            },
+            async rename() {
+                const role = interaction.client.getRole(interaction.options.getString("role", true) as keyof typeof interaction.client.config.mainServer.roles);
+                const name = interaction.options.getString("name", false);
+                const roleNamePrefix = role.name.split(" ").slice(0, 3).join(" ");
+
+                if (name) {
+                    await role.setName(`${roleNamePrefix} (${name})`);
+                } else {
+                    await role.setName(roleNamePrefix);
+                }
+
+                await interaction.reply(`${roleNamePrefix} role name set to \`${role.name}\``);
             }
         } as Index)[interaction.options.getSubcommand()]();
 	},
@@ -132,4 +145,16 @@ export default {
                 .setName('member')
                 .setDescription('The member to add or remove the MF Farm Owner role from')
                 .setRequired(true)))
+        .addSubcommand(x => x
+            .setName("rename")
+            .setDescription("Rename a given MF Farm role")
+            .addStringOption(x => x
+                .setName("role")
+                .setDescription("The role to rename")
+                .setRequired(true)
+                .setAutocomplete(true))
+            .addStringOption(x => x
+                .setName("name")
+                .setDescription("The name of the MF Farm. Leave unspecified to clear farm name in role")
+                .setRequired(false)))
 };

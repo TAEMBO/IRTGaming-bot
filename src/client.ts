@@ -90,6 +90,6 @@ export default class TClient extends Client<true> {
 
         if (subcommand && !subCmd) return null;
 
-        return `</${cmd.name}${subcommand ? "" : " " + subCmd?.name}:${cmd.id}>` as const;
+        return `</${cmd.name}${subcommand ? " " + subCmd?.name : ""}:${cmd.id}>` as const;
     }
 }

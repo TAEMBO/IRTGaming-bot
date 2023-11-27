@@ -3,7 +3,7 @@ import { hasRole, log, onMFFarms } from '../utilities.js';
 import { Command, Index } from '../typings.js';
 
 export default async (interaction: Interaction) => {
-    if (!interaction.inGuild() || !interaction.inCachedGuild()) return;
+    if (!interaction.inCachedGuild()) return;
 
     if (interaction.isChatInputCommand()) {
         if (interaction.commandName === 'ping') {

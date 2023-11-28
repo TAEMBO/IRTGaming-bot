@@ -103,7 +103,7 @@ export default {
         for (const activity of member.presence.activities) {
             if (activity.type === ActivityType.Listening && activity.details && activity.assets) {
                 embeds.push(new EmbedBuilder()
-                    .setAuthor({ name: activity.name, iconURL: 'https://www.freepnglogos.com/uploads/spotify-logo-png/spotify-icon-marilyn-scott-0.png' })
+                    .setAuthor({ name: activity.name, iconURL: interaction.client.config.resources.whoisSpotifyEmbedAuthorImage })
                     .setColor('#1DB954')
                     .setFields({ name: activity.details, value: `by ${activity.state}\non ${activity.assets.largeText}\nStarted listening <t:${Math.round(activity.createdTimestamp / 1000)}:R>` })
                     .setThumbnail(`https://i.scdn.co/image/${activity.assets.largeImage?.replace('spotify:', '')}`)

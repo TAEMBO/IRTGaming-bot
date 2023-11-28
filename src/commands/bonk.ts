@@ -19,7 +19,7 @@ export default {
                 reason ?? 'no reason',
                 '!'
             ].join(''))
-            .setThumbnail('https://cdn.discordapp.com/emojis/764425143304847370.png')
+            .setThumbnail(interaction.client.config.resources.bonkEmbedThumbnail)
         ] });
 	},
 	data: new SlashCommandBuilder()

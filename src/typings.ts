@@ -183,7 +183,7 @@ export interface Config {
     /** An object for managing and communicating with Farming Simulator servers, keyed by their abbreviated acronym */
     fs: Record<string, FSServer>;
     /** A list of user IDs that are considered developers of this bot */
-    devWhitelist: Array<string>;
+    devWhitelist: string[];
     whitelist: {
         /** A list of channel IDs that automod does not apply to */
         bannedWords: string[];
@@ -192,6 +192,7 @@ export interface Config {
     };
     /** `Array<[ChannelID, ChannelName]>` */
     ytCacheChannels: string[][];
+    resources: Record<keyof typeof config.resources, `https://${string}`>;
     mainServer: {
         /** The ID of the guild that this bot is for */
         id: string;

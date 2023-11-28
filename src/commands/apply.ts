@@ -13,7 +13,7 @@ export default {
         if (!eligibleMsgs) deniedMsgs.push('be more active on the Discord server');
 
         if (!deniedMsgs.length) {
-            await interaction.reply({ content: 'https://forms.gle/o1oM1vHdJe6RCmJ39', ephemeral: true });
+            await interaction.reply({ content: interaction.client.config.resources.applyGoogleForm, ephemeral: true });
             await applicationLogs.send(`<@${interaction.user.id}> (${interaction.user.tag}) opened an MP Staff application on <t:${Math.round(Date.now() / 1000)}>`);
         } else {
             await interaction.reply({ content: `You need to ${deniedMsgs.join(' and ')} before applying`, ephemeral: true });

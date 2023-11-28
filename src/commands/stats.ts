@@ -31,7 +31,7 @@ export default {
             || interaction.channelId === interaction.client.config.mainServer.channels.mfPublicChat
         ) && !isMPStaff(interaction.member)) return await interaction.reply({
             content: [
-                'This command has [restrictions](https://discord.com/channels/552565546089054218/891791005098053682/991799952084828170) set',
+                `This command has [restrictions](${interaction.client.config.resources.statsRestrictionRedirect}) set`,
                 ` please use <#${interaction.client.config.mainServer.channels.botCommands}> for ${interaction.client.getCommandMention("stats")} commands.`
             ].join(),
             ephemeral: true
@@ -117,7 +117,7 @@ export default {
                         ].join('\n'))
                         .setFields(formattedTimeData)
                     ] });
-                } else await interaction.reply('No data found with that name. [Find out why.](https://canary.discord.com/channels/552565546089054218/552583841936834560/1087422094519836792)');
+                } else await interaction.reply(`No data found with that name. [Find out why.](${interaction.client.config.resources.statsNoDataRedirect})`);
 
             } else await interaction.reply({ embeds: [new EmbedBuilder()
                 .setColor(interaction.client.config.EMBED_COLOR)

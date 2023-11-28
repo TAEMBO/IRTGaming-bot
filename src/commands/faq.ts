@@ -10,12 +10,12 @@ export default {
 
         await ({
             staff: () => interaction.reply({ content, components: [
-                new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder().setStyle(ButtonStyle.Link).setURL(`https://discord.com/channels/552565546089054218/852483521859551232/866257346513862687`).setLabel("Apply for MP Staff"))
+                new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder().setStyle(ButtonStyle.Link).setURL(interaction.client.config.resources.faqStaffButtonRedirect).setLabel("Apply for MP Staff"))
             ] }),
             troll: () => interaction.reply({ content, embeds: [new EmbedBuilder()
                 .setTitle('Reporting trolls')
                 .setColor(interaction.client.config.EMBED_COLOR)
-                .setImage('https://cdn.discordapp.com/attachments/979863373439184966/1123088776185516032/image.png')
+                .setImage(interaction.client.config.resources.faqTrollEmbedImage)
                 .setDescription([
                     `If a player is causing problems on a server, ${isFromTicket ? 'let us know' : `don't hesitate to send a report to ${fsServers.getPublicAll().map(([_, x]) => `<#${x.channelId}>`).join(' or ')}`} with:`,
                     '',
@@ -34,7 +34,7 @@ export default {
                 `${content} `,
                 '\n',
                 "If you would like to appeal your ban on our MP servers, ",
-                "head to <#825046442300145744> and open an [MP Support](https://discord.com/channels/552565546089054218/825046442300145744/969893324947337246) ticket to privately discuss it with MP Staff."
+                `head to <#${interaction.client.config.mainServer.channels.support}> and open an [MP Support](${interaction.client.config.resources.faqAppealSupportMsg}) ticket to privately discuss it with MP Staff.`
             ].join('')),
             todo: () => interaction.reply({ content, embeds: [new EmbedBuilder()
                 .setTitle('To-do')
@@ -45,7 +45,7 @@ export default {
             filters: () => interaction.reply({ content, embeds: [new EmbedBuilder()
                 .setColor(interaction.client.config.EMBED_COLOR)
                 .setTitle('Please note that servers may "ghost" and not show up until you\'ve refreshed your MP menu several times.')
-                .setImage('https://cdn.discordapp.com/attachments/830916009107652630/978795707681079376/unknown.png')
+                .setImage(interaction.client.config.resources.faqFiltersEmbedImage)
             ] }),
             equipment: () => interaction.reply([
                 content, 

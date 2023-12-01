@@ -1,4 +1,5 @@
 import type TClient from '../client.js';
+import mongoose from "mongoose";
 import fs from 'node:fs';
 import path from 'node:path';
 import { xml2js } from 'xml-js';
@@ -12,9 +13,21 @@ export default async (client: TClient) => {
     const dailyMsgs: [number, number][] = JSON.parse(fs.readFileSync(dailyMsgsPath, 'utf8'));
     const now = Date.now();
 
-    if (client.config.toggles.registerCommands) await guild.commands.set(client.commands.map(x => x.data.toJSON()))
-        .then(() => log('Purple', 'Slash commands registered'))
-        .catch(e => log('Red', 'Couldn\'t register commands: ', e));
+    await mongoose.set('strictQuery', true).connect(client.config.MONGO_URI, {
+        autoIndex: true,
+        serverSelectionTimeoutMS: 5_000,
+        socketTimeoutMS: 45_000,
+        family: 4,
+        waitQueueTimeoutMS: 50_000
+    }).then(() => log('Purple', 'Connected to MongoDB'));
+
+    if (client.config.toggles.registerCommands) {
+        await guild.commands.set(client.commands.map(x => x.data.toJSON()))
+            .then(() => log('Purple', 'Slash commands registered'))
+            .catch(e => log('Red', 'Couldn\'t register commands: ', e));
+    } else {
+        await guild.commands.fetch();
+    }
 
     await guild.members.fetch();
         

@@ -1,21 +1,11 @@
 import TClient from './client.js';
 import fs from 'node:fs';
 import path from 'node:path';
-import mongoose from 'mongoose';
-import { log } from './utilities.js';
 import { Command, Prettify } from './typings.js';
 import { EmbedBuilder } from 'discord.js';
 
 const client = new TClient();
 const fsKeys = Object.keys(client.config.fs);
-
-await mongoose.set('strictQuery', true).connect(client.config.MONGO_URI, {
-    autoIndex: true,
-    serverSelectionTimeoutMS: 5_000,
-    socketTimeoutMS: 45_000,
-    family: 4,
-    waitQueueTimeoutMS: 50_000
-}).then(() => log('Purple', 'Connected to MongoDB'));
 
 Error.stackTraceLimit = 25;
 client.setMaxListeners(100);

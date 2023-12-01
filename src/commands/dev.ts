@@ -84,10 +84,10 @@ export default {
                 await interaction.reply({ embeds: [embed] }).catch(() => interaction.channel.send({ embeds: [embed] }));
             },
             async restart() {
-                await interaction.reply('Compiling...');
+                interaction.replied ? await interaction.editReply("Compiling...") : await interaction.reply("Compiling...");
 
                 exec('tsc', async (error, stdout) => {
-                    if (error) return await interaction.editReply(codeBlock(stdout.slice(0, 2000)));
+                    if (error) return await interaction.editReply(codeBlock(stdout.slice(0, 1950)));
 
                     await interaction.editReply('Restarting...').then(() => process.exit(-1));
                 });
@@ -100,13 +100,7 @@ export default {
 
                     if (stdout.includes('Already up to date')) return await interaction.editReply(`Pull aborted:\nUp-to-date`);
 
-                    await interaction.editReply('Compiling...');
-
-                    exec('tsc', async (error, _) => {
-                        if (error) return await interaction.editReply(error.message);
-
-                        await interaction.editReply('Restarting...').then(() => process.exit(-1));
-                    });
+                    await this.restart();
                 });
             }
         } as Index)[interaction.options.getSubcommand()]();

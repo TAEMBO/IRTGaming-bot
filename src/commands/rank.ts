@@ -149,14 +149,14 @@ export default {
 		
 			const index = allData.sort((a, b) => b.messages - a.messages).map(x => x._id).indexOf(member.id) + 1;
 			const memberDifference = userData.messages - interaction.client.userLevels.algorithm(userData.level);
-			const levelDifference = interaction.client.userLevels.algorithm(userData.level+1) - interaction.client.userLevels.algorithm(userData.level);
+			const levelDifference = interaction.client.userLevels.algorithm(userData.level + 1) - interaction.client.userLevels.algorithm(userData.level);
 
 			await interaction.reply({ embeds: [new EmbedBuilder()
 				.setTitle([
 					`Level: **${userData.level}**`,
 					`Rank: **${index ? '#' + index  : 'last'}**`,
-					`Progress: **${memberDifference}/${levelDifference} (${(memberDifference/levelDifference*100).toFixed(2)}%)**`,
-					`Total: **${userData.messages}**`
+					`Progress: **${memberDifference.toLocaleString("en-US")}/${levelDifference.toLocaleString("en-US")} (${(memberDifference / levelDifference * 100).toFixed(2)}%)**`,
+					`Total: **${userData.messages.toLocaleString("en-US")}**`
 				].join('\n'))
 				.setColor(member.displayColor)
 				.setThumbnail(member.user.displayAvatarURL({ extension: 'png', size: 2048 }))

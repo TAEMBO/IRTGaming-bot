@@ -98,7 +98,7 @@ export default {
                                 await int.update({ embeds: [new EmbedBuilder().setDescription('Command canceled').setColor(interaction.client.config.EMBED_COLOR)], components: [] });
                             }
                         } as Index)[int.customId]();
-                    })
+                    });
                 } else {
                     await member.roles.add(interaction.client.config.mainServer.roles.mffarmowner);
 
@@ -120,6 +120,11 @@ export default {
                 }
 
                 await interaction.reply(`${roleNamePrefix} role name set to \`${role.name}\``);
+            },
+            async apply() {
+                if (!hasRole(interaction.member, "mpmanager") && !hasRole(interaction.member, "mfmanager")) return await youNeedRole(interaction, "mpmanager");
+
+                await interaction.reply(interaction.client.config.resources.mfFarmOwnerForm);
             }
         } as Index)[interaction.options.getSubcommand()]();
 	},
@@ -157,4 +162,7 @@ export default {
                 .setName("name")
                 .setDescription("The name of the MF Farm. Leave unspecified to clear farm name in role")
                 .setRequired(false)))
+        .addSubcommand(x => x
+            .setName("apply")
+            .setDescription("Send the Google Form to apply to be an MF Farm Owner"))
 };

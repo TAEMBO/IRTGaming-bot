@@ -73,7 +73,6 @@ export default {
                             .setDescription(`This member already has the <@&${interaction.client.config.mainServer.roles.mffarmowner}> role, do you want to remove it from them?`)
                             .setColor(interaction.client.config.EMBED_COLOR)
                         ],
-                        ephemeral: true,
                         components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
                             new ButtonBuilder().setCustomId('yes').setStyle(ButtonStyle.Success).setLabel('Confirm'),
                             new ButtonBuilder().setCustomId('no').setStyle(ButtonStyle.Danger).setLabel('Cancel')
@@ -88,10 +87,13 @@ export default {
                             async yes() {
                                 await member.roles.remove(interaction.client.config.mainServer.roles.mffarmowner);
 
-                                await int.update({ embeds: [new EmbedBuilder()
-                                    .setDescription(`<#${member.user.id}> (${member.user.tag}) has been removed from the <@&${interaction.client.config.mainServer.roles.mffarmowner}> role`)
-                                    .setColor(interaction.client.config.EMBED_COLOR)
-                                ] });
+                                await int.update({
+                                    embeds: [new EmbedBuilder()
+                                        .setDescription(`${member} (${member.user.tag}) has been removed from the <@&${interaction.client.config.mainServer.roles.mffarmowner}> role`)
+                                        .setColor(interaction.client.config.EMBED_COLOR)
+                                    ],
+                                    components: []
+                                });
 
                             },
                             async no() {

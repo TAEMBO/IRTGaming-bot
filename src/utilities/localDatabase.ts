@@ -8,8 +8,8 @@ export class LocalDatabase<T> {
     /** The content for this LocalDatabase */
     public readonly data: T[];
 
-    constructor(fileName: string) {
-        this._path = path.resolve(`../databases/${fileName}.json`);
+    constructor(fileName: `${string}.json`) {
+        this._path = path.resolve(`../databases/${fileName}`);
         this.data = JSON.parse(fs.readFileSync(this._path, 'utf8'));
     }
 

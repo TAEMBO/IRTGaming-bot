@@ -25,6 +25,7 @@ export default class TClient extends Client<true> {
     public readonly fmList = new LocalDatabase<string>('FMlist');
     public readonly whitelist = new LocalDatabase<string>('adminWhitelist');
     public readonly watchListPings = new LocalDatabase<string>('watchListPings');
+    public readonly dailyMsgs = new LocalDatabase<[number, number]>("dailyMsgs");
     public readonly userLevels = new UserLevels(this);
     public readonly punishments = new Punishments(this);
     public readonly watchList = new WatchList();

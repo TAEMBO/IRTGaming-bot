@@ -1,7 +1,5 @@
 import type TClient from '../client.js';
 import mongoose from "mongoose";
-import fs from 'node:fs';
-import path from 'node:path';
 import { xml2js } from 'xml-js';
 import { log, fsLoop, fsLoopAll, FSServers, formatRequestInit } from '../utilities.js';
 import type { YTCacheFeed } from '../typings.js';
@@ -9,8 +7,6 @@ import type { YTCacheFeed } from '../typings.js';
 export default async (client: TClient) => {
     const fsServers = new FSServers(client.config.fs);
     const guild = client.mainGuild();
-    const dailyMsgsPath = path.resolve('../databases/dailyMsgs.json');
-    const dailyMsgs: [number, number][] = JSON.parse(fs.readFileSync(dailyMsgsPath, 'utf8'));
     const now = Date.now();
 
     await mongoose.set('strictQuery', true).connect(client.config.MONGO_URI, {
@@ -53,17 +49,16 @@ export default async (client: TClient) => {
     setInterval(async () => {
         const formattedDate = Math.floor((Date.now() - client.config.DAILY_MSGS_TIMESTAMP) / 1000 / 60 / 60 / 24);
 
-        if (dailyMsgs.some(x => x[0] === formattedDate)) return;
+        if (client.dailyMsgs.data.some(x => x[0] === formattedDate)) return;
 
         const today = Date().toLowerCase();
         const channel = client.getChan('general');
-        const yesterday = dailyMsgs.find(x => x[0] === formattedDate - 1) ?? [formattedDate - 1, 0];
+        const yesterday = client.dailyMsgs.data.find(x => x[0] === formattedDate - 1) ?? [formattedDate - 1, 0];
         let total = (await client.userLevels.data.find()).reduce((a, b) => a + b.messages, 0); // sum of all users
 
         if (total < yesterday[1]) total = yesterday[1]; // messages went down
 
-        dailyMsgs.push([formattedDate, total]);
-        fs.writeFileSync(dailyMsgsPath, JSON.stringify(dailyMsgs, null, 4));
+        client.dailyMsgs.add([formattedDate, total]);
         log('Cyan', `Pushed [${formattedDate}, ${total}] to dailyMsgs`);
     
         if (today.startsWith('fri')) {

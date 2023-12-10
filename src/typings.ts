@@ -206,6 +206,19 @@ export interface Config {
     };
 }
 
+interface FSLoopDSSPlayerCoordinates {
+    readonly x: number;
+    readonly y: number;
+    readonly z: number;
+}
+
+export type FSLoopDSSPlayer = {
+    readonly isUsed: boolean;
+    readonly isAdmin: boolean;
+    readonly uptime: number;
+    readonly name: string;
+} & (Empty<FSLoopDSSPlayerCoordinates> | FSLoopDSSPlayerCoordinates);
+
 interface FSLoopDSSServer {
     readonly dayTime: number;
     readonly game: string;
@@ -224,25 +237,49 @@ interface FSLoopDSSSlots {
     readonly players: FSLoopDSSPlayer[];
 }
 
+interface FSLoopDSSVehicle {
+    readonly name: string;
+    readonly category: string;
+    readonly type: string;
+    readonly x: number;
+    readonly y: number;
+    readonly z: number;
+    readonly fills: {
+        readonly type: string;
+        readonly level: number;
+    }[];
+}
+
+interface FSLoopDSSMod {
+    readonly author: string;
+    readonly hash: string;
+    readonly name: string;
+    readonly version: string;
+    readonly description: string;
+}
+
+interface FSLoopDSSField {
+    readonly id: number;
+    readonly isOwned: boolean;
+    readonly x: number;
+    readonly z: number;
+}
+
 interface FSLoopDSSObject {
     readonly server: FSLoopDSSServer;
     readonly slots: FSLoopDSSSlots;
+    readonly vehicles: FSLoopDSSVehicle[];
+    readonly mods: FSLoopDSSMod[];
+    readonly fields: FSLoopDSSField[];
 }
 
 export type FSLoopDSS = FSLoopDSSObject | Empty<FSLoopDSSObject>;
-
-export interface FSLoopDSSPlayer {
-    readonly isUsed: boolean;
-    readonly isAdmin: boolean;
-    readonly uptime: number;
-    readonly name: string;
-}
 
 export interface FSLoopCSG {
     readonly careerSavegame: {
         readonly settings?: {
             readonly savegameName: { readonly _text: string; };
-            readonly creationDate: { readonly _text: string; },
+            readonly creationDate: { readonly _text: string; };
             readonly mapId: { readonly _text: string; };
             readonly mapTitle: { readonly _text: string; };
             readonly saveDateFormatted: { readonly _text: string; };

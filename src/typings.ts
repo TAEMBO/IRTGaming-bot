@@ -19,6 +19,7 @@ declare module "discord.js" {
         readonly fmList: LocalDatabase<string>;
         readonly whitelist: LocalDatabase<string>;
         readonly watchListPings: LocalDatabase<string>;
+        readonly dailyMsgs: LocalDatabase<[number, number]>;
         readonly userLevels: UserLevels;
         readonly punishments: Punishments;
         readonly watchList: WatchList;

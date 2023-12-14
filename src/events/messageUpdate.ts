@@ -3,8 +3,7 @@ import { formatUser, isDCStaff, isMPStaff, Profanity } from '../utilities.js';
 
 export default async (oldMsg: Message | PartialMessage, newMsg: Message | PartialMessage) => {
     if (
-        !newMsg.client.config.toggles.logs
-        || !oldMsg.content
+        !oldMsg.content
         || newMsg.content === oldMsg.content
         || !newMsg.inGuild()
         || newMsg.author.bot
@@ -15,6 +14,8 @@ export default async (oldMsg: Message | PartialMessage, newMsg: Message | Partia
     const profanity = new Profanity(msg);
 
     if (profanity.hasProfanity(newMsg.client.bannedWords.data) && (!isMPStaff(newMsg.member) && !isDCStaff(newMsg.member))) await newMsg.delete();
+
+    if (!newMsg.client.config.toggles.logs) return;
 
     let oldContent = oldMsg.content;
     let newContent = newMsg.content;

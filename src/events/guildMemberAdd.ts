@@ -1,10 +1,8 @@
 import { EmbedBuilder, GuildMember } from 'discord.js';
-import { formatUser } from '../utilities.js';
+import { formatUser, log } from '../utilities.js';
 
 export default async (member: GuildMember) => {
-    if (!member.client.config.toggles.logs || member.partial) return;
-
-    await member.roles.add(member.client.config.mainServer.roles.member).catch(() => null);
+    await member.roles.add(member.client.config.mainServer.roles.member).catch(() => log("Red", `Failed to add member role to ${member.id}`));
     await member.client.userLevels.data.findByIdAndUpdate(member.id, { hasLeft: false });
     
     const newInvites = await member.guild.invites.fetch();
@@ -23,7 +21,7 @@ export default async (member: GuildMember) => {
 
     if (usedInvite) embed.addFields({ name: "🔹 Invite Data", value: `Invite: \`${usedInvite.code}\`\nCreated by: **${usedInvite.inviter?.tag}**`});
 
-    await member.client.getChan('botLogs').send({ embeds: [embed] });
+    if (member.client.config.toggles.logs) await member.client.getChan('botLogs').send({ embeds: [embed] });
 
     if (evadingCase) await member.roles.add(member.client.config.mainServer.roles.detained);
 }

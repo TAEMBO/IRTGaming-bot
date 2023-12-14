@@ -22,5 +22,9 @@ export default async (member: GuildMember | PartialGuildMember) => {
     
     await member.client.getChan('leaveLogs').send(`**${member.user.tag}** left the server.`);
 
-    await member.client.userLevels.data.findByIdAndDelete(member.id);
+    if (!rankingData) return;
+    
+    rankingData.hasLeft = true;
+
+    await rankingData.save();
 }

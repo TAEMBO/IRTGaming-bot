@@ -136,7 +136,7 @@ export default {
 
 			ctx.fillText('time ->', tx, ty);
 
-			const topUsers = allData.sort((a, b) => b.messages - a.messages).slice(0, 10).map((x, i) => `\`${i + 1}.\` <@${x._id}>: ${x.messages.toLocaleString('en-US')}`).join('\n');
+			const topUsers = allData.sort((a, b) => b.messages - a.messages).filter(x => !x.hasLeft).slice(0, 10).map((x, i) => `\`${i + 1}.\` <@${x._id}>: ${x.messages.toLocaleString('en-US')}`).join('\n');
 			
 			await interaction.reply({
 				files: [new AttachmentBuilder(img.toBuffer(), { name: "dailymsgs.png" })],

@@ -4,7 +4,8 @@ import type TClient from '../client.js';
 const model = mongoose.model('userLevels', new mongoose.Schema({
     _id: { type: String, required: true },
     messages: { type: Number, required: true },
-    level: { type: Number, required: true }
+    level: { type: Number, required: true },
+    hasLeft: { type: Boolean, required: false }
 }, { versionKey: false }));
 
 export type UserLevelsDocument = ReturnType<typeof model.castObject>;

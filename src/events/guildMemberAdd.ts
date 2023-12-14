@@ -5,6 +5,7 @@ export default async (member: GuildMember) => {
     if (!member.client.config.toggles.logs || member.partial) return;
 
     await member.roles.add(member.client.config.mainServer.roles.member).catch(() => null);
+    await member.client.userLevels.data.findByIdAndUpdate(member.id, { hasLeft: false });
     
     const newInvites = await member.guild.invites.fetch();
     const usedInvite = newInvites.find(inv => (member.client.inviteCache.get(inv.code)?.uses ?? 0) < (inv.uses ?? 0));

@@ -17,5 +17,5 @@ export * from './utilities/punish.js';
 export * from './utilities/repeatedMessages.js';
 export * from './utilities/sleep.js';
 export * from './utilities/stringifyStream.js';
-export * from './utilities/tempMsgReply.js';
+export * from './utilities/tempReply.js';
 export * from './utilities/youNeedRole.js';

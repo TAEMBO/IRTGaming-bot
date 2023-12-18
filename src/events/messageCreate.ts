@@ -1,5 +1,5 @@
 import { Message } from 'discord.js';
-import { isDCStaff, isMPStaff, log, tempMsgReply, Profanity } from '../utilities.js';
+import { isDCStaff, isMPStaff, log, tempReply, Profanity } from '../utilities.js';
 
 export default async (message: Message<true>) => {
     if ((!message.client.config.toggles.commands && !message.client.config.devWhitelist.includes(message.author.id)) || message.system || message.author.bot) return;
@@ -32,7 +32,7 @@ export default async (message: Message<true>) => {
         if (profanity.hasProfanity(message.client.bannedWords.data)) {
             automodded = true;
 
-            await tempMsgReply(message, { timeout: 10_000, content: "That word is banned here" });
+            await tempReply(message, { timeout: 10_000, content: "That word is banned here" });
             await message.reply("That word is banned here.").then(botMsg => setTimeout(async () => await botMsg.delete(), 10_000));
             await message.delete();
 
@@ -50,7 +50,7 @@ export default async (message: Message<true>) => {
             if (validInvite && validInvite.guild?.id !== message.client.config.mainServer.id) {
                 automodded = true;
 
-                await tempMsgReply(message, { timeout: 10_000, content: "No advertising other Discord servers" });
+                await tempReply(message, { timeout: 10_000, content: "No advertising other Discord servers" });
                 await message.delete();
 
                 await message.client.repeatedMessages.increment(message, {
@@ -74,7 +74,7 @@ export default async (message: Message<true>) => {
 
     // Community idea message management
     if (message.channelId === message.client.config.mainServer.channels.communityIdeas && message.author.id !== message.client.user.id && !isDCStaff(message.member)) {
-        await tempMsgReply(message, { timeout: 10_000, content: `You can only post community ideas in this channel using the ${message.client.getCommandMention("suggest")} command!` });
+        await tempReply(message, { timeout: 10_000, content: `You can only post community ideas in this channel using the ${message.client.getCommandMention("suggest")} command!` });
         await message.delete();
     }
 

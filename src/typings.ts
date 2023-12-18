@@ -1,4 +1,4 @@
-import { Collection, SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder, ChatInputCommandInteraction, PresenceData, Snowflake } from 'discord.js';
+import { Collection, SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder, ChatInputCommandInteraction, PresenceData, Snowflake, ContextMenuCommandInteraction, ContextMenuCommandBuilder } from 'discord.js';
 import config from './config.json' assert { type: 'json' };
 import TClient from './client.js';
 import { RepeatedMessages, LocalDatabase } from './utilities.js';
@@ -11,7 +11,8 @@ declare module "discord.js" {
         readonly config: Config;
         readonly fsCache: FSCache;
         readonly ytCache: YTCache;
-        readonly commands: Collection<string, Command>;
+        readonly chatInputCommands: Collection<string, ChatInputCommand>;
+        readonly contextMenuCommands: Collection<string, ContextMenuCommand>;
         readonly repeatedMessages: RepeatedMessages;
         readonly inviteCache: Collection<string, CachedInvite>;
         readonly bannedWords: LocalDatabase<string>;
@@ -37,7 +38,7 @@ declare module "discord.js" {
          * @param roleName
          */
         getRole(...args: Parameters<TClient["getRole"]>): ReturnType<TClient["getRole"]>;
-        
+
         /**
          * Get the main guild this client is designed for
          */
@@ -101,11 +102,15 @@ export interface CachedInvite {
     creator: string;
 }
 
-export interface Command {
-    run(interaction: ChatInputCommandInteraction<"cached">): Promise<any>;
-    data: Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup"> | SlashCommandSubcommandsOnlyBuilder;
+interface BaseCommand<I, B> {
+    run(interaction: I): Promise<any>;
+    data: B;
     uses: number;
 }
+
+
+export type ContextMenuCommand = Prettify<BaseCommand<ContextMenuCommandInteraction<"cached">, ContextMenuCommandBuilder>>;
+export type ChatInputCommand = Prettify<BaseCommand<ChatInputCommandInteraction<"cached">, Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup"> | SlashCommandSubcommandsOnlyBuilder>>;
 
 /** `Discord.ChatInputCommandInteraction<CacheType>` */
 export interface TInteraction extends ChatInputCommandInteraction<"cached"> {

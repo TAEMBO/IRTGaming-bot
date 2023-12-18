@@ -18,8 +18,8 @@ export default async (client: TClient) => {
     }).then(() => log('Purple', 'Connected to MongoDB'));
 
     if (client.config.toggles.registerCommands) {
-        await guild.commands.set(client.commands.map(x => x.data.toJSON()))
-            .then(() => log('Purple', 'Slash commands registered'))
+        await guild.commands.set([...client.chatInputCommands.map(x => x.data.toJSON()), ...client.contextMenuCommands.map(x => x.data.toJSON())])
+            .then(() => log('Purple', 'Application commands registered'))
             .catch(e => log('Red', 'Couldn\'t register commands: ', e));
     } else {
         await guild.commands.fetch();

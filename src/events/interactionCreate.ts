@@ -1,9 +1,11 @@
 import { Interaction } from 'discord.js';
 import { hasRole, log, onMFFarms } from '../utilities.js';
-import { Command, Index } from '../typings.js';
+import { Index } from '../typings.js';
 
 export default async (interaction: Interaction) => {
     if (!interaction.inCachedGuild()) return;
+
+    const ERR_TEXT = ":warning: An error occurred while running this command - developers notified of issue";
 
     if (interaction.isChatInputCommand()) {
         if (interaction.commandName === 'ping') {
@@ -13,7 +15,12 @@ export default async (interaction: Interaction) => {
         }
         
         const subCmd = interaction.options.getSubcommand(false);
-        const command = interaction.client.commands.get(interaction.commandName) as Command;
+        const command = interaction.client.chatInputCommands.get(interaction.commandName);
+
+        if (!command) {
+            await interaction.reply(ERR_TEXT);
+            return log("Red", `Missing cached command: /${interaction.commandName}`);
+        }
 
         log('White', `\x1b[32m${interaction.user.tag}\x1b[37m used \x1b[32m/${interaction.commandName} ${subCmd ?? ''}\x1b[37m in \x1b[32m#${interaction.channel?.name}`);
 
@@ -23,15 +30,37 @@ export default async (interaction: Interaction) => {
             await command.run(interaction);
             command.uses++;
         } catch (err) {
-            const errMsg = ":warning: An error occurred while running this command, bot developer(s) notified of matter";
-
             interaction.client.emit('intErr', err);
 
-            interaction.replied
-                ? await interaction.followUp(errMsg) // Interaction replied to
-                : interaction.deferred
-                    ? await interaction.editReply(errMsg) // Interaction deferred
-                    : await interaction.reply(errMsg); // Interaction not replied to or deferred
+            if (interaction.replied || interaction.deferred) {
+                await interaction.followUp(ERR_TEXT);
+            } else {
+                await interaction.reply(ERR_TEXT);
+            }
+        }
+    } else if (interaction.isContextMenuCommand()) {
+        const command = interaction.client.contextMenuCommands.get(interaction.commandName);
+
+        if (!command) {
+            await interaction.reply(ERR_TEXT);
+            return log("Red", `Missing cached command: ${interaction.commandName}`);
+        }
+
+        log('White', `\x1b[32m${interaction.user.tag}\x1b[37m used \x1b[32m${interaction.commandName}\x1b[37m in \x1b[32m#${interaction.channel?.name}`);
+
+        if (!interaction.client.config.toggles.commands && !interaction.client.config.devWhitelist.includes(interaction.user.id)) return await interaction.reply('Commands are currently disabled.');
+
+        try {
+            await command.run(interaction);
+            command.uses++;
+        } catch(err) {
+            interaction.client.emit('intErr', err);
+
+            if (interaction.replied || interaction.deferred) {
+                await interaction.followUp(ERR_TEXT);
+            } else {
+                await interaction.reply(ERR_TEXT);
+            }
         }
     } else if (interaction.isButton()) {
         if (!interaction.customId.includes('-')) return;

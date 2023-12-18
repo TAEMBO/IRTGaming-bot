@@ -1,8 +1,7 @@
 import TClient from './client.js';
 import fs from 'node:fs';
 import path from 'node:path';
-import { Command, Prettify } from './typings.js';
-import { EmbedBuilder } from 'discord.js';
+import { ContextMenuCommandBuilder, EmbedBuilder } from 'discord.js';
 
 const client = new TClient();
 const fsKeys = Object.keys(client.config.fs);
@@ -17,10 +16,13 @@ for (const [chanId, _] of client.config.ytCacheChannels) client.ytCache[chanId] 
 for (const serverAcro of fsKeys) client.fsCache[serverAcro] = { players: [], status: null, lastAdmin: null, graphPoints: [] };
 
 // Command handler
-for await (const file of fs.readdirSync(path.resolve('./commands'))) {
-    const commandFile: { default: Prettify<Omit<Command, 'uses'>> } = await import(`./commands/${file}`);
+for await (const folder of fs.readdirSync(path.resolve("./commands"))) {
+    for await (const file of fs.readdirSync(path.resolve("./commands", folder))) {
+        const commandFile = await import(`./commands/${folder}/${file}`);
+        const collectionType = commandFile.default.data instanceof ContextMenuCommandBuilder ? "contextMenuCommands": "chatInputCommands";
 
-    client.commands.set(commandFile.default.data.name, { uses: 0, ...commandFile.default });
+        client[collectionType].set(commandFile.default.data.name, commandFile.default);
+    }
 }
 
 // Event handler

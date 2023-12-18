@@ -11,13 +11,14 @@ import {
 import { PlayerTimes, Punishments, Reminders, UserLevels, WatchList } from "./schemas.js";
 import config from './config.json' assert { type: 'json' };
 import { LocalDatabase, RepeatedMessages } from './utilities.js';
-import { Config, FSCache, YTCache, CachedInvite, Command } from './typings.js';
+import { Config, FSCache, YTCache, CachedInvite, ChatInputCommand, ContextMenuCommand } from './typings.js';
 
 export default class TClient extends Client<true> {
     public readonly config = config as Config;
     public readonly fsCache: FSCache = {};
     public readonly ytCache: YTCache = {};
-    public readonly commands = new Collection<string, Command>();
+    public readonly chatInputCommands = new Collection<string, ChatInputCommand>();
+    public readonly contextMenuCommands = new Collection<string, ContextMenuCommand>();
     public readonly repeatedMessages = new RepeatedMessages(this);
     public readonly inviteCache = new Collection<string, CachedInvite>();
     public readonly bannedWords = new LocalDatabase<string>('bannedWords.json');

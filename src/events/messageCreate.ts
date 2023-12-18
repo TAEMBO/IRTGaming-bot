@@ -1,5 +1,5 @@
 import { Message } from 'discord.js';
-import { isDCStaff, isMPStaff, log, Profanity } from '../utilities.js';
+import { isDCStaff, isMPStaff, log, tempMsgReply, Profanity } from '../utilities.js';
 
 export default async (message: Message<true>) => {
     if ((!message.client.config.toggles.commands && !message.client.config.devWhitelist.includes(message.author.id)) || message.system || message.author.bot) return;
@@ -32,10 +32,9 @@ export default async (message: Message<true>) => {
         if (profanity.hasProfanity(message.client.bannedWords.data)) {
             automodded = true;
 
-            const msg = await message.reply("That word is banned here.");
-
+            await tempMsgReply(message, { timeout: 10_000, content: "That word is banned here" });
+            await message.reply("That word is banned here.").then(botMsg => setTimeout(async () => await botMsg.delete(), 10_000));
             await message.delete();
-            setTimeout(async () => await msg.delete(), 10_000);
 
             await message.client.repeatedMessages.increment(message, {
                 thresholdTime: 30_000,
@@ -51,10 +50,8 @@ export default async (message: Message<true>) => {
             if (validInvite && validInvite.guild?.id !== message.client.config.mainServer.id) {
                 automodded = true;
 
-                const msg = await message.reply("No advertising other Discord servers.");
-
+                await tempMsgReply(message, { timeout: 10_000, content: "No advertising other Discord servers" });
                 await message.delete();
-                setTimeout(async () => await msg.delete(), 10_000);
 
                 await message.client.repeatedMessages.increment(message, {
                     thresholdTime: 60_000,
@@ -73,6 +70,12 @@ export default async (message: Message<true>) => {
                 muteReason: "Repeated messages"
             });
         }
+    }
+
+    // Community idea message management
+    if (message.channelId === message.client.config.mainServer.channels.communityIdeas && message.author.id !== message.client.user.id && !isDCStaff(message.member)) {
+        await tempMsgReply(message, { timeout: 10_000, content: `You can only post community ideas in this channel using the ${message.client.getCommandMention("suggest")} command!` });
+        await message.delete();
     }
 
     if (automodded) return;

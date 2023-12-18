@@ -1,4 +1,4 @@
-import { Collection, SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder, ChatInputCommandInteraction, PresenceData } from 'discord.js';
+import { Collection, SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder, ChatInputCommandInteraction, PresenceData, Snowflake } from 'discord.js';
 import config from './config.json' assert { type: 'json' };
 import TClient from './client.js';
 import { RepeatedMessages, LocalDatabase } from './utilities.js';
@@ -25,16 +25,19 @@ declare module "discord.js" {
         readonly watchList: WatchList;
         readonly playerTimes: PlayerTimes;
         readonly reminders: Reminders;
+
         /**
          * Get a text channel via config
          * @param channelName
          */
         getChan(...args: Parameters<TClient["getChan"]>): ReturnType<TClient["getChan"]>;
+
         /**
          * Get a role via config
          * @param roleName
          */
         getRole(...args: Parameters<TClient["getRole"]>): ReturnType<TClient["getRole"]>;
+        
         /**
          * Get the main guild this client is designed for
          */
@@ -184,26 +187,26 @@ export interface Config {
     /** An object for managing and communicating with Farming Simulator servers, keyed by their abbreviated acronym */
     fs: Record<string, FSServer>;
     /** A list of user IDs that are considered developers of this bot */
-    devWhitelist: string[];
+    devWhitelist: Snowflake[];
     whitelist: {
         /** A list of channel IDs that automod does not apply to */
-        bannedWords: string[];
+        bannedWords: Snowflake[];
         /** A list of channel IDs that logs do not emit for */
-        logs: string[];
+        logs: Snowflake[];
     };
     /** `Array<[ChannelID, ChannelName]>` */
     ytCacheChannels: string[][];
     resources: Record<keyof typeof config.resources, `https://${string}`>;
     mainServer: {
         /** The ID of the guild that this bot is for */
-        id: string;
-        fsLoopMsgId: string;
+        id: Snowflake;
+        fsLoopMsgId: Snowflake;
         mfFarmRoles: Array<keyof Config["mainServer"]["roles"]>;
         mpStaffRoles: Array<keyof Config["mainServer"]["roles"]>;
         dcStaffRoles: Array<keyof Config["mainServer"]["roles"]>;
-        roles: Record<keyof typeof config.mainServer.roles, string>;
-        channels: Record<keyof typeof config.mainServer.channels, string>;
-        categories: Record<keyof typeof config.mainServer.categories, string>;
+        roles: Record<keyof typeof config.mainServer.roles, Snowflake>;
+        channels: Record<keyof typeof config.mainServer.channels, Snowflake>;
+        categories: Record<keyof typeof config.mainServer.categories, Snowflake>;
     };
 }
 

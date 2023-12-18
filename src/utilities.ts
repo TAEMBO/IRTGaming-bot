@@ -15,7 +15,6 @@ export * from './utilities/onMFFarms.js';
 export * from './utilities/profanity.js';
 export * from './utilities/punish.js';
 export * from './utilities/repeatedMessages.js';
-export * from './utilities/sleep.js';
 export * from './utilities/stringifyStream.js';
 export * from './utilities/tempReply.js';
 export * from './utilities/youNeedRole.js';

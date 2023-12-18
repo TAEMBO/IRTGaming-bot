@@ -11,6 +11,7 @@ import util from 'node:util';
 import { exec } from 'child_process';
 import * as utilities from '../utilities.js';
 import fs from 'node:fs';
+import { setTimeout as sleep } from "node:timers/promises";
 import { Index, TInteraction } from '../typings.js';
 
 export default {
@@ -19,7 +20,7 @@ export default {
         
 		await ({
 			async eval() {
-                fs; Discord; // Imports possibly used in eval
+                sleep; fs; Discord; // Imports possibly used in eval
                 const now = Date.now();
                 const { client } = interaction;
                 const code = interaction.options.getString("code", true);

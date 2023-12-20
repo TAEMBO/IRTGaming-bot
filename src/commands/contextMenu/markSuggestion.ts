@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ApplicationCommandType, ButtonBuilder, ButtonStyle, ComponentType, ContextMenuCommandBuilder, EmbedBuilder, MessageContextMenuCommandInteraction } from "discord.js";
 import { isDCStaff, isMPStaff, youNeedRole } from "../../utilities.js";
-import { Index } from "src/typings.js";
+import { Index } from "../../typings.js";
 
 export default {
     async run(interaction: MessageContextMenuCommandInteraction<"cached">) {

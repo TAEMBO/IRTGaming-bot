@@ -9,7 +9,7 @@ export default {
 
         const msg = await interaction.reply({ embeds: [new EmbedBuilder()
             .setAuthor({ name: `${interaction.member.displayName} (${interaction.user.id})`, iconURL: interaction.user.displayAvatarURL({ extension: 'png', size: 128 }) })
-            .setTitle("Community Idea\n**Beans**")
+            .setTitle("Community Idea")
             .setDescription(suggestion)
             .setTimestamp()
             .setColor(interaction.client.config.EMBED_COLOR)

@@ -84,7 +84,7 @@ export default class TClient extends Client<true> {
     }
 
     public getCommandMention(name: string, subcommand?: string) {
-        const cmd = this.mainGuild().commands.cache.find(x => x.name === name);
+        const cmd = this.application.commands.cache.find(x => x.name === name);
 
         if (!cmd) return null;
 

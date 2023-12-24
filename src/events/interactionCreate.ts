@@ -8,12 +8,6 @@ export default async (interaction: Interaction) => {
     const ERR_TEXT = ":warning: An error occurred while running this command - developers notified of issue";
 
     if (interaction.isChatInputCommand()) {
-        if (interaction.commandName === 'ping') {
-            const msg = await interaction.reply({ content: 'Pinging...', fetchReply: true });
-
-            return await msg.edit(`Websocket: \`${interaction.client.ws.ping}\`ms\nBot: \`${msg.createdTimestamp - interaction.createdTimestamp}\`ms`);
-        }
-        
         const subCmd = interaction.options.getSubcommand(false);
         const command = interaction.client.chatInputCommands.get(interaction.commandName);
 

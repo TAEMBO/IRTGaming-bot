@@ -1,4 +1,4 @@
-import { Collection, SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder, ChatInputCommandInteraction, PresenceData, Snowflake, ContextMenuCommandInteraction, ContextMenuCommandBuilder } from 'discord.js';
+import { Collection, SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder, ChatInputCommandInteraction, PresenceData, Snowflake, ContextMenuCommandInteraction, ContextMenuCommandBuilder, AutocompleteInteraction } from 'discord.js';
 import config from './config.json' assert { type: 'json' };
 import TClient from './client.js';
 import { RepeatedMessages, LocalDatabase } from './utilities.js';
@@ -110,7 +110,12 @@ interface BaseCommand<I, B> {
 
 
 export type ContextMenuCommand = Prettify<BaseCommand<ContextMenuCommandInteraction<"cached">, ContextMenuCommandBuilder>>;
-export type ChatInputCommand = Prettify<BaseCommand<ChatInputCommandInteraction<"cached">, Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup"> | SlashCommandSubcommandsOnlyBuilder>>;
+export type ChatInputCommand = Prettify<
+    BaseCommand<ChatInputCommandInteraction<"cached">, Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup"> | SlashCommandSubcommandsOnlyBuilder>
+    & {
+        autocomplete?(interaction: AutocompleteInteraction<"cached">): Promise<any>;
+    }
+>;
 
 /** `Discord.ChatInputCommandInteraction<CacheType>` */
 export interface TInteraction extends ChatInputCommandInteraction<"cached"> {

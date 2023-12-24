@@ -1,5 +1,5 @@
 import { Interaction } from 'discord.js';
-import { hasRole, log, onMFFarms } from '../utilities.js';
+import { log } from '../utilities.js';
 import { Index } from '../typings.js';
 
 export default async (interaction: Interaction) => {
@@ -19,7 +19,7 @@ export default async (interaction: Interaction) => {
 
         if (!command) {
             await interaction.reply(ERR_TEXT);
-            return log("Red", `Missing cached command: /${interaction.commandName}`);
+            return log("Red", `ChatInput - missing cached command: /${interaction.commandName}`);
         }
 
         log('White', `\x1b[32m${interaction.user.tag}\x1b[37m used \x1b[32m/${interaction.commandName} ${subCmd ?? ''}\x1b[37m in \x1b[32m#${interaction.channel?.name}`);
@@ -43,7 +43,7 @@ export default async (interaction: Interaction) => {
 
         if (!command) {
             await interaction.reply(ERR_TEXT);
-            return log("Red", `Missing cached command: ${interaction.commandName}`);
+            return log("Red", `ContextMenu - missing cached command: ${interaction.commandName}`);
         }
 
         log('White', `\x1b[32m${interaction.user.tag}\x1b[37m used \x1b[32m${interaction.commandName}\x1b[37m in \x1b[32m#${interaction.channel?.name}`);
@@ -92,35 +92,18 @@ export default async (interaction: Interaction) => {
             }
         } as Index)[args[0]]();
     } else if (interaction.isAutocomplete()) {
-        await ({
-            async mf() {
-                await ({
-                    async member() {
-                        const displayedRoles = (() => {
-                            if (hasRole(interaction.member, 'mpmanager') || hasRole(interaction.member, 'mfmanager')) {
-                                return interaction.client.config.mainServer.mfFarmRoles.map(x => interaction.client.getRole(x));
-                            } else if (hasRole(interaction.member, 'mffarmowner')) {
-                                return interaction.client.config.mainServer.mfFarmRoles.map(x => interaction.client.getRole(x)).filter(x => onMFFarms(interaction.member).some(y => x.id === y));
-                            } else {
-                                return [];
-                            }
-                        })();
-        
-                        await interaction.respond(displayedRoles.map(({ name, id }) => ({ name, value: id })));
-                    },
-                    async rename() {
-                        const displayedRoles = (() => {
-                            if (!hasRole(interaction.member, "mpmanager") && !hasRole(interaction.member, "mfmanager")) {
-                                return [];
-                            } else {
-                                return interaction.client.config.mainServer.mfFarmRoles.map(x => ({ name: interaction.client.getRole(x).name, value: x }));
-                            }
-                        })();
+        const command = interaction.client.chatInputCommands.get(interaction.commandName);
 
-                        await interaction.respond(displayedRoles);
-                    }
-                } as Index)[interaction.options.getSubcommand()]();
-            }
-        } as Index)[interaction.commandName]();
+        if (!command) {
+            await interaction.respond([]);
+            return log("Red", `Autocomplete - missing cached command: ${interaction.commandName}`);
+        }
+
+        if (!command.autocomplete) {
+            await interaction.respond([]);
+            return log("Red", `Autocomplete - missing autocomplete function: ${interaction.commandName}`);
+        }
+
+        await command.autocomplete(interaction);
     }
 }

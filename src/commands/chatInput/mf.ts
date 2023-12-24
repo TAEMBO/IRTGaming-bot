@@ -1,8 +1,36 @@
-import { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, ComponentType } from 'discord.js';
+import { SlashCommandBuilder, AutocompleteInteraction, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, ComponentType } from 'discord.js';
 import { hasRole, onMFFarms, youNeedRole } from '../../utilities.js';
 import { Index, TInteraction } from '../../typings.js';
 
 export default {
+    async autocomplete(interaction: AutocompleteInteraction<"cached">) {
+        await ({
+            async member() {
+                const displayedRoles = (() => {
+                    if (hasRole(interaction.member, 'mpmanager') || hasRole(interaction.member, 'mfmanager')) {
+                        return interaction.client.config.mainServer.mfFarmRoles.map(x => interaction.client.getRole(x));
+                    } else if (hasRole(interaction.member, 'mffarmowner')) {
+                        return interaction.client.config.mainServer.mfFarmRoles.map(x => interaction.client.getRole(x)).filter(x => onMFFarms(interaction.member).some(y => x.id === y));
+                    } else {
+                        return [];
+                    }
+                })();
+
+                await interaction.respond(displayedRoles.map(({ name, id }) => ({ name, value: id })));
+            },
+            async rename() {
+                const displayedRoles = (() => {
+                    if (!hasRole(interaction.member, "mpmanager") && !hasRole(interaction.member, "mfmanager")) {
+                        return [];
+                    } else {
+                        return interaction.client.config.mainServer.mfFarmRoles.map(x => ({ name: interaction.client.getRole(x).name, value: x }));
+                    }
+                })();
+
+                await interaction.respond(displayedRoles);
+            }
+        } as Index)[interaction.options.getSubcommand()]();
+    },
 	async run(interaction: TInteraction) {
         await ({
             async member() {

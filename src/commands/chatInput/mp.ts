@@ -163,7 +163,8 @@ export default {
                     } else if (key === 'timeLastConnected') {
                         const utcDate = new Date(perm);
 
-                        utcDate.setMinutes(utcDate.getMinutes() + fsServers.getPublicOne(chosenServer).utcDiff);
+                        utcDate.setMinutes(utcDate.getMinutes() - utcDate.getTimezoneOffset() + fsServers.getPublicOne(chosenServer).utcDiff);
+                        
                         return utcDate.toUTCString();
                     } else return perm;
                 }

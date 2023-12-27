@@ -19,7 +19,7 @@ declare module "discord.js" {
         readonly tfList: LocalDatabase<string>;
         readonly fmList: LocalDatabase<string>;
         readonly whitelist: LocalDatabase<string>;
-        readonly watchListPings: LocalDatabase<string>;
+        readonly watchListPings: LocalDatabase<Snowflake>;
         readonly dailyMsgs: LocalDatabase<[number, number]>;
         readonly userLevels: UserLevels;
         readonly punishments: Punishments;

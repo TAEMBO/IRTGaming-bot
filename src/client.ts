@@ -6,7 +6,8 @@ import {
     Collection,
     PresenceData,
     TextChannel,
-    ApplicationCommandOptionType
+    ApplicationCommandOptionType,
+    Snowflake
 } from "discord.js";
 import { PlayerTimes, Punishments, Reminders, UserLevels, WatchList } from "./schemas.js";
 import config from './config.json' assert { type: 'json' };
@@ -25,7 +26,7 @@ export default class TClient extends Client<true> {
     public readonly tfList = new LocalDatabase<string>('TFlist.json');
     public readonly fmList = new LocalDatabase<string>('FMlist.json');
     public readonly whitelist = new LocalDatabase<string>('adminWhitelist.json');
-    public readonly watchListPings = new LocalDatabase<string>('watchListPings.json');
+    public readonly watchListPings = new LocalDatabase<Snowflake>('watchListPings.json');
     public readonly dailyMsgs = new LocalDatabase<[number, number]>("dailyMsgs.json");
     public readonly userLevels = new UserLevels(this);
     public readonly punishments = new Punishments(this);

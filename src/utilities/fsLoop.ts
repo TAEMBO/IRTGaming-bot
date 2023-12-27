@@ -16,13 +16,13 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
         return decorators;
     }
 
-    function wlEmbed(playerName: string, joinLog: boolean, wlReason?: string) {
+    function wlEmbed(document: WatchListDocument, joinLog: boolean) {
         const embed = new EmbedBuilder()
-            .setTitle('WatchList')
-            .setDescription(`\`${playerName}\` ${joinLog ? 'joined' : 'left'} **${serverAcroUp}** at <t:${now}:t>`);
+            .setTitle(`WatchList - ${document.isSevere ? "ban" : "watch closely"}`)
+            .setDescription(`\`${document._id}\` ${joinLog ? 'joined' : 'left'} **${serverAcroUp}** at <t:${now}:t>`);
 
         if (joinLog) {
-            return embed.setColor(client.config.EMBED_COLOR_GREEN).setFooter({ text: `Reason: ${wlReason}` });
+            return embed.setColor(client.config.EMBED_COLOR_GREEN).setFooter({ text: `Reason: ${document.reason}` });
         } else return embed.setColor(client.config.EMBED_COLOR_RED);
     }
 
@@ -83,7 +83,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
         const playTimeMins = (player.uptime % 60).toString().padStart(2, '0');
 
         playerInfo.push(`\`${player.name}\` ${decorators(player, true)} **|** ${playTimeHrs}:${playTimeMins}`);
-    };
+    }
 
     // Data crunching for stats embed
     const stats = {
@@ -174,7 +174,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
 
     if (justStarted) return;
     
-    for (const player of newPlayers.filter(x => oldPlayers.some(y => x.isAdmin && !y.isAdmin && y.name === x.name))) {
+    for await (const player of newPlayers.filter(x => oldPlayers.some(y => x.isAdmin && !y.isAdmin && y.name === x.name))) {
         if (!client.whitelist.data.includes(player.name) && !client.fmList.data.includes(player.name) && !client.config.fs[serverAcro].isPrivate) {
             await client.getChan('juniorAdminChat').send({ embeds: [new EmbedBuilder()
                 .setTitle('UNKNOWN ADMIN LOGIN')
@@ -188,15 +188,15 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
     }
     
     // Filter for players leaving
-    for (const player of oldPlayers.filter(x => !newPlayers.some(y => y.name === x.name))) {
+    for await (const player of oldPlayers.filter(x => !newPlayers.some(y => y.name === x.name))) {
         const inWl = watchList.find(x => x._id === player.name);
 
-        if (inWl) await wlChannel.send({ embeds: [wlEmbed(inWl._id, false)] });
+        if (inWl) await wlChannel.send({ embeds: [wlEmbed(inWl, false)] });
         
         if (player.uptime) await client.playerTimes.addPlayerTime(player.name, player.uptime, serverAcro);
         
         await logChannel.send({ embeds: [logEmbed(player, false)] });
-    };
+    }
 
     // Filter for players joining
     const playerObj = (() => {
@@ -207,17 +207,17 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
         }
     })();
     
-    if (playerObj) for (const player of playerObj) {
+    if (playerObj) for await (const player of playerObj) {
         const inWl = watchList.find(y => y._id === player.name);
 
         if (inWl) {
             const filterWLPings = client.watchListPings.data.filter(x => !client.mainGuild().members.cache.get(x)?.roles.cache.has(client.config.mainServer.roles.loa));
 
-            await wlChannel.send({ content: filterWLPings.map(x => `<@${x}>`).join(" "), embeds: [wlEmbed(inWl._id, true, inWl.reason)] });
+            await wlChannel.send({ content: inWl.isSevere ? filterWLPings.map(x => `<@${x}>`).join(" ") : undefined, embeds: [wlEmbed(inWl, true)] });
         }
 
         await logChannel.send({ embeds: [logEmbed(player, true)] });
-    };
+    }
     
     // Update cache
     if (client.fsCache[serverAcro].graphPoints.length >= 120) client.fsCache[serverAcro].graphPoints.shift();

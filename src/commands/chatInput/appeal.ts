@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { TInteraction } from '../../typings.js';
-import { FSServers, isMPStaff } from '../../utilities.js';
+import { FSServers, isMPStaff } from '../../utils.js';
 
 export default {
 	async run(interaction: TInteraction) {

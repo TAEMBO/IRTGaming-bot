@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } from 'discord.js';
 import { TInteraction } from '../../typings.js';
-import { formatTime } from '../../utilities.js';
+import { formatTime } from '../../utils.js';
 import { Index } from '../../typings.js';
 
 export default {

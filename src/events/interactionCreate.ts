@@ -1,5 +1,5 @@
 import { Interaction } from 'discord.js';
-import { log } from '../utilities.js';
+import { log } from '../utils.js';
 import { Index } from '../typings.js';
 
 export default async (interaction: Interaction) => {

@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, AttachmentBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } from 'discord.js';
 import { Index, TInteraction } from '../../typings.js';
-import { isMPStaff, youNeedRole } from '../../utilities.js';
+import { isMPStaff, youNeedRole } from '../../utils.js';
 
 export default {
 	async run(interaction: TInteraction) {

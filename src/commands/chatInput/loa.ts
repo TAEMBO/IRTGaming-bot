@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { TInteraction } from '../../typings.js'; 
-import { hasRole, isMPStaff, youNeedRole } from '../../utilities.js';
+import { hasRole, isMPStaff, youNeedRole } from '../../utils.js';
 
 export default {
 	async run(interaction: TInteraction) {

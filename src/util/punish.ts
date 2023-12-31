@@ -1,4 +1,4 @@
-import { hasRole, youNeedRole } from '../utilities.js';
+import { hasRole, youNeedRole } from '../utils.js';
 import { TInteraction } from '../typings.js';
 
 /**

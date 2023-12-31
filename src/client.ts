@@ -11,7 +11,7 @@ import {
 } from "discord.js";
 import { PlayerTimes, Punishments, Reminders, UserLevels, WatchList } from "./schemas.js";
 import config from './config.json' assert { type: 'json' };
-import { LocalDatabase, RepeatedMessages } from './utilities.js';
+import { LocalDatabase, RepeatedMessages } from './utils.js';
 import { Config, FSCache, YTCache, CachedInvite, ChatInputCommand, ContextMenuCommand } from './typings.js';
 
 export default class TClient extends Client<true> {

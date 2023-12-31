@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, AutocompleteInteraction, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, ComponentType } from 'discord.js';
-import { hasRole, onMFFarms, youNeedRole } from '../../utilities.js';
+import { hasRole, onMFFarms, youNeedRole } from '../../utils.js';
 import { Index, TInteraction } from '../../typings.js';
 
 export default {

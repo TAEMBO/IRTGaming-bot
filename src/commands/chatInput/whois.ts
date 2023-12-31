@@ -1,6 +1,6 @@
 import { APIEmbedField, ActivityType, EmbedBuilder, SlashCommandBuilder, ClientPresenceStatus, ApplicationFlagsBitField, escapeItalic } from 'discord.js';
 import { ApplicationRPC, TInteraction } from '../../typings.js';
-import { formatUser } from '../../utilities.js';
+import { formatUser } from '../../utils.js';
 
 export default {
 	async run(interaction: TInteraction) {

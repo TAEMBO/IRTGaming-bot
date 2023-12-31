@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 import FTPClient from 'ftp';
 import xjs from 'xml-js';
 import config from '../config.json' assert { type: 'json' };
-import { FSServers, log, stringifyStream } from '../utilities.js';
+import { FSServers, log, stringifyStream } from '../utils.js';
 import { farmFormat } from '../typings.js';
 
 /** The object that each server will have */

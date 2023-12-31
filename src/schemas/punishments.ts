@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import { EmbedBuilder, User, GuildMember } from 'discord.js';
 import type TClient from '../client.js';
 import ms from 'ms';
-import { formatTime, log } from '../utilities.js';
+import { formatTime, log } from '../utils.js';
 import { Index, TInteraction } from '../typings.js';
 
 const model = mongoose.model('punishments', new mongoose.Schema({

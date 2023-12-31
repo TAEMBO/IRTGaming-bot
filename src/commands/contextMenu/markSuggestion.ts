@@ -1,5 +1,5 @@
 import { ActionRowBuilder, ApplicationCommandType, ButtonBuilder, ButtonStyle, ComponentType, ContextMenuCommandBuilder, EmbedBuilder, MessageContextMenuCommandInteraction } from "discord.js";
-import { isDCStaff, isMPStaff, youNeedRole } from "../../utilities.js";
+import { isDCStaff, isMPStaff, youNeedRole } from "../../utils.js";
 import { Index } from "../../typings.js";
 
 export default {

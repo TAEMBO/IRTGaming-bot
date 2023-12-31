@@ -9,7 +9,7 @@ import Discord, {
 } from 'discord.js';
 import util from 'node:util';
 import { exec } from 'child_process';
-import * as utilities from '../../utilities.js';
+import * as utilities from '../../utils.js';
 import fs from 'node:fs';
 import { setTimeout as sleep } from "node:timers/promises";
 import { Index, TInteraction } from '../../typings.js';

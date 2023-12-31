@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
-import { FSServers } from '../../utilities.js';
+import { FSServers } from '../../utils.js';
 import { Index, TInteraction } from '../../typings.js';
 
 export default {

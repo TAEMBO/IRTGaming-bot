@@ -1,6 +1,6 @@
 import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { TInteraction } from '../../typings.js';
-import { hasRole, youNeedRole } from '../../utilities.js';
+import { hasRole, youNeedRole } from '../../utils.js';
 
 export default {
 	async run(interaction: TInteraction) {

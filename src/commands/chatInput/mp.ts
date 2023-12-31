@@ -4,7 +4,7 @@ import puppeteer from 'puppeteer'; // Credits to Trolly for suggesting this pack
 import FTPClient from 'ftp';
 import { xml2js } from 'xml-js';
 import config from '../../config.json' assert { type: 'json' };
-import { FSServers, getFSURL, hasRole, isMPStaff, stringifyStream, youNeedRole } from '../../utilities.js';
+import { FSServers, getFSURL, hasRole, isMPStaff, stringifyStream, youNeedRole } from '../../utils.js';
 import type { banFormat, DedicatedServerConfig, farmFormat, Index, TInteraction } from '../../typings.js';
 
 const fsServers = new FSServers(config.fs);

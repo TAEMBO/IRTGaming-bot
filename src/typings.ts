@@ -1,7 +1,7 @@
 import { Collection, SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder, ChatInputCommandInteraction, PresenceData, Snowflake, ContextMenuCommandInteraction, ContextMenuCommandBuilder, AutocompleteInteraction } from 'discord.js';
 import config from './config.json' assert { type: 'json' };
 import TClient from './client.js';
-import { RepeatedMessages, LocalDatabase } from './utilities.js';
+import { RepeatedMessages, LocalDatabase } from './utils.js';
 import { PlayerTimes, Punishments, Reminders, UserLevels, WatchList } from "./schemas.js";
 
 export * from "./schemas.js";

@@ -15,9 +15,11 @@ export default async (oldMember: GuildMember | PartialGuildMember, newMember: Gu
     // Nickname changes
     if (oldMember.nickname !== newMember.nickname) {
         changes = true;
+
         embed.addFields(
             { name: '🔹 Old Nickname', value: oldMember.nickname ? `\`\`\`${oldMember.nickname}\`\`\`` : '*No nickname*' },
-            { name: '🔹 New Nickname', value: newMember.nickname ? `\`\`\`${newMember.nickname}\`\`\`` : '*No nickname*' })
+            { name: '🔹 New Nickname', value: newMember.nickname ? `\`\`\`${newMember.nickname}\`\`\`` : '*No nickname*' }
+        );
     }
 
     // Role changes
@@ -34,5 +36,9 @@ export default async (oldMember: GuildMember | PartialGuildMember, newMember: Gu
     
     if (changes) await newMember.client.getChan('botLogs').send({ embeds: [embed] });
 
-    if (oldRoles.has(boosterRole) || newRoles.has(boosterRole)) await newMember.client.getChan('boostLogs').send({ embeds: [embed] });
+    if (oldRoles.has(boosterRole) || newRoles.has(boosterRole)) {
+        embed.setColor("#f47fff").setFooter({ text: `Total boosts: ${newMember.guild.premiumSubscriptionCount}`});
+
+        await newMember.client.getChan('boostLogs').send({ embeds: [embed] });
+    }
 }

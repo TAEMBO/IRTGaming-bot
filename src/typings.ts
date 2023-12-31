@@ -220,6 +220,8 @@ export interface Config {
     };
 }
 
+export type MFFarmRoleKeys = Config['mainServer']['mfFarmRoles'][number];
+
 interface FSLoopDSSPlayerCoordinates {
     readonly x: number;
     readonly y: number;

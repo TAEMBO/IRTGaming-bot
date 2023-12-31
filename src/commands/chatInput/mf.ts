@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, AutocompleteInteraction, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, ComponentType } from 'discord.js';
 import { hasRole, onMFFarms, youNeedRole } from '../../utils.js';
-import { Index, TInteraction } from '../../typings.js';
+import { Index, MFFarmRoleKeys, TInteraction } from '../../typings.js';
 
 export default {
     async autocomplete(interaction: AutocompleteInteraction<"cached">) {
@@ -37,14 +37,17 @@ export default {
                 if (!hasRole(interaction.member, 'mpmanager') && !hasRole(interaction.member, 'mfmanager') && !hasRole(interaction.member, 'mffarmowner')) return await youNeedRole(interaction, "mffarmowner");
 
                 const member = interaction.options.getMember("member");
-                const farmRole = interaction.options.getString("role", true);
+                const roleId = interaction.options.getString("role", true);
+                const validFarmIds = interaction.client.config.mainServer.mfFarmRoles.map(x => interaction.client.config.mainServer.roles[x]);
+
+                if (!validFarmIds.includes(roleId)) return await interaction.reply("You need to select a valid MF Farm role from the list provided!");
 
                 if (!member) return await interaction.reply({ content: 'You need to select a member that\'s in this server', ephemeral: true });
 
-                if (member.roles.cache.has(farmRole)) {
+                if (member.roles.cache.has(roleId)) {
                     (await interaction.reply({
                         embeds: [new EmbedBuilder()
-                            .setDescription(`This member already has the <@&${farmRole}> role, do you want to remove it from them?`)
+                            .setDescription(`This member already has the <@&${roleId}> role, do you want to remove it from them?`)
                             .setColor(interaction.client.config.EMBED_COLOR)
                         ],
                         fetchReply: true, 
@@ -60,13 +63,13 @@ export default {
                     }).on('collect', async int => {
                         await ({
                             async yes() {
-                                const rolesToRemove = onMFFarms(member).length === 1 ? [farmRole, interaction.client.config.mainServer.roles.mfmember] : [farmRole];
+                                const rolesToRemove = onMFFarms(member).length === 1 ? [roleId, interaction.client.config.mainServer.roles.mfmember] : [roleId];
                                 
                                 await member.roles.remove(rolesToRemove);
 
                                 await int.update({
                                     embeds: [new EmbedBuilder()
-                                        .setDescription(`<@${member.user.id}> (${member.user.tag}) has been removed from the <@&${interaction.client.config.mainServer.roles.mfmember}> and <@&${farmRole}> roles.`)
+                                        .setDescription(`<@${member.user.id}> (${member.user.tag}) has been removed from the <@&${interaction.client.config.mainServer.roles.mfmember}> and <@&${roleId}> roles.`)
                                         .setColor(interaction.client.config.EMBED_COLOR)
                                     ],
                                     components: []
@@ -78,10 +81,10 @@ export default {
                         } as Index)[int.customId]();
                     });
                 } else {
-                    await member.roles.add([farmRole, interaction.client.config.mainServer.roles.mfmember]);
+                    await member.roles.add([roleId, interaction.client.config.mainServer.roles.mfmember]);
 
                     await interaction.reply({ embeds: [new EmbedBuilder()
-                        .setDescription(`<@${member.user.id}> (${member.user.tag}) has been given the <@&${interaction.client.config.mainServer.roles.mfmember}> and <@&${farmRole}> roles.`)
+                        .setDescription(`<@${member.user.id}> (${member.user.tag}) has been given the <@&${interaction.client.config.mainServer.roles.mfmember}> and <@&${roleId}> roles.`)
                         .setColor(interaction.client.config.EMBED_COLOR)
                     ] });
                 }
@@ -92,8 +95,6 @@ export default {
                 const member = interaction.options.getMember('member');
 
                 if (!member) return await interaction.reply({ content: 'You need to select a member that\'s in this server', ephemeral: true });
-
-                if (!onMFFarms(member).length) return await interaction.reply({ content: 'The chosen member needs to be on at least one MF farm', ephemeral: true });
 
                 if (member.roles.cache.has(interaction.client.config.mainServer.roles.mffarmowner)) {
                     (await interaction.reply({
@@ -139,7 +140,13 @@ export default {
                 }
             },
             async rename() {
-                const role = interaction.client.getRole(interaction.options.getString("role", true) as keyof typeof interaction.client.config.mainServer.roles);
+                const roleKey = interaction.options.getString("role", true);
+
+                if (!((role: string): role is MFFarmRoleKeys => {
+                    return interaction.client.config.mainServer.mfFarmRoles.includes(role as MFFarmRoleKeys);
+                })(roleKey)) return await interaction.reply("You need to select a valid MF Farm role from the list provided!");
+
+                const role = interaction.client.getRole(roleKey);
                 const name = interaction.options.getString("name", false);
                 const roleNamePrefix = role.name.split(" ").slice(0, 3).join(" ");
 

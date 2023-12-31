@@ -18,7 +18,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
 
     function wlEmbed(document: WatchListDocument, joinLog: boolean) {
         const embed = new EmbedBuilder()
-            .setTitle(`WatchList - ${document.isSevere ? "ban" : "watch closely"}`)
+            .setTitle(`WatchList - ${document.isSevere ? "ban" : "watch over"}`)
             .setDescription(`\`${document._id}\` ${joinLog ? 'joined' : 'left'} **${serverAcroUp}** at <t:${now}:t>`);
 
         if (joinLog) {
@@ -40,9 +40,11 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
     const serverAcroUp = serverAcro.toUpperCase();
     const statsEmbed = new EmbedBuilder();
     const statsMsgEdit = async () => {
-        const channel = client.channels.cache.get(server.channelId) as TextChannel | undefined;
+        const channel = client.channels.cache.get(server.channelId);
+
+        if (!(channel instanceof TextChannel)) return log("Red", `FSLoop ${serverAcroUp} invalid channel`);
         
-        await channel?.messages?.edit(server.messageId, { embeds: [statsEmbed] }).catch(() => log('Red', `FSLoop ${serverAcroUp} invalid msg`));
+        await channel.messages.edit(server.messageId, { embeds: [statsEmbed] }).catch(() => log('Red', `FSLoop ${serverAcroUp} invalid msg`));
     };
     const init = formatRequestInit(7_000, "FSLoop");
 

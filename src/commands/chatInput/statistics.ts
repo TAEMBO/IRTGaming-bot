@@ -1,10 +1,19 @@
 import { SlashCommandBuilder, EmbedBuilder, version } from 'discord.js';
 import os from 'node:os';
 import { TInteraction } from '../../typings.js';
-import { formatBytes, formatTime } from '../../utilities.js';
+import { formatTime } from '../../utilities.js';
 
 export default {
 	async run(interaction: TInteraction) {
+        function formatBytes(integer: number, decimals: number, bitsOrBytes: 1000 | 1024) {
+            if (!integer) return '0 Bytes';
+        
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(integer) / Math.log(bitsOrBytes));
+        
+            return (integer / Math.pow(bitsOrBytes, i)).toFixed(decimals < 0 ? 0 : decimals) + ' ' + sizes[i];
+        }
+        
 		const colunms = ['Command Name', 'Uses'];
 		const includedCommands = interaction.client.chatInputCommands.filter(x => x.uses).sort((a, b) => b.uses - a.uses);
 

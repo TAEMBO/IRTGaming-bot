@@ -1,4 +1,3 @@
-export * from './utilities/formatBytes.js';
 export * from './utilities/formatRequestInit.js';
 export * from './utilities/formatString.js';
 export * from './utilities/formatTime.js';

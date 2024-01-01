@@ -57,7 +57,7 @@ export default {
                         componentType: ComponentType.Button
                     }).on('collect', async int => {
                         await int.reply(codeBlock(err.stack.slice(0, 1950)));
-                    }).on('end', async ints => {
+                    }).on('end', async () => {
                         await msg.edit({ embeds: msg.embeds, components: [] });
                     });
                     

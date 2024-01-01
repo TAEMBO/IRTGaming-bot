@@ -6,7 +6,7 @@ export default {
 	async run(interaction: TInteraction) {
         if (!isMPStaff(interaction.member)) return await youNeedRole(interaction, "mpstaff");
 
-        const roles = interaction.member.roles.cache.map((x, i) => i);
+        const roles = interaction.member.roles.cache.map(x => x.id);
         const configRoles = interaction.client.config.mainServer.roles;
 
         if (!roles.includes(configRoles.loa)) {

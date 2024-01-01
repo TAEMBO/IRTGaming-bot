@@ -5,14 +5,20 @@
         "module": "NodeNext",
         "forceConsistentCasingInFileNames": true,
         "strict": true,
+        "strictNullChecks": true,
+        "strictFunctionTypes": true,
+        "strictPropertyInitialization": true,
         "skipLibCheck": true,
         "moduleResolution": "NodeNext",
         "resolveJsonModule": true,
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
         "noUnusedLocals": true,
-        "noUnusedParameters": false,
-        "outDir": "dist"
+        "noUnusedParameters": true,
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "removeComments": true,
+        "outDir": "dist",
     },
     "include": ["src"]
 }

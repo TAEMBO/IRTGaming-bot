@@ -23,8 +23,8 @@ export default async (oldMember: GuildMember | PartialGuildMember, newMember: Gu
     }
 
     // Role changes
-    const newRoles = newMember.roles.cache.filter((x, i) => !oldMember.roles.cache.has(i));
-    const oldRoles = oldMember.roles.cache.filter((x, i) => !newMember.roles.cache.has(i));
+    const newRoles = newMember.roles.cache.filter(x => !oldMember.roles.cache.has(x.id));
+    const oldRoles = oldMember.roles.cache.filter(x => !newMember.roles.cache.has(x.id));
     const boosterRole = newMember.client.config.mainServer.roles.legendarynitrobooster;
 
     if ((newRoles.size || oldRoles.size) && ((Date.now() - (newMember.joinedTimestamp as number)) > 5000)) {

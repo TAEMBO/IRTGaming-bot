@@ -121,7 +121,7 @@ export default {
 
             } else await interaction.reply({ embeds: [new EmbedBuilder()
                 .setColor(interaction.client.config.EMBED_COLOR)
-                .setDescription(`Top 50 players with the most time spent on IRTGaming FS22 servers since\n<t:1685602800>`)
+                .setDescription(`Top 50 players with the most time spent on IRTGaming FS22 servers since ${interaction.client.config.PLAYERTIMES_START_DATE}`)
                 .addFields(
                     { name: '\u200b', value: leaderboard(sortedData.slice(0, 25), true), inline: true },
                     { name: '\u200b', value: leaderboard(sortedData.slice(25, 50), false) + '\u200b', inline: true })

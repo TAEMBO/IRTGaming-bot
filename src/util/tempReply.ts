@@ -6,5 +6,7 @@ import { Message, MessageCreateOptions } from "discord.js";
  * @param options Options for sending the reply
  */
 export async function tempReply(message: Message, options: MessageCreateOptions & { timeout: number; }) {
-    await message.reply({ ...options, allowedMentions: { repliedUser: true } }).then(msg => setTimeout(async () => await msg.delete(), options.timeout));
+    const msg = await message.reply({ ...options, allowedMentions: { repliedUser: true } });
+
+    setTimeout(msg.delete.bind(msg), options.timeout);
 }

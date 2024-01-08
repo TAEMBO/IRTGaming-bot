@@ -5,19 +5,10 @@ import { formatTime } from '../../utils.js';
 
 export default {
 	async run(interaction: TInteraction) {
-        function formatBytes(integer: number, decimals: number, bitsOrBytes: 1000 | 1024) {
-            if (!integer) return '0 Bytes';
-        
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(integer) / Math.log(bitsOrBytes));
-        
-            return (integer / Math.pow(bitsOrBytes, i)).toFixed(decimals < 0 ? 0 : decimals) + ' ' + sizes[i];
-        }
-
-		const colunms = ['Command Name', 'Uses'];
+		const colunms = ['Command Name', 'Uses'] as const;
 		const includedCommands = interaction.client.chatInputCommands.filter(x => x.uses).sort((a, b) => b.uses - a.uses);
 
-		if (!includedCommands.size) return await interaction.reply(`No commands have been used yet.\nUptime: ${formatTime(interaction.client.uptime as number, 2, { commas: true, longNames: true })}`);
+		if (!includedCommands.size) return await interaction.reply(`No commands have been used yet.\nUptime: ${formatTime(interaction.client.uptime, 2, { commas: true, longNames: true })}`);
         
 		const nameLength = Math.max(...includedCommands.map(x => x.data.name.length), colunms[0].length) + 2;
 		const amountLength = Math.max(...includedCommands.map(x => x.uses.toString().length), colunms[1].length) + 1;
@@ -47,20 +38,30 @@ export default {
 
 			embed.addFields({ name: '\u200b', value: `\`\`\`\n${fieldValue}\`\`\`` });
 		} else embed.addFields({ name: '\u200b', value: `\`\`\`\n${rows.join('')}\`\`\`` });
+
+        const ramUsage = [
+            process.memoryUsage().heapUsed,
+            process.memoryUsage().heapTotal,
+            os.freemem()
+        ].map(bytes => {
+            if (!bytes) return '0 Bytes';
+        
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(1_000));
+        
+            return (bytes / Math.pow(1_000, i)).toFixed(1) + ' ' + sizes[i];
+        }).join("**/**");
 		
-		embed.addFields(
-			{ name: 'Node.js', value: [
-				`**RAM:** ${formatBytes(process.memoryUsage().heapUsed, 2, 1000)}**/**${formatBytes(os.freemem(), 2, 1000)}`,
-				`**Version:** ${process.version}`,
-				`**Discord.js version:** v${version}`,
-				`**Uptime:** ${formatTime(interaction.client.uptime as number, 2, { commas: true, longNames: true })}`
-			].join('\n') },
-			{ name: 'System', value: [
-				`**CPU:** ${os.cpus()[0].model.trim()}`,
-				`**RAM:** ${formatBytes(os.totalmem(), 2, 1000)}`,
-				`**Uptime:** ${formatTime((os.uptime() * 1000), 2, { commas: true, longNames: true })}`
-			].join('\n') }
-		);
+		embed.addFields({
+            name: 'Misc. Stats',
+            value: [
+				`**RAM Usage:** ${ramUsage}`,
+				`**Node.js Version:** ${process.version}`,
+				`**Discord.js Version:** v${version}`,
+				`**Bot Uptime:** ${formatTime(interaction.client.uptime, 2, { commas: true, longNames: true })}`,
+                `**Host Uptime:** ${formatTime((os.uptime() * 1000), 2, { commas: true, longNames: true })}`
+			].join('\n')
+        });
         
 		await interaction.reply({ embeds: [embed] });
 	},

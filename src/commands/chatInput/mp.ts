@@ -201,16 +201,18 @@ export default {
             },
             async farms() {
                 const chosenServer = interaction.options.getString('server', true);
-                const ftpLogin = fsServers.getPublicOne(chosenServer).ftp;
+                const server = interaction.client.config.fs[chosenServer];
+
+                if (server.isPrivate && !hasRole(interaction.member, "mpmanager") && !hasRole(interaction.member, "mfmanager")) return await youNeedRole(interaction, "mpmanager");
 
                 await interaction.deferReply();
 
-                FTP.on('ready', () => FTP.get(ftpLogin.path + 'savegame1/farms.xml', async (err, stream) => {
+                FTP.on('ready', () => FTP.get(server.ftp.path + 'savegame1/farms.xml', async (err, stream) => {
                     if (err) return await interaction.editReply(err.message);
 
                     await interaction.editReply({ files: [new AttachmentBuilder(Buffer.from(await stringifyStream(stream)), { name: 'farms.xml' })] });
                     stream.once('close', FTP.end);
-                })).connect(ftpLogin);
+                })).connect(server.ftp);
             },
             async password() {
                 await interaction.deferReply();
@@ -437,7 +439,7 @@ export default {
             .addStringOption(x => x
                 .setName('server')
                 .setDescription('The server to fetch from')
-                .addChoices(...cmdOptionChoices)
+                .addChoices(...fsServers.entries().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro })))
                 .setRequired(true)))
         .addSubcommand(x => x
             .setName('password')

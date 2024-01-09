@@ -141,6 +141,14 @@ interface FSServerBase {
     readonly code: string;
     /** Whether or not this server is a private server with a password */
     readonly isPrivate: boolean;
+    /** The FTP details for this server */
+    readonly ftp: {
+        readonly host: string;
+        readonly user: string;
+        readonly password: string;
+        /** The path to navigate to the game's profile folder */
+        readonly path: string;
+    };
 }
 
 /** Object data for a public server */
@@ -150,14 +158,6 @@ export interface FSServerPublic extends FSServerBase {
     readonly utcDiff: number;
     /** An array of activities that can be done on this server */
     readonly todo: string[];
-    /** The FTP details for this server */
-    readonly ftp: {
-        readonly host: string;
-        readonly user: string;
-        readonly password: string;
-        /** The path to navigate to the game's profile folder */
-        readonly path: string;
-    };
 }
 
 /** Object data for a private server */

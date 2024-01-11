@@ -1,4 +1,16 @@
-import { SlashCommandBuilder, AutocompleteInteraction, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, ComponentType } from 'discord.js';
+import {
+    ActionRowBuilder,
+    AutocompleteInteraction,
+    ButtonBuilder,
+    ButtonStyle,
+    ComponentType,
+    CategoryChannel,
+    EmbedBuilder,
+    OverwriteData,
+    OverwriteType,
+    SlashCommandBuilder,
+    TextChannel
+} from 'discord.js';
 import { hasRole, onMFFarms, youNeedRole } from '../../utils.js';
 import { Index, MFFarmRoleKeys, TInteraction } from '../../typings.js';
 
@@ -28,6 +40,19 @@ export default {
                 })();
 
                 await interaction.respond(displayedRoles);
+            },
+            async archive() {
+                const activeFarmChannels = interaction.client.mainGuild().channels.cache.filter(x => /mf-\d/.test(x.name) && x.parentId === interaction.client.config.mainServer.categories.multiFarm);
+                const archivedFarmChannels = interaction.client.mainGuild().channels.cache.filter(x => /mf-\d/.test(x.name) && x.parentId === interaction.client.config.mainServer.categories.archived);
+                
+                await interaction.respond([
+                    ...activeFarmChannels.map(x => ({ name: `(Active) ${x.name}`, value: x.id })),
+                    ...archivedFarmChannels.map(x => ({ name: `(Archived) ${x.name}`, value: x.id }))
+                ].sort((a, b) => {
+                    if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
+                    if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
+                    return 0;
+                }));
             }
         } as Index)[interaction.options.getSubcommand()]();
     },
@@ -158,6 +183,59 @@ export default {
 
                 await interaction.reply(`${roleNamePrefix} role name set to \`${role.name}\``);
             },
+            async archive() {
+                const channelId = interaction.options.getString("channel", true);
+                const channel = interaction.client.channels.cache.get(channelId) as TextChannel | undefined;
+
+                if (!channel || !/mf-\d/.test(channel.name)) return await interaction.reply("You need to select a channel from the list provided!");
+
+                const { archived, multiFarm } = interaction.client.config.mainServer.categories;
+                const channelisActive = channel.parentId === multiFarm;
+
+                if (channelisActive) { // Channel currently active, change to archived
+                    await channel.edit({
+                        parent: archived,
+                        permissionOverwrites: [
+                            ...(interaction.client.channels.cache.get(archived) as CategoryChannel).permissionOverwrites.cache.map(x => x.toJSON() as OverwriteData),
+                            {
+                                id: interaction.client.config.mainServer.roles.mpmanager,
+                                allow: "ViewChannel",
+                                type: OverwriteType.Role
+                            }
+                        ]
+                    });
+
+                    await interaction.reply(`${channel} successfully set to archived`);
+                } else { // Channel currently archived, change to active
+                    await channel.edit({
+                        parent: multiFarm,
+                        permissionOverwrites: [
+                            {
+                                id: interaction.client.config.mainServer.id,
+                                deny: "ViewChannel",
+                                type: OverwriteType.Role
+                            },
+                            {
+                                id: interaction.client.config.mainServer.roles.mffarmowner,
+                                allow: ["MentionEveryone", "ManageMessages"],
+                                type: OverwriteType.Role
+                            },
+                            {
+                                id: interaction.client.config.mainServer.roles[`mffarm${channel.name.slice(3, 4)}` as MFFarmRoleKeys],
+                                allow: "ViewChannel",
+                                type: OverwriteType.Role
+                            },
+                            {
+                                id: interaction.client.config.mainServer.roles.mpmanager,
+                                allow: "ViewChannel",
+                                type: OverwriteType.Role
+                            }
+                        ]
+                    });
+
+                    await interaction.reply(`${channel} successfully set to active`);
+                }
+            },
             async apply() {
                 if (!hasRole(interaction.member, "mpmanager") && !hasRole(interaction.member, "mfmanager")) return await youNeedRole(interaction, "mpmanager");
 
@@ -199,6 +277,14 @@ export default {
                 .setName("name")
                 .setDescription("The name of the MF Farm. Leave unspecified to clear farm name in role")
                 .setRequired(false)))
+        .addSubcommand(x => x
+            .setName("archive")
+            .setDescription("Manage archivement of MF Farm channels")
+            .addStringOption(x => x
+                .setName("channel")
+                .setDescription("The MF Farm channel to manage archivement of")
+                .setAutocomplete(true)
+                .setRequired(true)))
         .addSubcommand(x => x
             .setName("apply")
             .setDescription("Send the Google Form to apply to be an MF Farm Owner"))

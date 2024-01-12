@@ -30,7 +30,7 @@ export default {
 
                 await interaction.respond(displayedRoles.map(({ name, id }) => ({ name, value: id })));
             },
-            async rename() {
+            async "rename-role"() {
                 const displayedRoles = (() => {
                     if (!hasRole(interaction.member, "mpmanager") && !hasRole(interaction.member, "mfmanager")) {
                         return [];
@@ -40,6 +40,19 @@ export default {
                 })();
 
                 await interaction.respond(displayedRoles);
+            },
+            async "rename-channel"() {
+                const activeFarmChannels = interaction.client.mainGuild().channels.cache.filter(x => /mf-\d/.test(x.name) && x.parentId === interaction.client.config.mainServer.categories.multiFarm);
+                const archivedFarmChannels = interaction.client.mainGuild().channels.cache.filter(x => /mf-\d/.test(x.name) && x.parentId === interaction.client.config.mainServer.categories.archived);
+
+                await interaction.respond([
+                    ...activeFarmChannels.map(x => ({ name: `(Active) ${x.name}`, value: x.id })),
+                    ...archivedFarmChannels.map(x => ({ name: `(Archived) ${x.name}`, value: x.id }))
+                ].sort((a, b) => {
+                    if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
+                    if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
+                    return 0;
+                }));
             },
             async archive() {
                 const activeFarmChannels = interaction.client.mainGuild().channels.cache.filter(x => /mf-\d/.test(x.name) && x.parentId === interaction.client.config.mainServer.categories.multiFarm);
@@ -164,7 +177,7 @@ export default {
                     ] });
                 }
             },
-            async rename() {
+            async "rename-role"() {
                 const roleKey = interaction.options.getString("role", true);
 
                 if (!((role: string): role is MFFarmRoleKeys => {
@@ -182,6 +195,20 @@ export default {
                 }
 
                 await interaction.reply(`${roleNamePrefix} role name set to \`${role.name}\``);
+            },
+            async "rename-channel"() {
+                const channelId = interaction.options.getString("channel", true);
+                const channel = interaction.client.channels.cache.get(channelId) as TextChannel | undefined;
+
+                if (!channel || !/mf-\d/.test(channel.name)) return await interaction.reply("You need to select a channel from the list provided!");
+
+                const farmNumber = channel.name.split("-")[1];
+                const role = interaction.client.getRole(`mffarm${farmNumber}` as MFFarmRoleKeys);
+                const farmName = role.name.slice(role.name.indexOf("(") + 1, -1);
+
+                await channel.setName(`mf-${farmNumber}-${farmName}`);
+
+                await interaction.reply(`${channel} name successfully updated`);
             },
             async archive() {
                 const channelId = interaction.options.getString("channel", true);
@@ -266,7 +293,7 @@ export default {
                 .setDescription('The member to add or remove the MF Farm Owner role from')
                 .setRequired(true)))
         .addSubcommand(x => x
-            .setName("rename")
+            .setName("rename-role")
             .setDescription("Rename a given MF Farm role")
             .addStringOption(x => x
                 .setName("role")
@@ -277,6 +304,14 @@ export default {
                 .setName("name")
                 .setDescription("The name of the MF Farm. Leave unspecified to clear farm name in role")
                 .setRequired(false)))
+        .addSubcommand(x => x
+            .setName("rename-channel")
+            .setDescription("Update the name of a given MF Farm channel")
+            .addStringOption(x => x
+                .setName("channel")
+                .setDescription("The channel to rename")
+                .setRequired(true)
+                .setAutocomplete(true)))
         .addSubcommand(x => x
             .setName("archive")
             .setDescription("Manage archivement of MF Farm channels")

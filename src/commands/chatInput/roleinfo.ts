@@ -22,7 +22,7 @@ export default {
                     `Members: \`${role.members.size}\`\n${role.members.size < 21 ? roleMembers : ''}`
                 ].join('\n'), inline: true },
 				{ name: '🔹 Key Permissions', value: includedPermissions.join(', ') || 'None', inline: true })
-			.setColor(role.color)
+			.setColor(role.color || "#ffffff")
 			.setThumbnail(role.iconURL())
 		] });
 	},

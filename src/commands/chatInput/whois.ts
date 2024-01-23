@@ -1,6 +1,6 @@
 import { APIEmbedField, ActivityType, EmbedBuilder, SlashCommandBuilder, ClientPresenceStatus, ApplicationFlagsBitField, escapeItalic } from 'discord.js';
 import { ApplicationRPC, TInteraction } from '../../typings.js';
-import { formatUser } from '../../utils.js';
+import { formatString, formatUser } from '../../utils.js';
 
 export default {
 	async run(interaction: TInteraction) {
@@ -43,7 +43,7 @@ export default {
                 .setTitle(`${user.bot ? 'Bot' : 'User'} info: ${escapeItalic(user.tag)}`)
                 .setURL(`https://discord.com/users/${user.id}`)
                 .setDescription(formatUser(user))
-                .addFields({ name: `🔹 ${user.bot ? 'Bot' : 'Account'} Created`, value: `<t:${Math.round(user.createdTimestamp / 1000)}:R>` })
+                .addFields({ name: `🔹 ${user.bot ? 'Bot' : 'Account'} created`, value: `<t:${Math.round(user.createdTimestamp / 1000)}:R>` })
                 .setColor(interaction.client.config.EMBED_COLOR)
                 .setImage(user.bannerURL({ extension: 'png', size: 1024 }) ?? null);
 
@@ -71,8 +71,8 @@ export default {
             .setURL(`https://discord.com/users/${member.user.id}`)
             .setDescription(formatUser(member.user))
             .addFields(
-                { name: '🔹 Account created', value: `<t:${Math.round(member.user.createdTimestamp / 1000)}:R>` },
-                { name: '🔹 Joined server', value: `<t:${Math.round(member.joinedTimestamp as number / 1000)}:R>` },
+                { name: '🔹 Account created', value: `<t:${Math.round(member.user.createdTimestamp / 1000)}:R>`, inline: true },
+                { name: '🔹 Joined server', value: `<t:${Math.round(member.joinedTimestamp as number / 1000)}:R>`, inline: true },
                 { name: `🔹 Roles: ${member.roles.cache.size - 1}`, value: member.roles.cache.size > 1 ? member.roles.cache.filter(x => x.id !== interaction.guildId).sort((a, b) => b.position - a.position).map(x => x).join(member.roles.cache.size > 4 ? ' ' : '\n').slice(0, 1024) : 'None' })
             .setColor(member.displayColor || '#ffffff')
             .setImage(member.user.bannerURL({ extension: 'png', size: 1024 }) ?? null)
@@ -92,20 +92,24 @@ export default {
 
         embeds[0].addFields({
             name: `🔹 Status: ${member.presence.status}`,
-            value: `${member.presence.status === 'offline' ? '\u200b' : [
-                `Web: ${convertStatus(member.presence.clientStatus?.web)}`,
-                `Mobile: ${convertStatus(member.presence.clientStatus?.mobile)}`,
-                `Desktop: ${convertStatus(member.presence.clientStatus?.desktop)}`
-            ].join('\n')}`,
-            inline: true
+            value: member.presence.status === 'offline'
+                ? '\u200b'
+                : Object.entries(member.presence.clientStatus ?? {}).map(x => `${formatString(x[0])}: ${convertStatus(x[1])}`).join('\n')
         });
 
         for (const activity of member.presence.activities) {
-            if (activity.type === ActivityType.Listening && activity.details && activity.assets) {
+            activity.flags
+            if (activity.type === ActivityType.Listening && activity.details && activity.assets && activity.name === "Spotify") {
                 embeds.push(new EmbedBuilder()
                     .setAuthor({ name: activity.name, iconURL: interaction.client.config.resources.whoisSpotifyEmbedAuthorImage })
                     .setColor('#1DB954')
-                    .setFields({ name: activity.details, value: `by ${activity.state}\non ${activity.assets.largeText}\nStarted listening <t:${Math.round(activity.createdTimestamp / 1000)}:R>` })
+                    .setTitle(activity.details)
+                    .setURL(`https://open.spotify.com/track/${activity.syncId}`)
+                    .setDescription([
+                        `by ${activity.state}`,
+                        `on ${activity.assets.largeText}`,
+                        `Started listening <t:${Math.round(activity.createdTimestamp / 1000)}:R>`
+                    ].join("\n"))
                     .setThumbnail(`https://i.scdn.co/image/${activity.assets.largeImage?.replace('spotify:', '')}`)
                 );
             } else if (activity.type === ActivityType.Custom) {
@@ -147,7 +151,7 @@ export default {
                     .setTitle(activity.name)
                     .setColor('#ffffff')
                     .setDescription([
-                        `\u200b**Started:** <t:${Math.round(activity.createdTimestamp / 1000)}:R>`,
+                        `\u200b**Started:** <t:${Math.round((activity.timestamps?.start?.getTime() ?? activity.createdTimestamp) / 1000)}:R>`,
                         activity.details ? '\n**Details:** ' + activity.details : '',
                         activity.state ? '\n**State:** ' + activity.state : '',
                         activity.assets?.largeText ? '\n**Large text:** ' + activity.assets.largeText : '',

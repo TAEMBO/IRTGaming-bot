@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder, User, Message } from 'discord.js';
+import { type ChatInputCommandInteraction, EmbedBuilder, type Message, SlashCommandBuilder, type User } from "discord.js";
 
 const rpsChannels: Record<string, RpsInstance> = {};
 

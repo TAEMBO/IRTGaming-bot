@@ -1,6 +1,13 @@
-import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction } from 'discord.js';
-import { FSServers } from '../../utils.js';
-import { Index } from '../../typings.js';
+import {
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    type ChatInputCommandInteraction,
+    EmbedBuilder,
+    SlashCommandBuilder
+} from "discord.js";
+import { FSServers } from "../../utils.js";
+import type { Index } from "../../typings.js";
 
 export default {
 	async run(interaction: ChatInputCommandInteraction<"cached">) {

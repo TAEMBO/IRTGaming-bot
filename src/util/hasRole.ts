@@ -1,5 +1,5 @@
-import { GuildMember } from 'discord.js';
-import { Config } from '../typings.js';
+import type { GuildMember } from "discord.js";
+import type { Config } from "../typings.js";
 
 /**
  * @param guildMember The member to check

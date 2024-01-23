@@ -1,18 +1,25 @@
 import {
-    Client,
-    GatewayIntentBits,
-    Partials,
-    Options,
-    Collection,
-    PresenceData,
-    TextChannel,
     ApplicationCommandOptionType,
-    Snowflake
+    Client,
+    Collection,
+    GatewayIntentBits,
+    Options,
+    Partials,
+    type PresenceData,
+    type Snowflake,
+    TextChannel
 } from "discord.js";
+import config from "./config.json" assert { type: "json" };
 import { PlayerTimes, Punishments, Reminders, UserLevels, WatchList } from "./schemas.js";
-import config from './config.json' assert { type: 'json' };
-import { LocalDatabase, RepeatedMessages } from './utils.js';
-import { Config, FSCache, YTCache, CachedInvite, ChatInputCommand, ContextMenuCommand } from './typings.js';
+import { LocalDatabase, RepeatedMessages } from "./utils.js";
+import type {
+    CachedInvite,
+    ChatInputCommand,
+    Config,
+    ContextMenuCommand,
+    FSCache,
+    YTCache
+} from "./typings.js";
 
 export default class TClient extends Client<true> {
     public readonly config = config as Config;

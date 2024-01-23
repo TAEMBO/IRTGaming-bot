@@ -1,9 +1,9 @@
-import mongoose from 'mongoose';
-import { EmbedBuilder, User, GuildMember, ChatInputCommandInteraction } from 'discord.js';
-import type TClient from '../client.js';
-import ms from 'ms';
-import { formatTime, log } from '../utils.js';
-import { Index } from '../typings.js';
+import { type ChatInputCommandInteraction, EmbedBuilder, type GuildMember, type User } from "discord.js";
+import type TClient from "../client.js";
+import mongoose from "mongoose";
+import ms from "ms";
+import { formatTime, log } from "../utils.js";
+import type { Index } from "../typings.js";
 
 const model = mongoose.model('punishments', new mongoose.Schema({
     _id: { type: Number, required: true },

@@ -1,10 +1,20 @@
-import { Collection, SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder, ChatInputCommandInteraction, PresenceData, Snowflake, ContextMenuCommandInteraction, ContextMenuCommandBuilder, AutocompleteInteraction } from 'discord.js';
-import config from './config.json' assert { type: 'json' };
-import TClient from './client.js';
-import { RepeatedMessages, LocalDatabase } from './utils.js';
-import { PlayerTimes, Punishments, Reminders, UserLevels, WatchList } from "./schemas.js";
+import type {
+    AutocompleteInteraction,
+    ChatInputCommandInteraction,
+    Collection,
+    ContextMenuCommandBuilder,
+    ContextMenuCommandInteraction,
+    PresenceData,
+    SlashCommandBuilder,
+    SlashCommandSubcommandsOnlyBuilder,
+    Snowflake
+} from "discord.js";
+import config from "./config.json" assert { type: "json" };
+import type TClient from "./client.js";
+import type { RepeatedMessages, LocalDatabase } from "./utils.js";
+import type { PlayerTimes, Punishments, Reminders, UserLevels, WatchList } from "./schemas.js";
 
-export * from "./schemas.js";
+export type * from "./schemas.js";
 
 declare module "discord.js" {
     interface Client {

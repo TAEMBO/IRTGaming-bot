@@ -1,8 +1,8 @@
 import { EmbedBuilder, TextChannel } from "discord.js";
 import type TClient from "../client.js";
 import { xml2js } from "xml-js";
-import { formatRequestInit, formatTime, getFSURL, log } from '../utils.js';
-import { FSLoopCSG, FSLoopDSS, FSLoopDSSPlayer, FSServer, WatchListDocument } from "../typings.js";
+import { formatRequestInit, formatTime, getFSURL, log } from "../utils.js";
+import type { FSLoopCSG, FSLoopDSS, FSLoopDSSPlayer, FSServer, WatchListDocument } from "../typings.js";
 
 export async function fsLoop(client: TClient, watchList: WatchListDocument[], server: FSServer, serverAcro: string) {
     function decorators(player: FSLoopDSSPlayer, publicLoc?: boolean) {

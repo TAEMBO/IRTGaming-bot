@@ -1,5 +1,5 @@
-import { SlashCommandBuilder, AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
-import canvas from 'canvas';
+import { AttachmentBuilder, type ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import canvas from "canvas";
 
 export default {
 	async run(interaction: ChatInputCommandInteraction<"cached">) {

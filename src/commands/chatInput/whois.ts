@@ -1,6 +1,15 @@
-import { APIEmbedField, ActivityType, EmbedBuilder, SlashCommandBuilder, ClientPresenceStatus, ChatInputCommandInteraction, ApplicationFlagsBitField, escapeItalic } from 'discord.js';
-import { ApplicationRPC } from '../../typings.js';
-import { formatString, formatUser } from '../../utils.js';
+import {
+    ActivityType,
+    type APIEmbedField,
+    ApplicationFlagsBitField,
+    type ClientPresenceStatus,
+    type ChatInputCommandInteraction,
+    escapeItalic,
+    EmbedBuilder,
+    SlashCommandBuilder
+} from "discord.js";
+import { formatString, formatUser } from "../../utils.js";
+import type { ApplicationRPC } from "../../typings.js";
 
 export default {
 	async run(interaction: ChatInputCommandInteraction<"cached">) {

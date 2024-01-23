@@ -1,8 +1,8 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder, AttachmentBuilder } from 'discord.js';
-import canvas from 'canvas';
-import config from '../../config.json' assert { type: 'json' };
-import { FSServers, formatRequestInit, formatTime, getFSURL, isMPStaff, log } from '../../utils.js';
-import { FSLoopDSS, PlayerTimesDocument } from '../../typings.js';
+import { AttachmentBuilder, type ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import config from "../../config.json" assert { type: "json" };
+import canvas from "canvas";
+import { formatRequestInit, formatTime, FSServers, getFSURL, isMPStaff, log } from "../../utils.js";
+import type { FSLoopDSS, PlayerTimesDocument } from "../../typings.js";
 
 const fsServers = new FSServers(config.fs);
 const cmdBuilderData = new SlashCommandBuilder()

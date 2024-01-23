@@ -1,4 +1,4 @@
-import { EmbedBuilder, Collection, Message, GuildTextBasedChannel, PartialMessage } from 'discord.js';
+import { type Collection, EmbedBuilder, type Message, type GuildTextBasedChannel, type PartialMessage } from "discord.js";
 
 export default async (messages: Collection<string, Message | PartialMessage>, channel: GuildTextBasedChannel) => {
     if (!channel.client.config.toggles.logs) return;

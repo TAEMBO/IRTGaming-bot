@@ -1,5 +1,5 @@
-import { EmbedBuilder, GuildMember } from 'discord.js';
-import { formatUser, log } from '../utils.js';
+import { EmbedBuilder, type GuildMember } from "discord.js";
+import { formatUser, log } from "../utils.js";
 
 export default async (member: GuildMember) => {
     await member.roles.add(member.client.config.mainServer.roles.member).catch(() => log("Red", `Failed to add member role to ${member.id}`));

@@ -1,4 +1,4 @@
-import { Message, MessageCreateOptions } from "discord.js";
+import type { Message, MessageCreateOptions } from "discord.js";
 
 /**
  * Send a temporary message reply that deletes after a set timeout in milliseconds. Pings the user in the reply

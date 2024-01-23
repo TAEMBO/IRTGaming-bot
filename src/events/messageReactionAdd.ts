@@ -1,4 +1,4 @@
-import { MessageReaction, PartialMessageReaction, User, PartialUser } from 'discord.js';
+import type { MessageReaction, PartialMessageReaction, PartialUser, User } from "discord.js";
 
 export default async (reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser) => {
     if (

@@ -1,5 +1,12 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, Message, PartialMessage } from "discord.js";
-import { formatUser, isDCStaff, isMPStaff, Profanity } from '../utils.js';
+import {
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    EmbedBuilder,
+    type Message,
+    type PartialMessage
+} from "discord.js";
+import { formatUser, isDCStaff, isMPStaff, Profanity } from "../utils.js";
 
 export default async (oldMsg: Message | PartialMessage, newMsg: Message | PartialMessage) => {
     if (

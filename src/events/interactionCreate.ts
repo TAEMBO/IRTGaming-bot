@@ -1,6 +1,6 @@
-import { Interaction } from 'discord.js';
-import { log } from '../utils.js';
-import { Index } from '../typings.js';
+import type { Interaction } from "discord.js";
+import { log } from "../utils.js";
+import type { Index } from "../typings.js";
 
 export default async (interaction: Interaction) => {
     if (!interaction.inCachedGuild()) return;

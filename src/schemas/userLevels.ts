@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';
-import type TClient from '../client.js';
+import type TClient from "../client.js";
+import mongoose from "mongoose";
 
 const model = mongoose.model('userLevels', new mongoose.Schema({
     _id: { type: String, required: true },

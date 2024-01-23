@@ -1,6 +1,6 @@
-import { EmbedBuilder, GuildTextBasedChannel } from 'discord.js';
-import mongoose from 'mongoose';
-import type TClient from '../client.js';
+import { EmbedBuilder, type GuildTextBasedChannel } from "discord.js";
+import type TClient from "../client.js";
+import mongoose from "mongoose";
 
 const model = mongoose.model('reminders', new mongoose.Schema({
     userid: { type: String, required: true },

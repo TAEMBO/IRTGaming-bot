@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder, ThreadAutoArchiveDuration } from 'discord.js';
+import { type ChatInputCommandInteraction, EmbedBuilder, ThreadAutoArchiveDuration, SlashCommandBuilder } from "discord.js";
 
 export default {
 	async run(interaction: ChatInputCommandInteraction<"cached">) {

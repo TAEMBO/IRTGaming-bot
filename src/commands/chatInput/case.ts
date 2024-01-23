@@ -1,6 +1,6 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } from 'discord.js';
-import { formatTime } from '../../utils.js';
-import { Index } from '../../typings.js';
+import { type ChatInputCommandInteraction, EmbedBuilder, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { formatTime } from "../../utils.js";
+import type { Index } from "../../typings.js";
 
 export default {
 	async run(interaction: ChatInputCommandInteraction<"cached">) {

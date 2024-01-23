@@ -1,5 +1,5 @@
-import { PermissionFlagsBits, SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
-import { hasRole, youNeedRole } from '../../utils.js';
+import { type ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { hasRole, youNeedRole } from "../../utils.js";
 
 export default {
 	async run(interaction: ChatInputCommandInteraction<"cached">) {

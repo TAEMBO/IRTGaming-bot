@@ -1,6 +1,6 @@
-import { Message, Collection } from 'discord.js';
-import type TClient from '../client.js';
-import { RepeatedMessagesData, RepeatedMessagesEntry, RepeatedMessagesIdentifiers } from '../typings.js';
+import { Collection, type Message } from "discord.js";
+import type TClient from "../client.js";
+import type { RepeatedMessagesData, RepeatedMessagesEntry, RepeatedMessagesIdentifiers } from "../typings.js";
 
 export class RepeatedMessages {
     private _data: RepeatedMessagesData = {};

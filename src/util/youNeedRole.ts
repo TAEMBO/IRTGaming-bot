@@ -1,5 +1,5 @@
-import { CommandInteraction } from 'discord.js';
-import { Config } from '../typings.js';
+import type { CommandInteraction } from "discord.js";
+import type { Config } from "../typings.js";
 
 /**
  * @param interaction 

@@ -1,6 +1,6 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder, version } from 'discord.js';
-import os from 'node:os';
-import { formatTime } from '../../utils.js';
+import { type ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder, version } from "discord.js";
+import os from "node:os";
+import { formatTime } from "../../utils.js";
 
 export default {
 	async run(interaction: ChatInputCommandInteraction<"cached">) {

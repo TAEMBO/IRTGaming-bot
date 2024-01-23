@@ -1,5 +1,5 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder, GuildMember } from 'discord.js';
-import { Index, } from '../../typings.js';
+import { type ChatInputCommandInteraction, EmbedBuilder, type GuildMember, SlashCommandBuilder } from "discord.js";
+import type { Index } from "../../typings.js";
 
 export default {
 	async run(interaction: ChatInputCommandInteraction<"cached">) {

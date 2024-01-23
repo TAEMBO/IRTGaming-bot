@@ -1,11 +1,20 @@
 
-import { SlashCommandBuilder, AttachmentBuilder, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, ChatInputCommandInteraction, ComponentType } from 'discord.js';
-import puppeteer from 'puppeteer'; // Credits to Trolly for suggesting this package
-import FTPClient from 'ftp';
-import { xml2js } from 'xml-js';
-import config from '../../config.json' assert { type: 'json' };
-import { FSServers, getFSURL, hasRole, isMPStaff, stringifyStream, youNeedRole } from '../../utils.js';
-import type { banFormat, DedicatedServerConfig, farmFormat, Index } from '../../typings.js';
+import {
+    ActionRowBuilder,
+    AttachmentBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    type ChatInputCommandInteraction,
+    ComponentType,
+    EmbedBuilder,
+    SlashCommandBuilder
+} from "discord.js";
+import config from "../../config.json" assert { type: "json" };
+import FTPClient from "ftp";
+import puppeteer from "puppeteer"; // Credits to Trolly for suggesting this package
+import { xml2js } from "xml-js";
+import { FSServers, getFSURL, hasRole, isMPStaff, stringifyStream, youNeedRole } from "../../utils.js";
+import type { banFormat, DedicatedServerConfig, farmFormat, Index } from "../../typings.js";
 
 const fsServers = new FSServers(config.fs);
 const cmdOptionChoices = fsServers.getPublicAll().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));

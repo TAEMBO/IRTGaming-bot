@@ -1,7 +1,7 @@
-import TClient from './client.js';
-import fs from 'node:fs';
-import path from 'node:path';
-import { ContextMenuCommandBuilder, EmbedBuilder } from 'discord.js';
+import { ContextMenuCommandBuilder, EmbedBuilder } from "discord.js";
+import TClient from "./client.js";
+import fs from "node:fs";
+import path from "node:path";
 
 const client = new TClient();
 const fsKeys = Object.keys(client.config.fs);

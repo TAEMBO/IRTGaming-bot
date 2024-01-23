@@ -1,4 +1,4 @@
-import { FSServer } from "../typings.js";
+import type { FSServer } from "../typings.js";
 
 /**
  * Get a given URL for an FS server

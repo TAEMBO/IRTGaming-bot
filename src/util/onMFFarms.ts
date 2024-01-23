@@ -1,4 +1,4 @@
-import { GuildMember } from 'discord.js';
+import type { GuildMember } from "discord.js";
 
 /**
  * @param guildMember The member to check

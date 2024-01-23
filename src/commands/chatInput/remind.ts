@@ -1,6 +1,17 @@
-import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ChatInputCommandInteraction, ComponentType, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, StringSelectMenuInteraction } from 'discord.js';
-import ms from 'ms';
-import { Index, RemindersDocument } from '../../typings.js';
+import {
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    type ChatInputCommandInteraction,
+    ComponentType,
+    EmbedBuilder,
+    SlashCommandBuilder,
+    StringSelectMenuBuilder,
+    type StringSelectMenuInteraction,
+    StringSelectMenuOptionBuilder
+} from "discord.js";
+import ms from "ms";
+import type { Index, RemindersDocument } from "../../typings.js";
 
 export default {
 	async run(interaction: ChatInputCommandInteraction<"cached">) {

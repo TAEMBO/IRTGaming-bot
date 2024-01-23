@@ -1,19 +1,19 @@
 import Discord, {
-    SlashCommandBuilder,
-    EmbedBuilder,
-    codeBlock,
     ActionRowBuilder,
     ButtonBuilder,
     ButtonStyle,
-    ChatInputCommandInteraction, 
-    ComponentType
-} from 'discord.js';
-import util from 'node:util';
-import { exec } from 'child_process';
-import * as utilities from '../../utils.js';
-import fs from 'node:fs';
+    codeBlock,
+    type ChatInputCommandInteraction,
+    ComponentType,
+    EmbedBuilder,
+    SlashCommandBuilder
+} from "discord.js";
+import { exec } from "child_process";
+import fs from "node:fs";
 import { setTimeout as sleep } from "node:timers/promises";
-import { Index } from '../../typings.js';
+import util from "node:util";
+import * as utilities from "../../utils.js";
+import type { Index } from "../../typings.js";
 
 export default {
 	async run(interaction: ChatInputCommandInteraction<"cached">) {

@@ -1,8 +1,8 @@
-import type TClient from '../client.js';
+import type TClient from "../client.js";
 import mongoose from "mongoose";
-import { xml2js } from 'xml-js';
-import { log, fsLoop, fsLoopAll, FSServers, formatRequestInit } from '../utils.js';
-import type { YTCacheFeed } from '../typings.js';
+import { xml2js } from "xml-js";
+import { formatRequestInit, fsLoop, fsLoopAll, FSServers, log } from "../utils.js";
+import type { YTCacheFeed } from "../typings.js";
 
 export default async (client: TClient) => {
     const fsServers = new FSServers(client.config.fs);

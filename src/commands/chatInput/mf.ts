@@ -1,19 +1,19 @@
 import {
     ActionRowBuilder,
-    AutocompleteInteraction,
+    type AutocompleteInteraction,
     ButtonBuilder,
     ButtonStyle,
-    ChatInputCommandInteraction, 
+    type CategoryChannel,
+    type ChatInputCommandInteraction, 
     ComponentType,
-    CategoryChannel,
     EmbedBuilder,
-    OverwriteData,
+    type OverwriteData,
     OverwriteType,
     SlashCommandBuilder,
-    TextChannel
-} from 'discord.js';
-import { hasRole, onMFFarms, youNeedRole } from '../../utils.js';
-import { Index, MFFarmRoleKeys } from '../../typings.js';
+    type TextChannel
+} from "discord.js";
+import { hasRole, onMFFarms, youNeedRole } from "../../utils.js";
+import type { Index, MFFarmRoleKeys } from "../../typings.js";
 
 export default {
     async autocomplete(interaction: AutocompleteInteraction<"cached">) {

@@ -1,9 +1,8 @@
-import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { punish } from '../../utils.js';
-import { TInteraction } from '../../typings.js';
 
 export default {
-	async run(interaction: TInteraction) {
+	async run(interaction: ChatInputCommandInteraction<"cached">) {
 		await punish(interaction, this.data.name);
 	},
 	data: new SlashCommandBuilder()

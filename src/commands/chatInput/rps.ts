@@ -1,5 +1,4 @@
-import { SlashCommandBuilder, EmbedBuilder, User, Message } from 'discord.js';
-import { TInteraction } from '../../typings.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder, User, Message } from 'discord.js';
 
 const rpsChannels: Record<string, RpsInstance> = {};
 
@@ -16,7 +15,7 @@ class RpsInstance {
 
 // Credits to Memw
 export default {
-	async run(interaction: TInteraction) {
+	async run(interaction: ChatInputCommandInteraction<"cached">) {
         const move = interaction.options.getString("move", true);
 
         if (!rpsChannels.hasOwnProperty(interaction.channelId)) {

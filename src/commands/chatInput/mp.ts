@@ -1,17 +1,17 @@
 
-import { SlashCommandBuilder, AttachmentBuilder, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, ComponentType } from 'discord.js';
+import { SlashCommandBuilder, AttachmentBuilder, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, ChatInputCommandInteraction, ComponentType } from 'discord.js';
 import puppeteer from 'puppeteer'; // Credits to Trolly for suggesting this package
 import FTPClient from 'ftp';
 import { xml2js } from 'xml-js';
 import config from '../../config.json' assert { type: 'json' };
 import { FSServers, getFSURL, hasRole, isMPStaff, stringifyStream, youNeedRole } from '../../utils.js';
-import type { banFormat, DedicatedServerConfig, farmFormat, Index, TInteraction } from '../../typings.js';
+import type { banFormat, DedicatedServerConfig, farmFormat, Index } from '../../typings.js';
 
 const fsServers = new FSServers(config.fs);
 const cmdOptionChoices = fsServers.getPublicAll().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));
 
 export default {
-    async run(interaction: TInteraction) {
+    async run(interaction: ChatInputCommandInteraction<"cached">) {
         if (!isMPStaff(interaction.member)) return await youNeedRole(interaction, 'mpstaff');
 
         const FTP = new FTPClient();

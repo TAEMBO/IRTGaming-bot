@@ -1,9 +1,9 @@
-import { APIEmbedField, ActivityType, EmbedBuilder, SlashCommandBuilder, ClientPresenceStatus, ApplicationFlagsBitField, escapeItalic } from 'discord.js';
-import { ApplicationRPC, TInteraction } from '../../typings.js';
+import { APIEmbedField, ActivityType, EmbedBuilder, SlashCommandBuilder, ClientPresenceStatus, ChatInputCommandInteraction, ApplicationFlagsBitField, escapeItalic } from 'discord.js';
+import { ApplicationRPC } from '../../typings.js';
 import { formatString, formatUser } from '../../utils.js';
 
 export default {
-	async run(interaction: TInteraction) {
+	async run(interaction: ChatInputCommandInteraction<"cached">) {
         async function getApplicationData(id: string) {
             const applicationData = await interaction.client.rest.get(`/applications/${id}/rpc`).catch(() => null) as ApplicationRPC | null;
             const fields: APIEmbedField[] = [];

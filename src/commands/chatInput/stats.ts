@@ -1,8 +1,8 @@
-import { SlashCommandBuilder, EmbedBuilder, AttachmentBuilder } from 'discord.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder, AttachmentBuilder } from 'discord.js';
 import canvas from 'canvas';
 import config from '../../config.json' assert { type: 'json' };
 import { FSServers, formatRequestInit, formatTime, getFSURL, isMPStaff, log } from '../../utils.js';
-import { FSLoopDSS, TInteraction, PlayerTimesDocument } from '../../typings.js';
+import { FSLoopDSS, PlayerTimesDocument } from '../../typings.js';
 
 const fsServers = new FSServers(config.fs);
 const cmdBuilderData = new SlashCommandBuilder()
@@ -23,7 +23,7 @@ const cmdBuilderData = new SlashCommandBuilder()
 for (const [serverAcro, { fullName }] of fsServers.entries()) cmdBuilderData.addSubcommand(x => x.setName(serverAcro).setDescription(`${fullName} server stats`));
 
 export default {
-	async run(interaction: TInteraction) {
+	async run(interaction: ChatInputCommandInteraction<"cached">) {
         const subCmd = interaction.options.getSubcommand();
 
         if ((

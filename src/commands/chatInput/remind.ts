@@ -1,9 +1,9 @@
-import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ComponentType, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, StringSelectMenuInteraction } from 'discord.js';
+import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ChatInputCommandInteraction, ComponentType, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, StringSelectMenuInteraction } from 'discord.js';
 import ms from 'ms';
-import { Index, TInteraction, RemindersDocument } from '../../typings.js';
+import { Index, RemindersDocument } from '../../typings.js';
 
 export default {
-	async run(interaction: TInteraction) {
+	async run(interaction: ChatInputCommandInteraction<"cached">) {
         function formatTime(time: number) {
             return `<t:${Math.round(time / 1000)}> (<t:${Math.round(time / 1000)}:R>)`;
         };
@@ -14,7 +14,7 @@ export default {
 
         async function promptDeletion(
             reminder: RemindersDocument,
-            int: StringSelectMenuInteraction<"cached"> | TInteraction
+            int: StringSelectMenuInteraction<"cached"> | ChatInputCommandInteraction<"cached">
         ) {
             const intOptions = {
                 embeds: [new EmbedBuilder()

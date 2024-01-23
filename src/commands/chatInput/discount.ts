@@ -1,8 +1,7 @@
-import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
-import { TInteraction } from '../../typings.js';
+import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 
 export default {
-	async run(interaction: TInteraction) {
+	async run(interaction: ChatInputCommandInteraction<"cached">) {
         const member = interaction.options.getMember('member');
 
         if (!member) return await interaction.reply({ content: 'You need to select a member that is in this server', ephemeral: true });

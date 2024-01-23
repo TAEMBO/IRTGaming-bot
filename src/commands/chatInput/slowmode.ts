@@ -1,11 +1,10 @@
-import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
-import { TInteraction } from '../../typings.js';
+import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 
 export default {
-	async run(interaction: TInteraction) {
+	async run(interaction: ChatInputCommandInteraction<"cached">) {
         const time = interaction.options.getInteger("time", true);
 
-        await interaction.channel.setRateLimitPerUser(time, `Done by ${interaction.user.tag}`);
+        await interaction.channel!.setRateLimitPerUser(time, `Done by ${interaction.user.tag}`);
 
         if (!time) {
             await interaction.reply('Slowmode removed.');

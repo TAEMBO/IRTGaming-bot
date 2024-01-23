@@ -3,6 +3,7 @@ import {
     AutocompleteInteraction,
     ButtonBuilder,
     ButtonStyle,
+    ChatInputCommandInteraction, 
     ComponentType,
     CategoryChannel,
     EmbedBuilder,
@@ -12,7 +13,7 @@ import {
     TextChannel
 } from 'discord.js';
 import { hasRole, onMFFarms, youNeedRole } from '../../utils.js';
-import { Index, MFFarmRoleKeys, TInteraction } from '../../typings.js';
+import { Index, MFFarmRoleKeys } from '../../typings.js';
 
 export default {
     async autocomplete(interaction: AutocompleteInteraction<"cached">) {
@@ -69,7 +70,7 @@ export default {
             }
         } as Index)[interaction.options.getSubcommand()]();
     },
-	async run(interaction: TInteraction) {
+	async run(interaction: ChatInputCommandInteraction<"cached">) {
         await ({
             async member() {
                 if (!hasRole(interaction.member, 'mpmanager') && !hasRole(interaction.member, 'mfmanager') && !hasRole(interaction.member, 'mffarmowner')) return await youNeedRole(interaction, "mffarmowner");

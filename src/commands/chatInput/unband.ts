@@ -1,8 +1,7 @@
-import { SlashCommandBuilder } from 'discord.js';
-import { TInteraction } from '../../typings.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 
 export default {
-	async run(interaction: TInteraction) {
+	async run(interaction: ChatInputCommandInteraction<"cached">) {
         const user = interaction.options.getUser("member", true);
 
         await interaction.deferReply({ ephemeral: true }).then(() => interaction.deleteReply());

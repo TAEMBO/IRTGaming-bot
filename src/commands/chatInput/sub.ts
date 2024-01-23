@@ -1,8 +1,7 @@
-import { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
-import { TInteraction } from '../../typings.js';
+import { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction } from 'discord.js';
 
 export default {
-	async run(interaction: TInteraction) {
+	async run(interaction: ChatInputCommandInteraction<"cached">) {
         await interaction.reply({ content: `Verification sent, please wait for someone to verify your subscription. You will then receive the <@&${interaction.client.config.mainServer.roles.subscriber}> role.`, ephemeral: true });
         
         await interaction.client.getChan('helperChat').send({

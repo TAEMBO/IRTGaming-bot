@@ -117,12 +117,6 @@ export type ChatInputCommand = Prettify<
     }
 >;
 
-/** `Discord.ChatInputCommandInteraction<CacheType>` */
-export interface TInteraction extends ChatInputCommandInteraction<"cached"> {
-    channel: NonNullable<ChatInputCommandInteraction<"cached">["channel"]>;
-}
-
-
 /** The base object data that is always present */
 interface FSServerBase {
     /** The unabbreviated name of this server */

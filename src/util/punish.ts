@@ -1,11 +1,11 @@
+import { ChatInputCommandInteraction } from 'discord.js'; 
 import { hasRole, youNeedRole } from '../utils.js';
-import { TInteraction } from '../typings.js';
 
 /**
  * @param interaction 
  * @param type The type of punishment this is
  */
-export async function punish(interaction: TInteraction, type: string) {
+export async function punish(interaction: ChatInputCommandInteraction<"cached">, type: string) {
     if (!['warn', 'mute'].includes(type) && hasRole(interaction.member, 'discordhelper')) return await youNeedRole(interaction, 'discordstaff');
 
     const time = interaction.options.getString('time') ?? undefined;

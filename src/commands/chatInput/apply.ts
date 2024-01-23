@@ -1,8 +1,7 @@
-import { SlashCommandBuilder } from 'discord.js';
-import { TInteraction } from '../../typings.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 
 export default {
-	async run(interaction: TInteraction) {
+	async run(interaction: ChatInputCommandInteraction<"cached">) {
         const applicationLogs = interaction.client.getChan('mpApplicationLogs');
         const userData = await interaction.client.userLevels.data.findById(interaction.user.id);
         const eligibleTime = (Date.now() - (interaction.member.joinedTimestamp as number)) > (1000 * 60 * 60 * 24 * 14);

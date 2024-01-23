@@ -1,8 +1,7 @@
-import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
-import { TInteraction } from '../../typings.js';
+import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 
 export default {
-	async run(interaction: TInteraction) {
+	async run(interaction: ChatInputCommandInteraction<"cached">) {
 		const word = interaction.options.getString("word", true);
 
 		if (!interaction.client.bannedWords.data.includes(word)) {

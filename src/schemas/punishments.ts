@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
-import { EmbedBuilder, User, GuildMember } from 'discord.js';
+import { EmbedBuilder, User, GuildMember, ChatInputCommandInteraction } from 'discord.js';
 import type TClient from '../client.js';
 import ms from 'ms';
 import { formatTime, log } from '../utils.js';
-import { Index, TInteraction } from '../typings.js';
+import { Index } from '../typings.js';
 
 const model = mongoose.model('punishments', new mongoose.Schema({
     _id: { type: Number, required: true },
@@ -90,7 +90,7 @@ export class Punishments {
         guildMember: GuildMember | null,
         options: {
             time?: string
-            interaction?: TInteraction
+            interaction?: ChatInputCommandInteraction<"cached">
         }
     ) {
 		const { time, interaction } = options;
@@ -187,7 +187,7 @@ export class Punishments {
 	}
 
 
-	public async removePunishment(caseId: number, moderator: string, reason: string, interaction?: TInteraction) {
+	public async removePunishment(caseId: number, moderator: string, reason: string, interaction?: ChatInputCommandInteraction<"cached">) {
 		const now = Date.now();
 		const punishment = await this.data.findById(caseId);
 

@@ -1,5 +1,4 @@
-import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
-import { TInteraction } from '../../typings.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 
 interface Quantity {
 	name: string;
@@ -141,7 +140,7 @@ function findUnit(unitNameQuery: string) {
 	}
 }
 export default {
-	async run(interaction: TInteraction) {
+	async run(interaction: ChatInputCommandInteraction<"cached">) {
 		if (interaction.options.getSubcommand() === 'help') {
 			const wantedQuantity = Object.keys(quantities).find(x => x === interaction.options.getString("type"));
 

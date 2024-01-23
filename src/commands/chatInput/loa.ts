@@ -1,9 +1,8 @@
-import { SlashCommandBuilder } from 'discord.js';
-import { TInteraction } from '../../typings.js'; 
+import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { hasRole, isMPStaff, youNeedRole } from '../../utils.js';
 
 export default {
-	async run(interaction: TInteraction) {
+	async run(interaction: ChatInputCommandInteraction<"cached">) {
         if (!isMPStaff(interaction.member)) return await youNeedRole(interaction, "mpstaff");
 
         const roles = interaction.member.roles.cache.map(x => x.id);

@@ -1,9 +1,8 @@
-import { SlashCommandBuilder, AttachmentBuilder, EmbedBuilder } from 'discord.js';
+import { SlashCommandBuilder, AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import canvas from 'canvas';
-import { TInteraction } from '../../typings.js';
 
 export default {
-	async run(interaction: TInteraction) {
+	async run(interaction: ChatInputCommandInteraction<"cached">) {
 		const subCmd = interaction.options.getSubcommand();
 		const allData = await interaction.client.userLevels.data.find();
 

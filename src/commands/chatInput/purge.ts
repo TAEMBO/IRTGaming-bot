@@ -1,17 +1,16 @@
-import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
-import { TInteraction } from '../../typings.js';
+import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 
 export default {
-	async run(interaction: TInteraction) {
+	async run(interaction: ChatInputCommandInteraction<"cached">) {
         const limit = interaction.options.getInteger("amount", true);
         const user = interaction.options.getUser("user");
         const msgs = await (async () => {
             if (user) {
-                return (await interaction.channel.messages.fetch({ limit })).filter(x => x.author.id === user.id);
-            } else return await interaction.channel.messages.fetch({ limit });
+                return (await interaction.channel!.messages.fetch({ limit })).filter(x => x.author.id === user.id);
+            } else return await interaction.channel!.messages.fetch({ limit });
         })();
 
-        await interaction.channel.bulkDelete(msgs, true);
+        await interaction.channel!.bulkDelete(msgs, true);
         await interaction.reply({ content: `Successfully deleted ${msgs.size} messages${user ? ` from ${user}` : ''}.`, ephemeral: true });
 	},
 	data: new SlashCommandBuilder()

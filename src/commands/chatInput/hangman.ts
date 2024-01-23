@@ -1,8 +1,7 @@
-import { SlashCommandBuilder } from 'discord.js';
-import { TInteraction } from '../../typings.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 
 export default {
-	async run(interaction: TInteraction) {
+	async run(interaction: ChatInputCommandInteraction<"cached">) {
 		await interaction.reply({ content: 'Game started!', ephemeral: true });
 
 		let hiddenLetters = true;

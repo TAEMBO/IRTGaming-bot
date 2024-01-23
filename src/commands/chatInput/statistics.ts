@@ -1,10 +1,9 @@
-import { SlashCommandBuilder, EmbedBuilder, version } from 'discord.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder, version } from 'discord.js';
 import os from 'node:os';
-import { TInteraction } from '../../typings.js';
 import { formatTime } from '../../utils.js';
 
 export default {
-	async run(interaction: TInteraction) {
+	async run(interaction: ChatInputCommandInteraction<"cached">) {
 		const colunms = ['Command Name', 'Uses'] as const;
 		const includedCommands = interaction.client.chatInputCommands.filter(x => x.uses).sort((a, b) => b.uses - a.uses);
 

@@ -1,8 +1,7 @@
-import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
-import { TInteraction } from '../../typings.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 
 export default {
-	async run(interaction: TInteraction) {
+	async run(interaction: ChatInputCommandInteraction<"cached">) {
 		const role = interaction.options.getRole("role", true);
 		const keyPermissions = ['Administrator', 'KickMembers', 'BanMembers', 'ManageChannels', 'ManageGuild', 'ViewAuditLog', 'ManageMessages', 'ManageNicknames', 'MentionEveryone', 'UseExternalEmojis', 'ManageRoles', 'ManageEmojisAndStickers', 'ModerateMembers'];
 		const permissions = role.permissions.toArray();

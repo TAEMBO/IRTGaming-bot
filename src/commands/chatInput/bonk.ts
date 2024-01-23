@@ -1,8 +1,7 @@
-import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
-import { TInteraction } from '../../typings.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 
 export default {
-	async run(interaction: TInteraction) {
+	async run(interaction: ChatInputCommandInteraction<"cached">) {
         const member = interaction.options.getMember('member');
         let reason = interaction.options.getString('reason', false);
 

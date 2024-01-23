@@ -1,9 +1,9 @@
-import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction } from 'discord.js';
 import { FSServers } from '../../utils.js';
-import { Index, TInteraction } from '../../typings.js';
+import { Index } from '../../typings.js';
 
 export default {
-	async run(interaction: TInteraction) {
+	async run(interaction: ChatInputCommandInteraction<"cached">) {
         const fsServers = new FSServers(interaction.client.config.fs);
         const isFromTicket = interaction.channel?.parentId === interaction.client.config.mainServer.categories.activeTickets;
         const content = interaction.options.getUser('user', false)?.toString();

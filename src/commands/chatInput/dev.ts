@@ -5,6 +5,7 @@ import Discord, {
     ActionRowBuilder,
     ButtonBuilder,
     ButtonStyle,
+    ChatInputCommandInteraction, 
     ComponentType
 } from 'discord.js';
 import util from 'node:util';
@@ -12,10 +13,10 @@ import { exec } from 'child_process';
 import * as utilities from '../../utils.js';
 import fs from 'node:fs';
 import { setTimeout as sleep } from "node:timers/promises";
-import { Index, TInteraction } from '../../typings.js';
+import { Index } from '../../typings.js';
 
 export default {
-	async run(interaction: TInteraction) {
+	async run(interaction: ChatInputCommandInteraction<"cached">) {
 		if (!interaction.client.config.devWhitelist.includes(interaction.user.id)) return await interaction.reply('You\'re not allowed to use dev commands.');
         
 		await ({
@@ -48,7 +49,7 @@ export default {
                         fetchReply: true as true
                     };
 
-                    const msg = await interaction.reply(msgPayload).catch(() => interaction.channel.send(msgPayload));
+                    const msg = await interaction.reply(msgPayload).catch(() => interaction.channel!.send(msgPayload));
 
                     msg.createMessageComponentCollector({
                         filter: x => x.user.id === interaction.user.id,
@@ -82,7 +83,7 @@ export default {
 
                 embed.addFields({ name: `Output • ${Date.now() - now}ms`, value: `\`\`\`${output.slice(0, 1016)}\n\`\`\`` });
 
-                await interaction.reply({ embeds: [embed] }).catch(() => interaction.channel.send({ embeds: [embed] }));
+                await interaction.reply({ embeds: [embed] }).catch(() => interaction.channel!.send({ embeds: [embed] }));
             },
             async restart() {
                 interaction.replied ? await interaction.editReply("Compiling...") : await interaction.reply("Compiling...");

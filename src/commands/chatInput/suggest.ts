@@ -1,8 +1,7 @@
-import { SlashCommandBuilder, EmbedBuilder, ThreadAutoArchiveDuration } from 'discord.js';
-import { TInteraction } from '../../typings.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder, ThreadAutoArchiveDuration } from 'discord.js';
 
 export default {
-	async run(interaction: TInteraction) {
+	async run(interaction: ChatInputCommandInteraction<"cached">) {
         const suggestion = interaction.options.getString("suggestion", true);
 
         if (interaction.channelId !== interaction.client.config.mainServer.channels.communityIdeas) return await interaction.reply({ content: `This command only works in <#${interaction.client.config.mainServer.channels.communityIdeas}>`, ephemeral: true });

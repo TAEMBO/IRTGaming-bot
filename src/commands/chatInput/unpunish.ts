@@ -1,9 +1,8 @@
-import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
-import { TInteraction } from '../../typings.js';
+import { PermissionFlagsBits, SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
 import { hasRole, youNeedRole } from '../../utils.js';
 
 export default {
-	async run(interaction: TInteraction) {
+	async run(interaction: ChatInputCommandInteraction<"cached">) {
 		const punishment = await interaction.client.punishments.data.findById(interaction.options.getInteger('caseid', true));
         const reason = interaction.options.getString("reason") ?? 'Unspecified';
 

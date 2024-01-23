@@ -1,8 +1,8 @@
-import { SlashCommandBuilder, EmbedBuilder, GuildMember } from 'discord.js';
-import { Index, TInteraction } from '../../typings.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder, GuildMember } from 'discord.js';
+import { Index, } from '../../typings.js';
 
 export default {
-	async run(interaction: TInteraction) {
+	async run(interaction: ChatInputCommandInteraction<"cached">) {
         function sortMembers(a: GuildMember, b: GuildMember) {
             if (a.displayName.toLowerCase() < b.displayName.toLowerCase()) return -1;
             if (a.displayName.toLowerCase() > b.displayName.toLowerCase()) return 1;

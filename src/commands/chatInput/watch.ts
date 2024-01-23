@@ -1,9 +1,9 @@
-import { SlashCommandBuilder, AttachmentBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } from 'discord.js';
-import { Index, TInteraction } from '../../typings.js';
+import { SlashCommandBuilder, AttachmentBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, ComponentType } from 'discord.js';
+import { Index } from '../../typings.js';
 import { isMPStaff, youNeedRole } from '../../utils.js';
 
 export default {
-	async run(interaction: TInteraction) {
+	async run(interaction: ChatInputCommandInteraction<"cached">) {
         if (!isMPStaff(interaction.member)) return await youNeedRole(interaction, "mpstaff");
 
         await ({

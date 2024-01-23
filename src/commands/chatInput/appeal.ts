@@ -1,9 +1,8 @@
-import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
-import { TInteraction } from '../../typings.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { FSServers, isMPStaff } from '../../utils.js';
 
 export default {
-	async run(interaction: TInteraction) {
+	async run(interaction: ChatInputCommandInteraction<"cached">) {
         if (interaction.channel?.parentId !== interaction.client.config.mainServer.categories.activeTickets && !isMPStaff(interaction.member)) return await interaction.reply({ content: 'You cannot use this command here', ephemeral: true });
 
         const fsServers = new FSServers(interaction.client.config.fs);

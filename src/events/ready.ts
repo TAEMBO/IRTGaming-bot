@@ -29,6 +29,8 @@ export default async (client: TClient) => {
     }
 
     await guild.members.fetch();
+
+    await client.dailyMsgs.fillCache();
         
     for (const [code, inv] of await guild.invites.fetch()) client.inviteCache.set(code, { uses: inv.uses ?? 0, creator: inv.inviter?.id ?? "UNKNOWN" });
 
@@ -52,17 +54,20 @@ export default async (client: TClient) => {
     setInterval(async () => {
         const formattedDate = Math.floor((Date.now() - client.config.DAILY_MSGS_TIMESTAMP) / 1000 / 60 / 60 / 24);
 
-        if (client.dailyMsgs.data.some(x => x[0] === formattedDate)) return;
+        if (client.dailyMsgs.cache.some(x => x._id === formattedDate)) return;
 
         const today = Date().toLowerCase();
         const channel = client.getChan('general');
-        const yesterday = client.dailyMsgs.data.find(x => x[0] === formattedDate - 1) ?? [formattedDate - 1, 0];
+        const yesterday = client.dailyMsgs.cache.find(x => x._id === formattedDate - 1) ?? { day: formattedDate - 1, count: 0 };
         let total = (await client.userLevels.data.find()).reduce((a, b) => a + b.messages, 0); // sum of all users
 
-        if (total < yesterday[1]) total = yesterday[1]; // messages went down
+        if (total < yesterday.count) total = yesterday.count; // messages went down
 
-        client.dailyMsgs.add([formattedDate, total]);
-        log('Cyan', `Pushed [${formattedDate}, ${total}] to dailyMsgs`);
+        await client.dailyMsgs.increment({
+            _id: formattedDate,
+            count: total
+        });
+        log('Cyan', `Pushed { ${formattedDate}, ${total} } to dailyMsgs`);
     
         if (today.startsWith('fri')) {
             await channel.send(`Weekend begins! ${client.config.DAILY_MSGS_WEEKEND}`);

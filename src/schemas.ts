@@ -1,3 +1,4 @@
+export * from "./schemas/dailyMsgs.js";
 export * from "./schemas/playerTimes.js";
 export * from "./schemas/punishments.js";
 export * from "./schemas/reminders.js";

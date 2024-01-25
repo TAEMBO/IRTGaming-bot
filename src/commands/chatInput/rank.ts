@@ -9,10 +9,10 @@ export default new Command<"chatInput">({
 
 		if (subCmd === "leaderboard") {
 			const messageCountsTotal = allData.reduce((a, b) => a + b.messages, 0);
-			const data = interaction.client.dailyMsgs.data.map((x, i, a) => {
+			const data = interaction.client.dailyMsgs.cache.map((x, i, a) => {
 				const yesterday = a[i - 1] || [];
 
-				return x[1] - (yesterday[1] || x[1]);
+				return x.count - (yesterday.count || x.count);
 			}).slice(1).slice(-60);
 			
             // handle negative days

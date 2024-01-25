@@ -2,7 +2,14 @@ import type { Collection, PresenceData, SlashCommandBuilder, SlashCommandSubcomm
 import config from "./config.json" assert { type: "json" };
 import type TClient from "./client.js";
 import type { Command, LocalDatabase, RepeatedMessages } from "./utils.js";
-import type { PlayerTimes, Punishments, Reminders, UserLevels, WatchList } from "./schemas.js";
+import type {
+    DailyMsgs,
+    PlayerTimes,
+    Punishments,
+    Reminders,
+    UserLevels,
+    WatchList
+} from "./schemas.js";
 
 export type * from "./schemas.js";
 
@@ -20,12 +27,12 @@ declare module "discord.js" {
         readonly fmList: LocalDatabase<string>;
         readonly whitelist: LocalDatabase<string>;
         readonly watchListPings: LocalDatabase<Snowflake>;
-        readonly dailyMsgs: LocalDatabase<[number, number]>;
         readonly userLevels: UserLevels;
         readonly punishments: Punishments;
         readonly watchList: WatchList;
         readonly playerTimes: PlayerTimes;
         readonly reminders: Reminders;
+        readonly dailyMsgs: DailyMsgs
 
         /**
          * Get a text channel via config

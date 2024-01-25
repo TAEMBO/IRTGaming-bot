@@ -10,7 +10,14 @@ import {
     TextChannel
 } from "discord.js";
 import config from "./config.json" assert { type: "json" };
-import { PlayerTimes, Punishments, Reminders, UserLevels, WatchList } from "./schemas.js";
+import {
+    DailyMsgs,
+    PlayerTimes,
+    Punishments,
+    Reminders,
+    UserLevels,
+    WatchList
+} from "./schemas.js";
 import { type Command, LocalDatabase, RepeatedMessages } from "./utils.js";
 import type { CachedInvite, Config, FSCache, YTCache } from "./typings.js";
 
@@ -27,12 +34,12 @@ export default class TClient extends Client<true> {
     public readonly fmList = new LocalDatabase<string>('FMlist.json');
     public readonly whitelist = new LocalDatabase<string>('adminWhitelist.json');
     public readonly watchListPings = new LocalDatabase<Snowflake>('watchListPings.json');
-    public readonly dailyMsgs = new LocalDatabase<[number, number]>("dailyMsgs.json");
     public readonly userLevels = new UserLevels(this);
     public readonly punishments = new Punishments(this);
     public readonly watchList = new WatchList();
     public readonly playerTimes = new PlayerTimes(this);
     public readonly reminders = new Reminders(this);
+    public readonly dailyMsgs = new DailyMsgs();
 
     constructor() {
         super({

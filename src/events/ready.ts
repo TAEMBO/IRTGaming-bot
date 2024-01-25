@@ -81,8 +81,8 @@ export default async (client: TClient) => {
 
     // YouTube upload notifications loop
     if (client.config.toggles.ytLoop) setInterval(async () => {
-        for await (const [chanId, chanName] of client.config.ytCacheChannels) {
-            const res = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${chanId}`, formatRequestInit(5_000, "YTLoop")).catch(() => log('Red', `${chanName} YT fetch fail`));
+        for await (const channel of client.config.ytChannels) {
+            const res = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`, formatRequestInit(5_000, "YTLoop")).catch(() => log('Red', `${channel.name} YT fetch fail`));
             let data;
     
             if (!res) continue;
@@ -90,21 +90,21 @@ export default async (client: TClient) => {
             try {
                 data = xml2js(await res.text(), { compact: true }) as YTCacheFeed;
             } catch (err) {
-                log("Red", `${chanName} YT parse fail`);
+                log("Red", `${channel.name} YT parse fail`);
                 continue;
             }
 
             const latestVid = data.feed.entry[0];
     
-            if (!client.ytCache[chanId]) {
-                client.ytCache[chanId] = latestVid['yt:videoId']._text;
+            if (!client.ytCache[channel.id]) {
+                client.ytCache[channel.id] = latestVid['yt:videoId']._text;
                 continue;
             }
     
-            if (data.feed.entry[1]['yt:videoId']._text !== client.ytCache[chanId]) continue;
+            if (data.feed.entry[1]['yt:videoId']._text !== client.ytCache[channel.id]) continue;
             
-            client.ytCache[chanId] = latestVid['yt:videoId']._text;
-            await client.getChan('videosAndLiveStreams').send(`**${chanName}** just uploaded a new video!\n${latestVid.link._attributes.href}`);
+            client.ytCache[channel.id] = latestVid['yt:videoId']._text;
+            await client.getChan('videosAndLiveStreams').send(`**${channel.name}** just uploaded a new video!\n${latestVid.link._attributes.href}`);
         }
     }, 300_000);
 }

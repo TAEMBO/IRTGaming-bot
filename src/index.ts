@@ -12,7 +12,7 @@ console.log(client.config.toggles);
 console.log(client.config.devWhitelist);
 console.log(fsKeys);
 
-for (const [chanId, _] of client.config.ytCacheChannels) client.ytCache[chanId] = null;
+for (const { id } of client.config.ytChannels) client.ytCache[id] = null;
 for (const serverAcro of fsKeys) client.fsCache[serverAcro] = { players: [], status: null, lastAdmin: null, graphPoints: [] };
 
 // Command handler

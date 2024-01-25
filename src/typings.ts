@@ -186,8 +186,10 @@ export interface Config {
         /** A list of channel IDs that logs do not emit for */
         logs: Snowflake[];
     };
-    /** `Array<[ChannelID, ChannelName]>` */
-    ytCacheChannels: string[][];
+    ytChannels: {
+        id: string,
+        name: string
+    }[];
     resources: Record<keyof typeof config.resources, `https://${string}`>;
     mainServer: {
         /** The ID of the guild that this bot is for */

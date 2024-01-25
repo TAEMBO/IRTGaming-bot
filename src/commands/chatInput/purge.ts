@@ -1,7 +1,8 @@
-import { type ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { Command } from "../../utils.js";
 
-export default {
-	async run(interaction: ChatInputCommandInteraction<"cached">) {
+export default new Command<"chatInput">({
+	async run(interaction) {
         const limit = interaction.options.getInteger("amount", true);
         const user = interaction.options.getUser("user");
         const msgs = await (async () => {
@@ -26,4 +27,4 @@ export default {
 			.setDescription("The user to purge messages from")
 			.setRequired(false))
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
-};
+});

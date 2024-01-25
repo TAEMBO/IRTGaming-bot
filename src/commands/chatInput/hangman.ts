@@ -1,7 +1,8 @@
-import { type ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
+import { Command } from "../../utils.js";
 
-export default {
-	async run(interaction: ChatInputCommandInteraction<"cached">) {
+export default new Command<"chatInput">({
+	async run(interaction) {
 		await interaction.reply({ content: 'Game started!', ephemeral: true });
 
 		let hiddenLetters = true;
@@ -12,7 +13,7 @@ export default {
 		const phrase = interaction.options.getString("phrase", true).toLowerCase();
 		const wordOrPhrase = phrase.includes(' ') ? 'phrase' : 'word';
 		const botMsg = await interaction.followUp({ content: `A hangman game has been started by *${interaction.user.tag}*!\nAnyone can guess letters${phrase.includes(' ') ? ', a word, or the full phrase': ' or the full word'} by doing \`guess [letter${phrase.includes(' ') ? ', word, or phrase' : ' or word'}]\`\nThe ${wordOrPhrase} is:\n\`\`\`\n${hidePhrase()}\n\`\`\``, fetchReply: true });
-        const guessCollector = interaction.channel?.createMessageCollector();
+        const guessCollector = interaction.channel!.createMessageCollector();
 
         await interaction.deleteReply();
 
@@ -22,7 +23,7 @@ export default {
 
 			if (!hiddenLetters) {
 				text = `The whole ${wordOrPhrase} has been revealed! The hangman game ends with the ${wordOrPhrase} being:\n\`\`\`\n${phrase}\n\`\`\``;
-				guessCollector?.stop();
+				guessCollector.stop();
 				clearInterval(interval);
 			}
 
@@ -45,7 +46,7 @@ export default {
 		async function guessLetter(letter: string) {
 			latestActivity = Date.now();
 
-			if (guesses.includes(letter)) return await interaction.channel?.send('That letter has been guessed already.');
+			if (guesses.includes(letter)) return await interaction.channel!.send('That letter has been guessed already.');
 
 			guesses.push(letter);
 
@@ -136,13 +137,13 @@ export default {
 
 			if (fouls === 7) {
 				loseText = `\nThe poor fella got hung. You lost the game. The ${wordOrPhrase} was:\n\`\`\`\n${phrase}\n\`\`\``;
-				guessCollector?.stop();
+				guessCollector.stop();
 				clearInterval(interval);
 			}
 			await botMsg.reply({ content: `The ${wordOrPhrase} doesn\'t include that ${isWord ? 'piece of text' : 'letter'}.\nAn incorrect guess leads to the addition of things to the drawing. It now looks like this:\n\`\`\`\n${stages[fouls - 1].join('\n')}\n\`\`\`` + loseText, allowedMentions: { repliedUser: false } });
 		}
 
-		guessCollector?.on('collect', async guessMessage => {
+		guessCollector.on('collect', async guessMessage => {
 			if (guessMessage.author.bot) return;
 			if (guessMessage.content.toLowerCase().startsWith('guess')) {
 				const guess = guessMessage.content.slice(6).toLowerCase();
@@ -161,7 +162,7 @@ export default {
 		const interval = setInterval(async () => {
 			if (Date.now() > (latestActivity + 120_000)) {
 				await botMsg.reply({ content: 'The hangman game has ended due to inactivity.', allowedMentions: { repliedUser: false } });
-				guessCollector?.stop();
+				guessCollector.stop();
 				clearInterval(interval);
 			}
 		}, 5000);
@@ -173,4 +174,4 @@ export default {
 			.setName("phrase")
 			.setDescription("The word or phrase for members to guess")
 			.setRequired(true))
-};
+});

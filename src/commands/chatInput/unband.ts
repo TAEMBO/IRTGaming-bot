@@ -1,11 +1,12 @@
-import { type ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
+import { Command } from "../../utils.js";
 
-export default {
-	async run(interaction: ChatInputCommandInteraction<"cached">) {
+export default new Command<"chatInput">({
+	async run(interaction) {
         const user = interaction.options.getUser("member", true);
 
         await interaction.deferReply({ ephemeral: true }).then(() => interaction.deleteReply());
-        await interaction.channel?.send(`<@${user.id}> had their honorary ban revoked!`);
+        await interaction.channel!.send(`<@${user.id}> had their honorary ban revoked!`);
     },
     data: new SlashCommandBuilder()
         .setName("unband")
@@ -14,4 +15,4 @@ export default {
             .setName("member")
             .setDescription("It's an honor")
             .setRequired(true))
-};
+});

@@ -1,3 +1,4 @@
+export * from './util/command.js';
 export * from './util/formatRequestInit.js';
 export * from './util/formatString.js';
 export * from './util/formatTime.js';

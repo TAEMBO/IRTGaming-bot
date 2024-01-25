@@ -1,7 +1,8 @@
-import { type ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
+import { Command } from "../../utils.js";
 
-export default {
-	async run(interaction: ChatInputCommandInteraction<"cached">) {
+export default new Command<"chatInput">({
+	async run(interaction) {
         const applicationLogs = interaction.client.getChan('mpApplicationLogs');
         const userData = await interaction.client.userLevels.data.findById(interaction.user.id);
         const eligibleTime = (Date.now() - (interaction.member.joinedTimestamp as number)) > (1000 * 60 * 60 * 24 * 14);
@@ -22,4 +23,4 @@ export default {
     data: new SlashCommandBuilder()
         .setName("apply")
         .setDescription("Apply for MP Staff")
-};
+});

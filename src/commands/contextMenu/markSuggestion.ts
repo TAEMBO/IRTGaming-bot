@@ -5,14 +5,13 @@ import {
     ButtonStyle,
     ComponentType,
     ContextMenuCommandBuilder,
-    EmbedBuilder,
-    type MessageContextMenuCommandInteraction
+    EmbedBuilder
 } from "discord.js";
-import { isDCStaff, isMPStaff, youNeedRole } from "../../utils.js";
+import { Command, isDCStaff, isMPStaff, youNeedRole } from "../../utils.js";
 import type { Index } from "../../typings.js";
 
-export default {
-    async run(interaction: MessageContextMenuCommandInteraction<"cached">) {
+export default new Command<"message">({
+    async run(interaction) {
         if (!isDCStaff(interaction.member) && !isMPStaff(interaction.member)) return await youNeedRole(interaction, "discordstaff");
 
         if (
@@ -61,4 +60,4 @@ export default {
     data: new ContextMenuCommandBuilder()
         .setName("Mark Suggestion")
         .setType(ApplicationCommandType.Message)
-}
+});

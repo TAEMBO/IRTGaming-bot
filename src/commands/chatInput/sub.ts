@@ -1,7 +1,8 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, type ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, SlashCommandBuilder } from "discord.js";
+import { Command } from "../../utils.js";
 
-export default {
-	async run(interaction: ChatInputCommandInteraction<"cached">) {
+export default new Command<"chatInput">({
+	async run(interaction) {
         await interaction.reply({ content: `Verification sent, please wait for someone to verify your subscription. You will then receive the <@&${interaction.client.config.mainServer.roles.subscriber}> role.`, ephemeral: true });
         
         await interaction.client.getChan('helperChat').send({
@@ -20,4 +21,4 @@ export default {
             .setName('image')
             .setDescription('Image proving subscription')
             .setRequired(true))
-}
+});

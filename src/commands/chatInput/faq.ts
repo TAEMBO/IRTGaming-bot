@@ -1,18 +1,11 @@
-import {
-    ActionRowBuilder,
-    ButtonBuilder,
-    ButtonStyle,
-    type ChatInputCommandInteraction,
-    EmbedBuilder,
-    SlashCommandBuilder
-} from "discord.js";
-import { FSServers } from "../../utils.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { Command, FSServers } from "../../utils.js";
 import type { Index } from "../../typings.js";
 
-export default {
-	async run(interaction: ChatInputCommandInteraction<"cached">) {
+export default new Command<"chatInput">({
+	async run(interaction) {
         const fsServers = new FSServers(interaction.client.config.fs);
-        const isFromTicket = interaction.channel?.parentId === interaction.client.config.mainServer.categories.activeTickets;
+        const isFromTicket = interaction.channel!.parentId === interaction.client.config.mainServer.categories.activeTickets;
         const content = interaction.options.getUser('user', false)?.toString();
 
         await ({
@@ -97,4 +90,4 @@ export default {
         .addUserOption(x => x
             .setName('user')
             .setDescription('The optional user to notify of with this FAQ'))
-};
+});

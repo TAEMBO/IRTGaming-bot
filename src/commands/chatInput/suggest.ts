@@ -1,7 +1,8 @@
-import { type ChatInputCommandInteraction, EmbedBuilder, ThreadAutoArchiveDuration, SlashCommandBuilder } from "discord.js";
+import { EmbedBuilder, ThreadAutoArchiveDuration, SlashCommandBuilder } from "discord.js";
+import { Command } from "../../utils.js";
 
-export default {
-	async run(interaction: ChatInputCommandInteraction<"cached">) {
+export default new Command<"chatInput">({
+	async run(interaction) {
         const suggestion = interaction.options.getString("suggestion", true);
 
         if (interaction.channelId !== interaction.client.config.mainServer.channels.communityIdeas) return await interaction.reply({ content: `This command only works in <#${interaction.client.config.mainServer.channels.communityIdeas}>`, ephemeral: true });
@@ -28,4 +29,4 @@ export default {
             .setName("suggestion")
             .setDescription("Your suggestion")
             .setRequired(true))
-};
+});

@@ -1,9 +1,9 @@
-import { type ChatInputCommandInteraction, EmbedBuilder, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
-import { formatTime } from "../../utils.js";
+import { EmbedBuilder, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { Command, formatTime } from "../../utils.js";
 import type { Index } from "../../typings.js";
 
-export default {
-	async run(interaction: ChatInputCommandInteraction<"cached">) {
+export default new Command<"chatInput">({
+	async run(interaction) {
 		const caseid = interaction.options.getInteger("id");
 
 		await ({
@@ -98,4 +98,4 @@ export default {
 				.setDescription("The New Reason For The Case.")
 				.setRequired(true)))
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
-};
+});

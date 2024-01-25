@@ -12,9 +12,10 @@ import {
 } from "discord.js";
 import ms from "ms";
 import type { Index, RemindersDocument } from "../../typings.js";
+import { Command } from "../../utils.js";
 
-export default {
-	async run(interaction: ChatInputCommandInteraction<"cached">) {
+export default new Command<"chatInput">({
+	async run(interaction) {
         function formatTime(time: number) {
             return `<t:${Math.round(time / 1000)}> (<t:${Math.round(time / 1000)}:R>)`;
         };
@@ -203,4 +204,4 @@ export default {
         .addSubcommand(x => x
             .setName('delete')
             .setDescription('Delete an active reminder'))
-};
+});

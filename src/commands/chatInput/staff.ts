@@ -1,8 +1,9 @@
-import { type ChatInputCommandInteraction, EmbedBuilder, type GuildMember, SlashCommandBuilder } from "discord.js";
+import { EmbedBuilder, type GuildMember, SlashCommandBuilder } from "discord.js";
 import type { Index } from "../../typings.js";
+import { Command } from "../../utils.js";
 
-export default {
-	async run(interaction: ChatInputCommandInteraction<"cached">) {
+export default new Command<"chatInput">({
+	async run(interaction) {
         function sortMembers(a: GuildMember, b: GuildMember) {
             if (a.displayName.toLowerCase() < b.displayName.toLowerCase()) return -1;
             if (a.displayName.toLowerCase() > b.displayName.toLowerCase()) return 1;
@@ -98,4 +99,4 @@ export default {
         .addSubcommand(x => x
             .setName("mc")
             .setDescription("Shows all IRTMC Staff members"))
-};
+});

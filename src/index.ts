@@ -21,7 +21,7 @@ for await (const folder of fs.readdirSync(path.resolve("./commands"))) {
         const commandFile = await import(`./commands/${folder}/${file}`);
         const collectionType = commandFile.default.data instanceof ContextMenuCommandBuilder ? "contextMenuCommands": "chatInputCommands";
 
-        client[collectionType].set(commandFile.default.data.name, { uses: 0, ...commandFile.default });
+        client[collectionType].set(commandFile.default.data.name, commandFile.default);
     }
 }
 

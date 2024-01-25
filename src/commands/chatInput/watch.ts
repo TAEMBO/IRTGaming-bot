@@ -3,16 +3,15 @@ import {
     AttachmentBuilder,
     ButtonBuilder,
     ButtonStyle,
-    type ChatInputCommandInteraction,
     ComponentType,
     EmbedBuilder,
     SlashCommandBuilder
 } from "discord.js";
-import { isMPStaff, youNeedRole } from "../../utils.js";
+import { Command, isMPStaff, youNeedRole } from "../../utils.js";
 import type { Index } from "../../typings.js";
 
-export default {
-	async run(interaction: ChatInputCommandInteraction<"cached">) {
+export default new Command<"chatInput">({
+	async run(interaction) {
         if (!isMPStaff(interaction.member)) return await youNeedRole(interaction, "mpstaff");
 
         await ({
@@ -121,4 +120,4 @@ export default {
         .addSubcommand(x => x
             .setName("subscription")
             .setDescription("Manage your subscription to watchList notifications"))
-};
+});

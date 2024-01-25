@@ -3,16 +3,15 @@ import {
     type APIEmbedField,
     ApplicationFlagsBitField,
     type ClientPresenceStatus,
-    type ChatInputCommandInteraction,
     escapeItalic,
     EmbedBuilder,
     SlashCommandBuilder
 } from "discord.js";
-import { formatString, formatUser } from "../../utils.js";
+import { Command, formatString, formatUser } from "../../utils.js";
 import type { ApplicationRPC } from "../../typings.js";
 
-export default {
-	async run(interaction: ChatInputCommandInteraction<"cached">) {
+export default new Command<"chatInput">({
+	async run(interaction) {
         async function getApplicationData(id: string) {
             const applicationData = await interaction.client.rest.get(`/applications/${id}/rpc`).catch(() => null) as ApplicationRPC | null;
             const fields: APIEmbedField[] = [];
@@ -119,7 +118,7 @@ export default {
                         `on ${activity.assets.largeText}`,
                         `Started listening <t:${Math.round(activity.createdTimestamp / 1000)}:R>`
                     ].join("\n"))
-                    .setThumbnail(`https://i.scdn.co/image/${activity.assets.largeImage?.replace('spotify:', '')}`)
+                    .setThumbnail(`https://i.scdn.co/image/${activity.assets.largeImage!.replace('spotify:', '')}`)
                 );
             } else if (activity.type === ActivityType.Custom) {
                 embeds.push(new EmbedBuilder()
@@ -180,4 +179,4 @@ export default {
             .setName("member")
             .setDescription("The member or user to get info on")
             .setRequired(true))
-};
+});

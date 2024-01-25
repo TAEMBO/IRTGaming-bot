@@ -1,8 +1,8 @@
-import { type ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
-import { punish } from "../../utils.js";
+import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { Command, punish } from "../../utils.js";
 
-export default {
-	async run(interaction: ChatInputCommandInteraction<"cached">) {
+export default new Command<"chatInput">({
+	async run(interaction) {
 		await punish(interaction, this.data.name);
 	},
 	data: new SlashCommandBuilder()
@@ -17,4 +17,4 @@ export default {
 			.setDescription("The reason for softbanning this member")
 			.setRequired(false))
         .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
-};
+});

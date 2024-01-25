@@ -1,4 +1,5 @@
-import { type ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { Command } from "../../utils.js";
 
 interface Quantity {
 	name: string;
@@ -139,8 +140,8 @@ function findUnit(unitNameQuery: string) {
 		}
 	}
 }
-export default {
-	async run(interaction: ChatInputCommandInteraction<"cached">) {
+export default new Command<"chatInput">({
+	async run(interaction) {
 		if (interaction.options.getSubcommand() === 'help') {
 			const wantedQuantity = Object.keys(quantities).find(x => x === interaction.options.getString("type"));
 
@@ -296,4 +297,4 @@ export default {
 				.setName('target')
 				.setDescription('The target quantity')
 				.setRequired(true)))
-}
+});

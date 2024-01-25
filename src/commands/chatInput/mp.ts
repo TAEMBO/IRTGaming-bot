@@ -4,7 +4,6 @@ import {
     AttachmentBuilder,
     ButtonBuilder,
     ButtonStyle,
-    type ChatInputCommandInteraction,
     ComponentType,
     EmbedBuilder,
     SlashCommandBuilder
@@ -13,14 +12,22 @@ import config from "../../config.json" assert { type: "json" };
 import FTPClient from "ftp";
 import puppeteer from "puppeteer"; // Credits to Trolly for suggesting this package
 import { xml2js } from "xml-js";
-import { FSServers, getFSURL, hasRole, isMPStaff, stringifyStream, youNeedRole } from "../../utils.js";
+import {
+    Command,
+    FSServers,
+    getFSURL,
+    hasRole,
+    isMPStaff,
+    stringifyStream,
+    youNeedRole
+} from "../../utils.js";
 import type { banFormat, DedicatedServerConfig, farmFormat, Index } from "../../typings.js";
 
 const fsServers = new FSServers(config.fs);
 const cmdOptionChoices = fsServers.getPublicAll().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));
 
-export default {
-    async run(interaction: ChatInputCommandInteraction<"cached">) {
+export default new Command<"chatInput">({
+    async run(interaction) {
         if (!isMPStaff(interaction.member)) return await youNeedRole(interaction, 'mpstaff');
 
         const FTP = new FTPClient();
@@ -69,7 +76,7 @@ export default {
                     async stop() {
                         result += 'stopped ';
 
-                        const uptime = await page.evaluate(() => document.querySelector("span.monitorHead")?.textContent);
+                        const uptime = await page.evaluate(() => document.querySelector("span.monitorHead")!.textContent);
 
                         uptimeText = `. Uptime before stopping: **${uptime}**`;
 
@@ -83,13 +90,13 @@ export default {
                             .setFooter({ text: '\u200b', iconURL: interaction.user.displayAvatarURL() })
                         ] });
 
-                        const uptime = await page.evaluate(() => document.querySelector("span.monitorHead")?.textContent);
+                        const uptime = await page.evaluate(() => document.querySelector("span.monitorHead")!.textContent);
 
                         uptimeText = `. Uptime before restarting: **${uptime}**`;
                     }
                 })[chosenAction]();
     
-                await page.waitForSelector(serverSelector).then(x => x?.click());
+                await page.waitForSelector(serverSelector).then(x => x!.click());
 
                 result += `**${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**`;
 
@@ -288,7 +295,7 @@ export default {
 
                                     await member.edit({
                                         roles: roles.filter(x => x !== roleId && x !== mainRoles.mpstaff).concat([mainRoles.formerstaff, mainRoles.trustedfarmer]),
-                                        nick: member.nickname?.replace(slicedNick, 'Former Staff')
+                                        nick: member.nickname!.replace(slicedNick, 'Former Staff')
                                     });
                                 } else await member.roles.remove(roleId);
 
@@ -328,12 +335,12 @@ export default {
                         mpjradmin() {
                             roles.push(roleId);
                             roles.splice(roles.indexOf(mainRoles.mpfarmmanager), 1);
-                            newNickname = member.nickname?.replace('MP Farm Manager', 'MP Jr. Admin');
+                            newNickname = member.nickname!.replace('MP Farm Manager', 'MP Jr. Admin');
                         },
                         mpsradmin() {
                             roles.push(roleId);
                             roles.splice(roles.indexOf(mainRoles.mpjradmin), 1);
-                            newNickname = member.nickname?.replace('MP Jr. Admin', 'MP Sr. Admin');
+                            newNickname = member.nickname!.replace('MP Jr. Admin', 'MP Sr. Admin');
                         }
                     })[roleName]();
                     
@@ -488,4 +495,4 @@ export default {
                 .setName('name')
                 .setDescription('The player name to add or remove')
                 .setRequired(true)))
-}
+});

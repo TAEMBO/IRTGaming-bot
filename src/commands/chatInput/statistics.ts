@@ -1,9 +1,9 @@
-import { type ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder, version } from "discord.js";
+import { EmbedBuilder, SlashCommandBuilder, version } from "discord.js";
 import os from "node:os";
-import { formatTime } from "../../utils.js";
+import { Command, formatTime } from "../../utils.js";
 
-export default {
-	async run(interaction: ChatInputCommandInteraction<"cached">) {
+export default new Command<"chatInput">({
+	async run(interaction) {
 		const colunms = ['Command Name', 'Uses'] as const;
 		const includedCommands = interaction.client.chatInputCommands.filter(x => x.uses).sort((a, b) => b.uses - a.uses);
 
@@ -67,4 +67,4 @@ export default {
 	data: new SlashCommandBuilder()
 		.setName("statistics")
 		.setDescription("See statistics for the bot itself")
-};
+});

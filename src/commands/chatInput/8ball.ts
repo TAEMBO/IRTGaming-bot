@@ -1,7 +1,8 @@
-import { type ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { Command } from "../../utils.js";
 
-export default {
-	async run(interaction: ChatInputCommandInteraction<"cached">) {
+export default new Command<"chatInput">({
+	async run(interaction) {
         const question = interaction.options.getString("question", true);
 
         if (question.length < 5) return await interaction.reply('Ask a real question, numb nut.');
@@ -22,4 +23,4 @@ export default {
             .setName("question")
             .setDescription('Your closed-ended question')
             .setRequired(true))
-}
+});

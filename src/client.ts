@@ -11,22 +11,15 @@ import {
 } from "discord.js";
 import config from "./config.json" assert { type: "json" };
 import { PlayerTimes, Punishments, Reminders, UserLevels, WatchList } from "./schemas.js";
-import { LocalDatabase, RepeatedMessages } from "./utils.js";
-import type {
-    CachedInvite,
-    ChatInputCommand,
-    Config,
-    ContextMenuCommand,
-    FSCache,
-    YTCache
-} from "./typings.js";
+import { type Command, LocalDatabase, RepeatedMessages } from "./utils.js";
+import type { CachedInvite, Config, FSCache, YTCache } from "./typings.js";
 
 export default class TClient extends Client<true> {
     public readonly config = config as Config;
     public readonly fsCache: FSCache = {};
     public readonly ytCache: YTCache = {};
-    public readonly chatInputCommands = new Collection<string, ChatInputCommand>();
-    public readonly contextMenuCommands = new Collection<string, ContextMenuCommand>();
+    public readonly chatInputCommands = new Collection<string, Command<"chatInput">>();
+    public readonly contextMenuCommands = new Collection<string, Command<"message" | "user">>();
     public readonly repeatedMessages = new RepeatedMessages(this);
     public readonly inviteCache = new Collection<string, CachedInvite>();
     public readonly bannedWords = new LocalDatabase<string>('bannedWords.json');

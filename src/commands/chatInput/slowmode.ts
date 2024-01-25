@@ -1,7 +1,8 @@
-import { type ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { Command } from "../../utils.js";
 
-export default {
-	async run(interaction: ChatInputCommandInteraction<"cached">) {
+export default new Command<"chatInput">({
+    async run(interaction) {
         const time = interaction.options.getInteger("time", true);
 
         await interaction.channel!.setRateLimitPerUser(time, `Done by ${interaction.user.tag}`);
@@ -19,4 +20,4 @@ export default {
             .setRequired(true)
             .setMaxValue(21600))
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
-};
+});

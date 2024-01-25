@@ -1,4 +1,5 @@
-import { type ChatInputCommandInteraction, EmbedBuilder, type Message, SlashCommandBuilder, type User } from "discord.js";
+import { EmbedBuilder, type Message, SlashCommandBuilder, type User } from "discord.js";
+import { Command } from "../../utils.js";
 
 const rpsChannels: Record<string, RpsInstance> = {};
 
@@ -14,20 +15,20 @@ class RpsInstance {
 }
 
 // Credits to Memw
-export default {
-	async run(interaction: ChatInputCommandInteraction<"cached">) {
+export default new Command<"chatInput">({
+	async run(interaction) {
         const move = interaction.options.getString("move", true);
 
         if (!rpsChannels.hasOwnProperty(interaction.channelId)) {
             await interaction.deferReply({ ephemeral: true }).then(() => interaction.deleteReply());
 
-            const message = await interaction.channel?.send({ embeds: [new EmbedBuilder()
+            const message = await interaction.channel!.send({ embeds: [new EmbedBuilder()
                 .setTitle("Rps game started")
                 .setDescription(`To play with <@${interaction.user.id}> run the command again.`)
                 .setFooter({ text: "You have 60 seconds to reply with another interaction." })
             ] });
 
-            rpsChannels[interaction.channelId] = new RpsInstance(interaction.user, move, message as NonNullable<typeof message>);
+            rpsChannels[interaction.channelId] = new RpsInstance(interaction.user, move, message);
         } else if (rpsChannels.hasOwnProperty(interaction.channelId)) {
             let firstMove = rpsChannels[interaction.channelId];
             
@@ -62,4 +63,4 @@ export default {
 				{ name: "Paper", value: "paper" },
 				{ name: "Scissors", value: "scissors" })
 			.setRequired(true))
-}
+});

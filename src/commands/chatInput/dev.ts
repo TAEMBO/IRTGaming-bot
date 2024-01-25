@@ -3,7 +3,6 @@ import Discord, {
     ButtonBuilder,
     ButtonStyle,
     codeBlock,
-    type ChatInputCommandInteraction,
     ComponentType,
     EmbedBuilder,
     SlashCommandBuilder
@@ -15,8 +14,8 @@ import util from "node:util";
 import * as utilities from "../../utils.js";
 import type { Index } from "../../typings.js";
 
-export default {
-	async run(interaction: ChatInputCommandInteraction<"cached">) {
+export default new utilities.Command<"chatInput">({
+	async run(interaction) {
 		if (!interaction.client.config.devWhitelist.includes(interaction.user.id)) return await interaction.reply('You\'re not allowed to use dev commands.');
         
 		await ({
@@ -126,4 +125,4 @@ export default {
         .addSubcommand(x => x
             .setName('update')
             .setDescription('Pull from GitHub repository to live bot'))
-};
+});

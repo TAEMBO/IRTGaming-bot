@@ -1,7 +1,7 @@
-import { AttachmentBuilder, type ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { AttachmentBuilder, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import config from "../../config.json" assert { type: "json" };
 import canvas from "canvas";
-import { formatRequestInit, formatTime, FSServers, getFSURL, isMPStaff, log } from "../../utils.js";
+import { Command, formatRequestInit, formatTime, FSServers, getFSURL, isMPStaff, log } from "../../utils.js";
 import type { FSLoopDSS, PlayerTimesDocument } from "../../typings.js";
 
 const fsServers = new FSServers(config.fs);
@@ -22,12 +22,12 @@ const cmdBuilderData = new SlashCommandBuilder()
 // Dynamically manage subcommands via fs data
 for (const [serverAcro, { fullName }] of fsServers.entries()) cmdBuilderData.addSubcommand(x => x.setName(serverAcro).setDescription(`${fullName} server stats`));
 
-export default {
-	async run(interaction: ChatInputCommandInteraction<"cached">) {
+export default new Command<"chatInput">({
+	async run(interaction) {
         const subCmd = interaction.options.getSubcommand();
 
         if ((
-            interaction.channel?.parentId === interaction.client.config.mainServer.categories.fs22PublicMP
+            interaction.channel!.parentId === interaction.client.config.mainServer.categories.fs22PublicMP
             || interaction.channelId === interaction.client.config.mainServer.channels.mfPublicChat
         ) && !isMPStaff(interaction.member)) return await interaction.reply({
             content: [
@@ -102,7 +102,7 @@ export default {
                         name: serverAcro.toUpperCase(),
                         value: [
                             `Time - ${formatTime(timeData.time * 60 * 1000, 5, { commas: true, longNames: false })}`,
-                            `Last on - ${interaction.client.fsCache[serverAcro]?.players?.some(x => x.name === playerData._id) ? 'Right now' : `<t:${timeData.lastOn}:R>`}`
+                            `Last on - ${interaction.client.fsCache[serverAcro]!.players.some(x => x.name === playerData._id) ? 'Right now' : `<t:${timeData.lastOn}:R>`}`
                         ].join('\n')
                     }));
 
@@ -324,4 +324,4 @@ export default {
         };
     },
     data: cmdBuilderData
-};
+});

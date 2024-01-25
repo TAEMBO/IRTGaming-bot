@@ -1,10 +1,8 @@
 import {
     ActionRowBuilder,
-    type AutocompleteInteraction,
     ButtonBuilder,
     ButtonStyle,
     type CategoryChannel,
-    type ChatInputCommandInteraction, 
     ComponentType,
     EmbedBuilder,
     type OverwriteData,
@@ -12,11 +10,11 @@ import {
     SlashCommandBuilder,
     type TextChannel
 } from "discord.js";
-import { hasRole, onMFFarms, youNeedRole } from "../../utils.js";
+import { Command, hasRole, onMFFarms, youNeedRole } from "../../utils.js";
 import type { Index, MFFarmRoleKeys } from "../../typings.js";
 
-export default {
-    async autocomplete(interaction: AutocompleteInteraction<"cached">) {
+export default new Command<"chatInput">({
+    async autocomplete(interaction) {
         await ({
             async member() {
                 const displayedRoles = (() => {
@@ -70,7 +68,7 @@ export default {
             }
         } as Index)[interaction.options.getSubcommand()]();
     },
-	async run(interaction: ChatInputCommandInteraction<"cached">) {
+	async run(interaction) {
         await ({
             async member() {
                 if (!hasRole(interaction.member, 'mpmanager') && !hasRole(interaction.member, 'mfmanager') && !hasRole(interaction.member, 'mffarmowner')) return await youNeedRole(interaction, "mffarmowner");
@@ -324,4 +322,4 @@ export default {
         .addSubcommand(x => x
             .setName("apply")
             .setDescription("Send the Google Form to apply to be an MF Farm Owner"))
-};
+});

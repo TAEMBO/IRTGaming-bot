@@ -1,7 +1,8 @@
-import { type ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { Command } from "../../utils.js";
 
-export default {
-	async run(interaction: ChatInputCommandInteraction<"cached">) {
+export default new Command<"chatInput">({
+	async run(interaction) {
         const member = interaction.options.getMember('member');
         let reason = interaction.options.getString('reason', false);
 
@@ -32,4 +33,4 @@ export default {
             .setName('reason')
             .setDescription('The reason for bonking the member')
             .setRequired(false))
-};
+});

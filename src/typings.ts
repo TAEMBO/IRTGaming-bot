@@ -1,17 +1,7 @@
-import type {
-    AutocompleteInteraction,
-    ChatInputCommandInteraction,
-    Collection,
-    ContextMenuCommandBuilder,
-    ContextMenuCommandInteraction,
-    PresenceData,
-    SlashCommandBuilder,
-    SlashCommandSubcommandsOnlyBuilder,
-    Snowflake
-} from "discord.js";
+import type { Collection, PresenceData, SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder, Snowflake } from "discord.js";
 import config from "./config.json" assert { type: "json" };
 import type TClient from "./client.js";
-import type { RepeatedMessages, LocalDatabase } from "./utils.js";
+import type { Command, LocalDatabase, RepeatedMessages } from "./utils.js";
 import type { PlayerTimes, Punishments, Reminders, UserLevels, WatchList } from "./schemas.js";
 
 export type * from "./schemas.js";
@@ -21,8 +11,8 @@ declare module "discord.js" {
         readonly config: Config;
         readonly fsCache: FSCache;
         readonly ytCache: YTCache;
-        readonly chatInputCommands: Collection<string, ChatInputCommand>;
-        readonly contextMenuCommands: Collection<string, ContextMenuCommand>;
+        readonly chatInputCommands: Collection<string, Command<"chatInput">>;
+        readonly contextMenuCommands: Collection<string, Command<"message" | "user">>;
         readonly repeatedMessages: RepeatedMessages;
         readonly inviteCache: Collection<string, CachedInvite>;
         readonly bannedWords: LocalDatabase<string>;
@@ -96,6 +86,8 @@ export type RepeatedMessagesData = Record<string, {
     timeout: NodeJS.Timeout;
 }>;
 
+export type CombinedSlashCommandBuilder = Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup"> | SlashCommandSubcommandsOnlyBuilder;
+
 export type FSCache = Record<string, {
     players: FSLoopDSSPlayer[];
     status: "online" | "offline" | null;
@@ -111,21 +103,6 @@ export interface CachedInvite {
     uses: number;
     creator: string;
 }
-
-interface BaseCommand<I, B> {
-    run(interaction: I): Promise<any>;
-    data: B;
-    uses: number;
-}
-
-
-export type ContextMenuCommand = Prettify<BaseCommand<ContextMenuCommandInteraction<"cached">, ContextMenuCommandBuilder>>;
-export type ChatInputCommand = Prettify<
-    BaseCommand<ChatInputCommandInteraction<"cached">, Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup"> | SlashCommandSubcommandsOnlyBuilder>
-    & {
-        autocomplete?(interaction: AutocompleteInteraction<"cached">): Promise<any>;
-    }
->;
 
 /** The base object data that is always present */
 interface FSServerBase {

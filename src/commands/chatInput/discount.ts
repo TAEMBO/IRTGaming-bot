@@ -1,7 +1,8 @@
-import { type ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { Command } from "../../utils.js";
 
-export default {
-	async run(interaction: ChatInputCommandInteraction<"cached">) {
+export default new Command<"chatInput">({
+	async run(interaction) {
         const member = interaction.options.getMember('member');
 
         if (!member) return await interaction.reply({ content: 'You need to select a member that is in this server', ephemeral: true });
@@ -17,4 +18,4 @@ export default {
 			.setDescription("The member to give a 15% discount to")
 			.setRequired(true))
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
-};
+});

@@ -1,7 +1,8 @@
-import { type ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { Command } from "../../utils.js";
 
-export default {
-	async run(interaction: ChatInputCommandInteraction<"cached">) {
+export default new Command<"chatInput">({
+	async run(interaction) {
 		const word = interaction.options.getString("word", true);
 
 		if (!interaction.client.bannedWords.data.includes(word)) {
@@ -18,4 +19,4 @@ export default {
 			.setDescription("The word to add")
 			.setRequired(true))
         .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
-};
+});

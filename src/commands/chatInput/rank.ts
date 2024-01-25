@@ -1,8 +1,9 @@
-import { AttachmentBuilder, type ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { AttachmentBuilder, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import canvas from "canvas";
+import { Command } from "../../utils.js";
 
-export default {
-	async run(interaction: ChatInputCommandInteraction<"cached">) {
+export default new Command<"chatInput">({
+	async run(interaction) {
 		const subCmd = interaction.options.getSubcommand();
 		const allData = await interaction.client.userLevels.data.find();
 
@@ -190,4 +191,4 @@ export default {
 	    .addSubcommand(x => x
 	    	.setName("leaderboard")
 	    	.setDescription("View top 10 users"))
-};
+});

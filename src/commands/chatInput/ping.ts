@@ -1,7 +1,8 @@
-import { type ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
+import { Command } from "../../utils.js";
 
-export default {
-	async run(interaction: ChatInputCommandInteraction<"cached">) {
+export default new Command<"chatInput">({
+	async run(interaction) {
         const msg = await interaction.reply({ content: 'Pinging...', fetchReply: true });
 
         await interaction.editReply([
@@ -12,4 +13,4 @@ export default {
 	data: new SlashCommandBuilder()
 		.setName("ping")
 		.setDescription("Check the bot's latency")
-};
+});

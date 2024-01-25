@@ -1,8 +1,8 @@
-import { type ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
-import { hasRole, isMPStaff, youNeedRole } from "../../utils.js";
+import { SlashCommandBuilder } from "discord.js";
+import { Command, hasRole, isMPStaff, youNeedRole } from "../../utils.js";
 
-export default {
-	async run(interaction: ChatInputCommandInteraction<"cached">) {
+export default new Command<"chatInput">({
+	async run(interaction) {
         if (!isMPStaff(interaction.member)) return await youNeedRole(interaction, "mpstaff");
 
         const roles = interaction.member.roles.cache.map(x => x.id);
@@ -26,7 +26,7 @@ export default {
             
             await interaction.member.edit({
                 roles: returnedRoles,
-                nick: interaction.member.nickname?.replaceAll('[LOA] ', '')
+                nick: interaction.member.nickname!.replaceAll('[LOA] ', '')
             }).catch(() => interaction.member.roles.set(returnedRoles));
 
             await interaction.reply({ content: 'LOA status removed', ephemeral: true });
@@ -35,4 +35,4 @@ export default {
 	data: new SlashCommandBuilder()
         .setName("loa")
         .setDescription("Manage your LOA status")
-};
+});

@@ -1,8 +1,8 @@
-import { type ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
-import { hasRole, youNeedRole } from "../../utils.js";
+import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { Command, hasRole, youNeedRole } from "../../utils.js";
 
-export default {
-	async run(interaction: ChatInputCommandInteraction<"cached">) {
+export default new Command<"chatInput">({
+	async run(interaction) {
 		const punishment = await interaction.client.punishments.data.findById(interaction.options.getInteger('caseid', true));
         const reason = interaction.options.getString("reason") ?? 'Unspecified';
 
@@ -24,4 +24,4 @@ export default {
 			.setDescription("The reason for overwriting the punishment")
 			.setRequired(false))
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
-};
+});

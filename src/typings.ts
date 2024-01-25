@@ -32,7 +32,7 @@ declare module "discord.js" {
         readonly watchList: WatchList;
         readonly playerTimes: PlayerTimes;
         readonly reminders: Reminders;
-        readonly dailyMsgs: DailyMsgs
+        readonly dailyMsgs: DailyMsgs;
 
         /**
          * Get a text channel via config

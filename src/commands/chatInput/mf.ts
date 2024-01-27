@@ -5,7 +5,6 @@ import {
     type CategoryChannel,
     ComponentType,
     EmbedBuilder,
-    type OverwriteData,
     OverwriteType,
     SlashCommandBuilder,
     type TextChannel
@@ -222,7 +221,7 @@ export default new Command<"chatInput">({
                     await channel.edit({
                         parent: archived,
                         permissionOverwrites: [
-                            ...(interaction.client.channels.cache.get(archived) as CategoryChannel).permissionOverwrites.cache.map(x => x.toJSON() as OverwriteData),
+                            ...(interaction.client.channels.cache.get(archived) as CategoryChannel).permissionOverwrites.cache.values(),
                             {
                                 id: interaction.client.config.mainServer.roles.mpmanager,
                                 allow: "ViewChannel",

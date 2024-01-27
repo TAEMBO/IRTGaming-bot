@@ -55,7 +55,7 @@ export default new Command<"chatInput">({
                 if (interaction.client.fsCache[chosenServer].status === 'online' && chosenAction === 'start') return await interaction.editReply('Server is already online');
 
                 const serverSelector = `[name="${chosenAction}_server"]`;
-                const browser = await puppeteer.launch();
+                const browser = await puppeteer.launch({ headless: "new" });
                 const page = await browser.newPage();
     
                 try {

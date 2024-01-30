@@ -106,7 +106,6 @@ export default new Command<"chatInput">({
         });
 
         for (const activity of member.presence.activities) {
-            activity.flags
             if (activity.type === ActivityType.Listening && activity.details && activity.assets && activity.name === "Spotify") {
                 embeds.push(new EmbedBuilder()
                     .setAuthor({ name: activity.name, iconURL: interaction.client.config.resources.whoisSpotifyEmbedAuthorImage })

@@ -31,6 +31,8 @@ export default async (client: TClient) => {
     await guild.members.fetch();
 
     await client.dailyMsgs.fillCache();
+
+    await client.playerTimes.fillCache();
         
     for (const [code, inv] of await guild.invites.fetch()) client.inviteCache.set(code, { uses: inv.uses ?? 0, creator: inv.inviter?.id ?? "UNKNOWN" });
 

@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 import { Snowflake } from "@sapphire/snowflake";
 import { xml2js } from "xml-js";
 import { FSServers, log, stringifyStream } from "../utils.js";
-import type { farmFormat } from "../typings.js";
+import type { Cached, farmFormat } from "../typings.js";
 
 /** The object that each server will have */
 const serverObj = {
@@ -23,15 +23,15 @@ for (const serverAcro of Object.keys(config.fs)) serversObj[serverAcro] = { type
 
 const model = mongoose.model('playerTimes', new mongoose.Schema({
     _id: { type: String, required: true },
-	uuid: { type: String },
     discordid: { type: String },
 	servers: { type: serversObj, required: true, _id: false }
 }, { versionKey: false }));
 
 export type PlayerTimesDocument = ReturnType<typeof model.castObject>;
 
-export class PlayerTimes {
+export class PlayerTimes implements Cached<PlayerTimes, PlayerTimesDocument> {
 	public data = model;
+    public cache: PlayerTimesDocument[] = [];
     private readonly _snowflake = new Snowflake(config.PLAYERTIMES_START_UNIX);
 
 	constructor(private readonly _client: TClient) { }
@@ -47,6 +47,12 @@ export class PlayerTimes {
 
     private createSnowflake() {
         return this._snowflake.generate().toString();
+    }
+    
+    public async fillCache() {
+        this.cache = await this.data.find();
+
+        return this;
     }
 
 	/**
@@ -101,10 +107,10 @@ export class PlayerTimes {
         let addedUuidCount = 0;
 
 		for await (const player of farmData.farms.farm[0].players.player) {
-			const playerDatabyUuid = allData.find(x => x.uuid === player._attributes.uniqueUserId);
+			const playerDatabyUuid = allData.find(x => x._id === player._attributes.uniqueUserId);
 
 			if (playerDatabyUuid) { // PlayerTimes data was found with UUID
-                if (playerDatabyUuid._id === player._attributes.lastNickname) continue; // PlayerTimes name matches farm name, no need to update playerTimes data
+                if (playerDatabyUuid.servers[serverAcro]?.name === player._attributes.lastNickname) continue; // PlayerTimes name matches farm name, no need to update playerTimes data
                 
                 const decorators = (name: string) => {
                     return [
@@ -118,18 +124,20 @@ export class PlayerTimes {
 					.setTitle('Player name change')
 					.setTimestamp()
 					.setDescription([
-						`**UUID:** \`${playerDatabyUuid.uuid}\``,
+						`**UUID:** \`${playerDatabyUuid._id}\``,
 						`**Old name:** ${playerDatabyUuid._id} ${decorators(playerDatabyUuid._id)}`,
 						`**New name:** ${player._attributes.lastNickname} ${decorators(player._attributes.lastNickname)}`
 					].join('\n'))
 				] });
 
                 changedNameCount++;
+
+                Object.freeze(player)
 				
 				await this.data.create({ _id: player._attributes.lastNickname, uuid: player._attributes.uniqueUserId, servers: playerDatabyUuid.servers })
 					.then(() => this.data.findByIdAndDelete(playerDatabyUuid._id)) // New name was not occupied, delete old name data
 					.catch(async () => { // New name was occupied
-						playerDatabyUuid.uuid = undefined; // Remove UUID from old name
+						playerDatabyUuid._id; // Remove UUID from old name
 
 						await playerDatabyUuid.save();
 						await this.data.findByIdAndUpdate(
@@ -142,9 +150,9 @@ export class PlayerTimes {
                         ); // Add UUID to new name
 					});
 			} else { // No playerTimes data was found with UUID
-				const playerDataByName = allData.find(x => x._id === player._attributes.lastNickname);
+				const playerDataByName = allData.find(x => x.servers[serverAcro].name === player._attributes.lastNickname);
 
-				if (playerDataByName && !playerDataByName.uuid) {
+				if (playerDataByName && !playerDataByName._id) {
                     await this.data.findByIdAndUpdate(player._attributes.lastNickname, { uuid: player._attributes.uniqueUserId }, { new: true });
 
                     addedUuidCount++;

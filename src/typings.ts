@@ -79,7 +79,23 @@ export type Prettify<T> = {
 
 export type Empty<T> = {
     [K in keyof T]: undefined;
-}
+};
+
+/** Adds cache implementation to the specified schema class */
+export interface Cached<SType, CType> {
+    cache: CType[];
+    /**
+     * @example
+     * ```ts
+     * public async fillCache() {
+     *     this.cache = await this.data.find();
+     * 
+     *     return this;
+     * }
+     * ```
+     */
+    fillCache(): Promise<SType>;
+} 
 export type RepeatedMessagesIdentifiers = 'bw' | 'adv' | 'spam';
 
 export interface RepeatedMessagesEntry {

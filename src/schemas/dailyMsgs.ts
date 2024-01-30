@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import type { Cached } from "../typings.js";
 
 const model = mongoose.model('dailyMsgs', new mongoose.Schema({
     _id: { type: Number, required: true },
@@ -7,7 +8,7 @@ const model = mongoose.model('dailyMsgs', new mongoose.Schema({
 
 export type DailyMsgsDocument = ReturnType<typeof model.castObject>;
 
-export class DailyMsgs {
+export class DailyMsgs implements Cached<DailyMsgs, DailyMsgsDocument> {
     public data = model;
     public cache: DailyMsgsDocument[] = [];
     

@@ -123,7 +123,7 @@ export default new Command<"chatInput">({
                     `Player - \`${playerData._id}\`${interaction.client.fmList.data.includes(playerData._id) ? ':farmer:' : ''}${interaction.client.tfList.data.includes(playerData._id) ? ':angel:' : ''}`,
                     `Leaderboard position - **#${sortedData.indexOf(playerData) + 1}**`,
                     `Total time - **${formatTime(playerTimeDataTotal * 60 * 1000, 5, { commas: true, longNames: false })}**`,
-                    (isMPStaff(interaction.member) && playerData.uuid) ? `UUID: \`${playerData.uuid}\`` : '',
+                    (isMPStaff(interaction.member) && playerData._id.length === 44) ? `UUID: \`${playerData._id}\`` : '',
                     (isMPStaff(interaction.member) && playerData.discordid) ? `Discord user ID - \`${playerData.discordid}\`` : '',
                 ].join('\n'))
                 .setFields(formattedTimeData)

@@ -41,10 +41,8 @@ export class PlayerTimes {
 	 * @param data The MongoDB document for the player
 	 * @returns An array of all server time objects from the player, with the first element for each being the server's acronym
 	 */
-	public getTimeData(data: PlayerTimesDocument) {
-		return (Object.entries(Object.values(data.servers)[3]) as unknown) as [string, {
-            [key in keyof typeof serverObj]: number;
-        }][];
+	public getServerData(data: PlayerTimesDocument) {
+		return (Object.entries(Object.values(data.servers)[3]) as unknown) as [string, PlayerTimesDocument['servers'][string]][];
 	}
 
     private createSnowflake() {

@@ -81,7 +81,7 @@ export default new Command<"chatInput">({
             await interaction.editReply({ embeds: [embed] });
         } else if (subCmd === 'playertimes') {
             const playersData = await interaction.client.playerTimes.data.find();
-            const sortedData = playersData.sort((a, b) => interaction.client.playerTimes.getTimeData(b).reduce((x, y) => x + y[1].time, 0) - interaction.client.playerTimes.getTimeData(a).reduce((x, y) => x + y[1].time, 0));
+            const sortedData = playersData.sort((a, b) => interaction.client.playerTimes.getServerData(b).reduce((x, y) => x + y[1].time, 0) - interaction.client.playerTimes.getServerData(a).reduce((x, y) => x + y[1].time, 0));
             const player = interaction.options.getString('name');
 
             const leaderboard = (data: PlayerTimesDocument[], isFirstField: boolean) => data.map((x, i) => [
@@ -89,42 +89,44 @@ export default new Command<"chatInput">({
                 interaction.client.fmList.data.includes(x._id) ? ':farmer:' : '',
                 interaction.client.tfList.data.includes(x._id) ? ':angel:' : '',
                 ' - ',
-                formatTime((interaction.client.playerTimes.getTimeData(x).reduce((x, y) => x + y[1].time, 0) * 60 * 1000), 3, { commas: true, longNames: false })
+                formatTime((interaction.client.playerTimes.getServerData(x).reduce((x, y) => x + y[1].time, 0) * 60 * 1000), 3, { commas: true, longNames: false })
             ].join('')).join('\n');
 
-            if (player) {
-                const playerData = playersData.find(x => x._id === player);
 
-                if (playerData) {
-                    const playerTimeData = interaction.client.playerTimes.getTimeData(playerData);
-                    const playerTimeDataTotal = playerTimeData.reduce((x, y) => x + y[1].time, 0);
-                    const formattedTimeData = playerTimeData.map(([serverAcro, timeData]) => ({
-                        name: serverAcro.toUpperCase(),
-                        value: [
-                            `Time - ${formatTime(timeData.time * 60 * 1000, 5, { commas: true, longNames: false })}`,
-                            `Last on - ${interaction.client.fsCache[serverAcro]!.players.some(x => x.name === playerData._id) ? 'Right now' : `<t:${timeData.lastOn}:R>`}`
-                        ].join('\n')
-                    }));
-
-                    await interaction.reply({ embeds: [new EmbedBuilder()
-                        .setColor(interaction.client.config.EMBED_COLOR)
-                        .setTitle([
-                            `Player - \`${playerData._id}\`${interaction.client.fmList.data.includes(playerData._id) ? ':farmer:' : ''}${interaction.client.tfList.data.includes(playerData._id) ? ':angel:' : ''}`,
-                            `Leaderboard position - **#${sortedData.indexOf(playerData) + 1}**`,
-                            `Total time - **${formatTime(playerTimeDataTotal * 60 * 1000, 5, { commas: true, longNames: false })}**`,
-                            (isMPStaff(interaction.member) && playerData.uuid) ? `UUID: \`${playerData.uuid}\`` : '',
-                            (isMPStaff(interaction.member) && playerData.discordid) ? `Discord user ID - \`${playerData.discordid}\`` : '',
-                        ].join('\n'))
-                        .setFields(formattedTimeData)
-                    ] });
-                } else await interaction.reply(`No data found with that name. [Find out why.](${interaction.client.config.resources.statsNoDataRedirect})`);
-
-            } else await interaction.reply({ embeds: [new EmbedBuilder()
+            if (!player) return await interaction.reply({ embeds: [new EmbedBuilder()
                 .setColor(interaction.client.config.EMBED_COLOR)
                 .setDescription(`Top 50 players with the most time spent on IRTGaming FS22 servers since ${time(interaction.client.config.PLAYERTIMES_START_UNIX / 1_000)}`)
                 .addFields(
                     { name: '\u200b', value: leaderboard(sortedData.slice(0, 25), true), inline: true },
                     { name: '\u200b', value: leaderboard(sortedData.slice(25, 50), false) + '\u200b', inline: true })
+            ] });
+
+            const playerData = playersData.find(x => interaction.client.playerTimes.getServerData(x).some(y => y[1].name === player));
+
+            if (!playerData) return await interaction.reply(`No data found with that name. [Find out why.](${interaction.client.config.resources.statsNoDataRedirect})`);
+            
+            const playerServerData = interaction.client.playerTimes.getServerData(playerData);
+            const playerTimeDataTotal = playerServerData.reduce((x, y) => x + y[1].time, 0);
+            const hasConsistentNames = playerServerData.map(x => x[1].name).every((x, _, arr) => x === arr[0]);
+            const formattedTimeData = playerServerData.map(([serverAcro, serverData]) => ({
+                name: serverAcro.toUpperCase(),
+                value: [
+                    hasConsistentNames ? "" : `Name - \`${serverData.name}\``,
+                    `Time - ${formatTime(serverData.time * 60 * 1000, 5, { commas: true, longNames: false })}`,
+                    `Last on - ${interaction.client.fsCache[serverAcro]!.players.some(x => x.name === playerData._id) ? 'Right now' : `<t:${serverData.lastOn}:R>`}`
+                ].join('\n')
+            }));
+
+            await interaction.reply({ embeds: [new EmbedBuilder()
+                .setColor(interaction.client.config.EMBED_COLOR)
+                .setTitle([
+                    `Player - \`${playerData._id}\`${interaction.client.fmList.data.includes(playerData._id) ? ':farmer:' : ''}${interaction.client.tfList.data.includes(playerData._id) ? ':angel:' : ''}`,
+                    `Leaderboard position - **#${sortedData.indexOf(playerData) + 1}**`,
+                    `Total time - **${formatTime(playerTimeDataTotal * 60 * 1000, 5, { commas: true, longNames: false })}**`,
+                    (isMPStaff(interaction.member) && playerData.uuid) ? `UUID: \`${playerData.uuid}\`` : '',
+                    (isMPStaff(interaction.member) && playerData.discordid) ? `Discord user ID - \`${playerData.discordid}\`` : '',
+                ].join('\n'))
+                .setFields(formattedTimeData)
             ] });
         } else {
             if (interaction.client.uptime < 60_000) return await interaction.reply({ content: 'Please await another 60 seconds before using this command', ephemeral: true });

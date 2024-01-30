@@ -1,4 +1,4 @@
-import { AttachmentBuilder, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { AttachmentBuilder, EmbedBuilder, SlashCommandBuilder, time } from "discord.js";
 import config from "../../config.json" assert { type: "json" };
 import canvas from "canvas";
 import { Command, formatRequestInit, formatTime, FSServers, getFSURL, isMPStaff, log } from "../../utils.js";
@@ -121,7 +121,7 @@ export default new Command<"chatInput">({
 
             } else await interaction.reply({ embeds: [new EmbedBuilder()
                 .setColor(interaction.client.config.EMBED_COLOR)
-                .setDescription(`Top 50 players with the most time spent on IRTGaming FS22 servers since ${interaction.client.config.PLAYERTIMES_START_DATE}`)
+                .setDescription(`Top 50 players with the most time spent on IRTGaming FS22 servers since ${time(interaction.client.config.PLAYERTIMES_START_UNIX / 1_000)}`)
                 .addFields(
                     { name: '\u200b', value: leaderboard(sortedData.slice(0, 25), true), inline: true },
                     { name: '\u200b', value: leaderboard(sortedData.slice(25, 50), false) + '\u200b', inline: true })

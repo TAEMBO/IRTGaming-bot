@@ -166,7 +166,7 @@ export interface Config {
     readonly EMBED_COLOR_GREEN: `#${string}`;
     readonly EMBED_COLOR_RED: `#${string}`;
     readonly EMBED_COLOR_YELLOW: `#${string}`;
-    readonly PLAYERTIMES_START_DATE: string;
+    readonly PLAYERTIMES_START_UNIX: number;
     /** Unix timestamp used for calculating when each day for daily msgs loop to be called */
     readonly DAILY_MSGS_TIMESTAMP: number;
     readonly DAILY_MSGS_DEFAULT: `<${"a" | ""}:${string}:${string}>`;

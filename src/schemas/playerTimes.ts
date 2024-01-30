@@ -3,12 +3,14 @@ import type TClient from "../client.js";
 import config from "../config.json" assert { type: "json" };
 import FTPClient from "ftp";
 import mongoose from "mongoose";
+import { Snowflake } from "@sapphire/snowflake";
 import { xml2js } from "xml-js";
 import { FSServers, log, stringifyStream } from "../utils.js";
 import type { farmFormat } from "../typings.js";
 
 /** The object that each server will have */
 const serverObj = {
+    name: { type: String, required: true },
 	time: { type: Number, required: true },
 	lastOn: { type: Number, required: true }
 };
@@ -30,6 +32,7 @@ export type PlayerTimesDocument = ReturnType<typeof model.castObject>;
 
 export class PlayerTimes {
 	public data = model;
+    private readonly _snowflake = new Snowflake(config.PLAYERTIMES_START_UNIX);
 
 	constructor(private readonly _client: TClient) { }
     
@@ -44,6 +47,10 @@ export class PlayerTimes {
         }][];
 	}
 
+    private createSnowflake() {
+        return this._snowflake.generate().toString();
+    }
+
 	/**
 	 * Add server-specific time to a player's data.
 	 * @param playerName The name of the player, a string
@@ -57,14 +64,16 @@ export class PlayerTimes {
 
 		if (playerData) {
 			playerData.servers[serverAcro] = {
+                name: playerData.servers[serverAcro].name,
 				time: (playerData.servers[serverAcro]?.time ?? 0) + playerTime,
 				lastOn: now
 			};
 			return await playerData.save();
 		} else return await this.data.create({
-			_id: playerName,
+			_id: this.createSnowflake(),
 			servers: {
 				[serverAcro]: {
+                    name: playerName,
 					time: playerTime,
 					lastOn: now
 				}

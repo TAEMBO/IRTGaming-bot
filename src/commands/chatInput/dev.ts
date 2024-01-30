@@ -73,12 +73,13 @@ export default new utilities.Command<"chatInput">({
                 const fsPub = fsServers.getPublicAll();
                 const fsObj = fsServers.values();
 
-                for (const credential of [client.config.TOKEN]
-                    .concat(fsObj.map(x => x.password))
-                    .concat(fsObj.map(x => x.code))
-                    .concat(fsPub.map(x => x[1].ftp.host))
-                    .concat(fsPub.map(x => x[1].ftp.password))
-                ) output = output.replace(credential, 'CREDENTIAL_LEAK');
+                for (const credential of [
+                    client.config.TOKEN,
+                    ...fsObj.map(x => x.password),
+                    ...fsObj.map(x => x.code),
+                    ...fsPub.map(x => x[1].ftp.host),
+                    ...fsPub.map(x => x[1].ftp.password)
+                ]) output = output.replace(credential, 'CREDENTIAL_LEAK');
 
                 embed.addFields({ name: `Output • ${Date.now() - now}ms`, value: `\`\`\`${output.slice(0, 1016)}\n\`\`\`` });
 

@@ -3,8 +3,7 @@ import type TClient from "../client.js";
 import config from "../config.json" assert { type: "json" };
 import FTPClient from "ftp";
 import mongoose from "mongoose";
-import { xml2js } from "xml-js";
-import { FSServers, log, stringifyStream } from "../utils.js";
+import { FSServers, jsonFromXML, log, stringifyStream } from "../utils.js";
 import type { farmFormat } from "../typings.js";
 
 /** The object that each server will have */
@@ -89,7 +88,7 @@ export class PlayerTimes {
 
         log('Yellow', `Downloaded farms.xml from ${serverAcro}, crunching...`);
 
-        const farmData = xml2js(await stringifyStream(stream), { compact: true }) as farmFormat;
+        const farmData = jsonFromXML<farmFormat>(await stringifyStream(stream));
         let changedNameCount = 0;
         let addedUuidCount = 0;
 

@@ -1,7 +1,6 @@
 import type TClient from "../client.js";
 import mongoose from "mongoose";
-import { xml2js } from "xml-js";
-import { formatRequestInit, fsLoop, fsLoopAll, FSServers, log } from "../utils.js";
+import { formatRequestInit, fsLoop, fsLoopAll, FSServers, jsonFromXML, log } from "../utils.js";
 import type { YTCacheFeed } from "../typings.js";
 
 export default async (client: TClient) => {
@@ -93,7 +92,7 @@ export default async (client: TClient) => {
             if (!res) continue;
 
             try {
-                data = xml2js(await res.text(), { compact: true }) as YTCacheFeed;
+                data = jsonFromXML<YTCacheFeed>(await res.text());
             } catch (err) {
                 log("Red", `${channel.name} YT parse fail`);
                 continue;

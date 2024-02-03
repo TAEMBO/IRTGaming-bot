@@ -11,13 +11,13 @@ import {
 import config from "../../config.json" assert { type: "json" };
 import FTPClient from "ftp";
 import puppeteer from "puppeteer"; // Credits to Trolly for suggesting this package
-import { xml2js } from "xml-js";
 import {
     Command,
     FSServers,
     getFSURL,
     hasRole,
     isMPStaff,
+    jsonFromXML,
     stringifyStream,
     youNeedRole
 } from "../../utils.js";
@@ -90,7 +90,7 @@ export default new Command<"chatInput">({
                             .setFooter({ text: '\u200b', iconURL: interaction.user.displayAvatarURL() })
                         ] });
 
-                        const uptime = await page.evaluate(() => document.querySelector("span.monitorHead")!.textContent);
+                        const uptime = await page.evaluate(() => document.querySelector("span.monitorHead")!.textContent!);
 
                         uptimeText = `. Uptime before restarting: **${uptime}**`;
                     }
@@ -141,7 +141,7 @@ export default new Command<"chatInput">({
                 } else {
                     if (!hasRole(interaction.member, 'mpmanager')) return await youNeedRole(interaction, 'mpmanager');
                     
-                    let data: banFormat;
+                    let data;
                     const banAttachment = interaction.options.getAttachment('bans');
 
                     if (!banAttachment) return await interaction.editReply(`Canceled: A ban file must be supplied`);
@@ -149,7 +149,7 @@ export default new Command<"chatInput">({
                     const banData = await (await fetch(banAttachment.url)).text();
 
                     try {
-                        data = xml2js(banData, { compact: true }) as banFormat;
+                        data = jsonFromXML<banFormat>(banData);
                     } catch (err) {
                         return await interaction.editReply(`Canceled: Improper file (not XML)`);
                     }
@@ -167,6 +167,7 @@ export default new Command<"chatInput">({
             },
             async search() {
                 await interaction.deferReply();
+                
                 const chosenServer = interaction.options.getString('server', true);
                 const name = interaction.options.getString('name', true);
                 const ftpLogin = fsServers.getPublicOne(chosenServer).ftp;
@@ -188,7 +189,7 @@ export default new Command<"chatInput">({
                 FTP.on('ready', () => FTP.get(ftpLogin.path + 'savegame1/farms.xml', async (err, stream) => {
                     if (err) return await interaction.editReply(err.message);
 
-                    const farmData = xml2js(await stringifyStream(stream), { compact: true }) as farmFormat;
+                    const farmData = jsonFromXML<farmFormat>(await stringifyStream(stream));
                     const playerData = farmData.farms.farm[0].players.player.find(x => {
                         if (name.length === 44) {
                             return x._attributes.uniqueUserId === name;
@@ -239,7 +240,7 @@ export default new Command<"chatInput">({
                 FTP.once('ready', () => FTP.get(ftpLogin.path + 'dedicated_server/dedicatedServerConfig.xml', async (err, stream) => {
                     if (err) return await interaction.editReply(err.message);
 
-                    const pw = (xml2js(await stringifyStream(stream), { compact: true }) as DedicatedServerConfig).gameserver.settings.game_password._text;
+                    const pw = jsonFromXML<DedicatedServerConfig>(await stringifyStream(stream)).gameserver.settings.game_password._text;
 
                     if (pw) {
                         await interaction.editReply(`Current password for **${chosenServer.toUpperCase()}** is \`${pw}\``);
@@ -256,10 +257,9 @@ export default new Command<"chatInput">({
 
                 if (!member) return await interaction.reply({ content: 'You need to select a member that is in this server', ephemeral: true });
 
-                const owner = await interaction.guild.fetchOwner();
                 const roleName = interaction.options.getString("role", true) as 'trustedfarmer' | 'mpfarmmanager' | 'mpjradmin' | 'mpsradmin';
                 const roleId = mainRoles[roleName];
-                const roles = member.roles.cache.map((_, i) => i);
+                const roles = [...member.roles.cache.keys()];
                 
                 if (member.roles.cache.has(roleId)) {
                     (await interaction.reply({
@@ -301,13 +301,16 @@ export default new Command<"chatInput">({
 
                                 await int.update({
                                     embeds: [new EmbedBuilder()
-                                        .setDescription(`<@${member.user.id}> has been removed from <@&${roleId}>.`)
+                                        .setDescription(`${member} has been removed from <@&${roleId}>.`)
                                         .setColor(interaction.client.config.EMBED_COLOR)
                                     ],
                                     components: []
                                 });
 
-                                await owner.send(`**${interaction.user.tag}** has demoted **${member.user.tag}** from **${interaction.client.getRole(roleName).name}**`);
+                                await interaction.client.users.send(
+                                    interaction.guild.ownerId,
+                                    `**${interaction.user.tag}** has demoted **${member.user.tag}** from **${interaction.client.getRole(roleName).name}**`
+                                );
                             },
                             async no() {
                                 await int.update({
@@ -321,32 +324,38 @@ export default new Command<"chatInput">({
                         } as Index)[int.customId]();
                     });
                 } else {
-                    let newNickname: string | undefined;
-
-                    ({
+                    const newNickname = ({
                         trustedfarmer() {
                             roles.push(roleId);
+
+                            return undefined;
                         },
                         mpfarmmanager() {
                             roles.push(roleId, mainRoles.mpstaff);
                             roles.splice(roles.indexOf(mainRoles.trustedfarmer), 1);
-                            newNickname = `${member.displayName.slice(0, 14)} | MP Farm Manager`;
+
+                            return `${member.displayName.slice(0, 14)} | MP Farm Manager`;
                         },
                         mpjradmin() {
                             roles.push(roleId);
                             roles.splice(roles.indexOf(mainRoles.mpfarmmanager), 1);
-                            newNickname = member.nickname!.replace('MP Farm Manager', 'MP Jr. Admin');
+
+                            return member.nickname!.replace('MP Farm Manager', 'MP Jr. Admin');
                         },
                         mpsradmin() {
                             roles.push(roleId);
                             roles.splice(roles.indexOf(mainRoles.mpjradmin), 1);
-                            newNickname = member.nickname!.replace('MP Jr. Admin', 'MP Sr. Admin');
+
+                            return member.nickname!.replace('MP Jr. Admin', 'MP Sr. Admin');
                         }
                     })[roleName]();
                     
                     await member.edit({ roles, nick: newNickname });
-                    await owner.send(`**${interaction.user.tag}** has promoted **${member.user.tag}** to **${interaction.client.getRole(roleName).name}**`);
-                    await interaction.reply({ embeds: [new EmbedBuilder().setDescription(`<@${member.user.id}> has been given <@&${roleId}>.`).setColor(interaction.client.config.EMBED_COLOR)] });
+                    await interaction.reply({ embeds: [new EmbedBuilder().setDescription(`${member} has been given <@&${roleId}>.`).setColor(interaction.client.config.EMBED_COLOR)] });
+                    await interaction.client.users.send(
+                        interaction.guild.ownerId,
+                        `**${interaction.user.tag}** has promoted **${member.user.tag}** to **${interaction.client.getRole(roleName).name}**`
+                    );
                 }
             },
             async fm() {

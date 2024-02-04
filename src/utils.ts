@@ -9,6 +9,7 @@ export * from './util/getFSURL.js';
 export * from './util/hasRole.js';
 export * from './util/isDCStaff.js';
 export * from './util/isMPStaff.js';
+export * from './util/jsonFromXML.js';
 export * from './util/localDatabase.js';
 export * from './util/log.js';
 export * from './util/onMFFarms.js';

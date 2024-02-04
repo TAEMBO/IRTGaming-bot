@@ -1,7 +1,6 @@
 import { EmbedBuilder, TextChannel } from "discord.js";
 import type TClient from "../client.js";
-import { xml2js } from "xml-js";
-import { formatRequestInit, formatTime, getFSURL, log } from "../utils.js";
+import { formatRequestInit, formatTime, getFSURL, jsonFromXML, log } from "../utils.js";
 import type { FSLoopCSG, FSLoopDSS, FSLoopDSSPlayer, FSServer, WatchListDocument } from "../typings.js";
 
 export async function fsLoop(client: TClient, watchList: WatchListDocument[], server: FSServer, serverAcro: string) {
@@ -55,7 +54,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
     const csg = !dss ? null : await fetch(getFSURL(server, "csg"), init) // Fetch dedicated-server-savegame.html if DSS was successful
         .then(async res => {
             if (res.status !== 204) {
-                const { careerSavegame } = xml2js(await res.text(), { compact: true }) as FSLoopCSG;
+                const { careerSavegame } = jsonFromXML<FSLoopCSG>(await res.text());
 
                 return careerSavegame;
             } else statsEmbed.setImage('https://http.cat/204');

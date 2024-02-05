@@ -7,8 +7,7 @@ import {
     ContextMenuCommandBuilder,
     EmbedBuilder
 } from "discord.js";
-import { Command, isDCStaff, isMPStaff, youNeedRole } from "../../utils.js";
-import type { Index } from "../../typings.js";
+import { Command, isDCStaff, isMPStaff, ooLookup, youNeedRole } from "../../utils.js";
 
 export default new Command<"message">({
     async run(interaction) {
@@ -38,7 +37,7 @@ export default new Command<"message">({
             time: 30_000,
             componentType: ComponentType.Button
         }).on('collect', async int => {
-            await ({
+            await ooLookup({
                 async accept() {
                     embed.setTitle("Community Idea - __**Seen and accepted by staff**__");
 
@@ -54,7 +53,7 @@ export default new Command<"message">({
                 async cancel() {
                     await int.update({ content: "Command canceled", components: [] });
                 }
-            } as Index)[int.customId]();
+            }, int.customId);
         });
     },
     data: new ContextMenuCommandBuilder()

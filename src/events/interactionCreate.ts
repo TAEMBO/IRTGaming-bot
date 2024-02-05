@@ -1,6 +1,5 @@
 import type { Interaction } from "discord.js";
-import { log } from "../utils.js";
-import type { Index } from "../typings.js";
+import { log, ooLookup } from "../utils.js";
 
 export default async (interaction: Interaction) => {
     if (!interaction.inCachedGuild()) return;
@@ -61,7 +60,7 @@ export default async (interaction: Interaction) => {
 
         const args = interaction.customId.split('-');
 
-        await ({
+        await ooLookup({
             async reaction() {
                 const roleId = args[1];
 
@@ -73,18 +72,16 @@ export default async (interaction: Interaction) => {
                     await interaction.reply({ content: `You've been added to <@&${roleId}>`, ephemeral: true });
                 }
             },
-            async sub() {
-                await ({
-                    async yes() {
-                        await interaction.guild.members.cache.get(args[2])?.roles.add(interaction.client.config.mainServer.roles.subscriber);
-                        await interaction.message.edit({ content: interaction.message.content + '\n**Accepted verification**', components: [] });
-                    },
-                    async no() {
-                        await interaction.message.edit({ content: interaction.message.content + '\n**Denied verification**', components: [] });
-                    }
-                } as Index)[args[1]]();
-            }
-        } as Index)[args[0]]();
+            sub: () => ooLookup({
+                async yes() {
+                    await interaction.guild.members.cache.get(args[2])?.roles.add(interaction.client.config.mainServer.roles.subscriber);
+                    await interaction.message.edit({ content: interaction.message.content + '\n**Accepted verification**', components: [] });
+                },
+                no() {
+                    return interaction.message.edit({ content: interaction.message.content + '\n**Denied verification**', components: [] });
+                }
+            }, args[1])
+        }, args[0]);
     } else if (interaction.isAutocomplete()) {
         const command = interaction.client.chatInputCommands.get(interaction.commandName);
 

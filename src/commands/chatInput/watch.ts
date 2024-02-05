@@ -7,14 +7,13 @@ import {
     EmbedBuilder,
     SlashCommandBuilder
 } from "discord.js";
-import { Command, isMPStaff, youNeedRole } from "../../utils.js";
-import type { Index } from "../../typings.js";
+import { Command, isMPStaff, ooLookup, youNeedRole } from "../../utils.js";
 
 export default new Command<"chatInput">({
 	async run(interaction) {
         if (!isMPStaff(interaction.member)) return await youNeedRole(interaction, "mpstaff");
 
-        await ({
+        await ooLookup({
             async add() {
                 const reason = interaction.options.getString('reason', true);
                 const name = interaction.options.getString('username', true);
@@ -55,7 +54,7 @@ export default new Command<"chatInput">({
                         time: 30_000,
                         componentType: ComponentType.Button
                     }).on('collect', async int => {
-                        await ({
+                        await ooLookup({
                             async yes() {
                                 interaction.client.watchListPings.remove(interaction.user.id);
 
@@ -71,7 +70,7 @@ export default new Command<"chatInput">({
                                     components: []
                                 });
                             }
-                        } as Index)[int.customId]();
+                        }, int.customId);
                     });
                 } else {
                     interaction.client.watchListPings.add(interaction.user.id)
@@ -83,7 +82,7 @@ export default new Command<"chatInput">({
                     ] });
                 }
             }
-        } as Index)[interaction.options.getSubcommand()]();
+        }, interaction.options.getSubcommand());
     },
     data: new SlashCommandBuilder()
         .setName("watch")

@@ -9,12 +9,12 @@ import {
     SlashCommandBuilder,
     type TextChannel
 } from "discord.js";
-import { Command, hasRole, onMFFarms, youNeedRole } from "../../utils.js";
-import type { Index, MFFarmRoleKeys } from "../../typings.js";
+import { Command, hasRole, onMFFarms, ooLookup, youNeedRole } from "../../utils.js";
+import type { MFFarmRoleKeys } from "../../typings.js";
 
 export default new Command<"chatInput">({
     async autocomplete(interaction) {
-        await ({
+        await ooLookup({
             async member() {
                 const displayedRoles = (() => {
                     if (hasRole(interaction.member, 'mpmanager') || hasRole(interaction.member, 'mfmanager')) {
@@ -65,10 +65,10 @@ export default new Command<"chatInput">({
                     return 0;
                 }));
             }
-        } as Index)[interaction.options.getSubcommand()]();
+        }, interaction.options.getSubcommand());
     },
 	async run(interaction) {
-        await ({
+        await ooLookup({
             async member() {
                 if (!hasRole(interaction.member, 'mpmanager') && !hasRole(interaction.member, 'mfmanager') && !hasRole(interaction.member, 'mffarmowner')) return await youNeedRole(interaction, "mffarmowner");
 
@@ -97,7 +97,7 @@ export default new Command<"chatInput">({
                         time: 30_000,
                         componentType: ComponentType.Button
                     }).on('collect', async int => {
-                        await ({
+                        await ooLookup({
                             async yes() {
                                 const rolesToRemove = onMFFarms(member).length === 1 ? [roleId, interaction.client.config.mainServer.roles.mfmember] : [roleId];
                                 
@@ -111,10 +111,10 @@ export default new Command<"chatInput">({
                                     components: []
                                 });
                             },
-                            async no() {
-                                await int.update({ embeds: [new EmbedBuilder().setDescription('Command canceled').setColor(interaction.client.config.EMBED_COLOR)], components: [] });
+                            no() {
+                                return int.update({ embeds: [new EmbedBuilder().setDescription('Command canceled').setColor(interaction.client.config.EMBED_COLOR)], components: [] });
                             }
-                        } as Index)[int.customId]();
+                        }, int.customId);
                     });
                 } else {
                     await member.roles.add([roleId, interaction.client.config.mainServer.roles.mfmember]);
@@ -148,7 +148,7 @@ export default new Command<"chatInput">({
                         time: 30_000,
                         componentType: ComponentType.Button
                     }).on('collect', async int => {
-                        await ({
+                        ooLookup({
                             async yes() {
                                 await member.roles.remove(interaction.client.config.mainServer.roles.mffarmowner);
 
@@ -159,12 +159,11 @@ export default new Command<"chatInput">({
                                     ],
                                     components: []
                                 });
-
                             },
-                            async no() {
-                                await int.update({ embeds: [new EmbedBuilder().setDescription('Command canceled').setColor(interaction.client.config.EMBED_COLOR)], components: [] });
+                            no() {
+                                return int.update({ embeds: [new EmbedBuilder().setDescription('Command canceled').setColor(interaction.client.config.EMBED_COLOR)], components: [] });
                             }
-                        } as Index)[int.customId]();
+                        }, int.customId);
                     });
                 } else {
                     await member.roles.add(interaction.client.config.mainServer.roles.mffarmowner);
@@ -266,7 +265,7 @@ export default new Command<"chatInput">({
 
                 await interaction.reply(interaction.client.config.resources.mfFarmOwnerForm);
             }
-        } as Index)[interaction.options.getSubcommand()]();
+        }, interaction.options.getSubcommand());
 	},
     data: new SlashCommandBuilder()
         .setName('mf')

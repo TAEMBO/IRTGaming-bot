@@ -2,8 +2,7 @@ import { type ChatInputCommandInteraction, EmbedBuilder, type GuildMember, type 
 import type TClient from "../client.js";
 import mongoose from "mongoose";
 import ms from "ms";
-import { formatTime, log } from "../utils.js";
-import type { Index } from "../typings.js";
+import { formatTime, log, ooLookup } from "../utils.js";
 
 const model = mongoose.model('punishments', new mongoose.Schema({
     _id: { type: Number, required: true },
@@ -105,7 +104,7 @@ export class Punishments {
 			.setTitle(`Case #${punData._id}: ${type[0].toUpperCase() + type.slice(1)}`)
 			.setDescription(`${user.tag}\n<@${user.id}>\n(\`${user.id}\`)`)
 			.addFields({ name: 'Reason', value: reason });
-		let punResult: User | GuildMember | string | null | undefined;
+		let punResult: User | GuildMember | string | null | void;
 		let timeInMillis: number | null;
 
 		if (type === "mute") {       
@@ -128,7 +127,7 @@ export class Punishments {
                 return null;
             });
 
-        punResult = await ({
+        punResult = await ooLookup({
             async ban() {
                 const banned = await guild.bans.fetch(user).catch(() => null);
 
@@ -156,7 +155,7 @@ export class Punishments {
                 } else return await guildMember?.timeout(timeInMillis, auditLogReason).catch((err: Error) => err.message);
             },
             warn: () => { }
-        } as Index)[type]();
+        }, type);
 
 		// If type was softban and it was successful, continue with softban (unban)
 		if (type === 'softban' && typeof punResult !== 'string') punResult = await guild.bans.remove(user, auditLogReason).catch((err: Error) => err.message);
@@ -186,7 +185,6 @@ export class Punishments {
 		}
 	}
 
-
 	public async removePunishment(caseId: number, moderator: string, reason: string, interaction?: ChatInputCommandInteraction<"cached">) {
 		const now = Date.now();
 		const punishment = await this.data.findById(caseId);
@@ -205,9 +203,9 @@ export class Punishments {
 			this.createId()
 		]);
 		let removePunishmentData: PunishmentsDocument = { type: `un${punishment.type}`, _id, cancels: punishment._id, member: punishment.member, reason, moderator, time: now };
-        let punResult: User | GuildMember | string | null | undefined;
+        let punResult: User | GuildMember | string | null | void;
 
-        punResult = await ({
+        punResult = await ooLookup({
             ban: async () => {
                 return await guild.bans.remove(punishment.member._id, auditLogReason).catch((err: Error) => err.message);
             },
@@ -229,7 +227,7 @@ export class Punishments {
             warn: () => {
                 removePunishmentData.type = 'removeOtherPunishment';
             }
-        } as Index)[punishment.type]();
+        }, punishment.type);
 
 		if (typeof punResult === 'string') { // Unpunish was unsuccessful
 			if (interaction) {

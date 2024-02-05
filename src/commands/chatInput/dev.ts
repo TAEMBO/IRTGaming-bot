@@ -9,6 +9,7 @@ import Discord, {
 } from "discord.js";
 import { exec } from "child_process";
 import fs from "node:fs";
+import { performance } from "perf_hooks";
 import { setTimeout as sleep } from "node:timers/promises";
 import util from "node:util";
 import * as utilities from "../../utils.js";
@@ -21,7 +22,7 @@ export default new utilities.Command<"chatInput">({
 		await ({
 			async eval() {
                 sleep; fs; Discord; // Imports possibly used in eval
-                const now = Date.now();
+                const now = performance.now();
                 const { client } = interaction;
                 const code = interaction.options.getString("code", true);
                 const useAsync = Boolean(interaction.options.getBoolean("async", false));
@@ -38,7 +39,7 @@ export default new utilities.Command<"chatInput">({
                     embed
                         .setColor('#ff0000')
                         .addFields({
-                            name: `Output • ${Date.now() - now}ms`,
+                            name: `Output • ${(performance.now() - now).toFixed(5)}ms`,
                             value: codeBlock(err)
                         });
 
@@ -55,11 +56,9 @@ export default new utilities.Command<"chatInput">({
                         max: 1,
                         time: 60_000,
                         componentType: ComponentType.Button
-                    }).on('collect', async int => {
-                        await int.reply(codeBlock(err.stack.slice(0, 1950)));
-                    }).on('end', async () => {
-                        await msg.edit({ embeds: msg.embeds, components: [] });
-                    });
+                    })
+                        .on('collect', int => void int.reply(codeBlock(err.stack.slice(0, 1950))))
+                        .on('end', () => void msg.edit({ embeds: msg.embeds, components: [] }));
                     
                     return;
                 }
@@ -81,7 +80,7 @@ export default new utilities.Command<"chatInput">({
                     ...fsPub.map(x => x[1].ftp.password)
                 ]) output = output.replace(credential, 'CREDENTIAL_LEAK');
 
-                embed.addFields({ name: `Output • ${Date.now() - now}ms`, value: `\`\`\`${output.slice(0, 1016)}\n\`\`\`` });
+                embed.addFields({ name: `Output • ${(performance.now() - now).toFixed(5)}ms`, value: `\`\`\`${output.slice(0, 1016)}\n\`\`\`` });
 
                 await interaction.reply({ embeds: [embed] }).catch(() => interaction.channel!.send({ embeds: [embed] }));
             },

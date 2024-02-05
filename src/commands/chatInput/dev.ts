@@ -13,14 +13,15 @@ import { performance } from "perf_hooks";
 import { setTimeout as sleep } from "node:timers/promises";
 import util from "node:util";
 import * as utilities from "../../utils.js";
-import type { Index } from "../../typings.js";
 
 export default new utilities.Command<"chatInput">({
 	async run(interaction) {
 		if (!interaction.client.config.devWhitelist.includes(interaction.user.id)) return await interaction.reply('You\'re not allowed to use dev commands.');
         
-		await ({
-			async eval() {
+
+        interaction.client.user.discriminator
+        await utilities.ooLookup({
+            async eval() {
                 sleep; fs; Discord; // Imports possibly used in eval
                 const now = performance.now();
                 const { client } = interaction;
@@ -104,7 +105,7 @@ export default new utilities.Command<"chatInput">({
                     await this.restart();
                 });
             }
-        } as Index)[interaction.options.getSubcommand()]();
+        }, interaction.options.getSubcommand());
 	},
 	data: new SlashCommandBuilder()
         .setName("dev")

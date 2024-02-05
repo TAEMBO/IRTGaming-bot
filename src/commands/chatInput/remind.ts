@@ -11,8 +11,8 @@ import {
     StringSelectMenuOptionBuilder
 } from "discord.js";
 import ms from "ms";
-import type { Index, RemindersDocument } from "../../typings.js";
-import { Command } from "../../utils.js";
+import type { RemindersDocument } from "../../typings.js";
+import { Command, ooLookup } from "../../utils.js";
 
 export default new Command<"chatInput">({
 	async run(interaction) {
@@ -50,19 +50,19 @@ export default new Command<"chatInput">({
                 time: 60_000,
                 componentType: ComponentType.Button
             }).on('collect', async int => {
-                await ({
+                await ooLookup({
                     yes: () => Promise.all([
                         interaction.client.reminders.data.findByIdAndDelete(reminder),
                         int.update(rplText(`Successfully deleted reminder \`${reminder.content}\``))
                     ]),
                     no: () => int.update(rplText('Command manually canceled'))
-                } as Index)[int.customId]();
+                }, int.customId);
             }).on('end', ints => {
                 if (!ints.size) interaction.editReply(rplText('No response given, command canceled'));
             });
         }
 
-        await ({
+        await ooLookup({
             async create() {
                 const reminderText = interaction.options.getString("what", true);
                 const reminderTime = ms(interaction.options.getString("when", true)) as number | undefined;
@@ -118,7 +118,7 @@ export default new Command<"chatInput">({
                     time: 60_000,
                     componentType: ComponentType.Button
                 }).on('collect', async int => {
-                    await ({
+                    await ooLookup({
                         async yes() {
                             const reminder = await interaction.client.reminders.data.create({ userid: interaction.user.id, content: reminderText, time: timeToRemind, ch: interaction.channelId });
 
@@ -132,8 +132,10 @@ export default new Command<"chatInput">({
                                 ]
                             });
                         },
-                        no: () => int.update(rplText('Command manually canceled'))
-                    } as Index)[int.customId]();
+                        no() {
+                            return int.update(rplText('Command manually canceled'));
+                        }
+                    }, int.customId);
                 }).on('end', ints => {
                     if (!ints.size) interaction.editReply(rplText('No response given, command canceled'));
                 });
@@ -178,14 +180,14 @@ export default new Command<"chatInput">({
                         max: 1,
                         time: 60_000,
                         componentType: ComponentType.StringSelect
-                    }).on('collect', async int => {
-                        promptDeletion(userReminders[parseInt(int.values[0]) - 1], int);
-                    }).on('end', ints => {
-                        if (!ints.size) interaction.editReply(rplText('No response given, command canceled'));
-                    });
+                    })
+                        .on('collect', int => promptDeletion(userReminders[parseInt(int.values[0]) - 1], int))
+                        .on('end', ints => {
+                            if (!ints.size) interaction.editReply(rplText('No response given, command canceled'));
+                        });
                 }
             }
-        } as Index)[interaction.options.getSubcommand()]();
+        }, interaction.options.getSubcommand());
       },
       data: new SlashCommandBuilder()
         .setName('remind')

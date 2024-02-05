@@ -1,6 +1,5 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import { Command, FSServers } from "../../utils.js";
-import type { Index } from "../../typings.js";
+import { Command, FSServers, ooLookup } from "../../utils.js";
 
 export default new Command<"chatInput">({
 	async run(interaction) {
@@ -8,7 +7,7 @@ export default new Command<"chatInput">({
         const isFromTicket = interaction.channel!.parentId === interaction.client.config.mainServer.categories.activeTickets;
         const content = interaction.options.getUser('user', false)?.toString();
 
-        await ({
+        await ooLookup({
             staff: () => interaction.reply({ content, components: [
                 new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder().setStyle(ButtonStyle.Link).setURL(interaction.client.config.resources.faqStaffButtonRedirect).setLabel("Apply for MP Staff"))
             ] }),
@@ -69,7 +68,7 @@ export default new Command<"chatInput">({
                 'This however is not the actual terrain formation on the server, and thus has no affect on where you can drive around. ',
                 'These are simply visual glitches that are only seen on your end, so don\'t fret that the server was possibly griefed!'
             ].join(''))
-        } as Index)[interaction.options.getString('questions', true)]();
+        }, interaction.options.getString('questions', true));
     },
     data: new SlashCommandBuilder()
         .setName('faq')

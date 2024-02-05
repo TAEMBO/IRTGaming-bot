@@ -1,13 +1,12 @@
 import { EmbedBuilder, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
-import { Command, formatTime } from "../../utils.js";
-import type { Index } from "../../typings.js";
+import { Command, formatTime, ooLookup } from "../../utils.js";
 
 export default new Command<"chatInput">({
 	async run(interaction) {
 		const caseid = interaction.options.getInteger("id");
 
-		await ({
-			async view() {
+        await ooLookup({
+            async view() {
 				const punishment = await interaction.client.punishments.data.findById(caseid);
 
 				if (!punishment) return await interaction.reply('A case with that ID wasn\'t found!');
@@ -63,7 +62,7 @@ export default new Command<"chatInput">({
 				await interaction.client.punishments.data.findByIdAndUpdate(caseid, { reason });
 				await interaction.reply({ embeds: [new EmbedBuilder().setColor(interaction.client.config.EMBED_COLOR).setTitle(`Case #${caseid} updated`).setDescription(`**New reason:** ${reason}`)] });
 			}
-		} as Index)[interaction.options.getSubcommand()]();
+        }, interaction.options.getSubcommand());
 	},
 	data: new SlashCommandBuilder()
 		.setName("case")

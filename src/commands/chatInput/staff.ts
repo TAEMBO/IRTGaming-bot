@@ -1,6 +1,5 @@
 import { EmbedBuilder, type GuildMember, SlashCommandBuilder } from "discord.js";
-import type { Index } from "../../typings.js";
-import { Command } from "../../utils.js";
+import { Command, ooLookup } from "../../utils.js";
 
 export default new Command<"chatInput">({
 	async run(interaction) {
@@ -10,7 +9,7 @@ export default new Command<"chatInput">({
             return 0;
         };
         
-        await ({
+        await ooLookup({
             async mp() {
                 const staff = {
                     mp_manager: interaction.client.getRole('mpmanager'),
@@ -82,7 +81,7 @@ export default new Command<"chatInput">({
                     .setDescription(`${staff.toString()}\n${staff.members.sort(sortMembers).map(x => x.toString()).join("\n") || "None"}`)
                 ] });
             }
-        } as Index)[interaction.options.getSubcommand()]();
+        }, interaction.options.getSubcommand());
     },
     data: new SlashCommandBuilder()
         .setName("staff")

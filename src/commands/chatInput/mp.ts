@@ -18,10 +18,11 @@ import {
     hasRole,
     isMPStaff,
     jsonFromXML,
+    ooLookup,
     stringifyStream,
     youNeedRole
 } from "../../utils.js";
-import type { banFormat, DedicatedServerConfig, farmFormat, Index } from "../../typings.js";
+import type { banFormat, DedicatedServerConfig, farmFormat } from "../../typings.js";
 
 const fsServers = new FSServers(config.fs);
 const cmdOptionChoices = fsServers.getPublicAll().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));
@@ -33,7 +34,7 @@ export default new Command<"chatInput">({
         const FTP = new FTPClient();
         const now = Date.now();
         
-        await ({
+        await ooLookup({
             async server() {
                 async function checkRole(role: keyof typeof interaction.client.config.mainServer.roles) {
                     if (!hasRole(interaction.member, role)) await youNeedRole(interaction, role);
@@ -284,7 +285,7 @@ export default new Command<"chatInput">({
                         time: 30_000,
                         componentType: ComponentType.Button
                     }).on('collect', async int => {
-                        await ({
+                        await ooLookup({
                             async yes() {
                                 if (roleName !== 'trustedfarmer') {
                                     const slicedNick = {
@@ -312,8 +313,8 @@ export default new Command<"chatInput">({
                                     `**${interaction.user.tag}** has demoted **${member.user.tag}** from **${interaction.client.getRole(roleName).name}**`
                                 );
                             },
-                            async no() {
-                                await int.update({
+                            no() {
+                                return int.update({
                                     embeds: [new EmbedBuilder()
                                         .setDescription(`Command canceled`)
                                         .setColor(interaction.client.config.EMBED_COLOR)
@@ -321,7 +322,7 @@ export default new Command<"chatInput">({
                                     components: []
                                 });
                             }
-                        } as Index)[int.customId]();
+                        }, int.customId);
                     });
                 } else {
                     const newNickname = ({
@@ -380,7 +381,7 @@ export default new Command<"chatInput">({
                     await interaction.reply(`Successfully added \`${name}\``);
                 }
             }
-        } as Index)[interaction.options.getSubcommand()]();
+        }, interaction.options.getSubcommand());
 	},
     data: new SlashCommandBuilder()
         .setName("mp")

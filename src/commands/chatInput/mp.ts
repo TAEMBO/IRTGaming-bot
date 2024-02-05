@@ -214,7 +214,7 @@ export default new Command<"chatInput">({
 
                 await playerData.save();
 
-                await interaction.reply(`Successfully paired Discord account \`${user.tag}\` to in-game UUID \`${playerData.uuid}\` (${playerData._id})`);
+                await interaction.reply(`Successfully paired Discord account \`${user.tag}\` to in-game UUID \`${playerData._id}\` (${playerData._id})`);
             },
             async farms() {
                 const chosenServer = interaction.options.getString('server', true);

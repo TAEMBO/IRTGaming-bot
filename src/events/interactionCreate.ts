@@ -1,5 +1,5 @@
 import type { Interaction } from "discord.js";
-import { log, ooLookup } from "../utils.js";
+import { log, lookup } from "../utils.js";
 
 export default async (interaction: Interaction) => {
     if (!interaction.inCachedGuild()) return;
@@ -60,7 +60,7 @@ export default async (interaction: Interaction) => {
 
         const args = interaction.customId.split('-');
 
-        await ooLookup({
+        await lookup({
             async reaction() {
                 const roleId = args[1];
 
@@ -72,7 +72,7 @@ export default async (interaction: Interaction) => {
                     await interaction.reply({ content: `You've been added to <@&${roleId}>`, ephemeral: true });
                 }
             },
-            sub: () => ooLookup({
+            sub: () => lookup({
                 async yes() {
                     await interaction.guild.members.cache.get(args[2])?.roles.add(interaction.client.config.mainServer.roles.subscriber);
                     await interaction.message.edit({ content: interaction.message.content + '\n**Accepted verification**', components: [] });

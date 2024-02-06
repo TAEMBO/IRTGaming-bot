@@ -13,7 +13,7 @@ export * from './util/jsonFromXML.js';
 export * from './util/localDatabase.js';
 export * from './util/log.js';
 export * from './util/onMFFarms.js';
-export * from './util/ooLookup.js'
+export * from './util/lookup.js'
 export * from './util/profanity.js';
 export * from './util/punish.js';
 export * from './util/repeatedMessages.js';

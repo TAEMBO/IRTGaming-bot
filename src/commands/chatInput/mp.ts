@@ -18,7 +18,7 @@ import {
     hasRole,
     isMPStaff,
     jsonFromXML,
-    ooLookup,
+    lookup,
     stringifyStream,
     youNeedRole
 } from "../../utils.js";
@@ -34,7 +34,7 @@ export default new Command<"chatInput">({
         const FTP = new FTPClient();
         const now = Date.now();
         
-        await ooLookup({
+        await lookup({
             async server() {
                 async function checkRole(role: keyof typeof interaction.client.config.mainServer.roles) {
                     if (!hasRole(interaction.member, role)) await youNeedRole(interaction, role);
@@ -284,46 +284,44 @@ export default new Command<"chatInput">({
                         max: 1,
                         time: 30_000,
                         componentType: ComponentType.Button
-                    }).on('collect', async int => {
-                        await ooLookup({
-                            async yes() {
-                                if (roleName !== 'trustedfarmer') {
-                                    const slicedNick = {
-                                        mpfarmmanager: 'MP Farm Manager',
-                                        mpjradmin: 'MP Jr. Admin',
-                                        mpsradmin: 'MP Sr. Admin'
-                                    }[roleName];
+                    }).on('collect', int => void lookup({
+                        async yes() {
+                            if (roleName !== 'trustedfarmer') {
+                                const slicedNick = {
+                                    mpfarmmanager: 'MP Farm Manager',
+                                    mpjradmin: 'MP Jr. Admin',
+                                    mpsradmin: 'MP Sr. Admin'
+                                }[roleName];
 
-                                    await member.edit({
-                                        roles: roles.filter(x => x !== roleId && x !== mainRoles.mpstaff).concat([mainRoles.formerstaff, mainRoles.trustedfarmer]),
-                                        nick: member.nickname!.replace(slicedNick, 'Former Staff')
-                                    });
-                                } else await member.roles.remove(roleId);
-
-                                await int.update({
-                                    embeds: [new EmbedBuilder()
-                                        .setDescription(`${member} has been removed from <@&${roleId}>.`)
-                                        .setColor(interaction.client.config.EMBED_COLOR)
-                                    ],
-                                    components: []
+                                await member.edit({
+                                    roles: roles.filter(x => x !== roleId && x !== mainRoles.mpstaff).concat([mainRoles.formerstaff, mainRoles.trustedfarmer]),
+                                    nick: member.nickname!.replace(slicedNick, 'Former Staff')
                                 });
+                            } else await member.roles.remove(roleId);
 
-                                await interaction.client.users.send(
-                                    interaction.guild.ownerId,
-                                    `**${interaction.user.tag}** has demoted **${member.user.tag}** from **${interaction.client.getRole(roleName).name}**`
-                                );
-                            },
-                            no() {
-                                return int.update({
-                                    embeds: [new EmbedBuilder()
-                                        .setDescription(`Command canceled`)
-                                        .setColor(interaction.client.config.EMBED_COLOR)
-                                    ],
-                                    components: []
-                                });
-                            }
-                        }, int.customId);
-                    });
+                            await int.update({
+                                embeds: [new EmbedBuilder()
+                                    .setDescription(`${member} has been removed from <@&${roleId}>.`)
+                                    .setColor(interaction.client.config.EMBED_COLOR)
+                                ],
+                                components: []
+                            });
+
+                            await interaction.client.users.send(
+                                interaction.guild.ownerId,
+                                `**${interaction.user.tag}** has demoted **${member.user.tag}** from **${interaction.client.getRole(roleName).name}**`
+                            );
+                        },
+                        no() {
+                            return int.update({
+                                embeds: [new EmbedBuilder()
+                                    .setDescription(`Command canceled`)
+                                    .setColor(interaction.client.config.EMBED_COLOR)
+                                ],
+                                components: []
+                            });
+                        }
+                    }, int.customId));
                 } else {
                     const newNickname = ({
                         trustedfarmer() {

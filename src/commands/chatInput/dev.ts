@@ -18,8 +18,6 @@ export default new utilities.Command<"chatInput">({
 	async run(interaction) {
 		if (!interaction.client.config.devWhitelist.includes(interaction.user.id)) return await interaction.reply('You\'re not allowed to use dev commands.');
         
-
-        interaction.client.user.discriminator
         await utilities.ooLookup({
             async eval() {
                 sleep; fs; Discord; // Imports possibly used in eval

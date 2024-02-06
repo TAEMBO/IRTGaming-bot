@@ -1,11 +1,11 @@
 import { EmbedBuilder, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
-import { Command, formatTime, ooLookup } from "../../utils.js";
+import { Command, formatTime, lookup } from "../../utils.js";
 
 export default new Command<"chatInput">({
 	async run(interaction) {
 		const caseid = interaction.options.getInteger("id");
 
-        await ooLookup({
+        await lookup({
             async view() {
 				const punishment = await interaction.client.punishments.data.findById(caseid);
 

@@ -12,7 +12,7 @@ import {
 } from "discord.js";
 import ms from "ms";
 import type { RemindersDocument } from "../../typings.js";
-import { Command, ooLookup } from "../../utils.js";
+import { Command, lookup } from "../../utils.js";
 
 export default new Command<"chatInput">({
 	async run(interaction) {
@@ -49,20 +49,18 @@ export default new Command<"chatInput">({
                 max: 1,
                 time: 60_000,
                 componentType: ComponentType.Button
-            }).on('collect', async int => {
-                await ooLookup({
-                    yes: () => Promise.all([
-                        interaction.client.reminders.data.findByIdAndDelete(reminder),
-                        int.update(rplText(`Successfully deleted reminder \`${reminder.content}\``))
-                    ]),
-                    no: () => int.update(rplText('Command manually canceled'))
-                }, int.customId);
-            }).on('end', ints => {
+            }).on('collect', int => void lookup({
+                yes: () => Promise.all([
+                    interaction.client.reminders.data.findByIdAndDelete(reminder),
+                    int.update(rplText(`Successfully deleted reminder \`${reminder.content}\``))
+                ]),
+                no: () => int.update(rplText('Command manually canceled'))
+            }, int.customId)).on('end', ints => {
                 if (!ints.size) interaction.editReply(rplText('No response given, command canceled'));
             });
         }
 
-        await ooLookup({
+        await lookup({
             async create() {
                 const reminderText = interaction.options.getString("what", true);
                 const reminderTime = ms(interaction.options.getString("when", true)) as number | undefined;
@@ -117,26 +115,24 @@ export default new Command<"chatInput">({
                     max: 1,
                     time: 60_000,
                     componentType: ComponentType.Button
-                }).on('collect', async int => {
-                    await ooLookup({
-                        async yes() {
-                            const reminder = await interaction.client.reminders.data.create({ userid: interaction.user.id, content: reminderText, time: timeToRemind, ch: interaction.channelId });
+                }).on('collect', int => void lookup({
+                    async yes() {
+                        const reminder = await interaction.client.reminders.data.create({ userid: interaction.user.id, content: reminderText, time: timeToRemind, ch: interaction.channelId });
 
-                            interaction.client.reminders.setExec(reminder._id, timeToRemind - Date.now());
-                            await int.update({
-                                components: [],
-                                embeds: [new EmbedBuilder()
-                                    .setTitle('Reminder set')
-                                    .setDescription(`\n\`\`\`${reminderText}\`\`\`\n${formatTime(timeToRemind)}`)
-                                    .setColor(interaction.client.config.EMBED_COLOR)
-                                ]
-                            });
-                        },
-                        no() {
-                            return int.update(rplText('Command manually canceled'));
-                        }
-                    }, int.customId);
-                }).on('end', ints => {
+                        interaction.client.reminders.setExec(reminder._id, timeToRemind - Date.now());
+                        await int.update({
+                            components: [],
+                            embeds: [new EmbedBuilder()
+                                .setTitle('Reminder set')
+                                .setDescription(`\n\`\`\`${reminderText}\`\`\`\n${formatTime(timeToRemind)}`)
+                                .setColor(interaction.client.config.EMBED_COLOR)
+                            ]
+                        });
+                    },
+                    no() {
+                        return int.update(rplText('Command manually canceled'));
+                    }
+                }, int.customId)).on('end', ints => {
                     if (!ints.size) interaction.editReply(rplText('No response given, command canceled'));
                 });
             },

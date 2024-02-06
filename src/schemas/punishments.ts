@@ -2,7 +2,7 @@ import { type ChatInputCommandInteraction, EmbedBuilder, type GuildMember, type 
 import type TClient from "../client.js";
 import mongoose from "mongoose";
 import ms from "ms";
-import { formatTime, log, ooLookup } from "../utils.js";
+import { formatTime, log, lookup } from "../utils.js";
 
 const model = mongoose.model('punishments', new mongoose.Schema({
     _id: { type: Number, required: true },
@@ -127,7 +127,7 @@ export class Punishments {
                 return null;
             });
 
-        punResult = await ooLookup({
+        punResult = await lookup({
             async ban() {
                 const banned = await guild.bans.fetch(user).catch(() => null);
 
@@ -205,7 +205,7 @@ export class Punishments {
 		let removePunishmentData: PunishmentsDocument = { type: `un${punishment.type}`, _id, cancels: punishment._id, member: punishment.member, reason, moderator, time: now };
         let punResult: User | GuildMember | string | null | void;
 
-        punResult = await ooLookup({
+        punResult = await lookup({
             ban: async () => {
                 return await guild.bans.remove(punishment.member._id, auditLogReason).catch((err: Error) => err.message);
             },

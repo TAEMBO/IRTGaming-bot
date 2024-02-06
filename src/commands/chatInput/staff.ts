@@ -1,5 +1,5 @@
 import { EmbedBuilder, type GuildMember, SlashCommandBuilder } from "discord.js";
-import { Command, ooLookup } from "../../utils.js";
+import { Command, lookup } from "../../utils.js";
 
 export default new Command<"chatInput">({
 	async run(interaction) {
@@ -9,7 +9,7 @@ export default new Command<"chatInput">({
             return 0;
         };
         
-        await ooLookup({
+        await lookup({
             async mp() {
                 const staff = {
                     mp_manager: interaction.client.getRole('mpmanager'),

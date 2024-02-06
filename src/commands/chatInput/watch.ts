@@ -7,13 +7,13 @@ import {
     EmbedBuilder,
     SlashCommandBuilder
 } from "discord.js";
-import { Command, isMPStaff, ooLookup, youNeedRole } from "../../utils.js";
+import { Command, isMPStaff, lookup, youNeedRole } from "../../utils.js";
 
 export default new Command<"chatInput">({
 	async run(interaction) {
         if (!isMPStaff(interaction.member)) return await youNeedRole(interaction, "mpstaff");
 
-        await ooLookup({
+        await lookup({
             async add() {
                 const reason = interaction.options.getString('reason', true);
                 const name = interaction.options.getString('username', true);
@@ -53,25 +53,23 @@ export default new Command<"chatInput">({
                         max: 1,
                         time: 30_000,
                         componentType: ComponentType.Button
-                    }).on('collect', async int => {
-                        await ooLookup({
-                            async yes() {
-                                interaction.client.watchListPings.remove(interaction.user.id);
+                    }).on('collect', int => void lookup({
+                        async yes() {
+                            interaction.client.watchListPings.remove(interaction.user.id);
 
-                                await int.update({
-                                    embeds: [new EmbedBuilder().setDescription("You have successfully unsubscribed from watchList notifications").setColor(interaction.client.config.EMBED_COLOR)],
-                                    components: []
-                                });
+                            await int.update({
+                                embeds: [new EmbedBuilder().setDescription("You have successfully unsubscribed from watchList notifications").setColor(interaction.client.config.EMBED_COLOR)],
+                                components: []
+                            });
 
-                            },
-                            async no() {
-                                await int.update({
-                                    embeds: [new EmbedBuilder().setDescription('Command canceled').setColor(interaction.client.config.EMBED_COLOR)],
-                                    components: []
-                                });
-                            }
-                        }, int.customId);
-                    });
+                        },
+                        async no() {
+                            await int.update({
+                                embeds: [new EmbedBuilder().setDescription('Command canceled').setColor(interaction.client.config.EMBED_COLOR)],
+                                components: []
+                            });
+                        }
+                    }, int.customId));
                 } else {
                     interaction.client.watchListPings.add(interaction.user.id)
 

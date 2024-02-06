@@ -7,7 +7,7 @@ import {
     ContextMenuCommandBuilder,
     EmbedBuilder
 } from "discord.js";
-import { Command, isDCStaff, isMPStaff, ooLookup, youNeedRole } from "../../utils.js";
+import { Command, isDCStaff, isMPStaff, lookup, youNeedRole } from "../../utils.js";
 
 export default new Command<"message">({
     async run(interaction) {
@@ -36,25 +36,23 @@ export default new Command<"message">({
             max: 1,
             time: 30_000,
             componentType: ComponentType.Button
-        }).on('collect', async int => {
-            await ooLookup({
-                async accept() {
-                    embed.setTitle("Community Idea - __**Seen and accepted by staff**__");
+        }).on('collect', int => void lookup({
+            async accept() {
+                embed.setTitle("Community Idea - __**Seen and accepted by staff**__");
 
-                    await interaction.targetMessage.edit({ embeds: [embed] });
-                    await int.update({ content: "Community idea updated and marked as accepted", components: [] });
-                },
-                async reject() {
-                    embed.setTitle("Community Idea - __**Seen and rejected by staff**__");
+                await interaction.targetMessage.edit({ embeds: [embed] });
+                await int.update({ content: "Community idea updated and marked as accepted", components: [] });
+            },
+            async reject() {
+                embed.setTitle("Community Idea - __**Seen and rejected by staff**__");
 
-                    await interaction.targetMessage.edit({ embeds: [embed] });
-                    await int.update({ content: "Community idea updated and marked as rejected", components: [] });
-                },
-                async cancel() {
-                    await int.update({ content: "Command canceled", components: [] });
-                }
-            }, int.customId);
-        });
+                await interaction.targetMessage.edit({ embeds: [embed] });
+                await int.update({ content: "Community idea updated and marked as rejected", components: [] });
+            },
+            async cancel() {
+                await int.update({ content: "Command canceled", components: [] });
+            }
+        }, int.customId));
     },
     data: new ContextMenuCommandBuilder()
         .setName("Mark Suggestion")

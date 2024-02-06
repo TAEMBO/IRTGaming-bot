@@ -1,5 +1,5 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import { Command, FSServers, ooLookup } from "../../utils.js";
+import { Command, FSServers, lookup } from "../../utils.js";
 
 export default new Command<"chatInput">({
 	async run(interaction) {
@@ -7,7 +7,7 @@ export default new Command<"chatInput">({
         const isFromTicket = interaction.channel!.parentId === interaction.client.config.mainServer.categories.activeTickets;
         const content = interaction.options.getUser('user', false)?.toString();
 
-        await ooLookup({
+        await lookup({
             staff: () => interaction.reply({ content, components: [
                 new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder().setStyle(ButtonStyle.Link).setURL(interaction.client.config.resources.faqStaffButtonRedirect).setLabel("Apply for MP Staff"))
             ] }),

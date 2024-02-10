@@ -1,7 +1,5 @@
 import {
     ActionRowBuilder,
-    ButtonBuilder,
-    ButtonStyle,
     type ChatInputCommandInteraction,
     ComponentType,
     EmbedBuilder,
@@ -12,7 +10,7 @@ import {
 } from "discord.js";
 import ms from "ms";
 import type { RemindersDocument } from "../../typings.js";
-import { Command, lookup } from "../../utils.js";
+import { Command, ackButtons, lookup } from "../../utils.js";
 
 export default new Command<"chatInput">({
 	async run(interaction) {
@@ -35,10 +33,7 @@ export default new Command<"chatInput">({
                     .setFooter({ text: '60s to respond' })
                 ],
                 ephemeral: true,
-                components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
-                    new ButtonBuilder().setCustomId('yes').setStyle(ButtonStyle.Success).setLabel("Confirm"),
-                    new ButtonBuilder().setCustomId('no').setStyle(ButtonStyle.Danger).setLabel("Cancel")
-                )]
+                components: ackButtons()
             };
 
             (await (int.isChatInputCommand()
@@ -50,11 +45,11 @@ export default new Command<"chatInput">({
                 time: 60_000,
                 componentType: ComponentType.Button
             }).on('collect', int => void lookup({
-                yes: () => Promise.all([
+                confirm: () => Promise.all([
                     interaction.client.reminders.data.findByIdAndDelete(reminder),
                     int.update(rplText(`Successfully deleted reminder \`${reminder.content}\``))
                 ]),
-                no: () => int.update(rplText('Command manually canceled'))
+                cancel: () => int.update(rplText('Command manually canceled'))
             }, int.customId)).on('end', ints => {
                 if (!ints.size) interaction.editReply(rplText('No response given, command canceled'));
             });
@@ -106,17 +101,14 @@ export default new Command<"chatInput">({
                         .setFooter({ text: '60s to respond' })
                     ],
                     ephemeral: true,
-                    components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
-                        new ButtonBuilder().setCustomId('yes').setStyle(ButtonStyle.Success).setLabel("Confirm"),
-                        new ButtonBuilder().setCustomId('no').setStyle(ButtonStyle.Danger).setLabel("Cancel")
-                    )]
+                    components: ackButtons()
                 })).createMessageComponentCollector({
                     filter: x => x.user.id === interaction.user.id,
                     max: 1,
                     time: 60_000,
                     componentType: ComponentType.Button
                 }).on('collect', int => void lookup({
-                    async yes() {
+                    async confirm() {
                         const reminder = await interaction.client.reminders.data.create({ userid: interaction.user.id, content: reminderText, time: timeToRemind, ch: interaction.channelId });
 
                         interaction.client.reminders.setExec(reminder._id, timeToRemind - Date.now());
@@ -129,7 +121,7 @@ export default new Command<"chatInput">({
                             ]
                         });
                     },
-                    no() {
+                    cancel() {
                         return int.update(rplText('Command manually canceled'));
                     }
                 }, int.customId)).on('end', ints => {

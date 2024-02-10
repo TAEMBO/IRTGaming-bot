@@ -46,7 +46,6 @@ export default class TClient extends Client<true> {
             intents: [
                 GatewayIntentBits.Guilds,
                 GatewayIntentBits.GuildMembers,
-                GatewayIntentBits.GuildModeration,
                 GatewayIntentBits.GuildInvites,
                 GatewayIntentBits.GuildPresences,
                 GatewayIntentBits.GuildMessages,

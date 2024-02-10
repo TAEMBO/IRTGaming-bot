@@ -1,13 +1,5 @@
-import {
-    ActionRowBuilder,
-    AttachmentBuilder,
-    ButtonBuilder,
-    ButtonStyle,
-    ComponentType,
-    EmbedBuilder,
-    SlashCommandBuilder
-} from "discord.js";
-import { Command, isMPStaff, lookup, youNeedRole } from "../../utils.js";
+import { AttachmentBuilder, ComponentType, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { Command, ackButtons, isMPStaff, lookup, youNeedRole } from "../../utils.js";
 
 export default new Command<"chatInput">({
 	async run(interaction) {
@@ -44,17 +36,14 @@ export default new Command<"chatInput">({
                             .setDescription("You are already subscribed to watchList notifications, do you want to unsubscribe?")
                             .setColor(interaction.client.config.EMBED_COLOR)
                         ],
-                        components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
-                            new ButtonBuilder().setCustomId('yes').setStyle(ButtonStyle.Success).setLabel('Yes'),
-                            new ButtonBuilder().setCustomId('no').setStyle(ButtonStyle.Danger).setLabel('No')
-                        )]
+                        components: ackButtons()
                     })).createMessageComponentCollector({
                         filter: x => x.user.id === interaction.user.id,
                         max: 1,
                         time: 30_000,
                         componentType: ComponentType.Button
                     }).on('collect', int => void lookup({
-                        async yes() {
+                        async confirm() {
                             interaction.client.watchListPings.remove(interaction.user.id);
 
                             await int.update({
@@ -63,7 +52,7 @@ export default new Command<"chatInput">({
                             });
 
                         },
-                        async no() {
+                        async cancel() {
                             await int.update({
                                 embeds: [new EmbedBuilder().setDescription('Command canceled').setColor(interaction.client.config.EMBED_COLOR)],
                                 components: []

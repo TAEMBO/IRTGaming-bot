@@ -1,19 +1,12 @@
 
-import {
-    ActionRowBuilder,
-    AttachmentBuilder,
-    ButtonBuilder,
-    ButtonStyle,
-    ComponentType,
-    EmbedBuilder,
-    SlashCommandBuilder
-} from "discord.js";
+import { AttachmentBuilder, ComponentType, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import config from "../../config.json" assert { type: "json" };
 import FTPClient from "ftp";
 import puppeteer from "puppeteer"; // Credits to Trolly for suggesting this package
 import {
     Command,
     FSServers,
+    ackButtons,
     getFSURL,
     hasRole,
     isMPStaff,
@@ -269,23 +262,14 @@ export default new Command<"chatInput">({
                             .setColor(interaction.client.config.EMBED_COLOR)
                         ],
                         fetchReply: true,
-                        components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
-                            new ButtonBuilder()
-                                .setCustomId('yes')
-                                .setStyle(ButtonStyle.Success)
-                                .setLabel('Confirm'),
-                            new ButtonBuilder()
-                                .setCustomId('no')
-                                .setStyle(ButtonStyle.Danger)
-                                .setLabel('Cancel'))
-                        ]
+                        components: ackButtons()
                     })).createMessageComponentCollector({
                         filter: x => x.user.id === interaction.user.id,
                         max: 1,
                         time: 30_000,
                         componentType: ComponentType.Button
                     }).on('collect', int => void lookup({
-                        async yes() {
+                        async confirm() {
                             if (roleName !== 'trustedfarmer') {
                                 const slicedNick = {
                                     mpfarmmanager: 'MP Farm Manager',
@@ -312,7 +296,7 @@ export default new Command<"chatInput">({
                                 `**${interaction.user.tag}** has demoted **${member.user.tag}** from **${interaction.client.getRole(roleName).name}**`
                             );
                         },
-                        no() {
+                        cancel() {
                             return int.update({
                                 embeds: [new EmbedBuilder()
                                     .setDescription(`Command canceled`)

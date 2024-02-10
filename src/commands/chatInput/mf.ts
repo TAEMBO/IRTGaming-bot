@@ -1,7 +1,4 @@
 import {
-    ActionRowBuilder,
-    ButtonBuilder,
-    ButtonStyle,
     type CategoryChannel,
     ComponentType,
     EmbedBuilder,
@@ -9,7 +6,14 @@ import {
     SlashCommandBuilder,
     type TextChannel
 } from "discord.js";
-import { Command, hasRole, lookup, onMFFarms, youNeedRole } from "../../utils.js";
+import {
+    Command,
+    ackButtons,
+    hasRole,
+    lookup,
+    onMFFarms,
+    youNeedRole
+} from "../../utils.js";
 import type { MFFarmRoleKeys } from "../../typings.js";
 
 export default new Command<"chatInput">({
@@ -87,35 +91,30 @@ export default new Command<"chatInput">({
                             .setColor(interaction.client.config.EMBED_COLOR)
                         ],
                         fetchReply: true, 
-                        components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
-                            new ButtonBuilder().setCustomId('yes').setStyle(ButtonStyle.Success).setLabel("Confirm"),
-                            new ButtonBuilder().setCustomId('no').setStyle(ButtonStyle.Danger).setLabel("Cancel")
-                        )]
+                        components: ackButtons()
                     })).createMessageComponentCollector({
                         filter: x => x.user.id === interaction.user.id,
                         max: 1,
                         time: 30_000,
                         componentType: ComponentType.Button
-                    }).on('collect', async int => {
-                        await lookup({
-                            async yes() {
-                                const rolesToRemove = onMFFarms(member).length === 1 ? [roleId, interaction.client.config.mainServer.roles.mfmember] : [roleId];
-                                
-                                await member.roles.remove(rolesToRemove);
+                    }).on('collect', int => void lookup({
+                        async confirm() {
+                            const rolesToRemove = onMFFarms(member).length === 1 ? [roleId, interaction.client.config.mainServer.roles.mfmember] : [roleId];
+                            
+                            await member.roles.remove(rolesToRemove);
 
-                                await int.update({
-                                    embeds: [new EmbedBuilder()
-                                        .setDescription(`<@${member.user.id}> (${member.user.tag}) has been removed from the <@&${interaction.client.config.mainServer.roles.mfmember}> and <@&${roleId}> roles.`)
-                                        .setColor(interaction.client.config.EMBED_COLOR)
-                                    ],
-                                    components: []
-                                });
-                            },
-                            no() {
-                                return int.update({ embeds: [new EmbedBuilder().setDescription('Command canceled').setColor(interaction.client.config.EMBED_COLOR)], components: [] });
-                            }
-                        }, int.customId);
-                    });
+                            await int.update({
+                                embeds: [new EmbedBuilder()
+                                    .setDescription(`<@${member.user.id}> (${member.user.tag}) has been removed from the <@&${interaction.client.config.mainServer.roles.mfmember}> and <@&${roleId}> roles.`)
+                                    .setColor(interaction.client.config.EMBED_COLOR)
+                                ],
+                                components: []
+                            });
+                        },
+                        cancel() {
+                            return int.update({ embeds: [new EmbedBuilder().setDescription('Command canceled').setColor(interaction.client.config.EMBED_COLOR)], components: [] });
+                        }
+                    }, int.customId));
                 } else {
                     await member.roles.add([roleId, interaction.client.config.mainServer.roles.mfmember]);
 
@@ -138,17 +137,14 @@ export default new Command<"chatInput">({
                             .setDescription(`This member already has the <@&${interaction.client.config.mainServer.roles.mffarmowner}> role, do you want to remove it from them?`)
                             .setColor(interaction.client.config.EMBED_COLOR)
                         ],
-                        components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
-                            new ButtonBuilder().setCustomId('yes').setStyle(ButtonStyle.Success).setLabel('Confirm'),
-                            new ButtonBuilder().setCustomId('no').setStyle(ButtonStyle.Danger).setLabel('Cancel')
-                        )]
+                        components: ackButtons()
                     })).createMessageComponentCollector({
                         filter: x => x.user.id === interaction.user.id,
                         max: 1,
                         time: 30_000,
                         componentType: ComponentType.Button
                     }).on('collect', int => void lookup({
-                        async yes() {
+                        async confirm() {
                             await member.roles.remove(interaction.client.config.mainServer.roles.mffarmowner);
 
                             await int.update({
@@ -159,7 +155,7 @@ export default new Command<"chatInput">({
                                 components: []
                             });
                         },
-                        no() {
+                        cancel() {
                             return int.update({ embeds: [new EmbedBuilder().setDescription('Command canceled').setColor(interaction.client.config.EMBED_COLOR)], components: [] });
                         }
                     }, int.customId));

@@ -82,6 +82,22 @@ export type Empty<T> = {
 }
 export type RepeatedMessagesIdentifiers = 'bw' | 'adv' | 'spam';
 
+/** Adds cache implementation to this schema */
+export interface Cached<TDocument> {
+    cache: TDocument[];
+    /**
+     * @example
+     * ```ts
+     * public async fillCache() {
+     *     this.cache = await this.data.find();
+     * 
+     *     return this;
+     * }
+     * ```
+     */
+    fillCache(): Promise<this>;
+}
+
 export interface RepeatedMessagesEntry {
     identifier: RepeatedMessagesIdentifiers;
     channel: string;

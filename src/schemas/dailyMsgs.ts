@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { Cached } from "src/typings.js";
 
 const model = mongoose.model('dailyMsgs', new mongoose.Schema({
     _id: { type: Number, required: true },
@@ -7,13 +8,13 @@ const model = mongoose.model('dailyMsgs', new mongoose.Schema({
 
 export type DailyMsgsDocument = ReturnType<typeof model.castObject>;
 
-export class DailyMsgs {
+export class DailyMsgs implements Cached<DailyMsgsDocument> {
     public data = model;
     public cache: DailyMsgsDocument[] = [];
     
     constructor() { }
 
-    async increment(data: DailyMsgsDocument) {
+    public async increment(data: DailyMsgsDocument) {
         const doc = await this.data.create(data);
         
         this.cache.push(doc);
@@ -21,7 +22,7 @@ export class DailyMsgs {
         return this;
     }
 
-    async fillCache() {
+    public async fillCache() {
         this.cache = await this.data.find();
 
         return this;

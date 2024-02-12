@@ -5,7 +5,7 @@ import FTPClient from "ftp";
 import mongoose from "mongoose";
 import { Snowflake } from "@sapphire/snowflake";
 import { FSServers, jsonFromXML, log, stringifyStream } from "../utils.js";
-import type { Cached, farmFormat } from "../typings.js";
+import type { Cached, FarmFormat } from "../typings.js";
 
 /** The child object for each server's set of data */
 const serverObj = {
@@ -101,7 +101,7 @@ export class PlayerTimes implements Cached<PlayerTimesDocument> {
 
         log('Yellow', `Downloaded farms.xml from ${serverAcro}, crunching...`);
 
-        const farmData = jsonFromXML<farmFormat>(await stringifyStream(stream));
+        const farmData = jsonFromXML<FarmFormat>(await stringifyStream(stream));
         let changedNameCount = 0;
         let addedUuidCount = 0;
 

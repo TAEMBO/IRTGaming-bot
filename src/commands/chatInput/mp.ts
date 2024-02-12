@@ -15,7 +15,7 @@ import {
     stringifyStream,
     youNeedRole
 } from "../../utils.js";
-import type { banFormat, DedicatedServerConfig, farmFormat } from "../../typings.js";
+import type { BanFormat, DedicatedServerConfig, FarmFormat } from "../../typings.js";
 
 const fsServers = new FSServers(config.fs);
 const cmdOptionChoices = fsServers.getPublicAll().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));
@@ -143,7 +143,7 @@ export default new Command<"chatInput">({
                     const banData = await (await fetch(banAttachment.url)).text();
 
                     try {
-                        data = jsonFromXML<banFormat>(banData);
+                        data = jsonFromXML<BanFormat>(banData);
                     } catch (err) {
                         return await interaction.editReply(`Canceled: Improper file (not XML)`);
                     }
@@ -183,7 +183,7 @@ export default new Command<"chatInput">({
                 FTP.on('ready', () => FTP.get(ftpLogin.path + 'savegame1/farms.xml', async (err, stream) => {
                     if (err) return await interaction.editReply(err.message);
 
-                    const farmData = jsonFromXML<farmFormat>(await stringifyStream(stream));
+                    const farmData = jsonFromXML<FarmFormat>(await stringifyStream(stream));
                     const playerData = farmData.farms.farm[0].players.player.find(x => {
                         if (name.length === 44) {
                             return x._attributes.uniqueUserId === name;

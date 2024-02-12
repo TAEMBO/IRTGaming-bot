@@ -28,7 +28,7 @@ const model = mongoose.model('playerTimes', new mongoose.Schema({
 
 export type PlayerTimesDocument = ReturnType<typeof model.castObject>;
 
-export class PlayerTimes implements Cached<PlayerTimes, PlayerTimesDocument> {
+export class PlayerTimes implements Cached<PlayerTimesDocument> {
 	public data = model;
     public cache: PlayerTimesDocument[] = [];
     private readonly _snowflake = new Snowflake(config.PLAYERTIMES_START_UNIX);

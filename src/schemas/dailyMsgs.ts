@@ -8,7 +8,7 @@ const model = mongoose.model('dailyMsgs', new mongoose.Schema({
 
 export type DailyMsgsDocument = ReturnType<typeof model.castObject>;
 
-export class DailyMsgs implements Cached<DailyMsgs, DailyMsgsDocument> {
+export class DailyMsgs implements Cached<DailyMsgsDocument> {
     public data = model;
     public cache: DailyMsgsDocument[] = [];
     

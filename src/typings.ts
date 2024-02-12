@@ -82,8 +82,8 @@ export type Empty<T> = {
 };
 
 /** Adds cache implementation to the specified schema class */
-export interface Cached<SType, CType> {
-    cache: CType[];
+export interface Cached<TDocument> {
+    cache: TDocument[];
     /**
      * @example
      * ```ts
@@ -94,7 +94,7 @@ export interface Cached<SType, CType> {
      * }
      * ```
      */
-    fillCache(): Promise<SType>;
+    fillCache(): Promise<this>;
 } 
 export type RepeatedMessagesIdentifiers = 'bw' | 'adv' | 'spam';
 

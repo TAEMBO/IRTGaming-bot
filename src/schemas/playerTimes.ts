@@ -7,17 +7,17 @@ import { Snowflake } from "@sapphire/snowflake";
 import { FSServers, jsonFromXML, log, stringifyStream } from "../utils.js";
 import type { Cached, farmFormat } from "../typings.js";
 
-/** The object that each server will have */
+/** The child object for each server's set of data */
 const serverObj = {
     name: { type: String, required: true },
 	time: { type: Number, required: true },
 	lastOn: { type: Number, required: true }
 };
 
-/** The base object to contain all server object data */
+/** The parent object to contain all children server objects */
 const serversObj: Record<string, { type: typeof serverObj, _id: boolean }> = {};
 
-// Populate the base object with all server objects by referencing config
+// Populate the parent object with all children server objects by referencing config
 for (const serverAcro of Object.keys(config.fs)) serversObj[serverAcro] = { type: serverObj, _id: false };
 
 const model = mongoose.model('playerTimes', new mongoose.Schema({
@@ -63,7 +63,7 @@ export class PlayerTimes implements Cached<PlayerTimesDocument> {
 	 */
 	public async addPlayerTime(playerName: string, playerTime: number, serverAcro: string) {
 		const now = Math.round(Date.now() / 1000);
-		const playerData = await this.data.findById(playerName);
+		const playerData = await this.data.findOne({ [`servers.${serverAcro}.name`]: playerName });
 
 		if (playerData) {
 			playerData.servers[serverAcro] = {

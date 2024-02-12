@@ -434,7 +434,7 @@ export interface YTCacheFeed {
     };
 }
 
-export interface banFormat {
+export interface BanFormat {
     readonly blockedUserIds: {
         readonly user: {
             readonly _attributes: {
@@ -447,7 +447,7 @@ export interface banFormat {
     };
 }
 
-export interface farmFormat {
+export interface FarmFormat {
     readonly _declaration: {
         readonly _attributes: {
             readonly version: string;
@@ -457,14 +457,14 @@ export interface farmFormat {
     };
     readonly farms: {
         readonly farm: [
-            greenFarm,
-            staffFarm,
-            staffFarm
+            GreenFarm,
+            StaffFarm,
+            StaffFarm
         ];
     };
 }
 
-interface greenFarm {
+interface GreenFarm {
     readonly _attributes: {
         readonly farmId: "1" | "2" | "3" | "4" | "5" | "6";
         readonly name: string;
@@ -473,17 +473,17 @@ interface greenFarm {
         readonly money: string;
     };
     readonly players: {
-        readonly player: farmPlayer[];
+        readonly player: FarmPlayer[];
     };
 }
-interface staffFarm {
-    readonly _attributes: Prettify<greenFarm["_attributes"] & { readonly password: string; }>;
+interface StaffFarm {
+    readonly _attributes: Prettify<GreenFarm["_attributes"] & { readonly password: string; }>;
     readonly players?: {
-        readonly player: farmPlayer[] | farmPlayer;
+        readonly player: FarmPlayer[] | FarmPlayer;
     };
 }
 
-interface farmPlayer {
+interface FarmPlayer {
     readonly _attributes: {
         readonly uniqueUserId: string;
         readonly farmManager: "true" | "false";

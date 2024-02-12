@@ -4,7 +4,7 @@ import config from "../config.json" assert { type: "json" };
 import FTPClient from "ftp";
 import mongoose from "mongoose";
 import { FSServers, jsonFromXML, log, stringifyStream } from "../utils.js";
-import type { farmFormat } from "../typings.js";
+import type { FarmFormat } from "../typings.js";
 
 /** The object that each server will have */
 const serverObj = {
@@ -88,7 +88,7 @@ export class PlayerTimes {
 
         log('Yellow', `Downloaded farms.xml from ${serverAcro}, crunching...`);
 
-        const farmData = jsonFromXML<farmFormat>(await stringifyStream(stream));
+        const farmData = jsonFromXML<FarmFormat>(await stringifyStream(stream));
         let changedNameCount = 0;
         let addedUuidCount = 0;
 

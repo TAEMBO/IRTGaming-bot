@@ -6,7 +6,7 @@ import type { FSServer } from "../typings.js";
  * @param endpoint The URL endpoint to get
  * @returns A full HTTP URL for the given endpoint
  */
-export function getFSURL<S extends "dss" | "csg" | "login">(server: FSServer, endpoint: S) {
+export function getFSURL<TEndpoint extends "dss" | "csg" | "login">(server: FSServer, endpoint: TEndpoint) {
     return ({
         dss: `http://${server.address}/feed/dedicated-server-stats.json?code=${server.code}` as const,
         csg: `http://${server.address}/feed/dedicated-server-savegame.html?code=${server.code}&file=careerSavegame` as const,

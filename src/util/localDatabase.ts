@@ -2,19 +2,21 @@ import fs from "node:fs";
 import path from "node:path";
 
 /** A class for managing local JSON array files */
-export class LocalDatabase<T> {
+export class LocalDatabase<TElement> {
     /** The path for this LocalDatabase's JSON file */
     private readonly _path: string;
     /** The content for this LocalDatabase */
-    public readonly data: T[];
+    public readonly data: TElement[];
 
     constructor(fileName: `${string}.json`) {
         this._path = path.resolve(`../databases/${fileName}`);
         this.data = JSON.parse(fs.readFileSync(this._path, "utf8"));
+
+        if (!Array.isArray(this.data)) throw new Error(`LocalDatabase not array: ${fileName}`);
     }
 
     /** Adds an element to the array and saves the data to JSON */
-    public add(data: T) {
+    public add(data: TElement) {
         this.data.push(data);
         this.save();
 
@@ -22,7 +24,7 @@ export class LocalDatabase<T> {
     }
 
     /** Removes an element from the array and saves the data to JSON */
-    public remove(data: T) {
+    public remove(data: TElement) {
         this.data.splice(this.data.indexOf(data), 1);
         this.save();
 

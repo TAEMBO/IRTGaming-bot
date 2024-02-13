@@ -11,38 +11,38 @@ import type { CombinedSlashCommandBuilder } from "../typings.js";
  * Creates a new instance of an application command
  */
 export class Command<
-    T extends "chatInput" | "message" | "user",
-    D = T extends "chatInput"
+    TCommand extends "chatInput" | "message" | "user",
+    TBuilder = TCommand extends "chatInput"
         ? CombinedSlashCommandBuilder
         : ContextMenuCommandBuilder,
-    I = T extends "chatInput"
+    TInteraction = TCommand extends "chatInput"
         ? ChatInputCommandInteraction<"cached">
-        : T extends "message"
+        : TCommand extends "message"
             ? MessageContextMenuCommandInteraction<"cached">
             : UserContextMenuCommandInteraction<"cached">,
-    A = T extends "chatInput"
+    TAutocomplete = TCommand extends "chatInput"
         ? ((interaction: AutocompleteInteraction<"cached">) => Promise<any>)
         : undefined
 > {
     /** The optional autocomplete function that is ran for this command */
-    autocomplete?: A;
+    autocomplete?: TAutocomplete;
     /** The function that is ran for this command */
-    run: (interaction: I) => Promise<any>;
+    run: (interaction: TInteraction) => Promise<any>;
     /** The builder data for this command */
-    readonly data: D;
+    readonly data: TBuilder;
     /** The amount of times this command has been used */
     uses = 0;
 
     constructor(commandData: (
         {
-            readonly data: D;
-            run(interaction: I): Promise<any>;
-        } & (T extends "chatInput"
-            ? { autocomplete?: A }
+            readonly data: TBuilder;
+            run(interaction: TInteraction): Promise<any>;
+        } & (TCommand extends "chatInput"
+            ? { autocomplete?: TAutocomplete }
             : Record<string, any>
         )
     )) {
-        this.autocomplete = (commandData as (typeof commandData & { autocomplete: A })).autocomplete;
+        this.autocomplete = (commandData as (typeof commandData & { autocomplete: TAutocomplete })).autocomplete;
         this.run = commandData.run;
         this.data = commandData.data;
 

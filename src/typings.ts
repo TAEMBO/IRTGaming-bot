@@ -116,6 +116,7 @@ export type FSCache = Record<string, {
     status: "online" | "offline" | null;
     lastAdmin: number | null;
     graphPoints: number[];
+    isThrottled: boolean | null;
 }>;
 
 export type YTCache = Record<string, string | null>;

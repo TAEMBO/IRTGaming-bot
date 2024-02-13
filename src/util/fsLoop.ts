@@ -37,6 +37,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
     }
 
     const serverAcroUp = serverAcro.toUpperCase();
+    const fsCacheServer = client.fsCache[serverAcro];
     const statsEmbed = new EmbedBuilder();
     const statsMsgEdit = async () => {
         const channel = client.channels.cache.get(server.channelId);
@@ -70,21 +71,33 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
         return;
     }
 
-    const newPlayers = dss.slots.players.filter(x=>x.isUsed);
-    const oldPlayers = client.fsCache[serverAcro].players;
+    const newPlayers = dss.slots.players.filter(x => x.isUsed);
+    const oldPlayers = fsCacheServer.players;
+    
+    // Throttle message updating if no changes in API data
+    if (JSON.stringify(newPlayers) === JSON.stringify(oldPlayers)) {
+        if (!dss.server.name && fsCacheServer.status === "offline") {
+            fsCacheServer.isThrottled = true;
+            
+            return;
+        } else if (dss.server.name && fsCacheServer.status === "online") {
+            fsCacheServer.isThrottled = true;
+            
+            return;
+        }
+    }
+    
     const serverStatusEmbed = (status: string) => new EmbedBuilder().setTitle(`${serverAcroUp} now ${status}`).setColor(client.config.EMBED_COLOR_YELLOW).setTimestamp();
     const wlChannel = client.getChan("watchList");
     const logChannel = client.getChan("fsLogs");
-    const now = Math.round(Date.now() / 1000);
-    const playerInfo: string[] = [];
-    let justStarted = false;
-
-    for (const player of newPlayers) {
+    const now = Math.round(Date.now() / 1_000);
+    const playerInfo = newPlayers.map(player => {
         const playTimeHrs = Math.floor(player.uptime / 60);
         const playTimeMins = (player.uptime % 60).toString().padStart(2, "0");
 
-        playerInfo.push(`\`${player.name}\` ${decorators(player, true)} **|** ${playTimeHrs}:${playTimeMins}`);
-    }
+        return `\`${player.name}\` ${decorators(player, true)} **|** ${playTimeHrs}:${playTimeMins}`;
+    });
+    let justStarted = false;
 
     // Data crunching for stats embed
     const stats = {
@@ -95,9 +108,9 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
         })(),
         ingameTime: dss.server.dayTime
             ? [
-                Math.floor(dss.server?.dayTime / 3600 / 1000).toString().padStart(2, "0"),
+                Math.floor(dss.server.dayTime / 3_600 / 1_000).toString().padStart(2, "0"),
                 ":",
-                Math.floor((dss.server?.dayTime / 60 / 1000) % 60).toString().padStart(2, "0")
+                Math.floor((dss.server.dayTime / 60 / 1_000) % 60).toString().padStart(2, "0")
             ].join("")
             : "`unavailable`",
         timescale: csg.settings?.timeScale._text
@@ -110,7 +123,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
                 ? [
                     (time / 60).toLocaleString("en-US"),
                     "hrs (",
-                    formatTime(time * 60 * 1000, 3, { commas: true, longNames: false }),
+                    formatTime(time * 60 * 1_000, 3, { commas: true, longNames: false }),
                     ")"
                 ].join("")
                 : "`unavailable`";
@@ -161,16 +174,16 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
     
     // Logs
     if (!dss.server.name) {
-        if (client.fsCache[serverAcro].status === "online") await logChannel.send({ embeds: [serverStatusEmbed("offline")] });
+        if (fsCacheServer.status === "online") await logChannel.send({ embeds: [serverStatusEmbed("offline")] });
 
-        client.fsCache[serverAcro].status = "offline";
+        fsCacheServer.status = "offline";
     } else {
-        if (client.fsCache[serverAcro].status === "offline") {
+        if (fsCacheServer.status === "offline") {
             await logChannel.send({ embeds: [serverStatusEmbed("online")] });
             justStarted = true;
         }
 
-        client.fsCache[serverAcro].status = "online";
+        fsCacheServer.status = "online";
     }
 
     if (justStarted) return;
@@ -221,15 +234,17 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
     }
     
     // Update cache
-    if (client.fsCache[serverAcro].graphPoints.length >= 120) client.fsCache[serverAcro].graphPoints.shift();
-    if (dss.slots.players.some(x => x.isAdmin)) client.fsCache[serverAcro].lastAdmin = now * 1000;
+    if (fsCacheServer.graphPoints.length >= 120) fsCacheServer.graphPoints.shift();
+    if (dss.slots.players.some(x => x.isAdmin)) fsCacheServer.lastAdmin = now * 1_000;
 
-    client.fsCache[serverAcro].graphPoints.push(dss.slots.used);
-    client.fsCache[serverAcro].players = newPlayers;
+    fsCacheServer.graphPoints.push(dss.slots.used);
+    fsCacheServer.players = newPlayers;
+    fsCacheServer.isThrottled = false;
 }
 
 export async function fsLoopAll(client: TClient, watchList: WatchListDocument[]) {
     const embed = new EmbedBuilder().setColor(client.config.EMBED_COLOR);
+    const pausedStatuses: (boolean | null)[] = [];
     const totalCount: number[] = [];
 
     for (const [serverAcro, server] of Object.entries(client.fsCache)) {
@@ -237,6 +252,7 @@ export async function fsLoopAll(client: TClient, watchList: WatchListDocument[])
         const serverSlots = server.players.length;
 
         totalCount.push(serverSlots);
+        pausedStatuses.push(server.isThrottled);
 
         for (const player of server.players) {
             const playTimeHrs = Math.floor(player.uptime / 60);
@@ -253,6 +269,9 @@ export async function fsLoopAll(client: TClient, watchList: WatchListDocument[])
         
         if (playerInfo.length) embed.addFields({ name: `${serverAcro.toUpperCase()} - ${serverSlots}/16`, value: playerInfo.join("\n") });
     }
+
+    // Throttle message updating if no changes in cached data
+    if (pausedStatuses.every(x => x)) return;
 
     await client.getChan("juniorAdminChat").messages.edit(client.config.mainServer.fsLoopMsgId, {
         content: `\`\`\`js\n["${client.whitelist.data.join(", ")}"]\`\`\`Updates every 30 seconds`,

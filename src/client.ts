@@ -54,7 +54,6 @@ export default class TClient extends Client<true> {
                 GatewayIntentBits.GuildVoiceStates
             ],
             partials: [
-                Partials.Channel,
                 Partials.Message,
                 Partials.Reaction
             ],

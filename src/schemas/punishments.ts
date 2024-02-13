@@ -2,7 +2,7 @@ import { type ChatInputCommandInteraction, EmbedBuilder, type GuildMember, type 
 import type TClient from "../client.js";
 import mongoose from "mongoose";
 import ms from "ms";
-import { formatTime, log, lookup } from "../utils.js";
+import { formatString, formatTime, log, lookup } from "../utils.js";
 
 const model = mongoose.model("punishments", new mongoose.Schema({
     _id: { type: Number, required: true },
@@ -35,14 +35,14 @@ export class Punishments {
 
             if (!punishment) return;
 
-            log("Yellow", `${punishment.member.tag}"s ${punishment.type} (case #${punishment._id}) should expire now`);
-            await this.removePunishment(punishment._id, this._client.user.id, "Time\"s up!").then(result => log("Yellow", result));
+            log("Yellow", `${punishment.member.tag}'s ${punishment.type} (case #${punishment._id}) should expire now`);
+            await this.removePunishment(punishment._id, this._client.user.id, "Time's up!").then(result => log("Yellow", result));
         }, timeout > 2_147_483_647 ? 2_147_483_647 : timeout);
     }
 
     private async makeModlogEntry(punishment: PunishmentsDocument) {
         const embed = new EmbedBuilder()
-            .setTitle(`${punishment.type[0].toUpperCase() + punishment.type.slice(1)} | Case #${punishment._id}`)
+            .setTitle(`${formatString(punishment.type)} | Case #${punishment._id}`)
             .addFields(
                 { name: "🔹 User", value: `${punishment.member.tag}\n<@${punishment.member._id}>\n\`${punishment.member._id}\``, inline: true },
                 { name: "🔹 Moderator", value: `<@${punishment.moderator}> \`${punishment.moderator}\``, inline: true },
@@ -101,8 +101,8 @@ export class Punishments {
         const auditLogReason = `${reason} | Case #${punData._id}`;
         const embed = new EmbedBuilder()
             .setColor(_client.config.EMBED_COLOR)
-            .setTitle(`Case #${punData._id}: ${type[0].toUpperCase() + type.slice(1)}`)
-            .setDescription(`${user.tag}\n<@${user.id}>\n(\`${user.id}\`)`)
+            .setTitle(`Case #${punData._id}: ${formatString(type)}`)
+            .setDescription(`${user.tag}\n${user}\n(\`${user.id}\`)`)
             .addFields({ name: "Reason", value: reason });
         let punResult: User | GuildMember | string | null | void;
         let timeInMillis: number | null;
@@ -120,12 +120,8 @@ export class Punishments {
         // Add field for duration if time is specified
         if (timeInMillis) embed.addFields({ name: "Duration", value: durationText });
 
-        const dm = await guildMember?.send(`You"ve been ${this.getTense(type)} ${inOrFromBoolean} ${guild.name}${durationText} for reason \`${reason}\` (case #${punData._id})`)
-            .catch(() =>{
-                embed.setFooter({ text: "Failed to DM member of punishment" });
-                
-                return null;
-            });
+        const dm = await guildMember?.send(`You've been ${this.getTense(type)} ${inOrFromBoolean} ${guild.name}${durationText} for reason \`${reason}\` (case #${punData._id})`)
+            .catch(() => void embed.setFooter({ text: "Failed to DM member of punishment" }));
 
         punResult = await lookup({
             async ban() {
@@ -218,7 +214,7 @@ export class Punishments {
             },
             mute: async () => {
                 if (GuildMember) {
-                    GuildMember.send(`You"ve been unmuted in ${guild.name}.`).catch((err: Error) => console.log(err.message));
+                    GuildMember.send(`You've been unmuted in ${guild.name}.`).catch((err: Error) => console.log(err.message));
                     return await GuildMember.timeout(null, auditLogReason).catch((err: Error) => err.message);
                 } else await this.data.findByIdAndUpdate(caseId, { expired: true }, { new: true });
             },
@@ -241,7 +237,7 @@ export class Punishments {
             if (interaction) {
                 return await interaction.reply({ embeds: [new EmbedBuilder()
                     .setColor(this._client.config.EMBED_COLOR)
-                    .setTitle(`Case #${removePunishmentData._id}: ${removePunishmentData.type[0].toUpperCase() + removePunishmentData.type.slice(1)}`)
+                    .setTitle(`Case #${removePunishmentData._id}: ${formatString(removePunishmentData.type)}`)
                     .setDescription(`${User.tag}\n<@${User.id}>\n(\`${User.id}\`)`)
                     .addFields(
                         { name: "Reason", value: reason },

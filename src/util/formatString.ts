@@ -9,10 +9,10 @@ export function formatString(text: string) {
     if (text.includes(" ")) {
         return text
             .split(" ")
-            .map(x => x[0].toUpperCase() + x.slice(1))
+            .map(x => x[0].toUpperCase() + x.toLowerCase().slice(1))
             .join(" ");
     } else {
-        return text[0].toUpperCase() + text.slice(1);
+        return text[0].toUpperCase() + text.toLowerCase().slice(1);
     }
 
 }

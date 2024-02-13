@@ -2,15 +2,15 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle, SlashCommandBuilder } fro
 import { Command } from "../../utils.js";
 
 export default new Command<"chatInput">({
-	async run(interaction) {
+    async run(interaction) {
         await interaction.reply({ content: `Verification sent, please wait for someone to verify your subscription. You will then receive the <@&${interaction.client.config.mainServer.roles.subscriber}> role.`, ephemeral: true });
         
-        await interaction.client.getChan('helperChat').send({
+        await interaction.client.getChan("helperChat").send({
             content: `<@${interaction.user.id}> (${interaction.user.tag}) Subscriber role verification`,
-            files: [interaction.options.getAttachment('image', true)],
+            files: [interaction.options.getAttachment("image", true)],
             components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
-                new ButtonBuilder().setLabel('Accept').setCustomId(`sub-yes-${interaction.user.id}`).setStyle(ButtonStyle.Success),
-                new ButtonBuilder().setLabel('Deny').setCustomId(`sub-no-${interaction.user.id}`).setStyle(ButtonStyle.Danger)
+                new ButtonBuilder().setLabel("Accept").setCustomId(`sub-yes-${interaction.user.id}`).setStyle(ButtonStyle.Success),
+                new ButtonBuilder().setLabel("Deny").setCustomId(`sub-no-${interaction.user.id}`).setStyle(ButtonStyle.Danger)
             )]
         });
     },
@@ -18,7 +18,7 @@ export default new Command<"chatInput">({
         .setName("sub")
         .setDescription("Verify your YT subscription to IRT")
         .addAttachmentOption(x => x
-            .setName('image')
-            .setDescription('Image proving subscription')
+            .setName("image")
+            .setDescription("Image proving subscription")
             .setRequired(true))
 });

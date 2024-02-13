@@ -8,6 +8,6 @@ import config from "../config.json" assert { type: "json" };
 export function formatRequestInit<S extends string>(timeout: number, identifier: S) {
     return {
         signal: AbortSignal.timeout(timeout),
-        headers: { 'User-Agent': `${config.USER_AGENT_HEADER}/${identifier}` as const }
+        headers: { "User-Agent": `${config.USER_AGENT_HEADER}/${identifier}` as const }
     };
 }

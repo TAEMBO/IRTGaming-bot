@@ -3,7 +3,7 @@ import type { User } from "discord.js";
 /**
  * 
  * @param user 
- * @returns A string with the given user's tag, global name if present, and codeblocked ID
+ * @returns A string with the given user"s tag, global name if present, and codeblocked ID
  */
 export function formatUser(user: User) {
     if (user.globalName) {
@@ -11,9 +11,9 @@ export function formatUser(user: User) {
             user.toString(),
             user.globalName,
             `\`${user.id}\``
-        ].join('\n');
+        ].join("\n");
     } else return [
         user.toString(),
         `\`${user.id}\``
-    ].join('\n');
+    ].join("\n");
 }

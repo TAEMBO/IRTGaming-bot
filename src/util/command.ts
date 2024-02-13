@@ -25,7 +25,7 @@ export class Command<
         : undefined
 > {
     /** The optional autocomplete function that is ran for this command */
-    autocomplete?: A
+    autocomplete?: A;
     /** The function that is ran for this command */
     run: (interaction: I) => Promise<any>;
     /** The builder data for this command */
@@ -39,7 +39,7 @@ export class Command<
             run(interaction: I): Promise<any>;
         } & (T extends "chatInput"
             ? { autocomplete?: A }
-            : { }
+            : Record<string, any>
         )
     )) {
         this.autocomplete = (commandData as (typeof commandData & { autocomplete: A })).autocomplete;

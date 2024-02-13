@@ -75,12 +75,12 @@ export interface ApplicationRPC {
 
 export type Prettify<T> = {
     [K in keyof T]: T[K];
-} & {};
+} & Record<string, any>;
 
 export type Empty<T> = {
     [K in keyof T]: undefined;
 }
-export type RepeatedMessagesIdentifiers = 'bw' | 'adv' | 'spam';
+export type RepeatedMessagesIdentifiers = "bw" | "adv" | "spam";
 
 /** Adds cache implementation to this schema */
 export interface Cached<TDocument> {
@@ -131,15 +131,15 @@ export interface CachedInvite {
 interface FSServerBase {
     /** The unabbreviated name of this server */
     readonly fullName: string;
-    /** The channel ID for this server's stats embed, used in FSLoop */
+    /** The channel ID for this server"s stats embed, used in FSLoop */
     readonly channelId: string;
-    /** The message ID for this server's stats embed, used in FSLoop */
+    /** The message ID for this server"s stats embed, used in FSLoop */
     readonly messageId: string;
-    /** The username to login to the server's panel */
+    /** The username to login to the server"s panel */
     readonly username: string;
-    /** The password to login to the server's panel */
+    /** The password to login to the server"s panel */
     readonly password: string;
-    /** The address to access the server's API & webserver panel (e.g. `192.168.0.1:8080` or `example.com`) */
+    /** The address to access the server"s API & webserver panel (e.g. `192.168.0.1:8080` or `example.com`) */
     readonly address: string;
     /** The API code to gain access to the API for the server (e.g. `a1b2c3d4e5f6g7h8i9`) */
     readonly code: string;
@@ -150,7 +150,7 @@ interface FSServerBase {
         readonly host: string;
         readonly user: string;
         readonly password: string;
-        /** The path to navigate to the game's profile folder */
+        /** The path to navigate to the game"s profile folder */
         readonly path: string;
     };
 }
@@ -158,7 +158,7 @@ interface FSServerBase {
 /** Object data for a public server */
 export interface FSServerPublic extends FSServerBase {
     readonly isPrivate: false;
-    /** The time zone difference between this server's location and UTC in minutes */
+    /** The time zone difference between this server"s location and UTC in minutes */
     readonly utcDiff: number;
     /** An array of activities that can be done on this server */
     readonly todo: string[];
@@ -227,7 +227,7 @@ export interface Config {
     };
 }
 
-export type MFFarmRoleKeys = Config['mainServer']['mfFarmRoles'][number];
+export type MFFarmRoleKeys = Config["mainServer"]["mfFarmRoles"][number];
 
 interface FSLoopDSSPlayerCoordinates {
     readonly x: number;

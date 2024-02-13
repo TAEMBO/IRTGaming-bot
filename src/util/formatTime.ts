@@ -7,16 +7,16 @@
  */
 export function formatTime(integer: number, accuracy = 1, options?: { longNames?: boolean, commas?: boolean }) {
     const timeNames = [
-        { name: 'year',   length: 1000 * 60 * 60 * 24 * 365 },
-        { name: 'month',  length: 1000 * 60 * 60 * 24 * 30 },
-        { name: 'week',   length: 1000 * 60 * 60 * 24 * 7 },
-        { name: 'day',    length: 1000 * 60 * 60 * 24 },
-        { name: 'hour',   length: 1000 * 60 * 60 },
-        { name: 'minute', length: 1000 * 60 },
-        { name: 'second', length: 1000 }
+        { name: "year",   length: 1_000 * 60 * 60 * 24 * 365 },
+        { name: "month",  length: 1_000 * 60 * 60 * 24 * 30 },
+        { name: "week",   length: 1_000 * 60 * 60 * 24 * 7 },
+        { name: "day",    length: 1_000 * 60 * 60 * 24 },
+        { name: "hour",   length: 1_000 * 60 * 60 },
+        { name: "minute", length: 1_000 * 60 },
+        { name: "second", length: 1_000 }
     ];
     let achievedAccuracy = 0;
-    let text = '';
+    let text = "";
 
     for (const timeName of timeNames) {
         if (achievedAccuracy < accuracy) {
@@ -25,21 +25,21 @@ export function formatTime(integer: number, accuracy = 1, options?: { longNames?
             if (!fullTimelengths) continue;
 
             achievedAccuracy++;
-            text += fullTimelengths + (options?.longNames ? (' ' + timeName.name + (fullTimelengths === 1 ? '' : 's')) : timeName.name.slice(0, timeName.name === 'month' ? 2 : 1)) + (options?.commas ? ', ' : ' ');
+            text += fullTimelengths + (options?.longNames ? (" " + timeName.name + (fullTimelengths === 1 ? "" : "s")) : timeName.name.slice(0, timeName.name === "month" ? 2 : 1)) + (options?.commas ? ", " : " ");
             integer -= fullTimelengths * timeName.length;
         } else break;
     }
 
-    if (!text) text = integer + (options?.longNames ? ' milliseconds' : 'ms') + (options?.commas ? ', ' : '');
+    if (!text) text = integer + (options?.longNames ? " milliseconds" : "ms") + (options?.commas ? ", " : "");
 
     if (options?.commas) {
         text = text.slice(0, -2);
 
         if (options?.longNames) {
-            let textArr = text.split('');
+            const textArr = text.split("");
 
-            textArr[text.lastIndexOf(',')] = ' and';
-            text = textArr.join('');
+            textArr[text.lastIndexOf(",")] = " and";
+            text = textArr.join("");
         }
     }
     

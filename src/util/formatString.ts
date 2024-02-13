@@ -6,11 +6,11 @@
 export function formatString(text: string) {
     text = text.trim();
 
-    if (text.includes(' ')) {
+    if (text.includes(" ")) {
         return text
-            .split(' ')
+            .split(" ")
             .map(x => x[0].toUpperCase() + x.slice(1))
-            .join(' ');
+            .join(" ");
     } else {
         return text[0].toUpperCase() + text.slice(1);
     }

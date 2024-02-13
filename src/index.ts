@@ -26,19 +26,19 @@ for await (const folder of fs.readdirSync(path.resolve("./commands"))) {
 }
 
 // Event handler
-for await (const file of fs.readdirSync(path.resolve('./events'))) client.on(file.replace('.js', ''), (await import(`./events/${file}`)).default);
+for await (const file of fs.readdirSync(path.resolve("./events"))) client.on(file.replace(".js", ""), (await import(`./events/${file}`)).default);
 
 await client.login(client.config.TOKEN);
 
 function errorLog(error: Error) {
     console.error(error);
 
-    if (['Request aborted', 'getaddrinfo ENOTFOUND discord.com'].includes(error.message)) return;
+    if (["Request aborted", "getaddrinfo ENOTFOUND discord.com"].includes(error.message)) return;
 
-    const dirname = process.cwd().replaceAll('\\', '/');
-    const channel = client.getChan('taesTestingZone');
+    const dirname = process.cwd().replaceAll("\\", "/");
+    const channel = client.getChan("taesTestingZone");
     const formattedErr = error.stack
-        ?.replaceAll(' at ', ' [31mat[37m ')
+        ?.replaceAll(" at ", " [31mat[37m ")
         .replaceAll(dirname, `[33m${dirname}[37m`)
         .slice(0, 2500);
 
@@ -55,8 +55,8 @@ function errorLog(error: Error) {
     });
 }
 
-process.on('unhandledRejection', errorLog);
-process.on('uncaughtException', errorLog);
-process.on('error', errorLog);
-client.on('error', errorLog);
-client.on('intErr', errorLog);
+process.on("unhandledRejection", errorLog);
+process.on("uncaughtException", errorLog);
+process.on("error", errorLog);
+client.on("error", errorLog);
+client.on("intErr", errorLog);

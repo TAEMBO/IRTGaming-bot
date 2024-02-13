@@ -21,9 +21,9 @@ export default new Command<"chatInput">({
         await lookup({
             async member() {
                 const displayedRoles = (() => {
-                    if (hasRole(interaction.member, 'mpmanager') || hasRole(interaction.member, 'mfmanager')) {
+                    if (hasRole(interaction.member, "mpmanager") || hasRole(interaction.member, "mfmanager")) {
                         return interaction.client.config.mainServer.mfFarmRoles.map(x => interaction.client.getRole(x));
-                    } else if (hasRole(interaction.member, 'mffarmowner')) {
+                    } else if (hasRole(interaction.member, "mffarmowner")) {
                         return interaction.client.config.mainServer.mfFarmRoles.map(x => interaction.client.getRole(x)).filter(x => onMFFarms(interaction.member).some(y => x.id === y));
                     } else {
                         return [];
@@ -71,10 +71,10 @@ export default new Command<"chatInput">({
             }
         }, interaction.options.getSubcommand());
     },
-	async run(interaction) {
+    async run(interaction) {
         await lookup({
             async member() {
-                if (!hasRole(interaction.member, 'mpmanager') && !hasRole(interaction.member, 'mfmanager') && !hasRole(interaction.member, 'mffarmowner')) return await youNeedRole(interaction, "mffarmowner");
+                if (!hasRole(interaction.member, "mpmanager") && !hasRole(interaction.member, "mfmanager") && !hasRole(interaction.member, "mffarmowner")) return await youNeedRole(interaction, "mffarmowner");
 
                 const member = interaction.options.getMember("member");
                 const roleId = interaction.options.getString("role", true);
@@ -82,7 +82,7 @@ export default new Command<"chatInput">({
 
                 if (!validFarmIds.includes(roleId)) return await interaction.reply("You need to select a valid MF Farm role from the list provided!");
 
-                if (!member) return await interaction.reply({ content: 'You need to select a member that\'s in this server', ephemeral: true });
+                if (!member) return await interaction.reply({ content: "You need to select a member that's in this server", ephemeral: true });
 
                 if (member.roles.cache.has(roleId)) {
                     (await interaction.reply({
@@ -97,7 +97,7 @@ export default new Command<"chatInput">({
                         max: 1,
                         time: 30_000,
                         componentType: ComponentType.Button
-                    }).on('collect', int => void lookup({
+                    }).on("collect", int => void lookup({
                         async confirm() {
                             const rolesToRemove = onMFFarms(member).length === 1 ? [roleId, interaction.client.config.mainServer.roles.mfmember] : [roleId];
                             
@@ -112,7 +112,7 @@ export default new Command<"chatInput">({
                             });
                         },
                         cancel() {
-                            return int.update({ embeds: [new EmbedBuilder().setDescription('Command canceled').setColor(interaction.client.config.EMBED_COLOR)], components: [] });
+                            return int.update({ embeds: [new EmbedBuilder().setDescription("Command canceled").setColor(interaction.client.config.EMBED_COLOR)], components: [] });
                         }
                     }, int.customId));
                 } else {
@@ -127,9 +127,9 @@ export default new Command<"chatInput">({
             async owner() {
                 if (!hasRole(interaction.member, "mpmanager") && !hasRole(interaction.member, "mfmanager")) return await youNeedRole(interaction, "mpmanager");
 
-                const member = interaction.options.getMember('member');
+                const member = interaction.options.getMember("member");
 
-                if (!member) return await interaction.reply({ content: 'You need to select a member that\'s in this server', ephemeral: true });
+                if (!member) return await interaction.reply({ content: "You need to select a member that's in this server", ephemeral: true });
 
                 if (member.roles.cache.has(interaction.client.config.mainServer.roles.mffarmowner)) {
                     (await interaction.reply({
@@ -143,7 +143,7 @@ export default new Command<"chatInput">({
                         max: 1,
                         time: 30_000,
                         componentType: ComponentType.Button
-                    }).on('collect', int => void lookup({
+                    }).on("collect", int => void lookup({
                         async confirm() {
                             await member.roles.remove(interaction.client.config.mainServer.roles.mffarmowner);
 
@@ -156,7 +156,7 @@ export default new Command<"chatInput">({
                             });
                         },
                         cancel() {
-                            return int.update({ embeds: [new EmbedBuilder().setDescription('Command canceled').setColor(interaction.client.config.EMBED_COLOR)], components: [] });
+                            return int.update({ embeds: [new EmbedBuilder().setDescription("Command canceled").setColor(interaction.client.config.EMBED_COLOR)], components: [] });
                         }
                     }, int.customId));
                 } else {
@@ -260,13 +260,13 @@ export default new Command<"chatInput">({
                 await interaction.reply(interaction.client.config.resources.mfFarmOwnerForm);
             }
         }, interaction.options.getSubcommand());
-	},
+    },
     data: new SlashCommandBuilder()
-        .setName('mf')
-        .setDescription('MF management')
+        .setName("mf")
+        .setDescription("MF management")
         .addSubcommand(x => x
-            .setName('member')
-            .setDescription('Manage MF farm members')
+            .setName("member")
+            .setDescription("Manage MF farm members")
             .addUserOption(x => x
                 .setName("member")
                 .setDescription("The member to add or remove a role from")
@@ -277,11 +277,11 @@ export default new Command<"chatInput">({
                 .setRequired(true)
                 .setAutocomplete(true)))
         .addSubcommand(x => x
-            .setName('owner')
-            .setDescription('Manage MF farm owners')
+            .setName("owner")
+            .setDescription("Manage MF farm owners")
             .addUserOption(x => x
-                .setName('member')
-                .setDescription('The member to add or remove the MF Farm Owner role from')
+                .setName("member")
+                .setDescription("The member to add or remove the MF Farm Owner role from")
                 .setRequired(true)))
         .addSubcommand(x => x
             .setName("rename-role")

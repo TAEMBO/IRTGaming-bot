@@ -8,4 +8,4 @@ export default async (reaction: MessageReaction | PartialMessageReaction, user: 
         await reaction.users.remove(user.id);
         await reaction.message.reply(`You cannot vote on your own suggestion, ${user}!`).then(msg => setTimeout(async () => await msg.delete(), 10_000));
     }
-}
+};

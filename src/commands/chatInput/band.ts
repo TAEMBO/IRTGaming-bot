@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from "discord.js";
 import { Command } from "../../utils.js";
 
 export default new Command<"chatInput">({
-	async run(interaction) {
+    async run(interaction) {
         const user = interaction.options.getUser("member", true);
 
         await interaction.deferReply({ ephemeral: true }).then(() => interaction.deleteReply());

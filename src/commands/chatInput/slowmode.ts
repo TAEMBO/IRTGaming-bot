@@ -8,9 +8,9 @@ export default new Command<"chatInput">({
         await interaction.channel!.setRateLimitPerUser(time, `Done by ${interaction.user.tag}`);
 
         if (!time) {
-            await interaction.reply('Slowmode removed.');
-        } else await interaction.reply(`Slowmode set to \`${time}\` ${time === 1 ? 'second' : 'seconds'}.`);
-	},
+            await interaction.reply("Slowmode removed.");
+        } else await interaction.reply(`Slowmode set to \`${time}\` ${time === 1 ? "second" : "seconds"}.`);
+    },
     data: new SlashCommandBuilder()
         .setName("slowmode")
         .setDescription("Sets the slowmode to the provided amount.")

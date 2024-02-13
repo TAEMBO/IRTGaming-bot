@@ -5,23 +5,23 @@ export default async (message: Message<true>) => {
     if ((!message.client.config.toggles.commands && !message.client.config.devWhitelist.includes(message.author.id)) || message.system || message.author.bot) return;
     //   ^^^     Bot is set to ignore commands and non-dev sent a message, ignore the message.      ^^^
 
-    const msg = message.content.replaceAll('\n', ' ').toLowerCase();
+    const msg = message.content.replaceAll("\n", " ").toLowerCase();
     const profanity = new Profanity(msg);
     let automodded = false;
 
     // Misuse of staff ping
     if (message.mentions.roles.some(role => role.id === message.client.config.mainServer.roles.mpstaff)) {
-        log('Purple', `${message.author.tag} mentioned staff role`);
+        log("Purple", `${message.author.tag} mentioned staff role`);
         
         message.channel.createMessageCollector({
-            filter: x => isMPStaff(x.member) && x.content === 'y',
+            filter: x => isMPStaff(x.member) && x.content === "y",
             max: 1,
             time: 60_000
-        }).on('collect', async collected => {
-            log('Purple', `Received "y" from ${collected.author.tag}, indicating to mute`);
+        }).on("collect", async collected => {
+            log("Purple", `Received "y" from ${collected.author.tag}, indicating to mute`);
 
-            await message.client.punishments.addPunishment('mute', collected.author.id, 'Automod; Misuse of staff ping', message.author, message.member, { time: '10m' });
-            await collected.react('✅');
+            await message.client.punishments.addPunishment("mute", collected.author.id, "Automod; Misuse of staff ping", message.author, message.member, { time: "10m" });
+            await collected.react("✅");
         });
     }
 
@@ -44,7 +44,7 @@ export default async (message: Message<true>) => {
                 muteReason: "Banned words"
             });
         } else if (msg.includes("discord.gg/") && !isMPStaff(message.member)) {
-            const inviteURL = message.content.split(' ').find(x => x.includes('discord.gg/')) as string;
+            const inviteURL = message.content.split(" ").find(x => x.includes("discord.gg/")) as string;
             const validInvite = await message.client.fetchInvite(inviteURL).catch(() => null);
 
             if (validInvite && validInvite.guild?.id !== message.client.config.mainServer.id) {
@@ -89,13 +89,13 @@ export default async (message: Message<true>) => {
     }
 
     // Morning message system
-	if (
-        ['morning all', 'morning everyone', 'morning guys', 'morning people'].some(x => msg.includes(x))
+    if (
+        ["morning all", "morning everyone", "morning guys", "morning people"].some(x => msg.includes(x))
         && message.channelId === message.client.config.mainServer.channels.general
     ) {
         const randomEl = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
-        const staffTag = message.member?.displayName.indexOf(' | ') ?? NaN < 0 ? undefined : message.member?.displayName.indexOf(' | ');
-        const user = message.member?.displayName.slice(0, staffTag).replace('[LOA] ', '');
+        const staffTag = (message.member?.displayName.indexOf(" | ") ?? NaN) < 0 ? undefined : message.member?.displayName.indexOf(" | ");
+        const user = message.member?.displayName.slice(0, staffTag).replace("[LOA] ", "");
         const dayReaction = (() => {
             const day = new Date().toUTCString().toLowerCase();
 
@@ -120,32 +120,32 @@ export default async (message: Message<true>) => {
         ];
         const mornRes2 = [
             dayReaction,
-            'Here, take a pancake or two 🥞',
-            'Here, take a 🥔',
-            'Here, take a cookie 🍪',
-            'Fancy a piece of pizza? Here you go 🍕',
-            'I have no movie, but I have some popcorn! Here you go 🍿',
-            'It\'s a bit stale but enjoy 🍞',
-            'Don\'t fall out of bed!',
-            'Coffee\'s gonna be a little late this morning',
-            'Tea\'s gonna be a little late this morning',
-            'Did you have a good dream?',
-            '<a:IRT_DogWave:716263418495238215>',
-            '<:IRT_GoodMorning:605524803008593920>',
-            'I hope you have a good day today sweetie!',
-            'Here\'s some wheat to make some bread that\'s not stale <:IRT_Wheat:761356327708131329>',
-            'I have a movie this time! Sync Sim 22, a real good one.',
-            'Did you sleep on the cold side of the pillow?',
-            'I have a sausage roll for you! <:IRT_Sausageroll:666726520701845534>',
-            'I spilled the tea... the floor smells like tea now',
-            'I spilled the coffee... the floor is lava now',
-            'So, we\'re uh, we\'re out of tea...',
-            'So, we\'re uh, we\'re out of coffee...',
-            'I got some *fresh* bread this time! 🍞',
-            'I got some *fresh* bread this time! You can have the older stuff though 🍞',
-            'We\'re out of breakfast ingredients, looks like no breakfast',
-            'Please be sure to put on matching socks!',
-            'Apple for you 🍎'
+            "Here, take a pancake or two 🥞",
+            "Here, take a 🥔",
+            "Here, take a cookie 🍪",
+            "Fancy a piece of pizza? Here you go 🍕",
+            "I have no movie, but I have some popcorn! Here you go 🍿",
+            "It\"s a bit stale but enjoy 🍞",
+            "Don\"t fall out of bed!",
+            "Coffee\"s gonna be a little late this morning",
+            "Tea\"s gonna be a little late this morning",
+            "Did you have a good dream?",
+            "<a:IRT_DogWave:716263418495238215>",
+            "<:IRT_GoodMorning:605524803008593920>",
+            "I hope you have a good day today sweetie!",
+            "Here\"s some wheat to make some bread that\"s not stale <:IRT_Wheat:761356327708131329>",
+            "I have a movie this time! Sync Sim 22, a real good one.",
+            "Did you sleep on the cold side of the pillow?",
+            "I have a sausage roll for you! <:IRT_Sausageroll:666726520701845534>",
+            "I spilled the tea... the floor smells like tea now",
+            "I spilled the coffee... the floor is lava now",
+            "So, we\"re uh, we\"re out of tea...",
+            "So, we\"re uh, we\"re out of coffee...",
+            "I got some *fresh* bread this time! 🍞",
+            "I got some *fresh* bread this time! You can have the older stuff though 🍞",
+            "We\"re out of breakfast ingredients, looks like no breakfast",
+            "Please be sure to put on matching socks!",
+            "Apple for you 🍎"
         ];
 
         await message.reply({
@@ -153,4 +153,4 @@ export default async (message: Message<true>) => {
             allowedMentions: { repliedUser: false }
         });
     }
-}
+};

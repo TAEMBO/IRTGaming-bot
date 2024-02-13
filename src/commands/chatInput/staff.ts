@@ -2,81 +2,81 @@ import { EmbedBuilder, type GuildMember, SlashCommandBuilder } from "discord.js"
 import { Command, lookup } from "../../utils.js";
 
 export default new Command<"chatInput">({
-	async run(interaction) {
+    async run(interaction) {
         function sortMembers(a: GuildMember, b: GuildMember) {
             if (a.displayName.toLowerCase() < b.displayName.toLowerCase()) return -1;
             if (a.displayName.toLowerCase() > b.displayName.toLowerCase()) return 1;
             return 0;
-        };
+        }
         
         await lookup({
             async mp() {
                 const staff = {
-                    mp_manager: interaction.client.getRole('mpmanager'),
-                    mp_sr_admin: interaction.client.getRole('mpsradmin'),
-                    mp_jr_admin: interaction.client.getRole('mpjradmin'),
-                    mp_farm_manager: interaction.client.getRole('mpfarmmanager'),
-                    mp_trusted_farmer: interaction.client.getRole('trustedfarmer')
+                    mp_manager: interaction.client.getRole("mpmanager"),
+                    mp_sr_admin: interaction.client.getRole("mpsradmin"),
+                    mp_jr_admin: interaction.client.getRole("mpjradmin"),
+                    mp_farm_manager: interaction.client.getRole("mpfarmmanager"),
+                    mp_trusted_farmer: interaction.client.getRole("trustedfarmer")
                 };
          
                 await interaction.reply({ embeds: [new EmbedBuilder()
-                    .setTitle('__MP Staff Members__')
+                    .setTitle("__MP Staff Members__")
                     .setColor(interaction.client.config.EMBED_COLOR)
                     .setDescription([
                         staff.mp_manager.toString(),
                         staff.mp_manager.members.sort(sortMembers).map(x => x.toString()).join("\n") || "None",
-                        '',
+                        "",
                         staff.mp_sr_admin.toString(),
                         staff.mp_sr_admin.members.sort(sortMembers).map(x => x.toString()).join("\n") || "None",
-                        '',
+                        "",
                         staff.mp_jr_admin.toString(),
                         staff.mp_jr_admin.members.sort(sortMembers).map(x => x.toString()).join("\n") || "None",
-                        '',
+                        "",
                         staff.mp_farm_manager.toString(),
                         staff.mp_farm_manager.members.sort(sortMembers).map(x => x.toString()).join("\n") || "None",
-                        '',
+                        "",
                         staff.mp_trusted_farmer.toString(),
                         staff.mp_trusted_farmer.members.sort(sortMembers).map(x => x.toString()).join("\n") || "None"
-                    ].join('\n'))
+                    ].join("\n"))
                 ] });
             },
             async fs() {
                 await interaction.reply({ embeds: [new EmbedBuilder()
-                    .setTitle('__MP Staff Usernames__')
+                    .setTitle("__MP Staff Usernames__")
                     .setColor(interaction.client.config.EMBED_COLOR)
                     .addFields(
-                        { name: 'Farm Managers :farmer:', value: `\`${interaction.client.fmList.data.join("\`\n\`")}\`` },
-                        { name: 'Trusted Farmers :angel:', value: `\`${interaction.client.tfList.data.join("\`\n\`")}\`` }
+                        { name: "Farm Managers :farmer:", value: `\`${interaction.client.fmList.data.join("`\n`")}\`` },
+                        { name: "Trusted Farmers :angel:", value: `\`${interaction.client.tfList.data.join("`\n`")}\`` }
                     )
                 ] });
             },
             async discord() {
                 const staff = {
-                    admin: interaction.client.getRole('discordadmin'),
-                    moderator: interaction.client.getRole('discordmoderator'),
-                    helper: interaction.client.getRole('discordhelper')
+                    admin: interaction.client.getRole("discordadmin"),
+                    moderator: interaction.client.getRole("discordmoderator"),
+                    helper: interaction.client.getRole("discordhelper")
                 };
          
                 await interaction.reply({ embeds: [new EmbedBuilder()
-                    .setTitle('__Discord Staff Members__')
+                    .setTitle("__Discord Staff Members__")
                     .setColor(interaction.client.config.EMBED_COLOR)
                     .setDescription([
                         staff.admin.toString(),
                         staff.admin.members.sort(sortMembers).map(x => x.toString()).join("\n") || "None",
-                        '',
+                        "",
                         staff.moderator.toString(),
                         staff.moderator.members.sort(sortMembers).map(x => x.toString()).join("\n") || "None",
-                        '',
+                        "",
                         staff.helper.toString(),
                         staff.helper.members.sort(sortMembers).map(x => x.toString()).join("\n") || "None"
-                    ].join('\n'))
+                    ].join("\n"))
                 ] });
             },
             async mc() {
-                const staff = interaction.client.getRole('irtmcstaff');
+                const staff = interaction.client.getRole("irtmcstaff");
 
                 await interaction.reply({ embeds: [new EmbedBuilder()
-                    .setTitle('__IRTMC Staff Members__')
+                    .setTitle("__IRTMC Staff Members__")
                     .setColor(interaction.client.config.EMBED_COLOR)
                     .setDescription(`${staff.toString()}\n${staff.members.sort(sortMembers).map(x => x.toString()).join("\n") || "None"}`)
                 ] });

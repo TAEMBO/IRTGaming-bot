@@ -8,10 +8,6 @@ export function lookup<TObj extends Record<string, () => any>>(obj: TObj, key: s
     const value = obj[key as keyof TObj];
 
     if (!value) throw new Error(`ooLookup: Missing key ${key}`);
-
-    try {
-        return value();
-    } catch (error) {
-        throw error;
-    }
+    
+    return value();
 }

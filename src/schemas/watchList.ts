@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const model = mongoose.model('watchList', new mongoose.Schema({
+const model = mongoose.model("watchList", new mongoose.Schema({
     _id: { type: String, required: true },
     reason: { type: String, required: true },
     isSevere: { type: Boolean, required: true }

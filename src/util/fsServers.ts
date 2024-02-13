@@ -3,7 +3,7 @@ import type { Config, FSServer, FSServerPrivate, FSServerPublic, Prettify } from
 
 /** A manager for object data for all Farming Simulator servers */
 export class FSServers {
-    constructor(public data: Config['fs'] | typeof config.fs) { }
+    constructor(public data: Config["fs"] | typeof config.fs) { }
 
     /**
      * @returns An array of server acronyms
@@ -69,4 +69,4 @@ export class FSServers {
     public getPrivateOne(serverAcro: string) {
         return this.entries().find(x => x[0] === serverAcro)?.[1] as Prettify<FSServerPrivate>;
     }
-};
+}

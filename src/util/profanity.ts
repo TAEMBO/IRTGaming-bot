@@ -46,7 +46,7 @@ export class Profanity {
         ])) this._text = this._text.replace(regExp, str);
     
         return this._text
-            .split(' ')
+            .split(" ")
             .map(word => {
                 if (/(.)\1{1,}/.test(word) && word.length > 3) {
                     const val: string[] = [];
@@ -69,12 +69,12 @@ export class Profanity {
                         arr.push(temp);
                     }
                 
-                    return this.allPossibleCases(arr).join(' ');
+                    return this.allPossibleCases(arr).join(" ");
                 } else return word;
             })
-            .join(' ')
+            .join(" ")
             .replace(/ +(?= )/g, "")
-            .split(' ');
+            .split(" ");
     }
 
     /**

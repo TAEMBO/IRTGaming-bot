@@ -15,8 +15,8 @@ import util from "node:util";
 import * as utilities from "../../utils.js";
 
 export default new utilities.Command<"chatInput">({
-	async run(interaction) {
-		if (!interaction.client.config.devWhitelist.includes(interaction.user.id)) return await interaction.reply('You\'re not allowed to use dev commands.');
+    async run(interaction) {
+        if (!interaction.client.config.devWhitelist.includes(interaction.user.id)) return await interaction.reply("You're not allowed to use dev commands.");
         
         await utilities.lookup({
             async eval() {
@@ -27,16 +27,16 @@ export default new utilities.Command<"chatInput">({
                 const useAsync = Boolean(interaction.options.getBoolean("async", false));
                 const fsServers = new utilities.FSServers(interaction.client.config.fs);
                 const embed = new EmbedBuilder()
-                    .setTitle('__Eval__')
+                    .setTitle("__Eval__")
                     .setColor(interaction.client.config.EMBED_COLOR)
-                    .addFields({ name: 'Input', value: codeBlock("js", code.slice(0, 1010)) });
-                let output: any = 'error';
-				
+                    .addFields({ name: "Input", value: codeBlock("js", code.slice(0, 1010)) });
+                let output;
+
                 try {
                     output = await eval(useAsync ? `(async () => { ${code} })()` : code);
                 } catch (err: any) {
                     embed
-                        .setColor('#ff0000')
+                        .setColor("#ff0000")
                         .addFields({
                             name: `Output • ${(performance.now() - now).toFixed(5)}ms`,
                             value: codeBlock(err)
@@ -44,8 +44,8 @@ export default new utilities.Command<"chatInput">({
 
                     const msgPayload = {
                         embeds: [embed],
-                        components: [new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder().setCustomId('stack').setStyle(ButtonStyle.Primary).setLabel('Stack'))],
-                        fetchReply: true as true
+                        components: [new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder().setCustomId("stack").setStyle(ButtonStyle.Primary).setLabel("Stack"))],
+                        fetchReply: true as const
                     };
 
                     const msg = await interaction.reply(msgPayload).catch(() => interaction.channel!.send(msgPayload));
@@ -56,16 +56,16 @@ export default new utilities.Command<"chatInput">({
                         time: 60_000,
                         componentType: ComponentType.Button
                     })
-                        .on('collect', int => void int.reply(codeBlock(err.stack.slice(0, 1950))))
-                        .on('end', () => void msg.edit({ embeds: msg.embeds, components: [] }));
+                        .on("collect", int => void int.reply(codeBlock(err.stack.slice(0, 1950))))
+                        .on("end", () => void msg.edit({ embeds: msg.embeds, components: [] }));
                     
                     return;
                 }
 
                 // Output manipulation
-                if (typeof output === 'object') {
-                    output = 'js\n' + util.formatWithOptions({ depth: 1 }, '%O', output);
-                } else output = '\n' + String(output);
+                if (typeof output === "object") {
+                    output = "js\n" + util.formatWithOptions({ depth: 1 }, "%O", output);
+                } else output = "\n" + String(output);
 
                 // Hide credentials
                 const fsPub = fsServers.getPublicAll();
@@ -77,7 +77,7 @@ export default new utilities.Command<"chatInput">({
                     ...fsObj.map(x => x.code),
                     ...fsPub.map(x => x[1].ftp.host),
                     ...fsPub.map(x => x[1].ftp.password)
-                ]) output = output.replace(credential, 'CREDENTIAL_LEAK');
+                ]) output = output.replace(credential, "CREDENTIAL_LEAK");
 
                 embed.addFields({ name: `Output • ${(performance.now() - now).toFixed(5)}ms`, value: `\`\`\`${output.slice(0, 1016)}\n\`\`\`` });
 
@@ -86,42 +86,42 @@ export default new utilities.Command<"chatInput">({
             async restart() {
                 interaction.replied ? await interaction.editReply("Compiling...") : await interaction.reply("Compiling...");
 
-                exec('tsc', async (error, stdout) => {
+                exec("tsc", async (error, stdout) => {
                     if (error) return await interaction.editReply(codeBlock(stdout.slice(0, 1950)));
 
-                    await interaction.editReply('Restarting...').then(() => process.exit(-1));
+                    await interaction.editReply("Restarting...").then(() => process.exit(-1));
                 });
             },
             async update() {
-                await interaction.reply('Pulling from repo...');
+                await interaction.reply("Pulling from repo...");
 
-                exec('git pull', async (error, stdout) => {
+                exec("git pull", async (error, stdout) => {
                     if (error) return await interaction.editReply(`Pull failed:\n\`\`\`${error.message}\`\`\``);
 
-                    if (stdout.includes('Already up to date')) return await interaction.editReply(`Pull aborted:\nUp-to-date`);
+                    if (stdout.includes("Already up to date")) return await interaction.editReply("Pull aborted:\nUp-to-date");
 
                     await this.restart();
                 });
             }
         }, interaction.options.getSubcommand());
-	},
-	data: new SlashCommandBuilder()
+    },
+    data: new SlashCommandBuilder()
         .setName("dev")
         .setDescription("Run bot-dev-only commands")
         .addSubcommand(x => x
-            .setName('eval')
-            .setDescription('Execute code within the bot')
+            .setName("eval")
+            .setDescription("Execute code within the bot")
             .addStringOption(x => x
                 .setName("code")
                 .setDescription("The code to execute")
                 .setRequired(true))
             .addBooleanOption(x => x
-                .setName('async')
-                .setDescription('Whether to wrap the code in an async block or not')))
+                .setName("async")
+                .setDescription("Whether to wrap the code in an async block or not")))
         .addSubcommand(x => x
-            .setName('restart')
-            .setDescription('Restart the bot'))
+            .setName("restart")
+            .setDescription("Restart the bot"))
         .addSubcommand(x => x
-            .setName('update')
-            .setDescription('Pull from GitHub repository to live bot'))
+            .setName("update")
+            .setDescription("Pull from GitHub repository to live bot"))
 });

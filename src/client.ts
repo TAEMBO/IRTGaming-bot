@@ -29,11 +29,11 @@ export default class TClient extends Client<true> {
     public readonly contextMenuCommands = new Collection<string, Command<"message" | "user">>();
     public readonly repeatedMessages = new RepeatedMessages(this);
     public readonly inviteCache = new Collection<string, CachedInvite>();
-    public readonly bannedWords = new LocalDatabase<string>('bannedWords.json');
-    public readonly tfList = new LocalDatabase<string>('TFlist.json');
-    public readonly fmList = new LocalDatabase<string>('FMlist.json');
-    public readonly whitelist = new LocalDatabase<string>('adminWhitelist.json');
-    public readonly watchListPings = new LocalDatabase<Snowflake>('watchListPings.json');
+    public readonly bannedWords = new LocalDatabase<string>("bannedWords.json");
+    public readonly tfList = new LocalDatabase<string>("TFlist.json");
+    public readonly fmList = new LocalDatabase<string>("FMlist.json");
+    public readonly whitelist = new LocalDatabase<string>("adminWhitelist.json");
+    public readonly watchListPings = new LocalDatabase<Snowflake>("watchListPings.json");
     public readonly userLevels = new UserLevels(this);
     public readonly punishments = new Punishments(this);
     public readonly watchList = new WatchList();

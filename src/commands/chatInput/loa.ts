@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from "discord.js";
 import { Command, hasRole, isMPStaff, youNeedRole } from "../../utils.js";
 
 export default new Command<"chatInput">({
-	async run(interaction) {
+    async run(interaction) {
         if (!isMPStaff(interaction.member)) return await youNeedRole(interaction, "mpstaff");
 
         const roles = interaction.member.roles.cache.map(x => x.id);
@@ -16,23 +16,23 @@ export default new Command<"chatInput">({
                 nick: `[LOA] ${interaction.member.nickname}`
             }).catch(() => interaction.member.roles.set(takenRoles));
 
-            await interaction.reply({ content: 'LOA status set', ephemeral: true });
+            await interaction.reply({ content: "LOA status set", ephemeral: true });
         } else {
             const returnedRoles = (() => {
-                if (hasRole(interaction.member, 'mpmanager')) {
+                if (hasRole(interaction.member, "mpmanager")) {
                     return roles.filter(x => x !== configRoles.loa).concat([configRoles.mpstaff, configRoles.mpmanagement]);
                 } else return roles.filter(x => x !== configRoles.loa).concat([configRoles.mpstaff]);
             })();
             
             await interaction.member.edit({
                 roles: returnedRoles,
-                nick: interaction.member.nickname!.replaceAll('[LOA] ', '')
+                nick: interaction.member.nickname!.replaceAll("[LOA] ", "")
             }).catch(() => interaction.member.roles.set(returnedRoles));
 
-            await interaction.reply({ content: 'LOA status removed', ephemeral: true });
+            await interaction.reply({ content: "LOA status removed", ephemeral: true });
         }
-	},
-	data: new SlashCommandBuilder()
+    },
+    data: new SlashCommandBuilder()
         .setName("loa")
         .setDescription("Manage your LOA status")
 });

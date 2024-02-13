@@ -10,7 +10,7 @@ export class LocalDatabase<T> {
 
     constructor(fileName: `${string}.json`) {
         this._path = path.resolve(`../databases/${fileName}`);
-        this.data = JSON.parse(fs.readFileSync(this._path, 'utf8'));
+        this.data = JSON.parse(fs.readFileSync(this._path, "utf8"));
     }
 
     /** Adds an element to the array and saves the data to JSON */

@@ -25,18 +25,18 @@ export default new Command<"message">({
             ephemeral: true,
             components: [
                 new ActionRowBuilder<ButtonBuilder>().addComponents(
-                    new ButtonBuilder().setCustomId('accept').setStyle(ButtonStyle.Success).setLabel('Accepted by staff'),
-                    new ButtonBuilder().setCustomId('reject').setStyle(ButtonStyle.Danger).setLabel('Rejected by staff')
+                    new ButtonBuilder().setCustomId("accept").setStyle(ButtonStyle.Success).setLabel("Accepted by staff"),
+                    new ButtonBuilder().setCustomId("reject").setStyle(ButtonStyle.Danger).setLabel("Rejected by staff")
                 ),
                 new ActionRowBuilder<ButtonBuilder>().addComponents(
-                    new ButtonBuilder().setCustomId('cancel').setStyle(ButtonStyle.Secondary).setLabel('Cancel')
+                    new ButtonBuilder().setCustomId("cancel").setStyle(ButtonStyle.Secondary).setLabel("Cancel")
                 )
             ]
         })).createMessageComponentCollector({
             max: 1,
             time: 30_000,
             componentType: ComponentType.Button
-        }).on('collect', int => void lookup({
+        }).on("collect", int => void lookup({
             async accept() {
                 embed.setTitle("Community Idea - __**Seen and accepted by staff**__");
 

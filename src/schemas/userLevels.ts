@@ -1,7 +1,7 @@
 import type TClient from "../client.js";
 import mongoose from "mongoose";
 
-const model = mongoose.model('userLevels', new mongoose.Schema({
+const model = mongoose.model("userLevels", new mongoose.Schema({
     _id: { type: String, required: true },
     messages: { type: Number, required: true },
     level: { type: Number, required: true },
@@ -16,7 +16,7 @@ export class UserLevels {
     constructor(private readonly _client: TClient) { }
     
     /**
-     * Increment a user's userLevels data, or create a document for them if one not found
+     * Increment a user"s userLevels data, or create a document for them if one not found
      * @param userid The Discord ID of the user to increment
      */
     public async incrementUser(userid: string) {
@@ -30,8 +30,8 @@ export class UserLevels {
                     console.log(`${userid} EXTENDED LEVELUP ${userData.level}`);
                 }
             } else if (userData.messages >= this.algorithm(userData.level + 1)) {
-                userData.level++
-                await this._client.getChan('botCommands').send(`Well done <@${userid}>, you made it to **level ${userData.level}**!`);
+                userData.level++;
+                await this._client.getChan("botCommands").send(`Well done <@${userid}>, you made it to **level ${userData.level}**!`);
             }
             await userData.save();
         } else await this.data.create({ _id: userid, messages: 1, level: 0 });

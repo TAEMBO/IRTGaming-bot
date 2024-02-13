@@ -9,6 +9,6 @@ type TElementCompact = {
  * @param data The XML data to convert
  * @returns The converted JSON data
  */
-export function jsonFromXML<T extends Record<string, any> = {}>(data: string) {
+export function jsonFromXML<T extends Record<string, any> = Record<string, any>>(data: string) {
     return xml2js(data, { compact: true }) as T & TElementCompact;
 }

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { Cached } from "src/typings.js";
 
-const model = mongoose.model('dailyMsgs', new mongoose.Schema({
+const model = mongoose.model("dailyMsgs", new mongoose.Schema({
     _id: { type: Number, required: true },
     count: { type: Number, required: true }
 }, { versionKey: false }));

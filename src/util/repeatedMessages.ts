@@ -49,7 +49,7 @@ export class RepeatedMessages {
     
         if (spammedMessage) {
             delete this._data[msg.author.id];
-            await this._client.punishments.addPunishment('mute', this._client.user.id, `Automod; ${options.muteReason}`, msg.author, msg.member, { time: options.muteTime });
+            await this._client.punishments.addPunishment("mute", this._client.user.id, `Automod; ${options.muteReason}`, msg.author, msg.member, { time: options.muteTime });
 
             const spamMsgIds = userData.entries.filter(x => x.identifier === "spam").map(x => x.msg);
 

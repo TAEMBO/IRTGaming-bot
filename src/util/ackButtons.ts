@@ -7,12 +7,12 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 export function ackButtons() {
     return [new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder()
-            .setCustomId('confirm')
+            .setCustomId("confirm")
             .setStyle(ButtonStyle.Success)
-            .setLabel('Confirm'),
+            .setLabel("Confirm"),
         new ButtonBuilder()
-            .setCustomId('cancel')
+            .setCustomId("cancel")
             .setStyle(ButtonStyle.Danger)
-            .setLabel('Cancel'))
+            .setLabel("Cancel"))
     ];
 }

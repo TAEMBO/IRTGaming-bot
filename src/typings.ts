@@ -1,7 +1,7 @@
 import type { Collection, PresenceData, SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder, Snowflake } from "discord.js";
-import config from "./config.json" assert { type: "json" };
+import type config from "./config.json";
 import type TClient from "./client.js";
-import type { Command, LocalDatabase, RepeatedMessages } from "./utils.js";
+import type { Command, LocalStorage, RepeatedMessages } from "./utils.js";
 import type {
     DailyMsgs,
     PlayerTimes,
@@ -22,11 +22,11 @@ declare module "discord.js" {
         readonly contextMenuCommands: Collection<string, Command<"message" | "user">>;
         readonly repeatedMessages: RepeatedMessages;
         readonly inviteCache: Collection<string, CachedInvite>;
-        readonly bannedWords: LocalDatabase<string>;
-        readonly tfList: LocalDatabase<string>;
-        readonly fmList: LocalDatabase<string>;
-        readonly whitelist: LocalDatabase<string>;
-        readonly watchListPings: LocalDatabase<Snowflake>;
+        readonly bannedWords: LocalStorage<string>;
+        readonly tfList: LocalStorage<string>;
+        readonly fmList: LocalStorage<string>;
+        readonly whitelist: LocalStorage<string>;
+        readonly watchListPings: LocalStorage<Snowflake>;
         readonly userLevels: UserLevels;
         readonly punishments: Punishments;
         readonly watchList: WatchList;

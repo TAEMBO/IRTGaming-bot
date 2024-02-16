@@ -18,7 +18,7 @@ import {
     UserLevels,
     WatchList
 } from "./schemas.js";
-import { type Command, LocalDatabase, RepeatedMessages } from "./utils.js";
+import { type Command, LocalStorage, RepeatedMessages } from "./utils.js";
 import type { CachedInvite, Config, FSCache, YTCache } from "./typings.js";
 
 export default class TClient extends Client<true> {
@@ -29,11 +29,11 @@ export default class TClient extends Client<true> {
     public readonly contextMenuCommands = new Collection<string, Command<"message" | "user">>();
     public readonly repeatedMessages = new RepeatedMessages(this);
     public readonly inviteCache = new Collection<string, CachedInvite>();
-    public readonly bannedWords = new LocalDatabase<string>("bannedWords.json");
-    public readonly tfList = new LocalDatabase<string>("TFlist.json");
-    public readonly fmList = new LocalDatabase<string>("FMlist.json");
-    public readonly whitelist = new LocalDatabase<string>("adminWhitelist.json");
-    public readonly watchListPings = new LocalDatabase<Snowflake>("watchListPings.json");
+    public readonly bannedWords = new LocalStorage<string>("bannedWords.json");
+    public readonly tfList = new LocalStorage<string>("TFlist.json");
+    public readonly fmList = new LocalStorage<string>("FMlist.json");
+    public readonly whitelist = new LocalStorage<string>("adminWhitelist.json");
+    public readonly watchListPings = new LocalStorage<Snowflake>("watchListPings.json");
     public readonly userLevels = new UserLevels(this);
     public readonly punishments = new Punishments(this);
     public readonly watchList = new WatchList();

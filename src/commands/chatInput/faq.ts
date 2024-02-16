@@ -5,7 +5,7 @@ export default new Command<"chatInput">({
     async run(interaction) {
         const fsServers = new FSServers(interaction.client.config.fs);
         const isFromTicket = interaction.channel!.parentId === interaction.client.config.mainServer.categories.activeTickets;
-        const content = interaction.options.getUser("user", false)?.toString();
+        const content = interaction.options.getUser("user", false)?.toString() || "";
 
         await lookup({
             staff: () => interaction.reply({ content, components: [

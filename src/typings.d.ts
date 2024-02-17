@@ -268,7 +268,7 @@ interface FSLoopDSSVehicle {
     readonly x: number;
     readonly y: number;
     readonly z: number;
-    readonly fills: {
+    readonly fills?: {
         readonly type: string;
         readonly level: number;
     }[];

@@ -6,7 +6,8 @@ import {
     type Message,
     type PartialMessage
 } from "discord.js";
-import { formatUser, isDCStaff, isMPStaff, Profanity } from "../utils.js";
+import { Profanity } from "../structures/index.js";
+import { formatUser, isDCStaff, isMPStaff } from "../util/index.js";
 
 export default async (oldMsg: Message | PartialMessage, newMsg: Message | PartialMessage) => {
     if (

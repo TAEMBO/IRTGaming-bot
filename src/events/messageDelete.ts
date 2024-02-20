@@ -1,5 +1,5 @@
 import { EmbedBuilder, type Message, type PartialMessage } from "discord.js";
-import { formatUser } from "../utils.js";
+import { formatUser } from "../util/index.js";
 
 export default async (message: Message | PartialMessage) => {
     if (

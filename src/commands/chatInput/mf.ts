@@ -6,14 +6,14 @@ import {
     SlashCommandBuilder,
     type TextChannel
 } from "discord.js";
+import { Command } from "../../structures/index.js";
 import {
-    Command,
     ackButtons,
     hasRole,
     lookup,
     onMFFarms,
     youNeedRole
-} from "../../utils.js";
+} from "../../util/index.js";
 import type { MFFarmRoleKeys } from "../../typings.js";
 
 export default new Command<"chatInput">({

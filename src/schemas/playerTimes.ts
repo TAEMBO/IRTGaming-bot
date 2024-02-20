@@ -3,7 +3,8 @@ import type TClient from "../client.js";
 import config from "../config.json" assert { type: "json" };
 import FTPClient from "ftp";
 import mongoose from "mongoose";
-import { FSServers, jsonFromXML, log, stringifyStream } from "../utils.js";
+import { FSServers } from "../structures/index.js";
+import { jsonFromXML, log, stringifyStream } from "../util/index.js";
 import type { FarmFormat } from "../typings.js";
 
 /** The object that each server will have */

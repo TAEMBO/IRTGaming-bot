@@ -7,7 +7,8 @@ import {
     EmbedBuilder,
     SlashCommandBuilder
 } from "discord.js";
-import { Command, formatString, formatUser } from "../../utils.js";
+import { Command } from "../../structures/index.js";
+import { formatString, formatUser } from "../../util/index.js";
 import type { ApplicationRPC } from "../../typings.js";
 
 export default new Command<"chatInput">({

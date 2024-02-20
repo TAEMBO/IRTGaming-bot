@@ -1,6 +1,7 @@
 import type TClient from "../client.js";
 import mongoose from "mongoose";
-import { formatRequestInit, fsLoop, fsLoopAll, FSServers, jsonFromXML, log } from "../utils.js";
+import { FSServers } from "../structures/index.js";
+import { formatRequestInit, fsLoop, fsLoopAll, jsonFromXML, log } from "../util/index.js";
 import type { YTCacheFeed } from "../typings.js";
 
 export default async (client: TClient) => {

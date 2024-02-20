@@ -1,6 +1,7 @@
 import { EmbedBuilder, SlashCommandBuilder, version } from "discord.js";
 import os from "node:os";
-import { Command, formatTime } from "../../utils.js";
+import { Command } from "../../structures/index.js";
+import { formatTime } from "../../util/index.js";
 
 export default new Command<"chatInput">({
     async run(interaction) {

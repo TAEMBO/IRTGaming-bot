@@ -1,6 +1,6 @@
 import { AttachmentBuilder, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import canvas from "canvas";
-import { Command } from "../../utils.js";
+import { Command } from "../../structures/index.js";
 
 export default new Command<"chatInput">({
     async run(interaction) {

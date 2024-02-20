@@ -1,5 +1,5 @@
 import type { MessageReaction, PartialMessageReaction, PartialUser, User } from "discord.js";
-import { tempReply } from "../utils.js";
+import { tempReply } from "../util/index.js";
 
 export default async (reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser) => {
     if (

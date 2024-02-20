@@ -1,7 +1,7 @@
 import type { Collection, PresenceData, SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder, Snowflake } from "discord.js";
 import type config from "./config.json";
 import type TClient from "./client.js";
-import type { Command, LocalStorage, RepeatedMessages } from "./utils.js";
+import type { Command, LocalStorage, RepeatedMessages } from "./util/index.js";
 import type {
     DailyMsgs,
     PlayerTimes,
@@ -9,9 +9,9 @@ import type {
     Reminders,
     UserLevels,
     WatchList
-} from "./schemas.js";
+} from "./schemas/index.js";
 
-export type * from "./schemas.js";
+export type * from "./schemas/index.js";
 
 declare module "discord.js" {
     interface Client {

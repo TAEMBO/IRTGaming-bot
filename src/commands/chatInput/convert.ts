@@ -1,5 +1,5 @@
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import { Command } from "../../utils.js";
+import { Command } from "../../structures/index.js";
 
 interface Quantity {
     name: string;

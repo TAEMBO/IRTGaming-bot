@@ -1,5 +1,6 @@
 import { SlashCommandBuilder } from "discord.js";
-import { Command, hasRole, isMPStaff, youNeedRole } from "../../utils.js";
+import { Command } from "../../structures/index.js";
+import { hasRole, isMPStaff, youNeedRole } from "../../util/index.js";
 
 export default new Command<"chatInput">({
     async run(interaction) {

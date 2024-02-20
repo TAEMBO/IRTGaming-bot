@@ -1,5 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import { Command, FSServers, lookup } from "../../utils.js";
+import { Command, FSServers } from "../../structures/index.js";
+import { lookup } from "../../util/index.js";
 
 export default new Command<"chatInput">({
     async run(interaction) {

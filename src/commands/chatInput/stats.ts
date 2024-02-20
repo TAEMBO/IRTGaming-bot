@@ -1,7 +1,8 @@
 import { AttachmentBuilder, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import config from "../../config.json" assert { type: "json" };
 import canvas from "canvas";
-import { Command, formatRequestInit, formatTime, FSServers, getFSURL, isMPStaff, log } from "../../utils.js";
+import { Command, FSServers } from "../../structures/index.js";
+import { formatRequestInit, formatTime, getFSURL, isMPStaff, log } from "../../util/index.js";
 import type { FSLoopDSS, PlayerTimesDocument } from "../../typings.js";
 
 const fsServers = new FSServers(config.fs);

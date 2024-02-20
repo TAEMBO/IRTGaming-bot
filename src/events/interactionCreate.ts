@@ -1,5 +1,5 @@
 import type { Interaction } from "discord.js";
-import { log, lookup } from "../utils.js";
+import { log, lookup } from "../util/index.js";
 
 export default async (interaction: Interaction) => {
     if (!interaction.inCachedGuild()) return;

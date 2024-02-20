@@ -1,5 +1,5 @@
 import { EmbedBuilder, type GuildMember, type PartialGuildMember } from "discord.js";
-import { formatUser } from "../utils.js";
+import { formatUser } from "../util/index.js";
 
 export default async (oldMember: GuildMember | PartialGuildMember, newMember: GuildMember) => {
     if (!newMember.client.config.toggles.logs) return;

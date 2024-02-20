@@ -12,9 +12,10 @@ import fs from "node:fs";
 import { performance } from "perf_hooks";
 import { setTimeout as sleep } from "node:timers/promises";
 import util from "node:util";
-import * as utilities from "../../utils.js";
+import * as structures from "../../structures/index.js";
+import * as utilities from "../../util/index.js";
 
-export default new utilities.Command<"chatInput">({
+export default new structures.Command<"chatInput">({
     async run(interaction) {
         if (!interaction.client.config.devWhitelist.includes(interaction.user.id)) return await interaction.reply("You're not allowed to use dev commands.");
         
@@ -25,7 +26,7 @@ export default new utilities.Command<"chatInput">({
                 const { client } = interaction;
                 const code = interaction.options.getString("code", true);
                 const useAsync = Boolean(interaction.options.getBoolean("async", false));
-                const fsServers = new utilities.FSServers(interaction.client.config.fs);
+                const fsServers = new structures.FSServers(interaction.client.config.fs);
                 const embed = new EmbedBuilder()
                     .setTitle("__Eval__")
                     .setColor(interaction.client.config.EMBED_COLOR)

@@ -1,5 +1,6 @@
 import type { Message } from "discord.js";
-import { isDCStaff, isMPStaff, log, tempReply, Profanity } from "../utils.js";
+import { Profanity } from "../structures/index.js";
+import { isDCStaff, isMPStaff, log, tempReply } from "../util/index.js";
 
 export default async (message: Message<true>) => {
     if ((!message.client.config.toggles.commands && !message.client.config.devWhitelist.includes(message.author.id)) || message.system || message.author.bot) return;

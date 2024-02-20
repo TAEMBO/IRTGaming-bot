@@ -1,5 +1,7 @@
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import { Command, FSServers, isMPStaff } from "../../utils.js";
+import { Command, FSServers } from "../../structures/index.js";
+
+import { isMPStaff } from "../../util/index.js";
 
 export default new Command<"chatInput">({
     async run(interaction) {

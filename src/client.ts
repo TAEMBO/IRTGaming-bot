@@ -17,8 +17,8 @@ import {
     Reminders,
     UserLevels,
     WatchList
-} from "./schemas.js";
-import { type Command, LocalStorage, RepeatedMessages } from "./utils.js";
+} from "./schemas/index.js";
+import { type Command, LocalStorage, RepeatedMessages } from "./structures/index.js";
 import type { CachedInvite, Config, FSCache, YTCache } from "./typings.js";
 
 export default class TClient extends Client<true> {

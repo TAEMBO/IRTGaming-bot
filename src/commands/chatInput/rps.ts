@@ -1,5 +1,5 @@
 import { EmbedBuilder, type Message, SlashCommandBuilder, type User } from "discord.js";
-import { Command } from "../../utils.js";
+import { Command } from "../../structures/index.js";
 
 const rpsChannels: Record<string, RpsInstance> = {};
 

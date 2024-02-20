@@ -3,9 +3,8 @@ import { AttachmentBuilder, ComponentType, EmbedBuilder, SlashCommandBuilder } f
 import config from "../../config.json" assert { type: "json" };
 import FTPClient from "ftp";
 import puppeteer from "puppeteer"; // Credits to Trolly for suggesting this package
+import { Command, FSServers } from "../../structures/index.js";
 import {
-    Command,
-    FSServers,
     ackButtons,
     getFSURL,
     hasRole,
@@ -14,7 +13,7 @@ import {
     lookup,
     stringifyStream,
     youNeedRole
-} from "../../utils.js";
+} from "../../util/index.js";
 import type { BanFormat, DedicatedServerConfig, FarmFormat } from "../../typings.js";
 
 const fsServers = new FSServers(config.fs);

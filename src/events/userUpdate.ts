@@ -1,5 +1,5 @@
 import { EmbedBuilder, type PartialUser, type User } from "discord.js";
-import { formatUser } from "../utils.js";
+import { formatUser } from "../util/index.js";
 
 export default async (oldUser: User | PartialUser, newUser: User) => {
     if (!newUser.client.config.toggles.logs || oldUser.tag === newUser.tag) return;

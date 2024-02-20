@@ -1,6 +1,6 @@
 import { EmbedBuilder, TextChannel } from "discord.js";
 import type TClient from "../client.js";
-import { formatRequestInit, formatTime, getFSURL, jsonFromXML, log } from "../utils.js";
+import { formatRequestInit, formatTime, getFSURL, jsonFromXML, log } from "./index.js";
 import type { FSLoopCSG, FSLoopDSS, FSLoopDSSPlayer, FSServer, WatchListDocument } from "../typings.js";
 
 export async function fsLoop(client: TClient, watchList: WatchListDocument[], server: FSServer, serverAcro: string) {

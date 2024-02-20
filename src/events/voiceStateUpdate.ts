@@ -1,5 +1,5 @@
 import { EmbedBuilder, type VoiceState } from "discord.js";
-import { formatUser } from "../utils.js";
+import { formatUser } from "../util/index.js";
 
 export default async (oldState: VoiceState, newState: VoiceState) => {
     if (!newState.client.config.toggles.logs || !newState.member) return;

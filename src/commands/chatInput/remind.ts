@@ -9,8 +9,9 @@ import {
     StringSelectMenuOptionBuilder
 } from "discord.js";
 import ms from "ms";
+import { Command } from "../../structures/index.js";
+import { ackButtons, lookup } from "../../util/index.js";
 import type { RemindersDocument } from "../../typings.js";
-import { Command, ackButtons, lookup } from "../../utils.js";
 
 export default new Command<"chatInput">({
     async run(interaction) {

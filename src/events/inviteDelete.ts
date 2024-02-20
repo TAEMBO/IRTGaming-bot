@@ -1,3 +1,9 @@
-import type { Invite } from "discord.js";
+import { Events } from "discord.js";
+import { Event } from "../structures/index.js";
 
-export default async (invite: Invite) => invite.client.inviteCache.delete(invite.code);
+export default new Event({
+    name: Events.InviteDelete,
+    async run(invite) {
+        invite.client.inviteCache.delete(invite.code);
+    }
+});

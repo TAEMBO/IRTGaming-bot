@@ -1,7 +1,8 @@
-import { ContextMenuCommandBuilder, EmbedBuilder } from "discord.js";
+import { type ClientEvents, ContextMenuCommandBuilder, EmbedBuilder } from "discord.js";
 import TClient from "./client.js";
 import fs from "node:fs";
 import path from "node:path";
+import type { Event } from "./structures/index.js";
 
 const client = new TClient();
 const fsKeys = Object.keys(client.config.fs);
@@ -26,7 +27,11 @@ for await (const folder of fs.readdirSync(path.resolve("./commands"))) {
 }
 
 // Event handler
-for await (const file of fs.readdirSync(path.resolve("./events"))) client.on(file.replace(".js", ""), (await import(`./events/${file}`)).default);
+for await (const file of fs.readdirSync(path.resolve("./events"))) {
+    const eventFile: Event<keyof ClientEvents> = (await import(`./events/${file}`)).default;
+
+    client[eventFile.once ? "once" : "on"](eventFile.name, eventFile.run);
+}
 
 await client.login(client.config.TOKEN);
 

@@ -1,4 +1,4 @@
-import { EmbedBuilder, Events } from "discord.js";
+import { codeBlock, EmbedBuilder, Events } from "discord.js";
 import { Event } from "../structures/index.js";
 import { formatUser } from "../util/index.js";
 
@@ -14,8 +14,8 @@ export default new Event({
             .setDescription(formatUser(newUser))
             .setThumbnail(newUser.displayAvatarURL({ extension: "png", size: 2048 }))
             .setFields(
-                { name: "🔹 Old Tag", value: `\`\`\`${oldUser.tag}\`\`\`` },
-                { name: "🔹 New Tag", value: `\`\`\`${newUser.tag}\`\`\`` })
+                { name: "🔹 Old Tag", value: codeBlock(oldUser.tag ?? "") },
+                { name: "🔹 New Tag", value: codeBlock(newUser.tag) })
         ] }); 
     }
 });

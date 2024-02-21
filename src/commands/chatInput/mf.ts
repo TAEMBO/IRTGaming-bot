@@ -74,7 +74,11 @@ export default new Command<"chatInput">({
     async run(interaction) {
         await lookup({
             async member() {
-                if (!hasRole(interaction.member, "mpmanager") && !hasRole(interaction.member, "mfmanager") && !hasRole(interaction.member, "mffarmowner")) return await youNeedRole(interaction, "mffarmowner");
+                if (
+                    !hasRole(interaction.member, "mpmanager")
+                    && !hasRole(interaction.member, "mfmanager")
+                    && !hasRole(interaction.member, "mffarmowner")
+                ) return await youNeedRole(interaction, "mffarmowner");
 
                 const member = interaction.options.getMember("member");
                 const roleId = interaction.options.getString("role", true);
@@ -99,7 +103,9 @@ export default new Command<"chatInput">({
                         componentType: ComponentType.Button
                     }).on("collect", int => void lookup({
                         async confirm() {
-                            const rolesToRemove = onMFFarms(member).length === 1 ? [roleId, interaction.client.config.mainServer.roles.mfmember] : [roleId];
+                            const rolesToRemove = onMFFarms(member).length === 1
+                                ? [roleId, interaction.client.config.mainServer.roles.mfmember]
+                                : [roleId];
                             
                             await member.roles.remove(rolesToRemove);
 

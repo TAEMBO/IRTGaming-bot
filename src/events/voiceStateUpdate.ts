@@ -11,7 +11,10 @@ export default new Event({
         const embed = new EmbedBuilder()
             .setTimestamp()
             .setDescription(formatUser(newState.member.user))
-            .setAuthor({ name: newState.member.user.tag, iconURL: newState.member.user.displayAvatarURL({ extension: "png", size: 2048 }) });
+            .setAuthor({
+                name: newState.member.user.tag,
+                iconURL: newState.member.user.displayAvatarURL({ extension: "png", size: 2048 })
+            });
     
         if (!oldState.channelId && newState.channelId) { // Joined VC
             embed

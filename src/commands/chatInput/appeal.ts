@@ -5,7 +5,10 @@ import { isMPStaff } from "../../util/index.js";
 
 export default new Command<"chatInput">({
     async run(interaction) {
-        if (interaction.channel!.parentId !== interaction.client.config.mainServer.categories.activeTickets && !isMPStaff(interaction.member)) return await interaction.reply({ content: "You cannot use this command here", ephemeral: true });
+        if (
+            interaction.channel!.parentId !== interaction.client.config.mainServer.categories.activeTickets
+            && !isMPStaff(interaction.member)
+        ) return await interaction.reply({ content: "You cannot use this command here", ephemeral: true });
 
         const fsServers = new FSServers(interaction.client.config.fs);
 

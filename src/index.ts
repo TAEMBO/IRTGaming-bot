@@ -14,7 +14,13 @@ console.log(client.config.devWhitelist);
 console.log(fsKeys);
 
 for (const { id } of client.config.ytChannels) client.ytCache[id] = null;
-for (const serverAcro of fsKeys) client.fsCache[serverAcro] = { players: [], status: null, lastAdmin: null, graphPoints: [], isThrottled: null };
+for (const serverAcro of fsKeys) client.fsCache[serverAcro] = {
+    players: [],
+    status: null,
+    lastAdmin: null,
+    graphPoints: [],
+    isThrottled: null
+};
 
 // Command handler
 for await (const folder of fs.readdirSync(path.resolve("./commands"))) {

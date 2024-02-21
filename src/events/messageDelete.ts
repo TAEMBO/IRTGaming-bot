@@ -1,4 +1,4 @@
-import { EmbedBuilder, Events } from "discord.js";
+import { EmbedBuilder, Events, time } from "discord.js";
 import { Event } from "../structures/index.js";
 import { formatUser } from "../util/index.js";
 
@@ -24,9 +24,9 @@ export default new Event({
     
         embed.addFields(
             { name: "🔹 Channel", value: message.channel.toString() },
-            { name: "🔹 Sent", value: `<t:${Math.round(message.createdTimestamp / 1000)}:R>` }
+            { name: "🔹 Sent", value: time(message.createdAt, "R") }
         );
     
-        await message.client.getChan("botLogs").send({ embeds: [embed], files: message.attachments.map(x => x) });
+        await message.client.getChan("botLogs").send({ embeds: [embed], files: [...message.attachments.values()] });
     }
 });

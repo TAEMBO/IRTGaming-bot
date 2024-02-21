@@ -110,7 +110,12 @@ export default new Command<"chatInput">({
                     componentType: ComponentType.Button
                 }).on("collect", int => void lookup({
                     async confirm() {
-                        const reminder = await interaction.client.reminders.data.create({ userid: interaction.user.id, content: reminderText, time: timeToRemind, ch: interaction.channelId });
+                        const reminder = await interaction.client.reminders.data.create({
+                            userid: interaction.user.id,
+                            content: reminderText,
+                            time: timeToRemind,
+                            ch: interaction.channelId
+                        });
 
                         interaction.client.reminders.setExec(reminder._id, timeToRemind - Date.now());
                         await int.update({

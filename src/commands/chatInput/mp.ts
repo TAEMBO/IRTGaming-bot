@@ -34,6 +34,7 @@ export default new Command<"chatInput">({
 
                 const chosenServer = interaction.options.getString("server", true);
                 const chosenAction = interaction.options.getString("action", true) as "start" | "stop" | "restart";
+                const cachedServer = interaction.client.fsCache[chosenServer];
 
                 if (interaction.client.config.fs[chosenServer].isPrivate && !hasRole(interaction.member, "mpmanager")) {
                     await checkRole("mfmanager");
@@ -43,9 +44,15 @@ export default new Command<"chatInput">({
 
                 await interaction.deferReply();
     
-                if (!interaction.client.fsCache[chosenServer].status) return await interaction.editReply("Cache not populated, retry in 30 seconds");
-                if (interaction.client.fsCache[chosenServer].status === "offline" && ["stop", "restart"].includes(chosenAction)) return await interaction.editReply("Server is already offline");
-                if (interaction.client.fsCache[chosenServer].status === "online" && chosenAction === "start") return await interaction.editReply("Server is already online");
+                if (!cachedServer.status) return await interaction.editReply("Cache not populated, retry in 30 seconds");
+                if (
+                    cachedServer.status === "offline"
+                    && ["stop", "restart"].includes(chosenAction)
+                ) return await interaction.editReply("Server is already offline");
+                if (
+                    cachedServer.status === "online"
+                    && chosenAction === "start"
+                ) return await interaction.editReply("Server is already online");
 
                 const serverSelector = `[name="${chosenAction}_server"]`;
                 const browser = await puppeteer.launch({ headless: "new" });
@@ -213,7 +220,11 @@ export default new Command<"chatInput">({
                 const chosenServer = interaction.options.getString("server", true);
                 const server = interaction.client.config.fs[chosenServer];
 
-                if (server.isPrivate && !hasRole(interaction.member, "mpmanager") && !hasRole(interaction.member, "mfmanager")) return await youNeedRole(interaction, "mpmanager");
+                if (
+                    server.isPrivate
+                    && !hasRole(interaction.member, "mpmanager")
+                    && !hasRole(interaction.member, "mfmanager")
+                ) return await youNeedRole(interaction, "mpmanager");
 
                 await interaction.deferReply();
 
@@ -333,7 +344,10 @@ export default new Command<"chatInput">({
                     })[roleName]();
                     
                     await member.edit({ roles, nick: newNickname });
-                    await interaction.reply({ embeds: [new EmbedBuilder().setDescription(`${member} has been given <@&${roleId}>.`).setColor(interaction.client.config.EMBED_COLOR)] });
+                    await interaction.reply({ embeds: [new EmbedBuilder()
+                        .setDescription(`${member} has been given <@&${roleId}>.`)
+                        .setColor(interaction.client.config.EMBED_COLOR)
+                    ]});
                     await interaction.client.users.send(
                         interaction.guild.ownerId,
                         `**${interaction.user.tag}** has promoted **${member.user.tag}** to **${interaction.client.getRole(roleName).name}**`

@@ -35,14 +35,23 @@ export default new Event({
     
         await client.dailyMsgs.fillCache();
             
-        for (const [code, inv] of await guild.invites.fetch()) client.inviteCache.set(code, { uses: inv.uses ?? 0, creator: inv.inviter?.id ?? "UNKNOWN" });
+        for (const [code, inv] of await guild.invites.fetch()) client.inviteCache.set(code, {
+            uses: inv.uses ?? 0,
+            creator: inv.inviter?.id ?? "UNKNOWN"
+        });
     
-        for (const reminder of await client.reminders.data.find()) client.reminders.setExec(reminder._id, reminder.time < now ? 0 : reminder.time - now);
+        for (const reminder of await client.reminders.data.find()) client.reminders.setExec(reminder._id, reminder.time < now
+            ? 0
+            : reminder.time - now
+        );
     
         for (const punishment of await client.punishments.data.find()) {
             if (!punishment.endTime || punishment.expired) continue;
     
-            client.punishments.setExec(punishment._id, punishment.endTime < now ? 0 : punishment.endTime - now);
+            client.punishments.setExec(punishment._id, punishment.endTime < now
+                ? 0
+                : punishment.endTime - now
+            );
         }
     
         await client.getChan("taesTestingZone").send([
@@ -90,7 +99,10 @@ export default new Event({
         // YouTube upload notifications loop
         if (client.config.toggles.ytLoop) setInterval(async () => {
             for await (const channel of client.config.ytChannels) {
-                const res = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`, formatRequestInit(5_000, "YTLoop")).catch(() => log("Red", `${channel.name} YT fetch fail`));
+                const res = await fetch(
+                    `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`,
+                    formatRequestInit(5_000, "YTLoop")
+                ).catch(() => log("Red", `${channel.name} YT fetch fail`));
                 let data;
         
                 if (!res) continue;

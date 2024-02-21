@@ -6,7 +6,7 @@ export default new Command<"chatInput">({
     async run(interaction) {
         if (!isMPStaff(interaction.member)) return await youNeedRole(interaction, "mpstaff");
 
-        const roles = interaction.member.roles.cache.map(x => x.id);
+        const roles = [...interaction.member.roles.cache.keys()];
         const configRoles = interaction.client.config.mainServer.roles;
 
         if (!roles.includes(configRoles.loa)) {

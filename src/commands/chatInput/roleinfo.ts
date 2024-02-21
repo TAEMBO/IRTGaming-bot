@@ -1,4 +1,4 @@
-import { EmbedBuilder, PermissionFlagsBits, PermissionsBitField, SlashCommandBuilder } from "discord.js";
+import { EmbedBuilder, PermissionFlagsBits, PermissionsBitField, SlashCommandBuilder, time } from "discord.js";
 import { Command } from "../../structures/index.js";
 
 export default new Command<"chatInput">({
@@ -29,7 +29,7 @@ export default new Command<"chatInput">({
             .addFields(
                 { name: "🔹 ID", value: `\`${role.id}\``, inline: true },
                 { name: "🔹 Color", value: `\`${role.hexColor}\``, inline: true },
-                { name: "🔹 Created", value: `<t:${Math.round(role.createdTimestamp/1000)}:R> `, inline: true },
+                { name: "🔹 Created", value: time(role.createdAt, "R"), inline: true },
                 { name: "🔹 Misc", value: [
                     `Hoist: \`${role.hoist}\``,
                     `Mentionable: \`${role.mentionable}\``,

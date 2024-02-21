@@ -1,4 +1,11 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, Events } from "discord.js";
+import {
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    codeBlock,
+    EmbedBuilder,
+    Events
+} from "discord.js";
 import { Event, Profanity } from "../structures/index.js";
 import { formatUser, isDCStaff, isMPStaff } from "../util/index.js";
 
@@ -16,7 +23,12 @@ export default new Event({
         const msg = newMessage.content.replaceAll("\n", " ").toLowerCase();
         const profanity = new Profanity(msg);
     
-        if (profanity.hasProfanity(newMessage.client.bannedWords.data) && (!isMPStaff(newMessage.member) && !isDCStaff(newMessage.member))) await newMessage.delete();
+        if (
+            profanity.hasProfanity(newMessage.client.bannedWords.data)
+            && (
+                !isMPStaff(newMessage.member)
+                && !isDCStaff(newMessage.member)
+            )) await newMessage.delete();
     
         if (!newMessage.client.config.toggles.logs) return;
     
@@ -34,8 +46,8 @@ export default new Event({
                     .setTitle("Message Edited")
                     .setDescription(formatUser(newMessage.author))
                     .addFields(
-                        { name: "🔹 Old Content", value: `\`\`\`ansi\n${oldContent.slice(0, 1000)}\n\`\`\`` },
-                        { name: "🔹 New Content", value: `\`\`\`ansi\n${newContent.slice(0, 1000)}\n\`\`\`` },
+                        { name: "🔹 Old Content", value: codeBlock("ansi", oldContent.slice(0, 1000)) },
+                        { name: "🔹 New Content", value: codeBlock("ansi", newContent.slice(0, 1000)) },
                         { name: "🔹 Channel", value: oldMessage.channel.toString() })
                     .setAuthor({ name: newMessage.author.tag, iconURL: newMessage.author.displayAvatarURL({ extension: "png", size: 128 }) })
                     .setColor(newMessage.client.config.EMBED_COLOR)

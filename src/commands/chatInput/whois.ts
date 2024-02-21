@@ -5,7 +5,9 @@ import {
     type ClientPresenceStatus,
     escapeItalic,
     EmbedBuilder,
-    SlashCommandBuilder
+    inlineCode,
+    SlashCommandBuilder,
+    time
 } from "discord.js";
 import { Command } from "../../structures/index.js";
 import { formatString, formatUser } from "../../util/index.js";
@@ -19,11 +21,20 @@ export default new Command<"chatInput">({
 
             if (!applicationData) return;
 
-            if (applicationData.description) fields.push({ name: "🔹 Bot description", value: applicationData.description });
+            if (applicationData.description) fields.push({
+                name: "🔹 Bot description",
+                value: applicationData.description
+            });
 
-            if (applicationData.tags?.length) fields.push({ name: "🔹 Bot tags", value: applicationData.tags.map(x => `\`${x}\``).join() });
+            if (applicationData.tags?.length) fields.push({
+                name: "🔹 Bot tags",
+                value: applicationData.tags.map(inlineCode).join()
+            });
 
-            if (applicationData.flags) fields.push({ name: "🔹 Bot flags", value: new ApplicationFlagsBitField(applicationData.flags).toArray().map(x => `\`${x}\``).join() });
+            if (applicationData.flags) fields.push({
+                name: "🔹 Bot flags",
+                value: new ApplicationFlagsBitField(applicationData.flags).toArray().map(inlineCode).join()
+            });
 
             fields.push({ name: "🔹 Bot is public", value: applicationData.bot_public ? "Yes" : "No" });
 
@@ -52,7 +63,7 @@ export default new Command<"chatInput">({
                 .setTitle(`${user.bot ? "Bot" : "User"} info: ${escapeItalic(user.tag)}`)
                 .setURL(`https://discord.com/users/${user.id}`)
                 .setDescription(formatUser(user))
-                .addFields({ name: `🔹 ${user.bot ? "Bot" : "Account"} created`, value: `<t:${Math.round(user.createdTimestamp / 1000)}:R>` })
+                .addFields({ name: `🔹 ${user.bot ? "Bot" : "Account"} created`, value: time(user.createdAt, "R") })
                 .setColor(interaction.client.config.EMBED_COLOR)
                 .setImage(user.bannerURL({ extension: "png", size: 1024 }) ?? null);
 
@@ -80,14 +91,29 @@ export default new Command<"chatInput">({
             .setURL(`https://discord.com/users/${member.user.id}`)
             .setDescription(formatUser(member.user))
             .addFields(
-                { name: "🔹 Account created", value: `<t:${Math.round(member.user.createdTimestamp / 1000)}:R>`, inline: true },
-                { name: "🔹 Joined server", value: `<t:${Math.round(member.joinedTimestamp as number / 1000)}:R>`, inline: true },
-                { name: `🔹 Roles: ${member.roles.cache.size - 1}`, value: member.roles.cache.size > 1 ? member.roles.cache.filter(x => x.id !== interaction.guildId).sort((a, b) => b.position - a.position).map(x => x).join(member.roles.cache.size > 4 ? " " : "\n").slice(0, 1024) : "None" })
+                { name: "🔹 Account created", value: time(member.user.createdAt, "R"), inline: true },
+                { name: "🔹 Joined server", value: time(member.joinedAt!, "R"), inline: true },
+                {
+                    name: `🔹 Roles: ${member.roles.cache.size - 1}`,
+                    value: member.roles.cache.size > 1
+                        ? member.roles.cache
+                            .filter(x => x.id !== interaction.guildId)
+                            .sort((a, b) => b.position - a.position)
+                            .map(x => x)
+                            .join(member.roles.cache.size > 4 ? " " : "\n")
+                            .slice(0, 1024)
+                        : "None"
+                }
+            )
             .setColor(member.displayColor || "#ffffff")
             .setImage(member.user.bannerURL({ extension: "png", size: 1024 }) ?? null)
         );
 
-        if (member.premiumSinceTimestamp) embeds[0].addFields({ name: "🔹 Server Boosting Since", value: `<t:${Math.round(member.premiumSinceTimestamp / 1000)}:R>`, inline: true });
+        if (member.premiumSince) embeds[0].addFields({
+            name: "🔹 Server Boosting Since",
+            value: time(member.premiumSince, "R"),
+            inline: true
+        });
 
         if (member.user.bot) {
             const appData = await getApplicationData(member.user.id);
@@ -116,7 +142,7 @@ export default new Command<"chatInput">({
                     .setDescription([
                         `by ${activity.state}`,
                         `on ${activity.assets.largeText}`,
-                        `Started listening <t:${Math.round(activity.createdTimestamp / 1000)}:R>`
+                        `Started listening ${time(activity.createdAt, "R")}`
                     ].join("\n"))
                     .setThumbnail(`https://i.scdn.co/image/${activity.assets.largeImage!.replace("spotify:", "")}`)
                 );
@@ -159,7 +185,7 @@ export default new Command<"chatInput">({
                     .setTitle(activity.name)
                     .setColor("#ffffff")
                     .setDescription([
-                        `\u200b**Started:** <t:${Math.round((activity.timestamps?.start?.getTime() ?? activity.createdTimestamp) / 1000)}:R>`,
+                        `\u200b**Started:** ${time(activity.timestamps?.start ?? activity.createdAt, "R")}`,
                         activity.details ? "\n**Details:** " + activity.details : "",
                         activity.state ? "\n**State:** " + activity.state : "",
                         activity.assets?.largeText ? "\n**Large text:** " + activity.assets.largeText : "",

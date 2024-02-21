@@ -15,12 +15,15 @@ export default new Event({
     
             if (!command) {
                 await interaction.reply(ERR_TEXT);
-                return log("Red", `ChatInput - missing cached command: /${interaction.commandName}`);
+                return log("Red", `ChatInput - missing command: /${interaction.commandName}`);
             }
     
             log("White", `\x1b[32m${interaction.user.tag}\x1b[37m used \x1b[32m/${interaction.commandName} ${subCmd ?? ""}\x1b[37m in \x1b[32m#${interaction.channel!.name}`);
     
-            if (!interaction.client.config.toggles.commands && !interaction.client.config.devWhitelist.includes(interaction.user.id)) return await interaction.reply("Commands are currently disabled.");
+            if (
+                !interaction.client.config.toggles.commands
+                && !interaction.client.config.devWhitelist.includes(interaction.user.id)
+            ) return await interaction.reply("Commands are currently disabled.");
     
             try {
                 await command.run(interaction);
@@ -39,12 +42,15 @@ export default new Event({
     
             if (!command) {
                 await interaction.reply(ERR_TEXT);
-                return log("Red", `ContextMenu - missing cached command: ${interaction.commandName}`);
+                return log("Red", `ContextMenu - missing command: ${interaction.commandName}`);
             }
     
             log("White", `\x1b[32m${interaction.user.tag}\x1b[37m used \x1b[32m${interaction.commandName}\x1b[37m in \x1b[32m#${interaction.channel!.name}`);
     
-            if (!interaction.client.config.toggles.commands && !interaction.client.config.devWhitelist.includes(interaction.user.id)) return await interaction.reply("Commands are currently disabled.");
+            if (
+                !interaction.client.config.toggles.commands
+                && !interaction.client.config.devWhitelist.includes(interaction.user.id)
+            ) return await interaction.reply("Commands are currently disabled.");
     
             try {
                 await command.run(interaction);
@@ -69,19 +75,25 @@ export default new Event({
     
                     if (interaction.member.roles.cache.has(roleId)) {
                         await interaction.member.roles.remove(roleId);
-                        await interaction.reply({ content: `You"ve been removed from <@&${roleId}>`, ephemeral: true });
+                        await interaction.reply({ content: `You've been removed from <@&${roleId}>`, ephemeral: true });
                     } else {
                         await interaction.member.roles.add(roleId);
-                        await interaction.reply({ content: `You"ve been added to <@&${roleId}>`, ephemeral: true });
+                        await interaction.reply({ content: `You've been added to <@&${roleId}>`, ephemeral: true });
                     }
                 },
                 sub: () => lookup({
                     async yes() {
                         await interaction.guild.members.cache.get(args[2])?.roles.add(interaction.client.config.mainServer.roles.subscriber);
-                        await interaction.message.edit({ content: interaction.message.content + "\n**Accepted verification**", components: [] });
+                        await interaction.message.edit({
+                            content: interaction.message.content + "\n**Accepted verification**",
+                            components: []
+                        });
                     },
                     no() {
-                        return interaction.message.edit({ content: interaction.message.content + "\n**Denied verification**", components: [] });
+                        return interaction.message.edit({
+                            content: interaction.message.content + "\n**Denied verification**",
+                            components: []
+                        });
                     }
                 }, args[1])
             }, args[0]);
@@ -90,7 +102,7 @@ export default new Event({
     
             if (!command) {
                 await interaction.respond([]);
-                return log("Red", `Autocomplete - missing cached command: ${interaction.commandName}`);
+                return log("Red", `Autocomplete - missing command: ${interaction.commandName}`);
             }
     
             if (!command.autocomplete) {

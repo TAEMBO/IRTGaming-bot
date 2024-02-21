@@ -5,8 +5,16 @@ import { isDCStaff, isMPStaff, log, tempReply } from "../util/index.js";
 export default new Event({
     name: Events.MessageCreate,
     async run(message) {
-        if ((!message.client.config.toggles.commands && !message.client.config.devWhitelist.includes(message.author.id)) || message.system || message.author.bot || !message.inGuild()) return;
-        //   ^^^     Bot is set to ignore commands and non-dev sent a message, ignore the message.      ^^^
+        if (
+            (
+                !message.client.config.toggles.commands
+                && !message.client.config.devWhitelist.includes(message.author.id)
+            )
+            || message.system
+            || message.author.bot
+            || !message.inGuild()
+        ) return;
+        // Bot is set to ignore commands and non-dev sent a message, ignore the message
     
         const msg = message.content.replaceAll("\n", " ").toLowerCase();
         const profanity = new Profanity(msg);
@@ -36,7 +44,6 @@ export default new Event({
                 automodded = true;
     
                 await tempReply(message, { timeout: 10_000, content: "That word is banned here" });
-                await message.reply("That word is banned here.").then(botMsg => setTimeout(async () => await botMsg.delete(), 10_000));
                 await message.delete();
     
                 await message.client.repeatedMessages.increment(message, {

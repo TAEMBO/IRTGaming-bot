@@ -1,4 +1,4 @@
-import { EmbedBuilder, Events } from "discord.js";
+import { EmbedBuilder, Events, time } from "discord.js";
 import { Event } from "../structures/index.js";
 import { formatUser, log } from "../util/index.js";
 
@@ -20,7 +20,7 @@ export default new Event({
             .setColor(member.client.config.EMBED_COLOR_GREEN)
             .setTimestamp()
             .setThumbnail(member.user.displayAvatarURL({ extension: "png", size: 2048 }))
-            .setFields({ name: "🔹 Account Created", value: `<t:${Math.round(member.user.createdTimestamp / 1_000)}:R>` });
+            .setFields({ name: "🔹 Account Created", value: time(member.user.createdAt, "R") });
     
         if (usedInvite) embed.addFields({ name: "🔹 Invite Data", value: `Invite: \`${usedInvite.code}\`\nCreated by: **${usedInvite.inviter?.tag}**`});
     

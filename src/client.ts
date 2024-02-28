@@ -60,7 +60,10 @@ export default class TClient extends Client<true> {
             presence: config.botPresence as PresenceData,
             makeCache: Options.cacheWithLimits({
                 ...Options.DefaultMakeCacheSettings,
-                GuildMessageManager: 500
+                BaseGuildEmojiManager: 0,
+                GuildEmojiManager: 0,
+                GuildMessageManager: 500,
+                
             })
         });
     }

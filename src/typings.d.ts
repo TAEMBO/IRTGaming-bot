@@ -1,7 +1,7 @@
 import type { Collection, PresenceData, SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder, Snowflake } from "discord.js";
 import type config from "./config.json";
 import type TClient from "./client.js";
-import type { Command, LocalStorage, RepeatedMessages } from "./util/index.js";
+import type { Command, LocalStorage, RepeatedMessages } from "./structures/index.js";
 import type {
     DailyMsgs,
     PlayerTimes,

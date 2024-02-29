@@ -15,7 +15,7 @@ export default new Event({
                 .slice(0, 3900)
             ))
             .addFields({ name: "🔹 Channel", value: channel.toString() })
-            .setColor(channel.client.config.EMBED_COLOR)
+            .setColor(channel.client.config.EMBED_COLOR_RED)
             .setTimestamp()
         ] });
     }

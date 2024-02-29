@@ -7,5 +7,8 @@ import type { Config } from "../typings.js";
  * @returns to the given interaction with a standardized message informing the need for the given role
  */
 export function youNeedRole(interaction: CommandInteraction, role: keyof Config["mainServer"]["roles"]) {
-    return interaction.reply(`You need the <@&${interaction.client.config.mainServer.roles[role]}> role to use this command`);
+    return interaction.reply({
+        content: `You need the <@&${interaction.client.config.mainServer.roles[role]}> role to use this command`,
+        ephemeral: true
+    });
 }

@@ -76,11 +76,11 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
     
     // Throttle message updating if no changes in API data
     if (JSON.stringify(newPlayers) === JSON.stringify(oldPlayers)) {
-        if (!dss.server.name && fsCacheServer.status === "offline") {
+        if (!dss.server.name && fsCacheServer.status === 0) {
             fsCacheServer.isThrottled = true;
             
             return;
-        } else if (dss.server.name && fsCacheServer.status === "online") {
+        } else if (dss.server.name && fsCacheServer.status === 1) {
             fsCacheServer.isThrottled = true;
             
             return;
@@ -174,16 +174,16 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
     
     // Logs
     if (!dss.server.name) {
-        if (fsCacheServer.status === "online") await logChannel.send({ embeds: [serverStatusEmbed("offline")] });
+        if (fsCacheServer.status === 1) await logChannel.send({ embeds: [serverStatusEmbed("offline")] });
 
-        fsCacheServer.status = "offline";
+        fsCacheServer.status = 0;
     } else {
-        if (fsCacheServer.status === "offline") {
+        if (fsCacheServer.status === 0) {
             await logChannel.send({ embeds: [serverStatusEmbed("online")] });
             justStarted = true;
         }
 
-        fsCacheServer.status = "online";
+        fsCacheServer.status = 1;
     }
 
     if (justStarted) return;

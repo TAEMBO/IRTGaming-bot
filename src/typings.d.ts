@@ -113,7 +113,7 @@ export type CombinedSlashCommandBuilder = Omit<SlashCommandBuilder, "addSubcomma
 
 export type FSCache = Record<string, {
     players: FSLoopDSSPlayer[];
-    status: "online" | "offline" | null;
+    status: 0 | 1 | null;
     lastAdmin: number | null;
     graphPoints: number[];
     isThrottled: boolean | null;

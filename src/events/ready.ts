@@ -80,6 +80,8 @@ export default new Event({
                 count: total
             });
             log("Cyan", `Pushed { ${formattedDate}, ${total} } to dailyMsgs`);
+
+            if (!client.config.toggles.autoResponses) return;
         
             if (today.startsWith("fri")) {
                 await channel.send(`Weekend begins! ${client.config.DAILY_MSGS_WEEKEND}`);

@@ -263,11 +263,11 @@ export default new Command<"chatInput">({
             ctx.fillStyle = "white";
         
             // highest value
-            if (!isNaN(previousY.at(-2) as number)) {
+            if (!isNaN(previousY.at(-2)!)) {
                 const maxx = graphOrigin[0] + graphSize[0] + textSize / 2;
-                const maxy = (previousY.at(-2) as number) + (textSize / 3);
+                const maxy = (previousY.at(-2)!) + (textSize / 3);
 
-                ctx.fillText((previousY.at(-1) as number).toLocaleString("en-US"), maxx, maxy);
+                ctx.fillText((previousY.at(-1)!).toLocaleString("en-US"), maxx, maxy);
             }
         
             // lowest value

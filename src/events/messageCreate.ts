@@ -38,6 +38,7 @@ export default new Event({
     
         // RepeatedMessages
         const isWhitelisted = message.client.config.whitelist.bannedWords.some(x => [message.channelId, message.channel.parentId].includes(x));
+        const possibleInvite = message.content.split(" ").find(x => x.includes("discord.gg/"));
     
         if (message.client.config.toggles.automod && !isDCStaff(message.member) && !isWhitelisted) {
             if (profanity.hasProfanity(message.client.bannedWords.data)) {
@@ -53,9 +54,8 @@ export default new Event({
                     muteTime: "30m",
                     muteReason: "Banned words"
                 });
-            } else if (msg.includes("discord.gg/") && !isMPStaff(message.member)) {
-                const inviteURL = message.content.split(" ").find(x => x.includes("discord.gg/")) as string;
-                const validInvite = await message.client.fetchInvite(inviteURL).catch(() => null);
+            } else if (possibleInvite && !isMPStaff(message.member)) {
+                const validInvite = await message.client.fetchInvite(possibleInvite).catch(() => null);
     
                 if (validInvite && validInvite.guild?.id !== message.client.config.mainServer.id) {
                     automodded = true;

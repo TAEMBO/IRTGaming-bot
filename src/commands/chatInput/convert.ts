@@ -167,7 +167,7 @@ export default new Command<"chatInput">({
 
             for await (let starter of interaction.options.getString("starter", true).split(",")) {
                 starter = starter.trim();
-                const stMtch = starter.match(/[0-9,.-]*/gi) as RegExpMatchArray;
+                const stMtch = starter.match(/[0-9,.-]*/gi)!;
 
                 // fraction
                 if (starter.includes("/") || starter.includes(" per ")) {

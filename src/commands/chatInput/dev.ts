@@ -65,7 +65,7 @@ export default new structures.Command<"chatInput">({
 
                 // Output manipulation
                 if (typeof output === "object") {
-                    output = "js\n" + util.formatWithOptions({ depth: 1 }, "%O", output);
+                    output = "js\n" + util.formatWithOptions({ depth: 0 }, "%O", output);
                 } else output = "\n" + String(output);
 
                 // Hide credentials

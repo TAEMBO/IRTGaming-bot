@@ -1,19 +1,29 @@
-import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { EmbedBuilder, SlashCommandBuilder, inlineCode } from "discord.js";
 import { Command } from "../../structures/index.js";
+import { formatString } from "../../util/index.js";
 
 interface Quantity {
-    name: string;
-    short: string[];
-    value: number;
-    numeratorQuantity?: string;
-    denominatorQuantity?: string;
-    tempMath?: {
-        toSelf: string;
-        toBase: string;
+    readonly name: string;
+    readonly short: string[];
+    readonly value: number;
+    readonly numeratorQuantity?: string;
+    readonly denominatorQuantity?: string;
+}
+
+interface StandardQuantity extends Quantity { 
+    readonly tempMath?: undefined;
+}
+
+interface TemperatureQuantity extends Quantity {
+    readonly tempMath: {
+        readonly toSelf: (absolute: number) => number;
+        readonly toBase: (amount: number) => number;
     };
 }
 
-const quantities: Record<string, Quantity[]> = {
+type CombinedQuantity = StandardQuantity | TemperatureQuantity;
+
+const quantities: Record<string, CombinedQuantity[]> = {
     storage: [
         { name: "bit", value: 1, short: ["bit", "bits"] },
         { name: "kilobit", value: 1_000, short: ["Kbit", "kilobits"] },
@@ -41,27 +51,27 @@ const quantities: Record<string, Quantity[]> = {
     ],
     currency: [
         { name: "Euro :flag_eu:", value: 1, short: ["EUR", "€"] },
-        { name: "US Dollar :flag_us:", value: 0.95, short: ["USD", "$"], },
-        { name: "Pound Sterling :flag_gb:", value: 1.15, short: ["GBP", "£"] },
-        { name: "Turkish Lira :flag_tr:", value: 0.035, short: ["TRY", "TL", "₺"] },
-        { name: "Russian Ruble :flag_ru:", value: 0.0098, short: ["RUB", "₽"] },
-        { name: "Canadian Dollar :flag_ca:", value: 0.70, short: ["CAD"] },
-        { name: "Australian Dollar :flag_au:", value: 0.61, short: ["AUD"] },
-        { name: "Japanese Yen :flag_jp:", value: 0.0064, short: ["JPY", "¥", "yen", "jy"] },
+        { name: "US Dollar :flag_us:", value: 0.92, short: ["USD", "$"], },
+        { name: "Pound Sterling :flag_gb:", value: 1.17, short: ["GBP", "£"] },
+        { name: "Turkish Lira :flag_tr:", value: 0.029, short: ["TRY", "TL", "₺"] },
+        { name: "Russian Ruble :flag_ru:", value: 0.01, short: ["RUB", "₽"] },
+        { name: "Canadian Dollar :flag_ca:", value: 0.68, short: ["CAD"] },
+        { name: "Australian Dollar :flag_au:", value: 0.6, short: ["AUD"] },
+        { name: "Japanese Yen :flag_jp:", value: 0.0061, short: ["JPY", "¥", "yen", "jy"] },
         { name: "New Zealand Dollar :flag_nz:", value: 0.56, short: ["NZD"] },
-        { name: "Indonesian Rupiah :flag_id:", value: 0.000061, short: ["IDR", "Rp"] },
+        { name: "Indonesian Rupiah :flag_id:", value: 0.000059, short: ["IDR", "Rp"] },
         { name: "Chinese Yuan Renminbi :flag_cn:", value: 0.13, short: ["CN¥", "CNY", "RMB", "元"] },
-        { name: "Swedish krona :flag_se:", value: 0.086, short: ["SEK", "kr"] },
-        { name: "Norwegian krone :flag_no:", value: 0.087, short: ["NOK"] },
+        { name: "Swedish krona :flag_se:", value: 0.089, short: ["SEK", "kr"] },
+        { name: "Norwegian krone :flag_no:", value: 0.088, short: ["NOK"] },
         { name: "Danish krone :flag_dk:", value: 0.13, short: ["DKK"] },
-        { name: "Icelandic króna :flag_is:", value: 0.0069, short: ["ISK"] },
-        { name: "Czech koruna :flag_cz:", value: 0.041, short: ["CZK", "Kč"] },
-        { name: "Swiss franc :flag_sw:", value: 1.03, short: ["CFH", "fr"] },
-        { name: "Ukrainian hryvnia :flag_ua:", value: 0.026, short: ["UAH", "₴", "грн"] },
+        { name: "Icelandic króna :flag_is:", value: 0.0067, short: ["ISK"] },
+        { name: "Czech koruna :flag_cz:", value: 0.039, short: ["CZK", "Kč"] },
+        { name: "Swiss franc :flag_ch:", value: 1.04, short: ["CFH", "fr"] },
+        { name: "Ukrainian hryvnia :flag_ua:", value: 0.024, short: ["UAH", "₴", "грн"] },
         { name: "Indian rupee :flag_in:", value: 0.011, short: ["INR", "₹"] },
-        { name: "United Arab Emirates dirham :flag_ae:", value: 0.26, short: ["AED", "د.إ"] },
-        { name: "Sri Lankan Rupee :flag_lk:", value: 0.0029, short: ["LKR", "රු", "ரூ"] },
-        { name: "Hungarian Forint :flag_hu:", value: 0.0026, short: ["HUF"] },
+        { name: "United Arab Emirates dirham :flag_ae:", value: 0.25, short: ["AED", "د.إ"] },
+        { name: "Sri Lankan Rupee :flag_lk:", value: 0.003, short: ["LKR", "රු", "ரூ"] },
+        { name: "Hungarian Forint :flag_hu:", value: 0.0025, short: ["HUF"] },
         { name: "Among Us ඞ:red_square:", value: NaN, short: ["SUS"] },
     ],
     mass: [
@@ -80,9 +90,33 @@ const quantities: Record<string, Quantity[]> = {
         { name: "US gallon", value: 0.00378541, short: ["gal"] }
     ],
     temperature: [
-        { name: "kelvin", short: ["K"], tempMath: { toSelf: "absolute", toBase: "starter?.amount" }, value: 0 },
-        { name: "celsius", short: ["°C", "c"], tempMath: { toSelf: "absolute - 273.15", toBase: "starter?.amount + 273.15" }, value: 0 },
-        { name: "fahrenheit", short: ["°F", "fh", "f"], tempMath: { toSelf: "((9 / 5) * (absolute - 273.15)) + 32", toBase: "((5 / 9) * (starter?.amount - 32)) + 273.15" }, value: 0 }
+        {
+            name: "kelvin",
+            short: ["K"],
+            tempMath: {
+                toSelf: (absolute) => absolute,
+                toBase: (amount) => amount
+            },
+            value: 0
+        },
+        {
+            name: "celsius",
+            short: ["°C", "c"],
+            tempMath: {
+                toSelf: (absolute) => absolute - 273.15,
+                toBase: (amount)  => amount + 273.15
+            },
+            value: 0
+        },
+        {
+            name: "fahrenheit",
+            short: ["°F", "fh", "f"],
+            tempMath: {
+                toSelf: (absolute) => ((9 / 5) * (absolute - 273.15)) + 32,
+                toBase: (amount) => ((5 / 9) * (amount - 32)) + 273.15
+            },
+            value: 0
+        }
     ],
     time: [
         { name: "millisecond", value: 0.001, short: ["ms"] },
@@ -96,8 +130,8 @@ const quantities: Record<string, Quantity[]> = {
     ],
     force: [
         { name: "newton", value: 1, short: ["N"] },
-        { name: "kilonewton", value: 1000, short: ["kN"] },
-        { name: "dyne", value: 100000, short: ["dyn"] },
+        { name: "kilonewton", value: 1_000, short: ["kN"] },
+        { name: "dyne", value: 100_000, short: ["dyn"] },
         { name: "pound-force", value: 4.448222, short: ["lbf"] },
         { name: "poundal", value: 0.1382550, short: ["pdl"] },
         { name: "kip", value: 4448.22, short: ["kip"] },
@@ -108,173 +142,151 @@ const quantities: Record<string, Quantity[]> = {
         { name: "kilowatt-hour", value: 3600000, short: ["kWh"] },
         { name: "calorie", value: 4.184, short: ["cal"] },
         { name: "electronvolt", value: 0.0000000000000000001602176634, short: ["eV"] },
-        { name: "foot-pound force", value: 1.355818, short: ["ft⋅lbf", "ftlbf", "ftlb"]},
+        { name: "foot-pound force", value: 1.355818, short: ["ft⋅lbf", "ftlbf", "ftlb"] },
     ]
 };
 
+const quantityKeys = Object.keys(quantities);
+const quantityValues = Object.values(quantities);
+
+function areTempQuantities(quantities: { unit?: CombinedQuantity }[]): quantities is {
+    quantity: string,
+    unit: TemperatureQuantity,
+    amount: number
+}[] {
+    return quantities.every((quantity) => quantity.unit?.tempMath);
+}
+
+function areValidStarters(starters: (Record<string, any> | undefined)[]): starters is {
+    amount: number;
+    quantity: string;
+    unit: CombinedQuantity;
+}[] {
+    return starters.every(x => x);
+}
+
 function findUnit(unitNameQuery: string) {
-    // short search
-    for (let i = 0; i < Object.values(quantities).length; i++) {
-        const unit = Object.values(quantities)[i].find(x => x.short.some(y => y.toLowerCase() === unitNameQuery.toLowerCase()));
-        if (unit) {
-            const quantity = Object.keys(quantities)[i];
-            return { quantity, unit };
-        }
+    // Short search
+    for (let i = 0; i < quantityValues.length; i++) {
+        const unit = quantityValues[i].find(x => x.short.some(y => y.toLowerCase() === unitNameQuery.toLowerCase()));
+
+        if (unit) return { quantity: quantityKeys[i], unit };
     }
 
-    // name identical search
-    for (let i = 0; i < Object.values(quantities).length; i++) {
-        const unit = Object.values(quantities)[i].find(x => x.name.toLowerCase() === unitNameQuery.toLowerCase());
-        if (unit) {
-            const quantity = Object.keys(quantities)[i];
-            return { quantity, unit };
-        }
+    // Name identical search
+    for(let i = 0; i < quantityValues.length; i++) {
+        const unit = quantityValues[i].find(x => x.name.toLowerCase() === unitNameQuery.toLowerCase());
+
+        if (unit) return { quantity: quantityKeys[i], unit };
     }
 
-    // name inclusive search
-    for (let i = 0; i < Object.values(quantities).length; i++) {
-        const unit = Object.values(quantities)[i].find(x => x.name.toLowerCase().includes(unitNameQuery.toLowerCase()));
-        if (unit) {
-            const quantity = Object.keys(quantities)[i];
-            return { quantity, unit };
-        }
+    // Name inclusive search
+    for (let i = 0; i < quantityValues.length; i++) {
+        const unit = quantityValues[i].find(x => x.name.toLowerCase().includes(unitNameQuery.toLowerCase()));
+
+        if (unit) return { quantity: quantityKeys[i], unit };
     }
 }
+
 export default new Command<"chatInput">({
     async run(interaction) {
         if (interaction.options.getSubcommand() === "help") {
-            const wantedQuantity = Object.keys(quantities).find(x => x === interaction.options.getString("type"));
+            const chosenQuantity = interaction.options.getString("quantity");
+            const commandMention = interaction.client.getCommandMention("convert", "convert");
 
-            if (wantedQuantity) {
-                const units = quantities[wantedQuantity];
+            if (chosenQuantity) {
+                const units = quantities[chosenQuantity];
 
-                await interaction.reply({ embeds: [new EmbedBuilder()
-                    .setTitle(`Convert help: ${wantedQuantity}`)
-                    .setDescription(`This quantity comprises ${units.length} units, which are:\n\n${units.sort((a, b) => a.name.localeCompare(b.name)).map(unit => `**${unit.name[0].toUpperCase() + unit.name.slice(1)}** (${unit.short.map(x => `\`${x}\``).join(", ")})`).join("\n")}`)
+                return await interaction.reply({ embeds: [new EmbedBuilder()
+                    .setTitle(`Convert help: ${chosenQuantity}`)
+                    .setDescription(`This quantity comprises ${units.length} units, which are:\n\n${units.sort((a, b) => a.name.localeCompare(b.name)).map(unit => `**${formatString(unit.name)}** (${unit.short.map(inlineCode).join(", ")})`).join("\n")}`)
                     .setColor(interaction.client.config.EMBED_COLOR)
                 ] });
-            } else await interaction.reply({ embeds: [new EmbedBuilder()
-                .setTitle("Convert help")
-                .setColor(interaction.client.config.EMBED_COLOR)    
-                .setDescription("To convert something, you add **amount** and **unit** combinations to the end of the command. The syntax for an amount and unit combination is `[amount][unit symbol]`. Amount and unit combinations are called **arguments**. Arguments are divided into **starters** and a **target unit**. Starters are the starting values that you want to convert to the target unit. A conversion command consists of one or many starters, separated with a comma (`,`) in case there are many. After starters comes the target unit, which must have a greater-than sign (`>`) or the word \"to\" before it. The argument(s) after the `>` (or \"to\"), called the target unit, must not include an amount. It is just a **unit symbol**. Because you cannot convert fruits into lengths, all starters and the target unit must be of the same **quantity**.")
-                .addFields(
-                    { name: "Supported Quantities", value: Object.keys(quantities).map(x => x[0].toUpperCase() + x.slice(1)).join(", ") + "\n\nTo learn more about a quantity and its units and unit symbols,\ndo `/convert help [quantity]`"},
-                    { name: "Examples", value: "An amount: \"5\", \"1200300\", \"1.99\"\nA unit: metre, kelvin, Euro\nA unit symbol: \"fh\", \"cm^3\", \"$\", \"fl oz\"\nAn argument: \"180cm\", \"12.99€\", \"5km\", \"16fl oz\"\nA target unit: \">km\", \">c\", \">m2\"\nA complete conversion command: \"`/convert 5ft, 8in to cm`\", \"`/convert 300kelvin >celsius`\", \"`/convert 57mm, 3.3cm, 0.4m >cm`\", \"`/convert 2dl, 0.2l to fl oz`\""},
-                    { name: "Fracton conversion", value: "Use division in your commands to achieve something, for example velocity conversion. In fraction conversion, all the starters\" and the target\"s unit symbol must be a fraction. The syntax for a fraction is `[unit symbol]['/' or 'per'][unit symbol]`. All of the numerators must be of the same quantity. Same for the denominators. You cannot mix fractions and non-fractions. Examples of Fraction Conversion:\n`/convert 5m/s >km/h`\n`/convert 5 miles per hour, 1 meter per second to kilometers per hour`"})
-            ] });
-        } else {
-            const starters: any[] = [];
-
-            for await (let starter of interaction.options.getString("starter", true).split(",")) {
-                starter = starter.trim();
-                const stMtch = starter.match(/[0-9,.-]*/gi)!;
-
-                // fraction
-                if (starter.includes("/") || starter.includes(" per ")) {
-                    if (!starter.match(/[0-9,.-]*/gi)) break;
-                    const separator = starter.includes("/") ? "/" : "per";
-                    const multiplier = stMtch[0];
-                    const numeratorUnitSymbol = starter.slice(multiplier.length, starter.indexOf(separator)).trim();
-                    const numeratorUnit = findUnit(numeratorUnitSymbol.endsWith("s") && numeratorUnitSymbol.length !== 1 ? numeratorUnitSymbol.slice(0, numeratorUnitSymbol.length - 1) : numeratorUnitSymbol);
-                    const denominatorUnitSymbol = starter.slice(starter.indexOf(separator) + separator.length).trim();
-                    const denominatorUnit = findUnit(denominatorUnitSymbol);
-                    if (!numeratorUnit) {
-                        await interaction.reply(numeratorUnitSymbol + " is wrong.");
-                        break;
-                    }
-                    if (!denominatorUnit) {
-                        await interaction.reply(denominatorUnitSymbol + " is wrong.");
-                        break;
-                    }
-                    starters.push({
-                        amount: parseFloat(multiplier),
-                        quantity: "mixed",
-                        unit: {
-                            numeratorQuantity: numeratorUnit.quantity,
-                            denominatorQuantity: denominatorUnit.quantity,
-                            name: numeratorUnit.unit.name + "(s) per " + denominatorUnit.unit.name,
-                            value: (numeratorUnit.unit.value ?? 0) / (denominatorUnit.unit.value ?? 0),
-                            short: [numeratorUnit.unit.short[0] + "/" + denominatorUnit.unit.short[0]],
-                            tempMath: (numeratorUnit.unit.tempMath ?? denominatorUnit.unit.tempMath)
-                        }
-                    });
-                } else {
-                    const unitSymbol = starter.slice(stMtch[0].length).trim();
-                    starters.push(Object.assign({ amount: parseFloat(starter) }, findUnit(unitSymbol.endsWith("s") && unitSymbol.length > 3 ? unitSymbol.slice(0, unitSymbol.length - 1) : unitSymbol)));
-                }
             }
-
-            if (interaction.replied) return;
-            if (!starters[0]) return await interaction.reply("You must convert _something._ Your message has 0 starters.");
-
-            const target = await (async () => {
-                const targetPortion = interaction.options.getString("target", true);
-
-                // target: fraction
-                if (targetPortion.includes("/") || targetPortion.includes(" per ")) {
-                    const separator = targetPortion.includes("/") ? "/" : "per";
-                    const numeratorUnitSymbol = targetPortion.slice(0, targetPortion.indexOf(separator)).trim();
-                    const numeratorUnit = findUnit(numeratorUnitSymbol.endsWith("s") && numeratorUnitSymbol.length !== 1 ? numeratorUnitSymbol.slice(0, numeratorUnitSymbol.length - 1) : numeratorUnitSymbol);
-                    const denominatorUnitSymbol = targetPortion.slice(targetPortion.indexOf(separator) + separator.length).trim();
-                    const denominatorUnit = findUnit(denominatorUnitSymbol);
-                    if (!numeratorUnit) {
-                        await interaction.reply(numeratorUnitSymbol + " is wrong.");
-                        return;
-                    }
-                    if (!denominatorUnit) {
-                        await interaction.reply(denominatorUnitSymbol + " is wrong.");
-                        return;
-                    }
-                    const division = (numeratorUnit.unit.value ?? 0) / (denominatorUnit.unit.value ?? 0);
-                    return {
-                        quantity: "mixed",
-                        unit: {
-                            numeratorQuantity: numeratorUnit.quantity,
-                            denominatorQuantity: denominatorUnit.quantity,
-                            name: numeratorUnit.unit.name + "(s) per " + denominatorUnit.unit.name,
-                            value: division,
-                            short: [numeratorUnit.unit.short[0] + "/" + denominatorUnit.unit.short[0]],
-                            tempMath: (numeratorUnit.unit.tempMath ?? denominatorUnit.unit.tempMath)
-                        }
-                    };
-                } else return findUnit(targetPortion.endsWith("s") && targetPortion.length > 3 ? targetPortion.slice(0, targetPortion.length - 1) : targetPortion);
-            })();
-
-            if (interaction.replied) return;
-            if (!target) return await interaction.reply("You must convert _to_ something. Your message doesn\"t have a (valid) target unit.").catch();
-
-            // check that all starters and target are the same quantity
-            const usedQuantities = new Set([target.quantity, ...starters.map(x => x?.quantity as string)]);
-            const numeratorQuantities = new Set([target.unit.numeratorQuantity, ...starters.map(x => x?.unit?.numeratorQuantity)]);
-            const denominatorQuantities = new Set([target.unit.denominatorQuantity, ...starters.map(x => x?.unit?.denominatorQuantity)]);
-
-            if (usedQuantities.size > 1 || numeratorQuantities.size > 1 || denominatorQuantities.size > 1) return await interaction.reply(`All starting units and the target unit must be of the same quantity. The quantities you used were \`${[...usedQuantities, ...numeratorQuantities, ...denominatorQuantities].filter(x => x)}\``);
-
-            const quantity = [...usedQuantities][0];
-
-            // get absolute value: sum of all starters (starter amount * starter unit value)
-            let absolute: number;
-
-            if (starters[0]?.unit?.tempMath) {
-                absolute = starters.map(starter => eval(starter?.unit?.tempMath?.toBase)).reduce((a, b) => a + b, 0);
-            } else absolute = starters.map(starter => (starter?.amount ?? 0) * (starter?.unit.value ?? 0)).reduce((a, b) => a + b, 0);
-
-            // multiply absolute by the value of the target unit
-            let amountInTarget: number;
-
-            if (starters[0]?.unit.tempMath) {
-                amountInTarget = eval(target.unit.tempMath?.toSelf as string);
-            } else amountInTarget = absolute / target.unit.value;
-
-            // display amount and target unit symbol
-            await interaction.reply({ embeds: [new EmbedBuilder()
-                .setTitle(`${quantity[0].toUpperCase() + quantity.slice(1)} conversion`)
+            
+            return await interaction.reply({ embeds: [new EmbedBuilder()
+                .setTitle("Convert help")
                 .setColor(interaction.client.config.EMBED_COLOR)
+                .setDescription("To convert something, you add **amount** and **unit** combinations to your starter(s). The syntax for an amount and unit combination is `[amount][unit symbol]`. Amount and unit combinations are called **arguments**. Arguments are divided into **starters** and a **target unit**. Starters are the starting values that you want to convert to the target unit. A conversion command can consist of one or more starters, separated with a comma (`,`) in case there are many. After starters comes the target unit as the second option. The target must not include an amount. It is just a **unit symbol**. Because you cannot convert fruits into lengths, all starters and the target unit must be of the same **quantity**, e.g. `1meter` to `centimeter`.")
                 .addFields(
-                    { name: "Starting amount", value: `${starters.map(x => `${x?.amount.toLocaleString("en-US")} ${x?.unit.short[0]}`).join(", ")}`, inline: true },
-                    { name: "Converted amount", value: `${amountInTarget.toLocaleString("en-US", { maximumFractionDigits: 2 }) + " " + target.unit.short[0]}`, inline: true })
+                    {
+                        name: "Supported Quantities",
+                        value: `${quantityKeys.map(formatString).join(", ")}\n\nTo learn more about a quantity and its units and unit symbols,\nuse ${interaction.client.getCommandMention("convert", "help")} with a specified quantity option.`
+                    },
+                    {
+                        name: "Examples",
+                        value: [
+                            "An amount: \"5\", \"1200300\", \"1.99\"",
+                            "A unit: metre, kelvin, Euro",
+                            "A unit symbol: \"fh\", \"cm^3\", \"$\", \"fl oz\"",
+                            "An argument: \"180cm\", \"12.99€\", \"5km\", \"16fl oz\"",
+                            "A target unit: \"km\", \"c\", \"m2\"",
+                            "Complete conversion examples:",
+                            `${commandMention} \`5ft, 8in\` & \`cm\``,
+                            `${commandMention} \`300kelvin\` & \`celsius\``,
+                            `${commandMention} \`57mm, 3.3cm, 0.4m\` & \`cm\``
+                        ].join("\n")
+                    }
+                )
             ] });
         }
+        
+        const starters = interaction.options.getString("starter", true).split(",").map(starter => {
+            starter = starter.trim();
+
+            const stMtch = starter.match(/[0-9,.-]*/gi)!;
+            const unitSymbol = starter.slice(stMtch[0].length).trim();
+            const unit = findUnit(unitSymbol.endsWith("s") && unitSymbol.length > 3
+                ? unitSymbol.slice(0, unitSymbol.length - 1)
+                : unitSymbol
+            );
+
+            if (!unit) return;
+
+            return { ...unit, amount: parseFloat(starter) };
+        });
+
+        if (!areValidStarters(starters)) return await interaction.reply("You must convert *something;* Your message has 0 starters.");
+        
+        const targetPortion = interaction.options.getString("target", true);
+        const target = findUnit(targetPortion.endsWith("s") && targetPortion.length > 3
+            ? targetPortion.slice(0, targetPortion.length - 1)
+            : targetPortion
+        );
+
+        if (!target) return await interaction.reply("You must convert *to* something; Your message doesn't have a (valid) target unit.");
+
+        // Check that all starters and target are the same quantity
+        const usedQuantities = new Set([target.quantity, ...starters.map(x => x.quantity)]);
+        const numeratorQuantities = new Set([target.unit.numeratorQuantity, ...starters.map(x => x.unit.numeratorQuantity)]);
+        const denominatorQuantities = new Set([target.unit.denominatorQuantity, ...starters.map(x => x.unit.denominatorQuantity)]);
+
+        if (
+            usedQuantities.size > 1
+            || numeratorQuantities.size > 1
+            || denominatorQuantities.size > 1
+        ) return await interaction.reply(`All starting units and the target unit must be of the same quantity; The quantities you used were \`${[...usedQuantities, ...numeratorQuantities, ...denominatorQuantities].filter(x => x)}\``);
+
+        const quantity = [...usedQuantities][0];
+
+        // Get absolute value: sum of all starters (starter amount * starter unit value)
+        const absolute = areTempQuantities(starters)
+            ? starters.map(starter => starter.unit.tempMath.toBase(starter.amount)).reduce((a, b) => a + b, 0)
+            : starters.map(starter => (starter.amount ?? 0) * (starter.unit.value ?? 0)).reduce((a, b) => a + b, 0);
+
+        // Multiply absolute by the value of the target unit
+        const amountInTarget = target.unit.tempMath
+            ? target.unit.tempMath.toSelf(absolute)
+            : absolute / target.unit.value;
+
+        // Display amount and target unit symbol
+        await interaction.reply({ embeds: [new EmbedBuilder()
+            .setTitle(`${formatString(quantity)} conversion`)
+            .setColor(interaction.client.config.EMBED_COLOR)
+            .addFields(
+                { name: "Starting amount", value: starters.map(x => `${x.amount.toLocaleString("en-US")} ${x.unit.short[0]}`).join(", "), inline: true },
+                { name: "Converted amount", value: amountInTarget.toLocaleString("en-US", { maximumFractionDigits: 2 }) + " " + target.unit.short[0], inline: true })
+        ] });
     },
     data: new SlashCommandBuilder()
         .setName("convert")
@@ -283,8 +295,9 @@ export default new Command<"chatInput">({
             .setName("help")
             .setDescription("Shows you how to use the command.")
             .addStringOption(x => x
-                .setName("type")
-                .setDescription("The type of conversion.")
+                .setName("quantity")
+                .setDescription("Info on a specific quantity")
+                .setChoices(...quantityKeys.map(x => ({ name: formatString(x), value: x })))
                 .setRequired(false)))
         .addSubcommand(x => x
             .setName("convert")

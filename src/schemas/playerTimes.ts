@@ -39,7 +39,7 @@ export class PlayerTimes {
      * @returns An array of all server time objects from the player, with the first element for each being the server"s acronym
      */
     public getTimeData(data: PlayerTimesDocument) {
-        return (Object.entries(Object.values(data.servers)[3]) as unknown) as [string, {
+        return (Object.entries(Object.values(data.servers)[3] ?? {}) as unknown) as [string, {
             [key in keyof typeof serverObj]: number;
         }][];
     }

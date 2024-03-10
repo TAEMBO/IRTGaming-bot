@@ -191,11 +191,11 @@ export default new Command<"chatInput">({
             .setDescription("Create a reminder")
             .addStringOption(x => x
                 .setName("what")
-                .setDescription("The reminder itself")
+                .setDescription("The content of the reminder")
                 .setRequired(true))
             .addStringOption(x => x
                 .setName("when")
-                .setDescription("The time to remind from now. Do \"help\" to see format")
+                .setDescription("The time to remind from now")
                 .setRequired(true)))
         .addSubcommand(x => x
             .setName("delete")

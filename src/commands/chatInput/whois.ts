@@ -200,9 +200,9 @@ export default new Command<"chatInput">({
     },
     data: new SlashCommandBuilder()
         .setName("whois")
-        .setDescription("Get info on a member or user")
+        .setDescription("Get info on a user")
         .addUserOption(x => x
             .setName("member")
-            .setDescription("The member or user to get info on")
+            .setDescription("The user to get info on")
             .setRequired(true))
 });

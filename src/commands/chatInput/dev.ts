@@ -14,15 +14,29 @@ import { setTimeout as sleep } from "node:timers/promises";
 import util from "node:util";
 import * as structures from "../../structures/index.js";
 import * as utilities from "../../util/index.js";
+import { Feeds, DSSExtension, MapSize, DSSFile, DSSObject } from "farming-simulator-types/2022";
 
 export default new structures.Command<"chatInput">({
     async run(interaction) {
         if (!interaction.client.config.devWhitelist.includes(interaction.user.id)) return await interaction.reply("You're not allowed to use dev commands.");
         
+        Feeds.dedicatedServerStats("aa", DSSExtension.JSON);
+
+        const h = {} as DSSObject;
+
+        h.server?.server;
+
+        const num: MapSize = 2048;
+
+        num;
+
+        Feeds.dedicatedServerSavegame("", DSSFile.Economy);
+        Feeds.dedicatedServerStats("", DSSExtension.XML);
+        Feeds.dedicatedServerStatsMap("", 60, 256);
+
         await utilities.lookup({
             async eval() {
                 sleep; fs; Discord; // Imports possibly used in eval
-                const now = performance.now();
                 const { client } = interaction;
                 const code = interaction.options.getString("code", true);
                 const useAsync = Boolean(interaction.options.getBoolean("async", false));
@@ -31,11 +45,14 @@ export default new structures.Command<"chatInput">({
                     .setTitle("__Eval__")
                     .setColor(interaction.client.config.EMBED_COLOR)
                     .addFields({ name: "Input", value: codeBlock("js", code.slice(0, 1010)) });
+                const now = performance.now();
                 let output;
 
                 try {
                     output = await eval(useAsync ? `(async () => { ${code} })()` : code);
                 } catch (err: any) {
+                    console.log(err);
+                    
                     embed
                         .setColor("#ff0000")
                         .addFields({

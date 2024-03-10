@@ -16,7 +16,7 @@ export default new Command<"chatInput">({
     },
     data: new SlashCommandBuilder()
         .setName("purge")
-        .setDescription("Purges messages in this channel")
+        .setDescription("Purge messages in this channel")
         .addIntegerOption(x => x
             .setName("amount")
             .setDescription("The amount of messages to purge")
@@ -24,7 +24,7 @@ export default new Command<"chatInput">({
             .setMaxValue(100))
         .addUserOption(x => x
             .setName("user")
-            .setDescription("The user to purge messages from")
+            .setDescription("The user whose messages to purge")
             .setRequired(false))
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
 });

@@ -15,7 +15,7 @@ export default new Command<"chatInput">({
             .setRequired(true))
         .addStringOption(x => x
             .setName("time")
-            .setDescription("The time for the ban")
+            .setDescription("The duration of the ban")
             .setRequired(false))
         .addStringOption(x => x
             .setName("reason")

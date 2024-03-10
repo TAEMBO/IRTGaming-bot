@@ -18,7 +18,7 @@ export default new Command<"chatInput">({
         await msg.react("✅");
         await msg.react("❌");
         await msg.startThread({
-            name: `Discussion of ${interaction.member.displayName}"s Community Idea`,
+            name: `Discussion of ${interaction.member.displayName}'s Community Idea`,
             autoArchiveDuration: ThreadAutoArchiveDuration.OneWeek
         });
     },

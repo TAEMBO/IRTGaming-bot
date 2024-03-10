@@ -8,14 +8,14 @@ export default new Command<"chatInput">({
         if (!member) return await interaction.reply({ content: "You need to select a member that is in this server", ephemeral: true });
 
         await interaction.client.getChan("counting").permissionOverwrites.edit(member, { SendMessages: false });
-        await interaction.reply(`${member}'s perm to send messages in <#${interaction.client.config.mainServer.channels.counting}> has been removed`);
+        await interaction.reply(`${member}'s permisson to send messages in <#${interaction.client.config.mainServer.channels.counting}> has been removed`);
     },
     data: new SlashCommandBuilder()
         .setName("discount")
-        .setDescription("Remove someone's ability to count in #counting")
+        .setDescription("Remove a member's ability to participate in #counting")
         .addUserOption(x => x
             .setName("member")
-            .setDescription("The member to give a 15% discount to")
+            .setDescription("The member to restrict participation for")
             .setRequired(true))
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
 });

@@ -10,7 +10,7 @@ export default new Command<"chatInput">({
             async view() {
                 const punishment = await interaction.client.punishments.data.findById(caseid);
 
-                if (!punishment) return await interaction.reply("A case with that ID wasn\"t found!");
+                if (!punishment) return await interaction.reply("A case with that ID wasn't found!");
 
                 const cancelledBy = punishment.expired ? await interaction.client.punishments.data.findOne({ cancels: punishment.id }) : null;
                 const cancels = punishment.cancels ? await interaction.client.punishments.data.findOne({ _id: punishment.cancels }) : null;
@@ -65,35 +65,35 @@ export default new Command<"chatInput">({
     },
     data: new SlashCommandBuilder()
         .setName("case")
-        .setDescription("Views a member's cases, or a single case ID")
+        .setDescription("View a case, or all of a member's cases")
         .addSubcommand(x => x
             .setName("view")
-            .setDescription("Views a single case ID")
+            .setDescription("View a single case")
             .addIntegerOption(x => x
                 .setName("id")
-                .setDescription("The ID of the case.")
+                .setDescription("The ID of the case")
                 .setRequired(true)))
         .addSubcommand(x => x
             .setName("member")
-            .setDescription("Views all a members cases")
+            .setDescription("View all of a member's cases")
             .addUserOption(x => x
                 .setName("user")
-                .setDescription("The user whomm's punishments you want to view.")
+                .setDescription("The member whose cases to view")
                 .setRequired(true))
             .addIntegerOption(x => x
                 .setName("page")
-                .setDescription("The page number.")
+                .setDescription("The page number (if multiple case pages)")
                 .setRequired(false)))
         .addSubcommand(x => x
             .setName("update")
-            .setDescription("Updates a cases reason.")
+            .setDescription("Update a case's reason")
             .addIntegerOption(x => x
                 .setName("id")
-                .setDescription("The ID Of The Case To Update.")
+                .setDescription("The ID of the case")
                 .setRequired(true))
             .addStringOption(x => x
                 .setName("reason")
-                .setDescription("The New Reason For The Case.")
+                .setDescription("The new reason for the case")
                 .setRequired(true)))
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
 });

@@ -67,7 +67,7 @@ export default new Command<"chatInput">({
                 "\n",
                 "When you join one of our servers, you may encounter terrain with jagged edges or extreme deformations into the ground. ",
                 "This however is not the actual terrain formation on the server, and thus has no affect on where you can drive around. ",
-                "These are simply visual glitches that are only seen on your end, so don\"t fret that the server was possibly griefed!"
+                "These are simply visual glitches that are only seen on your end, so don't fret that the server was possibly griefed!"
             ].join(""))
         }, interaction.options.getString("questions", true));
     },

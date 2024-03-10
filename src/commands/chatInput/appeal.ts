@@ -21,7 +21,7 @@ export default new Command<"chatInput">({
                 "- Rough time and date",
                 `- Server name (${fsServers.getPublicNames().join(" or ")})`,
                 "- If applicable; what you were doing at the time of being banned",
-                "- Anything else which could help with the appeal, e.g. additional names you\"ve used",
+                "- Anything else which could help with the appeal, e.g. additional names you've used",
                 "\u200b",
                 "Once you have done so, we will review your ban as soon as possible. Please be patient as we may have to wait for staff in other time zones before making a decision."
             ].join("\n"))

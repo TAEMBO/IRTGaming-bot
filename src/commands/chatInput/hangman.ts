@@ -172,9 +172,9 @@ export default new Command<"chatInput">({
     },
     data: new SlashCommandBuilder()
         .setName("hangman")
-        .setDescription("Starts a game of hangman!")
+        .setDescription("Start a game of hangman")
         .addStringOption(x => x
             .setName("phrase")
-            .setDescription("The word or phrase for members to guess")
+            .setDescription("The word or phrase for others to guess")
             .setRequired(true))
 });

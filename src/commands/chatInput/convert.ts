@@ -290,13 +290,13 @@ export default new Command<"chatInput">({
     },
     data: new SlashCommandBuilder()
         .setName("convert")
-        .setDescription("Use many starting amounts and units by attaching amounts and units of the same quantity with a comma")
+        .setDescription("Quantity conversion")
         .addSubcommand(x => x
             .setName("help")
-            .setDescription("Shows you how to use the command.")
+            .setDescription("Show how to use the command")
             .addStringOption(x => x
                 .setName("quantity")
-                .setDescription("Info on a specific quantity")
+                .setDescription("The quantity to get info on")
                 .setChoices(...quantityKeys.map(x => ({ name: formatString(x), value: x })))
                 .setRequired(false)))
         .addSubcommand(x => x

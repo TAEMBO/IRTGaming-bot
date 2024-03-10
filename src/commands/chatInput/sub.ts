@@ -3,7 +3,7 @@ import { Command } from "../../structures/index.js";
 
 export default new Command<"chatInput">({
     async run(interaction) {
-        await interaction.reply({ content: `Verification sent, please wait for someone to verify your subscription. You will then receive the <@&${interaction.client.config.mainServer.roles.subscriber}> role.`, ephemeral: true });
+        await interaction.reply({ content: `Verification sent. Please wait for someone to verify your subscription, you will then receive the <@&${interaction.client.config.mainServer.roles.subscriber}> role.`, ephemeral: true });
         
         await interaction.client.getChan("helperChat").send({
             content: `<@${interaction.user.id}> (${interaction.user.tag}) Subscriber role verification`,

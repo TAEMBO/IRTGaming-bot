@@ -186,12 +186,12 @@ export default new Command<"chatInput">({
         .setDescription("Ranking system")
         .addSubcommand(x => x
             .setName("view")
-            .setDescription("View your or another member's ranking information")
+            .setDescription("View a member's ranking information")
             .addUserOption(x => x
                 .setName("member")
                 .setDescription("Member whose rank to view")
                 .setRequired(false)))
         .addSubcommand(x => x
             .setName("leaderboard")
-            .setDescription("View top 10 users"))
+            .setDescription("View top 10 users in the ranking system"))
 });

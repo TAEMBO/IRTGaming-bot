@@ -13,7 +13,7 @@ export default new Command<"chatInput">({
     },
     data: new SlashCommandBuilder()
         .setName("slowmode")
-        .setDescription("Sets the slowmode to the provided amount.")
+        .setDescription("Set a slowmode in this channel")
         .addIntegerOption(x => x
             .setName("time")
             .setDescription("The time amount for the slowmode")

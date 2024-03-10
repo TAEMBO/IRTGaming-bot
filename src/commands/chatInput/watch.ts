@@ -88,9 +88,9 @@ export default new Command<"chatInput">({
                 .setRequired(true))
             .addStringOption(x => x
                 .setName("severity")
-                .setDescription("Whether this player needs to be banned, or simply watched over")
+                .setDescription("Whether this player needs to be banned or watched over")
                 .addChoices(
-                    { name: "Needs banning", value: "ban" },
+                    { name: "Needs to be banned", value: "ban" },
                     { name: "Needs to be watched over", value: "watch" }
                 )
                 .setRequired(true)))

@@ -26,7 +26,7 @@ export default new Event({
                 ...client.contextMenuCommands.map(x => x.data.toJSON())
             ])
                 .then(() => log("Purple", "Application commands registered"))
-                .catch(e => log("Red", "Couldn\"t register commands: ", e));
+                .catch(e => log("Red", "Couldn't register commands: ", e));
         } else {
             await client.application.commands.fetch();
         }

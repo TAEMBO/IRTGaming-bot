@@ -13,7 +13,7 @@ export default new Command<"chatInput">({
     },
     data: new SlashCommandBuilder()
         .setName("addbannedword")
-        .setDescription("Add a word to the bannedWords database")
+        .setDescription("Add a word to the bannedWords list")
         .addStringOption(x => x
             .setName("word")
             .setDescription("The word to add")

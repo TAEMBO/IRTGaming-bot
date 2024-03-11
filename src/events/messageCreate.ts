@@ -1,6 +1,6 @@
 import { Events } from "discord.js";
-import { Event, Profanity } from "../structures/index.js";
-import { isDCStaff, isMPStaff, log, tempReply } from "../util/index.js";
+import { Event } from "../structures/index.js";
+import { hasProfanity, isDCStaff, isMPStaff, log, tempReply } from "../util/index.js";
 
 export default new Event({
     name: Events.MessageCreate,
@@ -17,7 +17,6 @@ export default new Event({
         // Bot is set to ignore commands and non-dev sent a message, ignore the message
     
         const msg = message.content.replaceAll("\n", " ").toLowerCase();
-        const profanity = new Profanity(msg);
         let automodded = false;
     
         // Misuse of staff ping
@@ -41,7 +40,7 @@ export default new Event({
         const possibleInvite = message.content.split(" ").find(x => x.includes("discord.gg/"));
     
         if (message.client.config.toggles.automod && !isDCStaff(message.member) && !isWhitelisted) {
-            if (profanity.hasProfanity(message.client.bannedWords.data)) {
+            if (hasProfanity(msg, message.client.bannedWords.data)) {
                 automodded = true;
     
                 await tempReply(message, { timeout: 10_000, content: "That word is banned here" });

@@ -6,8 +6,8 @@ import {
     EmbedBuilder,
     Events
 } from "discord.js";
-import { Event, Profanity } from "../structures/index.js";
-import { formatUser, isDCStaff, isMPStaff } from "../util/index.js";
+import { Event } from "../structures/index.js";
+import { formatUser, hasProfanity, isDCStaff, isMPStaff } from "../util/index.js";
 
 export default new Event({
     name: Events.MessageUpdate,
@@ -21,10 +21,9 @@ export default new Event({
         ) return;
     
         const msg = newMessage.content.replaceAll("\n", " ").toLowerCase();
-        const profanity = new Profanity(msg);
     
         if (
-            profanity.hasProfanity(newMessage.client.bannedWords.data)
+            hasProfanity(msg, newMessage.client.bannedWords.data)
             && (
                 !isMPStaff(newMessage.member)
                 && !isDCStaff(newMessage.member)

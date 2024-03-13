@@ -1,66 +1,70 @@
-import { EmbedBuilder, type Message, SlashCommandBuilder, type User } from "discord.js";
+import { Collection, EmbedBuilder, type Message, SlashCommandBuilder, type User } from "discord.js";
 import { Command } from "../../structures/index.js";
+import { formatString } from "../../util/index.js";
 
-const rpsChannels: Record<string, RpsInstance> = {};
+const possibleMoves = ["rock", "paper", "scissors"] as const;
+const RPSInstances = new Collection<string, RPSInstance>();
 
-class RpsInstance {
-    to = (async () => setTimeout(async () => {
-        if (!rpsChannels[this.message.channelId]) return;
-        
-        await this.message.edit({ embeds: [], content: "This rock paper scissors game has ended due to inactivity." });
-        delete rpsChannels[this.message.channel.id];
-    }, 60_000))();
+type Move = (typeof possibleMoves)[number];
 
-    constructor(public firstPlayer: User, public firstMove: string, public message: Message<boolean>) { }
+class RPSInstance {
+    constructor(public readonly user: User, public readonly move: Move, public readonly message: Message<true>) {
+        setTimeout(async () => {
+            if (!RPSInstances.has(this.message.channelId)) return;
+            
+            await this.message.edit({ embeds: [], content: `This ${possibleMoves.join(" ")} game has ended due to inactivity.` });
+            RPSInstances.delete(this.message.channelId);
+        }, 60_000);
+    }
 }
 
-// Credits to Memw
 export default new Command<"chatInput">({
     async run(interaction) {
-        const move = interaction.options.getString("move", true);
+        const move = interaction.options.getString("move", true) as Move;
+        const firstMove = RPSInstances.get(interaction.channelId);
 
-        if (!rpsChannels[interaction.channelId]) {
+        if (firstMove) {
+            if (interaction.user.id === firstMove.user.id) return await interaction.reply("You can't play against yourself");
+
+            await interaction.deferReply();
+            let winner = null;
+
+            if (move === "rock") if (firstMove.move === "paper") winner = firstMove.user; else winner = interaction.user;
+            if (move === "scissors") if (firstMove.move === "rock") winner = firstMove.user; else winner = interaction.user;
+            if (move === "paper") if (firstMove.move === "scissors") winner = firstMove.user; else winner = interaction.user;
+            if (move === firstMove.move) winner = null;
+
+            await firstMove.message.edit({ embeds: [new EmbedBuilder()
+                .setTitle([
+                    `${winner?.tag ?? "Nobody"} won this rock paper scissors game!`,
+                    "",
+                    `**${firstMove.user.tag}** chose ${firstMove.move}`,
+                    `**${interaction.user.tag}** chose ${move}`
+                ].join("\n"))
+                .setColor(interaction.client.config.EMBED_COLOR)
+            ] });
+
+            RPSInstances.delete(interaction.channelId);
+            await interaction.deleteReply();
+        } else {
             await interaction.deferReply({ ephemeral: true }).then(() => interaction.deleteReply());
 
             const message = await interaction.channel!.send({ embeds: [new EmbedBuilder()
-                .setTitle("Rps game started")
-                .setDescription(`To play with <@${interaction.user.id}> run the command again.`)
-                .setFooter({ text: "You have 60 seconds to reply with another interaction." })
+                .setTitle("Rock paper scissors game started!")
+                .setColor(interaction.client.config.EMBED_COLOR)
+                .setDescription(`To play against ${interaction.user}, use the ${interaction.client.getCommandMention("rps")} command with your move`)
+                .setFooter({ text: "Game will time out in 60 seconds" })
             ] });
 
-            rpsChannels[interaction.channelId] = new RpsInstance(interaction.user, move, message);
-        } else if (rpsChannels[interaction.channelId]) {
-            const firstMove = rpsChannels[interaction.channelId];
-            
-            if (interaction.user.id !== firstMove.firstPlayer.id) {
-                await interaction.deferReply();
-                let winner = null;
-
-                if (move === "rock") if (firstMove.firstMove === "paper") winner = firstMove.firstPlayer; else winner = interaction.user;
-                if (move === "scissors") if (firstMove.firstMove === "rock") winner = firstMove.firstPlayer; else winner = interaction.user;
-                if (move === "paper") if (firstMove.firstMove === "scissors") winner = firstMove.firstPlayer; else winner = interaction.user;
-                if (move === firstMove.firstMove) winner = null;
-
-                await firstMove.message.edit({ embeds: [new EmbedBuilder()
-                    .setTitle("Rps game ended")
-                    .setDescription(`Both players sent their move.\n**${firstMove.firstPlayer.tag}:** ${firstMove.firstMove}\n**${interaction.user.tag}:** ${move}`)
-                    .setFooter({ text: `This game has ended, ${winner ? `${winner.tag} won.` : "it's a tie."}` })
-                ] });
-
-                delete rpsChannels[interaction.channelId];
-                await interaction.deleteReply();
-            } else await interaction.reply("You can't play with yourself.");
-        } else await interaction.reply({ content: "You can't start 2 different games in the same channel, go to another channel or wait for the current game to end.", ephemeral: true });
+            RPSInstances.set(interaction.channelId, new RPSInstance(interaction.user, move, message));
+        }
     },
     data: new SlashCommandBuilder()
         .setName("rps")
-        .setDescription("Start a rock paper scissors game.")
+        .setDescription("Play a game of rock paper scissors")
         .addStringOption(x => x
             .setName("move")
             .setDescription("Your move")
-            .addChoices(
-                { name: "Rock", value: "rock" },
-                { name: "Paper", value: "paper" },
-                { name: "Scissors", value: "scissors" })
+            .addChoices(...possibleMoves.map(x => ({ name: formatString(x), value: x })))
             .setRequired(true))
 });

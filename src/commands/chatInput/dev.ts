@@ -14,31 +14,17 @@ import { setTimeout as sleep } from "node:timers/promises";
 import util from "node:util";
 import * as structures from "../../structures/index.js";
 import * as utilities from "../../util/index.js";
-import { Feeds, DSSExtension, MapSize, DSSFile, DSSObject } from "farming-simulator-types/2022";
 
 export default new structures.Command<"chatInput">({
     async run(interaction) {
         if (!interaction.client.config.devWhitelist.includes(interaction.user.id)) return await interaction.reply("You're not allowed to use dev commands.");
-        
-        Feeds.dedicatedServerStats("aa", DSSExtension.JSON);
-
-        const h = {} as DSSObject;
-
-        h.server?.server;
-
-        const num: MapSize = 2048;
-
-        num;
-
-        Feeds.dedicatedServerSavegame("", DSSFile.Economy);
-        Feeds.dedicatedServerStats("", DSSExtension.XML);
-        Feeds.dedicatedServerStatsMap("", 60, 256);
 
         await utilities.lookup({
             async eval() {
                 sleep; fs; Discord; // Imports possibly used in eval
                 const { client } = interaction;
                 const code = interaction.options.getString("code", true);
+                const depth = interaction.options.getInteger("depth") ?? 1;
                 const useAsync = Boolean(interaction.options.getBoolean("async", false));
                 const fsServers = new structures.FSServers(interaction.client.config.fs);
                 const embed = new EmbedBuilder()
@@ -82,7 +68,7 @@ export default new structures.Command<"chatInput">({
 
                 // Output manipulation
                 if (typeof output === "object") {
-                    output = "js\n" + util.formatWithOptions({ depth: 0 }, "%O", output);
+                    output = "js\n" + util.formatWithOptions({ depth }, "%O", output);
                 } else output = "\n" + String(output);
 
                 // Hide credentials
@@ -133,6 +119,10 @@ export default new structures.Command<"chatInput">({
                 .setName("code")
                 .setDescription("The code to execute")
                 .setRequired(true))
+            .addIntegerOption(x => x
+                .setName("depth")
+                .setDescription("The depth of the output")
+                .setMaxValue(5))
             .addBooleanOption(x => x
                 .setName("async")
                 .setDescription("Whether to wrap the code in an async block or not")))

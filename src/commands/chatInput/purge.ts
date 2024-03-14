@@ -5,11 +5,7 @@ export default new Command<"chatInput">({
     async run(interaction) {
         const limit = interaction.options.getInteger("amount", true);
         const user = interaction.options.getUser("user");
-        const msgs = await (async () => {
-            if (user) {
-                return (await interaction.channel!.messages.fetch({ limit })).filter(x => x.author.id === user.id);
-            } else return await interaction.channel!.messages.fetch({ limit });
-        })();
+        const msgs = (await interaction.channel!.messages.fetch({ limit })).filter(msg => user ? msg.author.id === user.id : true);
 
         await interaction.channel!.bulkDelete(msgs, true);
         await interaction.reply({ content: `Successfully deleted ${msgs.size} messages${user ? ` from ${user}` : ""}.`, ephemeral: true });

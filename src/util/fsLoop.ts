@@ -1,10 +1,18 @@
 import { EmbedBuilder, TextChannel } from "discord.js";
 import type TClient from "../client.js";
-import { formatRequestInit, formatTime, getFSURL, jsonFromXML, log } from "./index.js";
-import type { FSLoopCSG, FSLoopDSS, FSLoopDSSPlayer, FSServer, WatchListDocument } from "../typings.js";
+import {
+    DSSExtension,
+    DSSFile,
+    type DSSResponse,
+    Feeds,
+    filterUnused,
+    type PlayerUsed
+} from "farming-simulator-types/2022";
+import { formatRequestInit, formatTime, jsonFromXML, log } from "./index.js";
+import type { FSLoopCSG, FSServer, WatchListDocument } from "../typings.js";
 
 export async function fsLoop(client: TClient, watchList: WatchListDocument[], server: FSServer, serverAcro: string) {
-    function decorators(player: FSLoopDSSPlayer, publicLoc?: boolean) {
+    function decorators(player: PlayerUsed, publicLoc?: boolean) {
         let decorators = player.isAdmin ? ":detective:" : ""; // Tag for if player is admin
     
         decorators += client.fmList.data.includes(player.name) ? ":farmer:" : ""; // Tag for if player is FM
@@ -25,7 +33,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
         } else return embed.setColor(client.config.EMBED_COLOR_RED);
     }
 
-    function logEmbed(player: FSLoopDSSPlayer, joinLog: boolean) {
+    function logEmbed(player: PlayerUsed, joinLog: boolean) {
         const playTimeHrs = Math.floor(player.uptime / 60);
         const playTimeMins = (player.uptime % 60).toString().padStart(2, "0");
         const embed = new EmbedBuilder()
@@ -48,11 +56,11 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
     };
     const init = formatRequestInit(7_000, "FSLoop");
 
-    const dss = await fetch(getFSURL(server, "dss"), init) // Fetch dedicated-server-stats.json
-        .then(res => res.json() as Promise<FSLoopDSS>)
+    const dss = await fetch(server.url + Feeds.dedicatedServerStats(server.code, DSSExtension.JSON), init) // Fetch dedicated-server-stats.json
+        .then(res => res.json() as Promise<DSSResponse>)
         .catch(err => log("Red", `${serverAcroUp} DSS ${err.message}`));
 
-    const csg = !dss ? null : await fetch(getFSURL(server, "csg"), init) // Fetch dedicated-server-savegame.html if DSS was successful
+    const csg = !dss ? null : await fetch(server.url + Feeds.dedicatedServerSavegame(server.code, DSSFile.CareerSavegame), init) // Fetch dedicated-server-savegame.html if DSS was successful
         .then(async res => {
             if (res.status !== 204) {
                 const { careerSavegame } = jsonFromXML<FSLoopCSG>(await res.text());
@@ -71,7 +79,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
         return;
     }
 
-    const newPlayers = dss.slots.players.filter(x => x.isUsed);
+    const newPlayers = filterUnused(dss.slots.players);
     const oldPlayers = fsCacheServer.players;
     
     // Throttle message updating if no changes in API data
@@ -235,7 +243,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
     
     // Update cache
     if (fsCacheServer.graphPoints.length >= 120) fsCacheServer.graphPoints.shift();
-    if (dss.slots.players.some(x => x.isAdmin)) fsCacheServer.lastAdmin = now * 1_000;
+    if (newPlayers.some(x => x.isAdmin)) fsCacheServer.lastAdmin = now * 1_000;
 
     fsCacheServer.graphPoints.push(dss.slots.used);
     fsCacheServer.players = newPlayers;

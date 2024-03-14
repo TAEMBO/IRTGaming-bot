@@ -1,9 +1,10 @@
 import { AttachmentBuilder, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import config from "../../config.json" assert { type: "json" };
 import canvas from "canvas";
+import { DSSExtension, DSSResponse, Feeds, filterUnused } from "farming-simulator-types/2022";
 import { Command, FSServers } from "../../structures/index.js";
-import { formatRequestInit, formatTime, getFSURL, isMPStaff, log } from "../../util/index.js";
-import type { FSLoopDSS, PlayerTimesDocument } from "../../typings.js";
+import { formatRequestInit, formatTime, isMPStaff, log } from "../../util/index.js";
+import type { PlayerTimesDocument } from "../../typings.js";
 
 const fsServers = new FSServers(config.fs);
 const cmdBuilderData = new SlashCommandBuilder()
@@ -47,8 +48,11 @@ export default new Command<"chatInput">({
 
             for await (const [serverAcro, server] of fsServers.entries()) {
                 const serverAcroUp = serverAcro.toUpperCase();
-                const dss = await fetch(getFSURL(server, "dss"), formatRequestInit(4_000, "StatsAll"))
-                    .then(res => res.json() as Promise<FSLoopDSS>)
+                const dss = await fetch(
+                    server.url + Feeds.dedicatedServerStats(server.code, DSSExtension.JSON),
+                    formatRequestInit(4_000, "StatsAll")
+                )
+                    .then(res => res.json() as Promise<DSSResponse>)
                     .catch(() => {
                         log("Red", `Stats all; ${serverAcroUp} failed`);
                         failedFooter.push(`Failed to fetch ${serverAcroUp}`);
@@ -61,7 +65,7 @@ export default new Command<"chatInput">({
                 const playerInfo: string[] = [];
                 const serverSlots = `${dss.slots.used}/${dss.slots.capacity}`;
 
-                for (const player of dss.slots.players.filter(x => x.isUsed)) {
+                for (const player of filterUnused(dss.slots.players)) {
                     const playTimeHrs = Math.floor(player.uptime / 60);
                     const playTimeMins = (player.uptime % 60).toString().padStart(2, "0");
                     const inWl = watchList.some(x => x._id === player.name);
@@ -130,8 +134,9 @@ export default new Command<"chatInput">({
         } else {
             if (interaction.client.uptime < 60_000) return await interaction.reply({ content: "Please await another 60 seconds before using this command", ephemeral: true });
 
-            const dss = await fetch(getFSURL(interaction.client.config.fs[subCmd], "dss"), formatRequestInit(2_000, "Stats"))
-                .then(res => res.json() as Promise<FSLoopDSS>)
+            const server = interaction.client.config.fs[subCmd];
+            const dss = await fetch(server.url + Feeds.dedicatedServerStats(server.code, DSSExtension.JSON), formatRequestInit(2_000, "Stats"))
+                .then(res => res.json() as Promise<DSSResponse>)
                 .catch(() => log("Red", `Stats ${subCmd.toUpperCase()} failed`));
 
             if (!dss || !dss.slots) return await interaction.reply("Server did not respond");
@@ -287,6 +292,7 @@ export default new Command<"chatInput">({
 
             const playerInfo: string[] = [];
             const watchList = await interaction.client.watchList.data.find();
+            const players = filterUnused(dss.slots.players);
             const color = (() => {
                 if (dss.slots.used === dss.slots.capacity) {
                     return interaction.client.config.EMBED_COLOR_RED;
@@ -297,7 +303,7 @@ export default new Command<"chatInput">({
                 }
             })();
         
-            for (const player of dss.slots.players.filter(x => x.isUsed)) {
+            for (const player of players) {
                 const playTimeHrs = Math.floor(player.uptime / 60);
                 const playTimeMins = (player.uptime % 60).toString().padStart(2, "0");
                 const inWl = watchList.some(x => x._id === player.name);
@@ -320,7 +326,7 @@ export default new Command<"chatInput">({
                 .setImage("attachment://FSStats.png")
                 .setColor(color);
 
-            if (!dss.slots.players.some(x => x.isAdmin) && interaction.client.fsCache[subCmd].lastAdmin) embed.setTimestamp(interaction.client.fsCache[subCmd].lastAdmin).setFooter({ text: "Admin last on" });
+            if (!players.some(x => x.isAdmin) && interaction.client.fsCache[subCmd].lastAdmin) embed.setTimestamp(interaction.client.fsCache[subCmd].lastAdmin).setFooter({ text: "Admin last on" });
         
             await interaction.reply({ embeds: [embed], files: [new AttachmentBuilder(img.toBuffer(), { name: "FSStats.png" })] });
         }

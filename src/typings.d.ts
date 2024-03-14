@@ -1,6 +1,7 @@
 import type { Collection, PresenceData, SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder, Snowflake } from "discord.js";
 import type config from "./config.json";
 import type TClient from "./client.js";
+import { type PlayerUsed } from "farming-simulator-types/2022";
 import type { Command, LocalStorage, RepeatedMessages } from "./structures/index.js";
 import type {
     DailyMsgs,
@@ -79,8 +80,7 @@ export type Prettify<T> = {
 
 export type Empty<T> = {
     [K in keyof T]: undefined;
-}
-export type RepeatedMessagesIdentifiers = "bw" | "adv" | "spam";
+};
 
 /** Adds cache implementation to this schema */
 export interface Cached<TDocument> {
@@ -98,6 +98,8 @@ export interface Cached<TDocument> {
     fillCache(): Promise<this>;
 }
 
+export type RepeatedMessagesIdentifiers = "bw" | "adv" | "spam";
+
 export interface RepeatedMessagesEntry {
     identifier: RepeatedMessagesIdentifiers;
     channel: string;
@@ -112,7 +114,7 @@ export type RepeatedMessagesData = Record<string, {
 export type CombinedSlashCommandBuilder = Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup"> | SlashCommandSubcommandsOnlyBuilder;
 
 export type FSCache = Record<string, {
-    players: FSLoopDSSPlayer[];
+    players: PlayerUsed[];
     status: 0 | 1 | null;
     lastAdmin: number | null;
     graphPoints: number[];
@@ -120,8 +122,6 @@ export type FSCache = Record<string, {
 }>;
 
 export type YTCache = Record<string, string | null>;
-
-export type Index = Record<string, () => any>;
 
 export interface CachedInvite {
     uses: number;
@@ -132,16 +132,16 @@ export interface CachedInvite {
 interface FSServerBase {
     /** The unabbreviated name of this server */
     readonly fullName: string;
-    /** The channel ID for this server"s stats embed, used in FSLoop */
+    /** The channel ID for this server's stats embed, used in FSLoop */
     readonly channelId: string;
     /** The message ID for this server"s stats embed, used in FSLoop */
     readonly messageId: string;
-    /** The username to login to the server"s panel */
+    /** The username to login to the server's panel */
     readonly username: string;
-    /** The password to login to the server"s panel */
+    /** The password to login to the server's panel */
     readonly password: string;
-    /** The address to access the server"s API & webserver panel (e.g. `192.168.0.1:8080` or `example.com`) */
-    readonly address: string;
+    /** The base URL to access the server's API & webserver panel (e.g. `http://192.168.0.1:8080` or `https://example.com`) */
+    readonly url: string;
     /** The API code to gain access to the API for the server (e.g. `a1b2c3d4e5f6g7h8i9`) */
     readonly code: string;
     /** Whether or not this server is a private server with a password */
@@ -151,7 +151,7 @@ interface FSServerBase {
         readonly host: string;
         readonly user: string;
         readonly password: string;
-        /** The path to navigate to the game"s profile folder */
+        /** The path to navigate to the game's profile folder */
         readonly path: string;
     };
 }
@@ -159,7 +159,7 @@ interface FSServerBase {
 /** Object data for a public server */
 export interface FSServerPublic extends FSServerBase {
     readonly isPrivate: false;
-    /** The time zone difference between this server"s location and UTC in minutes */
+    /** The time zone difference between this server's location and UTC in minutes */
     readonly utcDiff: number;
     /** An array of activities that can be done on this server */
     readonly todo: string[];
@@ -229,75 +229,6 @@ export interface Config {
 }
 
 export type MFFarmRoleKeys = Config["mainServer"]["mfFarmRoles"][number];
-
-interface FSLoopDSSPlayerCoordinates {
-    readonly x: number;
-    readonly y: number;
-    readonly z: number;
-}
-
-export type FSLoopDSSPlayer = {
-    readonly isUsed: boolean;
-    readonly isAdmin: boolean;
-    readonly uptime: number;
-    readonly name: string;
-} & (Empty<FSLoopDSSPlayerCoordinates> | FSLoopDSSPlayerCoordinates);
-
-interface FSLoopDSSServer {
-    readonly dayTime: number;
-    readonly game: string;
-    readonly mapName: string;
-    readonly mapSize: number;
-    readonly mapOverviewFilename: string;
-    readonly money: number;
-    readonly name: string;
-    readonly server: string;
-    readonly version: string;
-}
-
-interface FSLoopDSSSlots {
-    readonly capacity: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
-    readonly used: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
-    readonly players: FSLoopDSSPlayer[];
-}
-
-interface FSLoopDSSVehicle {
-    readonly name: string;
-    readonly category: string;
-    readonly type: string;
-    readonly x: number;
-    readonly y: number;
-    readonly z: number;
-    readonly fills?: {
-        readonly type: string;
-        readonly level: number;
-    }[];
-}
-
-interface FSLoopDSSMod {
-    readonly author: string;
-    readonly hash: string;
-    readonly name: string;
-    readonly version: string;
-    readonly description: string;
-}
-
-interface FSLoopDSSField {
-    readonly id: number;
-    readonly isOwned: boolean;
-    readonly x: number;
-    readonly z: number;
-}
-
-interface FSLoopDSSObject {
-    readonly server: FSLoopDSSServer;
-    readonly slots: FSLoopDSSSlots;
-    readonly vehicles: FSLoopDSSVehicle[];
-    readonly mods: FSLoopDSSMod[];
-    readonly fields: FSLoopDSSField[];
-}
-
-export type FSLoopDSS = FSLoopDSSObject | Empty<FSLoopDSSObject>;
 
 export interface FSLoopCSG {
     readonly careerSavegame: {

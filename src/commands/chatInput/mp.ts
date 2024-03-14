@@ -6,7 +6,6 @@ import puppeteer from "puppeteer"; // Credits to Trolly for suggesting this pack
 import { Command, FSServers } from "../../structures/index.js";
 import {
     ackButtons,
-    getFSURL,
     hasRole,
     isMPStaff,
     jsonFromXML,
@@ -15,6 +14,7 @@ import {
     youNeedRole
 } from "../../util/index.js";
 import type { BanFormat, DedicatedServerConfig, FarmFormat } from "../../typings.js";
+import { Routes } from "farming-simulator-types/2022";
 
 const fsServers = new FSServers(config.fs);
 const cmdOptionChoices = fsServers.getPublicAll().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));
@@ -35,8 +35,9 @@ export default new Command<"chatInput">({
                 const chosenServer = interaction.options.getString("server", true);
                 const chosenAction = interaction.options.getString("action", true) as "start" | "stop" | "restart";
                 const cachedServer = interaction.client.fsCache[chosenServer];
+                const configServer = interaction.client.config.fs[chosenServer];
 
-                if (interaction.client.config.fs[chosenServer].isPrivate && !hasRole(interaction.member, "mpmanager")) {
+                if (configServer.isPrivate && !hasRole(interaction.member, "mpmanager")) {
                     await checkRole("mfmanager");
                 } else await checkRole("mpmanager");
 
@@ -59,7 +60,7 @@ export default new Command<"chatInput">({
                 const page = await browser.newPage();
     
                 try {
-                    await page.goto(getFSURL(interaction.client.config.fs[chosenServer], "login"), { timeout: 120_000 });
+                    await page.goto(configServer.url + Routes.webPageLogin(configServer.username, configServer.password), { timeout: 120_000 });
                 } catch (err: any) {
                     return await interaction.editReply(err.message);
                 }
@@ -76,7 +77,7 @@ export default new Command<"chatInput">({
                     async stop() {
                         result += "stopped ";
 
-                        const uptime = await page.evaluate(() => document.querySelector("span.monitorHead")!.textContent);
+                        const uptime = await page.evaluate(() => document.querySelector("span.monitorHead")!.textContent!);
 
                         uptimeText = `. Uptime before stopping: **${uptime}**`;
 

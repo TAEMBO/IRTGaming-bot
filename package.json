@@ -13,6 +13,7 @@
   "dependencies": {
     "canvas": "^2.11.2",
     "discord.js": "^14.14.1",
+    "farming-simulator-types": "^1.4.0",
     "ftp": "^0.3.10",
     "mongoose": "^8.2.1",
     "ms": "^2.1.3",

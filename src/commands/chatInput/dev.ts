@@ -61,7 +61,7 @@ export default new structures.Command<"chatInput">({
                         componentType: ComponentType.Button
                     })
                         .on("collect", int => void int.reply(codeBlock(err.stack.slice(0, 1950))))
-                        .on("end", () => void msg.edit({ embeds: msg.embeds, components: [] }));
+                        .on("end", () => void msg.edit({ components: [] }));
                     
                     return;
                 }

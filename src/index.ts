@@ -1,11 +1,13 @@
 import { type ClientEvents, ContextMenuCommandBuilder, EmbedBuilder } from "discord.js";
 import TClient from "./client.js";
-import fs from "node:fs";
-import path from "node:path";
+import { readdir } from "node:fs/promises";
+import { join } from "node:path";
+import { fileURLToPath, URL, pathToFileURL } from "node:url";
 import type { Event } from "./structures/index.js";
 
 const client = new TClient();
 const fsKeys = Object.keys(client.config.fs);
+const urlPath = (path: string) => pathToFileURL(fileURLToPath(new URL(path, import.meta.url))).toString();
 
 Error.stackTraceLimit = 25;
 client.setMaxListeners(100);
@@ -23,18 +25,20 @@ for (const serverAcro of fsKeys) client.fsCache[serverAcro] = {
 };
 
 // Command handler
-for await (const folder of fs.readdirSync(path.resolve("./commands"))) {
-    for await (const file of fs.readdirSync(path.resolve("./commands", folder))) {
-        const commandFile = await import(`./commands/${folder}/${file}`);
-        const collectionType = commandFile.default.data instanceof ContextMenuCommandBuilder ? "contextMenuCommands": "chatInputCommands";
+for await (const folder of await readdir("commands")) {
+    for await (const file of await readdir(join("commands", folder))) {
+        const commandFile = (await import(urlPath(join("commands", folder, file)))).default;
+        const collectionType = commandFile.data instanceof ContextMenuCommandBuilder
+            ? "contextMenuCommands"
+            : "chatInputCommands";
 
-        client[collectionType].set(commandFile.default.data.name, commandFile.default);
+        client[collectionType].set(commandFile.data.name, commandFile);
     }
 }
 
 // Event handler
-for await (const file of fs.readdirSync(path.resolve("./events"))) {
-    const eventFile: Event<keyof ClientEvents> = (await import(`./events/${file}`)).default;
+for await (const file of await readdir("events")) {
+    const eventFile: Event<keyof ClientEvents> = (await import(urlPath(join("events", file)))).default;
 
     client[eventFile.once ? "once" : "on"](eventFile.name, eventFile.run);
 }

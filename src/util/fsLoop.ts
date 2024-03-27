@@ -12,6 +12,8 @@ import { formatRequestInit, formatTime, jsonFromXML, log } from "./index.js";
 import type { FSLoopCSG, FSServer, WatchListDocument } from "../typings.js";
 
 export async function fsLoop(client: TClient, watchList: WatchListDocument[], server: FSServer, serverAcro: string) {
+    if (client.config.toggles.debug) log("Yellow", "FSLoop", serverAcro);
+
     function decorators(player: PlayerUsed, publicLoc?: boolean) {
         let decorators = player.isAdmin ? ":detective:" : ""; // Tag for if player is admin
     

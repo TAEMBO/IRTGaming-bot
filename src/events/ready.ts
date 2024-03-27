@@ -11,6 +11,8 @@ export default new Event({
         const fsServers = new FSServers(client.config.fs);
         const guild = client.mainGuild();
         const now = Date.now();
+
+        if (client.config.toggles.debug) setTimeout(() => log("Yellow", "Uptime - 60 seconds"), 60_000);
     
         await mongoose.set("strictQuery", true).connect(client.config.MONGO_URI, {
             autoIndex: true,
@@ -86,7 +88,7 @@ export default new Event({
             if (today.startsWith("fri")) {
                 await channel.send(`Weekend begins! ${client.config.DAILY_MSGS_WEEKEND}`);
             } else if (today.startsWith("sun")) {
-                await channel.send(`It"s back to Monday... ${client.config.DAILY_MSGS_MONDAY}`);
+                await channel.send(`It's back to Monday... ${client.config.DAILY_MSGS_MONDAY}`);
             } else await channel.send(client.config.DAILY_MSGS_DEFAULT);
         }, 10_000);
     
@@ -101,6 +103,8 @@ export default new Event({
         // YouTube upload notifications loop
         if (client.config.toggles.ytLoop) setInterval(async () => {
             for await (const channel of client.config.ytChannels) {
+                if (client.config.toggles.debug) log("Yellow", "YTLoop", channel.name);
+
                 const res = await fetch(
                     `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`,
                     formatRequestInit(5_000, "YTLoop")
@@ -128,6 +132,6 @@ export default new Event({
                 client.ytCache[channel.id] = latestVid["yt:videoId"]._text;
                 await client.getChan("videosAndLiveStreams").send(`**${channel.name}** just uploaded a new video!\n${latestVid.link._attributes.href}`);
             }
-        }, 300_000);
+        }, 1_800_000);
     }
 });

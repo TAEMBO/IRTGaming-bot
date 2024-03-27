@@ -193,6 +193,7 @@ export interface Config {
     toggles: {
         commands: boolean;
         automod: boolean;
+        debug: boolean;
         logs: boolean;
         registerCommands: boolean;
         fsLoop: boolean;

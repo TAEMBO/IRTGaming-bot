@@ -10,10 +10,11 @@ const fsKeys = Object.keys(client.config.fs);
 const urlPath = (path: string) => pathToFileURL(fileURLToPath(new URL(path, import.meta.url))).toString();
 
 Error.stackTraceLimit = 25;
-client.setMaxListeners(100);
 console.log(client.config.toggles);
 console.log(client.config.devWhitelist);
 console.log(fsKeys);
+
+if (client.config.toggles.debug) client.on("debug", console.log);
 
 for (const { id } of client.config.ytChannels) client.ytCache[id] = null;
 for (const serverAcro of fsKeys) client.fsCache[serverAcro] = {

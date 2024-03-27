@@ -11,7 +11,7 @@
     "build": "npm run lint && tsc"
   },
   "dependencies": {
-    "canvas": "^2.11.2",
+    "@napi-rs/canvas": "^0.1.51",
     "discord.js": "^14.14.1",
     "farming-simulator-types": "^1.4.0",
     "ftp": "^0.3.10",

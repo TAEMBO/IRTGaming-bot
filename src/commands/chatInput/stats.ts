@@ -1,6 +1,6 @@
 import { AttachmentBuilder, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import config from "../../config.json" assert { type: "json" };
-import canvas from "canvas";
+import canvas from "@napi-rs/canvas";
 import { DSSExtension, DSSResponse, Feeds, filterUnused } from "farming-simulator-types/2022";
 import { Command, FSServers } from "../../structures/index.js";
 import { formatRequestInit, formatTime, isMPStaff, log } from "../../util/index.js";
@@ -328,7 +328,7 @@ export default new Command<"chatInput">({
 
             if (!players.some(x => x.isAdmin) && interaction.client.fsCache[subCmd].lastAdmin) embed.setTimestamp(interaction.client.fsCache[subCmd].lastAdmin).setFooter({ text: "Admin last on" });
         
-            await interaction.reply({ embeds: [embed], files: [new AttachmentBuilder(img.toBuffer(), { name: "FSStats.png" })] });
+            await interaction.reply({ embeds: [embed], files: [new AttachmentBuilder(img.toBuffer("image/png"), { name: "FSStats.png" })] });
         }
     },
     data: cmdBuilderData

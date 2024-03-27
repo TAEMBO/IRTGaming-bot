@@ -1,5 +1,5 @@
 import { AttachmentBuilder, EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import canvas from "canvas";
+import canvas from "@napi-rs/canvas";
 import { Command } from "../../structures/index.js";
 
 export default new Command<"chatInput">({
@@ -142,7 +142,7 @@ export default new Command<"chatInput">({
             const topUsers = allData.sort((a, b) => b.messages - a.messages).filter(x => !x.hasLeft).slice(0, 10).map((x, i) => `\`${i + 1}.\` <@${x._id}>: ${x.messages.toLocaleString("en-US")}`).join("\n");
             
             await interaction.reply({
-                files: [new AttachmentBuilder(img.toBuffer(), { name: "dailymsgs.png" })],
+                files: [new AttachmentBuilder(img.toBuffer("image/png"), { name: "dailyMsgs.png" })],
                 embeds: [new EmbedBuilder()
                     .setTitle("Ranking leaderboard")
                     .setDescription(`A total of **${messageCountsTotal.toLocaleString("en-US")}** messages have been recorded in this server.`)

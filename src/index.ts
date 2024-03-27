@@ -1,9 +1,10 @@
-import { type ClientEvents, ContextMenuCommandBuilder, EmbedBuilder } from "discord.js";
+import { ContextMenuCommandBuilder, EmbedBuilder } from "discord.js";
 import TClient from "./client.js";
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath, URL, pathToFileURL } from "node:url";
-import type { Event } from "./structures/index.js";
+import { Command, Event } from "./structures/index.js";
+import { log } from "./util/index.js";
 
 const client = new TClient();
 const fsKeys = Object.keys(client.config.fs);
@@ -29,6 +30,13 @@ for (const serverAcro of fsKeys) client.fsCache[serverAcro] = {
 for await (const folder of await readdir("commands")) {
     for await (const file of await readdir(join("commands", folder))) {
         const commandFile = (await import(urlPath(join("commands", folder, file)))).default;
+
+        if (!(commandFile instanceof Command)) {
+            log("Red", `${file} not Command`);
+    
+            continue;
+        }
+
         const collectionType = commandFile.data instanceof ContextMenuCommandBuilder
             ? "contextMenuCommands"
             : "chatInputCommands";
@@ -39,7 +47,13 @@ for await (const folder of await readdir("commands")) {
 
 // Event handler
 for await (const file of await readdir("events")) {
-    const eventFile: Event<keyof ClientEvents> = (await import(urlPath(join("events", file)))).default;
+    const eventFile = (await import(urlPath(join("events", file)))).default;
+
+    if (!(eventFile instanceof Event)) {
+        log("Red", `${file} not Event`);
+
+        continue;
+    }
 
     client[eventFile.once ? "once" : "on"](eventFile.name, eventFile.run);
 }

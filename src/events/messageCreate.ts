@@ -20,7 +20,7 @@ export default new Event({
         let automodded = false;
     
         // Misuse of staff ping
-        if (message.mentions.roles.some(role => role.id === message.client.config.mainServer.roles.mpstaff)) {
+        if (message.mentions.roles.has(message.client.config.mainServer.roles.mpstaff)) {
             log("Purple", `${message.author.tag} mentioned staff role`);
             
             message.channel.createMessageCollector({

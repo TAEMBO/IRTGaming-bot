@@ -63,7 +63,8 @@ export default class TClient extends Client<true> {
                 BaseGuildEmojiManager: 0,
                 GuildEmojiManager: 0,
                 GuildMessageManager: 500,
-            })
+            }),
+            allowedMentions: { repliedUser: false, parse: ["users", "roles", "everyone"] }
         });
     }
 

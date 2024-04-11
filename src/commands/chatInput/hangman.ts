@@ -30,7 +30,7 @@ export default new Command<"chatInput">({
                 clearInterval(interval);
             }
 
-            await botMsg.reply({ content: text, allowedMentions: { repliedUser: false } });
+            await botMsg.reply(text);
         }
 
         function hidePhrase() {
@@ -141,19 +141,13 @@ export default new Command<"chatInput">({
                 clearInterval(interval);
             }
 
-            await botMsg.reply({
-                content: `The ${wordOrPhrase} doesn't include that ${isWord ? "piece of text" : "letter"}.\nAn incorrect guess leads to the addition of things to the drawing. It now looks like this:\n\`\`\`\n${stages[fouls - 1].join("\n")}\n\`\`\`` + loseText,
-                allowedMentions: { repliedUser: false }
-            });
+            await botMsg.reply(`The ${wordOrPhrase} doesn't include that ${isWord ? "piece of text" : "letter"}.\nAn incorrect guess leads to the addition of things to the drawing. It now looks like this:\n\`\`\`\n${stages[fouls - 1].join("\n")}\n\`\`\`` + loseText);
         }
 
         guessCollector.on("collect", async guessMessage => {
             const guess = guessMessage.content.slice(6).toLowerCase();
 
-            if (!guess || !guess.length) return void await guessMessage.reply({
-                content: "You're using the `guess` command wrong. Get good.",
-                allowedMentions: { repliedUser: false }
-            });
+            if (!guess || !guess.length) return void await guessMessage.reply("You're using the `guess` command wrong. Get good.");
 
             if (guess.length > 1) {
                 guessWord(guess);
@@ -165,7 +159,7 @@ export default new Command<"chatInput">({
         const interval = setInterval(async () => {
             if (Date.now() <= (latestActivity + 120_000)) return;
             
-            await botMsg.reply({ content: "The hangman game has ended due to inactivity.", allowedMentions: { repliedUser: false } });
+            await botMsg.reply("The hangman game has ended due to inactivity.");
             guessCollector.stop();
             clearInterval(interval);
         }, 5_000);

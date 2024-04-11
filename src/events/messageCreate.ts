@@ -157,10 +157,7 @@ export default new Event({
                 "Apple for you 🍎"
             ];
     
-            await message.reply({
-                content: `${randomEl(mornRes1)} ${user}! ${randomEl(mornRes2)}`,
-                allowedMentions: { repliedUser: false }
-            });
+            await message.reply(`${randomEl(mornRes1)} ${user}! ${randomEl(mornRes2)}`);
         }
     }
 });

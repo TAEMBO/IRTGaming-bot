@@ -14,4 +14,8 @@ jobs:
         with:
           node-version: latest
       - run: npm ci
+      - run: | 
+          echo $CONFIG_JSON > ./src/config.json
+        env:
+          CONFIG_JSON: ${{ secrets.CONFIG_FILE }}
       - run: npm run build

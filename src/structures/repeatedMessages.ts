@@ -5,7 +5,7 @@ import type { RepeatedMessagesData, RepeatedMessagesEntry, RepeatedMessagesIdent
 export class RepeatedMessages {
     private _data: RepeatedMessagesData = {};
 
-    constructor(private readonly _client: TClient) { }
+    public constructor(private readonly _client: TClient) { }
 
     public async increment(
         msg: Message<true>,

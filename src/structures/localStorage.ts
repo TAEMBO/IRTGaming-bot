@@ -8,7 +8,7 @@ export class LocalStorage<TElement> {
     /** The content for this instance */
     public readonly data: TElement[];
 
-    constructor(fileName: `${string}.json`) {
+    public constructor(fileName: `${string}.json`) {
         this._path = path.resolve(`../databases/${fileName}`);
         this.data = JSON.parse(fs.readFileSync(this._path, "utf8"));
 

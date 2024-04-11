@@ -8,7 +8,7 @@ const RPSInstances = new Collection<string, RPSInstance>();
 type Move = (typeof possibleMoves)[number];
 
 class RPSInstance {
-    constructor(public readonly user: User, public readonly move: Move, public readonly message: Message<true>) {
+    public constructor(public readonly user: User, public readonly move: Move, public readonly message: Message<true>) {
         setTimeout(async () => {
             if (!RPSInstances.has(this.message.channelId)) return;
             

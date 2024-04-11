@@ -41,7 +41,7 @@ export default class TClient extends Client<true> {
     public readonly reminders = new Reminders(this);
     public readonly dailyMsgs = new DailyMsgs();
 
-    constructor() {
+    public constructor() {
         super({
             intents: [
                 GatewayIntentBits.Guilds,

@@ -14,7 +14,7 @@ export type RemindersDocument = ReturnType<typeof model.castObject>;
 export class Reminders {
     public data = model;
     
-    constructor(private readonly _client: TClient) { }
+    public constructor(private readonly _client: TClient) { }
 
 
     public setExec(_id: mongoose.Types.ObjectId, timeout: number) {

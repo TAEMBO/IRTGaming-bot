@@ -31,7 +31,7 @@ export type PlayerTimesDocument = ReturnType<typeof model.castObject>;
 export class PlayerTimes {
     public data = model;
 
-    constructor(private readonly _client: TClient) { }
+    public constructor(private readonly _client: TClient) { }
     
     /**
      * Retrieve an array-ified form of a player"s server time data.

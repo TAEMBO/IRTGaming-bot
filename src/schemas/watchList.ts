@@ -11,5 +11,5 @@ export type WatchListDocument = ReturnType<typeof model.castObject>;
 export class WatchList {
     public data = model;
     
-    constructor() { }
+    public constructor() { }
 }

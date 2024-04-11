@@ -13,7 +13,7 @@ export type UserLevelsDocument = ReturnType<typeof model.castObject>;
 export class UserLevels {
     public data = model;
 
-    constructor(private readonly _client: TClient) { }
+    public constructor(private readonly _client: TClient) { }
     
     /**
      * Increment a user"s userLevels data, or create a document for them if one not found

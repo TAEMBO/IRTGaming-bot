@@ -25,15 +25,15 @@ export class Command<
         : undefined
 > {
     /** The optional autocomplete function that is ran for this command */
-    autocomplete?: TAutocomplete;
+    public autocomplete?: TAutocomplete;
     /** The function that is ran for this command */
-    run: (interaction: TInteraction) => Promise<any>;
+    public run: (interaction: TInteraction) => Promise<any>;
     /** The builder data for this command */
-    readonly data: TBuilder;
+    public readonly data: TBuilder;
     /** The amount of times this command has been used */
-    uses = 0;
+    public uses = 0;
 
-    constructor(commandData: (
+    public constructor(commandData: (
         {
             readonly data: TBuilder;
             run(interaction: TInteraction): Promise<any>;

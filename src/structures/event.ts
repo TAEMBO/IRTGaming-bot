@@ -2,13 +2,13 @@ import type { ClientEvents } from "discord.js";
 
 export class Event<TEvent extends keyof ClientEvents> {
     /** The listener name of the event */
-    readonly name: TEvent;
+    public readonly name: TEvent;
     /** Whether or not to use `once()` or `on()` */
-    readonly once?: boolean;
+    public readonly once?: boolean;
     /** The function to be ran when this event is emitted */
-    readonly run: (...args: ClientEvents[TEvent]) => Promise<any>;
+    public readonly run: (...args: ClientEvents[TEvent]) => Promise<any>;
 
-    constructor(eventData: {
+    public constructor(eventData: {
         name: TEvent;
         once?: boolean;
         run: (...args: ClientEvents[TEvent]) => Promise<any>;

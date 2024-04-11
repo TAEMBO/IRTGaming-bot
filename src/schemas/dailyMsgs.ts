@@ -12,7 +12,7 @@ export class DailyMsgs implements Cached<DailyMsgsDocument> {
     public data = model;
     public cache: DailyMsgsDocument[] = [];
     
-    constructor() { }
+    public constructor() { }
 
     public async increment(data: DailyMsgsDocument) {
         const doc = await this.data.create(data);

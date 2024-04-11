@@ -25,7 +25,7 @@ export type PunishmentsDocument = ReturnType<typeof model.castObject>;
 export class Punishments {
     public data = model;
 
-    constructor(private readonly _client: TClient) { }
+    public constructor(private readonly _client: TClient) { }
 
     public setExec(_id: number, timeout: number) {
         setTimeout(async () => {

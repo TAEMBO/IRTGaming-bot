@@ -5,7 +5,7 @@ import FTPClient from "ftp";
 import puppeteer from "puppeteer"; // Credits to Trolly for suggesting this package
 import { Command, FSServers } from "../../structures/index.js";
 import {
-    ackButtons,
+    ACK_BUTTONS,
     hasRole,
     isMPStaff,
     jsonFromXML,
@@ -273,7 +273,7 @@ export default new Command<"chatInput">({
                             .setColor(interaction.client.config.EMBED_COLOR)
                         ],
                         fetchReply: true,
-                        components: ackButtons()
+                        components: ACK_BUTTONS
                     })).createMessageComponentCollector({
                         filter: x => x.user.id === interaction.user.id,
                         max: 1,

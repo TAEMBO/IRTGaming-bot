@@ -1,6 +1,6 @@
 import { AttachmentBuilder, ComponentType, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { Command } from "../../structures/index.js";
-import { ackButtons, isMPStaff, lookup, youNeedRole } from "../../util/index.js";
+import { ACK_BUTTONS, isMPStaff, lookup, youNeedRole } from "../../util/index.js";
 
 export default new Command<"chatInput">({
     async run(interaction) {
@@ -37,7 +37,7 @@ export default new Command<"chatInput">({
                             .setDescription("You are already subscribed to watchList notifications, do you want to unsubscribe?")
                             .setColor(interaction.client.config.EMBED_COLOR)
                         ],
-                        components: ackButtons()
+                        components: ACK_BUTTONS
                     })).createMessageComponentCollector({
                         filter: x => x.user.id === interaction.user.id,
                         max: 1,

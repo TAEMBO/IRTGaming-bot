@@ -8,7 +8,7 @@ import {
 } from "discord.js";
 import { Command } from "../../structures/index.js";
 import {
-    ackButtons,
+    ACK_BUTTONS,
     hasRole,
     lookup,
     onMFFarms,
@@ -95,7 +95,7 @@ export default new Command<"chatInput">({
                             .setColor(interaction.client.config.EMBED_COLOR)
                         ],
                         fetchReply: true, 
-                        components: ackButtons()
+                        components: ACK_BUTTONS
                     })).createMessageComponentCollector({
                         filter: x => x.user.id === interaction.user.id,
                         max: 1,
@@ -143,7 +143,7 @@ export default new Command<"chatInput">({
                             .setDescription(`This member already has the <@&${interaction.client.config.mainServer.roles.mffarmowner}> role, do you want to remove it from them?`)
                             .setColor(interaction.client.config.EMBED_COLOR)
                         ],
-                        components: ackButtons()
+                        components: ACK_BUTTONS
                     })).createMessageComponentCollector({
                         filter: x => x.user.id === interaction.user.id,
                         max: 1,

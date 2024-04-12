@@ -10,7 +10,7 @@ import {
 } from "discord.js";
 import ms from "ms";
 import { Command } from "../../structures/index.js";
-import { ackButtons, lookup } from "../../util/index.js";
+import { ACK_BUTTONS, lookup } from "../../util/index.js";
 import type { RemindersDocument } from "../../typings.js";
 
 export default new Command<"chatInput">({
@@ -34,7 +34,7 @@ export default new Command<"chatInput">({
                     .setFooter({ text: "60s to respond" })
                 ],
                 ephemeral: true,
-                components: ackButtons()
+                components: ACK_BUTTONS
             };
 
             (await (int.isChatInputCommand()
@@ -102,7 +102,7 @@ export default new Command<"chatInput">({
                         .setFooter({ text: "60s to respond" })
                     ],
                     ephemeral: true,
-                    components: ackButtons()
+                    components: ACK_BUTTONS
                 })).createMessageComponentCollector({
                     filter: x => x.user.id === interaction.user.id,
                     max: 1,

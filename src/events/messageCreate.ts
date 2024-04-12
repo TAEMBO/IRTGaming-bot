@@ -40,7 +40,7 @@ export default new Event({
         const possibleInvite = message.content.split(" ").find(x => x.includes("discord.gg/"));
     
         if (message.client.config.toggles.automod && !isDCStaff(message.member) && !isWhitelisted) {
-            if (hasProfanity(msg, message.client.bannedWords.data)) {
+            if (hasProfanity(msg, message.client.bannedWords.cache)) {
                 automodded = true;
     
                 await tempReply(message, { timeout: 10_000, content: "That word is banned here" });

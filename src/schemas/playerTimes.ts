@@ -101,8 +101,8 @@ export class PlayerTimes {
                 
                 const decorators = (name: string) => {
                     return [
-                        this._client.fmList.data.includes(name) ? ":farmer:" : "", // Tag for if player is FM
-                        this._client.tfList.data.includes(name) ? ":angel:" : "" // Tag for if player is TF
+                        this._client.fmList.cache.includes(name) ? ":farmer:" : "", // Tag for if player is FM
+                        this._client.tfList.cache.includes(name) ? ":angel:" : "" // Tag for if player is TF
                     ].join("");
                 };
 

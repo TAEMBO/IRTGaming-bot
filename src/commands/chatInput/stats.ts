@@ -70,8 +70,8 @@ export default new Command<"chatInput">({
                     const playTimeMins = (player.uptime % 60).toString().padStart(2, "0");
                     const inWl = watchList.some(x => x._id === player.name);
                     let decorators = player.isAdmin ? ":detective:" : ""; // Tag for if player is admin
-                    decorators += interaction.client.fmList.data.includes(player.name) ? ":farmer:" : ""; // Tag for if player is FM
-                    decorators += interaction.client.tfList.data.includes(player.name) ? ":angel:" : ""; // Tag for if player is TF
+                    decorators += interaction.client.fmList.cache.includes(player.name) ? ":farmer:" : ""; // Tag for if player is FM
+                    decorators += interaction.client.tfList.cache.includes(player.name) ? ":angel:" : ""; // Tag for if player is TF
                     decorators += inWl ? "⛔" : ""; // Tag for if player is on watchList
         
                     playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
@@ -91,8 +91,8 @@ export default new Command<"chatInput">({
 
             const leaderboard = (data: PlayerTimesDocument[], isFirstField: boolean) => data.map((x, i) => [
                 `**${i + (isFirstField ? 1 : 26)}.** \`${x._id}\``,
-                interaction.client.fmList.data.includes(x._id) ? ":farmer:" : "",
-                interaction.client.tfList.data.includes(x._id) ? ":angel:" : "",
+                interaction.client.fmList.cache.includes(x._id) ? ":farmer:" : "",
+                interaction.client.tfList.cache.includes(x._id) ? ":angel:" : "",
                 " - ",
                 formatTime((interaction.client.playerTimes.getTimeData(x).reduce((x, y) => x + y[1].time, 0) * 60 * 1000), 3, { commas: true, longNames: false })
             ].join("")).join("\n");
@@ -114,7 +114,7 @@ export default new Command<"chatInput">({
                     await interaction.reply({ embeds: [new EmbedBuilder()
                         .setColor(interaction.client.config.EMBED_COLOR)
                         .setTitle([
-                            `Player - \`${playerData._id}\`${interaction.client.fmList.data.includes(playerData._id) ? ":farmer:" : ""}${interaction.client.tfList.data.includes(playerData._id) ? ":angel:" : ""}`,
+                            `Player - \`${playerData._id}\`${interaction.client.fmList.cache.includes(playerData._id) ? ":farmer:" : ""}${interaction.client.tfList.cache.includes(playerData._id) ? ":angel:" : ""}`,
                             `Leaderboard position - **#${sortedData.indexOf(playerData) + 1}**`,
                             `Total time - **${formatTime(playerTimeDataTotal * 60 * 1000, 5, { commas: true, longNames: false })}**`,
                             (isMPStaff(interaction.member) && playerData.uuid) ? `UUID: \`${playerData.uuid}\`` : "",
@@ -309,8 +309,8 @@ export default new Command<"chatInput">({
                 const inWl = watchList.some(x => x._id === player.name);
                 let decorators = player.isAdmin ? ":detective:" : ""; // Tag for if player is admin
 
-                decorators += interaction.client.fmList.data.includes(player.name) ? ":farmer:" : ""; // Tag for if player is FM
-                decorators += interaction.client.tfList.data.includes(player.name) ? ":angel:" : ""; // Tag for if player is TF
+                decorators += interaction.client.fmList.cache.includes(player.name) ? ":farmer:" : ""; // Tag for if player is FM
+                decorators += interaction.client.tfList.cache.includes(player.name) ? ":angel:" : ""; // Tag for if player is TF
                 decorators += inWl ? "⛔" : ""; // Tag for if player is on watchList
         
                 playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);

@@ -31,7 +31,7 @@ export default new Command<"chatInput">({
                 await interaction.reply({ files: [new AttachmentBuilder(Buffer.from(JSON.stringify(await interaction.client.watchList.data.find(), null, 2)), { name: "watchListCache.json" })] });
             },
             async subscription() {
-                if (interaction.client.watchListPings.data.includes(interaction.user.id)) {
+                if (interaction.client.watchListPings.cache.includes(interaction.user.id)) {
                     (await interaction.reply({
                         embeds: [new EmbedBuilder()
                             .setDescription("You are already subscribed to watchList notifications, do you want to unsubscribe?")
@@ -45,7 +45,7 @@ export default new Command<"chatInput">({
                         componentType: ComponentType.Button
                     }).on("collect", int => void lookup({
                         async confirm() {
-                            interaction.client.watchListPings.remove(interaction.user.id);
+                            await interaction.client.watchListPings.remove(interaction.user.id);
 
                             await int.update({
                                 embeds: [new EmbedBuilder().setDescription("You have successfully unsubscribed from watchList notifications").setColor(interaction.client.config.EMBED_COLOR)],
@@ -61,7 +61,7 @@ export default new Command<"chatInput">({
                         }
                     }, int.customId));
                 } else {
-                    interaction.client.watchListPings.add(interaction.user.id);
+                    await interaction.client.watchListPings.add(interaction.user.id);
 
                     await interaction.reply({ embeds: [new EmbedBuilder()
                         .setDescription("You have successfully subscribed to watchList notifications")

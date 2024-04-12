@@ -358,22 +358,22 @@ export default new Command<"chatInput">({
             async fm() {
                 const name = interaction.options.getString("name", true);
 
-                if (interaction.client.fmList.data.includes(name)) {
-                    interaction.client.fmList.remove(name);
+                if (interaction.client.fmList.cache.includes(name)) {
+                    await interaction.client.fmList.remove(name);
                     await interaction.reply(`Successfully removed \`${name}\``);
                 } else {
-                    interaction.client.fmList.add(name);
+                    await interaction.client.fmList.add(name);
                     await interaction.reply(`Successfully added \`${name}\``);
                 }
             },
             async tf() {
                 const name = interaction.options.getString("name", true);
 
-                if (interaction.client.tfList.data.includes(name)) {
-                    interaction.client.tfList.remove(name);
+                if (interaction.client.tfList.cache.includes(name)) {
+                    await interaction.client.tfList.remove(name);
                     await interaction.reply(`Successfully removed \`${name}\``);
                 } else {
-                    interaction.client.tfList.add(name);
+                    await interaction.client.tfList.add(name);
                     await interaction.reply(`Successfully added \`${name}\``);
                 }
             }

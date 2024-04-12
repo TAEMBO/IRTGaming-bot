@@ -46,8 +46,8 @@ export default new Command<"chatInput">({
                     .setTitle("__MP Staff Usernames__")
                     .setColor(interaction.client.config.EMBED_COLOR)
                     .addFields(
-                        { name: "Farm Managers :farmer:", value: `\`${interaction.client.fmList.data.join("`\n`")}\`` },
-                        { name: "Trusted Farmers :angel:", value: `\`${interaction.client.tfList.data.join("`\n`")}\`` }
+                        { name: "Farm Managers :farmer:", value: `\`${interaction.client.fmList.cache.join("`\n`")}\`` },
+                        { name: "Trusted Farmers :angel:", value: `\`${interaction.client.tfList.cache.join("`\n`")}\`` }
                     )
                 ] });
             },

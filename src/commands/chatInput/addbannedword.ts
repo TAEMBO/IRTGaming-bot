@@ -5,8 +5,8 @@ export default new Command<"chatInput">({
     async run(interaction) {
         const word = interaction.options.getString("word", true);
 
-        if (!interaction.client.bannedWords.data.includes(word)) {
-            interaction.client.bannedWords.add(word);
+        if (!interaction.client.bannedWords.cache.includes(word)) {
+            await interaction.client.bannedWords.add(word);
 
             await interaction.reply("Successfully added to bannedWords list");
         } else await interaction.reply("That word is already added");

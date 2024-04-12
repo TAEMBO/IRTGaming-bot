@@ -6,19 +6,23 @@ import {
     Options,
     Partials,
     type PresenceData,
-    type Snowflake,
     TextChannel
 } from "discord.js";
 import config from "./config.json" assert { type: "json" };
 import {
+    BannedWords,
     DailyMsgs,
+    FMList,
     PlayerTimes,
     Punishments,
     Reminders,
+    TFList,
     UserLevels,
-    WatchList
+    WatchList,
+    WatchListPings,
+    Whitelist
 } from "./schemas/index.js";
-import { type Command, LocalStorage, RepeatedMessages } from "./structures/index.js";
+import { type Command, RepeatedMessages } from "./structures/index.js";
 import type { CachedInvite, Config, FSCache, YTCache } from "./typings.js";
 
 export default class TClient extends Client<true> {
@@ -29,11 +33,11 @@ export default class TClient extends Client<true> {
     public readonly contextMenuCommands = new Collection<string, Command<"message" | "user">>();
     public readonly repeatedMessages = new RepeatedMessages(this);
     public readonly inviteCache = new Collection<string, CachedInvite>();
-    public readonly bannedWords = new LocalStorage<string>("bannedWords.json");
-    public readonly tfList = new LocalStorage<string>("TFlist.json");
-    public readonly fmList = new LocalStorage<string>("FMlist.json");
-    public readonly whitelist = new LocalStorage<string>("adminWhitelist.json");
-    public readonly watchListPings = new LocalStorage<Snowflake>("watchListPings.json");
+    public readonly bannedWords = new BannedWords();
+    public readonly tfList = new TFList();
+    public readonly fmList = new FMList();
+    public readonly whitelist = new Whitelist();
+    public readonly watchListPings = new WatchListPings();
     public readonly userLevels = new UserLevels(this);
     public readonly punishments = new Punishments(this);
     public readonly watchList = new WatchList();

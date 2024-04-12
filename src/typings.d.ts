@@ -2,14 +2,19 @@ import type { Collection, PresenceData, SlashCommandBuilder, SlashCommandSubcomm
 import type config from "./config.json";
 import type TClient from "./client.js";
 import { type PlayerUsed } from "farming-simulator-types/2022";
-import type { Command, LocalStorage, RepeatedMessages } from "./structures/index.js";
+import type { Command, RepeatedMessages } from "./structures/index.js";
 import type {
+    BannedWords,
     DailyMsgs,
+    FMList,
     PlayerTimes,
     Punishments,
     Reminders,
+    TFList,
     UserLevels,
-    WatchList
+    WatchList,
+    WatchListPings,
+    Whitelist
 } from "./schemas/index.js";
 
 export type * from "./schemas/index.js";
@@ -23,11 +28,11 @@ declare module "discord.js" {
         readonly contextMenuCommands: Collection<string, Command<"message" | "user">>;
         readonly repeatedMessages: RepeatedMessages;
         readonly inviteCache: Collection<string, CachedInvite>;
-        readonly bannedWords: LocalStorage<string>;
-        readonly tfList: LocalStorage<string>;
-        readonly fmList: LocalStorage<string>;
-        readonly whitelist: LocalStorage<string>;
-        readonly watchListPings: LocalStorage<Snowflake>;
+        readonly bannedWords: BannedWords;
+        readonly tfList: TFList;
+        readonly fmList: FMList;
+        readonly whitelist: Whitelist;
+        readonly watchListPings: WatchListPings;
         readonly userLevels: UserLevels;
         readonly punishments: Punishments;
         readonly watchList: WatchList;

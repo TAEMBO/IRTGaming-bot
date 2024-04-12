@@ -23,7 +23,7 @@ export default new Event({
         const msg = newMessage.content.replaceAll("\n", " ").toLowerCase();
     
         if (
-            hasProfanity(msg, newMessage.client.bannedWords.data)
+            hasProfanity(msg, newMessage.client.bannedWords.cache)
             && (
                 !isMPStaff(newMessage.member)
                 && !isDCStaff(newMessage.member)

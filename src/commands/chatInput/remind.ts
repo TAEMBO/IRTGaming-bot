@@ -51,8 +51,8 @@ export default new Command<"chatInput">({
                     int.update(rplText(`Successfully deleted reminder \`${reminder.content}\``))
                 ]),
                 cancel: () => int.update(rplText("Command manually canceled"))
-            }, int.customId)).on("end", ints => {
-                if (!ints.size) interaction.editReply(rplText("No response given, command canceled"));
+            }, int.customId)).on("end", async ints => {
+                if (!ints.size) await interaction.editReply(rplText("No response given, command canceled"));
             });
         }
 
@@ -130,8 +130,8 @@ export default new Command<"chatInput">({
                     cancel() {
                         return int.update(rplText("Command manually canceled"));
                     }
-                }, int.customId)).on("end", ints => {
-                    if (!ints.size) interaction.editReply(rplText("No response given, command canceled"));
+                }, int.customId)).on("end", async ints => {
+                    if (!ints.size) await interaction.editReply(rplText("No response given, command canceled"));
                 });
             },
             async delete() {
@@ -176,8 +176,8 @@ export default new Command<"chatInput">({
                         componentType: ComponentType.StringSelect
                     })
                         .on("collect", int => promptDeletion(userReminders[parseInt(int.values[0]) - 1], int))
-                        .on("end", ints => {
-                            if (!ints.size) interaction.editReply(rplText("No response given, command canceled"));
+                        .on("end", async ints => {
+                            if (!ints.size) await interaction.editReply(rplText("No response given, command canceled"));
                         });
                 }
             }

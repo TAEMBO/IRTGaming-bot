@@ -55,17 +55,17 @@ export default new Command<"chatInput">({
 
             if (!phrase.includes(letter)) {
                 fouls++;
-                checkFouls(false);
+                await checkFouls(false);
                 return;
             }
         }
 
-        function guessWord(text: string) {
+        async function guessWord(text: string) {
             latestActivity = Date.now();
 
             if (!phrase.includes(text)) {
                 fouls++;
-                checkFouls(true);
+                await checkFouls(true);
                 return;
             }
 
@@ -150,7 +150,7 @@ export default new Command<"chatInput">({
             if (!guess || !guess.length) return void await guessMessage.reply("You're using the `guess` command wrong. Get good.");
 
             if (guess.length > 1) {
-                guessWord(guess);
+                await guessWord(guess);
             } else await guessLetter(guess);
 
             await phraseUpdate();

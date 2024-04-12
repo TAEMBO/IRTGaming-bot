@@ -4,4 +4,4 @@ import { log } from "./util/index.js";
 const sharder = new ShardingManager("./index.js", { totalShards: 1 });
 
 sharder.on("shardCreate", () => log("Green", "Shard started"));
-sharder.spawn();
+sharder.spawn().catch(console.error);

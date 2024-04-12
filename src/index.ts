@@ -60,7 +60,7 @@ for await (const file of await readdir("events")) {
 
 await client.login(client.config.TOKEN);
 
-function errorLog(error: Error) {
+async function errorLog(error: Error) {
     console.error(error);
 
     if (["Request aborted", "getaddrinfo ENOTFOUND discord.com"].includes(error.message)) return;
@@ -74,7 +74,7 @@ function errorLog(error: Error) {
 
     if (!channel) return;
 
-    channel.send({
+    await channel.send({
         content: `<@${client.config.devWhitelist[0]}>`,
         embeds: [new EmbedBuilder()
             .setTitle(`Error Caught - ${error.message.slice(0, 240)}`)

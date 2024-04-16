@@ -10,6 +10,7 @@ export * from "./isDCStaff.js";
 export * from "./isMPStaff.js";
 export * from "./jsonFromXML.js";
 export * from "./log.js";
+export * from "./logColor.js";
 export * from "./onMFFarms.js";
 export * from "./lookup.js";
 export * from "./punish.js";

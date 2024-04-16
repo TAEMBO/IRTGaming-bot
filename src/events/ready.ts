@@ -100,8 +100,6 @@ export default new Event({
 
                         log("Cyan", "IRTMC server rebooted");
 
-                        await client.getChan("general").send("IRTMC server rebooted");
-
                         for await (const [uuid, player] of Object.entries(client.mcCache)) {
                             await client.mcPlayerTimes.addPlayerTime(uuid, player.playerName, Date.now() - player.joinTime);
 

@@ -13,6 +13,7 @@ import {
     BannedWords,
     DailyMsgs,
     FMList,
+    MCPlayerTimes,
     PlayerTimes,
     Punishments,
     Reminders,
@@ -23,12 +24,13 @@ import {
     Whitelist
 } from "./schemas/index.js";
 import { type Command, RepeatedMessages } from "./structures/index.js";
-import type { CachedInvite, Config, FSCache, YTCache } from "./typings.js";
+import type { CachedInvite, Config, FSCache, MCCache, YTCache } from "./typings.js";
 
 export default class TClient extends Client<true> {
     public readonly config = config as Config;
     public readonly fsCache: FSCache = {};
     public readonly ytCache: YTCache = {};
+    public readonly mcCache: MCCache = {};
     public readonly chatInputCommands = new Collection<string, Command<"chatInput">>();
     public readonly contextMenuCommands = new Collection<string, Command<"message" | "user">>();
     public readonly repeatedMessages = new RepeatedMessages(this);
@@ -42,6 +44,7 @@ export default class TClient extends Client<true> {
     public readonly punishments = new Punishments(this);
     public readonly watchList = new WatchList();
     public readonly playerTimes = new PlayerTimes(this);
+    public readonly mcPlayerTimes = new MCPlayerTimes();
     public readonly reminders = new Reminders(this);
     public readonly dailyMsgs = new DailyMsgs();
 

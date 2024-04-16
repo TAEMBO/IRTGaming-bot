@@ -7,6 +7,7 @@ import type {
     BannedWords,
     DailyMsgs,
     FMList,
+    MCPlayerTimes,
     PlayerTimes,
     Punishments,
     Reminders,
@@ -24,6 +25,7 @@ declare module "discord.js" {
         readonly config: Config;
         readonly fsCache: FSCache;
         readonly ytCache: YTCache;
+        readonly mcCache: MCCache;
         readonly chatInputCommands: Collection<string, Command<"chatInput">>;
         readonly contextMenuCommands: Collection<string, Command<"message" | "user">>;
         readonly repeatedMessages: RepeatedMessages;
@@ -37,6 +39,7 @@ declare module "discord.js" {
         readonly punishments: Punishments;
         readonly watchList: WatchList;
         readonly playerTimes: PlayerTimes;
+        readonly mcPlayerTimes: MCPlayerTimes;
         readonly reminders: Reminders;
         readonly dailyMsgs: DailyMsgs;
 
@@ -128,6 +131,53 @@ export type FSCache = Record<string, {
 
 export type YTCache = Record<string, string | null>;
 
+export type MCCache = Record<string, {
+    playerName: string;
+    joinTime: number;
+}>;
+
+export interface MinecraftPlayer {
+    uuid: string;
+    name: string;
+}
+
+export interface MinecraftEventPlayerJoin {
+    uuid: string;
+    playerName: string;
+    event: "player-join";
+}
+
+export interface MinecraftEventQuit {
+    uuid: string;
+    playerName: string;
+    event: "quit";
+}
+
+export interface MinecraftEventPlayerDeath {
+    message: string;
+    uuid: string;
+    playerName: string;
+    event: "player-death";
+}
+
+export interface MinecraftEventChat {
+    message: string;
+    uuid: string;
+    playerName: string;
+    event: "chat";
+}
+
+export interface MinecraftEventLog {
+    thread: string;
+    timestamp: number;
+    level: "INFO" | "WARN" | "ERROR" | "TRACE" | "DEBUG";
+    message: string;
+    loggerName: string;
+    event: "log";
+}
+
+export type MinecraftEvent = MinecraftEventPlayerJoin | MinecraftEventQuit | MinecraftEventPlayerDeath | MinecraftEventChat | MinecraftEventLog;
+
 export interface CachedInvite {
     uses: number;
     creator: string;
@@ -203,11 +253,19 @@ export interface Config {
         registerCommands: boolean;
         fsLoop: boolean;
         ytLoop: boolean;
+        irtmc: boolean;
         autoResponses: boolean;
         buttonRoles: boolean;
     };
     /** An object for managing and communicating with Farming Simulator servers, keyed by their abbreviated acronym */
     fs: Record<string, FSServer>;
+    /** Details for making an SSE connection to the affiliated Minecraft server via the Siphon server plugin */
+    minecraft: {
+        /** The HTTP web address for the SSE connection */
+        address: string;
+        /** The authorization details for making the SSE connection - as `username:password` */
+        authorization: `${string}:${string}`;
+    };
     /** A list of user IDs that are considered developers of this bot */
     devWhitelist: Snowflake[];
     whitelist: {

@@ -133,7 +133,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
                 ? [
                     (time / 60).toLocaleString("en-US"),
                     "hrs (",
-                    formatTime(time * 60 * 1_000, 3, { commas: true, longNames: false }),
+                    formatTime(time * 60 * 1_000, 3, { commas: true }),
                     ")"
                 ].join("")
                 : "`unavailable`";

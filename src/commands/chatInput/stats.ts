@@ -94,7 +94,7 @@ export default new Command<"chatInput">({
                 interaction.client.fmList.cache.includes(x._id) ? ":farmer:" : "",
                 interaction.client.tfList.cache.includes(x._id) ? ":angel:" : "",
                 " - ",
-                formatTime((interaction.client.playerTimes.getTimeData(x).reduce((x, y) => x + y[1].time, 0) * 60 * 1000), 3, { commas: true, longNames: false })
+                formatTime((interaction.client.playerTimes.getTimeData(x).reduce((x, y) => x + y[1].time, 0) * 60 * 1000), 3, { commas: true })
             ].join("")).join("\n");
 
             if (player) {
@@ -106,7 +106,7 @@ export default new Command<"chatInput">({
                     const formattedTimeData = playerTimeData.map(([serverAcro, timeData]) => ({
                         name: serverAcro.toUpperCase(),
                         value: [
-                            `Time - ${formatTime(timeData.time * 60 * 1000, 5, { commas: true, longNames: false })}`,
+                            `Time - ${formatTime(timeData.time * 60 * 1000, 5, { commas: true })}`,
                             `Last on - ${interaction.client.fsCache[serverAcro]!.players.some(x => x.name === playerData._id) ? "Right now" : `<t:${timeData.lastOn}:R>`}`
                         ].join("\n")
                     }));
@@ -116,7 +116,7 @@ export default new Command<"chatInput">({
                         .setTitle([
                             `Player - \`${playerData._id}\`${interaction.client.fmList.cache.includes(playerData._id) ? ":farmer:" : ""}${interaction.client.tfList.cache.includes(playerData._id) ? ":angel:" : ""}`,
                             `Leaderboard position - **#${sortedData.indexOf(playerData) + 1}**`,
-                            `Total time - **${formatTime(playerTimeDataTotal * 60 * 1000, 5, { commas: true, longNames: false })}**`,
+                            `Total time - **${formatTime(playerTimeDataTotal * 60 * 1000, 5, { commas: true })}**`,
                             (isMPStaff(interaction.member) && playerData.uuid) ? `UUID: \`${playerData.uuid}\`` : "",
                             (isMPStaff(interaction.member) && playerData.discordid) ? `Discord user ID - \`${playerData.discordid}\`` : "",
                         ].join("\n"))

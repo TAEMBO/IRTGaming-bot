@@ -23,7 +23,7 @@ export default new Command<"chatInput">({
                     .setColor(interaction.client.config.EMBED_COLOR)
                     .setTitle([
                         `Player - \`${playerData.playerName}\``,
-                        `Total time - **${formatTime(playerData.time, 5, { commas: true, longNames: false })}**`,
+                        `Total time - **${formatTime(playerData.time, 5, { commas: true })}**`,
                         `Total deaths - **${playerData.deaths.toLocaleString("en-US")}**`,
                         `Last on - ${isOnline ? "Now" : time(Math.round(playerData.lastOn / 1_000), "R")}`
                     ].join("\n"))
@@ -35,7 +35,7 @@ export default new Command<"chatInput">({
         const fullData = await interaction.client.mcPlayerTimes.data.find();
         const formattedData = fullData.sort((a, b) => b[subCmd] - a[subCmd]).map((player, index) => {
             const displayNum = subCmd === "time"
-                ? formatTime(player.time, 3, { commas: true, longNames: false })
+                ? formatTime(player.time, 3, { commas: true })
                 : player.deaths.toLocaleString("en-US");
             
             return `**${index + 1}.** ${inlineCode(player.playerName)} - ${displayNum}`;

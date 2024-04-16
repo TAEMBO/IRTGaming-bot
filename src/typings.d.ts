@@ -66,6 +66,12 @@ declare module "discord.js" {
          * @param subcommand The optional subcommand to add
          */
         getCommandMention(...args: Parameters<TClient["getCommandMention"]>): ReturnType<TClient["getCommandMention"]>;
+
+        /**
+         * Error logger
+         * @param error The error to log
+         */
+        errorLog(...args: Parameters<TClient["errorLog"]>): ReturnType<TClient["errorLog"]>;
     }
 }
 

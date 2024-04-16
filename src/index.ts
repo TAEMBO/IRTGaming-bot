@@ -1,4 +1,4 @@
-import { ContextMenuCommandBuilder, EmbedBuilder } from "discord.js";
+import { ContextMenuCommandBuilder } from "discord.js";
 import TClient from "./client.js";
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
@@ -60,33 +60,7 @@ for await (const file of await readdir("events")) {
 
 await client.login(client.config.TOKEN);
 
-async function errorLog(error: Error) {
-    console.error(error);
-
-    if (["Request aborted", "getaddrinfo ENOTFOUND discord.com"].includes(error.message)) return;
-
-    const dirname = process.cwd().replaceAll("\\", "/");
-    const channel = client.getChan("taesTestingZone");
-    const formattedErr = error.stack
-        ?.replaceAll(" at ", " [31mat[37m ")
-        .replaceAll(dirname, `[33m${dirname}[37m`)
-        .slice(0, 2500);
-
-    if (!channel) return;
-
-    await channel.send({
-        content: `<@${client.config.devWhitelist[0]}>`,
-        embeds: [new EmbedBuilder()
-            .setTitle(`Error Caught - ${error.message.slice(0, 240)}`)
-            .setColor("#420420")
-            .setDescription(`\`\`\`ansi\n${formattedErr}\`\`\``)
-            .setTimestamp()
-        ]
-    });
-}
-
-process.on("unhandledRejection", errorLog);
-process.on("uncaughtException", errorLog);
-process.on("error", errorLog);
-client.on("error", errorLog);
-client.on("intErr", errorLog);
+process.on("unhandledRejection", client.errorLog.bind(client));
+process.on("uncaughtException", client.errorLog.bind(client));
+process.on("error", client.errorLog.bind(client));
+client.on("error", client.errorLog.bind(client));

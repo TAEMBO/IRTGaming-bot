@@ -28,8 +28,8 @@ export default new Event({
             try {
                 await command.run(interaction);
                 command.uses++;
-            } catch (err) {
-                interaction.client.emit("intErr", err);
+            } catch (err: any) {
+                await interaction.client.errorLog(err);
     
                 if (interaction.replied || interaction.deferred) {
                     await interaction.followUp(ERR_TEXT);
@@ -55,8 +55,8 @@ export default new Event({
             try {
                 await command.run(interaction);
                 command.uses++;
-            } catch(err) {
-                interaction.client.emit("intErr", err);
+            } catch(err: any) {
+                await interaction.client.errorLog(err);
     
                 if (interaction.replied || interaction.deferred) {
                     await interaction.followUp(ERR_TEXT);

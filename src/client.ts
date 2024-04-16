@@ -2,6 +2,7 @@ import {
     ApplicationCommandOptionType,
     Client,
     Collection,
+    EmbedBuilder,
     GatewayIntentBits,
     Options,
     Partials,
@@ -23,6 +24,7 @@ import {
     WatchListPings,
     Whitelist
 } from "./schemas/index.js";
+import { LogColor } from "./util/index.js";
 import { type Command, RepeatedMessages } from "./structures/index.js";
 import type { CachedInvite, Config, FSCache, MCCache, YTCache } from "./typings.js";
 
@@ -109,5 +111,30 @@ export default class TClient extends Client<true> {
         if (subcommand && !subCmd) return null;
 
         return `</${cmd.name}${subcommand ? " " + subCmd?.name : ""}:${cmd.id}>` as const;
+    }
+
+    public async errorLog(error: Error) {
+        console.error(error);
+    
+        if (["Request aborted", "getaddrinfo ENOTFOUND discord.com"].includes(error.message)) return;
+    
+        const dirname = process.cwd().replaceAll("\\", "/");
+        const channel = this.getChan("taesTestingZone");
+        const formattedErr = error.stack
+            ?.replaceAll(" at ", ` ${LogColor.Red}at${LogColor.Reset} `)
+            .replaceAll(dirname, LogColor.Yellow + dirname + LogColor.Reset)
+            .slice(0, 2500);
+    
+        if (!channel) return;
+    
+        await channel.send({
+            content: `<@${this.config.devWhitelist[0]}>`,
+            embeds: [new EmbedBuilder()
+                .setTitle(`Error Caught - ${error.message.slice(0, 240)}`)
+                .setColor("#420420")
+                .setDescription(`\`\`\`ansi\n${formattedErr}\`\`\``)
+                .setTimestamp()
+            ]
+        });
     }
 }

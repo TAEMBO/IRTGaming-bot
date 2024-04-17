@@ -33,11 +33,17 @@ export default new Event({
         } else {
             await client.application.commands.fetch();
         }
-    
-        await guild.members.fetch();
-    
-        await client.dailyMsgs.fillCache();
-            
+
+        await Promise.allSettled([
+            guild.members.fetch(),
+            client.bannedWords.fillCache(),
+            client.dailyMsgs.fillCache(),
+            client.fmList.fillCache(),
+            client.tfList.fillCache(),
+            client.watchListPings.fillCache(),
+            client.whitelist.fillCache()
+        ]);
+
         for (const [code, inv] of await guild.invites.fetch()) client.inviteCache.set(code, {
             uses: inv.uses ?? 0,
             creator: inv.inviter?.id ?? "UNKNOWN"

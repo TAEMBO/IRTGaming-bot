@@ -1,4 +1,5 @@
 export * from "./ackButtons.js";
+export * from "./formatDiff.js";
 export * from "./formatRequestInit.js";
 export * from "./formatString.js";
 export * from "./formatTime.js";

@@ -10,20 +10,7 @@ import {
     TextChannel
 } from "discord.js";
 import config from "./config.json" assert { type: "json" };
-import {
-    BannedWords,
-    DailyMsgs,
-    FMList,
-    MCPlayerTimes,
-    PlayerTimes,
-    Punishments,
-    Reminders,
-    TFList,
-    UserLevels,
-    WatchList,
-    WatchListPings,
-    Whitelist
-} from "./schemas/index.js";
+import * as Schemas from "./schemas/index.js";
 import { LogColor } from "./util/index.js";
 import { type Command, RepeatedMessages } from "./structures/index.js";
 import type { CachedInvite, Config, FSCache, MCCache, YTCache } from "./typings.js";
@@ -37,18 +24,18 @@ export default class TClient extends Client<true> {
     public readonly contextMenuCommands = new Collection<string, Command<"message" | "user">>();
     public readonly repeatedMessages = new RepeatedMessages(this);
     public readonly inviteCache = new Collection<string, CachedInvite>();
-    public readonly bannedWords = new BannedWords();
-    public readonly tfList = new TFList();
-    public readonly fmList = new FMList();
-    public readonly whitelist = new Whitelist();
-    public readonly watchListPings = new WatchListPings();
-    public readonly userLevels = new UserLevels(this);
-    public readonly punishments = new Punishments(this);
-    public readonly watchList = new WatchList();
-    public readonly playerTimes = new PlayerTimes(this);
-    public readonly mcPlayerTimes = new MCPlayerTimes();
-    public readonly reminders = new Reminders(this);
-    public readonly dailyMsgs = new DailyMsgs();
+    public readonly bannedWords = new Schemas.BannedWords();
+    public readonly tfList = new Schemas.TFList();
+    public readonly fmList = new Schemas.FMList();
+    public readonly whitelist = new Schemas.Whitelist();
+    public readonly watchListPings = new Schemas.WatchListPings();
+    public readonly userLevels = new Schemas.UserLevels(this);
+    public readonly punishments = new Schemas.Punishments(this);
+    public readonly watchList = new Schemas.WatchList();
+    public readonly playerTimes = new Schemas.PlayerTimes(this);
+    public readonly mcPlayerTimes = new Schemas.MCPlayerTimes();
+    public readonly reminders = new Schemas.Reminders(this);
+    public readonly dailyMsgs = new Schemas.DailyMsgs();
 
     public constructor() {
         super({

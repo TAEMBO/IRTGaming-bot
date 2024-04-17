@@ -1,4 +1,5 @@
 import { codeBlock, EmbedBuilder, Events } from "discord.js";
+import { LogColor } from "../util/index.js";
 import { Event } from "../structures/index.js";
 
 export default new Event({
@@ -9,7 +10,7 @@ export default new Event({
         await channel.client.getChan("botLogs").send({ embeds: [new EmbedBuilder()
             .setTitle(`${messages.size} messages were deleted`)
             .setDescription(codeBlock("ansi", messages
-                .map(msg => `[33m${msg.author?.username}:[37m ${msg.content}`)
+                .map(msg => `${LogColor.Yellow}${msg.author?.username}:${LogColor.Reset} ${msg.content}`)
                 .reverse()
                 .join("\n")
                 .slice(0, 3900)

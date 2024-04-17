@@ -41,12 +41,13 @@ export default new Command<"chatInput">({
 
         if (subCmd === "all") {
             await interaction.deferReply();
+
             const embed = new EmbedBuilder().setColor(interaction.client.config.EMBED_COLOR);
             const failedFooter: string[] = [];
             const totalCount: number[] = [];
             const watchList = await interaction.client.watchList.data.find();
 
-            for await (const [serverAcro, server] of fsServers.entries()) {
+            await Promise.allSettled(fsServers.entries().map(async ([serverAcro, server]) => {
                 const serverAcroUp = serverAcro.toUpperCase();
                 const dss = await fetch(
                     server.url + Feeds.dedicatedServerStats(server.code, DSSExtension.JSON),
@@ -58,7 +59,7 @@ export default new Command<"chatInput">({
                         failedFooter.push(`Failed to fetch ${serverAcroUp}`);
                     });
                 
-                if (!dss || !dss.slots || !dss.slots.used) continue;
+                if (!dss || !dss.slots || !dss.slots.used) return;
 
                 totalCount.push(dss.slots.used);
                 
@@ -78,8 +79,7 @@ export default new Command<"chatInput">({
                 }
 
                 embed.addFields({ name: `${server.fullName} - ${serverSlots}`, value: playerInfo.join("\n"), inline: true });
-
-            }
+            }));
 
             embed.setTitle(`All Servers: ${totalCount.reduce((a, b) => a + b, 0)} players online`).setFooter(failedFooter.length ? { text: failedFooter.join(", ") } : null);
 

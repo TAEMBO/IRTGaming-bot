@@ -1,6 +1,6 @@
 import { EmbedBuilder, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import { Command } from "../../structures/index.js";
-import { formatTime, lookup } from "../../util/index.js";
+import { formatTime, formatUser, lookup } from "../../util/index.js";
 
 export default new Command<"chatInput">({
     async run(interaction) {
@@ -49,7 +49,7 @@ export default new Command<"chatInput">({
 
                 await interaction.reply({ embeds: [new EmbedBuilder()
                     .setTitle(`Punishments for ${user.tag}`)
-                    .setDescription(`<@${user.id}>\n\`${user.id}\``)
+                    .setDescription(formatUser(user))
                     .setFooter({ text: `${userPunishments.length} total punishments. Viewing page ${pageNumber} out of ${Math.ceil(userPunishments.length / 25)}.` })
                     .setColor(interaction.client.config.EMBED_COLOR)
                     .addFields(userPunishments.slice((pageNumber - 1) * 25, pageNumber * 25))

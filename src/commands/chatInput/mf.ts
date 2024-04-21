@@ -111,7 +111,7 @@ export default new Command<"chatInput">({
 
                             await int.update({
                                 embeds: [new EmbedBuilder()
-                                    .setDescription(`<@${member.user.id}> (${member.user.tag}) has been removed from the <@&${interaction.client.config.mainServer.roles.mfmember}> and <@&${roleId}> roles.`)
+                                    .setDescription(`${member} (${member.user.tag}) has been removed from the <@&${interaction.client.config.mainServer.roles.mfmember}> and <@&${roleId}> roles.`)
                                     .setColor(interaction.client.config.EMBED_COLOR)
                                 ],
                                 components: []
@@ -125,7 +125,7 @@ export default new Command<"chatInput">({
                     await member.roles.add([roleId, interaction.client.config.mainServer.roles.mfmember]);
 
                     await interaction.reply({ embeds: [new EmbedBuilder()
-                        .setDescription(`<@${member.user.id}> (${member.user.tag}) has been given the <@&${interaction.client.config.mainServer.roles.mfmember}> and <@&${roleId}> roles.`)
+                        .setDescription(`${member} (${member.user.tag}) has been given the <@&${interaction.client.config.mainServer.roles.mfmember}> and <@&${roleId}> roles.`)
                         .setColor(interaction.client.config.EMBED_COLOR)
                     ] });
                 }
@@ -169,7 +169,7 @@ export default new Command<"chatInput">({
                     await member.roles.add(interaction.client.config.mainServer.roles.mffarmowner);
 
                     await interaction.reply({ embeds: [new EmbedBuilder()
-                        .setDescription(`<@${member.user.id}> (${member.user.tag}) has been given the <@&${interaction.client.config.mainServer.roles.mffarmowner}> role`)
+                        .setDescription(`${member} (${member.user.tag}) has been given the <@&${interaction.client.config.mainServer.roles.mffarmowner}> role`)
                         .setColor(interaction.client.config.EMBED_COLOR)
                     ] });
                 }

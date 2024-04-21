@@ -14,10 +14,10 @@ export default new Command<"chatInput">({
 
         if (!deniedMsgs.length) {
             await interaction.reply({ content: interaction.client.config.resources.applyGoogleForm, ephemeral: true });
-            await applicationLogs.send(`<@${interaction.user.id}> (${interaction.user.tag}) opened an MP Staff application on <t:${Math.round(Date.now() / 1000)}>`);
+            await applicationLogs.send(`${interaction.user} (${interaction.user.tag}) opened an MP Staff application on <t:${Math.round(Date.now() / 1000)}>`);
         } else {
             await interaction.reply({ content: `You need to ${deniedMsgs.join(" and ")} before applying`, ephemeral: true });
-            await applicationLogs.send(`<@${interaction.user.id}> (${interaction.user.tag}) tried to open an MP Staff application but was rejected (**${deniedMsgs.join("** and **")}**)`);
+            await applicationLogs.send(`${interaction.user} (${interaction.user.tag}) tried to open an MP Staff application but was rejected (**${deniedMsgs.join("** and **")}**)`);
         }
     },
     data: new SlashCommandBuilder()

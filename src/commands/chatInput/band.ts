@@ -6,7 +6,7 @@ export default new Command<"chatInput">({
         const user = interaction.options.getUser("member", true);
 
         await interaction.deferReply({ ephemeral: true }).then(() => interaction.deleteReply());
-        await interaction.channel!.send(`<@${user.id}> has received an honorary ban!`);
+        await interaction.channel!.send(`${user} has received an honorary ban!`);
     },
     data: new SlashCommandBuilder()
         .setName("band")

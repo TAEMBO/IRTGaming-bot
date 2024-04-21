@@ -6,7 +6,7 @@ export default new Command<"chatInput">({
         await interaction.reply({ content: `Verification sent. Please wait for someone to verify your subscription, you will then receive the <@&${interaction.client.config.mainServer.roles.subscriber}> role.`, ephemeral: true });
         
         await interaction.client.getChan("helperChat").send({
-            content: `<@${interaction.user.id}> (${interaction.user.tag}) Subscriber role verification`,
+            content: `${interaction.user} (${interaction.user.tag}) Subscriber role verification`,
             files: [interaction.options.getAttachment("image", true)],
             components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
                 new ButtonBuilder().setLabel("Accept").setCustomId(`sub-yes-${interaction.user.id}`).setStyle(ButtonStyle.Success),

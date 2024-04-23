@@ -1,12 +1,20 @@
 import { AttachmentBuilder, EmbedBuilder, SlashCommandBuilder, inlineCode, time } from "discord.js";
 import { Command } from "../../structures/index.js";
-import { formatString, formatTime, hasRole, youNeedRole } from "../../util/index.js";
+import {
+    formatRequestInit,
+    formatString,
+    formatTime,
+    hasRole,
+    log,
+    youNeedRole
+} from "../../util/index.js";
+import type { MinecraftPlayer } from "../../typings.js";
 
 export default new Command<"chatInput">({
     async run(interaction) {
         if (!hasRole(interaction.member, "irtmcplayer")) return await youNeedRole(interaction, "irtmcplayer");
 
-        const subCmd = interaction.options.getSubcommand() as "time" | "deaths" | "view";
+        const subCmd = interaction.options.getSubcommand() as "players" | "time" | "deaths" | "view";
 
         if (subCmd === "view") {
             const username = interaction.options.getString("username", true);
@@ -30,6 +38,29 @@ export default new Command<"chatInput">({
                     .setThumbnail("attachment://profilePicture.png")
                 ]
             });
+        } else if (subCmd === "players") {
+            const players = await fetch(
+                interaction.client.config.minecraft.address + "/players",
+                formatRequestInit(2_000, "IRTMC", { Authorization: `Basic ${Buffer.from(interaction.client.config.minecraft.authorization).toString("base64")}` })
+            )
+                .then(x => x.json() as Promise<MinecraftPlayer[]>)
+                .catch(() => log("Red", "IRTMC failed"));
+
+            if (!players) return await interaction.reply("Server did not respond");
+
+            const formattedPlayers = players.map(player => {
+                const playerUptime = interaction.client.mcCache[player.uuid]
+                    ? formatTime(Date.now() - interaction.client.mcCache[player.uuid].joinTime, 3)
+                    : "Unknown play duration";
+
+                return `\`${player.name}\` **|** ${playerUptime}`;
+            });
+
+            return await interaction.reply({ embeds: [new EmbedBuilder()
+                .setTitle("Players currently on IRTMC")
+                .setColor(interaction.client.config.EMBED_COLOR)
+                .setDescription(formattedPlayers.join("\n") || "None")
+            ] });
         }
 
         const fullData = await interaction.client.mcPlayerTimes.data.find();
@@ -50,6 +81,9 @@ export default new Command<"chatInput">({
     data: new SlashCommandBuilder()
         .setName("irtmc")
         .setDescription("Player data for the IRTMC Minecraft server")
+        .addSubcommand(x => x
+            .setName("players")
+            .setDescription("View a list of players currently on the server"))
         .addSubcommand(x => x
             .setName("time")
             .setDescription("View time-based leaderboard data for all IRTMC players"))

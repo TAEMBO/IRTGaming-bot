@@ -23,10 +23,10 @@ export default new Command<"chatInput">({
                         "- The name of the player",
                         "- What they are doing",
                         "- A picture or video as proof if possible",
-                        isFromTicket ? "" : `- The <@&${interaction.client.config.mainServer.roles.mpstaff}> tag to notify staff`
+                        isFromTicket ? "" : `- The <@&${interaction.client.config.mainServer.roles.mpStaff}> tag to notify staff`
                     ].join("\n"),
                     "",
-                    `Please do not ping or DM individual staff members${isFromTicket ? "" : `, use the <@&${interaction.client.config.mainServer.roles.mpstaff}> tag as mentioned above`}.`,
+                    `Please do not ping or DM individual staff members${isFromTicket ? "" : `, use the <@&${interaction.client.config.mainServer.roles.mpStaff}> tag as mentioned above`}.`,
                     `Check <#${interaction.client.config.mainServer.channels.mpRulesAndInfo}> to see what a good reason could be for a player report.`
                 ].join("\n"))
             ] }),

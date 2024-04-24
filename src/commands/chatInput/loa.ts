@@ -4,13 +4,13 @@ import { hasRole, isMPStaff, youNeedRole } from "../../util/index.js";
 
 export default new Command<"chatInput">({
     async run(interaction) {
-        if (!isMPStaff(interaction.member)) return await youNeedRole(interaction, "mpstaff");
+        if (!isMPStaff(interaction.member)) return await youNeedRole(interaction, "mpStaff");
 
         const roles = [...interaction.member.roles.cache.keys()];
         const configRoles = interaction.client.config.mainServer.roles;
 
         if (!roles.includes(configRoles.loa)) {
-            const takenRoles = roles.filter(x => x != configRoles.mpstaff && x != configRoles.mpmanagement).concat([configRoles.loa]);
+            const takenRoles = roles.filter(x => x != configRoles.mpStaff && x != configRoles.mpManagement).concat([configRoles.loa]);
 
             await interaction.member.edit({
                 roles: takenRoles,
@@ -20,9 +20,9 @@ export default new Command<"chatInput">({
             await interaction.reply({ content: "LOA status set", ephemeral: true });
         } else {
             const returnedRoles = (() => {
-                if (hasRole(interaction.member, "mpmanager")) {
-                    return roles.filter(x => x !== configRoles.loa).concat([configRoles.mpstaff, configRoles.mpmanagement]);
-                } else return roles.filter(x => x !== configRoles.loa).concat([configRoles.mpstaff]);
+                if (hasRole(interaction.member, "mpManager")) {
+                    return roles.filter(x => x !== configRoles.loa).concat([configRoles.mpStaff, configRoles.mpManagement]);
+                } else return roles.filter(x => x !== configRoles.loa).concat([configRoles.mpStaff]);
             })();
             
             await interaction.member.edit({

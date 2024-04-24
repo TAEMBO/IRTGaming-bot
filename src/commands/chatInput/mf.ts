@@ -21,9 +21,9 @@ export default new Command<"chatInput">({
         await lookup({
             async member() {
                 const displayedRoles = (() => {
-                    if (hasRole(interaction.member, "mpmanager") || hasRole(interaction.member, "mfmanager")) {
+                    if (hasRole(interaction.member, "mpManager") || hasRole(interaction.member, "mfManager")) {
                         return interaction.client.config.mainServer.mfFarmRoles.map(x => interaction.client.getRole(x));
-                    } else if (hasRole(interaction.member, "mffarmowner")) {
+                    } else if (hasRole(interaction.member, "mfFarmOwner")) {
                         return interaction.client.config.mainServer.mfFarmRoles.map(x => interaction.client.getRole(x)).filter(x => onMFFarms(interaction.member).some(y => x.id === y));
                     } else {
                         return [];
@@ -34,7 +34,7 @@ export default new Command<"chatInput">({
             },
             async "rename-role"() {
                 const displayedRoles = (() => {
-                    if (!hasRole(interaction.member, "mpmanager") && !hasRole(interaction.member, "mfmanager")) {
+                    if (!hasRole(interaction.member, "mpManager") && !hasRole(interaction.member, "mfManager")) {
                         return [];
                     } else {
                         return interaction.client.config.mainServer.mfFarmRoles.map(x => ({ name: interaction.client.getRole(x).name, value: x }));
@@ -75,10 +75,10 @@ export default new Command<"chatInput">({
         await lookup({
             async member() {
                 if (
-                    !hasRole(interaction.member, "mpmanager")
-                    && !hasRole(interaction.member, "mfmanager")
-                    && !hasRole(interaction.member, "mffarmowner")
-                ) return await youNeedRole(interaction, "mffarmowner");
+                    !hasRole(interaction.member, "mpManager")
+                    && !hasRole(interaction.member, "mfManager")
+                    && !hasRole(interaction.member, "mfFarmOwner")
+                ) return await youNeedRole(interaction, "mfFarmOwner");
 
                 const member = interaction.options.getMember("member");
                 const roleId = interaction.options.getString("role", true);
@@ -104,14 +104,14 @@ export default new Command<"chatInput">({
                     }).on("collect", int => void lookup({
                         async confirm() {
                             const rolesToRemove = onMFFarms(member).length === 1
-                                ? [roleId, interaction.client.config.mainServer.roles.mfmember]
+                                ? [roleId, interaction.client.config.mainServer.roles.mfMember]
                                 : [roleId];
                             
                             await member.roles.remove(rolesToRemove);
 
                             await int.update({
                                 embeds: [new EmbedBuilder()
-                                    .setDescription(`${member} (${member.user.tag}) has been removed from the <@&${interaction.client.config.mainServer.roles.mfmember}> and <@&${roleId}> roles.`)
+                                    .setDescription(`${member} (${member.user.tag}) has been removed from the <@&${interaction.client.config.mainServer.roles.mfMember}> and <@&${roleId}> roles.`)
                                     .setColor(interaction.client.config.EMBED_COLOR)
                                 ],
                                 components: []
@@ -122,25 +122,25 @@ export default new Command<"chatInput">({
                         }
                     }, int.customId));
                 } else {
-                    await member.roles.add([roleId, interaction.client.config.mainServer.roles.mfmember]);
+                    await member.roles.add([roleId, interaction.client.config.mainServer.roles.mfMember]);
 
                     await interaction.reply({ embeds: [new EmbedBuilder()
-                        .setDescription(`${member} (${member.user.tag}) has been given the <@&${interaction.client.config.mainServer.roles.mfmember}> and <@&${roleId}> roles.`)
+                        .setDescription(`${member} (${member.user.tag}) has been given the <@&${interaction.client.config.mainServer.roles.mfMember}> and <@&${roleId}> roles.`)
                         .setColor(interaction.client.config.EMBED_COLOR)
                     ] });
                 }
             },
             async owner() {
-                if (!hasRole(interaction.member, "mpmanager") && !hasRole(interaction.member, "mfmanager")) return await youNeedRole(interaction, "mpmanager");
+                if (!hasRole(interaction.member, "mpManager") && !hasRole(interaction.member, "mfManager")) return await youNeedRole(interaction, "mpManager");
 
                 const member = interaction.options.getMember("member");
 
                 if (!member) return await interaction.reply({ content: "You need to select a member that's in this server", ephemeral: true });
 
-                if (member.roles.cache.has(interaction.client.config.mainServer.roles.mffarmowner)) {
+                if (member.roles.cache.has(interaction.client.config.mainServer.roles.mfFarmOwner)) {
                     (await interaction.reply({
                         embeds: [new EmbedBuilder()
-                            .setDescription(`This member already has the <@&${interaction.client.config.mainServer.roles.mffarmowner}> role, do you want to remove it from them?`)
+                            .setDescription(`This member already has the <@&${interaction.client.config.mainServer.roles.mfFarmOwner}> role, do you want to remove it from them?`)
                             .setColor(interaction.client.config.EMBED_COLOR)
                         ],
                         components: ACK_BUTTONS
@@ -151,11 +151,11 @@ export default new Command<"chatInput">({
                         componentType: ComponentType.Button
                     }).on("collect", int => void lookup({
                         async confirm() {
-                            await member.roles.remove(interaction.client.config.mainServer.roles.mffarmowner);
+                            await member.roles.remove(interaction.client.config.mainServer.roles.mfFarmOwner);
 
                             await int.update({
                                 embeds: [new EmbedBuilder()
-                                    .setDescription(`${member} (${member.user.tag}) has been removed from the <@&${interaction.client.config.mainServer.roles.mffarmowner}> role`)
+                                    .setDescription(`${member} (${member.user.tag}) has been removed from the <@&${interaction.client.config.mainServer.roles.mfFarmOwner}> role`)
                                     .setColor(interaction.client.config.EMBED_COLOR)
                                 ],
                                 components: []
@@ -166,10 +166,10 @@ export default new Command<"chatInput">({
                         }
                     }, int.customId));
                 } else {
-                    await member.roles.add(interaction.client.config.mainServer.roles.mffarmowner);
+                    await member.roles.add(interaction.client.config.mainServer.roles.mfFarmOwner);
 
                     await interaction.reply({ embeds: [new EmbedBuilder()
-                        .setDescription(`${member} (${member.user.tag}) has been given the <@&${interaction.client.config.mainServer.roles.mffarmowner}> role`)
+                        .setDescription(`${member} (${member.user.tag}) has been given the <@&${interaction.client.config.mainServer.roles.mfFarmOwner}> role`)
                         .setColor(interaction.client.config.EMBED_COLOR)
                     ] });
                 }
@@ -222,7 +222,7 @@ export default new Command<"chatInput">({
                         permissionOverwrites: [
                             ...(interaction.client.channels.cache.get(archived) as CategoryChannel).permissionOverwrites.cache.values(),
                             {
-                                id: interaction.client.config.mainServer.roles.mpmanager,
+                                id: interaction.client.config.mainServer.roles.mpManager,
                                 allow: "ViewChannel",
                                 type: OverwriteType.Role
                             }
@@ -240,7 +240,7 @@ export default new Command<"chatInput">({
                                 type: OverwriteType.Role
                             },
                             {
-                                id: interaction.client.config.mainServer.roles.mffarmowner,
+                                id: interaction.client.config.mainServer.roles.mfFarmOwner,
                                 allow: ["MentionEveryone", "ManageMessages"],
                                 type: OverwriteType.Role
                             },
@@ -250,7 +250,7 @@ export default new Command<"chatInput">({
                                 type: OverwriteType.Role
                             },
                             {
-                                id: interaction.client.config.mainServer.roles.mpmanager,
+                                id: interaction.client.config.mainServer.roles.mpManager,
                                 allow: "ViewChannel",
                                 type: OverwriteType.Role
                             }
@@ -261,7 +261,7 @@ export default new Command<"chatInput">({
                 }
             },
             async apply() {
-                if (!hasRole(interaction.member, "mpmanager") && !hasRole(interaction.member, "mfmanager")) return await youNeedRole(interaction, "mpmanager");
+                if (!hasRole(interaction.member, "mpManager") && !hasRole(interaction.member, "mfManager")) return await youNeedRole(interaction, "mpManager");
 
                 await interaction.reply(interaction.client.config.resources.mfFarmOwnerForm);
             }

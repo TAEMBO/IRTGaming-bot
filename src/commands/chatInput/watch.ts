@@ -4,7 +4,7 @@ import { ACK_BUTTONS, isMPStaff, lookup, youNeedRole } from "../../util/index.js
 
 export default new Command<"chatInput">({
     async run(interaction) {
-        if (!isMPStaff(interaction.member)) return await youNeedRole(interaction, "mpstaff");
+        if (!isMPStaff(interaction.member)) return await youNeedRole(interaction, "mpStaff");
 
         await lookup({
             async add() {

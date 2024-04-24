@@ -12,7 +12,7 @@ import { isDCStaff, isMPStaff, lookup, youNeedRole } from "../../util/index.js";
 
 export default new Command<"message">({
     async run(interaction) {
-        if (!isDCStaff(interaction.member) && !isMPStaff(interaction.member)) return await youNeedRole(interaction, "discordstaff");
+        if (!isDCStaff(interaction.member) && !isMPStaff(interaction.member)) return await youNeedRole(interaction, "discordStaff");
 
         if (
             interaction.channelId !== interaction.client.config.mainServer.channels.communityIdeas

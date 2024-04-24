@@ -28,7 +28,7 @@ export default new Event({
         // Role changes
         const newRoles = newMember.roles.cache.filter(x => !oldMember.roles.cache.has(x.id));
         const oldRoles = oldMember.roles.cache.filter(x => !newMember.roles.cache.has(x.id));
-        const boosterRole = newMember.client.config.mainServer.roles.legendarynitrobooster;
+        const boosterRole = newMember.client.config.mainServer.roles.legendaryNitroBooster;
     
         if ((newRoles.size || oldRoles.size) && ((Date.now() - newMember.joinedTimestamp!) > 5_000)) {
             if (newRoles.size) embed.addFields({ name: "🔹 Roles Added", value: newRoles.map(x => x.toString()).join(" ") });

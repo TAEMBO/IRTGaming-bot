@@ -21,7 +21,7 @@ const cmdOptionChoices = fsServers.getPublicAll().map(([serverAcro, { fullName }
 
 export default new Command<"chatInput">({
     async run(interaction) {
-        if (!isMPStaff(interaction.member)) return await youNeedRole(interaction, "mpstaff");
+        if (!isMPStaff(interaction.member)) return await youNeedRole(interaction, "mpStaff");
 
         const FTP = new FTPClient();
         const now = Date.now();
@@ -37,9 +37,9 @@ export default new Command<"chatInput">({
                 const cachedServer = interaction.client.fsCache[chosenServer];
                 const configServer = interaction.client.config.fs[chosenServer];
 
-                if (configServer.isPrivate && !hasRole(interaction.member, "mpmanager")) {
-                    await checkRole("mfmanager");
-                } else await checkRole("mpmanager");
+                if (configServer.isPrivate && !hasRole(interaction.member, "mpManager")) {
+                    await checkRole("mfManager");
+                } else await checkRole("mpManager");
 
                 if (interaction.replied) return;
 
@@ -108,7 +108,7 @@ export default new Command<"chatInput">({
                 setTimeout(() => browser.close(), 10_000);
             },
             async mop() {
-                if (!hasRole(interaction.member, "mpmanager")) return await youNeedRole(interaction, "mpmanager");
+                if (!hasRole(interaction.member, "mpManager")) return await youNeedRole(interaction, "mpManager");
 
                 const chosenServer = interaction.options.getString("server", true);
                 const chosenAction = interaction.options.getString("action", true) as "items.xml" | "players.xml";
@@ -140,7 +140,7 @@ export default new Command<"chatInput">({
                         stream.once("close", FTP.end);
                     })).connect(ftpLogin);
                 } else {
-                    if (!hasRole(interaction.member, "mpmanager")) return await youNeedRole(interaction, "mpmanager");
+                    if (!hasRole(interaction.member, "mpManager")) return await youNeedRole(interaction, "mpManager");
                     
                     let data;
                     const banAttachment = interaction.options.getAttachment("bans");
@@ -223,9 +223,9 @@ export default new Command<"chatInput">({
 
                 if (
                     server.isPrivate
-                    && !hasRole(interaction.member, "mpmanager")
-                    && !hasRole(interaction.member, "mfmanager")
-                ) return await youNeedRole(interaction, "mpmanager");
+                    && !hasRole(interaction.member, "mpManager")
+                    && !hasRole(interaction.member, "mfManager")
+                ) return await youNeedRole(interaction, "mpManager");
 
                 await interaction.deferReply();
 
@@ -255,14 +255,14 @@ export default new Command<"chatInput">({
                 })).connect(ftpLogin);
             },
             async roles() {
-                if (!hasRole(interaction.member, "mpmanager")) return await youNeedRole(interaction, "mpmanager");
+                if (!hasRole(interaction.member, "mpManager")) return await youNeedRole(interaction, "mpManager");
 
                 const member = interaction.options.getMember("member");
                 const mainRoles = interaction.client.config.mainServer.roles;
 
                 if (!member) return await interaction.reply({ content: "You need to select a member that is in this server", ephemeral: true });
 
-                const roleName = interaction.options.getString("role", true) as "trustedfarmer" | "mpfarmmanager" | "mpjradmin" | "mpsradmin";
+                const roleName = interaction.options.getString("role", true) as "trustedFarmer" | "mpFarmManager" | "mpJrAdmin" | "mpSrAdmin";
                 const roleId = mainRoles[roleName];
                 const roles = [...member.roles.cache.keys()];
                 
@@ -281,15 +281,15 @@ export default new Command<"chatInput">({
                         componentType: ComponentType.Button
                     }).on("collect", int => void lookup({
                         async confirm() {
-                            if (roleName !== "trustedfarmer") {
+                            if (roleName !== "trustedFarmer") {
                                 const slicedNick = {
-                                    mpfarmmanager: "MP Farm Manager",
-                                    mpjradmin: "MP Jr. Admin",
-                                    mpsradmin: "MP Sr. Admin"
+                                    mpFarmManager: "MP Farm Manager",
+                                    mpJrAdmin: "MP Jr. Admin",
+                                    mpSrAdmin: "MP Sr. Admin"
                                 }[roleName];
 
                                 await member.edit({
-                                    roles: roles.filter(x => x !== roleId && x !== mainRoles.mpstaff).concat([mainRoles.formerstaff, mainRoles.trustedfarmer]),
+                                    roles: roles.filter(x => x !== roleId && x !== mainRoles.mpStaff).concat([mainRoles.formerStaff, mainRoles.trustedFarmer]),
                                     nick: member.nickname!.replace(slicedNick, "Former Staff")
                                 });
                             } else await member.roles.remove(roleId);
@@ -319,26 +319,26 @@ export default new Command<"chatInput">({
                     }, int.customId));
                 } else {
                     const newNickname = ({
-                        trustedfarmer() {
+                        trustedFarmer() {
                             roles.push(roleId);
 
                             return undefined;
                         },
-                        mpfarmmanager() {
-                            roles.push(roleId, mainRoles.mpstaff);
-                            roles.splice(roles.indexOf(mainRoles.trustedfarmer), 1);
+                        mpFarmManager() {
+                            roles.push(roleId, mainRoles.mpStaff);
+                            roles.splice(roles.indexOf(mainRoles.trustedFarmer), 1);
 
                             return `${member.displayName.slice(0, 14)} | MP Farm Manager`;
                         },
-                        mpjradmin() {
+                        mpJrAdmin() {
                             roles.push(roleId);
-                            roles.splice(roles.indexOf(mainRoles.mpfarmmanager), 1);
+                            roles.splice(roles.indexOf(mainRoles.mpFarmManager), 1);
 
                             return member.nickname!.replace("MP Farm Manager", "MP Jr. Admin");
                         },
-                        mpsradmin() {
+                        mpSrAdmin() {
                             roles.push(roleId);
-                            roles.splice(roles.indexOf(mainRoles.mpjradmin), 1);
+                            roles.splice(roles.indexOf(mainRoles.mpJrAdmin), 1);
 
                             return member.nickname!.replace("MP Jr. Admin", "MP Sr. Admin");
                         }
@@ -482,10 +482,10 @@ export default new Command<"chatInput">({
                 .setName("role")
                 .setDescription("the role to add or remove")
                 .addChoices(
-                    { name: "Trusted Farmer", value: "trustedfarmer" },
-                    { name: "Farm Manager", value: "mpfarmmanager" },
-                    { name: "Junior Admin", value: "mpjradmin" },
-                    { name: "Senior Admin", value: "mpsradmin" })
+                    { name: "Trusted Farmer", value: "trustedFarmer" },
+                    { name: "Farm Manager", value: "mpfarmManager" },
+                    { name: "Junior Admin", value: "mpJrAdmin" },
+                    { name: "Senior Admin", value: "mpSrAdmin" })
                 .setRequired(true)))
         .addSubcommand(x => x
             .setName("fm")

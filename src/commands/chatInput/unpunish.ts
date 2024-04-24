@@ -9,7 +9,7 @@ export default new Command<"chatInput">({
 
         if (!punishment) return await interaction.reply("No case found with that ID");
         if (punishment.expired) return await interaction.reply("That case has already been overwritten");
-        if (!["warn", "mute"].includes(punishment.type) && hasRole(interaction.member, "discordhelper")) return await youNeedRole(interaction, "discordmoderator");
+        if (!["warn", "mute"].includes(punishment.type) && hasRole(interaction.member, "discordHelper")) return await youNeedRole(interaction, "discordModerator");
         
         await interaction.client.punishments.removePunishment(punishment._id, interaction.user.id, reason, interaction);
     },

@@ -13,11 +13,11 @@ export default new Command<"chatInput">({
         await lookup({
             async mp() {
                 const staff = {
-                    mp_manager: interaction.client.getRole("mpmanager"),
-                    mp_sr_admin: interaction.client.getRole("mpsradmin"),
-                    mp_jr_admin: interaction.client.getRole("mpjradmin"),
-                    mp_farm_manager: interaction.client.getRole("mpfarmmanager"),
-                    mp_trusted_farmer: interaction.client.getRole("trustedfarmer")
+                    mp_manager: interaction.client.getRole("mpManager"),
+                    mp_sr_admin: interaction.client.getRole("mpSrAdmin"),
+                    mp_jr_admin: interaction.client.getRole("mpJrAdmin"),
+                    mp_farm_manager: interaction.client.getRole("mpFarmManager"),
+                    mp_trusted_farmer: interaction.client.getRole("trustedFarmer")
                 };
          
                 await interaction.reply({ embeds: [new EmbedBuilder()
@@ -53,9 +53,9 @@ export default new Command<"chatInput">({
             },
             async discord() {
                 const staff = {
-                    admin: interaction.client.getRole("discordadmin"),
-                    moderator: interaction.client.getRole("discordmoderator"),
-                    helper: interaction.client.getRole("discordhelper")
+                    admin: interaction.client.getRole("discordAdmin"),
+                    moderator: interaction.client.getRole("discordModerator"),
+                    helper: interaction.client.getRole("discordHelper")
                 };
          
                 await interaction.reply({ embeds: [new EmbedBuilder()
@@ -74,7 +74,7 @@ export default new Command<"chatInput">({
                 ] });
             },
             async mc() {
-                const staff = interaction.client.getRole("irtmcstaff");
+                const staff = interaction.client.getRole("irtmcStaff");
 
                 await interaction.reply({ embeds: [new EmbedBuilder()
                     .setTitle("__IRTMC Staff Members__")

@@ -12,7 +12,7 @@ import type { MinecraftPlayer } from "../../typings.js";
 
 export default new Command<"chatInput">({
     async run(interaction) {
-        if (!hasRole(interaction.member, "irtmcplayer")) return await youNeedRole(interaction, "irtmcplayer");
+        if (!hasRole(interaction.member, "irtmcPlayer")) return await youNeedRole(interaction, "irtmcPlayer");
 
         const subCmd = interaction.options.getSubcommand() as "players" | "time" | "deaths" | "view";
 

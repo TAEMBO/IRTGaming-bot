@@ -6,7 +6,7 @@ import { hasRole, youNeedRole } from "./index.js";
  * @param type The type of punishment this is
  */
 export async function punish(interaction: ChatInputCommandInteraction<"cached">, type: string) {
-    if (!["warn", "mute"].includes(type) && hasRole(interaction.member, "discordhelper")) return await youNeedRole(interaction, "discordstaff");
+    if (!["warn", "mute"].includes(type) && hasRole(interaction.member, "discordHelper")) return await youNeedRole(interaction, "discordStaff");
 
     const time = interaction.options.getString("time") ?? undefined;
     const reason = interaction.options.getString("reason") ?? "Unspecified";

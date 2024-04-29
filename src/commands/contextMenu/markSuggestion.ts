@@ -26,8 +26,8 @@ export default new Command<"message">({
             ephemeral: true,
             components: [
                 new ActionRowBuilder<ButtonBuilder>().addComponents(
-                    new ButtonBuilder().setCustomId("accept").setStyle(ButtonStyle.Success).setLabel("Accepted by staff"),
-                    new ButtonBuilder().setCustomId("reject").setStyle(ButtonStyle.Danger).setLabel("Rejected by staff")
+                    new ButtonBuilder().setCustomId("like").setStyle(ButtonStyle.Success).setLabel("Liked by staff"),
+                    new ButtonBuilder().setCustomId("dislike").setStyle(ButtonStyle.Danger).setLabel("Disliked by staff")
                 ),
                 new ActionRowBuilder<ButtonBuilder>().addComponents(
                     new ButtonBuilder().setCustomId("cancel").setStyle(ButtonStyle.Secondary).setLabel("Cancel")
@@ -38,17 +38,17 @@ export default new Command<"message">({
             time: 30_000,
             componentType: ComponentType.Button
         }).on("collect", int => void lookup({
-            async accept() {
-                embed.setTitle("Community Idea - __**Seen and accepted by staff**__");
+            async like() {
+                embed.setTitle("Community Idea\n__**Acknowledged and liked by staff**__");
 
                 await interaction.targetMessage.edit({ embeds: [embed] });
-                await int.update({ content: "Community idea updated and marked as accepted", components: [] });
+                await int.update({ content: "Community idea updated and marked as liked", components: [] });
             },
-            async reject() {
-                embed.setTitle("Community Idea - __**Seen and rejected by staff**__");
+            async dislike() {
+                embed.setTitle("Community Idea\n__**Acknowledged and disliked by staff**__");
 
                 await interaction.targetMessage.edit({ embeds: [embed] });
-                await int.update({ content: "Community idea updated and marked as rejected", components: [] });
+                await int.update({ content: "Community idea updated and marked as diliked", components: [] });
             },
             async cancel() {
                 await int.update({ content: "Command canceled", components: [] });

@@ -8,6 +8,7 @@ export * from "./fsLoop.js";
 export * from "./hasProfanity.js";
 export * from "./hasRole.js";
 export * from "./isDCStaff.js";
+export * from "./isMCStaff.js";
 export * from "./isMPStaff.js";
 export * from "./jsonFromXML.js";
 export * from "./log.js";

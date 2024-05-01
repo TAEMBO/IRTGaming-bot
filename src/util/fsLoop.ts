@@ -36,12 +36,23 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
     }
 
     function logEmbed(player: PlayerUsed, joinLog: boolean) {
+        let description = `\`${player.name}\`${decorators(player)} ${joinLog ? "joined" : "left"} **${serverAcroUp}** at <t:${now}:t>`;
         const playTimeHrs = Math.floor(player.uptime / 60);
         const playTimeMins = (player.uptime % 60).toString().padStart(2, "0");
         const embed = new EmbedBuilder()
-            .setDescription(`\`${player.name}\`${decorators(player)} ${joinLog ? "joined" : "left"} **${serverAcroUp}** at <t:${now}:t>`)
             .setColor(joinLog ? client.config.EMBED_COLOR_GREEN : client.config.EMBED_COLOR_RED)
             .setFooter(player.uptime ? { text: `Playtime: ${playTimeHrs}:${playTimeMins}` } : null);
+
+        if (joinLog && player.uptime > 1) {
+            const comparableUptimes = [player.uptime, player.uptime - 1];
+            const candidate = oldPlayers
+                .filter(x => !newPlayers.some(y => y.name === x.name))
+                .find(x => comparableUptimes.includes(x.uptime));
+
+            if (candidate) description += `\nPossible name change from \`${candidate.name}\``;
+        }
+
+        embed.setDescription(description);
 
         return embed;
     }
@@ -159,7 +170,6 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
     statsEmbed
         .setAuthor({ name: `${dss.slots.used}/${dss.slots.capacity}` })
         .setTitle(dss.server.name ? null : "Server is offline")
-        .setColor(client.config.EMBED_COLOR_GREEN)
         .setDescription(dss.slots.used ? playerInfo.join("\n") : dss.server.name ? "*No players online*" : null)
         .setFields({
             name: "**Server Statistics**",
@@ -176,9 +186,11 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
             ].join("\n")
         });
 
-    if (dss.slots.used === dss.slots.capacity) {
-        statsEmbed.setColor(client.config.EMBED_COLOR_RED);
-    } else if (dss.slots.used > 9) statsEmbed.setColor(client.config.EMBED_COLOR_YELLOW);
+    dss.slots.used === dss.slots.capacity
+        ? statsEmbed.setColor(client.config.EMBED_COLOR_RED)
+        : dss.slots.used > (dss.slots.capacity / 2)
+            ? statsEmbed.setColor(client.config.EMBED_COLOR_YELLOW)
+            : statsEmbed.setColor(client.config.EMBED_COLOR_GREEN);
 
     await statsMsgEdit();
     

@@ -125,7 +125,7 @@ export type RepeatedMessagesData = Record<string, {
     timeout: NodeJS.Timeout;
 }>;
 
-export type CombinedSlashCommandBuilder = Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup"> | SlashCommandSubcommandsOnlyBuilder;
+export type CombinedSlashCommandBuilder = SlashCommandOptionsOnlyBuilder | SlashCommandSubcommandsOnlyBuilder;
 
 export type FSCache = Record<string, {
     players: PlayerUsed[];

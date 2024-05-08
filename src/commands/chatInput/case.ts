@@ -1,6 +1,6 @@
 import { EmbedBuilder, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import { Command } from "../../structures/index.js";
-import { formatTime, formatUser, lookup } from "../../util/index.js";
+import { formatString, formatTime, formatUser, lookup } from "../../util/index.js";
 
 export default new Command<"chatInput">({
     async run(interaction) {
@@ -15,7 +15,7 @@ export default new Command<"chatInput">({
                 const cancelledBy = punishment.expired ? await interaction.client.punishments.data.findOne({ cancels: punishment.id }) : null;
                 const cancels = punishment.cancels ? await interaction.client.punishments.data.findOne({ _id: punishment.cancels }) : null;
                 const embed = new EmbedBuilder()
-                    .setTitle(`${punishment.type[0].toUpperCase() + punishment.type.slice(1)} | Case #${punishment.id}`)
+                    .setTitle(`${formatString(punishment.type)} | Case #${punishment.id}`)
                     .addFields(
                         { name: "🔹 User", value: `${punishment.member.tag}\n<@${punishment.member._id}> \`${punishment.member._id}\``, inline: true },
                         { name: "🔹 Moderator", value: `<@${punishment.moderator}> \`${punishment.moderator}\``, inline: true },
@@ -36,7 +36,7 @@ export default new Command<"chatInput">({
                 const punishments = await interaction.client.punishments.data.find();
                 const userPunishmentsData = punishments.filter(x => x.member._id === user.id);
                 const userPunishments = userPunishmentsData.sort((a, b) => a.time - b.time).map(punishment => ({
-                    name: `${punishment.type[0].toUpperCase() + punishment.type.slice(1)} | Case #${punishment.id}`,
+                    name: `${formatString(punishment.type)} | Case #${punishment.id}`,
                     value: [
                         `> Reason: \`${punishment.reason}\``,
                         punishment.duration ? `\n> Duration: ${formatTime(punishment.duration, 3)}` : "",

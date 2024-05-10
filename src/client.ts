@@ -1,4 +1,5 @@
 import {
+    AllowedMentionsTypes,
     ApplicationCommandOptionType,
     Client,
     Collection,
@@ -60,7 +61,14 @@ export default class TClient extends Client<true> {
                 GuildEmojiManager: 0,
                 GuildMessageManager: 500,
             }),
-            allowedMentions: { repliedUser: false, parse: ["users", "roles", "everyone"] }
+            allowedMentions: {
+                repliedUser: false,
+                parse: [
+                    AllowedMentionsTypes.User,
+                    AllowedMentionsTypes.Role,
+                    AllowedMentionsTypes.Everyone
+                ]
+            }
         });
     }
 

@@ -30,6 +30,23 @@ export default [
             "@typescript-eslint/no-unused-vars": "off",
             "@typescript-eslint/explicit-member-accessibility": "error",
             "@typescript-eslint/no-floating-promises": "error",
+            "@typescript-eslint/naming-convention": [
+                "error",
+                {
+                    "format": [
+                        "camelCase",
+                        "UPPER_CASE"
+                    ],
+                    "selector": [
+                        "function",
+                        "variable",
+                        "parameter",
+                        "classProperty",
+                        "classMethod"
+                    ],
+                    "leadingUnderscore": "allow"
+                }
+            ],
             "no-multiple-empty-lines": [
                 "error",
                 { "max": 1 }

@@ -3,17 +3,17 @@ import { Command } from "../../structures/index.js";
 import { formatString } from "../../util/index.js";
 
 const possibleMoves = ["rock", "paper", "scissors"] as const;
-const RPSInstances = new Collection<string, RPSInstance>();
+const rpsInstances = new Collection<string, RPSInstance>();
 
 type Move = (typeof possibleMoves)[number];
 
 class RPSInstance {
     public constructor(public readonly user: User, public readonly move: Move, public readonly message: Message<true>) {
         setTimeout(async () => {
-            if (!RPSInstances.has(this.message.channelId)) return;
+            if (!rpsInstances.has(this.message.channelId)) return;
             
             await this.message.edit({ embeds: [], content: `This ${possibleMoves.join(" ")} game has ended due to inactivity.` });
-            RPSInstances.delete(this.message.channelId);
+            rpsInstances.delete(this.message.channelId);
         }, 60_000);
     }
 }
@@ -21,7 +21,7 @@ class RPSInstance {
 export default new Command<"chatInput">({
     async run(interaction) {
         const move = interaction.options.getString("move", true) as Move;
-        const firstMove = RPSInstances.get(interaction.channelId);
+        const firstMove = rpsInstances.get(interaction.channelId);
 
         if (firstMove) {
             if (interaction.user.id === firstMove.user.id) return await interaction.reply("You can't play against yourself");
@@ -44,7 +44,7 @@ export default new Command<"chatInput">({
                 .setColor(interaction.client.config.EMBED_COLOR)
             ] });
 
-            RPSInstances.delete(interaction.channelId);
+            rpsInstances.delete(interaction.channelId);
             await interaction.deleteReply();
         } else {
             await interaction.deferReply({ ephemeral: true }).then(() => interaction.deleteReply());
@@ -56,7 +56,7 @@ export default new Command<"chatInput">({
                 .setFooter({ text: "Game will time out in 60 seconds" })
             ] });
 
-            RPSInstances.set(interaction.channelId, new RPSInstance(interaction.user, move, message));
+            rpsInstances.set(interaction.channelId, new RPSInstance(interaction.user, move, message));
         }
     },
     data: new SlashCommandBuilder()

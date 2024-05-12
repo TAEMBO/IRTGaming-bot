@@ -146,8 +146,8 @@ export default new Command<"chatInput">({
             // handle negative days
             for (const [i, change] of data.entries()) if (change < 0) data[i] = data[i - 1] || data[i + 1] || 0;
             
-            const first_graph_top = 16;
-            const second_graph_top = 16;
+            const firstGraphTop = 16;
+            const secondGraphTop = 16;
             const textSize = 40;
             const img = canvas.createCanvas(1500, 750);
             const ctx = img.getContext("2d");
@@ -161,26 +161,26 @@ export default new Command<"chatInput">({
             // grey horizontal lines
             ctx.lineWidth = 5;
         
-            const interval_candidates: [number, number, number][] = [];
+            const intervalCandidates: [number, number, number][] = [];
 
             for (let i = 4; i < 10; i++) {
-                const interval = first_graph_top / i;
+                const interval = firstGraphTop / i;
 
                 if (Number.isInteger(interval)) {
                     const intervalString = interval.toString();
-                    const reference_number = i * Math.max(intervalString.split("").filter(x => x === "0").length / intervalString.length, 0.3) * (["1", "2", "4", "5", "6", "8"].includes(intervalString[0]) ? 1.5 : 0.67);
+                    const referenceNumber = i * Math.max(intervalString.split("").filter(x => x === "0").length / intervalString.length, 0.3) * (["1", "2", "4", "5", "6", "8"].includes(intervalString[0]) ? 1.5 : 0.67);
 
-                    interval_candidates.push([interval, i, reference_number]);
+                    intervalCandidates.push([interval, i, referenceNumber]);
                 }
             }
 
-            const chosen_interval = interval_candidates.sort((a, b) => b[2] - a[2])[0];
+            const chosenInterval = intervalCandidates.sort((a, b) => b[2] - a[2])[0];
             const previousY: number[] = [];
 
             ctx.strokeStyle = "#202225";
 
-            for (let i = 0; i <= chosen_interval[1]; i++) {
-                const y = graphOrigin[1] + graphSize[1] - (i * (chosen_interval[0] / second_graph_top) * graphSize[1]);
+            for (let i = 0; i <= chosenInterval[1]; i++) {
+                const y = graphOrigin[1] + graphSize[1] - (i * (chosenInterval[0] / secondGraphTop) * graphSize[1]);
 
                 if (y < graphOrigin[1]) continue;
 
@@ -196,7 +196,7 @@ export default new Command<"chatInput">({
 
                 if (even) ctx.strokeStyle = "#202225";
 
-                previousY.push(y, i * chosen_interval[0]);
+                previousY.push(y, i * chosenInterval[0]);
             }
         
             // 30d mark
@@ -227,7 +227,7 @@ export default new Command<"chatInput">({
                 if (curPC < 0) curPC = 0;
 
                 const x = i * nodeWidth + graphOrigin[0];
-                const y = ((1 - (curPC / second_graph_top)) * graphSize[1]) + graphOrigin[1];
+                const y = ((1 - (curPC / secondGraphTop)) * graphSize[1]) + graphOrigin[1];
                 const nexPC /* next player count */ = data[i + 1];
                 const prvPC /* previous player count */ = data[i - 1];
 

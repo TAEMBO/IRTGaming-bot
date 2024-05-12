@@ -20,8 +20,8 @@ export default new Command<"chatInput">({
             
             const maxValue = Math.max(...data);
             const maxValueArr = maxValue.toString().split("");
-            const first_graph_top = Math.ceil(maxValue * 10 ** (-maxValueArr.length + 1)) * 10 ** (maxValueArr.length - 1);
-            const second_graph_top = Math.ceil(maxValue * 10 ** (-maxValueArr.length + 2)) * 10 ** (maxValueArr.length - 2);
+            const firstGraphTop = Math.ceil(maxValue * 10 ** (-maxValueArr.length + 1)) * 10 ** (maxValueArr.length - 1);
+            const secondGraphTop = Math.ceil(maxValue * 10 ** (-maxValueArr.length + 2)) * 10 ** (maxValueArr.length - 2);
             const textSize = 40;
             const img = canvas.createCanvas(1500, 750);
             const ctx = img.getContext("2d");
@@ -35,24 +35,24 @@ export default new Command<"chatInput">({
             // grey horizontal lines
             ctx.lineWidth = 5;
             
-            const interval_candidates: [number, number, number][] = [];
+            const intervalCandidates: [number, number, number][] = [];
             for (let i = 4; i < 10; i++) {
-                const interval = first_graph_top / i;
+                const interval = firstGraphTop / i;
 
                 if (Number.isInteger(interval)) {
                     const intervalString = interval.toString();
-                    const reference_number = i * Math.max(intervalString.split("").filter(x => x === "0").length / intervalString.length, 0.3) * (["1", "2", "4", "5", "6", "8"].includes(intervalString[0]) ? 1.5 : 0.67);
+                    const referenceNumber = i * Math.max(intervalString.split("").filter(x => x === "0").length / intervalString.length, 0.3) * (["1", "2", "4", "5", "6", "8"].includes(intervalString[0]) ? 1.5 : 0.67);
 
-                    interval_candidates.push([interval, i, reference_number]);
+                    intervalCandidates.push([interval, i, referenceNumber]);
                 }
             }
-            const chosen_interval = interval_candidates.sort((a, b) => b[2] - a[2])[0];
+            const chosenInterval = intervalCandidates.sort((a, b) => b[2] - a[2])[0];
             let previousY: number[] = [];
 
             ctx.strokeStyle = "#202225";
 
-            for (let i = 0; i <= chosen_interval[1]; i++) {
-                const y = graphOrigin[1] + graphSize[1] - (i * (chosen_interval[0] / second_graph_top) * graphSize[1]);
+            for (let i = 0; i <= chosenInterval[1]; i++) {
+                const y = graphOrigin[1] + graphSize[1] - (i * (chosenInterval[0] / secondGraphTop) * graphSize[1]);
 
                 if (y < graphOrigin[1]) continue;
 
@@ -68,7 +68,7 @@ export default new Command<"chatInput">({
 
                 if (even) ctx.strokeStyle = "#202225";
 
-                previousY = [y, i * chosen_interval[0]];
+                previousY = [y, i * chosenInterval[0]];
             }
             
             // 30d mark
@@ -98,7 +98,7 @@ export default new Command<"chatInput">({
                 if (value < 0) value = 0;
 
                 const x = i * nodeWidth + graphOrigin[0];
-                const y = ((1 - (value / second_graph_top)) * graphSize[1]) + graphOrigin[1];
+                const y = ((1 - (value / secondGraphTop)) * graphSize[1]) + graphOrigin[1];
 
                 ctx.lineTo(x, y);
 

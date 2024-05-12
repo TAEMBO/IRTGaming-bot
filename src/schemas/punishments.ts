@@ -193,7 +193,7 @@ export class Punishments {
 
         const guild = this._client.mainGuild();
         const auditLogReason = `${reason} | Case #${punishment._id}`;
-        const [User, GuildMember, _id] = await Promise.all([
+        const [user, guildMember, _id] = await Promise.all([
             this._client.users.fetch(punishment.member._id),
             guild.members.fetch(punishment.member._id).catch(() => null),
             this.createId()
@@ -210,12 +210,12 @@ export class Punishments {
                 removePunishmentData.type = "removeOtherPunishment";
             },
             detain: async () => {
-                return await GuildMember?.roles.remove(this._client.config.mainServer.roles.detained, auditLogReason).catch((err: Error) => err.message);
+                return await guildMember?.roles.remove(this._client.config.mainServer.roles.detained, auditLogReason).catch((err: Error) => err.message);
             },
             mute: async () => {
-                if (GuildMember) {
-                    GuildMember.send(`You've been unmuted in ${guild.name}.`).catch((err: Error) => console.log(err.message));
-                    return await GuildMember.timeout(null, auditLogReason).catch((err: Error) => err.message);
+                if (guildMember) {
+                    guildMember.send(`You've been unmuted in ${guild.name}.`).catch((err: Error) => console.log(err.message));
+                    return await guildMember.timeout(null, auditLogReason).catch((err: Error) => err.message);
                 } else await this.data.findByIdAndUpdate(caseId, { expired: true }, { new: true });
             },
             warn: () => {
@@ -238,12 +238,12 @@ export class Punishments {
                 return await interaction.reply({ embeds: [new EmbedBuilder()
                     .setColor(this._client.config.EMBED_COLOR)
                     .setTitle(`Case #${removePunishmentData._id}: ${formatString(removePunishmentData.type)}`)
-                    .setDescription(`${User.tag}\n<@${User.id}>\n(\`${User.id}\`)`)
+                    .setDescription(`${user.tag}\n${user}\n(\`${user.id}\`)`)
                     .addFields(
                         { name: "Reason", value: reason },
                         { name: "Overwrites", value: `Case #${punishment._id}` })
                 ] });
-            } else return `Successfully un${this.getTense(punishment.type)} ${User.tag} (${User.id}) for reason "${reason}"`;
+            } else return `Successfully un${this.getTense(punishment.type)} ${user.tag} (${user.id}) for reason "${reason}"`;
         }
     }
 }

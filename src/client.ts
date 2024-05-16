@@ -56,10 +56,9 @@ export default class TClient extends Client<true> {
             ],
             presence: config.botPresence as PresenceData,
             makeCache: Options.cacheWithLimits({
-                ...Options.DefaultMakeCacheSettings,
-                BaseGuildEmojiManager: 0,
                 GuildEmojiManager: 0,
                 GuildMessageManager: 500,
+                DMMessageManager: 0
             }),
             allowedMentions: {
                 repliedUser: false,

@@ -93,7 +93,7 @@ export class PlayerTimes {
         let changedNameCount = 0;
         let addedUuidCount = 0;
 
-        for await (const player of farmData.farms.farm[0].players.player) {
+        for (const player of farmData.farms.farm[0].players.player) {
             const playerDatabyUuid = allData.find(x => x.uuid === player._attributes.uniqueUserId);
 
             if (playerDatabyUuid) { // PlayerTimes data was found with UUID

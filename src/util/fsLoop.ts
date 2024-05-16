@@ -210,7 +210,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
 
     if (justStarted) return;
     
-    for await (const player of newPlayers.filter(x => oldPlayers.some(y => x.isAdmin && !y.isAdmin && y.name === x.name))) {
+    for (const player of newPlayers.filter(x => oldPlayers.some(y => x.isAdmin && !y.isAdmin && y.name === x.name))) {
         if (!client.whitelist.cache.includes(player.name) && !client.fmList.cache.includes(player.name) && !client.config.fs[serverAcro].isPrivate) {
             await client.getChan("juniorAdminChat").send({ embeds: [new EmbedBuilder()
                 .setTitle("UNKNOWN ADMIN LOGIN")
@@ -224,7 +224,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
     }
     
     // Filter for players leaving
-    for await (const player of oldPlayers.filter(x => !newPlayers.some(y => y.name === x.name))) {
+    for (const player of oldPlayers.filter(x => !newPlayers.some(y => y.name === x.name))) {
         const inWl = watchList.find(x => x._id === player.name);
 
         if (inWl) await wlChannel.send({ embeds: [wlEmbed(inWl, false)] });
@@ -243,7 +243,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
         }
     })();
     
-    if (playerObj) for await (const player of playerObj) {
+    if (playerObj) for (const player of playerObj) {
         const inWl = watchList.find(y => y._id === player.name);
 
         if (inWl) {

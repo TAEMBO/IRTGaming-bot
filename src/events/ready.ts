@@ -106,7 +106,7 @@ export default new Event({
 
                         log("Cyan", "IRTMC server rebooted");
 
-                        for await (const [uuid, player] of Object.entries(client.mcCache)) {
+                        for (const [uuid, player] of Object.entries(client.mcCache)) {
                             await client.mcPlayerTimes.addPlayerTime(uuid, player.playerName, Date.now() - player.joinTime);
 
                             delete client.mcCache[uuid];
@@ -158,13 +158,13 @@ export default new Event({
         if (client.config.toggles.fsLoop) setInterval(async () => {
             const watchList = await client.watchList.data.find();
     
-            for await (const [serverAcro, server] of fsServers.entries()) await fsLoop(client, watchList, server, serverAcro);
+            for (const [serverAcro, server] of fsServers.entries()) await fsLoop(client, watchList, server, serverAcro);
             await fsLoopAll(client, watchList);
         }, 30_000);
     
         // YouTube upload notifications loop
         if (client.config.toggles.ytLoop) setInterval(async () => {
-            for await (const channel of client.config.ytChannels) {
+            for (const channel of client.config.ytChannels) {
                 if (client.config.toggles.debug) log("Yellow", "YTLoop", channel.name);
 
                 const res = await fetch(

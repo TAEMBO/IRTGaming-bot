@@ -27,8 +27,8 @@ for (const serverAcro of fsKeys) client.fsCache[serverAcro] = {
 };
 
 // Command handler
-for await (const folder of await readdir("commands")) {
-    for await (const file of await readdir(join("commands", folder))) {
+for (const folder of await readdir("commands")) {
+    for (const file of await readdir(join("commands", folder))) {
         const commandFile = (await import(urlPath(join("commands", folder, file)))).default;
 
         if (!(commandFile instanceof Command)) {
@@ -46,7 +46,7 @@ for await (const folder of await readdir("commands")) {
 }
 
 // Event handler
-for await (const file of await readdir("events")) {
+for (const file of await readdir("events")) {
     const eventFile = (await import(urlPath(join("events", file)))).default;
 
     if (!(eventFile instanceof Event)) {

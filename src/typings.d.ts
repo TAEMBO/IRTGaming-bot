@@ -1,4 +1,4 @@
-import type { Collection, PresenceData, SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder, Snowflake } from "discord.js";
+import type { Collection, MessageContextMenuCommandInteraction, PresenceData, SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder, Snowflake, UserContextMenuCommandInteraction } from "discord.js";
 import type config from "./config.json";
 import type TClient from "./client.js";
 import { type PlayerUsed } from "farming-simulator-types/2022";
@@ -126,6 +126,10 @@ export type RepeatedMessagesData = Record<string, {
 }>;
 
 export type CombinedSlashCommandBuilder = SlashCommandOptionsOnlyBuilder | SlashCommandSubcommandsOnlyBuilder;
+
+export type CombinedContextMenuCommandInteraction =
+    MessageContextMenuCommandInteraction<"cached">
+    | UserContextMenuCommandInteraction<"cached">;
 
 export type FSCache = Record<string, {
     players: PlayerUsed[];

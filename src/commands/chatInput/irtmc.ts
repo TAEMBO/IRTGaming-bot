@@ -6,19 +6,31 @@ import {
     formatTime,
     hasRole,
     log,
+    lookup,
     youNeedRole
 } from "../../util/index.js";
 import type { MinecraftPlayer } from "../../typings.js";
 
 export default new Command<"chatInput">({
+    async autocomplete(interaction) {
+        await lookup({
+            async view() {
+                const playerData = await interaction.client.mcPlayerTimes.data.find();
+                const focused = interaction.options.getFocused().toLowerCase();
+                const choices = playerData.filter(x => x.playerName.toLowerCase().startsWith(focused));
+
+                await interaction.respond(choices.map(x => ({ name: x.playerName, value: x._id })).slice(0, 25));
+            }
+        }, interaction.options.getSubcommand());
+    },
     async run(interaction) {
         if (!hasRole(interaction.member, "irtmcPlayer")) return await youNeedRole(interaction, "irtmcPlayer");
 
         const subCmd = interaction.options.getSubcommand() as "players" | "time" | "deaths" | "view";
 
         if (subCmd === "view") {
-            const username = interaction.options.getString("username", true);
-            const playerData = await interaction.client.mcPlayerTimes.data.findOne({ playerName: username });
+            const playerId = interaction.options.getString("username", true);
+            const playerData = await interaction.client.mcPlayerTimes.data.findById(playerId);
 
             if (!playerData) return await interaction.reply(`No data found with that name. [Find out why.](${interaction.client.config.resources.statsNoDataRedirect})`);
 
@@ -96,6 +108,7 @@ export default new Command<"chatInput">({
             .addStringOption(x => x
                 .setName("username")
                 .setDescription("The name of the player to search for")
+                .setAutocomplete(true)
                 .setRequired(true))) 
 
 });

@@ -3,7 +3,7 @@ import config from "../../config.json" assert { type: "json" };
 import canvas from "@napi-rs/canvas";
 import { DSSExtension, DSSResponse, Feeds, filterUnused } from "farming-simulator-types/2022";
 import { Command, FSServers } from "../../structures/index.js";
-import { formatRequestInit, formatTime, isMPStaff, log } from "../../util/index.js";
+import { formatRequestInit, formatTime, isMPStaff, log, lookup } from "../../util/index.js";
 import type { PlayerTimesDocument } from "../../typings.js";
 
 const fsServers = new FSServers(config.fs);
@@ -19,12 +19,27 @@ const cmdBuilderData = new SlashCommandBuilder()
         .addStringOption(x => x
             .setName("name")
             .setDescription("The in-game name of the player to get stats for")
+            .setAutocomplete(true)
             .setRequired(false)));
 
 // Dynamically manage subcommands via fs data
 for (const [serverAcro, { fullName }] of fsServers.entries()) cmdBuilderData.addSubcommand(x => x.setName(serverAcro).setDescription(`${fullName} server stats`));
 
 export default new Command<"chatInput">({
+    async autocomplete(interaction) {
+        await lookup({
+            async playertimes() {
+                const playerData = await interaction.client.playerTimes.data.find();
+                const focused = interaction.options.getFocused().toLowerCase().replace(" ", "");
+                const choices = playerData
+                    .filter(x => x._id.toLowerCase().replace(" ", "").startsWith(focused))
+                    .map(x => ({ name: x._id, value: x._id }))
+                    .slice(0, 24);
+
+                await interaction.respond(choices);
+            }
+        }, interaction.options.getSubcommand());
+    },
     async run(interaction) {
         const subCmd = interaction.options.getSubcommand();
 

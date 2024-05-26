@@ -88,23 +88,12 @@ export default new structures.Command<"chatInput">({
                 await interaction.reply({ embeds: [embed] }).catch(() => interaction.channel!.send({ embeds: [embed] }));
             },
             async restart() {
-                interaction.replied ? await interaction.editReply("Compiling...") : await interaction.reply("Compiling...");
+                await interaction.reply("Compiling...");
 
                 exec("tsc", async (error, stdout) => {
                     if (error) return await interaction.editReply(codeBlock(stdout.slice(0, 1950)));
 
                     await interaction.editReply("Restarting...").then(() => process.exit(-1));
-                });
-            },
-            async update() {
-                await interaction.reply("Pulling from repo...");
-
-                exec("git pull", async (error, stdout) => {
-                    if (error) return await interaction.editReply(`Pull failed:\n\`\`\`${error.message}\`\`\``);
-
-                    if (stdout.includes("Already up to date")) return await interaction.editReply("Pull aborted:\nUp-to-date");
-
-                    await this.restart();
                 });
             }
         }, interaction.options.getSubcommand());
@@ -129,7 +118,4 @@ export default new structures.Command<"chatInput">({
         .addSubcommand(x => x
             .setName("restart")
             .setDescription("Restart the bot"))
-        .addSubcommand(x => x
-            .setName("update")
-            .setDescription("Pull from GitHub repository to live bot"))
 });

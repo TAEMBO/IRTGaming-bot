@@ -13,7 +13,7 @@ export async function fsLoopAll(client: TClient, watchList: WatchListDocument[])
         const serverSlots = server.players.length;
 
         totalCount.push(serverSlots);
-        pausedStatuses.push(server.isThrottled);
+        pausedStatuses.push(server.throttled);
 
         for (const player of server.players) {
             const playTimeHrs = Math.floor(player.uptime / 60);

@@ -45,13 +45,13 @@ export default new Command<"chatInput">({
 
                 await interaction.deferReply();
     
-                if (cachedServer.status === null) return await interaction.editReply("Cache not populated, retry in 30 seconds");
+                if (cachedServer.state === null) return await interaction.editReply("Cache not populated, retry in 30 seconds");
                 if (
-                    cachedServer.status === 0
+                    cachedServer.state === 0
                     && ["stop", "restart"].includes(chosenAction)
                 ) return await interaction.editReply("Server is already offline");
                 if (
-                    cachedServer.status === 1
+                    cachedServer.state === 1
                     && chosenAction === "start"
                 ) return await interaction.editReply("Server is already online");
 
@@ -114,7 +114,7 @@ export default new Command<"chatInput">({
                 const chosenAction = interaction.options.getString("action", true) as "items.xml" | "players.xml";
                 const ftpLogin = fsServers.getPublicOne(chosenServer).ftp;
                 
-                if (interaction.client.fsCache[chosenServer].status === 1) return await interaction.reply(`You cannot mop files from **${chosenServer.toUpperCase()}** while it is online`);
+                if (interaction.client.fsCache[chosenServer].state === 1) return await interaction.reply(`You cannot mop files from **${chosenServer.toUpperCase()}** while it is online`);
                 
                 await interaction.deferReply();
     

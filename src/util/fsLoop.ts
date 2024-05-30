@@ -8,6 +8,7 @@ import {
     filterUnused,
     type PlayerUsed
 } from "farming-simulator-types/2022";
+import { constants } from "http2";
 import { formatRequestInit, formatTime, jsonFromXML, log } from "./index.js";
 import type { FSLoopCSG, FSServer, WatchListDocument } from "../typings.js";
 
@@ -57,88 +58,122 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
         return embed;
     }
 
+    let justStarted = false;
+    let justStopped = false;
     const serverAcroUp = serverAcro.toUpperCase();
+    const now = Math.round(Date.now() / 1_000);
     const fsCacheServer = client.fsCache[serverAcro];
-    const statsEmbed = new EmbedBuilder();
-    const statsMsgEdit = async () => {
+    const failedEmbed = new EmbedBuilder().setTitle("Host not responding").setColor(client.config.EMBED_COLOR_RED);
+    const init = formatRequestInit(7_000, "FSLoop");
+    const wlChannel = client.getChan("watchList");
+    const logChannel = client.getChan("fsLogs");
+    const serverStatusEmbed = (status: string) => new EmbedBuilder().setTitle(`${serverAcroUp} now ${status}`).setColor(client.config.EMBED_COLOR_YELLOW).setTimestamp();
+    const statsMsgEdit = async (embed: EmbedBuilder, completeRes = true) => {
         const channel = client.channels.cache.get(server.channelId);
+
+        fsCacheServer.completeRes = completeRes;
 
         if (!(channel instanceof TextChannel)) return log("Red", `FSLoop ${serverAcroUp} invalid channel`);
         
-        await channel.messages.edit(server.messageId, { embeds: [statsEmbed] }).catch(() => log("Red", `FSLoop ${serverAcroUp} invalid msg`));
+        await channel.messages.edit(server.messageId, { embeds: [embed] }).catch(() => log("Red", `FSLoop ${serverAcroUp} invalid msg`));
     };
-    const init = formatRequestInit(7_000, "FSLoop");
 
-    const dss = await fetch(server.url + Feeds.dedicatedServerStats(server.code, DSSExtension.JSON), init) // Fetch dedicated-server-stats.json
-        .then(res => res.json() as Promise<DSSResponse>)
+    // Fetch dedicated-server-stats.json
+    const dssRes = await fetch(server.url + Feeds.dedicatedServerStats(server.code, DSSExtension.JSON), init)
         .catch(err => log("Red", `${serverAcroUp} DSS ${err.message}`));
 
-    const csg = !dss ? null : await fetch(server.url + Feeds.dedicatedServerSavegame(server.code, DSSFile.CareerSavegame), init) // Fetch dedicated-server-savegame.html if DSS was successful
-        .then(async res => {
-            if (res.status !== 204) {
-                const { careerSavegame } = jsonFromXML<FSLoopCSG>(await res.text());
-
-                return careerSavegame;
-            } else statsEmbed.setImage("https://http.cat/204");
-        })
+    // Fetch dedicated-server-savegame.html if DSS was successful
+    const csgRes = !dssRes ? null : await fetch(server.url + Feeds.dedicatedServerSavegame(server.code, DSSFile.CareerSavegame), init)
         .catch(err => log("Red", `${serverAcroUp} CSG ${err.message}`));
 
-    if (!dss || !dss.slots || !csg) {
-        if (dss && !dss.slots) log("Red", `${serverAcroUp} DSS empty object`);
+    if (!dssRes || !csgRes) return await statsMsgEdit(failedEmbed, false); // Request(s) failed
 
-        statsEmbed.setTitle("Host not responding").setColor(client.config.EMBED_COLOR_RED);
-        await statsMsgEdit();
+    // Parse DSS data
+    const dssData: DSSResponse = await dssRes.json();
 
-        return;
-    }
+    if (!dssData.slots) return await statsMsgEdit(failedEmbed, false); // DSS returned empty content
 
-    const newPlayers = filterUnused(dss.slots.players);
+    const newPlayers = filterUnused(dssData.slots.players);
     const oldPlayers = fsCacheServer.players;
-    
-    // Throttle message updating if no changes in API data
-    if (JSON.stringify(newPlayers) === JSON.stringify(oldPlayers)) {
-        if (!dss.server.name && fsCacheServer.status === 0) {
-            fsCacheServer.isThrottled = true;
-            
-            return;
-        } else if (dss.server.name && fsCacheServer.status === 1) {
-            fsCacheServer.isThrottled = true;
-            
-            return;
+
+    if (!dssData.server.name) {
+        if (fsCacheServer.state === 1) {
+            await logChannel.send({ embeds: [serverStatusEmbed("offline")] });
+
+            justStopped = true;
         }
+
+        fsCacheServer.state = 0;
+    } else {
+        if (fsCacheServer.state === 0) {
+            await logChannel.send({ embeds: [serverStatusEmbed("online")] });
+            
+            justStarted = true;
+        }
+
+        fsCacheServer.state = 1;
     }
+
+    const toThrottle = (() => { // Throttle Discord message updating if no changes in API data
+        if (csgRes.status === constants.HTTP_STATUS_NO_CONTENT) return false;
+
+        if (!fsCacheServer.completeRes) return false;
+        
+        if (justStarted || justStopped) return false;
+
+        if (JSON.stringify(newPlayers) !== JSON.stringify(oldPlayers)) return false;
+        
+        if (!dssData.server.name && fsCacheServer.state === 0) return true;
+        
+        if (dssData.server.name && fsCacheServer.state === 1) return true;
+        
+        return false;
+    })();
     
-    const serverStatusEmbed = (status: string) => new EmbedBuilder().setTitle(`${serverAcroUp} now ${status}`).setColor(client.config.EMBED_COLOR_YELLOW).setTimestamp();
-    const wlChannel = client.getChan("watchList");
-    const logChannel = client.getChan("fsLogs");
-    const now = Math.round(Date.now() / 1_000);
+    // Update cache
+    fsCacheServer.throttled = toThrottle;
+
+    if (toThrottle) return;
+
+    if (fsCacheServer.graphPoints.length >= 120) fsCacheServer.graphPoints.shift();
+    
+    fsCacheServer.graphPoints.push(dssData.slots.used);
+
+    if (newPlayers.some(x => x.isAdmin)) fsCacheServer.lastAdmin = now * 1_000;
+
+    fsCacheServer.players = newPlayers;
+
     const playerInfo = newPlayers.map(player => {
         const playTimeHrs = Math.floor(player.uptime / 60);
         const playTimeMins = (player.uptime % 60).toString().padStart(2, "0");
 
         return `\`${player.name}\` ${decorators(player, true)} **|** ${playTimeHrs}:${playTimeMins}`;
     });
-    let justStarted = false;
+
+    if (csgRes.status === constants.HTTP_STATUS_NO_CONTENT) return await statsMsgEdit(failedEmbed.setImage("https://http.cat/204"), false); // CSG returned empty content
+
+    // Parse CSG data
+    const csgData = jsonFromXML<FSLoopCSG>(await csgRes.text()).careerSavegame;
 
     // Data crunching for stats embed
     const stats = {
         money: (() => {
-            const num = parseInt(csg.statistics?.money?._text);
+            const num = parseInt(csgData.statistics?.money?._text);
 
             return Number.isNaN(num) ? "`unavailable`" : num.toLocaleString("en-US");
         })(),
-        ingameTime: dss.server.dayTime
+        ingameTime: dssData.server.dayTime
             ? [
-                Math.floor(dss.server.dayTime / 3_600 / 1_000).toString().padStart(2, "0"),
+                Math.floor(dssData.server.dayTime / 3_600 / 1_000).toString().padStart(2, "0"),
                 ":",
-                Math.floor((dss.server.dayTime / 60 / 1_000) % 60).toString().padStart(2, "0")
+                Math.floor((dssData.server.dayTime / 60 / 1_000) % 60).toString().padStart(2, "0")
             ].join("")
             : "`unavailable`",
-        timescale: csg.settings?.timeScale._text
-            ? parseFloat(csg.settings.timeScale._text) + "x"
+        timescale: csgData.settings?.timeScale._text
+            ? parseFloat(csgData.settings.timeScale._text) + "x"
             : "`unavailable`",
         playTime: (() => {
-            const time = parseInt(csg.statistics.playTime._text);
+            const time = parseInt(csgData.statistics.playTime._text);
 
             return time
                 ? [
@@ -149,28 +184,27 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
                 ].join("")
                 : "`unavailable`";
         })(),
-        seasons: csg.settings?.growthMode._text
+        seasons: csgData.settings?.growthMode._text
             ? {
                 "1": client.config.fs[serverAcro].isPrivate ? "Yes" : "Yes 🔴",
                 "2": "No",
                 "3": "Paused 🔴",
-            }[csg.settings?.growthMode?._text]
+            }[csgData.settings?.growthMode?._text]
             : "`unavailable`",
-        autosaveInterval: csg.settings?.autoSaveInterval._text
-            ? parseInt(csg.settings?.autoSaveInterval._text).toFixed(0) + " min"
+        autosaveInterval: csgData.settings?.autoSaveInterval._text
+            ? parseInt(csgData.settings?.autoSaveInterval._text).toFixed(0) + " min"
             : "`unavailable`",
         slotUsage: (() => {
-            const num = parseInt(csg.slotSystem?._attributes?.slotUsage);
+            const num = parseInt(csgData.slotSystem?._attributes?.slotUsage);
 
             return Number.isNaN(num) ? "`unavailable`" : num.toLocaleString("en-US");
         })()
     } as const;
 
-    // Stats embed
-    statsEmbed
-        .setAuthor({ name: `${dss.slots.used}/${dss.slots.capacity}` })
-        .setTitle(dss.server.name ? null : "Server is offline")
-        .setDescription(dss.slots.used ? playerInfo.join("\n") : dss.server.name ? "*No players online*" : null)
+    await statsMsgEdit(new EmbedBuilder()
+        .setAuthor({ name: `${dssData.slots.used}/${dssData.slots.capacity}` })
+        .setTitle(dssData.server.name ? null : "Server is offline")
+        .setDescription(dssData.slots.used ? playerInfo.join("\n") : dssData.server.name ? "*No players online*" : null)
         .setFields({
             name: "**Server Statistics**",
             value: [
@@ -178,35 +212,20 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
                 `**In-game time:** ${stats.ingameTime}`,
                 `**Timescale:** ${stats.timescale}`,
                 `**Playtime:** ${stats.playTime}`,
-                `**Map name:** ${dss.server.mapName || "`unavailable`"}`,
+                `**Map name:** ${dssData.server.mapName || "`unavailable`"}`,
                 `**Seasonal growth:** ${stats.seasons}`,
                 `**Autosave interval:** ${stats.autosaveInterval}`,
-                `**Game version:** ${dss.server.version || "`unavailable`"}`,
+                `**Game version:** ${dssData.server.version || "`unavailable`"}`,
                 `**Slot usage:** ${stats.slotUsage}`
             ].join("\n")
-        });
-
-    dss.slots.used === dss.slots.capacity
-        ? statsEmbed.setColor(client.config.EMBED_COLOR_RED)
-        : dss.slots.used > (dss.slots.capacity / 2)
-            ? statsEmbed.setColor(client.config.EMBED_COLOR_YELLOW)
-            : statsEmbed.setColor(client.config.EMBED_COLOR_GREEN);
-
-    await statsMsgEdit();
-    
-    // Logs
-    if (!dss.server.name) {
-        if (fsCacheServer.status === 1) await logChannel.send({ embeds: [serverStatusEmbed("offline")] });
-
-        fsCacheServer.status = 0;
-    } else {
-        if (fsCacheServer.status === 0) {
-            await logChannel.send({ embeds: [serverStatusEmbed("online")] });
-            justStarted = true;
-        }
-
-        fsCacheServer.status = 1;
-    }
+        })
+        .setColor(dssData.slots.used === dssData.slots.capacity
+            ? client.config.EMBED_COLOR_RED
+            : dssData.slots.used > (dssData.slots.capacity / 2)
+                ? client.config.EMBED_COLOR_YELLOW
+                : client.config.EMBED_COLOR_GREEN
+        )
+    );
 
     if (justStarted) return;
     
@@ -254,12 +273,4 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
 
         await logChannel.send({ embeds: [logEmbed(player, true)] });
     }
-    
-    // Update cache
-    if (fsCacheServer.graphPoints.length >= 120) fsCacheServer.graphPoints.shift();
-    if (newPlayers.some(x => x.isAdmin)) fsCacheServer.lastAdmin = now * 1_000;
-
-    fsCacheServer.graphPoints.push(dss.slots.used);
-    fsCacheServer.players = newPlayers;
-    fsCacheServer.isThrottled = false;
 }

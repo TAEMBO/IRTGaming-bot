@@ -133,10 +133,11 @@ export type CombinedContextMenuCommandInteraction =
 
 export type FSCache = Record<string, {
     players: PlayerUsed[];
-    status: 0 | 1 | null;
     lastAdmin: number | null;
     graphPoints: number[];
-    isThrottled: boolean | null;
+    completeRes: boolean | null;
+    state: 0 | 1 | null;
+    throttled: boolean | null;
 }>;
 
 export type YTCache = Record<string, string | null>;

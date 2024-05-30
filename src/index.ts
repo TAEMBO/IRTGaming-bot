@@ -20,10 +20,11 @@ if (client.config.toggles.debug) client.on("debug", console.log);
 for (const { id } of client.config.ytChannels) client.ytCache[id] = null;
 for (const serverAcro of fsKeys) client.fsCache[serverAcro] = {
     players: [],
-    status: null,
     lastAdmin: null,
     graphPoints: [],
-    isThrottled: null
+    completeRes: null,
+    state: null,
+    throttled: null
 };
 
 // Command handler

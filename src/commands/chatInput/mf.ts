@@ -200,7 +200,7 @@ export default new Command<"chatInput">({
                 if (!channel || !/mf-\d/.test(channel.name)) return await interaction.reply("You need to select a channel from the list provided!");
 
                 const farmNumber = channel.name.split("-")[1];
-                const role = interaction.client.getRole(`mffarm${farmNumber}` as MFFarmRoleKeys);
+                const role = interaction.client.getRole(`mfFarm${farmNumber}` as MFFarmRoleKeys);
                 const farmName = role.name.slice(role.name.indexOf("(") + 1, -1);
 
                 await channel.setName(`mf-${farmNumber}-${farmName}`);
@@ -245,7 +245,7 @@ export default new Command<"chatInput">({
                                 type: OverwriteType.Role
                             },
                             {
-                                id: interaction.client.config.mainServer.roles[`mffarm${channel.name.slice(3, 4)}` as MFFarmRoleKeys],
+                                id: interaction.client.config.mainServer.roles[`mfFarm${channel.name.slice(3, 4)}` as MFFarmRoleKeys],
                                 allow: "ViewChannel",
                                 type: OverwriteType.Role
                             },

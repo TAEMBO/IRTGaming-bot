@@ -133,11 +133,11 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
     // Update cache
     fsCacheServer.throttled = toThrottle;
 
-    if (toThrottle) return;
-
     if (fsCacheServer.graphPoints.length >= 120) fsCacheServer.graphPoints.shift();
     
     fsCacheServer.graphPoints.push(dssData.slots.used);
+    
+    if (toThrottle) return;
 
     if (newPlayers.some(x => x.isAdmin)) fsCacheServer.lastAdmin = now * 1_000;
 

@@ -147,7 +147,7 @@ export default new Command<"chatInput">({
                     .setTitle("Ranking leaderboard")
                     .setDescription(`A total of **${messageCountsTotal.toLocaleString("en-US")}** messages have been recorded in this server.`)
                     .addFields({ name: "Top users by messages sent:", value: topUsers })
-                    .setImage("attachment://dailymsgs.png")
+                    .setImage("attachment://dailyMsgs.png")
                     .setColor(interaction.client.config.EMBED_COLOR)]
             });
         } else if (subCmd === "view") {

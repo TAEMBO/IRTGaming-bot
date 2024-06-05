@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Cached } from "src/typings.js";
+import type { Cached } from "src/typings.js";
 
 const model = mongoose.model("dailyMsgs", new mongoose.Schema({
     _id: { type: Number, required: true },

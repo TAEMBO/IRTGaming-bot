@@ -1,7 +1,7 @@
 import { AttachmentBuilder, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import config from "../../config.json" assert { type: "json" };
 import canvas from "@napi-rs/canvas";
-import { DSSExtension, DSSResponse, Feeds, filterUnused } from "farming-simulator-types/2022";
+import { DSSExtension, type DSSResponse, Feeds, filterUnused } from "farming-simulator-types/2022";
 import { Command, FSServers } from "../../structures/index.js";
 import { formatRequestInit, formatTime, isMPStaff, log, lookup } from "../../util/index.js";
 import type { PlayerTimesDocument } from "../../typings.js";

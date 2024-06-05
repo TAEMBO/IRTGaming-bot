@@ -137,20 +137,21 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
     
     fsCacheServer.graphPoints.push(dssData.slots.used);
     
-    if (toThrottle) return;
-
     if (newPlayers.some(x => x.isAdmin)) fsCacheServer.lastAdmin = now * 1_000;
 
     fsCacheServer.players = newPlayers;
 
+    if (toThrottle) return;
+
+    if (csgRes.status === constants.HTTP_STATUS_NO_CONTENT) return await statsMsgEdit(failedEmbed.setImage("https://http.cat/204"), false); // CSG returned empty content
+
+    // Create list of players with time data
     const playerInfo = newPlayers.map(player => {
         const playTimeHrs = Math.floor(player.uptime / 60);
         const playTimeMins = (player.uptime % 60).toString().padStart(2, "0");
 
         return `\`${player.name}\` ${decorators(player, true)} **|** ${playTimeHrs}:${playTimeMins}`;
     });
-
-    if (csgRes.status === constants.HTTP_STATUS_NO_CONTENT) return await statsMsgEdit(failedEmbed.setImage("https://http.cat/204"), false); // CSG returned empty content
 
     // Parse CSG data
     const csgData = jsonFromXML<FSLoopCSG>(await csgRes.text()).careerSavegame;

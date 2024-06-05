@@ -48,7 +48,7 @@ export default new Command<"message">({
                 embed.setTitle("Community Idea\n__**Acknowledged and disliked by staff**__");
 
                 await interaction.targetMessage.edit({ embeds: [embed] });
-                await int.update({ content: "Community idea updated and marked as diliked", components: [] });
+                await int.update({ content: "Community idea updated and marked as disliked", components: [] });
             },
             async cancel() {
                 await int.update({ content: "Command canceled", components: [] });

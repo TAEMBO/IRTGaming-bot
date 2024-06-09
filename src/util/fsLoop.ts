@@ -129,7 +129,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
         
         return false;
     })();
-    
+
     // Update cache
     fsCacheServer.throttled = toThrottle;
 
@@ -139,7 +139,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
     
     if (newPlayers.some(x => x.isAdmin)) fsCacheServer.lastAdmin = now * 1_000;
 
-    fsCacheServer.players = newPlayers;
+    if (!justStarted) fsCacheServer.players = newPlayers;
 
     if (toThrottle) return;
 
@@ -229,7 +229,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
     );
 
     if (justStarted) return;
-    
+
     for (const player of newPlayers.filter(x => oldPlayers.some(y => x.isAdmin && !y.isAdmin && y.name === x.name))) {
         if (!client.whitelist.cache.includes(player.name) && !client.fmList.cache.includes(player.name) && !client.config.fs[serverAcro].isPrivate) {
             await client.getChan("juniorAdminChat").send({ embeds: [new EmbedBuilder()

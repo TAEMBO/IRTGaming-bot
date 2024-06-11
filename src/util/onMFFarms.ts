@@ -1,13 +1,14 @@
 import type { GuildMember } from "discord.js";
+import { FSServers } from "../structures/fsServers.js";
 
 /**
  * @param guildMember The member to check
  * @returns An array of MF farm role IDs that the GuildMember is a member of
  */
-export function onMFFarms(guildMember: GuildMember | null) {
+export function onMFFarms(guildMember: GuildMember | null, serverAcro: string) {
     if (!guildMember) return [];
+    
+    const serverObj = new FSServers(guildMember.client.config.fs).getPrivateOne(serverAcro);
 
-    return guildMember.client.config.mainServer.mfFarmRoles
-        .map(x => guildMember.client.config.mainServer.roles[x])
-        .filter(x => guildMember.roles.cache.has(x));
+    return Object.values(serverObj.roles.farms).filter(x => guildMember.roles.cache.has(x));
 }

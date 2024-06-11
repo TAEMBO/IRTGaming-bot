@@ -1,4 +1,3 @@
-
 import { AttachmentBuilder, ComponentType, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import config from "../../config.json" assert { type: "json" };
 import FTPClient from "ftp";
@@ -28,20 +27,12 @@ export default new Command<"chatInput">({
         
         await lookup({
             async server() {
-                async function checkRole(role: keyof typeof interaction.client.config.mainServer.roles) {
-                    if (!hasRole(interaction.member, role)) await youNeedRole(interaction, role);
-                }
-
                 const chosenServer = interaction.options.getString("server", true);
                 const chosenAction = interaction.options.getString("action", true) as "start" | "stop" | "restart";
                 const cachedServer = interaction.client.fsCache[chosenServer];
                 const configServer = interaction.client.config.fs[chosenServer];
 
-                if (configServer.isPrivate && !hasRole(interaction.member, "mpManager")) {
-                    await checkRole("mfManager");
-                } else await checkRole("mpManager");
-
-                if (interaction.replied) return;
+                if (!interaction.member.roles.cache.hasAny(...configServer.managerRoles)) return await youNeedRole(interaction, "mpManager");
 
                 await interaction.deferReply();
     
@@ -55,7 +46,6 @@ export default new Command<"chatInput">({
                     && chosenAction === "start"
                 ) return await interaction.editReply("Server is already online");
 
-                const serverSelector = `[name="${chosenAction}_server"]`;
                 const browser = await puppeteer.launch();
                 const page = await browser.newPage();
     
@@ -97,7 +87,7 @@ export default new Command<"chatInput">({
                     }
                 })[chosenAction]();
     
-                await page.waitForSelector(serverSelector).then(x => x!.click());
+                await page.waitForSelector(`[name="${chosenAction}_server"]`).then(x => x!.click());
 
                 result += `**${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**`;
 
@@ -105,7 +95,7 @@ export default new Command<"chatInput">({
 
                 await interaction.editReply(result);
                 
-                setTimeout(() => browser.close(), 10_000);
+                setTimeout(() => browser.close(), 5_000);
             },
             async mop() {
                 if (!hasRole(interaction.member, "mpManager")) return await youNeedRole(interaction, "mpManager");
@@ -221,11 +211,7 @@ export default new Command<"chatInput">({
                 const chosenServer = interaction.options.getString("server", true);
                 const server = interaction.client.config.fs[chosenServer];
 
-                if (
-                    server.isPrivate
-                    && !hasRole(interaction.member, "mpManager")
-                    && !hasRole(interaction.member, "mfManager")
-                ) return await youNeedRole(interaction, "mpManager");
+                if (interaction.member.roles.cache.hasAny(...server.managerRoles)) return await youNeedRole(interaction, "mpManager");
 
                 await interaction.deferReply();
 

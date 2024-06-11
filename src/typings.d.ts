@@ -212,6 +212,8 @@ interface FSServerBase {
     readonly code: string;
     /** Whether or not this server is a private server with a password */
     readonly isPrivate: boolean;
+    /** A list of Discord role IDs considered as those who manager this server */
+    readonly managerRoles: Snowflake[];
     /** The FTP details for this server */
     readonly ftp: {
         readonly host: string;
@@ -234,6 +236,12 @@ export interface FSServerPublic extends FSServerBase {
 /** Object data for a private server */
 export interface FSServerPrivate extends FSServerBase {
     readonly isPrivate: true;
+    readonly category: Snowflake;
+    readonly roles: {
+        readonly farmOwner: Snowflake;
+        readonly member: Snowflake;
+        readonly farms: Record<string, Snowflake>;
+    }
 }
 
 export type FSServer = FSServerPrivate | FSServerPublic;
@@ -294,7 +302,6 @@ export interface Config {
         /** The ID of the guild that this bot is for */
         id: Snowflake;
         fsLoopMsgId: Snowflake;
-        mfFarmRoles: Array<keyof Config["mainServer"]["roles"]>;
         mpStaffRoles: Array<keyof Config["mainServer"]["roles"]>;
         dcStaffRoles: Array<keyof Config["mainServer"]["roles"]>;
         roles: Record<keyof typeof config.mainServer.roles, Snowflake>;
@@ -302,8 +309,6 @@ export interface Config {
         categories: Record<keyof typeof config.mainServer.categories, Snowflake>;
     };
 }
-
-export type MFFarmRoleKeys = Config["mainServer"]["mfFarmRoles"][number];
 
 export interface FSLoopCSG {
     readonly careerSavegame: {

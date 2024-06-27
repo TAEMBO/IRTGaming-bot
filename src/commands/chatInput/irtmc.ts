@@ -26,6 +26,11 @@ export default new Command<"chatInput">({
     async run(interaction) {
         if (!hasRole(interaction.member, "irtmcPlayer")) return await youNeedRole(interaction, "irtmcPlayer");
 
+        if (!interaction.client.config.toggles.irtmc) return await interaction.reply({
+            content: "IRTMC commands are currently disabled",
+            ephemeral: true
+        });
+
         const subCmd = interaction.options.getSubcommand() as "players" | "time" | "deaths" | "view";
 
         if (subCmd === "view") {

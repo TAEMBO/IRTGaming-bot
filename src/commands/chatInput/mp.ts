@@ -228,7 +228,7 @@ export default new Command<"chatInput">({
                 const chosenServer = interaction.options.getString("server", true);
                 const ftpLogin = fsServers.getPublicOne(chosenServer).ftp;
 
-                FTP.once("ready", () => FTP.get(ftpLogin.path + "dedicated_server/dedicatedServerConfig.xml", async (err, stream) => {
+                FTP.on("ready", () => FTP.get(ftpLogin.path + "dedicated_server/dedicatedServerConfig.xml", async (err, stream) => {
                     if (err) return await interaction.editReply(err.message);
 
                     const pw = jsonFromXML<DedicatedServerConfig>(await stringifyStream(stream)).gameserver.settings.game_password._text;

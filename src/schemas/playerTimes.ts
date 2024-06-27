@@ -78,7 +78,7 @@ export class PlayerTimes {
         const fsServers = new FSServers(this._client.config.fs);
         const server = fsServers.getPublicOne(serverAcro);
         const stream = await new Promise<NodeJS.ReadableStream>((resolve, reject) => {
-            FTP.once("ready", () => FTP.get(server.ftp.path + "savegame1/farms.xml", (err, stream) => {
+            FTP.on("ready", () => FTP.get(server.ftp.path + "savegame1/farms.xml", (err, stream) => {
                 if (err) {
                     reject(err);
                 } else {

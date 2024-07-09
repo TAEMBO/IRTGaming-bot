@@ -1,6 +1,7 @@
 import { Events } from "discord.js";
 import mongoose from "mongoose";
 import EventSource from "eventsource";
+import cron from "node-cron";
 import { Event, FSServers } from "../structures/index.js";
 import { formatRequestInit, fsLoop, fsLoopAll, jsonFromXML, log } from "../util/index.js";
 import type { MinecraftEvent, MinecraftPlayer, YTCacheFeed } from "../typings.js";
@@ -126,15 +127,14 @@ export default new Event({
     
         log("Blue", `Bot active as ${client.user.tag}`);
     
-        // DailyMsgs loop
-        setInterval(async () => {
+        // DailyMsgs schedule
+        cron.schedule("0 0 * * *", async (date) => {
+            if (typeof date === "string") return;
+
             const formattedDate = Math.floor((Date.now() - client.config.DAILY_MSGS_TIMESTAMP) / 1000 / 60 / 60 / 24);
-    
-            if (client.dailyMsgs.cache.some(x => x._id === formattedDate)) return;
-    
-            const today = Date().toLowerCase();
+            const day = date.getDay();
             const channel = client.getChan("general");
-            const yesterday = client.dailyMsgs.cache.find(x => x._id === formattedDate - 1) ?? { day: formattedDate - 1, count: 0 };
+            const yesterday = client.dailyMsgs.cache.find(x => x._id === formattedDate - 1) ?? { _id: formattedDate - 1, count: 0 };
             let total = (await client.userLevels.data.find()).reduce((a, b) => a + b.messages, 0); // sum of all users
     
             if (total < yesterday.count) total = yesterday.count; // messages went down
@@ -147,13 +147,13 @@ export default new Event({
 
             if (!client.config.toggles.autoResponses) return;
         
-            if (today.startsWith("fri")) {
-                await channel.send(`Weekend begins! ${client.config.DAILY_MSGS_WEEKEND}`);
-            } else if (today.startsWith("sun")) {
-                await channel.send(`It's back to Monday... ${client.config.DAILY_MSGS_MONDAY}`);
+            if (day === 6) {
+                await channel.send(client.config.DAILY_MSGS_WEEKEND);
+            } else if (day === 1) {
+                await channel.send(client.config.DAILY_MSGS_MONDAY);
             } else await channel.send(client.config.DAILY_MSGS_DEFAULT);
-        }, 10_000);
-    
+        }, { timezone: "UCT" });
+
         // Farming Simulator stats loop
         if (client.config.toggles.fsLoop) setInterval(async () => {
             const watchList = await client.watchList.data.find();

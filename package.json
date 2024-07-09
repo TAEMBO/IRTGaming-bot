@@ -22,14 +22,14 @@
     "xml-js": "^1.6.11"
   },
   "devDependencies": {
-    "@eslint/js": "^8.57.0",
+    "@eslint/js": "8.57.0",
     "@types/eventsource": "^1.1.15",
     "@types/ftp": "^0.3.33",
     "@types/ms": "^0.7.31",
-    "@typescript-eslint/eslint-plugin": "^7.2.0",
-    "@typescript-eslint/parser": "^7.2.0",
-    "eslint": "^8.57.0",
-    "globals": "^15.1.0",
+    "@typescript-eslint/eslint-plugin": "7.2.0",
+    "@typescript-eslint/parser": "7.2.0",
+    "eslint": "8.57.0",
+    "globals": "15.1.0",
     "typescript": "^5.4.5"
   }
 }

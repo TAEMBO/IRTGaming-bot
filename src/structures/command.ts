@@ -42,7 +42,7 @@ export class Command<
             : Record<string, any>
         )
     )) {
-        this.autocomplete = (commandData as (typeof commandData & { autocomplete: TAutocomplete })).autocomplete;
+        this.autocomplete = commandData.autocomplete;
         this.run = commandData.run;
         this.data = commandData.data;
 

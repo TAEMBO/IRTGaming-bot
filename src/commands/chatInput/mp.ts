@@ -469,7 +469,7 @@ export default new Command<"chatInput">({
                 .setDescription("the role to add or remove")
                 .addChoices(
                     { name: "Trusted Farmer", value: "trustedFarmer" },
-                    { name: "Farm Manager", value: "mpfarmManager" },
+                    { name: "Farm Manager", value: "mpFarmManager" },
                     { name: "Junior Admin", value: "mpJrAdmin" },
                     { name: "Senior Admin", value: "mpSrAdmin" })
                 .setRequired(true)))

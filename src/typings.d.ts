@@ -237,6 +237,7 @@ export interface FSServerPublic extends FSServerBase {
 export interface FSServerPrivate extends FSServerBase {
     readonly isPrivate: true;
     readonly category: Snowflake;
+    readonly form: string;
     readonly roles: {
         readonly farmOwner: Snowflake;
         readonly member: Snowflake;

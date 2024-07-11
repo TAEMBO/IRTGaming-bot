@@ -343,7 +343,7 @@ export default new Command<"chatInput">({
             async apply() {
                 if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return await youNeedRole(interaction, "mpManager");
 
-                await interaction.reply(interaction.client.config.resources.mfFarmOwnerForm);
+                await interaction.reply(serverObj.form);
             }
         }, interaction.options.getSubcommand());
     },

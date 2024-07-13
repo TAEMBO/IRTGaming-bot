@@ -82,8 +82,15 @@ export default new Event({
         }
     
         // Community idea message management
-        if (message.channelId === message.client.config.mainServer.channels.communityIdeas && message.author.id !== message.client.user.id && !isDCStaff(message.member)) {
-            await tempReply(message, { timeout: 10_000, content: `You can only post community ideas in this channel using the ${message.client.getCommandMention("suggest")} command!` });
+        if (
+            message.channelId === message.client.config.mainServer.channels.communityIdeas
+            && message.author.id !== message.client.user.id
+            && !isDCStaff(message.member)
+        ) {
+            await tempReply(message, {
+                timeout: 10_000,
+                content: `You can only post community ideas in this channel using the ${message.client.getCommandMention("suggest")} command!`
+            });
             await message.delete();
         }
     
@@ -92,9 +99,12 @@ export default new Event({
         if (!message.client.config.toggles.autoResponses) return;
     
         // MF mod voting
-        if (message.channelId === message.client.config.mainServer.channels.mfModSuggestions && message.content.startsWith("http")) {
-            await message.react(":IRT_Upvote:764965325342244915");
-            await message.react(":IRT_Downvote:764965659423408148");
+        if (
+            message.client.fsServers.getPrivateAll().some(x => x[1].modSuggestions === message.channelId)
+            && message.content.includes("http")
+        ) {
+            await message.react("764965325342244915");
+            await message.react("764965659423408148");
         }
     
         // Morning message system
@@ -103,19 +113,22 @@ export default new Event({
             && message.channelId === message.client.config.mainServer.channels.general
         ) {
             const randomEl = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
-            const staffTag = (message.member?.displayName.indexOf(" | ") ?? NaN) < 0 ? undefined : message.member?.displayName.indexOf(" | ");
-            const user = message.member?.displayName.slice(0, staffTag).replace("[LOA] ", "");
+            const staffTag = (message.member!.displayName.indexOf(" | ") ?? NaN) < 0 ? undefined : message.member!.displayName.indexOf(" | ");
+            const displayName = message.member!.displayName.slice(0, staffTag).replace("[LOA] ", "");
             const dayReaction = (() => {
-                const day = new Date().toUTCString().toLowerCase();
-    
-                if (day.startsWith("fri")) {
+                const date = new Date();
+                const utcOffset = date.getTimezoneOffset();
+
+                date.setMinutes(date.getMinutes() + utcOffset);
+
+                if (date.getDay() === 5) {
                     return "It's Friday!!!";
-                } else if (day.startsWith("thu")) {
+                } else if (date.getDay() === 4) {
                     return "It's almost Friday...";
                 } else {
                     return "";
                 }
-            })();
+            });
             const mornRes1 = [
                 "Wakey wakey",
                 "Morning",
@@ -128,7 +141,7 @@ export default new Event({
                 "What's up"
             ];
             const mornRes2 = [
-                dayReaction,
+                dayReaction(),
                 "Here, take a pancake or two 🥞",
                 "Here, take a 🥔",
                 "Here, take a cookie 🍪",
@@ -157,7 +170,7 @@ export default new Event({
                 "Apple for you 🍎"
             ];
     
-            await message.reply(`${randomEl(mornRes1)} ${user}! ${randomEl(mornRes2)}`);
+            await message.reply(`${randomEl(mornRes1)} ${displayName}! ${randomEl(mornRes2)}`);
         }
     }
 });

@@ -2,7 +2,7 @@ import type { Collection, MessageContextMenuCommandInteraction, PresenceData, Sl
 import type config from "./config.json";
 import type TClient from "./client.js";
 import { type PlayerUsed } from "farming-simulator-types/2022";
-import type { Command, RepeatedMessages } from "./structures/index.js";
+import type { Command, FSServers, RepeatedMessages } from "./structures/index.js";
 import type {
     BannedWords,
     DailyMsgs,
@@ -26,6 +26,7 @@ declare module "discord.js" {
         readonly fsCache: FSCache;
         readonly ytCache: YTCache;
         readonly mcCache: MCCache;
+        readonly fsServers: FSServers;
         readonly chatInputCommands: Collection<string, Command<"chatInput">>;
         readonly contextMenuCommands: Collection<string, Command<"message" | "user">>;
         readonly repeatedMessages: RepeatedMessages;
@@ -238,6 +239,7 @@ export interface FSServerPrivate extends FSServerBase {
     readonly isPrivate: true;
     readonly category: Snowflake;
     readonly form: string;
+    readonly modSuggestions: Snowflake;
     readonly roles: {
         readonly farmOwner: Snowflake;
         readonly member: Snowflake;

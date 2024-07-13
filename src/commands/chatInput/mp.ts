@@ -211,7 +211,7 @@ export default new Command<"chatInput">({
                 const chosenServer = interaction.options.getString("server", true);
                 const server = interaction.client.config.fs[chosenServer];
 
-                if (interaction.member.roles.cache.hasAny(...server.managerRoles)) return await youNeedRole(interaction, "mpManager");
+                if (!interaction.member.roles.cache.hasAny(...server.managerRoles)) return await youNeedRole(interaction, "mpManager");
 
                 await interaction.deferReply();
 

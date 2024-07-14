@@ -147,8 +147,6 @@ export default new Command<"chatInput">({
                     { name: "\u200b", value: leaderboard(sortedData.slice(25, 50), false) + "\u200b", inline: true })
             ] });
         } else {
-            if (interaction.client.uptime < 60_000) return await interaction.reply({ content: "Please await another 60 seconds before using this command", ephemeral: true });
-
             const server = interaction.client.config.fs[subCmd];
             const dss = await fetch(server.url + Feeds.dedicatedServerStats(server.code, DSSExtension.JSON), formatRequestInit(2_000, "Stats"))
                 .then(res => res.json() as Promise<DSSResponse>)
@@ -167,7 +165,7 @@ export default new Command<"chatInput">({
             const img = canvas.createCanvas(1500, 750);
             const ctx = img.getContext("2d");
             const graphOrigin = [15, 65];
-            const graphSize = [1300, 630];
+            const graphSize = [1275, 630];
             const nodeWidth = graphSize[0] / (data.length - 1);
 
             ctx.fillStyle = "#36393f";
@@ -279,7 +277,7 @@ export default new Command<"chatInput">({
             }
         
             // draw text
-            ctx.font = "400 " + textSize + "px sans-serif";
+            ctx.font = "400 " + textSize + "px DejaVu Sans";
             ctx.fillStyle = "white";
         
             // highest value

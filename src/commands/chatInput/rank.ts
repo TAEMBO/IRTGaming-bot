@@ -26,7 +26,7 @@ export default new Command<"chatInput">({
             const img = canvas.createCanvas(1500, 750);
             const ctx = img.getContext("2d");
             const graphOrigin = [15, 65];
-            const graphSize = [1300, 630];
+            const graphSize = [1275, 630];
             const nodeWidth = graphSize[0] / (data.length - 1);
 
             ctx.fillStyle = "#36393f";
@@ -115,7 +115,7 @@ export default new Command<"chatInput">({
             }
             
             // draw text
-            ctx.font = "400 " + textSize + "px sans-serif";
+            ctx.font = "400 " + textSize + "DejaVu Sans";
             ctx.fillStyle = "white";
             
             // highest value

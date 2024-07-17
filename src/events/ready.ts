@@ -1,10 +1,9 @@
 import { Events } from "discord.js";
 import mongoose from "mongoose";
-import EventSource from "eventsource";
 import cron from "node-cron";
 import { Event, FSServers } from "../structures/index.js";
 import { formatRequestInit, fsLoop, fsLoopAll, jsonFromXML, log } from "../util/index.js";
-import type { MinecraftEvent, MinecraftPlayer, YTCacheFeed } from "../typings.js";
+import type { YTCacheFeed } from "../typings.js";
 
 export default new Event({
     name: Events.ClientReady,
@@ -62,61 +61,6 @@ export default new Event({
                 ? 0
                 : punishment.endTime - now
             );
-        }
-        
-        // Minecraft SSE implementation
-        if (client.config.toggles.irtmc) {
-            const init = { headers: { Authorization: `Basic ${Buffer.from(client.config.minecraft.authorization).toString("base64")}` } };
-            const mcServerPlayers: MinecraftPlayer[] = await fetch(client.config.minecraft.address + "/players", init).then(x => x.json()).catch(() => []);
-            const source = new EventSource(client.config.minecraft.address + "/events", init);
-    
-            await new Promise<void>(res => source.onopen = () => res()).then(() => log("Purple", "Minecraft SSE connection opened"));
-
-            for (const player of mcServerPlayers) client.mcCache[player.uuid] = { playerName: player.name, joinTime: now };
-
-            source.addEventListener("message", async event => {
-                const data: MinecraftEvent = JSON.parse(event.data);
-
-                switch (data.event) {
-                    case "player-join": {
-                        client.mcCache[data.uuid] = { playerName: data.playerName, joinTime: Date.now() };
-
-                        break;
-                    }
-                    case "player-death": {
-                        await client.mcPlayerTimes.addDeath(data.uuid, data.playerName);
-
-                        break;
-                    }
-                    case "quit": {
-                        const uptime = Date.now() - client.mcCache[data.uuid].joinTime;
-                    
-                        await client.mcPlayerTimes.addPlayerTime(data.uuid, data.playerName, uptime);
-
-                        delete client.mcCache[data.uuid];
-
-                        break;
-                    }
-                    case "log": {
-                        if (
-                            data.thread !== "Server thread"
-                            || data.level !== "INFO"
-                            || data.loggerName !== "net.minecraft.server.MinecraftServer"
-                            || !data.message.startsWith("Done")
-                        ) break; // Narrow for server log event indicating server now online
-
-                        log("Cyan", "IRTMC server rebooted");
-
-                        for (const [uuid, player] of Object.entries(client.mcCache)) {
-                            await client.mcPlayerTimes.addPlayerTime(uuid, player.playerName, Date.now() - player.joinTime);
-
-                            delete client.mcCache[uuid];
-                        }
-
-                        break;
-                    }
-                }
-            });
         }
     
         await client.getChan("taesTestingZone").send([

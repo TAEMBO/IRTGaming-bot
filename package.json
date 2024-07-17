@@ -14,7 +14,6 @@
     "@napi-rs/canvas": "^0.1.51",
     "@types/node-cron": "^3.0.11",
     "discord.js": "^14.15.3",
-    "eventsource": "^2.0.2",
     "farming-simulator-types": "^1.6.0",
     "ftp": "^0.3.10",
     "mongoose": "^8.2.1",
@@ -25,7 +24,6 @@
   },
   "devDependencies": {
     "@eslint/js": "8.57.0",
-    "@types/eventsource": "^1.1.15",
     "@types/ftp": "^0.3.33",
     "@types/ms": "^0.7.31",
     "@typescript-eslint/eslint-plugin": "7.2.0",

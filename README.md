@@ -1,1 +1,1 @@
-Single-guild discord.js bot. Integrates with Farming Simulator, Minecraft, YouTube, MongoDB, FTP, and more.
+Single-guild discord.js bot. Integrates with Farming Simulator, YouTube, MongoDB, FTP, and more.

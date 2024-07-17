@@ -14,13 +14,12 @@ import config from "./config.json" assert { type: "json" };
 import * as Schemas from "./schemas/index.js";
 import { LogColor } from "./util/index.js";
 import { type Command, RepeatedMessages, FSServers } from "./structures/index.js";
-import type { CachedInvite, Config, FSCache, MCCache, YTCache } from "./typings.js";
+import type { CachedInvite, Config, FSCache, YTCache } from "./typings.js";
 
 export default class TClient extends Client<true> {
     public readonly config = config as Config;
     public readonly fsCache: FSCache = {};
     public readonly ytCache: YTCache = {};
-    public readonly mcCache: MCCache = {};
     public readonly fsServers = new FSServers(config.fs);
     public readonly chatInputCommands = new Collection<string, Command<"chatInput">>();
     public readonly contextMenuCommands = new Collection<string, Command<"message" | "user">>();
@@ -35,7 +34,6 @@ export default class TClient extends Client<true> {
     public readonly punishments = new Schemas.Punishments(this);
     public readonly watchList = new Schemas.WatchList();
     public readonly playerTimes = new Schemas.PlayerTimes(this);
-    public readonly mcPlayerTimes = new Schemas.MCPlayerTimes();
     public readonly reminders = new Schemas.Reminders(this);
     public readonly dailyMsgs = new Schemas.DailyMsgs();
 

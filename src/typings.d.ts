@@ -25,7 +25,6 @@ declare module "discord.js" {
         readonly config: Config;
         readonly fsCache: FSCache;
         readonly ytCache: YTCache;
-        readonly mcCache: MCCache;
         readonly fsServers: FSServers;
         readonly chatInputCommands: Collection<string, Command<"chatInput">>;
         readonly contextMenuCommands: Collection<string, Command<"message" | "user">>;
@@ -40,7 +39,6 @@ declare module "discord.js" {
         readonly punishments: Punishments;
         readonly watchList: WatchList;
         readonly playerTimes: PlayerTimes;
-        readonly mcPlayerTimes: MCPlayerTimes;
         readonly reminders: Reminders;
         readonly dailyMsgs: DailyMsgs;
 
@@ -143,53 +141,6 @@ export type FSCache = Record<string, {
 
 export type YTCache = Record<string, string | null>;
 
-export type MCCache = Record<string, {
-    playerName: string;
-    joinTime: number;
-}>;
-
-export interface MinecraftPlayer {
-    uuid: string;
-    name: string;
-}
-
-export interface MinecraftEventPlayerJoin {
-    uuid: string;
-    playerName: string;
-    event: "player-join";
-}
-
-export interface MinecraftEventQuit {
-    uuid: string;
-    playerName: string;
-    event: "quit";
-}
-
-export interface MinecraftEventPlayerDeath {
-    message: string;
-    uuid: string;
-    playerName: string;
-    event: "player-death";
-}
-
-export interface MinecraftEventChat {
-    message: string;
-    uuid: string;
-    playerName: string;
-    event: "chat";
-}
-
-export interface MinecraftEventLog {
-    thread: string;
-    timestamp: number;
-    level: "INFO" | "WARN" | "ERROR" | "TRACE" | "DEBUG";
-    message: string;
-    loggerName: string;
-    event: "log";
-}
-
-export type MinecraftEvent = MinecraftEventPlayerJoin | MinecraftEventQuit | MinecraftEventPlayerDeath | MinecraftEventChat | MinecraftEventLog;
-
 export interface CachedInvite {
     uses: number;
     creator: string;
@@ -275,7 +226,6 @@ export interface Config {
         registerCommands: boolean;
         fsLoop: boolean;
         ytLoop: boolean;
-        irtmc: boolean;
         autoResponses: boolean;
         buttonRoles: boolean;
     };

@@ -116,7 +116,10 @@ export default new Command<"chatInput">({
                 const playerData = playersData.find(x => x._id === player);
 
                 if (playerData) {
-                    const playerTimeData = interaction.client.playerTimes.getTimeData(playerData);
+                    const fsKeys = fsServers.keys();
+                    const playerTimeData = interaction.client.playerTimes
+                        .getTimeData(playerData)
+                        .sort((a, b) => fsKeys.indexOf(a[0]) - fsKeys.indexOf(b[0]));
                     const playerTimeDataTotal = playerTimeData.reduce((x, y) => x + y[1].time, 0);
                     const formattedTimeData = playerTimeData.map(([serverAcro, timeData]) => ({
                         name: serverAcro.toUpperCase(),

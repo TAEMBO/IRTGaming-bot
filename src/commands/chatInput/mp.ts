@@ -32,23 +32,47 @@ export default new Command<"chatInput">({
                 const cachedServer = interaction.client.fsCache[chosenServer];
                 const configServer = interaction.client.config.fs[chosenServer];
 
-                if (!interaction.member.roles.cache.hasAny(...configServer.managerRoles)) return await youNeedRole(interaction, "mpManager");
+                if (!interaction.member.roles.cache.hasAny(...configServer.managerRoles)) return await youNeedRole(interaction, "mpManager");                
 
-                await interaction.deferReply();
-    
-                if (cachedServer.state === null) return await interaction.editReply("Cache not populated, retry in 30 seconds");
+                if (cachedServer.state === null) return await interaction.reply("Cache not populated, retry in 30 seconds");
+                
                 if (
                     cachedServer.state === 0
                     && ["stop", "restart"].includes(chosenAction)
-                ) return await interaction.editReply("Server is already offline");
+                ) return await interaction.reply("Server is already offline");
                 if (
                     cachedServer.state === 1
                     && chosenAction === "start"
-                ) return await interaction.editReply("Server is already online");
+                ) return await interaction.reply("Server is already online");
+
+                if (cachedServer.players.length) {
+                    const message = await interaction.reply({
+                        content: `There are players currently on **${configServer.fullName}**, are you sure you want to manage its state?`,
+                        components: ACK_BUTTONS,
+                        fetchReply: true
+                    });
+
+                    try {
+                        const collected = await message.awaitMessageComponent({
+                            filter: x => x.user.id === interaction.user.id,
+                            time: 15_000,
+                            componentType: ComponentType.Button
+                        });
+
+                        if (collected.customId === "confirm") {
+                            await collected.update({ content: "Continuing...", components: [] });
+                        } else {
+                            return await collected.update({ content: "Command canceled", components: [] });
+                        }
+                    } catch (err) {
+                        return await interaction.editReply({ content: "Command canceled", components: [] });
+                    }
+                    
+                } else await interaction.deferReply();
 
                 const browser = await puppeteer.launch({ args: ["--no-sandbox"] });
                 const page = await browser.newPage();
-    
+                
                 try {
                     await page.goto(configServer.url + Routes.webPageLogin(configServer.username, configServer.password), { timeout: 120_000 });
                 } catch (err: any) {

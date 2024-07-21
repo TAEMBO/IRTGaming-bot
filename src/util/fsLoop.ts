@@ -9,6 +9,7 @@ import {
     type PlayerUsed
 } from "farming-simulator-types/2022";
 import { constants } from "http2";
+import { setTimeout as sleep } from "node:timers/promises";
 import { formatRequestInit, formatTime, jsonFromXML, log } from "./index.js";
 import type { FSLoopCSG, FSServer, WatchListDocument } from "../typings.js";
 
@@ -77,10 +78,12 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
         
         await channel.messages.edit(server.messageId, { embeds: [embed] }).catch(() => log("Red", `FSLoop ${serverAcroUp} invalid msg`));
     };
-
+    
     // Fetch dedicated-server-stats.json
     const dssRes = await fetch(server.url + Feeds.dedicatedServerStats(server.code, DSSExtension.JSON), init)
         .catch(err => log("Red", `${serverAcroUp} DSS ${err.message}`));
+
+    await sleep(500);
 
     // Fetch dedicated-server-savegame.html if DSS was successful
     const csgRes = !dssRes ? null : await fetch(server.url + Feeds.dedicatedServerSavegame(server.code, DSSFile.CareerSavegame), init)
@@ -94,7 +97,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
     if (!dssData.slots) return await statsMsgEdit(failedEmbed, false); // DSS returned empty content
 
     const newPlayers = filterUnused(dssData.slots.players);
-    const oldPlayers = fsCacheServer.players;
+    const oldPlayers = { ...fsCacheServer.players };
 
     if (!dssData.server.name) {
         if (fsCacheServer.state === 1) {
@@ -274,4 +277,6 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
 
         await logChannel.send({ embeds: [logEmbed(player, true)] });
     }
+
+    await sleep(500);
 }

@@ -97,7 +97,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
     if (!dssData.slots) return await statsMsgEdit(failedEmbed, false); // DSS returned empty content
 
     const newPlayers = filterUnused(dssData.slots.players);
-    const oldPlayers = { ...fsCacheServer.players };
+    const oldPlayers = [...fsCacheServer.players];
 
     if (!dssData.server.name) {
         if (fsCacheServer.state === 1) {

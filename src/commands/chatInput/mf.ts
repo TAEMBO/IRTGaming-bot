@@ -93,17 +93,15 @@ export default new Command<"chatInput">({
                 await interaction.respond(displayedRoles.map(({ name, id }) => ({ name, value: id })));
             },
             async "rename-role"() {
-                const displayedRoles = (() => {
-                    if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) {
-                        return [];
-                    } else {
-                        return farmRoles.map(x => ({ name: x.name, value: x.id }));
-                    }
-                })();
-
-                await interaction.respond(displayedRoles);
+                await interaction.respond(
+                    interaction.member.roles.cache.hasAny(...serverObj.managerRoles)
+                        ? farmRoles.map(x => ({ name: x.name, value: x.id }))
+                        : []
+                );
             },
             async "rename-channel"() {
+                if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return await interaction.respond([]);
+
                 const regExp = new RegExp(`${commandName}\\d`);
                 const activeFarmChannels = interaction.client.mainGuild()
                     .channels.cache
@@ -122,6 +120,8 @@ export default new Command<"chatInput">({
                 }));
             },
             async archive() {
+                if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return await interaction.respond([]);
+
                 const regExp = new RegExp(`${commandName}\\d`);
                 const activeFarmChannels = interaction.client.mainGuild()
                     .channels.cache
@@ -258,6 +258,8 @@ export default new Command<"chatInput">({
                 }
             },
             async "rename-role"() {
+                if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return await youNeedRole(interaction, "mpManager");
+
                 const roleId = interaction.options.getString("role", true);
                 const isValidRole = Object.values(serverObj.roles.farms).includes(roleId);
 
@@ -267,33 +269,33 @@ export default new Command<"chatInput">({
                 const name = interaction.options.getString("name", false);
                 const roleNamePrefix = role.name.split(" ").slice(0, 3).join(" ");
 
-                if (name) {
-                    await role.setName(`${roleNamePrefix} (${name})`);
-                } else {
-                    await role.setName(roleNamePrefix);
-                }
+                await role.setName(name ? `${roleNamePrefix} (${name})` : roleNamePrefix);
 
                 await interaction.reply(`${roleNamePrefix} role name set to \`${role.name}\``);
             },
             async "rename-channel"() {
+                if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return await youNeedRole(interaction, "mpManager");
+
                 const channelId = interaction.options.getString("channel", true);
                 const channel = interaction.client.channels.cache.get(channelId) as TextChannel | undefined;
 
-                if (!channel || !new RegExp(`${commandName}\\d`).test(channel.name)) return await interaction.reply("You need to select a channel from the list provided!");
+                if (!channel || !new RegExp(serverAcro).test(channel.name)) return await interaction.reply("You need to select a channel from the list provided!");
 
-                const farmNumber = channel.name.split("-")[1];
+                const farmNumber = channel.name.match(/\d/)![0];
                 const role = interaction.client.mainGuild().roles.cache.get(serverObj.roles.farms[farmNumber])!;
                 const farmName = role.name.slice(role.name.indexOf("(") + 1, -1);
 
-                await channel.setName(`${serverAcro}-${farmNumber}-${farmName}`);
+                await channel.setName(`${channel.name.slice(0, channel.name.indexOf("-"))}-${farmName}`);
 
                 await interaction.reply(`${channel} name successfully updated`);
             },
             async archive() {
+                if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return await youNeedRole(interaction, "mpManager");
+
                 const channelId = interaction.options.getString("channel", true);
                 const channel = interaction.client.channels.cache.get(channelId) as TextChannel | undefined;
 
-                if (!channel || !new RegExp(`${commandName}\\d`).test(channel.name)) return await interaction.reply("You need to select a channel from the list provided!");
+                if (!channel || !new RegExp(serverAcro).test(channel.name)) return await interaction.reply("You need to select a channel from the list provided!");
 
                 const { archived } = interaction.client.config.mainServer.categories;
                 const channelisActive = channel.parentId === serverObj.category;

@@ -73,7 +73,8 @@ for (const [serverAcro, server]  of fsServers.getPrivateAll()) cmdBuilderData.ad
 
 export default new Command<"chatInput">({
     async autocomplete(interaction) {
-        const serverAcro = interaction.commandName + interaction.options.getSubcommandGroup(true);
+        const { commandName } = interaction;
+        const serverAcro = commandName + interaction.options.getSubcommandGroup(true);
         const serverObj = fsServers.getPrivateOne(serverAcro);
         const farmRoles = Object.values(serverObj.roles.farms).map(x => interaction.client.mainGuild().roles.cache.get(x)!);
 
@@ -103,7 +104,7 @@ export default new Command<"chatInput">({
                 await interaction.respond(displayedRoles);
             },
             async "rename-channel"() {
-                const regExp = new RegExp(`${serverAcro}-\\d`);
+                const regExp = new RegExp(`${commandName}\\d`);
                 const activeFarmChannels = interaction.client.mainGuild()
                     .channels.cache
                     .filter(x => regExp.test(x.name) && x.parentId === serverObj.category);
@@ -121,7 +122,7 @@ export default new Command<"chatInput">({
                 }));
             },
             async archive() {
-                const regExp = new RegExp(`${serverAcro}-\\d`);
+                const regExp = new RegExp(`${commandName}\\d`);
                 const activeFarmChannels = interaction.client.mainGuild()
                     .channels.cache
                     .filter(x => regExp.test(x.name) && x.parentId === serverObj.category);
@@ -141,7 +142,8 @@ export default new Command<"chatInput">({
         }, interaction.options.getSubcommand());
     },
     async run(interaction) {
-        const serverAcro = interaction.commandName + interaction.options.getSubcommandGroup(true);
+        const { commandName } = interaction;
+        const serverAcro = commandName + interaction.options.getSubcommandGroup(true);
         const serverObj = fsServers.getPrivateOne(serverAcro);
 
         await lookup({
@@ -277,7 +279,7 @@ export default new Command<"chatInput">({
                 const channelId = interaction.options.getString("channel", true);
                 const channel = interaction.client.channels.cache.get(channelId) as TextChannel | undefined;
 
-                if (!channel || !new RegExp(`${serverAcro}-\\d`).test(channel.name)) return await interaction.reply("You need to select a channel from the list provided!");
+                if (!channel || !new RegExp(`${commandName}\\d`).test(channel.name)) return await interaction.reply("You need to select a channel from the list provided!");
 
                 const farmNumber = channel.name.split("-")[1];
                 const role = interaction.client.mainGuild().roles.cache.get(serverObj.roles.farms[farmNumber])!;
@@ -291,7 +293,7 @@ export default new Command<"chatInput">({
                 const channelId = interaction.options.getString("channel", true);
                 const channel = interaction.client.channels.cache.get(channelId) as TextChannel | undefined;
 
-                if (!channel || !new RegExp(`${serverAcro}-\\d`).test(channel.name)) return await interaction.reply("You need to select a channel from the list provided!");
+                if (!channel || !new RegExp(`${commandName}\\d`).test(channel.name)) return await interaction.reply("You need to select a channel from the list provided!");
 
                 const { archived } = interaction.client.config.mainServer.categories;
                 const channelisActive = channel.parentId === serverObj.category;

@@ -121,13 +121,15 @@ export default new Command<"chatInput">({
                         .getTimeData(playerData)
                         .sort((a, b) => fsKeys.indexOf(a[0]) - fsKeys.indexOf(b[0]));
                     const playerTimeDataTotal = playerTimeData.reduce((x, y) => x + y[1].time, 0);
-                    const formattedTimeData = playerTimeData.map(([serverAcro, timeData]) => ({
-                        name: serverAcro.toUpperCase(),
-                        value: [
-                            `Time - ${formatTime(timeData.time * 60 * 1000, 5, { commas: true })}`,
-                            `Last on - ${interaction.client.fsCache[serverAcro]!.players.some(x => x.name === playerData._id) ? "Right now" : `<t:${timeData.lastOn}:R>`}`
-                        ].join("\n")
-                    }));
+                    const formattedTimeData = playerTimeData
+                        .filter(x => interaction.client.fsCache[x[0]])
+                        .map(([serverAcro, timeData]) => ({
+                            name: serverAcro.toUpperCase(),
+                            value: [
+                                `Time - ${formatTime(timeData.time * 60 * 1000, 5, { commas: true })}`,
+                                `Last on - ${interaction.client.fsCache[serverAcro].players.some(x => x.name === playerData._id) ? "Right now" : `<t:${timeData.lastOn}:R>`}`
+                            ].join("\n")
+                        }));
 
                     await interaction.reply({ embeds: [new EmbedBuilder()
                         .setColor(interaction.client.config.EMBED_COLOR)

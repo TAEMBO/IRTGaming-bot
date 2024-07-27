@@ -2,23 +2,21 @@ import { ContextMenuCommandBuilder } from "discord.js";
 import TClient from "./client.js";
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
-import { fileURLToPath, URL, pathToFileURL } from "node:url";
+import { URL } from "node:url";
 import { Command, Event } from "./structures/index.js";
 import { log } from "./util/index.js";
 
 const client = new TClient();
-const fsKeys = Object.keys(client.config.fs);
-const urlPath = (path: string) => pathToFileURL(fileURLToPath(new URL(path, import.meta.url))).toString();
 
 Error.stackTraceLimit = 25;
 console.log(client.config.toggles);
 console.log(client.config.devWhitelist);
-console.log(fsKeys);
+console.log(client.fsServers.keys());
 
 if (client.config.toggles.debug) client.on("debug", console.log);
 
 for (const { id } of client.config.ytChannels) client.ytCache[id] = null;
-for (const serverAcro of fsKeys) client.fsCache[serverAcro] = {
+for (const serverAcro of client.fsServers.keys()) client.fsCache[serverAcro] = {
     players: [],
     lastAdmin: null,
     graphPoints: [],
@@ -30,7 +28,8 @@ for (const serverAcro of fsKeys) client.fsCache[serverAcro] = {
 // Command handler
 for (const folder of await readdir("commands")) {
     for (const file of await readdir(join("commands", folder))) {
-        const commandFile = (await import(urlPath(join("commands", folder, file)))).default;
+        const commandPath = new URL(join("commands", folder, file), import.meta.url);
+        const { default: commandFile } = await import(commandPath.toString());
 
         if (!(commandFile instanceof Command)) {
             log("Red", `${file} not Command`);
@@ -48,7 +47,8 @@ for (const folder of await readdir("commands")) {
 
 // Event handler
 for (const file of await readdir("events")) {
-    const eventFile = (await import(urlPath(join("events", file)))).default;
+    const eventPath = new URL(join("events", file), import.meta.url);
+    const { default: eventFile } = await import(eventPath.toString());
 
     if (!(eventFile instanceof Event)) {
         log("Red", `${file} not Event`);
@@ -64,4 +64,4 @@ await client.login(client.config.TOKEN);
 process.on("unhandledRejection", client.errorLog.bind(client));
 process.on("uncaughtException", client.errorLog.bind(client));
 process.on("error", client.errorLog.bind(client));
-client.on("error", client.errorLog.bind(client));
+client.on("error", client.errorLog);

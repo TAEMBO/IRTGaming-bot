@@ -16,7 +16,7 @@ import type { FSLoopCSG, FSServer, WatchListDocument } from "../typings.js";
 export async function fsLoop(client: TClient, watchList: WatchListDocument[], server: FSServer, serverAcro: string) {
     if (client.config.toggles.debug) log("Yellow", "FSLoop", serverAcro);
 
-    function decorators(player: PlayerUsed, publicLoc?: boolean) {
+    function decorators(player: PlayerUsed, publicLoc = false) {
         let decorators = player.isAdmin ? ":detective:" : ""; // Tag for if player is admin
     
         decorators += client.fmList.cache.includes(player.name) ? ":farmer:" : ""; // Tag for if player is FM
@@ -33,8 +33,12 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
             .setDescription(`\`${document._id}\` ${joinLog ? "joined" : "left"} **${serverAcroUp}** at <t:${now}:t>`);
 
         if (joinLog) {
-            return embed.setColor(client.config.EMBED_COLOR_GREEN).setFooter({ text: `Reason: ${document.reason}` });
-        } else return embed.setColor(client.config.EMBED_COLOR_RED);
+            embed.setColor(client.config.EMBED_COLOR_GREEN).setFooter({ text: `Reason: ${document.reason}` });
+        } else {
+            embed.setColor(client.config.EMBED_COLOR_RED);
+        }
+
+        return embed;
     }
 
     function logEmbed(player: PlayerUsed, joinLog: boolean) {
@@ -47,8 +51,8 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
 
         if (joinLog && player.uptime > 1) {
             const comparableUptimes = [player.uptime, player.uptime - 1];
-            const candidate = oldPlayers
-                .filter(x => !newPlayers.some(y => y.name === x.name))
+            const candidate = oldPlayerList
+                .filter(x => !newPlayerList.some(y => y.name === x.name))
                 .find(x => comparableUptimes.includes(x.uptime));
 
             if (candidate) description += `\nPossible name change from \`${candidate.name}\``;
@@ -64,11 +68,15 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
     const serverAcroUp = serverAcro.toUpperCase();
     const now = Math.round(Date.now() / 1_000);
     const fsCacheServer = client.fsCache[serverAcro];
+    const justInstantiated = fsCacheServer.state === null;
     const failedEmbed = new EmbedBuilder().setTitle("Host not responding").setColor(client.config.EMBED_COLOR_RED);
     const init = formatRequestInit(7_000, "FSLoop");
     const wlChannel = client.getChan("watchList");
     const logChannel = client.getChan("fsLogs");
-    const serverStatusEmbed = (status: string) => new EmbedBuilder().setTitle(`${serverAcroUp} now ${status}`).setColor(client.config.EMBED_COLOR_YELLOW).setTimestamp();
+    const serverStatusEmbed = (status: string) => new EmbedBuilder()
+        .setTitle(`${serverAcroUp} now ${status}`)
+        .setColor(client.config.EMBED_COLOR_YELLOW)
+        .setTimestamp();
     const statsMsgEdit = async (embed: EmbedBuilder, completeRes = true) => {
         const channel = client.channels.cache.get(server.channelId);
 
@@ -76,7 +84,10 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
 
         if (!(channel instanceof TextChannel)) return log("Red", `FSLoop ${serverAcroUp} invalid channel`);
         
-        await channel.messages.edit(server.messageId, { embeds: [embed] }).catch(() => log("Red", `FSLoop ${serverAcroUp} invalid msg`));
+        await channel.messages.edit(
+            server.messageId,
+            { embeds: [embed] }
+        ).catch(() => log("Red", `FSLoop ${serverAcroUp} invalid msg`));
     };
     
     // Fetch dedicated-server-stats.json and parse
@@ -109,8 +120,8 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
 
     if (!dss || !csg) return await statsMsgEdit(failedEmbed, false); // Request(s) failed
 
-    const newPlayers = filterUnused(dss.slots.players);
-    const oldPlayers = [...fsCacheServer.players];
+    const newPlayerList = filterUnused(dss.slots.players);
+    const oldPlayerList = [...fsCacheServer.players];
 
     if (!dss.server.name) {
         if (fsCacheServer.state === 1) {
@@ -135,7 +146,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
         
         if (justStarted || justStopped) return false;
 
-        if (JSON.stringify(newPlayers) !== JSON.stringify(oldPlayers)) return false;
+        if (JSON.stringify(newPlayerList) !== JSON.stringify(oldPlayerList)) return false;
         
         if (!dss.server.name && fsCacheServer.state === 0) return true;
         
@@ -151,14 +162,14 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
     
     fsCacheServer.graphPoints.push(dss.slots.used);
     
-    if (newPlayers.some(x => x.isAdmin)) fsCacheServer.lastAdmin = now * 1_000;
+    if (newPlayerList.some(x => x.isAdmin)) fsCacheServer.lastAdmin = now * 1_000;
 
-    if (!justStarted) fsCacheServer.players = newPlayers;
+    if (!justStarted) fsCacheServer.players = newPlayerList;
 
     if (toThrottle) return;
 
     // Create list of players with time data
-    const playerInfo = newPlayers.map(player => {
+    const playerInfo = newPlayerList.map(player => {
         const playTimeHrs = Math.floor(player.uptime / 60);
         const playTimeMins = (player.uptime % 60).toString().padStart(2, "0");
 
@@ -196,7 +207,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
         })(),
         seasons: csg.settings?.growthMode._text
             ? {
-                "1": client.config.fs[serverAcro].isPrivate ? "Yes" : "Yes 🔴",
+                "1": server.isPrivate ? "Yes" : "Yes 🔴",
                 "2": "No",
                 "3": "Paused 🔴",
             }[csg.settings?.growthMode?._text]
@@ -213,7 +224,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
 
     await statsMsgEdit(new EmbedBuilder()
         .setAuthor({ name: `${dss.slots.used}/${dss.slots.capacity}` })
-        .setTitle(dss.server.name ? null : "Server is offline")
+        .setTitle(dss.server.name ? server.fullName : "Server is offline")
         .setDescription(dss.slots.used ? playerInfo.join("\n") : dss.server.name ? "*No players online*" : null)
         .setFields({
             name: "**Server Statistics**",
@@ -239,8 +250,14 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
 
     if (justStarted) return;
 
-    for (const player of newPlayers.filter(x => oldPlayers.some(y => x.isAdmin && !y.isAdmin && y.name === x.name))) {
-        if (!client.whitelist.cache.includes(player.name) && !client.fmList.cache.includes(player.name) && !client.config.fs[serverAcro].isPrivate) {
+    for (const player of newPlayerList.filter(x =>
+        oldPlayerList.some(y => x.isAdmin && !y.isAdmin && y.name === x.name)
+    )) {
+        if (
+            !client.whitelist.cache.includes(player.name)
+            && !client.fmList.cache.includes(player.name)
+            && !server.isPrivate
+        ) {
             await client.getChan("juniorAdminChat").send({ embeds: [new EmbedBuilder()
                 .setTitle("UNKNOWN ADMIN LOGIN")
                 .setDescription(`\`${player.name}\` on **${serverAcroUp}** on <t:${now}>`)
@@ -253,7 +270,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
     }
     
     // Filter for players leaving
-    for (const player of oldPlayers.filter(x => !newPlayers.some(y => y.name === x.name))) {
+    for (const player of oldPlayerList.filter(x => !newPlayerList.some(y => y.name === x.name))) {
         const inWl = watchList.find(x => x._id === player.name);
 
         if (inWl) await wlChannel.send({ embeds: [wlEmbed(inWl, false)] });
@@ -264,21 +281,24 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
     }
 
     // Filter for players joining
-    const playerObj = (() => {
-        if (oldPlayers.length) {
-            return newPlayers.filter(x => !oldPlayers.some(y => y.name === x.name));
-        } else if (client.uptime > 50_000) {
-            return newPlayers;
-        }
-    })();
-    
-    if (playerObj) for (const player of playerObj) {
+    const joinedPlayers = oldPlayerList.length
+        ? newPlayerList.filter(x => !oldPlayerList.some(y => y.name === x.name))
+        : justInstantiated
+            ? []
+            : newPlayerList;
+
+    for (const player of joinedPlayers) {
         const inWl = watchList.find(y => y._id === player.name);
 
         if (inWl) {
-            const filterWLPings = client.watchListPings.cache.filter(x => !client.mainGuild().members.cache.get(x)?.roles.cache.has(client.config.mainServer.roles.loa));
+            const filterWLPings = client.watchListPings.cache.filter(x => 
+                !client.mainGuild().members.cache.get(x)?.roles.cache.has(client.config.mainServer.roles.loa)
+            );
 
-            await wlChannel.send({ content: inWl.isSevere ? filterWLPings.map(x => `<@${x}>`).join(" ") : undefined, embeds: [wlEmbed(inWl, true)] });
+            await wlChannel.send({
+                content: inWl.isSevere ? filterWLPings.map(x => `<@${x}>`).join(" ") : undefined,
+                embeds: [wlEmbed(inWl, true)]
+            });
         }
 
         await logChannel.send({ embeds: [logEmbed(player, true)] });

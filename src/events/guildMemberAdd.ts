@@ -1,6 +1,6 @@
 import { EmbedBuilder, Events, time } from "discord.js";
-import { Event } from "../structures/index.js";
-import { formatUser, log } from "../util/index.js";
+import { Event } from "#structures";
+import { formatUser, log } from "#util";
 
 export default new Event({
     name: Events.GuildMemberAdd,

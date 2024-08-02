@@ -1,6 +1,6 @@
 import { Collection, EmbedBuilder, type Message, SlashCommandBuilder, type User } from "discord.js";
-import { Command } from "../../structures/index.js";
-import { formatString } from "../../util/index.js";
+import { Command } from "#structures";
+import { formatString } from "#util";
 
 const possibleMoves = ["rock", "paper", "scissors"] as const;
 const rpsInstances = new Collection<string, RPSInstance>();

@@ -2,7 +2,7 @@ import { type ChatInputCommandInteraction, EmbedBuilder, type GuildMember, type 
 import type TClient from "../client.js";
 import mongoose from "mongoose";
 import ms from "ms";
-import { formatString, formatTime, log, lookup } from "../util/index.js";
+import { formatString, formatTime, log, lookup } from "#util";
 
 const model = mongoose.model("punishments", new mongoose.Schema({
     _id: { type: Number, required: true },

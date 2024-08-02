@@ -1,5 +1,5 @@
 import { EmbedBuilder, ThreadAutoArchiveDuration, SlashCommandBuilder } from "discord.js";
-import { Command } from "../../structures/index.js";
+import { Command } from "#structures";
 
 export default new Command<"chatInput">({
     async run(interaction) {

@@ -10,8 +10,8 @@ import {
 } from "farming-simulator-types/2022";
 import { constants } from "http2";
 import { setTimeout as sleep } from "node:timers/promises";
-import { formatRequestInit, formatTime, jsonFromXML, log } from "./index.js";
-import type { FSLoopCSG, FSServer, WatchListDocument } from "../typings.js";
+import { formatRequestInit, formatTime, jsonFromXML, log } from "#util";
+import type { FSLoopCSG, FSServer, WatchListDocument } from "#typings";
 
 export async function fsLoop(client: TClient, watchList: WatchListDocument[], server: FSServer, serverAcro: string) {
     if (client.config.toggles.debug) log("Yellow", "FSLoop", serverAcro);

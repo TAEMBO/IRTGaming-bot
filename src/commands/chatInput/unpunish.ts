@@ -1,6 +1,6 @@
 import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
-import { Command } from "../../structures/index.js";
-import { hasRole, youNeedRole } from "../../util/index.js";
+import { Command } from "#structures";
+import { hasRole, youNeedRole } from "#util";
 
 export default new Command<"chatInput">({
     async run(interaction) {

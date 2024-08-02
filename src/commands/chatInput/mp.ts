@@ -1,8 +1,9 @@
 import { AttachmentBuilder, ComponentType, EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import config from "../../config.json" assert { type: "json" };
+import config from "#config" assert { type: "json" };
+import { Routes } from "farming-simulator-types/2022";
 import FTPClient from "ftp";
 import puppeteer from "puppeteer"; // Credits to Trolly for suggesting this package
-import { Command, FSServers } from "../../structures/index.js";
+import { Command, FSServers } from "#structures";
 import {
     ACK_BUTTONS,
     hasRole,
@@ -11,9 +12,8 @@ import {
     lookup,
     stringifyStream,
     youNeedRole
-} from "../../util/index.js";
-import type { BanFormat, DedicatedServerConfig, FarmFormat } from "../../typings.js";
-import { Routes } from "farming-simulator-types/2022";
+} from "#util";
+import type { BanFormat, DedicatedServerConfig, FarmFormat } from "#typings";
 
 const fsServers = new FSServers(config.fs);
 const cmdOptionChoices = fsServers.getPublicAll().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));

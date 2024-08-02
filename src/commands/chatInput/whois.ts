@@ -9,9 +9,9 @@ import {
     SlashCommandBuilder,
     time
 } from "discord.js";
-import { Command } from "../../structures/index.js";
-import { formatString, formatUser } from "../../util/index.js";
-import type { ApplicationRPC } from "../../typings.js";
+import { Command } from "#structures";
+import { formatString, formatUser } from "#util";
+import type { ApplicationRPC } from "#typings";
 
 export default new Command<"chatInput">({
     async run(interaction) {

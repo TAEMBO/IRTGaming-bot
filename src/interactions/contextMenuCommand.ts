@@ -1,5 +1,5 @@
-import { ERR_TEXT, log } from "../util/index.js";
-import type { CombinedContextMenuCommandInteraction } from "../typings.js";
+import { ERR_TEXT, log } from "#util";
+import type { CombinedContextMenuCommandInteraction } from "#typings";
 
 export async function handleContextMenuCommand(interaction: CombinedContextMenuCommandInteraction) {
     const command = interaction.client.contextMenuCommands.get(interaction.commandName);

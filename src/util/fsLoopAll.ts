@@ -1,7 +1,7 @@
 import { EmbedBuilder } from "discord.js";
 import type TClient from "../client.js";
-import { log } from "../util/index.js";
-import type { WatchListDocument } from "../typings.js";
+import { log } from "#util";
+import type { WatchListDocument } from "#typings";
 
 export async function fsLoopAll(client: TClient, watchList: WatchListDocument[]) {
     const embed = new EmbedBuilder().setColor(client.config.EMBED_COLOR);

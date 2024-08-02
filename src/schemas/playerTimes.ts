@@ -1,11 +1,11 @@
 import { EmbedBuilder } from "discord.js";
 import type TClient from "../client.js";
-import config from "../config.json" assert { type: "json" };
+import config from "#config" assert { type: "json" };
 import FTPClient from "ftp";
 import mongoose from "mongoose";
-import { FSServers } from "../structures/index.js";
-import { jsonFromXML, log, stringifyStream } from "../util/index.js";
-import type { FarmFormat } from "../typings.js";
+import { FSServers } from "#structures";
+import { jsonFromXML, log, stringifyStream } from "#util";
+import type { FarmFormat } from "#typings";
 
 /** The object that each server will have */
 const serverObj = {

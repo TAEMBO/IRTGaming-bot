@@ -1,5 +1,5 @@
 import type { CommandInteraction } from "discord.js";
-import type { Config } from "../typings.js";
+import type { Config } from "#typings";
 
 /**
  * @param interaction 

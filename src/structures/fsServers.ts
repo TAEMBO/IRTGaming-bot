@@ -1,5 +1,5 @@
-import config from "../config.json" assert { type: "json" };
-import type { Config, FSServer, FSServerPrivate, FSServerPublic, Prettify } from "../typings.js";
+import config from "#config" assert { type: "json" };
+import type { Config, FSServer, FSServerPrivate, FSServerPublic, Prettify } from "#typings";
 
 /** A manager for object data for all Farming Simulator servers */
 export class FSServers {

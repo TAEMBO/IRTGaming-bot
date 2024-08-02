@@ -1,5 +1,5 @@
 import { Events } from "discord.js";
-import { Event } from "../structures/index.js";
+import { Event } from "#structures";
 
 export default new Event({
     name: Events.InviteCreate,

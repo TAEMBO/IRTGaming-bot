@@ -6,8 +6,8 @@ import {
     EmbedBuilder,
     Events
 } from "discord.js";
-import { Event } from "../structures/index.js";
-import { formatDiff, formatUser, hasProfanity, isDCStaff, isMPStaff } from "../util/index.js";
+import { Event } from "#structures";
+import { formatDiff, formatUser, hasProfanity, isDCStaff, isMPStaff } from "#util";
 
 export default new Event({
     name: Events.MessageUpdate,

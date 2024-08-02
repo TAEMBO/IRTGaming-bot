@@ -1,8 +1,16 @@
-import type { Collection, MessageContextMenuCommandInteraction, PresenceData, SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder, Snowflake, UserContextMenuCommandInteraction } from "discord.js";
-import type config from "./config.json";
+import type {
+    Collection,
+    MessageContextMenuCommandInteraction,
+    PresenceData,
+    SlashCommandBuilder,
+    SlashCommandSubcommandsOnlyBuilder,
+    Snowflake,
+    UserContextMenuCommandInteraction
+} from "discord.js";
+import type config from "#config";
 import type TClient from "./client.js";
 import { type PlayerUsed } from "farming-simulator-types/2022";
-import type { Command, FSServers, RepeatedMessages } from "./structures/index.js";
+import type { Command, FSServers, RepeatedMessages } from "#structures";
 import type {
     BannedWords,
     DailyMsgs,
@@ -16,9 +24,9 @@ import type {
     WatchList,
     WatchListPings,
     Whitelist
-} from "./schemas/index.js";
+} from "#schemas";
 
-export type * from "./schemas/index.js";
+export type * from "#schemas";
 
 declare module "discord.js" {
     interface Client {

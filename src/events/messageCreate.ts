@@ -1,6 +1,6 @@
 import { Events } from "discord.js";
-import { Event } from "../structures/index.js";
-import { hasProfanity, isDCStaff, isMPStaff, log, tempReply } from "../util/index.js";
+import { Event } from "#structures";
+import { hasProfanity, isDCStaff, isMPStaff, log, tempReply } from "#util";
 
 export default new Event({
     name: Events.MessageCreate,

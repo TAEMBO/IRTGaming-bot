@@ -7,9 +7,9 @@ import {
     type TextChannel,
     PermissionFlagsBits
 } from "discord.js";
-import config from "../../config.json" assert { type: "json" };
-import { Command, FSServers } from "../../structures/index.js";
-import { ACK_BUTTONS, lookup, onMFFarms, youNeedRole } from "../../util/index.js";
+import config from "#config" assert { type: "json" };
+import { Command, FSServers } from "#structures";
+import { ACK_BUTTONS, lookup, onMFFarms, youNeedRole } from "#util";
 
 const fsServers = new FSServers(config.fs);
 const cmdBuilderData = new SlashCommandBuilder()

@@ -9,11 +9,10 @@ import Discord, {
 } from "discord.js";
 import { exec } from "child_process";
 import fs from "node:fs";
-import { performance } from "perf_hooks";
 import { setTimeout as sleep } from "node:timers/promises";
 import util from "node:util";
-import * as structures from "../../structures/index.js";
-import * as utilities from "../../util/index.js";
+import * as structures from "#structures";
+import * as utilities from "#util";
 
 export default new structures.Command<"chatInput">({
     async run(interaction) {

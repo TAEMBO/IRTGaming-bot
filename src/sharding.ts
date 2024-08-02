@@ -1,5 +1,5 @@
 import { ShardingManager } from "discord.js";
-import { log } from "./util/index.js";
+import { log } from "#util";
 
 const sharder = new ShardingManager("./index.js", { totalShards: 1 });
 

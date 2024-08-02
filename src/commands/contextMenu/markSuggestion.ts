@@ -7,8 +7,8 @@ import {
     ContextMenuCommandBuilder,
     EmbedBuilder
 } from "discord.js";
-import { Command } from "../../structures/index.js";
-import { isDCStaff, isMPStaff, lookup, youNeedRole } from "../../util/index.js";
+import { Command } from "#structures";
+import { isDCStaff, isMPStaff, lookup, youNeedRole } from "#util";
 
 export default new Command<"message">({
     async run(interaction) {

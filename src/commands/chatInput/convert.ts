@@ -1,6 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder, inlineCode } from "discord.js";
-import { Command } from "../../structures/index.js";
-import { formatString } from "../../util/index.js";
+import { Command } from "#structures";
+import { formatString } from "#util";
 
 interface Quantity {
     readonly name: string;

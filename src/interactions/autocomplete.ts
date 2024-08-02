@@ -1,5 +1,5 @@
 import type { AutocompleteInteraction } from "discord.js";
-import { log } from "../util/index.js";
+import { log } from "#util";
 
 export async function handleAutocomplete(interaction: AutocompleteInteraction<"cached">) {
     const command = interaction.client.chatInputCommands.get(interaction.commandName);

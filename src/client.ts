@@ -10,11 +10,11 @@ import {
     type PresenceData,
     TextChannel
 } from "discord.js";
-import config from "./config.json" assert { type: "json" };
-import * as Schemas from "./schemas/index.js";
-import { LogColor } from "./util/index.js";
-import { type Command, RepeatedMessages, FSServers } from "./structures/index.js";
-import type { CachedInvite, Config, FSCache, YTCache } from "./typings.js";
+import config from "#config" assert { type: "json" };
+import * as Schemas from "#schemas";
+import { LogColor } from "#util";
+import { type Command, RepeatedMessages, FSServers } from "#structures";
+import type { CachedInvite, Config, FSCache, YTCache } from "#typings";
 
 export default class TClient extends Client<true> {
     public readonly config = config as Config;

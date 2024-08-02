@@ -5,7 +5,7 @@ import type {
     MessageContextMenuCommandInteraction,
     UserContextMenuCommandInteraction
 } from "discord.js";
-import type { CombinedSlashCommandBuilder } from "../typings.js";
+import type { CombinedSlashCommandBuilder } from "#typings";
 
 /**
  * Creates a new instance of an application command

@@ -1,5 +1,5 @@
 import type { ButtonInteraction } from "discord.js";
-import { lookup } from "../util/index.js";
+import { lookup } from "#util";
 
 export async function handleButton(interaction: ButtonInteraction<"cached">) {
     if (!interaction.customId.includes("-")) return;

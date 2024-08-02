@@ -1,5 +1,5 @@
 import type { ChatInputCommandInteraction } from "discord.js";
-import { ERR_TEXT, log } from "../util/index.js";
+import { ERR_TEXT, log } from "#util";
 
 export async function handleChatInputCommand(interaction: ChatInputCommandInteraction<"cached">) {
     const subCmd = interaction.options.getSubcommand(false);

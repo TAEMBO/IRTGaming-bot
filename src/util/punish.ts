@@ -1,5 +1,5 @@
 import type { ChatInputCommandInteraction } from "discord.js"; 
-import { hasRole, youNeedRole } from "./index.js";
+import { hasRole, youNeedRole } from "#util";
 
 /**
  * @param interaction 

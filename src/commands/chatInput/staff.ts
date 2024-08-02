@@ -1,6 +1,6 @@
 import { EmbedBuilder, type GuildMember, SlashCommandBuilder } from "discord.js";
-import { Command } from "../../structures/index.js";
-import { lookup } from "../../util/index.js";
+import { Command } from "#structures";
+import { lookup } from "#util";
 
 export default new Command<"chatInput">({
     async run(interaction) {

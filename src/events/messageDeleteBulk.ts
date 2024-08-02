@@ -1,6 +1,6 @@
 import { codeBlock, EmbedBuilder, Events } from "discord.js";
-import { LogColor } from "../util/index.js";
-import { Event } from "../structures/index.js";
+import { LogColor } from "#util";
+import { Event } from "#structures";
 
 export default new Event({
     name: Events.MessageBulkDelete,

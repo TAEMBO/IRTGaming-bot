@@ -1,6 +1,6 @@
 import { EmbedBuilder, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
-import { Command } from "../../structures/index.js";
-import { formatString, formatTime, formatUser, lookup } from "../../util/index.js";
+import { Command } from "#structures";
+import { formatString, formatTime, formatUser, lookup } from "#util";
 
 export default new Command<"chatInput">({
     async run(interaction) {

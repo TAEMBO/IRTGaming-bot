@@ -1,6 +1,6 @@
 import { AttachmentBuilder, ComponentType, EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import { Command } from "../../structures/index.js";
-import { ACK_BUTTONS, isMPStaff, lookup, youNeedRole } from "../../util/index.js";
+import { Command } from "#structures";
+import { ACK_BUTTONS, isMPStaff, lookup, youNeedRole } from "#util";
 
 export default new Command<"chatInput">({
     async run(interaction) {

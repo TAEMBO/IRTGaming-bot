@@ -1,6 +1,6 @@
 import { EmbedBuilder, Events } from "discord.js";
-import { formatUser } from "../util/index.js";
-import { Event } from "../structures/index.js";
+import { formatUser } from "#util";
+import { Event } from "#structures";
 
 export default new Event({
     name: Events.VoiceStateUpdate,

@@ -3,8 +3,8 @@ import TClient from "./client.js";
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { URL } from "node:url";
-import { Command, Event } from "./structures/index.js";
-import { log } from "./util/index.js";
+import { Command, Event } from "#structures";
+import { log } from "#util";
 
 const client = new TClient();
 

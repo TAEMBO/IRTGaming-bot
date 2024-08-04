@@ -3,8 +3,7 @@ import type TClient from "../client.js";
 import config from "#config" assert { type: "json" };
 import FTPClient from "ftp";
 import mongoose from "mongoose";
-import { FSServers } from "#structures";
-import { jsonFromXML, log, stringifyStream } from "#util";
+import { fsServers, jsonFromXML, log, stringifyStream } from "#util";
 import type { FarmFormat } from "#typings";
 
 /** The object that each server will have */
@@ -75,7 +74,6 @@ export class PlayerTimes {
     public async fetchFarmData(serverAcro: string) {
         const FTP = new FTPClient();
         const allData = await this.data.find();
-        const fsServers = new FSServers(this._client.config.fs);
         const server = fsServers.getPublicOne(serverAcro);
         const stream = await new Promise<NodeJS.ReadableStream>((resolve, reject) => {
             FTP.on("ready", () => FTP.get(server.ftp.path + "savegame1/farms.xml", (err, stream) => {

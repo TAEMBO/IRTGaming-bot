@@ -1,5 +1,5 @@
 import type { GuildMember } from "discord.js";
-import { FSServers } from "../structures/fsServers.js";
+import { fsServers } from "#util";
 
 /**
  * @param guildMember The member to check
@@ -8,7 +8,7 @@ import { FSServers } from "../structures/fsServers.js";
 export function onMFFarms(guildMember: GuildMember | null, serverAcro: string) {
     if (!guildMember) return [];
     
-    const serverObj = new FSServers(guildMember.client.config.fs).getPrivateOne(serverAcro);
+    const serverObj = fsServers.getPrivateOne(serverAcro);
 
     return Object.values(serverObj.roles.farms).filter(x => guildMember.roles.cache.has(x));
 }

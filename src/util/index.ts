@@ -7,6 +7,7 @@ export * from "./formatTime.js";
 export * from "./formatUser.js";
 export * from "./fsLoop.js";
 export * from "./fsLoopAll.js";
+export * from "./fsServers.js";
 export * from "./hasProfanity.js";
 export * from "./hasRole.js";
 export * from "./isDCStaff.js";

@@ -1,6 +1,6 @@
 import { Events } from "discord.js";
 import { Event } from "#structures";
-import { log, tempReply } from "#util";
+import { fsServers, log, tempReply } from "#util";
 
 export default new Event({
     name: Events.MessageReactionAdd,
@@ -12,7 +12,7 @@ export default new Event({
             )
             || (
                 reaction.message.author?.id === user.id
-                && reaction.client.fsServers.getPrivateAll().some(x => x[1].modSuggestions === reaction.message.channelId)
+                && fsServers.getPrivateAll().some(x => x[1].modSuggestions === reaction.message.channelId)
             )
         ) {
             await reaction.users.remove(user.id);

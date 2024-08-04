@@ -1,12 +1,10 @@
 import { AttachmentBuilder, EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import config from "#config" assert { type: "json" };
 import canvas from "@napi-rs/canvas";
 import { DSSExtension, type DSSResponse, Feeds, filterUnused } from "farming-simulator-types/2022";
-import { Command, FSServers } from "#structures";
-import { formatRequestInit, formatTime, isMPStaff, log, lookup } from "#util";
+import { Command } from "#structures";
+import { formatRequestInit, formatTime, fsServers, isMPStaff, log, lookup } from "#util";
 import type { PlayerTimesDocument } from "#typings";
 
-const fsServers = new FSServers(config.fs);
 const cmdBuilderData = new SlashCommandBuilder()
     .setName("stats")
     .setDescription("Gets info on an FS22 server")

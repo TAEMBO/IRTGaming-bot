@@ -1,6 +1,6 @@
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import { Command, FSServers } from "#structures";
-import { isMPStaff } from "#util";
+import { Command } from "#structures";
+import { fsServers, isMPStaff } from "#util";
 
 export default new Command<"chatInput">({
     async run(interaction) {
@@ -8,8 +8,6 @@ export default new Command<"chatInput">({
             interaction.channel!.parentId !== interaction.client.config.mainServer.categories.activeTickets
             && !isMPStaff(interaction.member)
         ) return await interaction.reply({ content: "You cannot use this command here", ephemeral: true });
-
-        const fsServers = new FSServers(interaction.client.config.fs);
 
         await interaction.reply({ embeds: [new EmbedBuilder()
             .setTitle("MP Support - Ban Appeal")

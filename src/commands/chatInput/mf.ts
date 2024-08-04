@@ -7,11 +7,9 @@ import {
     type TextChannel,
     PermissionFlagsBits
 } from "discord.js";
-import config from "#config" assert { type: "json" };
-import { Command, FSServers } from "#structures";
-import { ACK_BUTTONS, lookup, onMFFarms, youNeedRole } from "#util";
+import { Command } from "#structures";
+import { ACK_BUTTONS, fsServers, lookup, onMFFarms, youNeedRole } from "#util";
 
-const fsServers = new FSServers(config.fs);
 const cmdBuilderData = new SlashCommandBuilder()
     .setName("mf")
     .setDescription("MF management");

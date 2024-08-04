@@ -33,7 +33,6 @@ declare module "discord.js" {
         readonly config: Config;
         readonly fsCache: FSCache;
         readonly ytCache: YTCache;
-        readonly fsServers: FSServers;
         readonly chatInputCommands: Collection<string, Command<"chatInput">>;
         readonly contextMenuCommands: Collection<string, Command<"message" | "user">>;
         readonly repeatedMessages: RepeatedMessages;

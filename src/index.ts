@@ -4,19 +4,19 @@ import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { URL } from "node:url";
 import { Command, Event } from "#structures";
-import { log } from "#util";
+import { fsServers, log } from "#util";
 
 const client = new TClient();
 
 Error.stackTraceLimit = 25;
 console.log(client.config.toggles);
 console.log(client.config.devWhitelist);
-console.log(client.fsServers.keys());
+console.log(fsServers.keys());
 
 if (client.config.toggles.debug) client.on("debug", console.log);
 
 for (const { id } of client.config.ytChannels) client.ytCache[id] = null;
-for (const serverAcro of client.fsServers.keys()) client.fsCache[serverAcro] = {
+for (const serverAcro of fsServers.keys()) client.fsCache[serverAcro] = {
     players: [],
     lastAdmin: null,
     graphPoints: [],

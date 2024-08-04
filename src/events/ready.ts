@@ -1,15 +1,14 @@
 import { Events } from "discord.js";
 import mongoose from "mongoose";
 import cron from "node-cron";
-import { Event, FSServers } from "#structures";
-import { formatRequestInit, fsLoop, fsLoopAll, jsonFromXML, log } from "#util";
+import { Event } from "#structures";
+import { formatRequestInit, fsLoop, fsLoopAll, fsServers, jsonFromXML, log } from "#util";
 import type { YTCacheFeed } from "#typings";
 
 export default new Event({
     name: Events.ClientReady,
     once: true,
     async run(client) {
-        const fsServers = new FSServers(client.config.fs);
         const guild = client.mainGuild();
         const now = Date.now();
 

@@ -1,10 +1,9 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import { Command, FSServers } from "#structures";
-import { lookup } from "#util";
+import { Command } from "#structures";
+import { fsServers, lookup } from "#util";
 
 export default new Command<"chatInput">({
     async run(interaction) {
-        const fsServers = new FSServers(interaction.client.config.fs);
         const isFromTicket = interaction.channel!.parentId === interaction.client.config.mainServer.categories.activeTickets;
         const content = interaction.options.getUser("user", false)?.toString() || "";
 

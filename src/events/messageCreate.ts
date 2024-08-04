@@ -1,6 +1,13 @@
 import { Events } from "discord.js";
 import { Event } from "#structures";
-import { hasProfanity, isDCStaff, isMPStaff, log, tempReply } from "#util";
+import {
+    fsServers,
+    hasProfanity,
+    isDCStaff,
+    isMPStaff,
+    log,
+    tempReply
+} from "#util";
 
 export default new Event({
     name: Events.MessageCreate,
@@ -100,7 +107,7 @@ export default new Event({
     
         // MF mod voting
         if (
-            message.client.fsServers.getPrivateAll().some(x => x[1].modSuggestions === message.channelId)
+            fsServers.getPrivateAll().some(x => x[1].modSuggestions === message.channelId)
             && message.content.includes("http")
         ) {
             await message.react("764965325342244915");

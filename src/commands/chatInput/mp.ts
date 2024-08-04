@@ -1,11 +1,11 @@
 import { AttachmentBuilder, ComponentType, EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import config from "#config" assert { type: "json" };
 import { Routes } from "farming-simulator-types/2022";
 import FTPClient from "ftp";
 import puppeteer from "puppeteer"; // Credits to Trolly for suggesting this package
-import { Command, FSServers } from "#structures";
+import { Command } from "#structures";
 import {
     ACK_BUTTONS,
+    fsServers,
     hasRole,
     isMPStaff,
     jsonFromXML,
@@ -15,7 +15,6 @@ import {
 } from "#util";
 import type { BanFormat, DedicatedServerConfig, FarmFormat } from "#typings";
 
-const fsServers = new FSServers(config.fs);
 const cmdOptionChoices = fsServers.getPublicAll().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));
 
 export default new Command<"chatInput">({

@@ -13,14 +13,13 @@ import {
 import config from "#config" assert { type: "json" };
 import * as Schemas from "#schemas";
 import { LogColor } from "#util";
-import { type Command, RepeatedMessages, FSServers } from "#structures";
+import { type Command, RepeatedMessages } from "#structures";
 import type { CachedInvite, Config, FSCache, YTCache } from "#typings";
 
 export default class TClient extends Client<true> {
     public readonly config = config as Config;
     public readonly fsCache: FSCache = {};
     public readonly ytCache: YTCache = {};
-    public readonly fsServers = new FSServers(config.fs);
     public readonly chatInputCommands = new Collection<string, Command<"chatInput">>();
     public readonly contextMenuCommands = new Collection<string, Command<"message" | "user">>();
     public readonly repeatedMessages = new RepeatedMessages(this);

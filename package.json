@@ -10,6 +10,12 @@
     "lint": "eslint ./src",
     "build": "npm run lint && tsc"
   },
+  "imports": {
+    "#util": "./dist/util/index.js",
+    "#structures": "./dist/structures/index.js",
+    "#schemas": "./dist/schemas/index.js",
+    "#config": "./dist/config.json"
+  },
   "dependencies": {
     "@napi-rs/canvas": "^0.1.51",
     "@types/node-cron": "^3.0.11",

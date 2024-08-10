@@ -1,22 +1,18 @@
 import { EmbedBuilder } from "discord.js";
 import type TClient from "../client.js";
-import config from "#config" assert { type: "json" };
 import FTPClient from "ftp";
 import mongoose from "mongoose";
 import { fsServers, jsonFromXML, log, stringifyStream } from "#util";
 import type { FarmFormat } from "#typings";
 
-/** The object that each server will have */
+/** The object for each server a player has been on */
 const serverObj = {
     time: { type: Number, required: true },
     lastOn: { type: Number, required: true }
 };
 
-/** The base object to contain all server object data */
-const serversObj: Record<string, { type: typeof serverObj, _id: boolean }> = {};
-
-// Populate the base object with all server objects by referencing config
-for (const serverAcro of Object.keys(config.fs)) serversObj[serverAcro] = { type: serverObj, _id: false };
+/** The object containing all server data for a given player */
+const serversObj = Object.fromEntries(fsServers.keys().map(x => [x, { type: serverObj, _id: false }]));
 
 const model = mongoose.model("playerTimes", new mongoose.Schema({
     _id: { type: String, required: true },
@@ -55,6 +51,7 @@ export class PlayerTimes {
         const playerData = await this.data.findById(playerName);
 
         if (playerData) {
+            playerData.toObject();
             playerData.servers[serverAcro] = {
                 time: (playerData.servers[serverAcro]?.time ?? 0) + playerTime,
                 lastOn: now

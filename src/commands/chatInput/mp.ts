@@ -1,8 +1,7 @@
 import { AttachmentBuilder, ComponentType, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { Routes } from "farming-simulator-types/2022";
-import FTPClient from "ftp";
 import puppeteer from "puppeteer"; // Credits to Trolly for suggesting this package
-import { Command } from "#structures";
+import { Command, FTPActions } from "#structures";
 import {
     ACK_BUTTONS,
     fsServers,
@@ -10,7 +9,6 @@ import {
     isMPStaff,
     jsonFromXML,
     lookup,
-    stringifyStream,
     youNeedRole
 } from "#util";
 import type { BanFormat, DedicatedServerConfig, FarmFormat } from "#typings";
@@ -21,7 +19,6 @@ export default new Command<"chatInput">({
     async run(interaction) {
         if (!isMPStaff(interaction.member)) return await youNeedRole(interaction, "mpStaff");
 
-        const FTP = new FTPClient();
         const now = Date.now();
         
         await lookup({
@@ -125,66 +122,57 @@ export default new Command<"chatInput">({
 
                 const chosenServer = interaction.options.getString("server", true);
                 const chosenAction = interaction.options.getString("action", true) as "items.xml" | "players.xml";
-                const ftpLogin = fsServers.getPublicOne(chosenServer).ftp;
                 
                 if (interaction.client.fsCache[chosenServer].state === 1) return await interaction.reply(`You cannot mop files from **${chosenServer.toUpperCase()}** while it is online`);
                 
                 await interaction.deferReply();
-    
-                FTP.on("ready", () => FTP.delete(ftpLogin.path + `savegame1/${chosenAction}`, async (err) => {
-                    if (err) return await interaction.editReply(err.message);
 
-                    await interaction.editReply(`Successfully deleted **${chosenAction}** from **${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**`);
-                    FTP.end();
-                })).connect(ftpLogin);
+                await new FTPActions(fsServers.getPublicOne(chosenServer).ftp).delete(`savegame1/${chosenAction}`);
+
+                await interaction.editReply(`Successfully deleted **${chosenAction}** from **${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**`);
             },
             async bans() {
                 const chosenServer = interaction.options.getString("server", true);
                 const chosenAction = interaction.options.getString("action", true) as "dl" | "ul";
-                const ftpLogin = fsServers.getPublicOne(chosenServer).ftp;
-    
-                await interaction.deferReply();
+                const ftpActions = new FTPActions(fsServers.getPublicOne(chosenServer).ftp);
     
                 if (chosenAction === "dl") {
-                    FTP.on("ready", () => FTP.get(ftpLogin.path + "blockedUserIds.xml", async (err, stream) => {
-                        if (err) return await interaction.editReply(err.message);
+                    await interaction.deferReply();
 
-                        await interaction.editReply({ files: [new AttachmentBuilder(Buffer.from(await stringifyStream(stream)), { name: "blockedUserIds.xml" })] });
-                        stream.once("close", FTP.end);
-                    })).connect(ftpLogin);
-                } else {
-                    if (!hasRole(interaction.member, "mpManager")) return await youNeedRole(interaction, "mpManager");
-                    
-                    let data;
-                    const banAttachment = interaction.options.getAttachment("bans");
+                    const data = await ftpActions.get("blockedUserIds.xml");
 
-                    if (!banAttachment) return await interaction.editReply("Canceled: A ban file must be supplied");
-    
-                    const banData = await (await fetch(banAttachment.url)).text();
-
-                    try {
-                        data = jsonFromXML<BanFormat>(banData);
-                    } catch (err) {
-                        return await interaction.editReply("Canceled: Improper file (not XML)");
-                    }
-    
-                    if (!data.blockedUserIds?.user[0]?._attributes?.displayName) return await interaction.editReply("Canceled: Improper file (data format)");
-    
-                    FTP.on("ready", () => FTP.put(banData, ftpLogin.path + "blockedUserIds.xml", async error => {
-                        if (error) {
-                            await interaction.editReply(error.message);
-                        } else await interaction.editReply(`Successfully uploaded ban file for ${chosenServer.toUpperCase()} after **${Date.now() - now}ms**`);
-                        
-                        FTP.end();
-                    })).connect(ftpLogin);
+                    return await interaction.editReply({ files: [new AttachmentBuilder(Buffer.from(data), { name: "blockedUserIds.xml" })] });
                 }
+                
+                if (!hasRole(interaction.member, "mpManager")) return await youNeedRole(interaction, "mpManager");
+
+                await interaction.deferReply();
+
+                let data;
+                const banAttachment = interaction.options.getAttachment("bans");
+
+                if (!banAttachment) return await interaction.editReply("Canceled: A ban file must be supplied");
+    
+                const banData = await (await fetch(banAttachment.url)).text();
+
+                try {
+                    data = jsonFromXML<BanFormat>(banData);
+                } catch (err) {
+                    return await interaction.editReply("Canceled: Improper file (not XML)");
+                }
+    
+                if (!data.blockedUserIds?.user[0]?._attributes?.displayName) return await interaction.editReply("Canceled: Improper file (data format)");
+
+                await ftpActions.put(banData, "blockedUserIds.xml");
+
+                await interaction.editReply(`Successfully uploaded ban file for ${chosenServer.toUpperCase()} after **${Date.now() - now}ms**`);
+                
             },
             async search() {
                 await interaction.deferReply();
                 
                 const chosenServer = interaction.options.getString("server", true);
                 const name = interaction.options.getString("name", true);
-                const ftpLogin = fsServers.getPublicOne(chosenServer).ftp;
 
                 function permIcon(perm: string, key: string) {
                     if (perm === "true") {
@@ -200,22 +188,16 @@ export default new Command<"chatInput">({
                     } else return perm;
                 }
 
-                FTP.on("ready", () => FTP.get(ftpLogin.path + "savegame1/farms.xml", async (err, stream) => {
-                    if (err) return await interaction.editReply(err.message);
+                const data = await new FTPActions(fsServers.getPublicOne(chosenServer).ftp).get("savegame1/farms.xml");
+                const farmData = jsonFromXML<FarmFormat>(data);
+                const playerData = farmData.farms.farm[0].players.player.find(x =>
+                    (name.length === 44 ? x._attributes.uniqueUserId : x._attributes.lastNickname) === name
+                );
 
-                    const farmData = jsonFromXML<FarmFormat>(await stringifyStream(stream));
-                    const playerData = farmData.farms.farm[0].players.player.find(x => {
-                        if (name.length === 44) {
-                            return x._attributes.uniqueUserId === name;
-                        } else return x._attributes.lastNickname === name;
-                    });
-
-                    if (playerData) {
-                        await interaction.editReply("```\n" + Object.entries(playerData._attributes).map(x => x[0].padEnd(18, " ") + permIcon(x[1], x[0])).join("\n") + "```");
-                    } else await interaction.editReply("No green farm data found with that name/UUID");
-
-                    stream.once("close", FTP.end);
-                })).connect(ftpLogin);
+                await interaction.editReply(playerData
+                    ? "```\n" + Object.entries(playerData._attributes).map(x => x[0].padEnd(18, " ") + permIcon(x[1], x[0])).join("\n") + "```"
+                    : "No green farm data found with that name/UUID"
+                );
             },
             async pair() {
                 const uuid = interaction.options.getString("uuid", true);
@@ -232,36 +214,27 @@ export default new Command<"chatInput">({
             },
             async farms() {
                 const chosenServer = interaction.options.getString("server", true);
-                const server = interaction.client.config.fs[chosenServer];
+                const serverConfig = interaction.client.config.fs[chosenServer];
 
-                if (!interaction.member.roles.cache.hasAny(...server.managerRoles)) return await youNeedRole(interaction, "mpManager");
+                if (!interaction.member.roles.cache.hasAny(...serverConfig.managerRoles)) return await youNeedRole(interaction, "mpManager");
 
                 await interaction.deferReply();
 
-                FTP.on("ready", () => FTP.get(server.ftp.path + "savegame1/farms.xml", async (err, stream) => {
-                    if (err) return await interaction.editReply(err.message);
+                const data = await new FTPActions(serverConfig.ftp).get("savegame1/farms.xml");
 
-                    await interaction.editReply({ files: [new AttachmentBuilder(Buffer.from(await stringifyStream(stream)), { name: "farms.xml" })] });
-                    stream.once("close", FTP.end);
-                })).connect(server.ftp);
+                await interaction.editReply({ files: [new AttachmentBuilder(Buffer.from(data), { name: "farms.xml" })] });
             },
             async password() {
                 await interaction.deferReply();
 
                 const chosenServer = interaction.options.getString("server", true);
-                const ftpLogin = fsServers.getPublicOne(chosenServer).ftp;
+                const data = await new FTPActions(fsServers.getPublicOne(chosenServer).ftp).get("dedicated_server/dedicatedServerConfig.xml");
+                const pw = jsonFromXML<DedicatedServerConfig>(data).gameserver.settings.game_password._text;
 
-                FTP.on("ready", () => FTP.get(ftpLogin.path + "dedicated_server/dedicatedServerConfig.xml", async (err, stream) => {
-                    if (err) return await interaction.editReply(err.message);
-
-                    const pw = jsonFromXML<DedicatedServerConfig>(await stringifyStream(stream)).gameserver.settings.game_password._text;
-
-                    if (pw) {
-                        await interaction.editReply(`Current password for **${chosenServer.toUpperCase()}** is \`${pw}\``);
-                    } else await interaction.editReply(`**${chosenServer.toUpperCase()}** doesn"t currently have a password set`);
-
-                    stream.once("close", FTP.end);
-                })).connect(ftpLogin);
+                await interaction.editReply(pw
+                    ? `Current password for **${chosenServer.toUpperCase()}**  \`${pw}\``
+                    : `Password not set for **${chosenServer.toUpperCase()}**`
+                );
             },
             async roles() {
                 if (!hasRole(interaction.member, "mpManager")) return await youNeedRole(interaction, "mpManager");

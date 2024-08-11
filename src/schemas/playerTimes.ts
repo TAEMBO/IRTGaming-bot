@@ -1,9 +1,9 @@
 import { EmbedBuilder } from "discord.js";
 import type TClient from "../client.js";
-import FTPClient from "ftp";
 import mongoose from "mongoose";
-import { fsServers, jsonFromXML, log, stringifyStream } from "#util";
+import { fsServers, jsonFromXML, log } from "#util";
 import type { FarmFormat } from "#typings";
+import { FTPActions } from "#structures";
 
 /** The object for each server a player has been on */
 const serverObj = {
@@ -69,22 +69,13 @@ export class PlayerTimes {
     }
 
     public async fetchFarmData(serverAcro: string) {
-        const FTP = new FTPClient();
         const allData = await this.data.find();
         const server = fsServers.getPublicOne(serverAcro);
-        const stream = await new Promise<NodeJS.ReadableStream>((resolve, reject) => {
-            FTP.on("ready", () => FTP.get(server.ftp.path + "savegame1/farms.xml", (err, stream) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(stream);
-                }
-            })).connect(server.ftp);
-        });
+        const data = await new FTPActions(server.ftp).get("savegame1/farms.xml");
 
         log("Yellow", `Downloaded farms.xml from ${serverAcro}, crunching...`);
 
-        const farmData = jsonFromXML<FarmFormat>(await stringifyStream(stream));
+        const farmData = jsonFromXML<FarmFormat>(data);
         let changedNameCount = 0;
         let addedUuidCount = 0;
 
@@ -147,6 +138,5 @@ export class PlayerTimes {
         ].join("\n"));
 
         log("Yellow", "Finished crunching farms.xml data");
-        stream.once("close", FTP.end);
     }
 }

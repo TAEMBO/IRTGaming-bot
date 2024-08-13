@@ -8,14 +8,9 @@ export class Event<TEvent extends keyof ClientEvents> {
     /** The function to be ran when this event is emitted */
     public readonly run: (...args: ClientEvents[TEvent]) => Promise<any>;
 
-    public constructor(eventData: {
-        name: TEvent;
-        once?: boolean;
-        run: (...args: ClientEvents[TEvent]) => Promise<any>;
-    }) {
+    public constructor(eventData: Event<TEvent>) {
         this.name = eventData.name;
+        this.once = eventData.once;
         this.run = eventData.run;
-
-        if (eventData.once) this.once = eventData.once;
     }
 }

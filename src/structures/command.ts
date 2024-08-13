@@ -33,19 +33,9 @@ export class Command<
     /** The amount of times this command has been used */
     public uses = 0;
 
-    public constructor(commandData: (
-        {
-            readonly data: TBuilder;
-            run(interaction: TInteraction): Promise<any>;
-        } & (TCommand extends "chatInput"
-            ? { autocomplete?: TAutocomplete }
-            : Record<string, any>
-        )
-    )) {
+    public constructor(commandData: Omit<Command<TCommand, TBuilder, TInteraction, TAutocomplete>, "uses">) {
         this.autocomplete = commandData.autocomplete;
         this.run = commandData.run;
         this.data = commandData.data;
-
-        if (!this.autocomplete) delete this.autocomplete;
     }
 }

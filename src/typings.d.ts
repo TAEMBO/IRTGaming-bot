@@ -2,7 +2,7 @@ import type {
     Collection,
     MessageContextMenuCommandInteraction,
     PresenceData,
-    SlashCommandBuilder,
+    SlashCommandOptionsOnlyBuilder,
     SlashCommandSubcommandsOnlyBuilder,
     Snowflake,
     UserContextMenuCommandInteraction
@@ -10,12 +10,11 @@ import type {
 import type config from "#config";
 import type TClient from "./client.js";
 import { type PlayerUsed } from "farming-simulator-types/2022";
-import type { Command, FSServers, RepeatedMessages } from "#structures";
+import type { Command, RepeatedMessages } from "#structures";
 import type {
     BannedWords,
     DailyMsgs,
     FMList,
-    MCPlayerTimes,
     PlayerTimes,
     Punishments,
     Reminders,

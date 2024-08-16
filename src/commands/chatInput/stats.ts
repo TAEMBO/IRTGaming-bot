@@ -309,15 +309,6 @@ export default new Command<"chatInput">({
             const playerInfo: string[] = [];
             const watchList = await interaction.client.watchList.data.find();
             const players = filterUnused(dss.slots.players);
-            const color = (() => {
-                if (dss.slots.used === dss.slots.capacity) {
-                    return interaction.client.config.EMBED_COLOR_RED;
-                } else if (dss.slots.used > 9) {
-                    return interaction.client.config.EMBED_COLOR_YELLOW;
-                } else {
-                    return interaction.client.config.EMBED_COLOR_GREEN;
-                }
-            })();
         
             for (const player of players) {
                 const playTimeHrs = Math.floor(player.uptime / 60);
@@ -340,9 +331,16 @@ export default new Command<"chatInput">({
                 .setTitle(dss.server.name || "Offline")
                 .setDescription(dss.slots.used ? playerInfo.join("\n"): "*No players online*")
                 .setImage("attachment://FSStats.png")
-                .setColor(color);
+                .setColor(dss.slots.used === dss.slots.capacity
+                    ? interaction.client.config.EMBED_COLOR_RED
+                    : dss.slots.used > (dss.slots.capacity / 2)
+                        ? interaction.client.config.EMBED_COLOR_YELLOW
+                        : interaction.client.config.EMBED_COLOR_GREEN
+                );
 
-            if (!players.some(x => x.isAdmin) && interaction.client.fsCache[subCmd].lastAdmin) embed.setTimestamp(interaction.client.fsCache[subCmd].lastAdmin).setFooter({ text: "Admin last on" });
+            if (!players.some(x => x.isAdmin) && interaction.client.fsCache[subCmd].lastAdmin) embed
+                .setTimestamp(interaction.client.fsCache[subCmd].lastAdmin)
+                .setFooter({ text: "Admin last on" });
         
             await interaction.reply({ embeds: [embed], files: [new AttachmentBuilder(img.toBuffer("image/png"), { name: "FSStats.png" })] });
         }

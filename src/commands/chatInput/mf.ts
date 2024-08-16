@@ -78,15 +78,11 @@ export default new Command<"chatInput">({
 
         await lookup({
             async member() {
-                const displayedRoles = (() => {
-                    if (interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) {
-                        return farmRoles;
-                    } else if (interaction.member.roles.cache.has(serverObj.roles.farmOwner)) {
-                        return farmRoles.filter(x => onMFFarms(interaction.member, serverAcro).some(y => x.id === y));
-                    } else {
-                        return [];
-                    }
-                })();
+                const displayedRoles = interaction.member.roles.cache.hasAny(...serverObj.managerRoles)
+                    ? farmRoles
+                    : interaction.member.roles.cache.has(serverObj.roles.farmOwner)
+                        ? farmRoles.filter(x => onMFFarms(interaction.member, serverAcro).some(y => x.id === y))
+                        : [];
 
                 await interaction.respond(displayedRoles.map(({ name, id }) => ({ name, value: id })));
             },
@@ -159,52 +155,52 @@ export default new Command<"chatInput">({
 
                 if (!member) return await interaction.reply({ content: "You need to select a member that's in this server", ephemeral: true });
 
-                if (member.roles.cache.has(roleId)) {
-                    (await interaction.reply({
-                        embeds: [new EmbedBuilder()
-                            .setDescription(`This member already has the <@&${roleId}> role, do you want to remove it from them?`)
-                            .setColor(interaction.client.config.EMBED_COLOR)
-                        ],
-                        fetchReply: true,
-                        components: ACK_BUTTONS
-                    })).createMessageComponentCollector({
-                        filter: x => x.user.id === interaction.user.id,
-                        max: 1,
-                        time: 30_000,
-                        componentType: ComponentType.Button
-                    }).on("collect", int => void lookup({
-                        async confirm() {
-                            const rolesToRemove = onMFFarms(member, serverAcro).length === 1
-                                ? [roleId, serverObj.roles.member]
-                                : [roleId];
-
-                            await member.roles.remove(rolesToRemove);
-
-                            await int.update({
-                                embeds: [new EmbedBuilder()
-                                    .setDescription(`${member} (${member.user.tag}) has been removed from the ${rolesToRemove.map(x => `<@&${x}>`).join(" and ")} role(s).`)
-                                    .setColor(interaction.client.config.EMBED_COLOR)
-                                ],
-                                components: []
-                            });
-                        },
-                        cancel() {
-                            return int.update({
-                                embeds: [new EmbedBuilder().setDescription("Command canceled").setColor(interaction.client.config.EMBED_COLOR)],
-                                components: []
-                            });
-                        }
-                    }, int.customId));
-                } else {
+                if (!member.roles.cache.has(roleId)) {
                     await member.roles.add([roleId, serverObj.roles.member]);
 
-                    await interaction.reply({
+                    return await interaction.reply({
                         embeds: [new EmbedBuilder()
                             .setDescription(`${member} (${member.user.tag}) has been given the <@&${serverObj.roles.member}> and <@&${roleId}> roles.`)
                             .setColor(interaction.client.config.EMBED_COLOR)
                         ]
                     });
                 }
+
+                (await interaction.reply({
+                    embeds: [new EmbedBuilder()
+                        .setDescription(`This member already has the <@&${roleId}> role, do you want to remove it from them?`)
+                        .setColor(interaction.client.config.EMBED_COLOR)
+                    ],
+                    fetchReply: true,
+                    components: ACK_BUTTONS
+                })).createMessageComponentCollector({
+                    filter: x => x.user.id === interaction.user.id,
+                    max: 1,
+                    time: 30_000,
+                    componentType: ComponentType.Button
+                }).on("collect", int => void lookup({
+                    async confirm() {
+                        const rolesToRemove = onMFFarms(member, serverAcro).length === 1
+                            ? [roleId, serverObj.roles.member]
+                            : [roleId];
+
+                        await member.roles.remove(rolesToRemove);
+
+                        await int.update({
+                            embeds: [new EmbedBuilder()
+                                .setDescription(`${member} (${member.user.tag}) has been removed from the ${rolesToRemove.map(x => `<@&${x}>`).join(" and ")} role(s).`)
+                                .setColor(interaction.client.config.EMBED_COLOR)
+                            ],
+                            components: []
+                        });
+                    },
+                    cancel() {
+                        return int.update({
+                            embeds: [new EmbedBuilder().setDescription("Command canceled").setColor(interaction.client.config.EMBED_COLOR)],
+                            components: []
+                        });
+                    }
+                }, int.customId));
             },
             async owner() {
                 if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return await youNeedRole(interaction, "mpManager");
@@ -213,47 +209,48 @@ export default new Command<"chatInput">({
 
                 if (!member) return await interaction.reply({ content: "You need to select a member that's in this server", ephemeral: true });
 
-                if (member.roles.cache.has(serverObj.roles.farmOwner)) {
-                    (await interaction.reply({
-                        embeds: [new EmbedBuilder()
-                            .setDescription(`This member already has the <@&${serverObj.roles.farmOwner}> role, do you want to remove it from them?`)
-                            .setColor(interaction.client.config.EMBED_COLOR)
-                        ],
-                        components: ACK_BUTTONS
-                    })).createMessageComponentCollector({
-                        filter: x => x.user.id === interaction.user.id,
-                        max: 1,
-                        time: 30_000,
-                        componentType: ComponentType.Button
-                    }).on("collect", int => void lookup({
-                        async confirm() {
-                            await member.roles.remove(serverObj.roles.farmOwner);
-
-                            await int.update({
-                                embeds: [new EmbedBuilder()
-                                    .setDescription(`${member} (${member.user.tag}) has been removed from the <@&${serverObj.roles.farmOwner}> role`)
-                                    .setColor(interaction.client.config.EMBED_COLOR)
-                                ],
-                                components: []
-                            });
-                        },
-                        cancel() {
-                            return int.update({
-                                embeds: [new EmbedBuilder().setDescription("Command canceled").setColor(interaction.client.config.EMBED_COLOR)],
-                                components: []
-                            });
-                        }
-                    }, int.customId));
-                } else {
+                if (!member.roles.cache.has(serverObj.roles.farmOwner)) {
                     await member.roles.add(serverObj.roles.farmOwner);
 
-                    await interaction.reply({
+                    return await interaction.reply({
                         embeds: [new EmbedBuilder()
                             .setDescription(`${member} (${member.user.tag}) has been given the <@&${serverObj.roles.farmOwner}> role`)
                             .setColor(interaction.client.config.EMBED_COLOR)
                         ]
                     });
                 }
+
+                (await interaction.reply({
+                    embeds: [new EmbedBuilder()
+                        .setDescription(`This member already has the <@&${serverObj.roles.farmOwner}> role, do you want to remove it from them?`)
+                        .setColor(interaction.client.config.EMBED_COLOR)
+                    ],
+                    fetchReply: true,
+                    components: ACK_BUTTONS
+                })).createMessageComponentCollector({
+                    filter: x => x.user.id === interaction.user.id,
+                    max: 1,
+                    time: 30_000,
+                    componentType: ComponentType.Button
+                }).on("collect", int => void lookup({
+                    async confirm() {
+                        await member.roles.remove(serverObj.roles.farmOwner);
+
+                        await int.update({
+                            embeds: [new EmbedBuilder()
+                                .setDescription(`${member} (${member.user.tag}) has been removed from the <@&${serverObj.roles.farmOwner}> role`)
+                                .setColor(interaction.client.config.EMBED_COLOR)
+                            ],
+                            components: []
+                        });
+                    },
+                    cancel() {
+                        return int.update({
+                            embeds: [new EmbedBuilder().setDescription("Command canceled").setColor(interaction.client.config.EMBED_COLOR)],
+                            components: []
+                        });
+                    }
+                }, int.customId));
             },
             async "rename-role"() {
                 if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return await youNeedRole(interaction, "mpManager");

@@ -55,7 +55,7 @@ export default new Command<"chatInput">({
         if (!member) {
             const user = interaction.options.getUser("member", true);
 
-            await user.fetch(true);
+            await user.fetch();
 
             const appData = await getApplicationData(user.id);
             const embed = new EmbedBuilder()
@@ -72,19 +72,15 @@ export default new Command<"chatInput">({
             return await interaction.reply({ embeds: [embed] });
         }
 
-        await member.user.fetch(true);
+        await member.user.fetch();
         
         const embeds: EmbedBuilder[] = [];
-        const titleText = (() => {
-            if (member.user.bot) {
-                return "Bot";
-            } else if (member.user.id === interaction.guild.ownerId) {
-                return ":crown: Server Owner";
-            } else {
-                return "Member";
-            }
-        })();
-        
+        const titleText = member.user.bot
+            ? "bot"
+            : member.user.id === interaction.guild.ownerId
+                ? ":crown: Server owner"
+                : "Member";
+
         embeds.push(new EmbedBuilder()
             .setThumbnail(member.user.displayAvatarURL({ extension: "png", size: 2048 }))
             .setTitle(`${titleText} info: ${escapeItalic(member.user.tag)}`)
@@ -144,7 +140,7 @@ export default new Command<"chatInput">({
                         `on ${activity.assets.largeText}`,
                         `Started listening ${time(activity.createdAt, "R")}`
                     ].join("\n"))
-                    .setThumbnail(`https://i.scdn.co/image/${activity.assets.largeImage!.replace("spotify:", "")}`)
+                    .setThumbnail(activity.assets.largeImageURL())
                 );
             } else if (activity.type === ActivityType.Custom) {
                 embeds.push(new EmbedBuilder()

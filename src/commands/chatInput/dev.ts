@@ -66,9 +66,9 @@ export default new structures.Command<"chatInput">({
                 }
 
                 // Output manipulation
-                if (typeof output === "object") {
-                    output = "js\n" + util.formatWithOptions({ depth }, "%O", output);
-                } else output = "\n" + String(output);
+                output = typeof output === "object"
+                    ? "js\n" + util.formatWithOptions({ depth }, "%O", output)
+                    : "\n" + String(output);
 
                 // Hide credentials
                 const fsPub = fsServers.getPublicAll();

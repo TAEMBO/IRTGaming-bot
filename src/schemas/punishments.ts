@@ -127,16 +127,16 @@ export class Punishments {
             async ban() {
                 const banned = await guild.bans.fetch(user).catch(() => null);
 
-                if (banned) {
-                    return "User is already banned.";
-                } else return await guild.bans.create(user, { reason: auditLogReason }).catch((err: Error) => err.message);
+                return banned
+                    ? "User is already banned."
+                    : await guild.bans.create(user, { reason: auditLogReason }).catch((err: Error) => err.message);
             },
             async softban() {
                 const banned = await guild.bans.fetch(user).catch(() => null);
 
-                if (banned) {
-                    return "User is already banned.";
-                } else return await guild.bans.create(user, { reason: auditLogReason, deleteMessageSeconds: 86_400 }).catch((err: Error) => err.message);
+                return banned
+                    ? "User is already banned."
+                    : await guild.bans.create(user, { reason: auditLogReason, deleteMessageSeconds: 86_400 }).catch((err: Error) => err.message);
             },
             async kick() {
                 return await guildMember?.kick(auditLogReason).catch((err: Error) => err.message);
@@ -146,9 +146,9 @@ export class Punishments {
                 return await guildMember?.roles.add(_client.config.mainServer.roles.detained, auditLogReason).catch((err: Error) => err.message);
             },
             async mute() {
-                if (guildMember?.communicationDisabledUntil) {
-                    return "Member is already muted.";
-                } else return await guildMember?.timeout(timeInMillis, auditLogReason).catch((err: Error) => err.message);
+                return guildMember?.isCommunicationDisabled()
+                    ? "Member is already muted."
+                    : await guildMember?.timeout(timeInMillis, auditLogReason).catch((err: Error) => err.message);
             },
             warn: () => { }
         }, type);
@@ -164,21 +164,18 @@ export class Punishments {
         if (typeof punResult === "string") { // Punishment was unsuccessful
             await dm?.delete();
             
-            if (interaction) {
-                return await interaction.editReply(punResult);
-            } else return punResult;
-        } else { // Punishment was successful
-            await Promise.all([
-                this.makeModlogEntry(punData),
-                this.data.create(punData)
-            ]);
-
-            if (punData.endTime) this.setExec(punData._id, punData.endTime - Date.now());
-
-            if (interaction) {
-                return await interaction.editReply({ embeds: [embed] });
-            } else return punResult;
+            return interaction ? await interaction.editReply(punResult) : punResult;
         }
+        
+        // Punishment was successful
+        await Promise.all([
+            this.makeModlogEntry(punData),
+            this.data.create(punData)
+        ]);
+
+        if (punData.endTime) this.setExec(punData._id, punData.endTime - Date.now());
+
+        return interaction ?  interaction.editReply({ embeds: [embed] }) : punResult;
     }
 
     public async removePunishment(caseId: number, moderator: string, reason: string, interaction?: ChatInputCommandInteraction<"cached">) {
@@ -213,10 +210,11 @@ export class Punishments {
                 return await guildMember?.roles.remove(this._client.config.mainServer.roles.detained, auditLogReason).catch((err: Error) => err.message);
             },
             mute: async () => {
-                if (guildMember) {
-                    guildMember.send(`You've been unmuted in ${guild.name}.`).catch((err: Error) => console.log(err.message));
-                    return await guildMember.timeout(null, auditLogReason).catch((err: Error) => err.message);
-                } else await this.data.findByIdAndUpdate(caseId, { expired: true }, { new: true });
+                if (!guildMember) return;
+                
+                guildMember.send(`You've been unmuted in ${guild.name}.`).catch((err: Error) => console.log(err.message));
+
+                return await guildMember.timeout(null, auditLogReason).catch((err: Error) => err.message);
             },
             warn: () => {
                 removePunishmentData.type = "removeOtherPunishment";
@@ -224,26 +222,25 @@ export class Punishments {
         }, punishment.type);
 
         if (typeof punResult === "string") { // Unpunish was unsuccessful
-            if (interaction) {
-                return await interaction.reply(punResult);
-            } else return punResult;
-        } else { // Unpunish was successful
-            await Promise.all([
-                this.data.findByIdAndUpdate(caseId, { expired: true }, { new: true }),
-                this.data.create(removePunishmentData),
-                this.makeModlogEntry(removePunishmentData)
-            ]);
-
-            if (interaction) {
-                return await interaction.reply({ embeds: [new EmbedBuilder()
-                    .setColor(this._client.config.EMBED_COLOR)
-                    .setTitle(`Case #${removePunishmentData._id}: ${formatString(removePunishmentData.type)}`)
-                    .setDescription(`${user.tag}\n${user}\n(\`${user.id}\`)`)
-                    .addFields(
-                        { name: "Reason", value: reason },
-                        { name: "Overwrites", value: `Case #${punishment._id}` })
-                ] });
-            } else return `Successfully un${this.getTense(punishment.type)} ${user.tag} (${user.id}) for reason "${reason}"`;
+            return interaction ? await interaction.reply(punResult) : punResult;
         }
+        
+        // Unpunish was successful
+        await Promise.all([
+            this.data.findByIdAndUpdate(caseId, { expired: true }, { new: true }),
+            this.data.create(removePunishmentData),
+            this.makeModlogEntry(removePunishmentData)
+        ]);
+
+        if (!interaction) return `Successfully un${this.getTense(punishment.type)} ${user.tag} (${user.id}) for reason "${reason}"`;
+
+        await interaction.reply({ embeds: [new EmbedBuilder()
+            .setColor(this._client.config.EMBED_COLOR)
+            .setTitle(`Case #${removePunishmentData._id}: ${formatString(removePunishmentData.type)}`)
+            .setDescription(`${user.tag}\n${user}\n(\`${user.id}\`)`)
+            .addFields(
+                { name: "Reason", value: reason },
+                { name: "Overwrites", value: `Case #${punishment._id}` })
+        ] });
     }
 }

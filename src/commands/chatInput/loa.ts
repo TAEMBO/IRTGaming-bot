@@ -17,21 +17,22 @@ export default new Command<"chatInput">({
                 nick: `[LOA] ${interaction.member.nickname}`
             }).catch(() => interaction.member.roles.set(takenRoles));
 
-            await interaction.reply({ content: "LOA status set", ephemeral: true });
-        } else {
-            const returnedRoles = (() => {
-                if (hasRole(interaction.member, "mpManager")) {
-                    return roles.filter(x => x !== configRoles.loa).concat([configRoles.mpStaff, configRoles.mpManagement]);
-                } else return roles.filter(x => x !== configRoles.loa).concat([configRoles.mpStaff]);
-            })();
-            
-            await interaction.member.edit({
-                roles: returnedRoles,
-                nick: interaction.member.nickname!.replaceAll("[LOA] ", "")
-            }).catch(() => interaction.member.roles.set(returnedRoles));
-
-            await interaction.reply({ content: "LOA status removed", ephemeral: true });
+            return await interaction.reply({ content: "LOA status set", ephemeral: true });
         }
+        
+        const returnedRoles = roles
+            .filter(x => x !== configRoles.loa)
+            .concat(hasRole(interaction.member, "mpManager")
+                ? [configRoles.mpStaff, configRoles.mpManagement]
+                : [configRoles.mpStaff]
+            );
+            
+        await interaction.member.edit({
+            roles: returnedRoles,
+            nick: interaction.member.nickname!.replaceAll("[LOA] ", "")
+        }).catch(() => interaction.member.roles.set(returnedRoles));
+
+        await interaction.reply({ content: "LOA status removed", ephemeral: true });
     },
     data: new SlashCommandBuilder()
         .setName("loa")

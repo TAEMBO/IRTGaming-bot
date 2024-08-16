@@ -13,62 +13,65 @@ export default new Command<"chatInput">({
                 const severity = interaction.options.getString("severity", true) as "ban" | "watch";
                 const wlData = await interaction.client.watchList.data.findById(name);
 
-                if (!wlData) {
-                    await interaction.client.watchList.data.create({ _id: name, reason, isSevere: severity === "ban" ? true : false });
-                    await interaction.reply(`Successfully added \`${name}\` who needs to be **${severity === "ban" ? "banned" : "watched over"}** with reason \`${reason}\``);
-                } else await interaction.reply(`\`${name}\` already exists for reason \`${wlData.reason}\``);
+                if (wlData) return await interaction.reply(`\`${name}\` already exists for reason \`${wlData.reason}\``);
+
+                await interaction.client.watchList.data.create({ _id: name, reason, isSevere: severity === "ban" ? true : false });
+                await interaction.reply(`Successfully added \`${name}\` who needs to be **${severity === "ban" ? "banned" : "watched over"}** with reason \`${reason}\``);
             },
             async remove() {
                 const name = interaction.options.getString("username", true);
                 const wlData = await interaction.client.watchList.data.findById(name);
 
-                if (wlData) {
-                    await interaction.client.watchList.data.findByIdAndDelete(name);
-                    await interaction.reply(`Successfully removed \`${name}\` from watchList`);
-                } else await interaction.reply(`\`${name}\` doesn"t exist on watchList`);
+                if (!wlData) return await interaction.reply(`\`${name}\` doesn"t exist on watchList`);
+
+                await interaction.client.watchList.data.findByIdAndDelete(name);
+                await interaction.reply(`Successfully removed \`${name}\` from watchList`);
             },
             async view() {
-                await interaction.reply({ files: [new AttachmentBuilder(Buffer.from(JSON.stringify(await interaction.client.watchList.data.find(), null, 2)), { name: "watchListCache.json" })] });
+                await interaction.reply({ files: [
+                    new AttachmentBuilder(Buffer.from(JSON.stringify(await interaction.client.watchList.data.find(), null, 2)), { name: "watchListCache.json" })
+                ] });
             },
             async subscription() {
-                if (interaction.client.watchListPings.cache.includes(interaction.user.id)) {
-                    (await interaction.reply({
-                        embeds: [new EmbedBuilder()
-                            .setDescription("You are already subscribed to watchList notifications, do you want to unsubscribe?")
-                            .setColor(interaction.client.config.EMBED_COLOR)
-                        ],
-                        components: ACK_BUTTONS
-                    })).createMessageComponentCollector({
-                        filter: x => x.user.id === interaction.user.id,
-                        max: 1,
-                        time: 30_000,
-                        componentType: ComponentType.Button
-                    }).on("collect", int => void lookup({
-                        async confirm() {
-                            await interaction.client.watchListPings.remove(interaction.user.id);
-
-                            await int.update({
-                                embeds: [new EmbedBuilder().setDescription("You have successfully unsubscribed from watchList notifications").setColor(interaction.client.config.EMBED_COLOR)],
-                                components: []
-                            });
-
-                        },
-                        async cancel() {
-                            await int.update({
-                                embeds: [new EmbedBuilder().setDescription("Command canceled").setColor(interaction.client.config.EMBED_COLOR)],
-                                components: []
-                            });
-                        }
-                    }, int.customId));
-                } else {
+                if (!interaction.client.watchListPings.cache.includes(interaction.user.id)) {
                     await interaction.client.watchListPings.add(interaction.user.id);
 
-                    await interaction.reply({ embeds: [new EmbedBuilder()
+                    return await interaction.reply({ embeds: [new EmbedBuilder()
                         .setDescription("You have successfully subscribed to watchList notifications")
                         .setFooter({ text: "Run this command again if this was a mistake" })
                         .setColor(interaction.client.config.EMBED_COLOR)
                     ] });
                 }
+
+                (await interaction.reply({
+                    embeds: [new EmbedBuilder()
+                        .setDescription("You are already subscribed to watchList notifications, do you want to unsubscribe?")
+                        .setColor(interaction.client.config.EMBED_COLOR)
+                    ],
+                    fetchReply: true,
+                    components: ACK_BUTTONS
+                })).createMessageComponentCollector({
+                    filter: x => x.user.id === interaction.user.id,
+                    max: 1,
+                    time: 30_000,
+                    componentType: ComponentType.Button
+                }).on("collect", int => void lookup({
+                    async confirm() {
+                        await interaction.client.watchListPings.remove(interaction.user.id);
+
+                        await int.update({
+                            embeds: [new EmbedBuilder().setDescription("You have successfully unsubscribed from watchList notifications").setColor(interaction.client.config.EMBED_COLOR)],
+                            components: []
+                        });
+
+                    },
+                    async cancel() {
+                        await int.update({
+                            embeds: [new EmbedBuilder().setDescription("Command canceled").setColor(interaction.client.config.EMBED_COLOR)],
+                            components: []
+                        });
+                    }
+                }, int.customId));
             }
         }, interaction.options.getSubcommand());
     },

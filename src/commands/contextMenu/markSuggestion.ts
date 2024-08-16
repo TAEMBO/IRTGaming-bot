@@ -24,6 +24,7 @@ export default new Command<"message">({
         (await interaction.reply({
             content: "What do you want to mark this community idea as?",
             ephemeral: true,
+            fetchReply: true,
             components: [
                 new ActionRowBuilder<ButtonBuilder>().addComponents(
                     new ButtonBuilder().setCustomId("like").setStyle(ButtonStyle.Success).setLabel("Liked by staff"),

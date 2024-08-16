@@ -7,14 +7,19 @@ export default new Event({
     async run(interaction) {
         if (!interaction.inCachedGuild()) return;
 
-        if (interaction.isChatInputCommand()) {
-            await Handlers.handleChatInputCommand(interaction);
-        } else if (interaction.isContextMenuCommand()) {
-            await Handlers.handleContextMenuCommand(interaction);
-        } else if (interaction.isButton()) {
-            await Handlers.handleButton(interaction);
-        } else if (interaction.isAutocomplete()) {
-            await Handlers.handleAutocomplete(interaction);
+        switch (true) {
+            case interaction.isChatInputCommand():
+                await Handlers.handleChatInputCommand(interaction);
+                break;
+            case interaction.isContextMenuCommand():
+                await Handlers.handleContextMenuCommand(interaction);
+                break;
+            case interaction.isButton():
+                await Handlers.handleButton(interaction);
+                break;
+            case interaction.isAutocomplete():
+                await Handlers.handleAutocomplete(interaction);
+                break;
         }
     }
 });

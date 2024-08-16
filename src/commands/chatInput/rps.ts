@@ -23,30 +23,7 @@ export default new Command<"chatInput">({
         const move = interaction.options.getString("move", true) as Move;
         const firstMove = rpsInstances.get(interaction.channelId);
 
-        if (firstMove) {
-            if (interaction.user.id === firstMove.user.id) return await interaction.reply("You can't play against yourself");
-
-            await interaction.deferReply();
-            let winner = null;
-
-            if (move === "rock") if (firstMove.move === "paper") winner = firstMove.user; else winner = interaction.user;
-            if (move === "scissors") if (firstMove.move === "rock") winner = firstMove.user; else winner = interaction.user;
-            if (move === "paper") if (firstMove.move === "scissors") winner = firstMove.user; else winner = interaction.user;
-            if (move === firstMove.move) winner = null;
-
-            await firstMove.message.edit({ embeds: [new EmbedBuilder()
-                .setTitle([
-                    `${winner?.tag ?? "Nobody"} won this rock paper scissors game!`,
-                    "",
-                    `**${firstMove.user.tag}** chose ${firstMove.move}`,
-                    `**${interaction.user.tag}** chose ${move}`
-                ].join("\n"))
-                .setColor(interaction.client.config.EMBED_COLOR)
-            ] });
-
-            rpsInstances.delete(interaction.channelId);
-            await interaction.deleteReply();
-        } else {
+        if (!firstMove) {
             await interaction.deferReply({ ephemeral: true }).then(() => interaction.deleteReply());
 
             const message = await interaction.channel!.send({ embeds: [new EmbedBuilder()
@@ -57,7 +34,33 @@ export default new Command<"chatInput">({
             ] });
 
             rpsInstances.set(interaction.channelId, new RPSInstance(interaction.user, move, message));
+
+            return;
         }
+
+        if (interaction.user.id === firstMove.user.id) return await interaction.reply("You can't play against yourself");
+
+        await interaction.deferReply();
+        
+        let winner = null;
+
+        if (move === "rock") if (firstMove.move === "paper") winner = firstMove.user; else winner = interaction.user;
+        if (move === "scissors") if (firstMove.move === "rock") winner = firstMove.user; else winner = interaction.user;
+        if (move === "paper") if (firstMove.move === "scissors") winner = firstMove.user; else winner = interaction.user;
+        if (move === firstMove.move) winner = null;
+
+        await firstMove.message.edit({ embeds: [new EmbedBuilder()
+            .setTitle([
+                `${winner?.tag ?? "Nobody"} won this rock paper scissors game!`,
+                "",
+                `**${firstMove.user.tag}** chose ${firstMove.move}`,
+                `**${interaction.user.tag}** chose ${move}`
+            ].join("\n"))
+            .setColor(interaction.client.config.EMBED_COLOR)
+        ] });
+
+        rpsInstances.delete(interaction.channelId);
+        await interaction.deleteReply();
     },
     data: new SlashCommandBuilder()
         .setName("rps")

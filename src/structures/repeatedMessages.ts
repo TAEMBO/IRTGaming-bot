@@ -46,14 +46,15 @@ export class RepeatedMessages {
         const spammedMessage = userData.entries.find(x => {
             return userData.entries.filter(y => x.identifier === y.identifier).size >= options.thresholdAmt;
         });
-    
-        if (spammedMessage) {
-            delete this._data[msg.author.id];
-            await this._client.punishments.addPunishment("mute", this._client.user.id, `Automod; ${options.muteReason}`, msg.author, msg.member, { time: options.muteTime });
 
-            const spamMsgIds = userData.entries.filter(x => x.identifier === "spam").map(x => x.msg);
+        if (!spammedMessage) return;
 
-            if (spamMsgIds) await msg.channel.bulkDelete(spamMsgIds);
-        }
+        delete this._data[msg.author.id];
+
+        await this._client.punishments.addPunishment("mute", this._client.user.id, `Automod; ${options.muteReason}`, msg.author, msg.member, { time: options.muteTime });
+
+        const spamMsgIds = userData.entries.filter(x => x.identifier === "spam").map(x => x.msg);
+
+        if (spamMsgIds.length) await msg.channel.bulkDelete(spamMsgIds);
     }
 }

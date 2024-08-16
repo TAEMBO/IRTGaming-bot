@@ -7,17 +7,24 @@ export default new Event({
     async run(messages, channel) {
         if (!channel.client.config.toggles.logs) return;
 
-        await channel.client.getChan("botLogs").send({ embeds: [new EmbedBuilder()
-            .setTitle(`${messages.size} messages were deleted`)
-            .setDescription(codeBlock("ansi", messages
-                .map(msg => `${LogColor.Yellow}${msg.author?.username}:${LogColor.Reset} ${msg.content}`)
-                .reverse()
-                .join("\n")
-                .slice(0, 3900)
-            ))
-            .addFields({ name: "🔹 Channel", value: channel.toString() })
-            .setColor(channel.client.config.EMBED_COLOR_RED)
-            .setTimestamp()
-        ] });
-    }
+        await channel.client.getChan("botLogs").send({
+            embeds: [
+                new EmbedBuilder()
+                    .setTitle(`${messages.size} messages were deleted`)
+                    .setDescription(
+                        codeBlock(
+                            "ansi",
+                            messages
+                                .map(msg => `${LogColor.Yellow}${msg.author?.username}:${LogColor.Reset} ${msg.content}`)
+                                .reverse()
+                                .join("\n")
+                                .slice(0, 3900),
+                        ),
+                    )
+                    .addFields({ name: "🔹 Channel", value: channel.toString() })
+                    .setColor(channel.client.config.EMBED_COLOR_RED)
+                    .setTimestamp(),
+            ],
+        });
+    },
 });

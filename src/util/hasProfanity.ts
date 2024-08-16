@@ -1,5 +1,5 @@
 /**
- * Checks whether a given text has profanity or not 
+ * Checks whether a given text has profanity or not
  * @param text The text to analyze for profanity
  * @param profanityList A list of words considered profanity
  */
@@ -20,21 +20,22 @@ export function hasProfanity(text: string, profanityList: string[]) {
         [/7/g, "t"],
         [/9/g, "g"],
         [/6/g, "b"],
-        [/8/g, "b"]
-    ])) text = text.replace(regExp, str);
+        [/8/g, "b"],
+    ]))
+        text = text.replace(regExp, str);
 
     function allPossibleCases(arr: string[][]) {
         loopCount++;
-    
+
         if (arr.length === 1 || loopCount > 20) return arr[0];
-    
+
         const result: string[] = [];
         const allCasesOfRest = allPossibleCases(arr.slice(1));
-    
+
         for (let i = 0; i < allCasesOfRest.length; i++) {
             for (let j = 0; j < arr[0].length; j++) result.push(arr[0][j] + allCasesOfRest[i]);
         }
-    
+
         return result;
     }
 
@@ -46,23 +47,23 @@ export function hasProfanity(text: string, profanityList: string[]) {
             const val: string[] = [];
             const arr: string[][] = [];
             let chop = word[0];
-                
+
             for (let i = 1; i <= word.length; i++) {
                 if (chop[0] != word[i]) {
                     val.push(chop);
                     chop = word[i];
                 } else chop += word[i];
             }
-                
+
             for (let i = 0; i < val.length; i++) {
                 const temp: string[] = [];
-    
+
                 if (val[i].length >= 2) temp.push(val[i][0].repeat(2));
-    
+
                 temp.push(val[i][0]);
                 arr.push(temp);
             }
-                
+
             return allPossibleCases(arr).join(" ");
         })
         .join(" ")

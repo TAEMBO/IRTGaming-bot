@@ -8,35 +8,44 @@ import { FTPActions } from "#structures";
 /** The object for each server a player has been on */
 const serverObj = {
     time: { type: Number, required: true },
-    lastOn: { type: Number, required: true }
+    lastOn: { type: Number, required: true },
 };
 
 /** The object containing all server data for a given player */
 const serversObj = Object.fromEntries(fsServers.keys().map(x => [x, { type: serverObj, _id: false }]));
 
-const model = mongoose.model("playerTimes", new mongoose.Schema({
-    _id: { type: String, required: true },
-    uuid: { type: String },
-    discordid: { type: String },
-    servers: { type: serversObj, required: true, _id: false }
-}, { versionKey: false }));
+const model = mongoose.model(
+    "playerTimes",
+    new mongoose.Schema(
+        {
+            _id: { type: String, required: true },
+            uuid: { type: String },
+            discordid: { type: String },
+            servers: { type: serversObj, required: true, _id: false },
+        },
+        { versionKey: false },
+    ),
+);
 
 export type PlayerTimesDocument = ReturnType<typeof model.castObject>;
 
 export class PlayerTimes {
     public data = model;
 
-    public constructor(private readonly _client: TClient) { }
-    
+    public constructor(private readonly _client: TClient) {}
+
     /**
      * Retrieve an array-ified form of a player"s server time data.
      * @param data The MongoDB document for the player
      * @returns An array of all server time objects from the player, with the first element for each being the server"s acronym
      */
     public getTimeData(data: PlayerTimesDocument) {
-        return (Object.entries(Object.values(data.servers)[3] ?? {}) as unknown) as [string, {
-            [key in keyof typeof serverObj]: number;
-        }][];
+        return Object.entries(Object.values(data.servers)[3] ?? {}) as unknown as [
+            string,
+            {
+                [key in keyof typeof serverObj]: number;
+            },
+        ][];
     }
 
     /**
@@ -51,21 +60,21 @@ export class PlayerTimes {
         const playerData = await this.data.findById(playerName);
 
         if (playerData) {
-            playerData.toObject();
             playerData.servers[serverAcro] = {
                 time: (playerData.servers[serverAcro]?.time ?? 0) + playerTime,
-                lastOn: now
+                lastOn: now,
             };
             return await playerData.save();
-        } else return await this.data.create({
-            _id: playerName,
-            servers: {
-                [serverAcro]: {
-                    time: playerTime,
-                    lastOn: now
-                }
-            }
-        });
+        } else
+            return await this.data.create({
+                _id: playerName,
+                servers: {
+                    [serverAcro]: {
+                        time: playerTime,
+                        lastOn: now,
+                    },
+                },
+            });
     }
 
     public async fetchFarmData(serverAcro: string) {
@@ -82,60 +91,83 @@ export class PlayerTimes {
         for (const player of farmData.farms.farm[0].players.player) {
             const playerDatabyUuid = allData.find(x => x.uuid === player._attributes.uniqueUserId);
 
-            if (playerDatabyUuid) { // PlayerTimes data was found with UUID
-                if (playerDatabyUuid._id === player._attributes.lastNickname) continue; // PlayerTimes name matches farm name, no need to update playerTimes data
-                
-                const decorators = (name: string) => {
-                    return [
-                        this._client.fmList.cache.includes(name) ? ":farmer:" : "", // Tag for if player is FM
-                        this._client.tfList.cache.includes(name) ? ":angel:" : "" // Tag for if player is TF
-                    ].join("");
-                };
-
-                await this._client.getChan("fsLogs").send({ embeds: [new EmbedBuilder()
-                    .setColor(this._client.config.EMBED_COLOR_YELLOW)
-                    .setTitle("Player name change")
-                    .setTimestamp()
-                    .setDescription([
-                        `**UUID:** \`${playerDatabyUuid.uuid}\``,
-                        `**Old name:** ${playerDatabyUuid._id} ${decorators(playerDatabyUuid._id)}`,
-                        `**New name:** ${player._attributes.lastNickname} ${decorators(player._attributes.lastNickname)}`
-                    ].join("\n"))
-                ] });
-
-                changedNameCount++;
-                
-                await this.data.create({ _id: player._attributes.lastNickname, uuid: player._attributes.uniqueUserId, servers: playerDatabyUuid.servers })
-                    .then(() => this.data.findByIdAndDelete(playerDatabyUuid._id)) // New name was not occupied, delete old name data
-                    .catch(async () => { // New name was occupied
-                        playerDatabyUuid.uuid = undefined; // Remove UUID from old name
-
-                        await playerDatabyUuid.save();
-                        await this.data.findByIdAndUpdate(
-                            player._attributes.lastNickname,
-                            {
-                                uuid: player._attributes.uniqueUserId,
-                                discordid: playerDatabyUuid.discordid
-                            },
-                            { new: true }
-                        ); // Add UUID to new name
-                    });
-            } else { // No playerTimes data was found with UUID
+            if (!playerDatabyUuid) {
+                // No playerTimes data was found with UUID
                 const playerDataByName = allData.find(x => x._id === player._attributes.lastNickname);
 
                 if (playerDataByName && !playerDataByName.uuid) {
-                    await this.data.findByIdAndUpdate(player._attributes.lastNickname, { uuid: player._attributes.uniqueUserId }, { new: true });
+                    await this.data.findByIdAndUpdate(
+                        player._attributes.lastNickname,
+                        { uuid: player._attributes.uniqueUserId },
+                        { new: true },
+                    );
 
                     addedUuidCount++;
                 }
+
+                continue;
             }
+
+            // PlayerTimes data was found with UUID
+            if (playerDatabyUuid._id === player._attributes.lastNickname) continue; // PlayerTimes name matches farm name, no need to update playerTimes data
+
+            const decorators = (name: string) => {
+                return [
+                    this._client.fmList.cache.includes(name) ? ":farmer:" : "", // Tag for if player is FM
+                    this._client.tfList.cache.includes(name) ? ":angel:" : "", // Tag for if player is TF
+                ].join("");
+            };
+
+            await this._client.getChan("fsLogs").send({
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor(this._client.config.EMBED_COLOR_YELLOW)
+                        .setTitle("Player name change")
+                        .setTimestamp()
+                        .setDescription(
+                            [
+                                `**UUID:** \`${playerDatabyUuid.uuid}\``,
+                                `**Old name:** ${playerDatabyUuid._id} ${decorators(playerDatabyUuid._id)}`,
+                                `**New name:** ${player._attributes.lastNickname} ${decorators(player._attributes.lastNickname)}`,
+                            ].join("\n"),
+                        ),
+                ],
+            });
+
+            changedNameCount++;
+
+            await this.data
+                .create({
+                    _id: player._attributes.lastNickname,
+                    uuid: player._attributes.uniqueUserId,
+                    servers: playerDatabyUuid.servers,
+                })
+                .then(() => this.data.findByIdAndDelete(playerDatabyUuid._id)) // New name was not occupied, delete old name data
+                .catch(async () => {
+                    // New name was occupied
+                    playerDatabyUuid.uuid = undefined; // Remove UUID from old name
+
+                    await playerDatabyUuid.save();
+                    await this.data.findByIdAndUpdate(
+                        player._attributes.lastNickname,
+                        {
+                            uuid: player._attributes.uniqueUserId,
+                            discordid: playerDatabyUuid.discordid,
+                        },
+                        { new: true },
+                    ); // Add UUID to new name
+                });
         }
-        
-        await this._client.getChan("fsLogs").send([
-            `⚠️ Farm data cruncher ran on ${server.fullName}`,
-            `Iterated over ${changedNameCount} changed names`,
-            `Added playerTimes UUID data to ${addedUuidCount} names`
-        ].join("\n"));
+
+        await this._client
+            .getChan("fsLogs")
+            .send(
+                [
+                    `⚠️ Farm data cruncher ran on ${server.fullName}`,
+                    `Iterated over ${changedNameCount} changed names`,
+                    `Added playerTimes UUID data to ${addedUuidCount} names`,
+                ].join("\n"),
+            );
 
         log("Yellow", "Finished crunching farms.xml data");
     }

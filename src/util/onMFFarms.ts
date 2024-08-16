@@ -7,7 +7,7 @@ import { fsServers } from "#util";
  */
 export function onMFFarms(guildMember: GuildMember | null, serverAcro: string) {
     if (!guildMember) return [];
-    
+
     const serverObj = fsServers.getPrivateOne(serverAcro);
 
     return Object.values(serverObj.roles.farms).filter(x => guildMember.roles.cache.has(x));

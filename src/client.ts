@@ -8,7 +8,7 @@ import {
     Options,
     Partials,
     type PresenceData,
-    TextChannel
+    TextChannel,
 } from "discord.js";
 import config from "#config" assert { type: "json" };
 import * as Schemas from "#schemas";
@@ -46,26 +46,19 @@ export default class TClient extends Client<true> {
                 GatewayIntentBits.GuildMessages,
                 GatewayIntentBits.GuildMessageReactions,
                 GatewayIntentBits.MessageContent,
-                GatewayIntentBits.GuildVoiceStates
+                GatewayIntentBits.GuildVoiceStates,
             ],
-            partials: [
-                Partials.Message,
-                Partials.Reaction
-            ],
+            partials: [Partials.Message, Partials.Reaction],
             presence: config.botPresence as PresenceData,
             makeCache: Options.cacheWithLimits({
                 GuildEmojiManager: 0,
                 GuildMessageManager: 500,
-                DMMessageManager: 0
+                DMMessageManager: 0,
             }),
             allowedMentions: {
                 repliedUser: false,
-                parse: [
-                    AllowedMentionsTypes.User,
-                    AllowedMentionsTypes.Role,
-                    AllowedMentionsTypes.Everyone
-                ]
-            }
+                parse: [AllowedMentionsTypes.User, AllowedMentionsTypes.Role, AllowedMentionsTypes.Everyone],
+            },
         });
     }
 
@@ -107,26 +100,27 @@ export default class TClient extends Client<true> {
 
     public async errorLog(error: Error) {
         console.error(error);
-    
+
         if (["Request aborted", "getaddrinfo ENOTFOUND discord.com"].includes(error.message)) return;
-    
+
         const dirname = process.cwd().replaceAll("\\", "/");
         const channel = this.getChan("taesTestingZone");
         const formattedErr = error.stack
             ?.replaceAll(" at ", ` ${LogColor.Red}at${LogColor.Reset} `)
             .replaceAll(dirname, LogColor.Yellow + dirname + LogColor.Reset)
             .slice(0, 2500);
-    
+
         if (!channel) return;
-    
+
         await channel.send({
             content: `<@${this.config.devWhitelist[0]}>`,
-            embeds: [new EmbedBuilder()
-                .setTitle(`Error Caught - ${error.message.slice(0, 240)}`)
-                .setColor("#420420")
-                .setDescription(`\`\`\`ansi\n${formattedErr}\`\`\``)
-                .setTimestamp()
-            ]
+            embeds: [
+                new EmbedBuilder()
+                    .setTitle(`Error Caught - ${error.message.slice(0, 240)}`)
+                    .setColor("#420420")
+                    .setDescription(`\`\`\`ansi\n${formattedErr}\`\`\``)
+                    .setTimestamp(),
+            ],
         });
     }
 }

@@ -5,7 +5,7 @@ import type {
     SlashCommandOptionsOnlyBuilder,
     SlashCommandSubcommandsOnlyBuilder,
     Snowflake,
-    UserContextMenuCommandInteraction
+    UserContextMenuCommandInteraction,
 } from "discord.js";
 import type config from "#config";
 import type TClient from "./client.js";
@@ -22,7 +22,7 @@ import type {
     UserLevels,
     WatchList,
     WatchListPings,
-    Whitelist
+    Whitelist,
 } from "#schemas";
 
 export type * from "#schemas";
@@ -109,7 +109,7 @@ export interface Cached<TDocument> {
      * ```ts
      * public async fillCache() {
      *     this.cache = await this.data.find();
-     * 
+     *
      *     return this;
      * }
      * ```
@@ -125,25 +125,31 @@ export interface RepeatedMessagesEntry {
     msg: string;
 }
 
-export type RepeatedMessagesData = Record<string, {
-    entries: Collection<number, RepeatedMessagesEntry>;
-    timeout: NodeJS.Timeout;
-}>;
+export type RepeatedMessagesData = Record<
+    string,
+    {
+        entries: Collection<number, RepeatedMessagesEntry>;
+        timeout: NodeJS.Timeout;
+    }
+>;
 
 export type CombinedSlashCommandBuilder = SlashCommandOptionsOnlyBuilder | SlashCommandSubcommandsOnlyBuilder;
 
 export type CombinedContextMenuCommandInteraction =
-    MessageContextMenuCommandInteraction<"cached">
+    | MessageContextMenuCommandInteraction<"cached">
     | UserContextMenuCommandInteraction<"cached">;
 
-export type FSCache = Record<string, {
-    players: PlayerUsed[];
-    lastAdmin: number | null;
-    graphPoints: number[];
-    completeRes: boolean | null;
-    state: 0 | 1 | null;
-    throttled: boolean | null;
-}>;
+export type FSCache = Record<
+    string,
+    {
+        players: PlayerUsed[];
+        lastAdmin: number | null;
+        graphPoints: number[];
+        completeRes: boolean | null;
+        state: 0 | 1 | null;
+        throttled: boolean | null;
+    }
+>;
 
 export type YTCache = Record<string, string | null>;
 
@@ -201,7 +207,7 @@ export interface FSServerPrivate extends FSServerBase {
         readonly farmOwner: Snowflake;
         readonly member: Snowflake;
         readonly farms: Record<string, Snowflake>;
-    }
+    };
 }
 
 export type FSServer = FSServerPrivate | FSServerPublic;
@@ -253,8 +259,8 @@ export interface Config {
         logs: Snowflake[];
     };
     ytChannels: {
-        id: string,
-        name: string
+        id: string;
+        name: string;
     }[];
     resources: Record<keyof typeof config.resources, `https://${string}`>;
     mainServer: {
@@ -269,58 +275,57 @@ export interface Config {
     };
 }
 
-interface FSLoopCSGCareerSavegame
-{
+interface FSLoopCSGCareerSavegame {
     readonly settings?: {
-        readonly savegameName: { readonly _text: string; };
-        readonly creationDate: { readonly _text: string; };
-        readonly mapId: { readonly _text: string; };
-        readonly mapTitle: { readonly _text: string; };
-        readonly saveDateFormatted: { readonly _text: string; };
-        readonly saveDate: { readonly _text: string; };
-        readonly resetVehicles: { readonly _text: "true" | "false"; };
-        readonly trafficEnabled: { readonly _text: "true" | "false"; };
-        readonly stopAndGoBraking: { readonly _text: "true" | "false"; };
-        readonly trailerFillLimit: { readonly _text: "true" | "false"; };
-        readonly automaticMotorStartEnabled: { readonly _text: "true" | "false"; };
-        readonly growthMode: { readonly _text: "1" | "2" | "3"; };
-        readonly fixedSeasonalVisuals: { readonly _text: string; };
-        readonly plannedDaysPerPeriod: { readonly _text: string; };
-        readonly fruitDestruction: { readonly _text: "true" | "fase"; };
-        readonly plowingRequiredEnabled: { readonly _text: "true" | "fase"; };
-        readonly stonesEnabled: { readonly _text: "true" | "false"; };
-        readonly weedsEnabled: { readonly _text: "true" | "false"; };
-        readonly limeRequired: { readonly _text: "true" | "false"; };
-        readonly isSnowEnabled: { readonly _text: "true" | "false"; };
-        readonly fuelUsage: { readonly _text: string; };
-        readonly helperBuyFuel: { readonly _text: "true" | "false"; };
-        readonly helperBuySeeds: { readonly _text: "true" | "false"; };
-        readonly helperBuyFertilizer: { readonly _text: "true" | "false"; };
-        readonly helperSlurrySource: { readonly _text: string; };
-        readonly helperManureSource: { readonly _text: string; };
-        readonly densityMapRevision: { readonly _text: string; };
-        readonly terrainTextureRevision: { readonly _text: string; };
-        readonly terrainLodTextureRevision: { readonly _text: string; };
-        readonly splitShapesRevision: { readonly _text: string; };
-        readonly tipCollisionRevision: { readonly _text: string; };
-        readonly placementCollisionRevision: { readonly _text: string; };
-        readonly navigationCollisionRevision: { readonly _text: string; };
-        readonly mapDensityMapRevision: { readonly _text: string; };
-        readonly mapTerrainTextureRevision: { readonly _text: string; };
-        readonly mapTerrainLodTextureRevision: { readonly _text: string; };
-        readonly mapSplitShapesRevision: { readonly _text: string; };
-        readonly mapTipCollisionRevision: { readonly _text: string; };
-        readonly mapPlacementCollisionRevision: { readonly _text: string; };
-        readonly mapNavigationCollisionRevision: { readonly _text: string; };
-        readonly difficulty: { readonly _text: string; };
-        readonly economicDifficulty: { readonly _text: string; };
-        readonly dirtInterval: { readonly _text: string; };
-        readonly timeScale: { readonly _text: string; };
-        readonly autoSaveInterval: { readonly _text: string; };
+        readonly savegameName: { readonly _text: string };
+        readonly creationDate: { readonly _text: string };
+        readonly mapId: { readonly _text: string };
+        readonly mapTitle: { readonly _text: string };
+        readonly saveDateFormatted: { readonly _text: string };
+        readonly saveDate: { readonly _text: string };
+        readonly resetVehicles: { readonly _text: "true" | "false" };
+        readonly trafficEnabled: { readonly _text: "true" | "false" };
+        readonly stopAndGoBraking: { readonly _text: "true" | "false" };
+        readonly trailerFillLimit: { readonly _text: "true" | "false" };
+        readonly automaticMotorStartEnabled: { readonly _text: "true" | "false" };
+        readonly growthMode: { readonly _text: "1" | "2" | "3" };
+        readonly fixedSeasonalVisuals: { readonly _text: string };
+        readonly plannedDaysPerPeriod: { readonly _text: string };
+        readonly fruitDestruction: { readonly _text: "true" | "fase" };
+        readonly plowingRequiredEnabled: { readonly _text: "true" | "fase" };
+        readonly stonesEnabled: { readonly _text: "true" | "false" };
+        readonly weedsEnabled: { readonly _text: "true" | "false" };
+        readonly limeRequired: { readonly _text: "true" | "false" };
+        readonly isSnowEnabled: { readonly _text: "true" | "false" };
+        readonly fuelUsage: { readonly _text: string };
+        readonly helperBuyFuel: { readonly _text: "true" | "false" };
+        readonly helperBuySeeds: { readonly _text: "true" | "false" };
+        readonly helperBuyFertilizer: { readonly _text: "true" | "false" };
+        readonly helperSlurrySource: { readonly _text: string };
+        readonly helperManureSource: { readonly _text: string };
+        readonly densityMapRevision: { readonly _text: string };
+        readonly terrainTextureRevision: { readonly _text: string };
+        readonly terrainLodTextureRevision: { readonly _text: string };
+        readonly splitShapesRevision: { readonly _text: string };
+        readonly tipCollisionRevision: { readonly _text: string };
+        readonly placementCollisionRevision: { readonly _text: string };
+        readonly navigationCollisionRevision: { readonly _text: string };
+        readonly mapDensityMapRevision: { readonly _text: string };
+        readonly mapTerrainTextureRevision: { readonly _text: string };
+        readonly mapTerrainLodTextureRevision: { readonly _text: string };
+        readonly mapSplitShapesRevision: { readonly _text: string };
+        readonly mapTipCollisionRevision: { readonly _text: string };
+        readonly mapPlacementCollisionRevision: { readonly _text: string };
+        readonly mapNavigationCollisionRevision: { readonly _text: string };
+        readonly difficulty: { readonly _text: string };
+        readonly economicDifficulty: { readonly _text: string };
+        readonly dirtInterval: { readonly _text: string };
+        readonly timeScale: { readonly _text: string };
+        readonly autoSaveInterval: { readonly _text: string };
     };
     readonly statistics: {
-        readonly money: { readonly _text: string; };
-        readonly playTime: { readonly _text: string; };
+        readonly money: { readonly _text: string };
+        readonly playTime: { readonly _text: string };
     };
     readonly slotSystem: {
         readonly _attributes: {
@@ -334,10 +339,10 @@ export interface FSLoopCSG {
 }
 
 interface YTCacheFeedEntry {
-    readonly id: { readonly _text: string; };
-    readonly "yt:videoId": { readonly _text: string; };
-    readonly "yt:channelId": { readonly _text: string; };
-    readonly title: { readonly _text: string; };
+    readonly id: { readonly _text: string };
+    readonly "yt:videoId": { readonly _text: string };
+    readonly "yt:channelId": { readonly _text: string };
+    readonly title: { readonly _text: string };
     readonly link: {
         readonly _attributes: {
             readonly rel: string;
@@ -345,13 +350,13 @@ interface YTCacheFeedEntry {
         };
     };
     readonly author: {
-        readonly name: { readonly _text: string; };
-        readonly uri: { readonly _text: string; };
+        readonly name: { readonly _text: string };
+        readonly uri: { readonly _text: string };
     };
-    readonly published: { readonly _text: string; };
-    readonly updated: { readonly _text: string; };
+    readonly published: { readonly _text: string };
+    readonly updated: { readonly _text: string };
     readonly "media:group": {
-        readonly "media:title": { readonly _text: string; };
+        readonly "media:title": { readonly _text: string };
         readonly "media:content": {
             readonly _attributes: {
                 readonly url: string;
@@ -367,7 +372,7 @@ interface YTCacheFeedEntry {
                 readonly height: string;
             };
         };
-        readonly "media:description": { readonly _text: string; };
+        readonly "media:description": { readonly _text: string };
         readonly "media:community": {
             readonly "media:starRating": {
                 readonly _attributes: {
@@ -378,7 +383,7 @@ interface YTCacheFeedEntry {
                 };
             };
             readonly "media:statistics": {
-                readonly _attributes: { readonly views: string; };
+                readonly _attributes: { readonly views: string };
             };
         };
     };
@@ -397,13 +402,13 @@ export interface YTCacheFeed {
                 readonly href: string;
             };
         }[];
-        readonly id: { readonly _text: string; };
-        readonly title: { readonly _text: string; };
+        readonly id: { readonly _text: string };
+        readonly title: { readonly _text: string };
         readonly author: {
-            readonly name: { readonly _text: string; };
-            readonly uri: { readonly _text: string; };
+            readonly name: { readonly _text: string };
+            readonly uri: { readonly _text: string };
         };
-        readonly published: { readonly _text: string; };
+        readonly published: { readonly _text: string };
         readonly entry: YTCacheFeedEntry[];
     };
 }
@@ -430,11 +435,7 @@ export interface FarmFormat {
         };
     };
     readonly farms: {
-        readonly farm: [
-            GreenFarm,
-            StaffFarm,
-            StaffFarm
-        ];
+        readonly farm: [GreenFarm, StaffFarm, StaffFarm];
     };
 }
 
@@ -451,7 +452,7 @@ interface GreenFarm {
     };
 }
 interface StaffFarm {
-    readonly _attributes: Prettify<GreenFarm["_attributes"] & { readonly password: string; }>;
+    readonly _attributes: Prettify<GreenFarm["_attributes"] & { readonly password: string }>;
     readonly players?: {
         readonly player: FarmPlayer[] | FarmPlayer;
     };
@@ -485,21 +486,68 @@ interface FarmPlayer {
 export interface DedicatedServerConfig {
     readonly gameserver: {
         readonly settings: {
-            readonly game_name: { readonly _text: string; };
-            readonly admin_password: { readonly _text?: string; };
-            readonly game_password: { readonly _text?: string; };
-            readonly savegame_index: { readonly _text: "1" | "2" | "3"| "4"| "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "13" | "14" | "15" | "16" | "18" | "19" | "20"; };
-            readonly max_player: { readonly _text: "2" | "3"| "4"| "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "13" | "14" | "15" | "16"; };
-            readonly port: { readonly _text: string; };
-            readonly language: { readonly _text: "en" | "de" | "jp" | "pl" | "cz" | "fr" | "es" | "ru" | "it" | "pt" | "hu" | "nl" | "cs" | "ct" | "br" | "tr" | "ro" | "kr" | "da" | "fi" | "no" | "sv"; };
-            readonly auto_save_interval: { readonly _text: `${string}.000000`; };
-            readonly stats_interval: { readonly _text: `${string}.000000`; };
-            readonly use_upnp: { readonly _text: "true" | "false"; };
-            readonly crossplay_allowed: { readonly _text: "true" | "false"; };
-            readonly difficulty: { readonly _text: "2" | "3"; };
-            readonly pause_game_if_empty: { readonly _text: "1" | "2"; };
-            readonly mapID: { readonly _text: string; };
-            readonly mapFilename: { readonly _text: string; };
+            readonly game_name: { readonly _text: string };
+            readonly admin_password: { readonly _text?: string };
+            readonly game_password: { readonly _text?: string };
+            readonly savegame_index: {
+                readonly _text:
+                    | "1"
+                    | "2"
+                    | "3"
+                    | "4"
+                    | "5"
+                    | "6"
+                    | "7"
+                    | "8"
+                    | "9"
+                    | "10"
+                    | "11"
+                    | "12"
+                    | "13"
+                    | "14"
+                    | "15"
+                    | "16"
+                    | "18"
+                    | "19"
+                    | "20";
+            };
+            readonly max_player: {
+                readonly _text: "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "13" | "14" | "15" | "16";
+            };
+            readonly port: { readonly _text: string };
+            readonly language: {
+                readonly _text:
+                    | "en"
+                    | "de"
+                    | "jp"
+                    | "pl"
+                    | "cz"
+                    | "fr"
+                    | "es"
+                    | "ru"
+                    | "it"
+                    | "pt"
+                    | "hu"
+                    | "nl"
+                    | "cs"
+                    | "ct"
+                    | "br"
+                    | "tr"
+                    | "ro"
+                    | "kr"
+                    | "da"
+                    | "fi"
+                    | "no"
+                    | "sv";
+            };
+            readonly auto_save_interval: { readonly _text: `${string}.000000` };
+            readonly stats_interval: { readonly _text: `${string}.000000` };
+            readonly use_upnp: { readonly _text: "true" | "false" };
+            readonly crossplay_allowed: { readonly _text: "true" | "false" };
+            readonly difficulty: { readonly _text: "2" | "3" };
+            readonly pause_game_if_empty: { readonly _text: "1" | "2" };
+            readonly mapID: { readonly _text: string };
+            readonly mapFilename: { readonly _text: string };
         };
     };
 }

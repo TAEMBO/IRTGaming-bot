@@ -6,5 +6,5 @@ import { LogColor } from "./logColor.js";
  * @param data The data to be logged
  */
 export function log(color: keyof typeof LogColor, ...data: any[]) {
-    console.log(`${LogColor[color]}[${(new Date()).toLocaleString("en-GB")}]`, ...data, LogColor.Reset);
+    console.log(`${LogColor[color]}[${new Date().toLocaleString("en-GB")}]`, ...data, LogColor.Reset);
 }

@@ -3,7 +3,7 @@ import type {
     ChatInputCommandInteraction,
     ContextMenuCommandBuilder,
     MessageContextMenuCommandInteraction,
-    UserContextMenuCommandInteraction
+    UserContextMenuCommandInteraction,
 } from "discord.js";
 import type { CombinedSlashCommandBuilder } from "#typings";
 
@@ -12,17 +12,13 @@ import type { CombinedSlashCommandBuilder } from "#typings";
  */
 export class Command<
     TCommand extends "chatInput" | "message" | "user",
-    TBuilder = TCommand extends "chatInput"
-        ? CombinedSlashCommandBuilder
-        : ContextMenuCommandBuilder,
+    TBuilder = TCommand extends "chatInput" ? CombinedSlashCommandBuilder : ContextMenuCommandBuilder,
     TInteraction = TCommand extends "chatInput"
         ? ChatInputCommandInteraction<"cached">
         : TCommand extends "message"
-            ? MessageContextMenuCommandInteraction<"cached">
-            : UserContextMenuCommandInteraction<"cached">,
-    TAutocomplete = TCommand extends "chatInput"
-        ? ((interaction: AutocompleteInteraction<"cached">) => Promise<any>)
-        : undefined
+          ? MessageContextMenuCommandInteraction<"cached">
+          : UserContextMenuCommandInteraction<"cached">,
+    TAutocomplete = TCommand extends "chatInput" ? (interaction: AutocompleteInteraction<"cached">) => Promise<any> : undefined,
 > {
     /** The optional autocomplete function that is ran for this command */
     public autocomplete?: TAutocomplete;

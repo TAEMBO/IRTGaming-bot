@@ -8,11 +8,17 @@ export default new Command<"chatInput">({
         const colunms = ["Command Name", "Uses"] as const;
         const includedCommands = interaction.client.chatInputCommands.filter(x => x.uses).sort((a, b) => b.uses - a.uses);
 
-        if (!includedCommands.size) return await interaction.reply(`No commands have been used yet.\nUptime: ${formatTime(interaction.client.uptime, 2, { commas: true, longNames: true })}`);
-        
+        if (!includedCommands.size)
+            return await interaction.reply(
+                `No commands have been used yet.\nUptime: ${formatTime(interaction.client.uptime, 2, { commas: true, longNames: true })}`,
+            );
+
         const nameLength = Math.max(...includedCommands.map(x => x.data.name.length), colunms[0].length) + 2;
         const amountLength = Math.max(...includedCommands.map(x => x.uses.toString().length), colunms[1].length) + 1;
-        const rows = [`${colunms[0] + " ".repeat(nameLength - colunms[0].length)}|${" ".repeat(amountLength - colunms[1].length) + colunms[1]}\n`, "-".repeat(nameLength) + "-".repeat(amountLength) + "\n"];
+        const rows = [
+            `${colunms[0] + " ".repeat(nameLength - colunms[0].length)}|${" ".repeat(amountLength - colunms[1].length) + colunms[1]}\n`,
+            "-".repeat(nameLength) + "-".repeat(amountLength) + "\n",
+        ];
 
         for (const [_, command] of includedCommands) {
             const name = command.data.name;
@@ -23,9 +29,11 @@ export default new Command<"chatInput">({
 
         const embed = new EmbedBuilder()
             .setTitle("Bot Statistics")
-            .setDescription(`List of commands that have been used. Total amount of commands used since last restart: **${interaction.client.chatInputCommands.reduce((a, b) => a + b.uses, 0)}**`)
+            .setDescription(
+                `List of commands that have been used. Total amount of commands used since last restart: **${interaction.client.chatInputCommands.reduce((a, b) => a + b.uses, 0)}**`,
+            )
             .setColor(interaction.client.config.EMBED_COLOR);
-            
+
         if (rows.join("").length > 1024) {
             let fieldValue = "";
 
@@ -39,19 +47,17 @@ export default new Command<"chatInput">({
             embed.addFields({ name: "\u200b", value: `\`\`\`\n${fieldValue}\`\`\`` });
         } else embed.addFields({ name: "\u200b", value: `\`\`\`\n${rows.join("")}\`\`\`` });
 
-        const ramUsage = [
-            process.memoryUsage().heapUsed,
-            process.memoryUsage().heapTotal,
-            os.freemem()
-        ].map(bytes => {
-            if (!bytes) return "0 Bytes";
-        
-            const sizes = ["Bytes", "KB", "MB", "GB"];
-            const i = Math.floor(Math.log(bytes) / Math.log(1_000));
-        
-            return (bytes / Math.pow(1_000, i)).toFixed(1) + " " + sizes[i];
-        }).join("**/**");
-        
+        const ramUsage = [process.memoryUsage().heapUsed, process.memoryUsage().heapTotal, os.freemem()]
+            .map(bytes => {
+                if (!bytes) return "0 Bytes";
+
+                const sizes = ["Bytes", "KB", "MB", "GB"];
+                const i = Math.floor(Math.log(bytes) / Math.log(1_000));
+
+                return (bytes / Math.pow(1_000, i)).toFixed(1) + " " + sizes[i];
+            })
+            .join("**/**");
+
         embed.addFields({
             name: "Misc. Stats",
             value: [
@@ -59,13 +65,11 @@ export default new Command<"chatInput">({
                 `**Node.js Version:** ${process.version}`,
                 `**Discord.js Version:** v${version}`,
                 `**Bot Uptime:** ${formatTime(interaction.client.uptime, 2, { commas: true, longNames: true })}`,
-                `**Host Uptime:** ${formatTime((os.uptime() * 1000), 2, { commas: true, longNames: true })}`
-            ].join("\n")
+                `**Host Uptime:** ${formatTime(os.uptime() * 1000, 2, { commas: true, longNames: true })}`,
+            ].join("\n"),
         });
-        
+
         await interaction.reply({ embeds: [embed] });
     },
-    data: new SlashCommandBuilder()
-        .setName("statistics")
-        .setDescription("See statistics for the bot itself")
+    data: new SlashCommandBuilder().setName("statistics").setDescription("See statistics for the bot itself"),
 });

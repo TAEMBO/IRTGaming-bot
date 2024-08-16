@@ -1,12 +1,13 @@
-import type { ChatInputCommandInteraction } from "discord.js"; 
+import type { ChatInputCommandInteraction } from "discord.js";
 import { hasRole, youNeedRole } from "#util";
 
 /**
- * @param interaction 
+ * @param interaction
  * @param type The type of punishment this is
  */
 export async function punish(interaction: ChatInputCommandInteraction<"cached">, type: string) {
-    if (!["warn", "mute"].includes(type) && hasRole(interaction.member, "discordHelper")) return await youNeedRole(interaction, "discordStaff");
+    if (!["warn", "mute"].includes(type) && hasRole(interaction.member, "discordHelper"))
+        return await youNeedRole(interaction, "discordStaff");
 
     const time = interaction.options.getString("time") ?? undefined;
     const reason = interaction.options.getString("reason") ?? "Unspecified";
@@ -17,5 +18,8 @@ export async function punish(interaction: ChatInputCommandInteraction<"cached">,
     if (!guildMember && type !== "ban") return await interaction.reply(`You cannot ${type} someone who is not in the server.`);
 
     await interaction.deferReply();
-    await interaction.client.punishments.addPunishment(type, interaction.user.id, reason, user, guildMember, { time, interaction });
+    await interaction.client.punishments.addPunishment(type, interaction.user.id, reason, user, guildMember, {
+        time,
+        interaction,
+    });
 }

@@ -16,5 +16,5 @@ export default new Event({
         } else if (interaction.isAutocomplete()) {
             await Handlers.handleAutocomplete(interaction);
         }
-    }
+    },
 });

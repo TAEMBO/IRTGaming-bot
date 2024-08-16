@@ -16,10 +16,9 @@ export class FTPActions extends FTPClient {
     public async get(path: string) {
         await this.login();
 
-        const data = await new Promise<string>((res, rej) => super.get(
-            this.config.path + path,
-            async (err, stream) => err ? rej(err) : res(await stringifyStream(stream))
-        ));
+        const data = await new Promise<string>((res, rej) =>
+            super.get(this.config.path + path, async (err, stream) => (err ? rej(err) : res(await stringifyStream(stream)))),
+        );
 
         super.end();
 
@@ -29,11 +28,7 @@ export class FTPActions extends FTPClient {
     public async put(data: NodeJS.ReadableStream | string | Buffer, path: string) {
         await this.login();
 
-        await new Promise<void>((res, rej) => super.put(
-            data,
-            this.config.path + path,
-            (err) => err ? rej(err) : res()
-        ));
+        await new Promise<void>((res, rej) => super.put(data, this.config.path + path, err => (err ? rej(err) : res())));
 
         super.end();
     }
@@ -41,10 +36,7 @@ export class FTPActions extends FTPClient {
     public async delete(path: string) {
         await this.login();
 
-        await new Promise<void>((res, rej) => super.delete(
-            this.config.path + path,
-            (err) => err ? rej(err) : res()
-        ));
+        await new Promise<void>((res, rej) => super.delete(this.config.path + path, err => (err ? rej(err) : res())));
 
         super.end();
     }

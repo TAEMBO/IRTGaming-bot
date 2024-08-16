@@ -16,14 +16,15 @@ console.log(fsServers.keys());
 if (client.config.toggles.debug) client.on("debug", console.log);
 
 for (const { id } of client.config.ytChannels) client.ytCache[id] = null;
-for (const serverAcro of fsServers.keys()) client.fsCache[serverAcro] = {
-    players: [],
-    lastAdmin: null,
-    graphPoints: [],
-    completeRes: null,
-    state: null,
-    throttled: null
-};
+for (const serverAcro of fsServers.keys())
+    client.fsCache[serverAcro] = {
+        players: [],
+        lastAdmin: null,
+        graphPoints: [],
+        completeRes: null,
+        state: null,
+        throttled: null,
+    };
 
 // Command handler
 for (const folder of await readdir("commands")) {
@@ -33,13 +34,11 @@ for (const folder of await readdir("commands")) {
 
         if (!(commandFile instanceof Command)) {
             log("Red", `${file} not Command`);
-    
+
             continue;
         }
 
-        const collectionType = commandFile.data instanceof ContextMenuCommandBuilder
-            ? "contextMenuCommands"
-            : "chatInputCommands";
+        const collectionType = commandFile.data instanceof ContextMenuCommandBuilder ? "contextMenuCommands" : "chatInputCommands";
 
         client[collectionType].set(commandFile.data.name, commandFile);
     }

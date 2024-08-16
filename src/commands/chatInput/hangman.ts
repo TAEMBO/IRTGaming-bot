@@ -13,10 +13,12 @@ export default new Command<"chatInput">({
         const phrase = interaction.options.getString("phrase", true).toLowerCase();
         const wordOrPhrase = phrase.includes(" ") ? "phrase" : "word";
         const botMsg = await interaction.followUp({
-            content: `A hangman game has been started by *${interaction.user.tag}*!\nAnyone can guess letters${phrase.includes(" ") ? ", a word, or the full phrase": " or the full word"} by doing \`guess [letter${phrase.includes(" ") ? ", word, or phrase" : " or word"}]\`\nThe ${wordOrPhrase} is:\n\`\`\`\n${hidePhrase()}\n\`\`\``,
-            fetchReply: true
+            content: `A hangman game has been started by *${interaction.user.tag}*!\nAnyone can guess letters${phrase.includes(" ") ? ", a word, or the full phrase" : " or the full word"} by doing \`guess [letter${phrase.includes(" ") ? ", word, or phrase" : " or word"}]\`\nThe ${wordOrPhrase} is:\n\`\`\`\n${hidePhrase()}\n\`\`\``,
+            fetchReply: true,
         });
-        const guessCollector = interaction.channel!.createMessageCollector({ filter: msg => !msg.author.bot && msg.content.toLowerCase().startsWith("guess") });
+        const guessCollector = interaction.channel!.createMessageCollector({
+            filter: msg => !msg.author.bot && msg.content.toLowerCase().startsWith("guess"),
+        });
 
         await interaction.deleteReply();
 
@@ -36,14 +38,17 @@ export default new Command<"chatInput">({
         function hidePhrase() {
             hiddenLetters = false;
 
-            return phrase.split("").map((x, i) => {
-                if (guesses.includes(x) || guessedWordsIndices.includes(i)) return x;
-                else if (x === " ") return " ";
-                else {
-                    hiddenLetters = true;
-                    return "_";
-                }
-            }).join(" ");
+            return phrase
+                .split("")
+                .map((x, i) => {
+                    if (guesses.includes(x) || guessedWordsIndices.includes(i)) return x;
+                    else if (x === " ") return " ";
+                    else {
+                        hiddenLetters = true;
+                        return "_";
+                    }
+                })
+                .join(" ");
         }
 
         async function guessLetter(letter: string) {
@@ -77,62 +82,13 @@ export default new Command<"chatInput">({
         async function checkFouls(isWord: boolean) {
             let loseText = "";
             const stages = [
-                [
-                    "      ",
-                    "      ",
-                    "      ",
-                    "      ",
-                    "╭────╮",
-                    "╯    ╰"
-                ],
-                [
-                    "      ",
-                    "      ",
-                    "  ┃   ",
-                    "  ┃   ",
-                    "╭─┸──╮",
-                    "╯    ╰"
-                ],
-                [
-                    "  ┏   ",
-                    "  ┃   ",
-                    "  ┃   ",
-                    "  ┃   ",
-                    "╭─┸──╮",
-                    "╯    ╰"
-                ],
-                [
-                    "  ┏   ",
-                    "  ┃   ",
-                    "  ┃   ",
-                    " ┌┨   ",
-                    "╭┴┸──╮",
-                    "╯    ╰"
-                ],
-                [
-                    "  ┏━┓ ",
-                    "  ┃   ",
-                    "  ┃   ",
-                    " ┌┨   ",
-                    "╭┴┸──╮",
-                    "╯    ╰"
-                ],
-                [
-                    "  ┏━┓ ",
-                    "  ┃ ⎔ ",
-                    "  ┃   ",
-                    " ┌┨   ",
-                    "╭┴┸──╮",
-                    "╯    ╰"
-                ],
-                [
-                    "  ┏━┓ ",
-                    "  ┃ ⎔ ",
-                    "  ┃╶╂╴",
-                    " ┌┨ ^ ",
-                    "╭┴┸──╮",
-                    "╯    ╰"
-                ],
+                ["      ", "      ", "      ", "      ", "╭────╮", "╯    ╰"],
+                ["      ", "      ", "  ┃   ", "  ┃   ", "╭─┸──╮", "╯    ╰"],
+                ["  ┏   ", "  ┃   ", "  ┃   ", "  ┃   ", "╭─┸──╮", "╯    ╰"],
+                ["  ┏   ", "  ┃   ", "  ┃   ", " ┌┨   ", "╭┴┸──╮", "╯    ╰"],
+                ["  ┏━┓ ", "  ┃   ", "  ┃   ", " ┌┨   ", "╭┴┸──╮", "╯    ╰"],
+                ["  ┏━┓ ", "  ┃ ⎔ ", "  ┃   ", " ┌┨   ", "╭┴┸──╮", "╯    ╰"],
+                ["  ┏━┓ ", "  ┃ ⎔ ", "  ┃╶╂╴", " ┌┨ ^ ", "╭┴┸──╮", "╯    ╰"],
             ];
 
             if (fouls === 7) {
@@ -141,13 +97,16 @@ export default new Command<"chatInput">({
                 clearInterval(interval);
             }
 
-            await botMsg.reply(`The ${wordOrPhrase} doesn't include that ${isWord ? "piece of text" : "letter"}.\nAn incorrect guess leads to the addition of things to the drawing. It now looks like this:\n\`\`\`\n${stages[fouls - 1].join("\n")}\n\`\`\`` + loseText);
+            await botMsg.reply(
+                `The ${wordOrPhrase} doesn't include that ${isWord ? "piece of text" : "letter"}.\nAn incorrect guess leads to the addition of things to the drawing. It now looks like this:\n\`\`\`\n${stages[fouls - 1].join("\n")}\n\`\`\`` +
+                    loseText,
+            );
         }
 
         guessCollector.on("collect", async guessMessage => {
             const guess = guessMessage.content.slice(6).toLowerCase();
 
-            if (!guess || !guess.length) return void await guessMessage.reply("You're using the `guess` command wrong. Get good.");
+            if (!guess || !guess.length) return void (await guessMessage.reply("You're using the `guess` command wrong. Get good."));
 
             if (guess.length > 1) {
                 await guessWord(guess);
@@ -157,8 +116,8 @@ export default new Command<"chatInput">({
         });
 
         const interval = setInterval(async () => {
-            if (Date.now() <= (latestActivity + 120_000)) return;
-            
+            if (Date.now() <= latestActivity + 120_000) return;
+
             await botMsg.reply("The hangman game has ended due to inactivity.");
             guessCollector.stop();
             clearInterval(interval);
@@ -167,8 +126,5 @@ export default new Command<"chatInput">({
     data: new SlashCommandBuilder()
         .setName("hangman")
         .setDescription("Start a game of hangman")
-        .addStringOption(x => x
-            .setName("phrase")
-            .setDescription("The word or phrase for others to guess")
-            .setRequired(true))
+        .addStringOption(x => x.setName("phrase").setDescription("The word or phrase for others to guess").setRequired(true)),
 });

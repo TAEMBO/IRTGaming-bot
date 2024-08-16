@@ -11,8 +11,5 @@ export default new Command<"chatInput">({
     data: new SlashCommandBuilder()
         .setName("band")
         .setDescription("Introduce an honorary ban")
-        .addUserOption(x => x
-            .setName("member")
-            .setDescription("It's an honor")
-            .setRequired(true))
+        .addUserOption(x => x.setName("member").setDescription("It's an honor").setRequired(true)),
 });

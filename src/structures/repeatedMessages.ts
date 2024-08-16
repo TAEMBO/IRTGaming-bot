@@ -5,7 +5,7 @@ import type { RepeatedMessagesData, RepeatedMessagesEntry, RepeatedMessagesIdent
 export class RepeatedMessages {
     private _data: RepeatedMessagesData = {};
 
-    public constructor(private readonly _client: TClient) { }
+    public constructor(private readonly _client: TClient) {}
 
     public async increment(
         msg: Message<true>,
@@ -15,7 +15,7 @@ export class RepeatedMessages {
             identifier: RepeatedMessagesIdentifiers;
             muteTime: string;
             muteReason: string;
-        }
+        },
     ) {
         const userData = this._data[msg.author.id];
 
@@ -24,9 +24,9 @@ export class RepeatedMessages {
                 entries: new Collection<number, RepeatedMessagesEntry>().set(msg.createdTimestamp, {
                     identifier: options.identifier,
                     channel: msg.channelId,
-                    msg: msg.id
+                    msg: msg.id,
                 }),
-                timeout: setTimeout(() => delete this._data[msg.author.id], options.thresholdTime)
+                timeout: setTimeout(() => delete this._data[msg.author.id], options.thresholdTime),
             };
 
             return;
@@ -34,22 +34,31 @@ export class RepeatedMessages {
 
         // Add this message to the list
         userData.entries.set(msg.createdTimestamp, { identifier: options.identifier, channel: msg.channelId, msg: msg.id });
-    
+
         // Reset timeout
         clearTimeout(userData.timeout);
         userData.timeout = setTimeout(() => delete this._data[msg.author.id], options.thresholdTime);
-    
+
         // Message mustve been sent after (now - threshold), so purge those that were sent earlier
         userData.entries = userData.entries.filter((_, i) => i >= Date.now() - options.thresholdTime);
-    
+
         // A spammed message is one that has been sent within the threshold parameters
         const spammedMessage = userData.entries.find(x => {
             return userData.entries.filter(y => x.identifier === y.identifier).size >= options.thresholdAmt;
         });
-    
+
         if (spammedMessage) {
             delete this._data[msg.author.id];
-            await this._client.punishments.addPunishment("mute", this._client.user.id, `Automod; ${options.muteReason}`, msg.author, msg.member, { time: options.muteTime });
+            await this._client.punishments.addPunishment(
+                "mute",
+                this._client.user.id,
+                `Automod; ${options.muteReason}`,
+                msg.author,
+                msg.member,
+                {
+                    time: options.muteTime,
+                },
+            );
 
             const spamMsgIds = userData.entries.filter(x => x.identifier === "spam").map(x => x.msg);
 

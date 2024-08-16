@@ -9,5 +9,5 @@ export enum LogColor {
     Cyan = "\x1b[36m",
     White = "\x1b[37m",
     Grey = "\x1b[90m",
-    Reset = "\x1b[0m"
+    Reset = "\x1b[0m",
 }

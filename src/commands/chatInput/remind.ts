@@ -1,9 +1,9 @@
 import {
     ActionRowBuilder,
+    ApplicationCommandOptionType,
     type ChatInputCommandInteraction,
     ComponentType,
     EmbedBuilder,
-    SlashCommandBuilder,
     StringSelectMenuBuilder,
     type StringSelectMenuInteraction,
     StringSelectMenuOptionBuilder
@@ -185,21 +185,34 @@ export default new Command<"chatInput">({
             
         }, interaction.options.getSubcommand());
     },
-    data: new SlashCommandBuilder()
-        .setName("remind")
-        .setDescription("Manage reminders")
-        .addSubcommand(x => x
-            .setName("create")
-            .setDescription("Create a reminder")
-            .addStringOption(x => x
-                .setName("what")
-                .setDescription("The content of the reminder")
-                .setRequired(true))
-            .addStringOption(x => x
-                .setName("when")
-                .setDescription("The time to remind from now")
-                .setRequired(true)))
-        .addSubcommand(x => x
-            .setName("delete")
-            .setDescription("Delete an active reminder"))
+    data: {
+        name: "remind",
+        description: "Manage reminders",
+        options: [
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "create",
+                description: "Create a reminder",
+                options: [
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "what",
+                        description: "The content of the reminder",
+                        required: true
+                    },
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "when",
+                        description: "The time to remind from now (e.g. 5m, 3h, 1d)",
+                        required: true
+                    }
+                ]
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "delete",
+                description: "Delete an active reminder"
+            }
+        ]
+    }
 });

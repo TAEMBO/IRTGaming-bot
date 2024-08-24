@@ -1,4 +1,4 @@
-import { EmbedBuilder, PermissionFlagsBits, PermissionsBitField, SlashCommandBuilder, time } from "discord.js";
+import { ApplicationCommandOptionType, EmbedBuilder, PermissionFlagsBits, PermissionsBitField, time } from "discord.js";
 import { Command } from "#structures";
 
 export default new Command<"chatInput">({
@@ -41,11 +41,16 @@ export default new Command<"chatInput">({
             .setThumbnail(role.iconURL())
         ] });
     },
-    data: new SlashCommandBuilder()
-        .setName("roleinfo")
-        .setDescription("Get information about a role")
-        .addRoleOption(x => x
-            .setName("role")
-            .setDescription("The role to get information on")
-            .setRequired(true))
+    data: {
+        name: "roleinfo",
+        description: "Get information about a role",
+        options: [
+            {
+                type: ApplicationCommandOptionType.Role,
+                name: "role",
+                description: "The role to get information about",
+                required: true
+            }
+        ]
+    }
 });

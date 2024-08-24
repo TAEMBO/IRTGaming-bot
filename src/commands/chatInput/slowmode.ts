@@ -1,4 +1,4 @@
-import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { ApplicationCommandOptionType, PermissionFlagsBits } from "discord.js";
 import { Command } from "#structures";
 
 export default new Command<"chatInput">({
@@ -12,13 +12,19 @@ export default new Command<"chatInput">({
             : "Slowmode removed"
         );
     },
-    data: new SlashCommandBuilder()
-        .setName("slowmode")
-        .setDescription("Set a slowmode in this channel")
-        .addIntegerOption(x => x
-            .setName("time")
-            .setDescription("The time amount for the slowmode")
-            .setRequired(true)
-            .setMaxValue(21600))
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
+    data: {
+        name: "slowmode",
+        description: "Set a slowmode for this channel",
+        default_member_permissions: PermissionFlagsBits.ManageMessages.toString(),
+        options: [
+            {
+                type: ApplicationCommandOptionType.Integer,
+                name: "time",
+                description: "The time amount for the slowmode in seconds",
+                min_value: 0,
+                max_value: 21600,
+                required: true
+            }
+        ]
+    }
 });

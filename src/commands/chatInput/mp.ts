@@ -1,4 +1,4 @@
-import { AttachmentBuilder, ComponentType, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { ApplicationCommandOptionType, AttachmentBuilder, ComponentType, EmbedBuilder } from "discord.js";
 import { Routes } from "farming-simulator-types/2022";
 import puppeteer from "puppeteer"; // Credits to Trolly for suggesting this package
 import { Command, FTPActions } from "#structures";
@@ -13,7 +13,8 @@ import {
 } from "#util";
 import type { BanFormat, DedicatedServerConfig, FarmFormat } from "#typings";
 
-const cmdOptionChoices = fsServers.getPublicAll().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));
+const publicServersChoices = fsServers.getPublicAll().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));
+const allServersChoices = fsServers.entries().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));
 
 export default new Command<"chatInput">({
     async run(interaction) {
@@ -361,126 +362,207 @@ export default new Command<"chatInput">({
             }
         }, interaction.options.getSubcommand());
     },
-    data: new SlashCommandBuilder()
-        .setName("mp")
-        .setDescription("All things multiplayer-related")
-        .addSubcommand(x => x
-            .setName("server")
-            .setDescription("Turn a given server on or off")
-            .addStringOption(x => x
-                .setName("server")
-                .setDescription("The server to manage")
-                .addChoices(...fsServers.entries().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro })))
-                .setRequired(true))
-            .addStringOption(x => x
-                .setName("action")
-                .setDescription("Start or stop the given server")
-                .addChoices(
-                    { name: "Start", value: "start" },
-                    { name: "Stop", value: "stop" },
-                    { name: "Restart", value: "restart" })
-                .setRequired(true)))
-        .addSubcommand(x => x
-            .setName("mop")
-            .setDescription("Mop a file from a given server")
-            .addStringOption(x => x
-                .setName("server")
-                .setDescription("The server to manage")
-                .addChoices(...cmdOptionChoices)
-                .setRequired(true))
-            .addStringOption(x => x
-                .setName("action")
-                .setDescription("The action to perform on the given server")
-                .addChoices(
-                    { name: "Mop players.xml", value: "players.xml" },
-                    { name: "Mop items.xml", value: "items.xml" })
-                .setRequired(true)))
-        .addSubcommand(x => x
-            .setName("bans")
-            .setDescription("Manage ban lists for servers")
-            .addStringOption(x => x
-                .setName("server")
-                .setDescription("The server to manage")
-                .addChoices(...cmdOptionChoices)
-                .setRequired(true))
-            .addStringOption(x => x
-                .setName("action")
-                .setDescription("To download or upload a ban file")
-                .addChoices(
-                    { name: "Download", value: "dl" },
-                    { name: "Upload", value: "ul" })
-                .setRequired(true))
-            .addAttachmentOption(x => x
-                .setName("bans")
-                .setDescription("The ban file if uploading")
-                .setRequired(false)))
-        .addSubcommand(x => x
-            .setName("search")
-            .setDescription("Fetch farm data for a player")
-            .addStringOption(x => x
-                .setName("server")
-                .setDescription("The server to search on")
-                .addChoices(...cmdOptionChoices)
-                .setRequired(true))
-            .addStringOption(x => x
-                .setName("name")
-                .setDescription("The name of the player to search for")
-                .setRequired(true)))
-        .addSubcommand(x => x
-            .setName("pair")
-            .setDescription("Manually pair a UUID with a Discord account for informational purposes")
-            .addStringOption(x => x
-                .setName("uuid")
-                .setDescription("The UUID of the in-game player")
-                .setRequired(true))
-            .addUserOption(x => x
-                .setName("user")
-                .setDescription("The Discord account to pair with the in-game player")
-                .setRequired(true)))
-        .addSubcommand(x => x
-            .setName("farms")
-            .setDescription("Download farms.xml from a server")
-            .addStringOption(x => x
-                .setName("server")
-                .setDescription("The server to fetch from")
-                .addChoices(...fsServers.entries().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro })))
-                .setRequired(true)))
-        .addSubcommand(x => x
-            .setName("password")
-            .setDescription("Fetch the game password for a given server")
-            .addStringOption(x => x
-                .setName("server")
-                .setDescription("The server to fetch from")
-                .addChoices(...cmdOptionChoices)
-                .setRequired(true)))
-        .addSubcommand(x => x
-            .setName("roles")
-            .setDescription("Give or take MP Staff roles")
-            .addUserOption(x => x
-                .setName("member")
-                .setDescription("The member to add or remove the role from")
-                .setRequired(true))
-            .addStringOption(x => x
-                .setName("role")
-                .setDescription("the role to add or remove")
-                .addChoices(
-                    { name: "Trusted Farmer", value: "trustedFarmer" },
-                    { name: "Farm Manager", value: "mpFarmManager" },
-                    { name: "Junior Admin", value: "mpJrAdmin" },
-                    { name: "Senior Admin", value: "mpSrAdmin" })
-                .setRequired(true)))
-        .addSubcommand(x => x
-            .setName("fm")
-            .setDescription("Add or remove player names in FM list")
-            .addStringOption(x => x
-                .setName("name")
-                .setDescription("The player name to add or remove")
-                .setRequired(true)))
-        .addSubcommand(x => x
-            .setName("tf")
-            .setDescription("Add or remove player names in TF list")
-            .addStringOption(x => x
-                .setName("name")
-                .setDescription("The player name to add or remove")
-                .setRequired(true)))
+    data: {
+        name: "mp",
+        description: "MP management",
+        options: [
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "server",
+                description: "Manage the state of a given server",
+                options: [
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "server",
+                        description: "The server to manage",
+                        choices: allServersChoices,
+                        required: true
+                    },
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "action",
+                        description: "The action to perform on the given server",
+                        choices: [
+                            { name: "Start", value: "start" },
+                            { name: "Stop", value: "stop" },
+                            { name: "Restart", value: "restart" }
+                        ],
+                        required: true
+                    }
+                ]
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "mop",
+                description: "Delete cached data from a given server to improve performance",
+                options: [
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "server",
+                        description: "The server to manage",
+                        choices: publicServersChoices,
+                        required: true
+                    },
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "action",
+                        description: "The action to perform on the given server",
+                        choices: [
+                            { name: "Delete players.xml", value: "players.xml" },
+                            { name: "Delete items.xml", value: "items.xml" }
+                        ],
+                        required: true
+                    }
+                ]
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "bans",
+                description: "Manage the ban list for a given server",
+                options: [
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "server",
+                        description: "The server to manage",
+                        choices: publicServersChoices,
+                        required: true
+                    },
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "action",
+                        description: "Whether to download or upload a ban file",
+                        choices: [
+                            { name: "Download", value: "dl" },
+                            { name: "Upload", value: "ul" }
+                        ],
+                        required: true
+                    },
+                    {
+                        type: ApplicationCommandOptionType.Attachment,
+                        name: "bans",
+                        description: "The ban file if uploading",
+                        required: false
+                    }
+                ]
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "search",
+                description: "Fetch farm data for a given player",
+                options: [
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "server",
+                        description: "The server to search on",
+                        choices: publicServersChoices,
+                        required: true
+                    },
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "name",
+                        description: "The name or UUID of the player to search for",
+                        required: true
+                    }
+                ]
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "pair",
+                description: "Manually pair a UUID with a Discord account for informational purposes",
+                options: [
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "uuid",
+                        description: "The UUID of the in-game player",
+                        required: true
+                    },
+                    {
+                        type: ApplicationCommandOptionType.User,
+                        name: "user",
+                        description: "The Discord account to pair with the in-game player",
+                        required: true
+                    }
+                ]
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "farms",
+                description: "Download farms.xml from a given server",
+                options: [
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "server",
+                        description: "The server to download from",
+                        choices: allServersChoices,
+                        required: true
+                    }
+                ]
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "password",
+                description: "Fetch the current game password for a given server",
+                options: [
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "server",
+                        description: "The server to fetch from",
+                        choices: publicServersChoices,
+                        required: true
+                    }
+                ]
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "roles",
+                description: "Manage MP Staff roles for members",
+                options: [
+                    {
+                        type: ApplicationCommandOptionType.User,
+                        name: "member",
+                        description: "The member to manage MP Staff roles for",
+                        required: true
+                    },
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "role",
+                        description: "The role to add or remove",
+                        choices: [
+                            { name: "Trusted Farmer", value: "trustedFarmer" },
+                            { name: "Farm Manager", value: "mpFarmManager" },
+                            { name: "Junior Admin", value: "mpJrAdmin" },
+                            { name: "Senior Admin", value: "mpSrAdmin" }
+                        ],
+                        required: true
+                    }
+                ]
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "fm",
+                description: "Manage player names in the FM list",
+                options: [
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "name",
+                        description: "The name of the player to add or remove",
+                        required: true
+                    }
+                ]
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "tf",
+                description: "Manage player names in the TF list",
+                options: [
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "name",
+                        description: "The name of the player to add or remove",
+                        required: true
+                    }
+                ]
+            }
+        ]
+    }
 });

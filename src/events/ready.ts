@@ -24,8 +24,8 @@ export default new Event({
     
         if (client.config.toggles.registerCommands) {
             await client.application.commands.set([
-                ...client.chatInputCommands.map(x => x.data.toJSON()),
-                ...client.contextMenuCommands.map(x => x.data.toJSON())
+                ...client.chatInputCommands.map(x => x.data),
+                ...client.contextMenuCommands.map(x => x.data)
             ])
                 .then(() => log("Purple", "Application commands registered"))
                 .catch(e => log("Red", "Couldn't register commands: ", e));

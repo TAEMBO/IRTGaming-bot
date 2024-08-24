@@ -6,8 +6,8 @@ import {
     escapeItalic,
     EmbedBuilder,
     inlineCode,
-    SlashCommandBuilder,
-    time
+    time,
+    ApplicationCommandOptionType
 } from "discord.js";
 import { Command } from "#structures";
 import { formatString, formatUser } from "#util";
@@ -50,10 +50,10 @@ export default new Command<"chatInput">({
             }[status ?? "invisible"];
         }
         
-        const member = interaction.options.getMember("member");
+        const member = interaction.options.getMember("user");
 
         if (!member) {
-            const user = interaction.options.getUser("member", true);
+            const user = interaction.options.getUser("user", true);
 
             await user.fetch();
 
@@ -194,11 +194,16 @@ export default new Command<"chatInput">({
         
         await interaction.reply({ embeds });
     },
-    data: new SlashCommandBuilder()
-        .setName("whois")
-        .setDescription("Get info on a user")
-        .addUserOption(x => x
-            .setName("member")
-            .setDescription("The user to get info on")
-            .setRequired(true))
+    data: {
+        name: "whois",
+        description: "Get info on a Discord user",
+        options: [
+            {
+                type: ApplicationCommandOptionType.User,
+                name: "user",
+                description: "The user to get info on",
+                required: true
+            }
+        ]
+    }
 });

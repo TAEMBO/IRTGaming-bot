@@ -4,7 +4,6 @@ import {
     ButtonBuilder,
     ButtonStyle,
     ComponentType,
-    ContextMenuCommandBuilder,
     EmbedBuilder
 } from "discord.js";
 import { Command } from "#structures";
@@ -56,7 +55,8 @@ export default new Command<"message">({
             }
         }, int.customId));
     },
-    data: new ContextMenuCommandBuilder()
-        .setName("Mark Suggestion")
-        .setType(ApplicationCommandType.Message)
+    data: {
+        name: "Mark Suggestion",
+        type: ApplicationCommandType.Message
+    }
 });

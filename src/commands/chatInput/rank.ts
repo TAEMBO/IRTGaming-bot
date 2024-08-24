@@ -1,4 +1,4 @@
-import { AttachmentBuilder, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { ApplicationCommandOptionType, AttachmentBuilder, EmbedBuilder } from "discord.js";
 import canvas from "@napi-rs/canvas";
 import { Command } from "#structures";
 
@@ -198,17 +198,28 @@ export default new Command<"chatInput">({
             ]
         });
     },
-    data: new SlashCommandBuilder()
-        .setName("rank")
-        .setDescription("Ranking system")
-        .addSubcommand(x => x
-            .setName("view")
-            .setDescription("View a member's ranking information")
-            .addUserOption(x => x
-                .setName("member")
-                .setDescription("Member whose rank to view")
-                .setRequired(false)))
-        .addSubcommand(x => x
-            .setName("leaderboard")
-            .setDescription("View top 10 users in the ranking system"))
+    data: {
+        name: "rank",
+        description: "Ranking system",
+        options: [
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "view",
+                description: "View a member's ranking information",
+                options: [
+                    {
+                        type: ApplicationCommandOptionType.User,
+                        name: "member",
+                        description: "The member whose rank to view",
+                        required: false
+                    }
+                ]
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "leaderboard",
+                description: "View the top 10 users in the ranking system"
+            }
+        ]
+    }
 });

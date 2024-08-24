@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, SlashCommandBuilder } from "discord.js";
+import { ActionRowBuilder, ApplicationCommandOptionType, ButtonBuilder, ButtonStyle } from "discord.js";
 import { Command } from "#structures";
 
 export default new Command<"chatInput">({
@@ -17,11 +17,16 @@ export default new Command<"chatInput">({
             )]
         });
     },
-    data: new SlashCommandBuilder()
-        .setName("sub")
-        .setDescription("Verify your YT subscription to IRT")
-        .addAttachmentOption(x => x
-            .setName("image")
-            .setDescription("Image proving subscription")
-            .setRequired(true))
+    data: {
+        name: "sub",
+        description: "Verify your YT subscription to IRTGaming",
+        options: [
+            {
+                type: ApplicationCommandOptionType.Attachment,
+                name: "image",
+                description: "Image proving subscription",
+                required: true
+            }
+        ]
+    }
 });

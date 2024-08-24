@@ -1,4 +1,4 @@
-import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { ApplicationCommandOptionType, PermissionFlagsBits } from "discord.js";
 import { Command } from "#structures";
 
 export default new Command<"chatInput">({
@@ -10,17 +10,24 @@ export default new Command<"chatInput">({
         await interaction.channel!.bulkDelete(msgs, true);
         await interaction.reply({ content: `Successfully deleted ${msgs.size} messages${user ? ` from ${user}` : ""}.`, ephemeral: true });
     },
-    data: new SlashCommandBuilder()
-        .setName("purge")
-        .setDescription("Purge messages in this channel")
-        .addIntegerOption(x => x
-            .setName("amount")
-            .setDescription("The amount of messages to purge")
-            .setRequired(true)
-            .setMaxValue(100))
-        .addUserOption(x => x
-            .setName("user")
-            .setDescription("The user whose messages to purge")
-            .setRequired(false))
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
+    data: {
+        name: "purge",
+        description: "Purge messages in this channel",
+        default_member_permissions: PermissionFlagsBits.ManageMessages.toString(),
+        options: [
+            {
+                type: ApplicationCommandOptionType.Integer,
+                name: "amount",
+                description: "The amount of messages to purge",
+                max_value: 100,
+                required: true
+            },
+            {
+                type: ApplicationCommandOptionType.User,
+                name: "user",
+                description: "The optional user whose messages to purge",
+                required: false
+            }
+        ]
+    }
 });

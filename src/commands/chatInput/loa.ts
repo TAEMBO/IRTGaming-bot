@@ -1,4 +1,3 @@
-import { SlashCommandBuilder } from "discord.js";
 import { Command } from "#structures";
 import { hasRole, isMPStaff, youNeedRole } from "#util";
 
@@ -34,7 +33,8 @@ export default new Command<"chatInput">({
 
         await interaction.reply({ content: "LOA status removed", ephemeral: true });
     },
-    data: new SlashCommandBuilder()
-        .setName("loa")
-        .setDescription("Manage your LOA status")
+    data: {
+        name: "loa",
+        description: "Manage your LOA status"
+    }
 });

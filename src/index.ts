@@ -1,10 +1,9 @@
-import { ContextMenuCommandBuilder } from "discord.js";
 import TClient from "./client.js";
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { URL } from "node:url";
-import { Command, Event } from "#structures";
-import { fsServers, log } from "#util";
+import { Event } from "#structures";
+import { fsServers, isValidCommand, log } from "#util";
 
 const client = new TClient();
 
@@ -31,15 +30,15 @@ for (const folder of await readdir("commands")) {
         const commandPath = new URL(join("commands", folder, file), import.meta.url);
         const { default: commandFile } = await import(commandPath.toString());
 
-        if (!(commandFile instanceof Command)) {
+        if (!isValidCommand(commandFile)) {
             log("Red", `${file} not Command`);
     
             continue;
         }
 
-        const collectionType = commandFile.data instanceof ContextMenuCommandBuilder
-            ? "contextMenuCommands"
-            : "chatInputCommands";
+        const collectionType = commandFile.data.description
+            ? "chatInputCommands"
+            : "contextMenuCommands";
 
         client[collectionType].set(commandFile.data.name, commandFile);
     }

@@ -1,4 +1,4 @@
-import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
 import { Command } from "#structures";
 
 export default new Command<"chatInput">({
@@ -16,11 +16,16 @@ export default new Command<"chatInput">({
             .setDescription(`> ${question}\n\n**${answers[randomAnswer]}**`)
         ] });
     },
-    data: new SlashCommandBuilder()
-        .setName("8ball")
-        .setDescription("Test your chances with 8ball")
-        .addStringOption(x => x
-            .setName("question")
-            .setDescription("Your closed-ended question")
-            .setRequired(true))
+    data: {
+        name: "8ball",
+        description: "Test your chances with 8ball",
+        options: [
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "question",
+                description: "Your close-ended question",
+                required: true
+            }
+        ]
+    }
 });

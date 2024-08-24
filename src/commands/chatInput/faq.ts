@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { ActionRowBuilder, ApplicationCommandOptionType, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import { Command } from "#structures";
 import { fsServers, lookup } from "#util";
 
@@ -70,23 +70,32 @@ export default new Command<"chatInput">({
             ].join(""))
         }, interaction.options.getString("questions", true));
     },
-    data: new SlashCommandBuilder()
-        .setName("faq")
-        .setDescription("Frequently asked questions")
-        .addStringOption(x => x
-            .setName("questions")
-            .setDescription("A list of answers to frequently asked questions")
-            .addChoices(
-                { name: "Applying for MP Staff", value: "staff" },
-                { name: "Reporting trolls", value: "troll" },
-                { name: "Appeal an MP ban", value: "appeal" },
-                { name: "What to do on MP servers", value: "todo" },
-                { name: "MP filters to join", value: "filters" },
-                { name: "Buying equipment", value: "equipment" },
-                { name: "Getting passwords", value: "passwords" },
-                { name: "Terrain glitches", value: "terrain" })
-            .setRequired(true))
-        .addUserOption(x => x
-            .setName("user")
-            .setDescription("The optional user to notify of with this FAQ"))
+    data: {
+        name: "faq",
+        description: "Frequently asked questions",
+        options: [
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "question",
+                description: "A list of answers to frequently asked questions",
+                choices: [
+                    { name: "Applying for MP Staff", value: "staff" },
+                    { name: "Reporting trolls", value: "troll" },
+                    { name: "Appeal an MP ban", value: "appeal" },
+                    { name: "What to do on MP servers", value: "todo" },
+                    { name: "MP filters to join", value: "filters" },
+                    { name: "Buying equipment", value: "equipment" },
+                    { name: "Getting passwords", value: "passwords" },
+                    { name: "Terrain glitches", value: "terrain" }
+                ],
+                required: true
+            },
+            {
+                type: ApplicationCommandOptionType.User,
+                name: "user",
+                description: "The optional user to notify of with this FAQ answer",
+                required: false
+            }
+        ]
+    }
 });

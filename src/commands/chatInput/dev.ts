@@ -1,11 +1,11 @@
 import Discord, {
     ActionRowBuilder,
+    ApplicationCommandOptionType,
     ButtonBuilder,
     ButtonStyle,
     codeBlock,
     ComponentType,
-    EmbedBuilder,
-    SlashCommandBuilder
+    EmbedBuilder
 } from "discord.js";
 import { exec } from "child_process";
 import fs from "node:fs";
@@ -97,24 +97,41 @@ export default new structures.Command<"chatInput">({
             }
         }, interaction.options.getSubcommand());
     },
-    data: new SlashCommandBuilder()
-        .setName("dev")
-        .setDescription("Run bot-dev-only commands")
-        .addSubcommand(x => x
-            .setName("eval")
-            .setDescription("Execute code within the bot")
-            .addStringOption(x => x
-                .setName("code")
-                .setDescription("The code to execute")
-                .setRequired(true))
-            .addIntegerOption(x => x
-                .setName("depth")
-                .setDescription("The depth of the output")
-                .setMaxValue(5))
-            .addBooleanOption(x => x
-                .setName("async")
-                .setDescription("Whether to wrap the code in an async block or not")))
-        .addSubcommand(x => x
-            .setName("restart")
-            .setDescription("Restart the bot"))
+    data: {
+        name: "dev",
+        description: "Run bot-dev-only commands",
+        options: [
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "eval",
+                description: "Execute code within the bot",
+                options: [
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "code",
+                        description: "The code to execute",
+                        required: true
+                    },
+                    {
+                        type: ApplicationCommandOptionType.Integer,
+                        name: "depth",
+                        description: "The depth of the output",
+                        max_value: 5,
+                        required: false
+                    },
+                    {
+                        type: ApplicationCommandOptionType.Boolean,
+                        name: "async",
+                        description: "Whether to wrap the code in an async block or not",
+                        required: false
+                    }
+                ]
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "restart",
+                description: "Restart the bot"
+            }
+        ]
+    }
 });

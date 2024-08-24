@@ -1,4 +1,3 @@
-import { SlashCommandBuilder } from "discord.js";
 import { Command } from "#structures";
 
 export default new Command<"chatInput">({
@@ -20,7 +19,8 @@ export default new Command<"chatInput">({
             await applicationLogs.send(`${interaction.user} (${interaction.user.tag}) tried to open an MP Staff application but was rejected (**${deniedMsgs.join("** and **")}**)`);
         }
     },
-    data: new SlashCommandBuilder()
-        .setName("apply")
-        .setDescription("Apply for MP Staff")
+    data: {
+        name: "apply",
+        description: "Apply for MP Staff"
+    }
 });

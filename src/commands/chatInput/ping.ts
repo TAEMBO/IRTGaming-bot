@@ -1,4 +1,3 @@
-import { SlashCommandBuilder } from "discord.js";
 import { Command } from "#structures";
 
 export default new Command<"chatInput">({
@@ -10,7 +9,8 @@ export default new Command<"chatInput">({
             `Round-trip: \`${msg.createdTimestamp - interaction.createdTimestamp}\`ms`
         ].join("\n"));
     },
-    data: new SlashCommandBuilder()
-        .setName("ping")
-        .setDescription("Check the bot's latency")
+    data: {
+        name: "ping",
+        description: "Check the bot's latency"
+    }
 });

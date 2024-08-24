@@ -1,73 +1,14 @@
 import {
+    ApplicationCommandOptionType,
     type CategoryChannel,
     ComponentType,
     EmbedBuilder,
     OverwriteType,
-    SlashCommandBuilder,
     type TextChannel,
     PermissionFlagsBits
 } from "discord.js";
 import { Command } from "#structures";
 import { ACK_BUTTONS, fsServers, lookup, onMFFarms, youNeedRole } from "#util";
-
-const cmdBuilderData = new SlashCommandBuilder()
-    .setName("mf")
-    .setDescription("MF management");
-
-for (const [serverAcro, server]  of fsServers.getPrivateAll()) cmdBuilderData.addSubcommandGroup(x => x
-    .setName(serverAcro.replace("mf", ""))
-    .setDescription(`${server.fullName} management`)
-    .addSubcommand(x => x
-        .setName("member")
-        .setDescription("Manage MF farm members")
-        .addUserOption(x => x
-            .setName("member")
-            .setDescription("The member to add or remove a role from")
-            .setRequired(true))
-        .addStringOption(x => x
-            .setName("role")
-            .setDescription("The role to add or remove")
-            .setRequired(true)
-            .setAutocomplete(true)))
-    .addSubcommand(x => x
-        .setName("owner")
-        .setDescription("Manage MF farm owners")
-        .addUserOption(x => x
-            .setName("member")
-            .setDescription("The member to add or remove the MF Farm Owner role from")
-            .setRequired(true)))
-    .addSubcommand(x => x
-        .setName("rename-role")
-        .setDescription("Rename a given MF Farm role")
-        .addStringOption(x => x
-            .setName("role")
-            .setDescription("The role to rename")
-            .setRequired(true)
-            .setAutocomplete(true))
-        .addStringOption(x => x
-            .setName("name")
-            .setDescription("The name of the MF Farm. Leave unspecified to clear farm name in role")
-            .setRequired(false)))
-    .addSubcommand(x => x
-        .setName("rename-channel")
-        .setDescription("Update the name of a given MF Farm channel")
-        .addStringOption(x => x
-            .setName("channel")
-            .setDescription("The channel to rename")
-            .setRequired(true)
-            .setAutocomplete(true)))
-    .addSubcommand(x => x
-        .setName("archive")
-        .setDescription("Manage archivement of MF Farm channels")
-        .addStringOption(x => x
-            .setName("channel")
-            .setDescription("The MF Farm channel to manage archivement of")
-            .setAutocomplete(true)
-            .setRequired(true)))
-    .addSubcommand(x => x
-        .setName("apply")
-        .setDescription("Send the Google Form to apply to be an MF Farm Owner"))
-);
 
 export default new Command<"chatInput">({
     async autocomplete(interaction) {
@@ -346,5 +287,95 @@ export default new Command<"chatInput">({
             }
         }, interaction.options.getSubcommand());
     },
-    data: cmdBuilderData
+    data: {
+        name: "mf",
+        description: "MF management",
+        options: fsServers.getPrivateAll().map(([serverAcro, server]) => ({
+            type: ApplicationCommandOptionType.SubcommandGroup,
+            name: serverAcro.replace("mf", ""),
+            description: `${server.fullName} management`,
+            options: [
+                {
+                    type: ApplicationCommandOptionType.Subcommand,
+                    name: "member",
+                    description: "Manage MF farm members",
+                    options: [
+                        {
+                            type: ApplicationCommandOptionType.User,
+                            name: "member",
+                            description: "The member to add or remove a role from",
+                            required: true
+                        },
+                        {
+                            type: ApplicationCommandOptionType.String,
+                            name: "role",
+                            description: "The role to add or remove",
+                            autocomplete: true,
+                            required: true
+                        }
+                    ]
+                },
+                {
+                    type: ApplicationCommandOptionType.Subcommand,
+                    name: "owner",
+                    description: "Manage MF farm owners",
+                    options: [
+                        {
+                            type: ApplicationCommandOptionType.User,
+                            name: "member",
+                            description: "The member to add or remove the MF Farm Owner role from",
+                            required: true
+                        }
+                    ]
+                },
+                {
+                    type: ApplicationCommandOptionType.Subcommand,
+                    name: "rename-role",
+                    description: "Rename a given MF Farm role",
+                    options: [
+                        {
+                            type: ApplicationCommandOptionType.String,
+                            name: "role",
+                            description: "The role to rename",
+                            autocomplete: true,
+                            required: true
+                        }
+                    ]
+                },
+                {
+                    type: ApplicationCommandOptionType.Subcommand,
+                    name: "rename-channel",
+                    description: "Update the name of a given MF Farm channel",
+                    options: [
+                        {
+                            type: ApplicationCommandOptionType.String,
+                            name: "channel",
+                            description: "The channel to rename",
+                            autocomplete: true,
+                            required: true
+                        }
+                    ]
+                },
+                {
+                    type: ApplicationCommandOptionType.Subcommand,
+                    name: "archive",
+                    description: "Manage archivement of MF Farm channels",
+                    options: [
+                        {
+                            type: ApplicationCommandOptionType.String,
+                            name: "channel",
+                            description: "The MF Farm channel to manage archivement of",
+                            autocomplete: true,
+                            required: true
+                        }
+                    ]
+                },
+                {
+                    type: ApplicationCommandOptionType.Subcommand,
+                    name: "apply",
+                    description: "Send the Google Form to apply to be an MF Farm Owner"
+                }
+            ]
+        }))
+    }
 });

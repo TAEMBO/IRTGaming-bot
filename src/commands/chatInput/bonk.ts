@@ -1,4 +1,4 @@
-import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
 import { Command } from "#structures";
 
 export default new Command<"chatInput">({
@@ -22,15 +22,22 @@ export default new Command<"chatInput">({
             .setThumbnail(interaction.client.config.resources.bonkEmbedThumbnail)
         ] });
     },
-    data: new SlashCommandBuilder()
-        .setName("bonk")
-        .setDescription("Bonk someone")
-        .addUserOption(x => x
-            .setName("member")
-            .setDescription("The member to bonk")
-            .setRequired(true))
-        .addStringOption(x => x
-            .setName("reason")
-            .setDescription("The reason for bonking the member")
-            .setRequired(false))
+    data: {
+        name: "bonk",
+        description: "Bonk someone",
+        options: [
+            {
+                type: ApplicationCommandOptionType.User,
+                name: "member",
+                description: "The member to bonk",
+                required: true
+            },
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "reason",
+                description: "The reason for bonking the member",
+                required: false
+            }
+        ]
+    }
 });

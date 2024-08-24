@@ -1,4 +1,4 @@
-import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { EmbedBuilder } from "discord.js";
 import { Command } from "#structures";
 import { fsServers, isMPStaff } from "#util";
 
@@ -24,7 +24,8 @@ export default new Command<"chatInput">({
             ].join("\n"))
         ] });
     },
-    data: new SlashCommandBuilder()
-        .setName("appeal")
-        .setDescription("Appeal an MP ban")
+    data: {
+        name: "appeal",
+        description: "Appeal an MP ban"
+    }
 });

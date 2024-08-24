@@ -1,27 +1,9 @@
-import { AttachmentBuilder, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { ApplicationCommandOptionType, AttachmentBuilder, EmbedBuilder } from "discord.js";
 import canvas from "@napi-rs/canvas";
 import { DSSExtension, type DSSResponse, Feeds, filterUnused } from "farming-simulator-types/2022";
 import { Command } from "#structures";
 import { formatRequestInit, formatTime, fsServers, isMPStaff, log, lookup } from "#util";
 import type { PlayerTimesDocument } from "#typings";
-
-const cmdBuilderData = new SlashCommandBuilder()
-    .setName("stats")
-    .setDescription("Gets info on an FS22 server")
-    .addSubcommand(x => x
-        .setName("all")
-        .setDescription("Server stats for all servers"))
-    .addSubcommand(x => x
-        .setName("playertimes")
-        .setDescription("Player time data")
-        .addStringOption(x => x
-            .setName("name")
-            .setDescription("The in-game name of the player to get stats for")
-            .setAutocomplete(true)
-            .setRequired(false)));
-
-// Dynamically manage subcommands via fs data
-for (const [serverAcro, { fullName }] of fsServers.entries()) cmdBuilderData.addSubcommand(x => x.setName(serverAcro).setDescription(`${fullName} server stats`));
 
 export default new Command<"chatInput">({
     async autocomplete(interaction) {
@@ -345,5 +327,34 @@ export default new Command<"chatInput">({
             await interaction.reply({ embeds: [embed], files: [new AttachmentBuilder(img.toBuffer("image/png"), { name: "FSStats.png" })] });
         }
     },
-    data: cmdBuilderData
+    data: {
+        name: "stats",
+        description: "Get info on an FS server",
+        options: [
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "all",
+                description: "Get info on all servers",
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "playertimes",
+                description: "Player time data",
+                options: [
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "name",
+                        description: "The in-game name of the player to get stats for",
+                        autocomplete: true,
+                        required: false
+                    }
+                ]
+            },
+            ...fsServers.entries().map(([serverAcro, { fullName }]) => ({
+                type: ApplicationCommandOptionType.Subcommand,
+                name: serverAcro,
+                description: `${fullName} server stats`
+            }) as const)
+        ]
+    }
 });

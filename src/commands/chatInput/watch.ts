@@ -1,4 +1,4 @@
-import { AttachmentBuilder, ComponentType, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { ApplicationCommandOptionType, AttachmentBuilder, ComponentType, EmbedBuilder } from "discord.js";
 import { Command } from "#structures";
 import { ACK_BUTTONS, isMPStaff, lookup, youNeedRole } from "#util";
 
@@ -75,39 +75,62 @@ export default new Command<"chatInput">({
             }
         }, interaction.options.getSubcommand());
     },
-    data: new SlashCommandBuilder()
-        .setName("watch")
-        .setDescription("Manage watchList names")
-        .addSubcommand(x => x
-            .setName("add")
-            .setDescription("add a player to watchList")
-            .addStringOption(x => x
-                .setName("username")
-                .setDescription("The player name to add")
-                .setRequired(true))
-            .addStringOption(x=>x
-                .setName("reason")
-                .setDescription("The reason for adding the player")
-                .setRequired(true))
-            .addStringOption(x => x
-                .setName("severity")
-                .setDescription("Whether this player needs to be banned or watched over")
-                .addChoices(
-                    { name: "Needs to be banned", value: "ban" },
-                    { name: "Needs to be watched over", value: "watch" }
-                )
-                .setRequired(true)))
-        .addSubcommand(x => x
-            .setName("remove")
-            .setDescription("remove a player from watchList")
-            .addStringOption(x => x
-                .setName("username")
-                .setDescription("The player name to remove")
-                .setRequired(true)))
-        .addSubcommand(x => x
-            .setName("view")
-            .setDescription("View the full watchList"))
-        .addSubcommand(x => x
-            .setName("subscription")
-            .setDescription("Manage your subscription to watchList notifications"))
+    data: {
+        name: "watch",
+        description: "Manage watch list",
+        options: [
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "add",
+                description: "Add a player to watchList",
+                options: [
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "username",
+                        description: "The player name to add",
+                        required: true
+                    },
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "reason",
+                        description: "The reason for adding the player",
+                        required: true
+                    },
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "severity",
+                        description: "Whether this player needs to be banned or watched over",
+                        choices: [
+                            { name: "Needs to be banned", value: "ban" },
+                            { name: "Needs to be watched over", value: "watch" }
+                        ],
+                        required: true
+                    }
+                ]
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "remove",
+                description: "Remove a player from watchList",
+                options: [
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "username",
+                        description: "The player name to remove",
+                        required: true
+                    }
+                ]
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "view",
+                description: "View the entire watch list"
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "subscription",
+                description: "Manage your subscription to watchList notifications"
+            }
+        ]
+    }
 });

@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { ApplicationCommandOptionType } from "discord.js";
 import { Command } from "#structures";
 
 export default new Command<"chatInput">({
@@ -8,11 +8,16 @@ export default new Command<"chatInput">({
         await interaction.deferReply({ ephemeral: true }).then(() => interaction.deleteReply());
         await interaction.channel!.send(`${user} had their honorary ban revoked!`);
     },
-    data: new SlashCommandBuilder()
-        .setName("unband")
-        .setDescription("Revoke an honorary ban")
-        .addUserOption(x => x
-            .setName("member")
-            .setDescription("It's an honor")
-            .setRequired(true))
+    data: {
+        name: "unband",
+        description: "Revoke an honorary ban",
+        options: [
+            {
+                type: ApplicationCommandOptionType.User,
+                name: "member",
+                description: "It's an honor",
+                required: true
+            }
+        ]
+    }
 });

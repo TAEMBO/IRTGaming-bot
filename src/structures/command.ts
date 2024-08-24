@@ -1,20 +1,23 @@
 import type {
+    ApplicationCommandType,
     AutocompleteInteraction,
     ChatInputCommandInteraction,
-    ContextMenuCommandBuilder,
     MessageContextMenuCommandInteraction,
+    RESTPostAPIChatInputApplicationCommandsJSONBody,
+    RESTPostAPIContextMenuApplicationCommandsJSONBody,
     UserContextMenuCommandInteraction
 } from "discord.js";
-import type { CombinedSlashCommandBuilder } from "#typings";
 
 /**
  * Creates a new instance of an application command
  */
 export class Command<
     TCommand extends "chatInput" | "message" | "user",
-    TBuilder = TCommand extends "chatInput"
-        ? CombinedSlashCommandBuilder
-        : ContextMenuCommandBuilder,
+    TData = TCommand extends "chatInput"
+        ? RESTPostAPIChatInputApplicationCommandsJSONBody
+        : TCommand extends "message"
+            ? RESTPostAPIContextMenuApplicationCommandsJSONBody & { type: ApplicationCommandType.Message }
+            : RESTPostAPIContextMenuApplicationCommandsJSONBody & { type: ApplicationCommandType.User },
     TInteraction = TCommand extends "chatInput"
         ? ChatInputCommandInteraction<"cached">
         : TCommand extends "message"
@@ -28,12 +31,12 @@ export class Command<
     public autocomplete?: TAutocomplete;
     /** The function that is ran for this command */
     public run: (interaction: TInteraction) => Promise<any>;
-    /** The builder data for this command */
-    public readonly data: TBuilder;
+    /** The data for this command */
+    public readonly data: TData;
     /** The amount of times this command has been used */
     public uses = 0;
 
-    public constructor(commandData: Omit<Command<TCommand, TBuilder, TInteraction, TAutocomplete>, "uses">) {
+    public constructor(commandData: Omit<Command<TCommand, TData, TInteraction, TAutocomplete>, "uses">) {
         this.autocomplete = commandData.autocomplete;
         this.run = commandData.run;
         this.data = commandData.data;

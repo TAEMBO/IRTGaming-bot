@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { ApplicationCommandOptionType } from "discord.js";
 import { Command } from "#structures";
 
 export default new Command<"chatInput">({
@@ -164,11 +164,16 @@ export default new Command<"chatInput">({
             clearInterval(interval);
         }, 5_000);
     },
-    data: new SlashCommandBuilder()
-        .setName("hangman")
-        .setDescription("Start a game of hangman")
-        .addStringOption(x => x
-            .setName("phrase")
-            .setDescription("The word or phrase for others to guess")
-            .setRequired(true))
+    data: {
+        name: "hangman",
+        description: "Start a game of hangman",
+        options: [
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "phrase",
+                description: "The word or phrase for others to guess",
+                required: true
+            }
+        ]
+    }
 });

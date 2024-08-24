@@ -1,4 +1,4 @@
-import { EmbedBuilder, type GuildMember, SlashCommandBuilder } from "discord.js";
+import { ApplicationCommandOptionType, EmbedBuilder, type GuildMember } from "discord.js";
 import { Command } from "#structures";
 import { lookup } from "#util";
 
@@ -84,19 +84,30 @@ export default new Command<"chatInput">({
             }
         }, interaction.options.getSubcommand());
     },
-    data: new SlashCommandBuilder()
-        .setName("staff")
-        .setDescription("Staff member information")
-        .addSubcommand(x => x
-            .setName("mp")
-            .setDescription("Shows all MP Staff members within Discord"))
-        .addSubcommand(x => x
-            .setName("fs")
-            .setDescription("Shows all MP Staff usernames within FS"))
-        .addSubcommand(x => x
-            .setName("discord")
-            .setDescription("Shows all Discord staff members"))
-        .addSubcommand(x => x
-            .setName("mc")
-            .setDescription("Shows all IRTMC Staff members"))
+    data: {
+        name: "staff",
+        description: "Staff member information",
+        options: [
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "mp",
+                description: "Shows all MP Staff members within Discord"
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "fs",
+                description: "Shows all MP Staff usernames within FS"
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "discord",
+                description: "Shows all Discord Staff members"
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "mc",
+                description: "Shows all MC Staff members"
+            },
+        ]
+    }
 });

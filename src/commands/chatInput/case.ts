@@ -1,4 +1,4 @@
-import { EmbedBuilder, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { ApplicationCommandOptionType, EmbedBuilder, PermissionFlagsBits } from "discord.js";
 import { Command } from "#structures";
 import { formatString, formatTime, formatUser, lookup } from "#util";
 
@@ -63,37 +63,61 @@ export default new Command<"chatInput">({
             }
         }, interaction.options.getSubcommand());
     },
-    data: new SlashCommandBuilder()
-        .setName("case")
-        .setDescription("View a case, or all of a member's cases")
-        .addSubcommand(x => x
-            .setName("view")
-            .setDescription("View a single case")
-            .addIntegerOption(x => x
-                .setName("id")
-                .setDescription("The ID of the case")
-                .setRequired(true)))
-        .addSubcommand(x => x
-            .setName("member")
-            .setDescription("View all of a member's cases")
-            .addUserOption(x => x
-                .setName("user")
-                .setDescription("The member whose cases to view")
-                .setRequired(true))
-            .addIntegerOption(x => x
-                .setName("page")
-                .setDescription("The page number (if multiple case pages)")
-                .setRequired(false)))
-        .addSubcommand(x => x
-            .setName("update")
-            .setDescription("Update a case's reason")
-            .addIntegerOption(x => x
-                .setName("id")
-                .setDescription("The ID of the case")
-                .setRequired(true))
-            .addStringOption(x => x
-                .setName("reason")
-                .setDescription("The new reason for the case")
-                .setRequired(true)))
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
+    data: {
+        name: "case",
+        description: "Manage punishment cases",
+        default_member_permissions: PermissionFlagsBits.ManageMessages.toString(),
+        options: [
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "view",
+                description: "View a single case",
+                options: [
+                    {
+                        type: ApplicationCommandOptionType.Integer,
+                        name: "id",
+                        description: "The ID of the case to view",
+                        required: true
+                    }
+                ]
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "member",
+                description: "View all of a member's cases",
+                options: [
+                    {
+                        type: ApplicationCommandOptionType.User,
+                        name: "user",
+                        description: "The member whose cases to view",
+                        required: true
+                    },
+                    {
+                        type: ApplicationCommandOptionType.Integer,
+                        name: "page",
+                        description: "The page number (if multiple case pages)"
+                    }
+                ]
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "update",
+                description: "Update a case's reason",
+                options: [
+                    {
+                        type: ApplicationCommandOptionType.Integer,
+                        name: "id",
+                        description: "The ID of the case to update",
+                        required: true,
+                    },
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "reason",
+                        description: "The new reason for the case",
+                        required: true
+                    }
+                ]
+            }
+        ]
+    }
 });

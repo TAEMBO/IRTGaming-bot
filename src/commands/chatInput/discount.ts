@@ -1,4 +1,4 @@
-import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { ApplicationCommandOptionType, PermissionFlagsBits } from "discord.js";
 import { Command } from "#structures";
 
 export default new Command<"chatInput">({
@@ -10,12 +10,17 @@ export default new Command<"chatInput">({
         await interaction.client.getChan("counting").permissionOverwrites.edit(member, { SendMessages: false });
         await interaction.reply(`${member}'s permisson to send messages in <#${interaction.client.config.mainServer.channels.counting}> has been removed`);
     },
-    data: new SlashCommandBuilder()
-        .setName("discount")
-        .setDescription("Remove a member's ability to participate in #counting")
-        .addUserOption(x => x
-            .setName("member")
-            .setDescription("The member to restrict participation for")
-            .setRequired(true))
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
+    data: {
+        name: "discount",
+        description: "Remove a member's ability to participate in #counting",
+        default_member_permissions: PermissionFlagsBits.ManageMessages.toString(),
+        options: [
+            {
+                type: ApplicationCommandOptionType.User,
+                name: "member",
+                description: "The member to restrict participation for",
+                required: true
+            }
+        ]
+    }
 });

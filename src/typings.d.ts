@@ -2,8 +2,6 @@ import type {
     Collection,
     MessageContextMenuCommandInteraction,
     PresenceData,
-    SlashCommandOptionsOnlyBuilder,
-    SlashCommandSubcommandsOnlyBuilder,
     Snowflake,
     UserContextMenuCommandInteraction
 } from "discord.js";
@@ -129,8 +127,6 @@ export type RepeatedMessagesData = Record<string, {
     entries: Collection<number, RepeatedMessagesEntry>;
     timeout: NodeJS.Timeout;
 }>;
-
-export type CombinedSlashCommandBuilder = SlashCommandOptionsOnlyBuilder | SlashCommandSubcommandsOnlyBuilder;
 
 export type CombinedContextMenuCommandInteraction =
     MessageContextMenuCommandInteraction<"cached">

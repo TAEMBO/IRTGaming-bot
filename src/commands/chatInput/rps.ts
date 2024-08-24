@@ -1,4 +1,4 @@
-import { Collection, EmbedBuilder, type Message, SlashCommandBuilder, type User } from "discord.js";
+import { ApplicationCommandOptionType, Collection, EmbedBuilder, type Message, type User } from "discord.js";
 import { Command } from "#structures";
 import { formatString } from "#util";
 
@@ -62,12 +62,17 @@ export default new Command<"chatInput">({
         rpsInstances.delete(interaction.channelId);
         await interaction.deleteReply();
     },
-    data: new SlashCommandBuilder()
-        .setName("rps")
-        .setDescription("Play a game of rock paper scissors")
-        .addStringOption(x => x
-            .setName("move")
-            .setDescription("Your move")
-            .addChoices(...possibleMoves.map(x => ({ name: formatString(x), value: x })))
-            .setRequired(true))
+    data: {
+        name: "rps",
+        description: "Play a game of rock paper scissors",
+        options: [
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "move",
+                description: "The move you want to play",
+                choices: possibleMoves.map(x => ({ name: formatString(x), value: x })),
+                required: true
+            }
+        ]
+    }
 });

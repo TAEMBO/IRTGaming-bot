@@ -1,4 +1,4 @@
-import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { ApplicationCommandOptionType, PermissionFlagsBits } from "discord.js";
 import { Command } from "#structures";
 
 export default new Command<"chatInput">({
@@ -11,12 +11,17 @@ export default new Command<"chatInput">({
 
         await interaction.reply("Successfully added to bannedWords list");
     },
-    data: new SlashCommandBuilder()
-        .setName("addbannedword")
-        .setDescription("Add a word to the bannedWords list")
-        .addStringOption(x => x
-            .setName("word")
-            .setDescription("The word to add")
-            .setRequired(true))
-        .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
+    data: {
+        name: "addbannedword",
+        description: "Add a word to the bannedWords list",
+        default_member_permissions: PermissionFlagsBits.ModerateMembers.toString(),
+        options: [
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "word",
+                description: "The word to add",
+                required: true
+            }
+        ]
+    }
 });

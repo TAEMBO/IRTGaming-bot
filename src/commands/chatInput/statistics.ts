@@ -1,4 +1,4 @@
-import { EmbedBuilder, SlashCommandBuilder, version } from "discord.js";
+import { EmbedBuilder, version } from "discord.js";
 import os from "node:os";
 import { Command } from "#structures";
 import { formatTime } from "#util";
@@ -65,7 +65,8 @@ export default new Command<"chatInput">({
         
         await interaction.reply({ embeds: [embed] });
     },
-    data: new SlashCommandBuilder()
-        .setName("statistics")
-        .setDescription("See statistics for the bot itself")
+    data: {
+        name: "statistics",
+        description: "See statistics for the bot itself"
+    }
 });

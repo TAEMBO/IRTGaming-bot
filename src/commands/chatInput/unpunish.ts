@@ -1,10 +1,10 @@
-import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { ApplicationCommandOptionType, PermissionFlagsBits } from "discord.js";
 import { Command } from "#structures";
 import { hasRole, youNeedRole } from "#util";
 
 export default new Command<"chatInput">({
     async run(interaction) {
-        const punishment = await interaction.client.punishments.data.findById(interaction.options.getInteger("caseid", true));
+        const punishment = await interaction.client.punishments.data.findById(interaction.options.getInteger("id", true));
         const reason = interaction.options.getString("reason") ?? "Unspecified";
 
         if (!punishment) return await interaction.reply("No case found with that ID");
@@ -13,16 +13,22 @@ export default new Command<"chatInput">({
         
         await interaction.client.punishments.removePunishment(punishment._id, interaction.user.id, reason, interaction);
     },
-    data: new SlashCommandBuilder()
-        .setName("unpunish")
-        .setDescription("Unpunish a member")
-        .addIntegerOption(x => x
-            .setName("caseid")
-            .setDescription("The ID of the punishment to overwrite")
-            .setRequired(true))
-        .addStringOption(x => x
-            .setName("reason")
-            .setDescription("The reason for overwriting the punishment")
-            .setRequired(false))
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
+    data: {
+        name: "unpunish",
+        description: "Overwrite a case",
+        default_member_permissions: PermissionFlagsBits.ManageMessages.toString(),
+        options: [
+            {
+                type: ApplicationCommandOptionType.Integer,
+                name: "id",
+                description: "Te ID of the punishment to overwrite",
+                required: true
+            },
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "reason",
+                description: "The reason for overwriting the punishment"
+            }
+        ]
+    }
 });

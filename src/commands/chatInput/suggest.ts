@@ -1,4 +1,4 @@
-import { EmbedBuilder, ThreadAutoArchiveDuration, SlashCommandBuilder } from "discord.js";
+import { ApplicationCommandOptionType, EmbedBuilder, ThreadAutoArchiveDuration } from "discord.js";
 import { Command } from "#structures";
 
 export default new Command<"chatInput">({
@@ -29,11 +29,16 @@ export default new Command<"chatInput">({
             autoArchiveDuration: ThreadAutoArchiveDuration.OneWeek
         });
     },
-    data: new SlashCommandBuilder()
-        .setName("suggest")
-        .setDescription("Create a suggestion")
-        .addStringOption(x => x
-            .setName("suggestion")
-            .setDescription("Your suggestion")
-            .setRequired(true))
+    data: {
+        name: "suggest",
+        description: "Create a suggestion",
+        options: [
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "suggestion",
+                description: "Your suggestion",
+                required: true
+            }
+        ]
+    }
 });

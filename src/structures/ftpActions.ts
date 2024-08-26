@@ -3,7 +3,7 @@ import type { FSServer } from "#typings";
 import { stringifyStream } from "#util";
 
 export class FTPActions extends FTPClient {
-    public constructor(private config: FSServer["ftp"]) {
+    public constructor(private config: FSServer["ftp"], private keepAlive = false) {
         super();
     }
 
@@ -21,7 +21,7 @@ export class FTPActions extends FTPClient {
             async (err, stream) => err ? rej(err) : res(await stringifyStream(stream))
         ));
 
-        super.end();
+        if (!this.keepAlive) super.end();
 
         return data;
     }
@@ -35,7 +35,7 @@ export class FTPActions extends FTPClient {
             (err) => err ? rej(err) : res()
         ));
 
-        super.end();
+        if (!this.keepAlive) super.end();
     }
 
     public async delete(path: string) {
@@ -46,6 +46,6 @@ export class FTPActions extends FTPClient {
             (err) => err ? rej(err) : res()
         ));
 
-        super.end();
+        if (!this.keepAlive) super.end();
     }
 }

@@ -19,7 +19,7 @@
   "dependencies": {
     "@napi-rs/canvas": "^0.1.51",
     "@types/node-cron": "^3.0.11",
-    "discord.js": "^14.15.3",
+    "discord.js": "^14.16.1",
     "farming-simulator-types": "^1.6.0",
     "ftp": "^0.3.10",
     "mongoose": "^8.2.1",

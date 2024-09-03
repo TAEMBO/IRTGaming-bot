@@ -31,6 +31,7 @@ export default [
             "@typescript-eslint/explicit-member-accessibility": "error",
             "@typescript-eslint/no-floating-promises": "error",
             "@typescript-eslint/consistent-type-imports": "error",
+            "@typescript-eslint/no-deprecated": "error",
             "@typescript-eslint/naming-convention": [
                 "error",
                 {

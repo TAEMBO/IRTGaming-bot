@@ -15,7 +15,7 @@ export default new Command<"message">({
 
         if (
             interaction.channelId !== interaction.client.config.mainServer.channels.communityIdeas
-            || interaction.targetMessage.interaction?.commandName !== "suggest"
+            || interaction.targetMessage.embeds[0]?.title !== "Community Idea"
         ) return await interaction.reply({ content: "You need to select a message that is a community idea!", ephemeral: true });
         
         const embed = EmbedBuilder.from(interaction.targetMessage.embeds[0]);

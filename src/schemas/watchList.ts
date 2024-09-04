@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { BaseSchema } from "#structures";
 
 const model = mongoose.model("watchList", new mongoose.Schema({
     _id: { type: String, required: true },
@@ -6,10 +7,8 @@ const model = mongoose.model("watchList", new mongoose.Schema({
     isSevere: { type: Boolean, required: true }
 }, { versionKey: false }));
 
-export type WatchListDocument = ReturnType<typeof model.castObject>;
-
-export class WatchList {
-    public data = model;
-    
-    public constructor() { }
+export class WatchList extends BaseSchema<typeof model> {
+    public constructor() {
+        super(model);
+    }
 }

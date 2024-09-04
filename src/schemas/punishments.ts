@@ -1,7 +1,8 @@
 import { type ChatInputCommandInteraction, EmbedBuilder, type GuildMember, type User } from "discord.js";
-import type TClient from "../client.js";
 import mongoose from "mongoose";
 import ms from "ms";
+import type TClient from "../client.js";
+import { BaseSchema } from "#structures";
 import { formatString, formatTime, log, lookup } from "#util";
 
 const model = mongoose.model("punishments", new mongoose.Schema({
@@ -20,12 +21,10 @@ const model = mongoose.model("punishments", new mongoose.Schema({
     duration: { type: Number }
 }, { versionKey: false }));
 
-export type PunishmentsDocument = ReturnType<typeof model.castObject>;
-
-export class Punishments {
-    public data = model;
-
-    public constructor(private readonly _client: TClient) { }
+export class Punishments extends BaseSchema<typeof model> {
+    public constructor(private readonly _client: TClient) {
+        super(model);
+    }
 
     public setExec(_id: number, timeout: number) {
         setTimeout(async () => {
@@ -40,7 +39,7 @@ export class Punishments {
         }, timeout > 2_147_483_647 ? 2_147_483_647 : timeout);
     }
 
-    private async makeModlogEntry(punishment: PunishmentsDocument) {
+    private async makeModlogEntry(punishment: typeof this.obj) {
         const embed = new EmbedBuilder()
             .setTitle(`${formatString(punishment.type)} | Case #${punishment._id}`)
             .addFields(
@@ -96,7 +95,7 @@ export class Punishments {
         const { _client } = this;
         const now = Date.now();
         const guild = _client.mainGuild();
-        const punData: PunishmentsDocument = { type, _id: await this.createId(), member: { tag: user.tag, _id: user.id }, reason, moderator, time: now };
+        const punData: typeof this.obj = { type, _id: await this.createId(), member: { tag: user.tag, _id: user.id }, reason, moderator, time: now };
         const inOrFromBoolean = ["warn", "mute"].includes(type) ? "in" : "from"; // Use "in" if the punishment doesn"t remove the member from the server, eg. mute, warn
         const auditLogReason = `${reason} | Case #${punData._id}`;
         const embed = new EmbedBuilder()
@@ -195,7 +194,7 @@ export class Punishments {
             guild.members.fetch(punishment.member._id).catch(() => null),
             this.createId()
         ]);
-        const removePunishmentData: PunishmentsDocument = { type: `un${punishment.type}`, _id, cancels: punishment._id, member: punishment.member, reason, moderator, time: now };
+        const removePunishmentData: typeof this.obj = { type: `un${punishment.type}`, _id, cancels: punishment._id, member: punishment.member, reason, moderator, time: now };
         const punResult = await lookup({
             ban: async () => {
                 return await guild.bans.remove(punishment.member._id, auditLogReason).catch((err: Error) => err.message);

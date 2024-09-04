@@ -11,7 +11,6 @@ import {
 import ms from "ms";
 import { Command } from "#structures";
 import { ACK_BUTTONS, lookup } from "#util";
-import type { RemindersDocument } from "#typings";
 
 export default new Command<"chatInput">({
     async run(interaction) {
@@ -24,7 +23,7 @@ export default new Command<"chatInput">({
         }
 
         async function promptDeletion(
-            reminder: RemindersDocument,
+            reminder: typeof interaction.client.reminders.doc,
             int: StringSelectMenuInteraction<"cached"> | ChatInputCommandInteraction<"cached">
         ) {
             const intOptions = {

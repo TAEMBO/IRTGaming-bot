@@ -37,7 +37,6 @@ export default new Event({
         await Promise.allSettled([
             guild.members.fetch(),
             client.bannedWords.fillCache(),
-            client.dailyMsgs.fillCache(),
             client.fmList.fillCache(),
             client.tfList.fillCache(),
             client.watchListPings.fillCache(),
@@ -78,12 +77,12 @@ export default new Event({
             const formattedDate = Math.floor((Date.now() - client.config.DAILY_MSGS_TIMESTAMP) / 1000 / 60 / 60 / 24);
             const day = date.getDay();
             const channel = client.getChan("general");
-            const yesterday = client.dailyMsgs.cache.find(x => x._id === formattedDate - 1) ?? { _id: formattedDate - 1, count: 0 };
+            const yesterday = await client.dailyMsgs.data.findById(formattedDate - 1) ?? { _id: formattedDate - 1, count: 0 };
             let total = (await client.userLevels.data.find()).reduce((a, b) => a + b.messages, 0); // sum of all users
     
             if (total < yesterday.count) total = yesterday.count; // messages went down
     
-            await client.dailyMsgs.increment({
+            await client.dailyMsgs.data.create({
                 _id: formattedDate,
                 count: total
             });

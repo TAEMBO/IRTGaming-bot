@@ -1,6 +1,7 @@
 import { EmbedBuilder, type GuildTextBasedChannel } from "discord.js";
-import type TClient from "../client.js";
 import mongoose from "mongoose";
+import type TClient from "../client.js";
+import { BaseSchema } from "#structures";
 
 const model = mongoose.model("reminders", new mongoose.Schema({
     userid: { type: String, required: true },
@@ -9,12 +10,10 @@ const model = mongoose.model("reminders", new mongoose.Schema({
     ch: { type: String, required: true }
 }, { versionKey: false }));
 
-export type RemindersDocument = ReturnType<typeof model.castObject>;
-
-export class Reminders {
-    public data = model;
-    
-    public constructor(private readonly _client: TClient) { }
+export class Reminders extends BaseSchema<typeof model> {
+    public constructor(private readonly _client: TClient) {
+        super(model);
+    }
 
     public setExec(_id: mongoose.Types.ObjectId, timeout: number) {
         setTimeout(async () => {

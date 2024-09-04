@@ -11,9 +11,9 @@ import {
 import { constants } from "http2";
 import { setTimeout as sleep } from "node:timers/promises";
 import { formatRequestInit, formatTime, jsonFromXML, log } from "#util";
-import type { FSLoopCSG, FSServer, WatchListDocument } from "#typings";
+import type { FSLoopCSG, FSServer } from "#typings";
 
-export async function fsLoop(client: TClient, watchList: WatchListDocument[], server: FSServer, serverAcro: string) {
+export async function fsLoop(client: TClient, watchList: TClient["watchList"]["doc"][], server: FSServer, serverAcro: string) {
     if (client.config.toggles.debug) log("Yellow", "FSLoop", serverAcro);
 
     function decorators(player: PlayerUsed, publicLoc = false) {
@@ -27,7 +27,7 @@ export async function fsLoop(client: TClient, watchList: WatchListDocument[], se
         return decorators;
     }
 
-    function wlEmbed(document: WatchListDocument, joinLog: boolean) {
+    function wlEmbed(document: TClient["watchList"]["doc"], joinLog: boolean) {
         const embed = new EmbedBuilder()
             .setTitle(`WatchList - ${document.isSevere ? "ban" : "watch over"}`)
             .setDescription(`\`${document._id}\` ${joinLog ? "joined" : "left"} **${serverAcroUp}** at <t:${now}:t>`);

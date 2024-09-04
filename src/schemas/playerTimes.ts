@@ -1,9 +1,9 @@
 import { EmbedBuilder } from "discord.js";
-import type TClient from "../client.js";
 import mongoose from "mongoose";
+import type TClient from "../client.js";
+import { BaseSchema, FTPActions } from "#structures";
 import { fsServers, jsonFromXML, log } from "#util";
 import type { FarmFormat } from "#typings";
-import { FTPActions } from "#structures";
 
 /** The object for each server a player has been on */
 const serverObj = {
@@ -21,19 +21,17 @@ const model = mongoose.model("playerTimes", new mongoose.Schema({
     servers: { type: serversObj, required: true, _id: false }
 }, { versionKey: false }));
 
-export type PlayerTimesDocument = ReturnType<typeof model.castObject>;
-
-export class PlayerTimes {
-    public data = model;
-
-    public constructor(private readonly _client: TClient) { }
+export class PlayerTimes extends BaseSchema<typeof model> {
+    public constructor(private readonly _client: TClient) {
+        super(model);
+    }
     
     /**
      * Retrieve an array-ified form of a player"s server time data.
      * @param data The MongoDB document for the player
      * @returns An array of all server time objects from the player, with the first element for each being the server"s acronym
      */
-    public getTimeData(data: PlayerTimesDocument) {
+    public getTimeData(data: typeof this.obj) {
         return (Object.entries(Object.values(data.servers)[3] ?? {}) as unknown) as [string, {
             [key in keyof typeof serverObj]: number;
         }][];

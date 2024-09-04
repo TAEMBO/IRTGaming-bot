@@ -3,7 +3,6 @@ import canvas from "@napi-rs/canvas";
 import { DSSExtension, type DSSResponse, Feeds, filterUnused } from "farming-simulator-types/2022";
 import { Command } from "#structures";
 import { formatRequestInit, formatTime, fsServers, isMPStaff, log, lookup } from "#util";
-import type { PlayerTimesDocument } from "#typings";
 
 export default new Command<"chatInput">({
     async autocomplete(interaction) {
@@ -84,7 +83,7 @@ export default new Command<"chatInput">({
             const sortedData = playersData.sort((a, b) => interaction.client.playerTimes.getTimeData(b).reduce((x, y) => x + y[1].time, 0) - interaction.client.playerTimes.getTimeData(a).reduce((x, y) => x + y[1].time, 0));
             const player = interaction.options.getString("name");
 
-            const leaderboard = (data: PlayerTimesDocument[], isFirstField: boolean) => data.map((x, i) => [
+            const leaderboard = (data: (typeof interaction.client.playerTimes.doc)[], isFirstField: boolean) => data.map((x, i) => [
                 `**${i + (isFirstField ? 1 : 26)}.** \`${x._id}\``,
                 interaction.client.fmList.cache.includes(x._id) ? ":farmer:" : "",
                 interaction.client.tfList.cache.includes(x._id) ? ":angel:" : "",
@@ -92,44 +91,45 @@ export default new Command<"chatInput">({
                 formatTime((interaction.client.playerTimes.getTimeData(x).reduce((x, y) => x + y[1].time, 0) * 60 * 1000), 3, { commas: true })
             ].join("")).join("\n");
 
-            if (player) {
-                const playerData = playersData.find(x => x._id === player);
+            if (!player) {
+                return await interaction.reply({ embeds: [new EmbedBuilder()
+                    .setColor(interaction.client.config.EMBED_COLOR)
+                    .setDescription(`Top 50 players with the most time spent on IRTGaming FS22 servers since ${interaction.client.config.PLAYERTIMES_START_DATE}`)
+                    .addFields(
+                        { name: "\u200b", value: leaderboard(sortedData.slice(0, 25), true), inline: true },
+                        { name: "\u200b", value: leaderboard(sortedData.slice(25, 50), false) + "\u200b", inline: true })
+                ] });
+            }
 
-                if (playerData) {
-                    const fsKeys = fsServers.keys();
-                    const playerTimeData = interaction.client.playerTimes
-                        .getTimeData(playerData)
-                        .sort((a, b) => fsKeys.indexOf(a[0]) - fsKeys.indexOf(b[0]));
-                    const playerTimeDataTotal = playerTimeData.reduce((x, y) => x + y[1].time, 0);
-                    const formattedTimeData = playerTimeData
-                        .filter(x => interaction.client.fsCache[x[0]])
-                        .map(([serverAcro, timeData]) => ({
-                            name: serverAcro.toUpperCase(),
-                            value: [
-                                `Time - ${formatTime(timeData.time * 60 * 1000, 5, { commas: true })}`,
-                                `Last on - ${interaction.client.fsCache[serverAcro].players.some(x => x.name === playerData._id) ? "Right now" : `<t:${timeData.lastOn}:R>`}`
-                            ].join("\n")
-                        }));
+            const playerData = playersData.find(x => x._id === player);
 
-                    await interaction.reply({ embeds: [new EmbedBuilder()
-                        .setColor(interaction.client.config.EMBED_COLOR)
-                        .setTitle([
-                            `Player - \`${playerData._id}\`${interaction.client.fmList.cache.includes(playerData._id) ? ":farmer:" : ""}${interaction.client.tfList.cache.includes(playerData._id) ? ":angel:" : ""}`,
-                            `Leaderboard position - **#${sortedData.indexOf(playerData) + 1}**`,
-                            `Total time - **${formatTime(playerTimeDataTotal * 60 * 1000, 5, { commas: true })}**`,
-                            (isMPStaff(interaction.member) && playerData.uuid) ? `UUID: \`${playerData.uuid}\`` : "",
-                            (isMPStaff(interaction.member) && playerData.discordid) ? `Discord user ID - \`${playerData.discordid}\`` : "",
-                        ].join("\n"))
-                        .setFields(formattedTimeData)
-                    ] });
-                } else await interaction.reply(`No data found with that name. [Find out why.](${interaction.client.config.resources.statsNoDataRedirect})`);
+            if (!playerData) return await interaction.reply(`No data found with that name. [Find out why.](${interaction.client.config.resources.statsNoDataRedirect})`);
 
-            } else await interaction.reply({ embeds: [new EmbedBuilder()
+            const fsKeys = fsServers.keys();
+            const playerTimeData = interaction.client.playerTimes
+                .getTimeData(playerData)
+                .sort((a, b) => fsKeys.indexOf(a[0]) - fsKeys.indexOf(b[0]));
+            const playerTimeDataTotal = playerTimeData.reduce((x, y) => x + y[1].time, 0);
+            const formattedTimeData = playerTimeData
+                .filter(x => interaction.client.fsCache[x[0]])
+                .map(([serverAcro, timeData]) => ({
+                    name: serverAcro.toUpperCase(),
+                    value: [
+                        `Time - ${formatTime(timeData.time * 60 * 1000, 5, { commas: true })}`,
+                        `Last on - ${interaction.client.fsCache[serverAcro].players.some(x => x.name === playerData._id) ? "Right now" : `<t:${timeData.lastOn}:R>`}`
+                    ].join("\n")
+                }));
+
+            await interaction.reply({ embeds: [new EmbedBuilder()
                 .setColor(interaction.client.config.EMBED_COLOR)
-                .setDescription(`Top 50 players with the most time spent on IRTGaming FS22 servers since ${interaction.client.config.PLAYERTIMES_START_DATE}`)
-                .addFields(
-                    { name: "\u200b", value: leaderboard(sortedData.slice(0, 25), true), inline: true },
-                    { name: "\u200b", value: leaderboard(sortedData.slice(25, 50), false) + "\u200b", inline: true })
+                .setTitle([
+                    `Player - \`${playerData._id}\`${interaction.client.fmList.cache.includes(playerData._id) ? ":farmer:" : ""}${interaction.client.tfList.cache.includes(playerData._id) ? ":angel:" : ""}`,
+                    `Leaderboard position - **#${sortedData.indexOf(playerData) + 1}**`,
+                    `Total time - **${formatTime(playerTimeDataTotal * 60 * 1000, 5, { commas: true })}**`,
+                    (isMPStaff(interaction.member) && playerData.uuid) ? `UUID: \`${playerData.uuid}\`` : "",
+                    (isMPStaff(interaction.member) && playerData.discordid) ? `Discord user ID - \`${playerData.discordid}\`` : "",
+                ].join("\n"))
+                .setFields(formattedTimeData)
             ] });
         } else {
             const server = interaction.client.config.fs[subCmd];

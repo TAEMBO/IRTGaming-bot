@@ -23,8 +23,6 @@ import type {
     Whitelist
 } from "#schemas";
 
-export type * from "#schemas";
-
 declare module "discord.js" {
     interface Client {
         readonly config: Config;

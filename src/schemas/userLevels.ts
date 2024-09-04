@@ -1,5 +1,6 @@
-import type TClient from "../client.js";
 import mongoose from "mongoose";
+import type TClient from "../client.js";
+import { BaseSchema } from "#structures";
 
 const model = mongoose.model("userLevels", new mongoose.Schema({
     _id: { type: String, required: true },
@@ -8,12 +9,11 @@ const model = mongoose.model("userLevels", new mongoose.Schema({
     hasLeft: { type: Boolean, required: false }
 }, { versionKey: false }));
 
-export type UserLevelsDocument = ReturnType<typeof model.castObject>;
+export class UserLevels extends BaseSchema<typeof model> {
 
-export class UserLevels {
-    public data = model;
-
-    public constructor(private readonly _client: TClient) { }
+    public constructor(private readonly _client: TClient) {
+        super(model);
+    }
     
     /**
      * Increment a user"s userLevels data, or create a document for them if one not found

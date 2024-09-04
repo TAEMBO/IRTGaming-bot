@@ -44,7 +44,7 @@ export default new Command<"chatInput">({
         }
 
         const messageCountsTotal = allData.reduce((a, b) => a + b.messages, 0);
-        const data = interaction.client.dailyMsgs.cache
+        const data = (await interaction.client.dailyMsgs.data.find())
             .map((x, i, a) => {
                 const yesterday = a[i - 1] || [];
 

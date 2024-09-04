@@ -2,7 +2,8 @@ import { Events } from "discord.js";
 import mongoose from "mongoose";
 import cron from "node-cron";
 import { Event } from "#structures";
-import { formatRequestInit, fsLoop, fsLoopAll, fsServers, jsonFromXML, log } from "#util";
+import { fsLoop, fsLoopAll } from "#actions";
+import { formatRequestInit, fsServers, jsonFromXML, log } from "#util";
 import type { YTCacheFeed } from "#typings";
 
 export default new Event({

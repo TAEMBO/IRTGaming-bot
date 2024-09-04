@@ -20,6 +20,7 @@
         "removeComments": true,
         "outDir": "dist",
         "paths": {
+            "#actions": ["src/actions/index.js"],
             "#util": ["src/util/index.js"],
             "#structures": ["src/structures/index.js"],
             "#schemas": ["src/schemas/index.js"],

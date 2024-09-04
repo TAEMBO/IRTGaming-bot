@@ -11,6 +11,7 @@
     "build": "npm run lint && tsc"
   },
   "imports": {
+    "#actions": "./dist/actions/index.js",
     "#util": "./dist/util/index.js",
     "#structures": "./dist/structures/index.js",
     "#schemas": "./dist/schemas/index.js",

@@ -1,4 +1,4 @@
-import { Events } from "discord.js";
+import { Events, InteractionContextType } from "discord.js";
 import mongoose from "mongoose";
 import cron from "node-cron";
 import { Event } from "#structures";
@@ -24,10 +24,20 @@ export default new Event({
         }).then(() => log("Purple", "Connected to MongoDB"));
     
         if (client.config.toggles.registerCommands) {
-            await client.application.commands.set([
-                ...client.chatInputCommands.map(x => x.data),
-                ...client.contextMenuCommands.map(x => x.data)
-            ])
+            const commands = [
+                ...client.chatInputCommands.map(x => {
+                    x.data.contexts = [InteractionContextType.Guild];
+
+                    return x.data;
+                }),
+                ...client.contextMenuCommands.map(x => {
+                    x.data.contexts = [InteractionContextType.Guild];
+
+                    return x.data;
+                })
+            ];
+
+            await client.application.commands.set(commands)
                 .then(() => log("Purple", "Application commands registered"))
                 .catch(e => log("Red", "Couldn't register commands: ", e));
         } else {

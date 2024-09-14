@@ -2,9 +2,8 @@ import { Events, InteractionContextType } from "discord.js";
 import mongoose from "mongoose";
 import cron from "node-cron";
 import { Event } from "#structures";
-import { fsLoop, fsLoopAll } from "#actions";
-import { formatRequestInit, fsServers, jsonFromXML, log } from "#util";
-import type { YTCacheFeed } from "#typings";
+import { fsLoop, fsLoopAll, ytLoop } from "#actions";
+import { fsServers, log } from "#util";
 
 export default new Event({
     name: Events.ClientReady,
@@ -116,37 +115,6 @@ export default new Event({
         }, 30_000);
     
         // YouTube upload notifications loop
-        if (client.config.toggles.ytLoop) setInterval(async () => {
-            for (const channel of client.config.ytChannels) {
-                if (client.config.toggles.debug) log("Yellow", "YTLoop", channel.name);
-
-                const res = await fetch(
-                    `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`,
-                    formatRequestInit(5_000, "YTLoop")
-                ).catch(() => log("Red", `${channel.name} YT fetch fail`));
-                let data;
-        
-                if (!res) continue;
-    
-                try {
-                    data = jsonFromXML<YTCacheFeed>(await res.text());
-                } catch (err) {
-                    log("Red", `${channel.name} YT parse fail`);
-                    continue;
-                }
-    
-                const latestVid = data.feed.entry[0];
-        
-                if (!client.ytCache[channel.id]) {
-                    client.ytCache[channel.id] = latestVid["yt:videoId"]._text;
-                    continue;
-                }
-        
-                if (data.feed.entry[1]["yt:videoId"]._text !== client.ytCache[channel.id]) continue;
-                
-                client.ytCache[channel.id] = latestVid["yt:videoId"]._text;
-                await client.getChan("videosAndLiveStreams").send(`**${channel.name}** just uploaded a new video!\n${latestVid.link._attributes.href}`);
-            }
-        }, 1_800_000);
+        if (client.config.toggles.ytLoop) setInterval(ytLoop.bind(client), 1_800_000);
     }
 });

@@ -1,8 +1,7 @@
-import { Events, InteractionContextType } from "discord.js";
-import mongoose from "mongoose";
+import { codeBlock, Events, InteractionContextType } from "discord.js";
 import cron from "node-cron";
+import { connectMongoDB, fsLoop, fsLoopAll, ytLoop } from "#actions";
 import { Event } from "#structures";
-import { fsLoop, fsLoopAll, ytLoop } from "#actions";
 import { fsServers, log } from "#util";
 
 export default new Event({
@@ -10,17 +9,8 @@ export default new Event({
     once: true,
     async run(client) {
         const guild = client.mainGuild();
-        const now = Date.now();
 
         if (client.config.toggles.debug) setTimeout(() => log("Yellow", "Uptime - 60 seconds"), 60_000);
-    
-        await mongoose.set("strictQuery", true).connect(client.config.MONGO_URI, {
-            autoIndex: true,
-            serverSelectionTimeoutMS: 5_000,
-            socketTimeoutMS: 45_000,
-            family: 4,
-            waitQueueTimeoutMS: 50_000
-        }).then(() => log("Purple", "Connected to MongoDB"));
     
         if (client.config.toggles.registerCommands) {
             const commands = [
@@ -43,41 +33,22 @@ export default new Event({
             await client.application.commands.fetch();
         }
 
-        await Promise.allSettled([
-            guild.members.fetch(),
-            client.bannedWords.fillCache(),
-            client.fmList.fillCache(),
-            client.tfList.fillCache(),
-            client.watchListPings.fillCache(),
-            client.whitelist.fillCache()
-        ]);
+        await connectMongoDB(client);
+
+        await guild.members.fetch();
 
         for (const [code, inv] of await guild.invites.fetch()) client.inviteCache.set(code, {
             uses: inv.uses ?? 0,
             creator: inv.inviter?.id ?? "UNKNOWN"
         });
-    
-        for (const reminder of await client.reminders.data.find()) client.reminders.setExec(reminder._id, reminder.time < now
-            ? 0
-            : reminder.time - now
-        );
-    
-        for (const punishment of await client.punishments.data.find()) {
-            if (!punishment.endTime || punishment.expired) continue;
-    
-            client.punishments.setExec(punishment._id, punishment.endTime < now
-                ? 0
-                : punishment.endTime - now
-            );
-        }
+
+        log("Blue", `Bot active as ${client.user.tag}`);
     
         await client.getChan("taesTestingZone").send([
             ":warning: Bot restarted :warning:",
             `<@${client.config.devWhitelist[0]}>`,
-            `\`\`\`json\n${JSON.stringify(client.config.toggles, null, 1).slice(1, -1)}\`\`\``
+            codeBlock("json", JSON.stringify(client.config.toggles, null, 1).slice(1, -1))
         ].join("\n"));
-    
-        log("Blue", `Bot active as ${client.user.tag}`);
     
         // DailyMsgs schedule
         cron.schedule("0 0 * * *", async (date) => {

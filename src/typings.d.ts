@@ -97,22 +97,6 @@ export type Empty<T> = {
     [K in keyof T]: undefined;
 };
 
-/** Adds cache implementation to this schema */
-export interface Cached<TDocument> {
-    cache: TDocument[];
-    /**
-     * @example
-     * ```ts
-     * public async fillCache() {
-     *     this.cache = await this.data.find();
-     * 
-     *     return this;
-     * }
-     * ```
-     */
-    fillCache(): Promise<this>;
-}
-
 export type RepeatedMessagesIdentifiers = "bw" | "adv" | "spam";
 
 export interface RepeatedMessagesEntry {
@@ -231,13 +215,6 @@ export interface Config {
     };
     /** An object for managing and communicating with Farming Simulator servers, keyed by their abbreviated acronym */
     fs: Record<string, FSServer>;
-    /** Details for making an SSE connection to the affiliated Minecraft server via the Siphon server plugin */
-    minecraft: {
-        /** The HTTP web address for the SSE connection */
-        address: string;
-        /** The authorization details for making the SSE connection - as `username:password` */
-        authorization: `${string}:${string}`;
-    };
     /** A list of user IDs that are considered developers of this bot */
     devWhitelist: Snowflake[];
     whitelist: {
@@ -263,8 +240,7 @@ export interface Config {
     };
 }
 
-interface FSLoopCSGCareerSavegame
-{
+interface FSLoopCSGCareerSavegame {
     readonly settings?: {
         readonly savegameName: { readonly _text: string; };
         readonly creationDate: { readonly _text: string; };

@@ -8,6 +8,7 @@ import {
     GatewayIntentBits,
     Options,
     Partials,
+    type TextChannel,
     type PresenceData
 } from "discord.js";
 import config from "#config" assert { type: "json" };
@@ -111,7 +112,7 @@ export default class TClient extends Client<true> {
         if (["Request aborted", "getaddrinfo ENOTFOUND discord.com"].includes(error.message)) return;
     
         const dirname = process.cwd().replaceAll("\\", "/");
-        const channel = this.getChan("taesTestingZone");
+        const channel = this.channels.cache.get(this.config.mainServer.channels.taesTestingZone) as TextChannel | undefined;
         const formattedErr = error.stack
             ?.replaceAll(" at ", ` ${LogColor.Red}at${LogColor.Reset} `)
             .replaceAll(dirname, LogColor.Yellow + dirname + LogColor.Reset)

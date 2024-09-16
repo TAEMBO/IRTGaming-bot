@@ -1,14 +1,14 @@
 import {
     AllowedMentionsTypes,
     ApplicationCommandOptionType,
+    ChannelType,
     Client,
     Collection,
     EmbedBuilder,
     GatewayIntentBits,
     Options,
     Partials,
-    type PresenceData,
-    TextChannel
+    type PresenceData
 } from "discord.js";
 import config from "#config" assert { type: "json" };
 import * as Schemas from "#schemas";
@@ -72,7 +72,7 @@ export default class TClient extends Client<true> {
     public getChan(channelName: keyof typeof this.config.mainServer.channels) {
         const channel = this.channels.cache.get(this.config.mainServer.channels[channelName]);
 
-        if (!(channel instanceof TextChannel)) throw new Error(`Config channel not of instance TextChannel: ${channelName}`);
+        if (channel?.type !== ChannelType.GuildText) throw new Error(`Config channel not of instance TextChannel: ${channelName}`);
 
         return channel;
     }

@@ -1,4 +1,4 @@
-import { EmbedBuilder, TextChannel } from "discord.js";
+import { ChannelType, EmbedBuilder } from "discord.js";
 import type TClient from "../client.js";
 import {
     DSSExtension,
@@ -82,7 +82,7 @@ export async function fsLoop(client: TClient, watchList: TClient["watchList"]["d
 
         fsCacheServer.completeRes = completeRes;
 
-        if (!(channel instanceof TextChannel)) return log("Red", `FSLoop ${serverAcroUp} invalid channel`);
+        if (channel?.type !== ChannelType.GuildText) return log("Red", `FSLoop ${serverAcroUp} invalid channel`);
         
         await channel.messages.edit(
             server.messageId,

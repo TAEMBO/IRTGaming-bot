@@ -1,13 +1,13 @@
 import { ApplicationCommandOptionType, AttachmentBuilder, ComponentType, EmbedBuilder } from "discord.js";
 import { Command } from "#structures";
-import { ACK_BUTTONS, isMPStaff, lookup, youNeedRole } from "#util";
+import { ACK_BUTTONS, isMPStaff, youNeedRole } from "#util";
 
 export default new Command<"chatInput">({
     async run(interaction) {
         if (!isMPStaff(interaction.member)) return await youNeedRole(interaction, "mpStaff");
 
-        await lookup({
-            async add() {
+        switch (interaction.options.getSubcommand()) {
+            case "add": {
                 const reason = interaction.options.getString("reason", true);
                 const name = interaction.options.getString("username", true);
                 const severity = interaction.options.getString("severity", true) as "ban" | "watch";
@@ -17,8 +17,10 @@ export default new Command<"chatInput">({
 
                 await interaction.client.watchList.data.create({ _id: name, reason, isSevere: severity === "ban" ? true : false });
                 await interaction.reply(`Successfully added \`${name}\` who needs to be **${severity === "ban" ? "banned" : "watched over"}** with reason \`${reason}\``);
-            },
-            async remove() {
+
+                break;
+            };
+            case "remove": {
                 const name = interaction.options.getString("username", true);
                 const wlData = await interaction.client.watchList.data.findById(name);
 
@@ -26,13 +28,17 @@ export default new Command<"chatInput">({
 
                 await interaction.client.watchList.data.findByIdAndDelete(name);
                 await interaction.reply(`Successfully removed \`${name}\` from watchList`);
-            },
-            async view() {
+
+                break;
+            };
+            case "view": {
                 await interaction.reply({ files: [
                     new AttachmentBuilder(Buffer.from(JSON.stringify(await interaction.client.watchList.data.find(), null, 2)), { name: "watchListCache.json" })
                 ] });
-            },
-            async subscription() {
+
+                break;
+            };
+            case "subscription": {
                 if (!interaction.client.watchListPings.cache.includes(interaction.user.id)) {
                     await interaction.client.watchListPings.add(interaction.user.id);
 
@@ -55,25 +61,28 @@ export default new Command<"chatInput">({
                     max: 1,
                     time: 30_000,
                     componentType: ComponentType.Button
-                }).on("collect", int => void lookup({
-                    async confirm() {
-                        await interaction.client.watchListPings.remove(interaction.user.id);
-
-                        await int.update({
-                            embeds: [new EmbedBuilder().setDescription("You have successfully unsubscribed from watchList notifications").setColor(interaction.client.config.EMBED_COLOR)],
-                            components: []
-                        });
-
-                    },
-                    async cancel() {
-                        await int.update({
+                }).on("collect", async int => {
+                    if (int.customId === "cancel") {
+                        return await int.update({
                             embeds: [new EmbedBuilder().setDescription("Command canceled").setColor(interaction.client.config.EMBED_COLOR)],
                             components: []
                         });
                     }
-                }, int.customId));
-            }
-        }, interaction.options.getSubcommand());
+
+                    await interaction.client.watchListPings.remove(interaction.user.id);
+
+                    await int.update({
+                        embeds: [new EmbedBuilder()
+                            .setDescription("You have successfully unsubscribed from watchList notifications")
+                            .setColor(interaction.client.config.EMBED_COLOR)
+                        ],
+                        components: []
+                    });
+                });
+
+                break;
+            };
+        };
     },
     data: {
         name: "watch",

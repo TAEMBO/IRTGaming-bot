@@ -1,6 +1,5 @@
 import { ApplicationCommandOptionType, EmbedBuilder, type GuildMember } from "discord.js";
 import { Command } from "#structures";
-import { lookup } from "#util";
 
 export default new Command<"chatInput">({
     async run(interaction) {
@@ -9,9 +8,11 @@ export default new Command<"chatInput">({
             if (a.displayName.toLowerCase() > b.displayName.toLowerCase()) return 1;
             return 0;
         }
+
+        const embed = new EmbedBuilder();
         
-        await lookup({
-            async mp() {
+        switch (interaction.options.getSubcommand()) {
+            case "mp": {
                 const staff = {
                     mp_manager: interaction.client.getRole("mpManager"),
                     mp_sr_admin: interaction.client.getRole("mpSrAdmin"),
@@ -20,7 +21,7 @@ export default new Command<"chatInput">({
                     mp_trusted_farmer: interaction.client.getRole("trustedFarmer")
                 };
          
-                await interaction.reply({ embeds: [new EmbedBuilder()
+                embed
                     .setTitle("__MP Staff Members__")
                     .setColor(interaction.client.config.EMBED_COLOR)
                     .setDescription([
@@ -38,27 +39,29 @@ export default new Command<"chatInput">({
                         "",
                         staff.mp_trusted_farmer.toString(),
                         staff.mp_trusted_farmer.members.sort(sortMembers).map(x => x.toString()).join("\n") || "None"
-                    ].join("\n"))
-                ] });
-            },
-            async fs() {
-                await interaction.reply({ embeds: [new EmbedBuilder()
+                    ].join("\n"));
+
+                break;
+            };
+            case "fs": {
+                embed
                     .setTitle("__MP Staff Usernames__")
                     .setColor(interaction.client.config.EMBED_COLOR)
                     .addFields(
                         { name: "Farm Managers :farmer:", value: `\`${interaction.client.fmList.cache.join("`\n`")}\`` },
                         { name: "Trusted Farmers :angel:", value: `\`${interaction.client.tfList.cache.join("`\n`")}\`` }
-                    )
-                ] });
-            },
-            async discord() {
+                    );
+
+                break;
+            };
+            case "discord": {
                 const staff = {
                     admin: interaction.client.getRole("discordAdmin"),
                     moderator: interaction.client.getRole("discordModerator"),
                     helper: interaction.client.getRole("discordHelper")
                 };
          
-                await interaction.reply({ embeds: [new EmbedBuilder()
+                embed
                     .setTitle("__Discord Staff Members__")
                     .setColor(interaction.client.config.EMBED_COLOR)
                     .setDescription([
@@ -70,19 +73,23 @@ export default new Command<"chatInput">({
                         "",
                         staff.helper.toString(),
                         staff.helper.members.sort(sortMembers).map(x => x.toString()).join("\n") || "None"
-                    ].join("\n"))
-                ] });
-            },
-            async mc() {
+                    ].join("\n"));
+
+                break;
+            };
+            case "mc": {
                 const staff = interaction.client.getRole("irtmcStaff");
 
-                await interaction.reply({ embeds: [new EmbedBuilder()
+                embed
                     .setTitle("__IRTMC Staff Members__")
                     .setColor(interaction.client.config.EMBED_COLOR)
-                    .setDescription(`${staff.toString()}\n${staff.members.sort(sortMembers).map(x => x.toString()).join("\n") || "None"}`)
-                ] });
+                    .setDescription(`${staff.toString()}\n${staff.members.sort(sortMembers).map(x => x.toString()).join("\n") || "None"}`);
+
+                break;
             }
-        }, interaction.options.getSubcommand());
+        };
+
+        await interaction.reply({ embeds: [embed] });
     },
     data: {
         name: "staff",

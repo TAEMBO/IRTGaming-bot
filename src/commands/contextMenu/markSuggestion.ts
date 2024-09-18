@@ -7,7 +7,7 @@ import {
     EmbedBuilder
 } from "discord.js";
 import { Command } from "#structures";
-import { isDCStaff, isMPStaff, lookup, youNeedRole } from "#util";
+import { isDCStaff, isMPStaff, youNeedRole } from "#util";
 
 export default new Command<"message">({
     async run(interaction) {
@@ -19,8 +19,7 @@ export default new Command<"message">({
         ) return await interaction.reply({ content: "You need to select a message that is a community idea!", ephemeral: true });
         
         const embed = EmbedBuilder.from(interaction.targetMessage.embeds[0]);
-
-        (await interaction.reply({
+        const msg = await interaction.reply({
             content: "What do you want to mark this community idea as?",
             ephemeral: true,
             fetchReply: true,
@@ -33,27 +32,37 @@ export default new Command<"message">({
                     new ButtonBuilder().setCustomId("cancel").setStyle(ButtonStyle.Secondary).setLabel("Cancel")
                 )
             ]
-        })).createMessageComponentCollector({
+        });
+        
+        msg.createMessageComponentCollector({
             max: 1,
             time: 30_000,
             componentType: ComponentType.Button
-        }).on("collect", int => void lookup({
-            async like() {
-                embed.setTitle("Community Idea\n__**Acknowledged and liked by staff**__");
+        }).on("collect", async int => {
+            switch (int.customId) {
+                case "like": {
+                    embed.setTitle("Community Idea\n__**Acknowledged and liked by staff**__");
 
-                await interaction.targetMessage.edit({ embeds: [embed] });
-                await int.update({ content: "Community idea updated and marked as liked", components: [] });
-            },
-            async dislike() {
-                embed.setTitle("Community Idea\n__**Acknowledged and disliked by staff**__");
+                    await interaction.targetMessage.edit({ embeds: [embed] });
+                    await int.update({ content: "Community idea updated and marked as liked", components: [] });
+                
+                    break;
+                };
+                case "dislike": {
+                    embed.setTitle("Community Idea\n__**Acknowledged and disliked by staff**__");
 
-                await interaction.targetMessage.edit({ embeds: [embed] });
-                await int.update({ content: "Community idea updated and marked as disliked", components: [] });
-            },
-            async cancel() {
-                await int.update({ content: "Command canceled", components: [] });
+                    await interaction.targetMessage.edit({ embeds: [embed] });
+                    await int.update({ content: "Community idea updated and marked as disliked", components: [] });
+
+                    break;
+                };
+                case "cancel": {
+                    await int.update({ content: "Command canceled", components: [] });
+
+                    break;
+                }
             }
-        }, int.customId));
+        });
     },
     data: {
         name: "Mark Suggestion",

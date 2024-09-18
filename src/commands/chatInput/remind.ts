@@ -10,7 +10,7 @@ import {
 } from "discord.js";
 import ms from "ms";
 import { Command } from "#structures";
-import { ACK_BUTTONS, lookup } from "#util";
+import { ACK_BUTTONS } from "#util";
 
 export default new Command<"chatInput">({
     async run(interaction) {
@@ -45,19 +45,19 @@ export default new Command<"chatInput">({
                 max: 1,
                 time: 60_000,
                 componentType: ComponentType.Button
-            }).on("collect", int => void lookup({
-                confirm: () => Promise.all([
-                    interaction.client.reminders.data.findByIdAndDelete(reminder),
-                    int.update(rplText(`Successfully deleted reminder \`${reminder.content}\``))
-                ]),
-                cancel: () => int.update(rplText("Command manually canceled"))
-            }, int.customId)).on("end", async ints => {
+            }).on("collect", async int => {
+                if (int.customId === "cancel") return int.update(rplText("Command manually canceled"));
+
+                await interaction.client.reminders.data.findByIdAndDelete(reminder);
+
+                await interaction.client.reminders.data.findByIdAndDelete(reminder);
+            }).on("end", async ints => {
                 if (!ints.size) await interaction.editReply(rplText("No response given, command canceled"));
             });
         }
 
-        await lookup({
-            async create() {
+        switch (interaction.options.getSubcommand()) {
+            case "create": {
                 const reminderText = interaction.options.getString("what", true);
                 const reminderTime = ms(interaction.options.getString("when", true)) as number | undefined;
                 
@@ -89,9 +89,12 @@ export default new Command<"chatInput">({
                 const timeToRemind = Date.now() + reminderTime;
                 const currentReminders = await interaction.client.reminders.data.find({ userid: interaction.user.id });
 
-                if (currentReminders.length > 25) return await interaction.reply({ content: "You can only have up to 25 reminders at a time", ephemeral: true });
+                if (currentReminders.length > 25) return await interaction.reply({
+                    content: "You can only have up to 25 reminders at a time",
+                    ephemeral: true
+                });
 
-                (await interaction.reply({
+                const msg = await interaction.reply({
                     embeds: [new EmbedBuilder()
                         .setColor(interaction.client.config.EMBED_COLOR)
                         .setDescription([
@@ -104,38 +107,39 @@ export default new Command<"chatInput">({
                     ephemeral: true,
                     fetchReply: true,
                     components: ACK_BUTTONS
-                })).createMessageComponentCollector({
+                });
+                
+                msg.createMessageComponentCollector({
                     filter: x => x.user.id === interaction.user.id,
                     max: 1,
                     time: 60_000,
                     componentType: ComponentType.Button
-                }).on("collect", int => void lookup({
-                    async confirm() {
-                        const reminder = await interaction.client.reminders.data.create({
-                            userid: interaction.user.id,
-                            content: reminderText,
-                            time: timeToRemind,
-                            ch: interaction.channelId
-                        });
+                }).on("collect", async int => {
+                    if (int.customId === "cancel") return await int.update(rplText("Command manually canceled"));
 
-                        interaction.client.reminders.setExec(reminder._id, timeToRemind - Date.now());
-                        await int.update({
-                            components: [],
-                            embeds: [new EmbedBuilder()
-                                .setTitle("Reminder set")
-                                .setDescription(`\n\`\`\`${reminderText}\`\`\`\n${formatTime(timeToRemind)}`)
-                                .setColor(interaction.client.config.EMBED_COLOR)
-                            ]
-                        });
-                    },
-                    cancel() {
-                        return int.update(rplText("Command manually canceled"));
-                    }
-                }, int.customId)).on("end", async ints => {
+                    const reminder = await interaction.client.reminders.data.create({
+                        userid: interaction.user.id,
+                        content: reminderText,
+                        time: timeToRemind,
+                        ch: interaction.channelId
+                    });
+
+                    interaction.client.reminders.setExec(reminder._id, timeToRemind - Date.now());
+                    await int.update({
+                        components: [],
+                        embeds: [new EmbedBuilder()
+                            .setTitle("Reminder set")
+                            .setDescription(`\n\`\`\`${reminderText}\`\`\`\n${formatTime(timeToRemind)}`)
+                            .setColor(interaction.client.config.EMBED_COLOR)
+                        ]
+                    });
+                }).on("end", async ints => {
                     if (!ints.size) await interaction.editReply(rplText("No response given, command canceled"));
                 });
-            },
-            async delete() {
+
+                break;
+            };
+            case "delete": {
                 const userReminders = await interaction.client.reminders.data.find({ userid: interaction.user.id });
 
                 if (userReminders.length === 0) return await interaction.reply({ content: "You have no active current reminders", ephemeral: true });
@@ -165,12 +169,14 @@ export default new Command<"chatInput">({
                     });
                 }
 
-                (await interaction.reply({
+                const msg = await interaction.reply({
                     embeds: [embed],
                     ephemeral: true,
                     components: [new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selectMenu)],
                     fetchReply: true
-                })).createMessageComponentCollector({
+                });
+                
+                msg.createMessageComponentCollector({
                     filter: x => x.user.id === interaction.user.id,
                     max: 1,
                     time: 60_000,
@@ -180,9 +186,10 @@ export default new Command<"chatInput">({
                     .on("end", async ints => {
                         if (!ints.size) await interaction.editReply(rplText("No response given, command canceled"));
                     });
-            }
-            
-        }, interaction.options.getSubcommand());
+
+                break;
+            };
+        }
     },
     data: {
         name: "remind",

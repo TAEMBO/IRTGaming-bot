@@ -2,12 +2,12 @@ import { ApplicationCommandOptionType, AttachmentBuilder, EmbedBuilder } from "d
 import canvas from "@napi-rs/canvas";
 import { DSSExtension, type DSSResponse, Feeds, filterUnused } from "farming-simulator-types/2022";
 import { Command } from "#structures";
-import { formatRequestInit, formatTime, fsServers, isMPStaff, log, lookup } from "#util";
+import { formatRequestInit, formatTime, fsServers, isMPStaff, log } from "#util";
 
 export default new Command<"chatInput">({
     async autocomplete(interaction) {
-        await lookup({
-            async playertimes() {
+        switch (interaction.options.getSubcommand()) {
+            case "playertimes": {
                 const playerData = await interaction.client.playerTimes.data.find();
                 const focused = interaction.options.getFocused().toLowerCase().replace(" ", "");
                 const choices = playerData
@@ -16,8 +16,10 @@ export default new Command<"chatInput">({
                     .slice(0, 24);
 
                 await interaction.respond(choices);
-            }
-        }, interaction.options.getSubcommand());
+
+                break;
+            };
+        }
     },
     async run(interaction) {
         const subCmd = interaction.options.getSubcommand();

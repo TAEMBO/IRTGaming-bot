@@ -8,7 +8,6 @@ import {
     hasRole,
     isMPStaff,
     jsonFromXML,
-    lookup,
     youNeedRole
 } from "#util";
 import type { BanFormat, DedicatedServerConfig, FarmFormat } from "#typings";
@@ -22,8 +21,8 @@ export default new Command<"chatInput">({
 
         const now = Date.now();
         
-        await lookup({
-            async server() {
+        switch (interaction.options.getSubcommand()) {
+            case "server": {
                 const chosenServer = interaction.options.getString("server", true);
                 const chosenAction = interaction.options.getString("action", true) as "start" | "stop" | "restart";
                 const cachedServer = interaction.client.fsCache[chosenServer];
@@ -117,8 +116,10 @@ export default new Command<"chatInput">({
                 await interaction.editReply(result);
                 
                 setTimeout(() => browser.close(), 5_000);
-            },
-            async mop() {
+
+                break;
+            };
+            case "mop": {
                 if (!hasRole(interaction.member, "mpManager")) return await youNeedRole(interaction, "mpManager");
 
                 const chosenServer = interaction.options.getString("server", true);
@@ -131,8 +132,10 @@ export default new Command<"chatInput">({
                 await new FTPActions(fsServers.getPublicOne(chosenServer).ftp).delete(`savegame1/${chosenAction}`);
 
                 await interaction.editReply(`Successfully deleted **${chosenAction}** from **${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**`);
-            },
-            async bans() {
+
+                break;
+            };
+            case "bans": {
                 const chosenServer = interaction.options.getString("server", true);
                 const chosenAction = interaction.options.getString("action", true) as "dl" | "ul";
                 const ftpActions = new FTPActions(fsServers.getPublicOne(chosenServer).ftp);
@@ -168,8 +171,9 @@ export default new Command<"chatInput">({
 
                 await interaction.editReply(`Successfully uploaded ban file for ${chosenServer.toUpperCase()} after **${Date.now() - now}ms**`);
                 
-            },
-            async search() {
+                break;
+            };
+            case "search": {
                 await interaction.deferReply();
                 
                 const chosenServer = interaction.options.getString("server", true);
@@ -199,8 +203,10 @@ export default new Command<"chatInput">({
                     ? "```\n" + Object.entries(playerData._attributes).map(x => x[0].padEnd(18, " ") + permIcon(x[1], x[0])).join("\n") + "```"
                     : "No green farm data found with that name/UUID"
                 );
-            },
-            async pair() {
+
+                break;
+            };
+            case "pair": {
                 const uuid = interaction.options.getString("uuid", true);
                 const user = interaction.options.getUser("user", true);
                 const playerData = await interaction.client.playerTimes.data.findOne({ uuid });
@@ -212,8 +218,10 @@ export default new Command<"chatInput">({
                 await playerData.save();
 
                 await interaction.reply(`Successfully paired Discord account \`${user.tag}\` to in-game UUID \`${playerData.uuid}\` (${playerData._id})`);
-            },
-            async farms() {
+
+                break;
+            };
+            case "farms": {
                 const chosenServer = interaction.options.getString("server", true);
                 const serverConfig = interaction.client.config.fs[chosenServer];
 
@@ -224,8 +232,10 @@ export default new Command<"chatInput">({
                 const data = await new FTPActions(serverConfig.ftp).get("savegame1/farms.xml");
 
                 await interaction.editReply({ files: [new AttachmentBuilder(Buffer.from(data), { name: "farms.xml" })] });
-            },
-            async password() {
+
+                break;
+            };
+            case "password": {
                 await interaction.deferReply();
 
                 const chosenServer = interaction.options.getString("server", true);
@@ -236,8 +246,10 @@ export default new Command<"chatInput">({
                     ? `Current password for **${chosenServer.toUpperCase()}**  \`${pw}\``
                     : `Password not set for **${chosenServer.toUpperCase()}**`
                 );
-            },
-            async roles() {
+
+                break;
+            };
+            case "roles": {
                 if (!hasRole(interaction.member, "mpManager")) return await youNeedRole(interaction, "mpManager");
 
                 const member = interaction.options.getMember("member");
@@ -262,36 +274,9 @@ export default new Command<"chatInput">({
                         max: 1,
                         time: 30_000,
                         componentType: ComponentType.Button
-                    }).on("collect", int => void lookup({
-                        async confirm() {
-                            if (roleName !== "trustedFarmer") {
-                                const slicedNick = {
-                                    mpFarmManager: "MP Farm Manager",
-                                    mpJrAdmin: "MP Jr. Admin",
-                                    mpSrAdmin: "MP Sr. Admin"
-                                }[roleName];
-
-                                await member.edit({
-                                    roles: roles.filter(x => x !== roleId && x !== mainRoles.mpStaff).concat([mainRoles.formerStaff, mainRoles.trustedFarmer]),
-                                    nick: member.nickname!.replace(slicedNick, "Former Staff")
-                                });
-                            } else await member.roles.remove(roleId);
-
-                            await int.update({
-                                embeds: [new EmbedBuilder()
-                                    .setDescription(`${member} has been removed from <@&${roleId}>.`)
-                                    .setColor(interaction.client.config.EMBED_COLOR)
-                                ],
-                                components: []
-                            });
-
-                            await interaction.client.users.send(
-                                interaction.guild.ownerId,
-                                `**${interaction.user.tag}** has demoted **${member.user.tag}** from **${interaction.client.getRole(roleName).name}**`
-                            );
-                        },
-                        cancel() {
-                            return int.update({
+                    }).on("collect", async int => {
+                        if (int.customId === "cancel") {
+                            return await int.update({
                                 embeds: [new EmbedBuilder()
                                     .setDescription("Command canceled")
                                     .setColor(interaction.client.config.EMBED_COLOR)
@@ -299,7 +284,33 @@ export default new Command<"chatInput">({
                                 components: []
                             });
                         }
-                    }, int.customId));
+
+                        if (roleName !== "trustedFarmer") {
+                            const slicedNick = {
+                                mpFarmManager: "MP Farm Manager",
+                                mpJrAdmin: "MP Jr. Admin",
+                                mpSrAdmin: "MP Sr. Admin"
+                            }[roleName];
+
+                            await member.edit({
+                                roles: roles.filter(x => x !== roleId && x !== mainRoles.mpStaff).concat([mainRoles.formerStaff, mainRoles.trustedFarmer]),
+                                nick: member.nickname!.replace(slicedNick, "Former Staff")
+                            });
+                        } else await member.roles.remove(roleId);
+
+                        await int.update({
+                            embeds: [new EmbedBuilder()
+                                .setDescription(`${member} has been removed from <@&${roleId}>.`)
+                                .setColor(interaction.client.config.EMBED_COLOR)
+                            ],
+                            components: []
+                        });
+
+                        await interaction.client.users.send(
+                            interaction.guild.ownerId,
+                            `**${interaction.user.tag}** has demoted **${member.user.tag}** from **${interaction.client.getRole(roleName).name}**`
+                        );
+                    });
                 } else {
                     const newNickname = ({
                         trustedFarmer() {
@@ -337,8 +348,10 @@ export default new Command<"chatInput">({
                         `**${interaction.user.tag}** has promoted **${member.user.tag}** to **${interaction.client.getRole(roleName).name}**`
                     );
                 }
-            },
-            async fm() {
+
+                break;
+            };
+            case "fm": {
                 const name = interaction.options.getString("name", true);
 
                 if (interaction.client.fmList.cache.includes(name)) {
@@ -348,8 +361,10 @@ export default new Command<"chatInput">({
                     await interaction.client.fmList.add(name);
                     await interaction.reply(`Successfully added \`${name}\``);
                 }
-            },
-            async tf() {
+                
+                break;
+            };
+            case "tf": {
                 const name = interaction.options.getString("name", true);
 
                 if (interaction.client.tfList.cache.includes(name)) {
@@ -359,8 +374,10 @@ export default new Command<"chatInput">({
                     await interaction.client.tfList.add(name);
                     await interaction.reply(`Successfully added \`${name}\``);
                 }
+
+                break;
             }
-        }, interaction.options.getSubcommand());
+        };
     },
     data: {
         name: "mp",

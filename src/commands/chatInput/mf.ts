@@ -8,7 +8,7 @@ import {
     PermissionFlagsBits
 } from "discord.js";
 import { Command } from "#structures";
-import { ACK_BUTTONS, fsServers, lookup, onMFFarms, youNeedRole } from "#util";
+import { ACK_BUTTONS, fsServers, onMFFarms, youNeedRole } from "#util";
 
 export default new Command<"chatInput">({
     async autocomplete(interaction) {
@@ -17,8 +17,8 @@ export default new Command<"chatInput">({
         const serverObj = fsServers.getPrivateOne(serverAcro);
         const farmRoles = Object.values(serverObj.roles.farms).map(x => interaction.client.mainGuild().roles.cache.get(x)!);
 
-        await lookup({
-            async member() {
+        switch (interaction.options.getSubcommand()) {
+            case "member": {
                 const displayedRoles = interaction.member.roles.cache.hasAny(...serverObj.managerRoles)
                     ? farmRoles
                     : interaction.member.roles.cache.has(serverObj.roles.farmOwner)
@@ -26,15 +26,19 @@ export default new Command<"chatInput">({
                         : [];
 
                 await interaction.respond(displayedRoles.map(({ name, id }) => ({ name, value: id })));
-            },
-            async "rename-role"() {
+
+                break;
+            };
+            case "rename-role": {
                 await interaction.respond(
                     interaction.member.roles.cache.hasAny(...serverObj.managerRoles)
                         ? farmRoles.map(x => ({ name: x.name, value: x.id }))
                         : []
                 );
-            },
-            async "rename-channel"() {
+
+                break;
+            };
+            case "rename-channel": {
                 if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return await interaction.respond([]);
 
                 const regExp = new RegExp(`${commandName}\\d`);
@@ -53,8 +57,10 @@ export default new Command<"chatInput">({
                     if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
                     return 0;
                 }));
-            },
-            async archive() {
+
+                break;
+            };
+            case "archive": {
                 if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return await interaction.respond([]);
 
                 const regExp = new RegExp(`${commandName}\\d`);
@@ -73,16 +79,18 @@ export default new Command<"chatInput">({
                     if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
                     return 0;
                 }));
-            }
-        }, interaction.options.getSubcommand());
+
+                break;
+            };
+        }
     },
     async run(interaction) {
         const { commandName } = interaction;
         const serverAcro = commandName + interaction.options.getSubcommandGroup(true);
         const serverObj = fsServers.getPrivateOne(serverAcro);
 
-        await lookup({
-            async member() {
+        switch (interaction.options.getSubcommand()) {
+            case "member": {
                 if (
                     !interaction.member.roles.cache.hasAny(...serverObj.managerRoles)
                     && !interaction.member.roles.cache.has(serverObj.roles.farmOwner)
@@ -107,43 +115,46 @@ export default new Command<"chatInput">({
                     });
                 }
 
-                (await interaction.reply({
+                const msg = await interaction.reply({
                     embeds: [new EmbedBuilder()
                         .setDescription(`This member already has the <@&${roleId}> role, do you want to remove it from them?`)
                         .setColor(interaction.client.config.EMBED_COLOR)
                     ],
                     fetchReply: true,
                     components: ACK_BUTTONS
-                })).createMessageComponentCollector({
+                });
+                
+                msg.createMessageComponentCollector({
                     filter: x => x.user.id === interaction.user.id,
                     max: 1,
                     time: 30_000,
                     componentType: ComponentType.Button
-                }).on("collect", int => void lookup({
-                    async confirm() {
-                        const rolesToRemove = onMFFarms(member, serverAcro).length === 1
-                            ? [roleId, serverObj.roles.member]
-                            : [roleId];
-
-                        await member.roles.remove(rolesToRemove);
-
-                        await int.update({
-                            embeds: [new EmbedBuilder()
-                                .setDescription(`${member} (${member.user.tag}) has been removed from the ${rolesToRemove.map(x => `<@&${x}>`).join(" and ")} role(s).`)
-                                .setColor(interaction.client.config.EMBED_COLOR)
-                            ],
-                            components: []
-                        });
-                    },
-                    cancel() {
-                        return int.update({
+                }).on("collect", async int => {
+                    if (int.customId === "cancel") {
+                        return await int.update({
                             embeds: [new EmbedBuilder().setDescription("Command canceled").setColor(interaction.client.config.EMBED_COLOR)],
                             components: []
                         });
                     }
-                }, int.customId));
-            },
-            async owner() {
+
+                    const rolesToRemove = onMFFarms(member, serverAcro).length === 1
+                        ? [roleId, serverObj.roles.member]
+                        : [roleId];
+
+                    await member.roles.remove(rolesToRemove);
+
+                    await int.update({
+                        embeds: [new EmbedBuilder()
+                            .setDescription(`${member} (${member.user.tag}) has been removed from the ${rolesToRemove.map(x => `<@&${x}>`).join(" and ")} role(s).`)
+                            .setColor(interaction.client.config.EMBED_COLOR)
+                        ],
+                        components: []
+                    });
+                });
+
+                break;
+            };
+            case "owner": {
                 if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return await youNeedRole(interaction, "mpManager");
 
                 const member = interaction.options.getMember("member");
@@ -161,39 +172,42 @@ export default new Command<"chatInput">({
                     });
                 }
 
-                (await interaction.reply({
+                const msg = await interaction.reply({
                     embeds: [new EmbedBuilder()
                         .setDescription(`This member already has the <@&${serverObj.roles.farmOwner}> role, do you want to remove it from them?`)
                         .setColor(interaction.client.config.EMBED_COLOR)
                     ],
                     fetchReply: true,
                     components: ACK_BUTTONS
-                })).createMessageComponentCollector({
+                });
+                
+                msg.createMessageComponentCollector({
                     filter: x => x.user.id === interaction.user.id,
                     max: 1,
                     time: 30_000,
                     componentType: ComponentType.Button
-                }).on("collect", int => void lookup({
-                    async confirm() {
-                        await member.roles.remove(serverObj.roles.farmOwner);
-
-                        await int.update({
-                            embeds: [new EmbedBuilder()
-                                .setDescription(`${member} (${member.user.tag}) has been removed from the <@&${serverObj.roles.farmOwner}> role`)
-                                .setColor(interaction.client.config.EMBED_COLOR)
-                            ],
-                            components: []
-                        });
-                    },
-                    cancel() {
-                        return int.update({
+                }).on("collect", async int => {
+                    if (int.customId === "cancel") {
+                        return await int.update({
                             embeds: [new EmbedBuilder().setDescription("Command canceled").setColor(interaction.client.config.EMBED_COLOR)],
                             components: []
                         });
                     }
-                }, int.customId));
-            },
-            async "rename-role"() {
+
+                    await member.roles.remove(serverObj.roles.farmOwner);
+
+                    await int.update({
+                        embeds: [new EmbedBuilder()
+                            .setDescription(`${member} (${member.user.tag}) has been removed from the <@&${serverObj.roles.farmOwner}> role`)
+                            .setColor(interaction.client.config.EMBED_COLOR)
+                        ],
+                        components: []
+                    });
+                });
+
+                break;
+            };
+            case "rename-role": {
                 if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return await youNeedRole(interaction, "mpManager");
 
                 const roleId = interaction.options.getString("role", true);
@@ -208,8 +222,10 @@ export default new Command<"chatInput">({
                 await role.setName(name ? `${roleNamePrefix} (${name})` : roleNamePrefix);
 
                 await interaction.reply(`${roleNamePrefix} role name set to \`${role.name}\``);
-            },
-            async "rename-channel"() {
+
+                break;
+            };
+            case "rename-channel": {
                 if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return await youNeedRole(interaction, "mpManager");
 
                 const channelId = interaction.options.getString("channel", true);
@@ -224,8 +240,10 @@ export default new Command<"chatInput">({
                 await channel.setName(`${channel.name.slice(0, channel.name.indexOf("-"))}-${farmName}`);
 
                 await interaction.reply(`${channel} name successfully updated`);
-            },
-            async archive() {
+
+                break;
+            };
+            case "archive": {
                 if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return await youNeedRole(interaction, "mpManager");
 
                 const channelId = interaction.options.getString("channel", true);
@@ -279,13 +297,17 @@ export default new Command<"chatInput">({
 
                     await interaction.reply(`${channel} successfully set to active`);
                 }
-            },
-            async apply() {
+
+                break;
+            };
+            case "apply": {
                 if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return await youNeedRole(interaction, "mpManager");
 
                 await interaction.reply(serverObj.form);
-            }
-        }, interaction.options.getSubcommand());
+
+                break;
+            };
+        }
     },
     data: {
         name: "mf",

@@ -16,11 +16,13 @@ import * as utilities from "#util";
 
 export default new structures.Command<"chatInput">({
     async run(interaction) {
-        if (!interaction.client.config.devWhitelist.includes(interaction.user.id)) return await interaction.reply("You're not allowed to use dev commands.");
+        if (!interaction.client.config.devWhitelist.includes(interaction.user.id)) {
+            return await interaction.reply("You're not allowed to use dev commands.");
+        }
 
-        await utilities.lookup({
-            async eval() {
-                sleep; fs; Discord; // Imports possibly used in eval
+        switch (interaction.options.getSubcommand()) {
+            case "eval": {
+                sleep; fs; Discord; utilities; // Imports possibly used in eval
                 const { client } = interaction;
                 const code = interaction.options.getString("code", true);
                 const depth = interaction.options.getInteger("depth") ?? 1;
@@ -47,7 +49,9 @@ export default new structures.Command<"chatInput">({
 
                     const msgPayload = {
                         embeds: [embed],
-                        components: [new ActionRowBuilder<ButtonBuilder>().addComponents(new ButtonBuilder().setCustomId("stack").setStyle(ButtonStyle.Primary).setLabel("Stack"))],
+                        components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
+                            new ButtonBuilder().setCustomId("stack").setStyle(ButtonStyle.Primary).setLabel("Stack")
+                        )],
                         fetchReply: true as const
                     };
 
@@ -82,11 +86,16 @@ export default new structures.Command<"chatInput">({
                     ...fsPub.map(x => x[1].ftp.password)
                 ]) output = output.replace(credential, "CREDENTIAL_LEAK");
 
-                embed.addFields({ name: `Output • ${(performance.now() - now).toFixed(5)}ms`, value: `\`\`\`${output.slice(0, 1016)}\n\`\`\`` });
+                embed.addFields({
+                    name: `Output • ${(performance.now() - now).toFixed(5)}ms`,
+                    value: `\`\`\`${output.slice(0, 1016)}\n\`\`\``
+                });
 
                 await interaction.reply({ embeds: [embed] }).catch(() => interaction.channel!.send({ embeds: [embed] }));
-            },
-            async restart() {
+
+                break;
+            };
+            case "restart": {
                 await interaction.reply("Compiling...");
 
                 exec("tsc", async (error, stdout) => {
@@ -94,8 +103,10 @@ export default new structures.Command<"chatInput">({
 
                     await interaction.editReply("Restarting...").then(() => process.exit(-1));
                 });
+
+                break;
             }
-        }, interaction.options.getSubcommand());
+        }
     },
     data: {
         name: "dev",

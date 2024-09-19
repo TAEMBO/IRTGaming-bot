@@ -1,4 +1,4 @@
-import { type ChatInputCommandInteraction, EmbedBuilder, type GuildMember, type User } from "discord.js";
+import { EmbedBuilder, type User, type Snowflake } from "discord.js";
 import mongoose from "mongoose";
 import ms from "ms";
 import type TClient from "../client.js";
@@ -32,10 +32,12 @@ export class Punishments extends BaseSchema<typeof model> {
             
             const punishment = await this.data.findById(_id);
 
-            if (!punishment) return;
+            if (!punishment || punishment.expired) return;
 
             log("Yellow", `${punishment.member.tag}'s ${punishment.type} (case #${punishment._id}) should expire now`);
-            await this.removePunishment(punishment._id, this._client.user.id, "Time's up!").then(result => log("Yellow", result));
+
+            await this.removePunishment(punishment, this._client.user.id, "Time's up!")
+                .catch(err => log("Red", "Error acting on punishment removal", err));
         }, timeout > 2_147_483_647 ? 2_147_483_647 : timeout);
     }
 
@@ -80,201 +82,180 @@ export class Punishments extends BaseSchema<typeof model> {
         }[type];
     }
 
-    public async addPunishment(
-        type: string,
-        moderator: string,
-        reason: string,
-        user: User,
-        guildMember: GuildMember | null,
-        options: {
-            time?: string
-            interaction?: ChatInputCommandInteraction<"cached">
-        }
-    ) {
-        const { time, interaction } = options;
-        const { _client } = this;
+    public async addPunishment(type: string, moderator: Snowflake, reason: string, user: User, duration?: string) {
         const now = Date.now();
-        const guild = _client.mainGuild();
-        const punData: typeof this.obj = { type, _id: await this.createId(), member: { tag: user.tag, _id: user.id }, reason, moderator, time: now };
-        const inOrFromBoolean = ["warn", "mute"].includes(type) ? "in" : "from"; // Use "in" if the punishment doesn"t remove the member from the server, eg. mute, warn
-        const auditLogReason = `${reason} | Case #${punData._id}`;
-        const embed = new EmbedBuilder()
-            .setColor(_client.config.EMBED_COLOR)
-            .setTitle(`Case #${punData._id}: ${formatString(type)}`)
-            .setDescription(`${user.tag}\n${user}\n(\`${user.id}\`)`)
-            .addFields({ name: "Reason", value: reason });
-        let punResult;
-        let timeInMillis: number | null;
+        const guild = this._client.mainGuild();
+        const newId = await this.createId();
+        const caseData: typeof this.obj = { type, _id: newId, member: { tag: user.tag, _id: user.id }, reason, moderator, time: now };
+        const inOrFrom = ["warn", "mute"].includes(type) ? "in" : "from";
+        const auditLogReason = `${reason} | Case #${caseData._id}`;
+        let dmSuccess = true;
 
-        if (type === "mute") {       
-            const parsedTime = time ? ms(time) : 2_073_600_000;
+        const sendDm = (dur?: number) => user
+            .send(
+                `You've been ${this.getTense(type)} ${inOrFrom} ${guild.name}` +
+                (dur ? ` for ${formatTime(dur, 4, { longNames: true, commas: true })}` : "") +
+                ` for reason \`${reason}\` (case #${caseData._id})`
+            )
+            .catch(() => {
+                log("Yellow", `Failed to DM ${user.id}`);
 
-            if (parsedTime > 2_073_600_000) return await interaction?.editReply("You cannot mute someone for longer than 24 days.");
+                dmSuccess = false;
 
-            timeInMillis = parsedTime;
-        } else timeInMillis = time ? ms(time) : null;
-
-        const durationText = timeInMillis ? ` for ${formatTime(timeInMillis, 4, { longNames: true, commas: true })}` : "";
-
-        // Add field for duration if time is specified
-        if (timeInMillis) embed.addFields({ name: "Duration", value: durationText });
-
-        const dm = await guildMember?.send(`You've been ${this.getTense(type)} ${inOrFromBoolean} ${guild.name}${durationText} for reason \`${reason}\` (case #${punData._id})`)
-            .catch(() => void embed.setFooter({ text: "Failed to DM member of punishment" }));
+                return null;
+            });
 
         switch (type) {
             case "ban": {
-                const banned = await guild.bans.fetch(user).catch(() => null);
+                const isBanned = await guild.bans.fetch(user).catch(() => null);
+                
+                if (isBanned) throw new Error("User is already banned!");
+                
+                const parsedTime = duration ? ms(duration) : undefined;
+                const dm = await sendDm(parsedTime);
+                
+                await guild.bans.create(user, { reason: auditLogReason })
+                    .catch(async err => {
+                        await dm?.delete();
 
-                punResult = banned
-                    ? "User is already banned."
-                    : await guild.bans.create(user, { reason: auditLogReason }).catch((err: Error) => err.message);
+                        throw err;
+                    });
+
+                if (parsedTime) {
+                    caseData.endTime = now + parsedTime;
+                    caseData.duration = parsedTime;
+                }
                     
                 break;
             };
             case "softban": {
-                const banned = await guild.bans.fetch(user).catch(() => null);
+                const isBanned = await guild.bans.fetch(user).catch(() => null);
 
-                punResult = banned
-                    ? "User is already banned."
-                    : await guild.bans
-                        .create(user, { reason: auditLogReason, deleteMessageSeconds: 86_400 })
-                        .catch((err: Error) => err.message);
+                if (isBanned) throw new Error("User is already banned!");
+
+                const dm = await sendDm();
+
+                await guild.bans.create(user, { reason: auditLogReason, deleteMessageSeconds: 86_400 })
+                    .catch(async err => {
+                        await dm?.delete();
+
+                        throw err;
+                    });
+
+                await guild.bans.remove(user, auditLogReason);
 
                 break;
             };
             case "kick": {
-                punResult = await guildMember?.kick(auditLogReason).catch((err: Error) => err.message);
+                const dm = await sendDm();
+
+                await guild.members.kick(user, auditLogReason)
+                    .catch(async err => {
+                        await dm?.delete();
+
+                        throw err;
+                    });
                 
                 break;
             };
             case "detain": {
-                await guildMember?.voice.disconnect();
-
-                punResult = await guildMember?.roles
-                    .add(_client.config.mainServer.roles.detained, auditLogReason)
-                    .catch((err: Error) => err.message);
+                await Promise.all([
+                    guild.voiceStates.cache.get(user.id)?.disconnect(),
+                    guild.members.addRole({ user, role: this._client.config.mainServer.roles.detained, reason: auditLogReason }),
+                    sendDm()
+                ]);
 
                 break;
             };
             case "mute": {
-                punResult = guildMember?.isCommunicationDisabled()
-                    ? "Member is already muted."
-                    : await guildMember?.timeout(timeInMillis, auditLogReason).catch((err: Error) => err.message);
+                const member = await guild.members.fetch(user);
+
+                if (member.isCommunicationDisabled()) throw new Error("User is already muted!");
+
+                const parsedTime = duration ? ms(duration) : 2_073_600_000;
+                
+                if (parsedTime > 2_073_600_000) throw new Error("Cannot mute user for longer than 24 days!");
+
+                await Promise.all([
+                    member.timeout(parsedTime, auditLogReason),
+                    sendDm(parsedTime)
+                ]);
+
+                caseData.endTime = now + parsedTime;
+                caseData.duration = parsedTime;
 
                 break;
             };
-        }
+            case "warn": {
+                await sendDm();
 
-        // If type was softban and it was successful, continue with softban (unban)
-        if (type === "softban" && typeof punResult !== "string") {
-            punResult = await guild.bans.remove(user, auditLogReason).catch((err: Error) => err.message);
-        }
-
-        if (timeInMillis && ["mute", "ban"].includes(type)) { // If type is mute or ban, specify duration and endTime
-            punData.endTime = now + timeInMillis;
-            punData.duration = timeInMillis;
-        }
-
-        if (typeof punResult === "string") { // Punishment was unsuccessful
-            await dm?.delete();
-            
-            return interaction ? await interaction.editReply(punResult) : punResult;
+                break;
+            }
         }
         
-        // Punishment was successful
-        await Promise.all([
-            this.makeModlogEntry(punData),
-            this.data.create(punData),
-            interaction?.editReply({ embeds: [embed] })
+        const [caseDoc] = await Promise.all([
+            this.data.create(caseData),
+            this.makeModlogEntry(caseData)
         ]);
 
-        if (punData.endTime) this.setExec(punData._id, punData.endTime - Date.now());
+        if (caseData.endTime) this.setExec(caseData._id, caseData.endTime - now);
+
+        return { caseDoc, dmSuccess };
     }
 
-    public async removePunishment(caseId: number, moderator: string, reason: string, interaction?: ChatInputCommandInteraction<"cached">) {
+    public async removePunishment(punishment: typeof this.doc, moderator: Snowflake, reason: string) {
         const now = Date.now();
-        const punishment = await this.data.findById(caseId);
-
-        if (!punishment) {
-            return interaction
-                ? await interaction.reply(`Case #${caseId} not found`)
-                : log("Red", `Case #${caseId} not found in punishment removal`);
-        }
-
         const guild = this._client.mainGuild();
-        const auditLogReason = `${reason} | Case #${punishment._id}`;
-        const [user, guildMember, _id] = await Promise.all([
-            this._client.users.fetch(punishment.member._id),
-            guild.members.fetch(punishment.member._id).catch(() => null),
-            this.createId()
-        ]);
-        const removePunishmentData: typeof this.obj = {
+        const newId = await this.createId();
+        const auditLogReason = `${reason} | Case $${newId}`;
+        const caseData: typeof this.obj = {
             type: `un${punishment.type}`,
-            _id,
+            _id: newId,
             cancels: punishment._id,
             member: punishment.member,
-            reason, moderator,
-            time: now
+            time: now,
+            reason,
+            moderator
         };
-        let punResult;
 
         switch (punishment.type) {
             case "ban": {
-                punResult = await guild.bans.remove(punishment.member._id, auditLogReason).catch((err: Error) => err.message);
+                await guild.bans.remove(punishment.member._id);
 
                 break;
             };
             case "softban": {
-                removePunishmentData.type = "removeOtherPunishment";
-
-                break;
+                throw new Error("Cannot undo softban!");
             };
             case "kick": {
-                removePunishmentData.type = "removeOtherPunishment";
-
-                break;
+                throw new Error("Cannot undo kick!");
             };
             case "detain": {
-                punResult = await guildMember?.roles
-                    .remove(this._client.config.mainServer.roles.detained, auditLogReason)
-                    .catch((err: Error) => err.message);
+                await guild.members.removeRole({
+                    user: punishment.member._id,
+                    role: this._client.config.mainServer.roles.detained,
+                    reason: auditLogReason
+                });
 
                 break;
             };
             case "mute": {
-                if (!guildMember) {
-                    await this.data.findByIdAndUpdate(caseId, { expired: true });
+                await guild.members.edit(punishment.member._id, { communicationDisabledUntil: null, reason: auditLogReason });
 
-                    break;
-                }
-
-                await guildMember.send(`You've been unmuted in ${guild.name}.`).catch((err: Error) => console.log(err.message));
-
-                punResult = await guildMember.timeout(null, auditLogReason).catch((err: Error) => err.message);
+                break;
             };
+            case "warn": {
+                // Only case data to be modified
+                break;
+            }
         }
 
-        if (typeof punResult === "string") { // Unpunish was unsuccessful
-            return interaction ? await interaction.reply(punResult) : punResult;
-        }
-        
-        // Unpunish was successful
-        await Promise.all([
-            this.data.findByIdAndUpdate(caseId, { expired: true }),
-            this.data.create(removePunishmentData),
-            this.makeModlogEntry(removePunishmentData)
+        const [caseDoc] = await Promise.all([
+            this.data.create(caseData),
+            this.data.findByIdAndUpdate(punishment._id, { expired: true }),
+            this.makeModlogEntry(caseData)
         ]);
 
-        if (!interaction) return `Successfully un${this.getTense(punishment.type)} ${user.tag} (${user.id}) for reason "${reason}"`;
-
-        await interaction.reply({ embeds: [new EmbedBuilder()
-            .setColor(this._client.config.EMBED_COLOR)
-            .setTitle(`Case #${removePunishmentData._id}: ${formatString(removePunishmentData.type)}`)
-            .setDescription(`${user.tag}\n${user}\n(\`${user.id}\`)`)
-            .addFields(
-                { name: "Reason", value: reason },
-                { name: "Overwrites", value: `Case #${punishment._id}` })
-        ] });
+        return caseDoc;
     }
 }

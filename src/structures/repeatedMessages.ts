@@ -1,5 +1,6 @@
 import { Collection, type Message } from "discord.js";
 import type TClient from "../client.js";
+import { log } from "#util";
 import type { RepeatedMessagesData, RepeatedMessagesEntry, RepeatedMessagesIdentifiers } from "#typings";
 
 export class RepeatedMessages {
@@ -51,7 +52,8 @@ export class RepeatedMessages {
 
         delete this._data[msg.author.id];
 
-        await this._client.punishments.addPunishment("mute", this._client.user.id, `Automod; ${options.muteReason}`, msg.author, msg.member, { time: options.muteTime });
+        await this._client.punishments.addPunishment("mute", this._client.user.id, `Automod; ${options.muteReason}`, msg.author, options.muteTime)
+            .catch(err => log("Red", "Failed to add punishment:", err));
 
         const spamMsgIds = userData.entries.filter(x => x.identifier === "spam").map(x => x.msg);
 

@@ -37,7 +37,9 @@ export default new Event({
             }).on("collect", async collected => {
                 log("Purple", `Received "y" from ${collected.author.tag}, indicating to mute`);
     
-                await message.client.punishments.addPunishment("mute", collected.author.id, "Automod; Misuse of staff ping", message.author, message.member, { time: "10m" });
+                await message.client.punishments.addPunishment("mute", collected.author.id, "Automod; Misuse of staff ping", message.author, "10m")
+                    .catch(err => log("Red", "Failed to add punishment", err));
+                    
                 await collected.react("✅");
             });
         }

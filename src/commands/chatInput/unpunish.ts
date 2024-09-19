@@ -1,17 +1,37 @@
-import { ApplicationCommandOptionType, PermissionFlagsBits } from "discord.js";
+import { ApplicationCommandOptionType, EmbedBuilder, PermissionFlagsBits } from "discord.js";
 import { Command } from "#structures";
-import { hasRole, youNeedRole } from "#util";
+import { formatString, hasRole, youNeedRole } from "#util";
 
 export default new Command<"chatInput">({
     async run(interaction) {
-        const punishment = await interaction.client.punishments.data.findById(interaction.options.getInteger("id", true));
+        const caseId = interaction.options.getInteger("id", true);
+        const punishment = await interaction.client.punishments.data.findById(caseId);
         const reason = interaction.options.getString("reason") ?? "Unspecified";
 
-        if (!punishment) return await interaction.reply("No case found with that ID");
-        if (punishment.expired) return await interaction.reply("That case has already been overwritten");
+        if (!punishment) return await interaction.reply("No case found with that ID!");
+        if (punishment.expired) return await interaction.reply(`Case #${caseId} has already been overwritten!`);
         if (!["warn", "mute"].includes(punishment.type) && hasRole(interaction.member, "discordHelper")) return await youNeedRole(interaction, "discordModerator");
+
+        await interaction.deferReply();
         
-        await interaction.client.punishments.removePunishment(punishment._id, interaction.user.id, reason, interaction);
+        let caseDoc;
+
+        try {
+            caseDoc = await interaction.client.punishments.removePunishment(punishment, interaction.user.id, reason);
+        } catch (err: any) {
+            return await interaction.editReply(err.message);
+        }
+
+        const user = await interaction.client.users.fetch(caseDoc.member._id);
+
+        await interaction.editReply({ embeds: [new EmbedBuilder()
+            .setColor(interaction.client.config.EMBED_COLOR)
+            .setTitle(`Case #${caseDoc._id}: ${formatString(caseDoc.type)}`)
+            .setDescription(`${user.tag}\n${user}\n(\`${user.id}\`)`)
+            .addFields(
+                { name: "Reason", value: reason },
+                { name: "Overwrites", value: `Case #${punishment._id}` })
+        ] });
     },
     data: {
         name: "unpunish",
@@ -21,7 +41,7 @@ export default new Command<"chatInput">({
             {
                 type: ApplicationCommandOptionType.Integer,
                 name: "id",
-                description: "Te ID of the punishment to overwrite",
+                description: "The ID of the punishment to overwrite",
                 required: true
             },
             {

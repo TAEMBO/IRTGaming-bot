@@ -1,4 +1,5 @@
-import Discord, {
+import * as Discord from "discord.js";
+import {
     ActionRowBuilder,
     ApplicationCommandOptionType,
     ButtonBuilder,

@@ -3,8 +3,8 @@
  * @param text The text to format
  * @returns 
  */
-export function formatString(text: string) {
-    text = text.trim();
+export function formatString(rawText: string) {
+    const text = rawText.trim();
 
     return text.includes(" ")
         ? text.split(" ").map(x => x[0].toUpperCase() + x.toLowerCase().slice(1)).join(" ")

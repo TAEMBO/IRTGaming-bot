@@ -56,7 +56,6 @@ export default new Command<"chatInput">({
             if (!phrase.includes(letter)) {
                 fouls++;
                 await checkFouls(false);
-                return;
             }
         }
 

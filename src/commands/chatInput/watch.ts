@@ -15,7 +15,7 @@ export default new Command<"chatInput">({
 
                 if (wlData) return await interaction.reply(`\`${name}\` already exists for reason \`${wlData.reason}\``);
 
-                await interaction.client.watchList.data.create({ _id: name, reason, isSevere: severity === "ban" ? true : false });
+                await interaction.client.watchList.data.create({ _id: name, reason, isSevere: severity === "ban" });
                 await interaction.reply(`Successfully added \`${name}\` who needs to be **${severity === "ban" ? "banned" : "watched over"}** with reason \`${reason}\``);
 
                 break;

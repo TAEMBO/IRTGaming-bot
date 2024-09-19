@@ -85,12 +85,12 @@ export default new Command<"chatInput">({
             const sortedData = playersData.sort((a, b) => interaction.client.playerTimes.getTimeData(b).reduce((x, y) => x + y[1].time, 0) - interaction.client.playerTimes.getTimeData(a).reduce((x, y) => x + y[1].time, 0));
             const player = interaction.options.getString("name");
 
-            const leaderboard = (data: (typeof interaction.client.playerTimes.doc)[], isFirstField: boolean) => data.map((x, i) => [
-                `**${i + (isFirstField ? 1 : 26)}.** \`${x._id}\``,
-                interaction.client.fmList.cache.includes(x._id) ? ":farmer:" : "",
-                interaction.client.tfList.cache.includes(x._id) ? ":angel:" : "",
+            const leaderboard = (data: (typeof interaction.client.playerTimes.doc)[], isFirstField: boolean) => data.map((playerData, i) => [
+                `**${i + (isFirstField ? 1 : 26)}.** \`${playerData._id}\``,
+                interaction.client.fmList.cache.includes(playerData._id) ? ":farmer:" : "",
+                interaction.client.tfList.cache.includes(playerData._id) ? ":angel:" : "",
                 " - ",
-                formatTime((interaction.client.playerTimes.getTimeData(x).reduce((x, y) => x + y[1].time, 0) * 60 * 1000), 3, { commas: true })
+                formatTime((interaction.client.playerTimes.getTimeData(playerData).reduce((x, y) => x + y[1].time, 0) * 60 * 1000), 3, { commas: true })
             ].join("")).join("\n");
 
             if (!player) {

@@ -3,9 +3,9 @@
  * @param text The text to analyze for profanity
  * @param profanityList A list of words considered profanity
  */
-export function hasProfanity(text: string, profanityList: string[]) {
+export function hasProfanity(rawText: string, profanityList: string[]) {
     let loopCount = 0;
-    text = text.replace(/[^a-zA-Z\s]/g, "");
+    let text = rawText.replace(/[^a-zA-Z\s]/g, "");
 
     for (const [regExp, str] of new Map([
         [/!/g, "i"],

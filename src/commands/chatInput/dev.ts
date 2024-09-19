@@ -23,6 +23,7 @@ export default new structures.Command<"chatInput">({
 
         switch (interaction.options.getSubcommand()) {
             case "eval": {
+                // eslint-disable-next-line no-unused-expressions
                 sleep; fs; Discord; utilities; // Imports possibly used in eval
                 const { client } = interaction;
                 const code = interaction.options.getString("code", true);

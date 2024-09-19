@@ -16,7 +16,7 @@ import type { FSLoopCSG, FSServer } from "#typings";
 export async function fsLoop(client: TClient, watchList: TClient["watchList"]["doc"][], server: FSServer, serverAcro: string) {
     if (client.config.toggles.debug) log("Yellow", "FSLoop", serverAcro);
 
-    function decorators(player: PlayerUsed, publicLoc = false) {
+    function getDecorators(player: PlayerUsed, publicLoc = false) {
         let decorators = player.isAdmin ? ":detective:" : ""; // Tag for if player is admin
     
         decorators += client.fmList.cache.includes(player.name) ? ":farmer:" : ""; // Tag for if player is FM
@@ -42,7 +42,7 @@ export async function fsLoop(client: TClient, watchList: TClient["watchList"]["d
     }
 
     function logEmbed(player: PlayerUsed, joinLog: boolean) {
-        let description = `\`${player.name}\`${decorators(player)} ${joinLog ? "joined" : "left"} **${serverAcroUp}** at <t:${now}:t>`;
+        let description = `\`${player.name}\`${getDecorators(player)} ${joinLog ? "joined" : "left"} **${serverAcroUp}** at <t:${now}:t>`;
         const playTimeHrs = Math.floor(player.uptime / 60);
         const playTimeMins = (player.uptime % 60).toString().padStart(2, "0");
         const embed = new EmbedBuilder()
@@ -173,7 +173,7 @@ export async function fsLoop(client: TClient, watchList: TClient["watchList"]["d
         const playTimeHrs = Math.floor(player.uptime / 60);
         const playTimeMins = (player.uptime % 60).toString().padStart(2, "0");
 
-        return `\`${player.name}\` ${decorators(player, true)} **|** ${playTimeHrs}:${playTimeMins}`;
+        return `\`${player.name}\` ${getDecorators(player, true)} **|** ${playTimeHrs}:${playTimeMins}`;
     });
 
     // Data crunching for stats embed
@@ -265,7 +265,7 @@ export async function fsLoop(client: TClient, watchList: TClient["watchList"]["d
             ] }); 
         } else await logChannel.send({ embeds: [new EmbedBuilder()
             .setColor(client.config.EMBED_COLOR_YELLOW)
-            .setDescription(`\`${player.name}\`${decorators(player)} logged in as admin on **${serverAcroUp}** at <t:${now}:t>`)
+            .setDescription(`\`${player.name}\`${getDecorators(player)} logged in as admin on **${serverAcroUp}** at <t:${now}:t>`)
         ] });
     }
     

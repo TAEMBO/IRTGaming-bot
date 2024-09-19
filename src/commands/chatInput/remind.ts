@@ -24,7 +24,7 @@ export default new Command<"chatInput">({
 
         async function promptDeletion(
             reminder: typeof interaction.client.reminders.doc,
-            int: StringSelectMenuInteraction<"cached"> | ChatInputCommandInteraction<"cached">
+            ackInt: StringSelectMenuInteraction<"cached"> | ChatInputCommandInteraction<"cached">
         ) {
             const intOptions = {
                 embeds: [new EmbedBuilder()
@@ -33,22 +33,22 @@ export default new Command<"chatInput">({
                     .setFooter({ text: "60s to respond" })
                 ],
                 ephemeral: true,
-                fetchReply: true,
+                fetchReply: true as const,
                 components: ACK_BUTTONS
             };
 
-            (await (int.isChatInputCommand()
-                ? int.reply(intOptions)
-                : int.update(intOptions)
-            )).createMessageComponentCollector({
+            const msg = await (ackInt.isChatInputCommand()
+                ? ackInt.reply(intOptions)
+                : ackInt.update(intOptions)
+            );
+            
+            msg.createMessageComponentCollector({
                 filter: x => x.user.id === interaction.user.id,
                 max: 1,
                 time: 60_000,
                 componentType: ComponentType.Button
             }).on("collect", async int => {
                 if (int.customId === "cancel") return int.update(rplText("Command manually canceled"));
-
-                await interaction.client.reminders.data.findByIdAndDelete(reminder);
 
                 await interaction.client.reminders.data.findByIdAndDelete(reminder);
             }).on("end", async ints => {

@@ -7,9 +7,9 @@ import { LogColor } from "./logColor.js";
  * @param newText 
  * @returns `oldText` with ANSI red highlights for removed text, `newText` with ANSI green highlights for added text
  */
-export function formatDiff(oldText: string, newText: string) {
-    oldText = oldText.replace(/\s+$/, "");
-    newText = newText.replace(/\s+$/, "");
+export function formatDiff(oldTextRaw: string, newTextRaw: string) {
+    const oldText = oldTextRaw.replace(/\s+$/, "");
+    const newText = newTextRaw.replace(/\s+$/, "");
     
     let oldTextChanges = "";
     let newTextChanges = "";

@@ -6,6 +6,7 @@
  * @returns The formatted output
  */
 export function formatTime(integer: number, accuracy = 1, options: { longNames?: true, commas?: true } = {}) {
+    let ms = integer;
     const timeNames = [
         { name: "year",   length: 1_000 * 60 * 60 * 24 * 365 },
         { name: "month",  length: 1_000 * 60 * 60 * 24 * 30 },
@@ -21,7 +22,7 @@ export function formatTime(integer: number, accuracy = 1, options: { longNames?:
     for (const timeName of timeNames) {
         if (achievedAccuracy >= accuracy) break;
 
-        const fullTimelengths = Math.floor(integer / timeName.length);
+        const fullTimelengths = Math.floor(ms / timeName.length);
 
         if (!fullTimelengths) continue;
 
@@ -33,10 +34,10 @@ export function formatTime(integer: number, accuracy = 1, options: { longNames?:
                     ? (" " + timeName.name + (fullTimelengths === 1 ? "" : "s"))
                     : timeName.name.slice(0, timeName.name === "month" ? 2 : 1))
             + (options.commas ? ", " : " ");
-        integer -= fullTimelengths * timeName.length;
+        ms -= fullTimelengths * timeName.length;
     }
 
-    if (!text) text = integer + (options.longNames ? " milliseconds" : "ms") + (options.commas ? ", " : "");
+    if (!text) text = ms + (options.longNames ? " milliseconds" : "ms") + (options.commas ? ", " : "");
 
     if (options.commas) {
         text = text.slice(0, -2);

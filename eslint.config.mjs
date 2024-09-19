@@ -27,6 +27,22 @@ export default [
             "no-explicit-any": "off",
             "@typescript-eslint/no-explicit-any": "off",
             "no-unused-vars": "off",
+            "no-useless-return": "error",
+            "no-unneeded-ternary": "error",
+            "no-param-reassign": "error",
+            "yoda": "error",
+            "no-return-assign": "error",
+            "no-multi-assign": "error",
+            "no-empty-function": [
+                "error",
+                { "allow": ["constructors"] }
+            ],
+            "no-implicit-coercion": "error",
+            "no-lonely-if": "error",
+            "no-self-compare": "error",
+            "no-shadow": "error",
+            "no-template-curly-in-string": "error",
+            "no-unused-expressions": "error",
             "@typescript-eslint/no-unused-vars": "off",
             "@typescript-eslint/explicit-member-accessibility": "error",
             "@typescript-eslint/no-floating-promises": "error",
@@ -48,6 +64,10 @@ export default [
                     ],
                     "leadingUnderscore": "allow"
                 }
+            ],
+            "max-nested-callbacks": [
+                "error",
+                { "max": 4 }
             ],
             "no-multiple-empty-lines": [
                 "error",

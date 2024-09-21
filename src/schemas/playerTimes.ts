@@ -27,14 +27,12 @@ export class PlayerTimes extends BaseSchema<typeof model> {
     }
     
     /**
-     * Retrieve an array-ified form of a player"s server time data.
+     * Retrieve an array-ified form of a player's server time data.
      * @param data The MongoDB document for the player
-     * @returns An array of all server time objects from the player, with the first element for each being the server"s acronym
+     * @returns An array of all server time objects from the player, with the first element for each being the server's acronym
      */
-    public getTimeData(data: typeof this.obj) {
-        return (Object.entries(Object.values(data.servers)[3] ?? {}) as unknown) as [string, {
-            [key in keyof typeof serverObj]: number;
-        }][];
+    public getTimeData(data: typeof this.doc) {
+        return Object.entries(data.toObject().servers).filter((x): x is [string, NonNullable<typeof x[1]>] => x[1] !== null);
     }
 
     /**

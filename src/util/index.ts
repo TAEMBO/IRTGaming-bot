@@ -18,5 +18,4 @@ export * from "./onMFFarms.js";
 export * from "./punish.js";
 export * from "./stringifyStream.js";
 export * from "./tempReply.js";
-export * from "./validateCommand.js";
 export * from "./youNeedRole.js";

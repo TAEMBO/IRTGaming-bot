@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType } from "discord.js";
+import { ApplicationCommandOptionType, codeBlock } from "discord.js";
 import { Command } from "#structures";
 
 export default new Command<"chatInput">({
@@ -25,7 +25,7 @@ export default new Command<"chatInput">({
             let text = `A part of the ${wordOrPhrase} has been revealed, this is what it looks like now:\n\`\`\`\n${hideWordResult}\n\`\`\``;
 
             if (!hiddenLetters) {
-                text = `The whole ${wordOrPhrase} has been revealed! The hangman game ends with the ${wordOrPhrase} being:\n\`\`\`\n${phrase}\n\`\`\``;
+                text = `The whole ${wordOrPhrase} has been revealed! The hangman game ends with the ${wordOrPhrase} being:\n${codeBlock(phrase)}`;
                 guessCollector.stop();
                 clearInterval(interval);
             }

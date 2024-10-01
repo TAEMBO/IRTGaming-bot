@@ -77,12 +77,17 @@ export default new Command<"chatInput">({
                 embed.addFields({ name: `${server.fullName} - ${serverSlots}`, value: playerInfo.join("\n"), inline: true });
             }));
 
-            embed.setTitle(`All Servers: ${totalCount.reduce((a, b) => a + b, 0)} players online`).setFooter(failedFooter.length ? { text: failedFooter.join(", ") } : null);
+            embed
+                .setTitle(`All Servers: ${totalCount.reduce((a, b) => a + b, 0)} players online`)
+                .setFooter(failedFooter.length ? { text: failedFooter.join(", ") } : null);
 
             await interaction.editReply({ embeds: [embed] });
         } else if (subCmd === "playertimes") {
+            const { getTimeData } = interaction.client.playerTimes;
             const playersData = await interaction.client.playerTimes.data.find();
-            const sortedData = playersData.sort((a, b) => interaction.client.playerTimes.getTimeData(b).reduce((x, y) => x + y[1].time, 0) - interaction.client.playerTimes.getTimeData(a).reduce((x, y) => x + y[1].time, 0));
+            const sortedData = playersData.sort((a, b) => 
+                getTimeData(b).reduce((x, y) => x + y[1].time, 0) - getTimeData(a).reduce((x, y) => x + y[1].time, 0)
+            );
             const player = interaction.options.getString("name");
 
             const leaderboard = (data: (typeof interaction.client.playerTimes.doc)[], isFirstField: boolean) => data.map((playerData, i) => [
@@ -90,7 +95,7 @@ export default new Command<"chatInput">({
                 interaction.client.fmList.cache.includes(playerData._id) ? ":farmer:" : "",
                 interaction.client.tfList.cache.includes(playerData._id) ? ":angel:" : "",
                 " - ",
-                formatTime((interaction.client.playerTimes.getTimeData(playerData).reduce((x, y) => x + y[1].time, 0) * 60 * 1000), 3, { commas: true })
+                formatTime((getTimeData(playerData).reduce((x, y) => x + y[1].time, 0) * 60 * 1_000), 3, { commas: true })
             ].join("")).join("\n");
 
             if (!player) {

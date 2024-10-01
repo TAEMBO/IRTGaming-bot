@@ -104,7 +104,11 @@ export default new Event({
         }
     
         if (automodded) return;
-        if (message.channelId !== message.client.config.mainServer.channels.spamZone) await message.client.userLevels.incrementUser(message.author.id);
+
+        if (message.channelId !== message.client.config.mainServer.channels.spamZone) {
+            await message.client.userLevels.incrementUser(message.author.id);
+        }
+        
         if (!message.client.config.toggles.autoResponses) return;
     
         // MF mod voting

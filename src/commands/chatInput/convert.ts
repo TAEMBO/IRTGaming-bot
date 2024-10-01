@@ -212,7 +212,7 @@ export default new Command<"chatInput">({
                         `
                     }
                 )
-            ]});
+            ] });
         }
 
         // Construct starter data

@@ -20,9 +20,10 @@ export default new Command<"chatInput">({
 
             if (!userData) return await interaction.reply(`${pronounBool("You", "They")} currently don't have a level, send some messages to level up.`);
 
+            const { algorithm } = interaction.client.userLevels;
             const index = allData.sort((a, b) => b.messages - a.messages).map((x) => x._id).indexOf(member.id) + 1;
             const memberDifference = userData.messages - interaction.client.userLevels.algorithm(userData.level);
-            const levelDifference = interaction.client.userLevels.algorithm(userData.level + 1) - interaction.client.userLevels.algorithm(userData.level);
+            const levelDifference = algorithm(userData.level + 1) - algorithm(userData.level);
 
             return await interaction.reply({
                 embeds: [new EmbedBuilder()

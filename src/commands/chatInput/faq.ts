@@ -26,7 +26,7 @@ export default new Command<"chatInput">({
                     .setColor(interaction.client.config.EMBED_COLOR)
                     .setImage(interaction.client.config.resources.faqTrollEmbedImage)
                     .setDescription([
-                        `If a player is causing problems on a server, ${isFromTicket ? "let us know" : `don"t hesitate to send a report to ${fsServers.getPublicAll().map(([_, x]) => `<#${x.channelId}>`).join(" or ")}`} with:`,
+                        `If a player is causing problems on a server, ${isFromTicket ? "let us know" : `don't hesitate to send a report to ${fsServers.getPublicAll().map(([_, x]) => `<#${x.channelId}>`).join(" or ")}`} with:`,
                         "",
                         [
                             "- The name of the player",

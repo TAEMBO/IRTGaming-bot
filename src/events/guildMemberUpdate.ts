@@ -40,7 +40,7 @@ export default new Event({
         if (changes) await newMember.client.getChan("botLogs").send({ embeds: [embed] });
     
         if (oldRoles.has(boosterRole) || newRoles.has(boosterRole)) {
-            embed.setColor("#f47fff").setFooter({ text: `Total boosts: ${newMember.guild.premiumSubscriptionCount}`});
+            embed.setColor("#f47fff").setFooter({ text: `Total boosts: ${newMember.guild.premiumSubscriptionCount}` });
     
             await newMember.client.getChan("boostLogs").send({ embeds: [embed] });
         }

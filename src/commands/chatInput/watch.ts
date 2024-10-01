@@ -24,7 +24,7 @@ export default new Command<"chatInput">({
                 const name = interaction.options.getString("username", true);
                 const wlData = await interaction.client.watchList.data.findById(name);
 
-                if (!wlData) return await interaction.reply(`\`${name}\` doesn"t exist on watchList`);
+                if (!wlData) return await interaction.reply(`\`${name}\` doesn't exist on watchList`);
 
                 await interaction.client.watchList.data.findByIdAndDelete(name);
                 await interaction.reply(`Successfully removed \`${name}\` from watchList`);

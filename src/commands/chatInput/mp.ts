@@ -293,7 +293,9 @@ export default new Command<"chatInput">({
                             }[roleName];
 
                             await member.edit({
-                                roles: roles.filter(x => x !== roleId && x !== mainRoles.mpStaff).concat([mainRoles.formerStaff, mainRoles.trustedFarmer]),
+                                roles: roles
+                                    .filter(x => x !== roleId && x !== mainRoles.mpStaff)
+                                    .concat([mainRoles.formerStaff, mainRoles.trustedFarmer]),
                                 nick: member.nickname!.replace(slicedNick, "Former Staff")
                             });
                         } else await member.roles.remove(roleId);
@@ -342,7 +344,7 @@ export default new Command<"chatInput">({
                     await interaction.reply({ embeds: [new EmbedBuilder()
                         .setDescription(`${member} has been given <@&${roleId}>.`)
                         .setColor(interaction.client.config.EMBED_COLOR)
-                    ]});
+                    ] });
                     await interaction.client.users.send(
                         interaction.guild.ownerId,
                         `**${interaction.user.tag}** has promoted **${member.user.tag}** to **${interaction.client.getRole(roleName).name}**`

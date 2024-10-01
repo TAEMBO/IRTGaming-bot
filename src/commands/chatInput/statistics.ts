@@ -8,11 +8,17 @@ export default new Command<"chatInput">({
         const colunms = ["Command Name", "Uses"] as const;
         const includedCommands = interaction.client.chatInputCommands.filter(x => x.uses).sort((a, b) => b.uses - a.uses);
 
-        if (!includedCommands.size) return await interaction.reply(`No commands have been used yet.\nUptime: ${formatTime(interaction.client.uptime, 2, { commas: true, longNames: true })}`);
+        if (!includedCommands.size) return await interaction.reply(
+            "No commands have been used yet.\n"
+            + `Uptime: ${formatTime(interaction.client.uptime, 2, { commas: true, longNames: true })}`
+        );
         
         const nameLength = Math.max(...includedCommands.map(x => x.data.name.length), colunms[0].length) + 2;
         const amountLength = Math.max(...includedCommands.map(x => x.uses.toString().length), colunms[1].length) + 1;
-        const rows = [`${colunms[0] + " ".repeat(nameLength - colunms[0].length)}|${" ".repeat(amountLength - colunms[1].length) + colunms[1]}\n`, "-".repeat(nameLength) + "-".repeat(amountLength) + "\n"];
+        const rows = [
+            `${colunms[0] + " ".repeat(nameLength - colunms[0].length)}|${" ".repeat(amountLength - colunms[1].length) + colunms[1]}\n`,
+            "-".repeat(nameLength) + "-".repeat(amountLength) + "\n"
+        ];
 
         for (const [_, command] of includedCommands) {
             const name = command.data.name;
@@ -23,7 +29,10 @@ export default new Command<"chatInput">({
 
         const embed = new EmbedBuilder()
             .setTitle("Bot Statistics")
-            .setDescription(`List of commands that have been used. Total amount of commands used since last restart: **${interaction.client.chatInputCommands.reduce((a, b) => a + b.uses, 0)}**`)
+            .setDescription(
+                "List of commands that have been used."
+                + `Total amount of commands used since last restart: **${interaction.client.chatInputCommands.reduce((a, b) => a + b.uses, 0)}**`
+            )
             .setColor(interaction.client.config.EMBED_COLOR);
             
         if (rows.join("").length > 1024) {

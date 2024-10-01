@@ -8,7 +8,9 @@ export default new Command<"chatInput">({
         if (!member) return await interaction.reply({ content: "You need to select a member that is in this server", ephemeral: true });
 
         await interaction.client.getChan("counting").permissionOverwrites.edit(member, { SendMessages: false });
-        await interaction.reply(`${member}'s permisson to send messages in <#${interaction.client.config.mainServer.channels.counting}> has been removed`);
+        await interaction.reply(
+            `${member}'s permisson to send messages in <#${interaction.client.config.mainServer.channels.counting}> has been removed`
+        );
     },
     data: {
         name: "discount",

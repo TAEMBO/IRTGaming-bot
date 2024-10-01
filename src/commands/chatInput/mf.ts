@@ -109,7 +109,7 @@ export default new Command<"chatInput">({
 
                     return await interaction.reply({
                         embeds: [new EmbedBuilder()
-                            .setDescription(`${member} (${member.user.tag}) has been given the <@&${serverObj.roles.member}> and <@&${roleId}> roles.`)
+                            .setDescription(`${member} (${member.user.tag}) has been given the <@&${serverObj.roles.member}> and <@&${roleId}> roles`)
                             .setColor(interaction.client.config.EMBED_COLOR)
                         ]
                     });

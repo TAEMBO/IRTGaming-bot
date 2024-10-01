@@ -56,7 +56,7 @@ export default new Command<"chatInput">({
                 const pageNumber = interaction.options.getInteger("page") ?? 1;
                 const punishments = await interaction.client.punishments.data.find();
                 const userPunishmentsData = punishments.filter(x => x.member._id === user.id);
-                const userPunishments = userPunishmentsData.sort((a, b) => a.time - b.time).map(punishment => ({
+                const formattedPuns = userPunishmentsData.sort((a, b) => a.time - b.time).map(punishment => ({
                     name: `${formatString(punishment.type)} | Case #${punishment.id}`,
                     value: [
                         `> Reason: \`${punishment.reason}\``,
@@ -66,16 +66,16 @@ export default new Command<"chatInput">({
                         punishment.cancels ? `\n> __Overwrites Case #${punishment.cancels}__` : ""].join("")
                 }));
 
-                if (!userPunishments || !userPunishments.length) return await interaction.reply("No punishments found with that user ID");
+                if (!formattedPuns || !formattedPuns.length) return await interaction.reply("No punishments found with that user ID");
 
                 await interaction.reply({ embeds: [new EmbedBuilder()
                     .setTitle(`Punishments for ${user.tag}`)
                     .setDescription(formatUser(user))
                     .setFooter({
-                        text: `${userPunishments.length} total punishments. Viewing page ${pageNumber} out of ${Math.ceil(userPunishments.length / 25)}.`
+                        text: `${formattedPuns.length} total punishments. Viewing page ${pageNumber} out of ${Math.ceil(formattedPuns.length / 25)}.`
                     })
                     .setColor(interaction.client.config.EMBED_COLOR)
-                    .addFields(userPunishments.slice((pageNumber - 1) * 25, pageNumber * 25))
+                    .addFields(formattedPuns.slice((pageNumber - 1) * 25, pageNumber * 25))
                 ] });
 
                 break;

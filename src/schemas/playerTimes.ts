@@ -2,7 +2,7 @@ import { EmbedBuilder } from "discord.js";
 import mongoose from "mongoose";
 import type TClient from "../client.js";
 import { BaseSchema, FTPActions } from "#structures";
-import { fsServers, jsonFromXML, log } from "#util";
+import { FM_ICON, TF_ICON, fsServers, jsonFromXML, log } from "#util";
 import type { FarmFormat } from "#typings";
 
 /** The object for each server a player has been on */
@@ -94,8 +94,8 @@ export class PlayerTimes extends BaseSchema<typeof model> {
                 
             const decorators = (name: string) => {
                 return [
-                    this._client.fmList.cache.includes(name) ? ":farmer:" : "", // Tag for if player is FM
-                    this._client.tfList.cache.includes(name) ? ":angel:" : "" // Tag for if player is TF
+                    this._client.fmList.cache.includes(name) ? FM_ICON : "",
+                    this._client.tfList.cache.includes(name) ? TF_ICON : ""
                 ].join("");
             };
 

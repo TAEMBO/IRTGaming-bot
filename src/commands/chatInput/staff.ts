@@ -1,5 +1,6 @@
 import { ApplicationCommandOptionType, EmbedBuilder, type GuildMember } from "discord.js";
 import { Command } from "#structures";
+import { FM_ICON, TF_ICON } from "#util";
 
 export default new Command<"chatInput">({
     async run(interaction) {
@@ -48,8 +49,8 @@ export default new Command<"chatInput">({
                     .setTitle("__MP Staff Usernames__")
                     .setColor(interaction.client.config.EMBED_COLOR)
                     .addFields(
-                        { name: "Farm Managers :farmer:", value: `\`${interaction.client.fmList.cache.join("`\n`")}\`` },
-                        { name: "Trusted Farmers :angel:", value: `\`${interaction.client.tfList.cache.join("`\n`")}\`` }
+                        { name: `Farm Managers ${FM_ICON}`, value: `\`${interaction.client.fmList.cache.join("`\n`")}\`` },
+                        { name: `Trusted Farmers ${TF_ICON}`, value: `\`${interaction.client.tfList.cache.join("`\n`")}\`` }
                     );
 
                 break;

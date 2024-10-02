@@ -10,19 +10,28 @@ import {
 } from "farming-simulator-types/2022";
 import { constants } from "http2";
 import { setTimeout as sleep } from "node:timers/promises";
-import { formatRequestInit, formatTime, jsonFromXML, log } from "#util";
+import {
+    ADMIN_ICON,
+    FM_ICON,
+    TF_ICON,
+    WL_ICON,
+    formatRequestInit,
+    formatTime,
+    jsonFromXML,
+    log
+} from "#util";
 import type { FSLoopCSG, FSServer } from "#typings";
 
 export async function fsLoop(client: TClient, watchList: TClient["watchList"]["doc"][], server: FSServer, serverAcro: string) {
     if (client.config.toggles.debug) log("Yellow", "FSLoop", serverAcro);
 
     function getDecorators(player: PlayerUsed, publicLoc = false) {
-        let decorators = player.isAdmin ? ":detective:" : ""; // Tag for if player is admin
+        let decorators = player.isAdmin ? ADMIN_ICON : "";
     
-        decorators += client.fmList.cache.includes(player.name) ? ":farmer:" : ""; // Tag for if player is FM
-        decorators += client.tfList.cache.includes(player.name) ? ":angel:" : ""; // Tag for if player is TF
+        decorators += client.fmList.cache.includes(player.name) ? FM_ICON : "";
+        decorators += client.tfList.cache.includes(player.name) ? TF_ICON : "";
         decorators += (client.whitelist.cache.includes(player.name) && !publicLoc) ? ":white_circle:" : ""; // Tag for if player is on whitelist and location is not public
-        decorators += watchList?.some(x => x._id === player.name) ? ":no_entry:" : ""; // Tag for if player is on watchList
+        decorators += watchList?.some(x => x._id === player.name) ? WL_ICON : "";
     
         return decorators;
     }

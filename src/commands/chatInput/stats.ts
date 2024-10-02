@@ -2,7 +2,17 @@ import { ApplicationCommandOptionType, AttachmentBuilder, EmbedBuilder } from "d
 import canvas from "@napi-rs/canvas";
 import { DSSExtension, type DSSResponse, Feeds, filterUnused } from "farming-simulator-types/2022";
 import { Command } from "#structures";
-import { formatRequestInit, formatTime, fsServers, isMPStaff, log } from "#util";
+import {
+    ADMIN_ICON,
+    FM_ICON,
+    TF_ICON,
+    WL_ICON,
+    formatRequestInit,
+    formatTime,
+    fsServers,
+    isMPStaff,
+    log
+} from "#util";
 
 export default new Command<"chatInput">({
     async autocomplete(interaction) {
@@ -66,10 +76,10 @@ export default new Command<"chatInput">({
                     const playTimeHrs = Math.floor(player.uptime / 60);
                     const playTimeMins = (player.uptime % 60).toString().padStart(2, "0");
                     const inWl = watchList.some(x => x._id === player.name);
-                    let decorators = player.isAdmin ? ":detective:" : ""; // Tag for if player is admin
-                    decorators += interaction.client.fmList.cache.includes(player.name) ? ":farmer:" : ""; // Tag for if player is FM
-                    decorators += interaction.client.tfList.cache.includes(player.name) ? ":angel:" : ""; // Tag for if player is TF
-                    decorators += inWl ? "⛔" : ""; // Tag for if player is on watchList
+                    let decorators = player.isAdmin ? ADMIN_ICON : "";
+                    decorators += interaction.client.fmList.cache.includes(player.name) ? FM_ICON : "";
+                    decorators += interaction.client.tfList.cache.includes(player.name) ? TF_ICON : "";
+                    decorators += inWl ? WL_ICON : "";
         
                     playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
                 }
@@ -92,8 +102,8 @@ export default new Command<"chatInput">({
 
             const leaderboard = (data: (typeof interaction.client.playerTimes.doc)[], isFirstField: boolean) => data.map((playerData, i) => [
                 `**${i + (isFirstField ? 1 : 26)}.** \`${playerData._id}\``,
-                interaction.client.fmList.cache.includes(playerData._id) ? ":farmer:" : "",
-                interaction.client.tfList.cache.includes(playerData._id) ? ":angel:" : "",
+                interaction.client.fmList.cache.includes(playerData._id) ? FM_ICON : "",
+                interaction.client.tfList.cache.includes(playerData._id) ? TF_ICON : "",
                 " - ",
                 formatTime((getTimeData(playerData).reduce((x, y) => x + y[1].time, 0) * 60 * 1_000), 3, { commas: true })
             ].join("")).join("\n");
@@ -130,7 +140,7 @@ export default new Command<"chatInput">({
             await interaction.reply({ embeds: [new EmbedBuilder()
                 .setColor(interaction.client.config.EMBED_COLOR)
                 .setTitle([
-                    `Player - \`${playerData._id}\`${interaction.client.fmList.cache.includes(playerData._id) ? ":farmer:" : ""}${interaction.client.tfList.cache.includes(playerData._id) ? ":angel:" : ""}`,
+                    `Player - \`${playerData._id}\`${interaction.client.fmList.cache.includes(playerData._id) ? FM_ICON : ""}${interaction.client.tfList.cache.includes(playerData._id) ? TF_ICON : ""}`,
                     `Leaderboard position - **#${sortedData.indexOf(playerData) + 1}**`,
                     `Total time - **${formatTime(playerTimeDataTotal * 60 * 1000, 5, { commas: true })}**`,
                     (isMPStaff(interaction.member) && playerData.uuid) ? `UUID: \`${playerData.uuid}\`` : "",
@@ -303,11 +313,11 @@ export default new Command<"chatInput">({
                 const playTimeHrs = Math.floor(player.uptime / 60);
                 const playTimeMins = (player.uptime % 60).toString().padStart(2, "0");
                 const inWl = watchList.some(x => x._id === player.name);
-                let decorators = player.isAdmin ? ":detective:" : ""; // Tag for if player is admin
+                let decorators = player.isAdmin ? ADMIN_ICON : "";
 
-                decorators += interaction.client.fmList.cache.includes(player.name) ? ":farmer:" : ""; // Tag for if player is FM
-                decorators += interaction.client.tfList.cache.includes(player.name) ? ":angel:" : ""; // Tag for if player is TF
-                decorators += inWl ? "⛔" : ""; // Tag for if player is on watchList
+                decorators += interaction.client.fmList.cache.includes(player.name) ? FM_ICON : "";
+                decorators += interaction.client.tfList.cache.includes(player.name) ? TF_ICON : "";
+                decorators += inWl ? WL_ICON : "";
         
                 playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
             }

@@ -1,6 +1,6 @@
 import { EmbedBuilder } from "discord.js";
 import type TClient from "../client.js";
-import { log } from "#util";
+import { ADMIN_ICON, FM_ICON, TF_ICON, WL_ICON, log } from "#util";
 
 export async function fsLoopAll(client: TClient, watchList: TClient["watchList"]["doc"][]) {
     const embed = new EmbedBuilder().setColor(client.config.EMBED_COLOR);
@@ -17,12 +17,12 @@ export async function fsLoopAll(client: TClient, watchList: TClient["watchList"]
         for (const player of server.players) {
             const playTimeHrs = Math.floor(player.uptime / 60);
             const playTimeMins = (player.uptime % 60).toString().padStart(2, "0");
-            let decorators = player.isAdmin ? ":detective:" : ""; // Tag for if player is admin
+            let decorators = player.isAdmin ? ADMIN_ICON : "";
             
-            decorators += client.fmList.cache.includes(player.name) ? ":farmer:" : ""; // Tag for if player is FM
-            decorators += client.tfList.cache.includes(player.name) ? ":angel:" : ""; // Tag for if player is TF
+            decorators += client.fmList.cache.includes(player.name) ? FM_ICON : "";
+            decorators += client.tfList.cache.includes(player.name) ? TF_ICON : "";
             decorators += client.whitelist.cache.includes(player.name) ? ":white_circle:" : ""; // Tag for if player is on whitelist
-            decorators += watchList.some(x => x._id === player.name) ? ":no_entry:" : ""; // Tag for if player is on watchList
+            decorators += watchList.some(x => x._id === player.name) ? WL_ICON : "";
 
             playerInfo.push(`\`${player.name.slice(0, 46)}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
         }

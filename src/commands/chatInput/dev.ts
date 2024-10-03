@@ -24,12 +24,11 @@ export default new structures.Command<"chatInput">({
         switch (interaction.options.getSubcommand()) {
             case "eval": {
                 // eslint-disable-next-line no-unused-expressions
-                sleep; fs; Discord; utilities; // Imports possibly used in eval
+                sleep; fs; Discord; // Imports possibly used in eval
                 const { client } = interaction;
                 const code = interaction.options.getString("code", true);
                 const depth = interaction.options.getInteger("depth") ?? 1;
                 const useAsync = Boolean(interaction.options.getBoolean("async", false));
-                const fsServers = new structures.FSServers(interaction.client.config.fs);
                 const embed = new EmbedBuilder()
                     .setTitle("__Eval__")
                     .setColor(interaction.client.config.EMBED_COLOR)
@@ -77,8 +76,8 @@ export default new structures.Command<"chatInput">({
                     : "\n" + String(output);
 
                 // Hide credentials
-                const fsPub = fsServers.getPublicAll();
-                const fsObj = fsServers.values();
+                const fsPub = utilities.fsServers.getPublicAll();
+                const fsObj = utilities.fsServers.values();
 
                 for (const credential of [
                     client.config.TOKEN,

@@ -130,7 +130,7 @@ export async function fsLoop(client: TClient, watchList: TClient["watchList"]["d
     if (!dss || !csg) return await statsMsgEdit(failedEmbed, false); // Request(s) failed
 
     const newPlayerList = filterUnused(dss.slots.players);
-    const oldPlayerList = [...fsCacheServer.players];
+    const oldPlayerList = structuredClone(fsCacheServer.players);
 
     if (!dss.server.name) {
         if (fsCacheServer.state === 1) {

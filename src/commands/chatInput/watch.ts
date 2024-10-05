@@ -1,6 +1,6 @@
-import { ApplicationCommandOptionType, AttachmentBuilder, ComponentType, EmbedBuilder } from "discord.js";
+import { ApplicationCommandOptionType, AttachmentBuilder, EmbedBuilder } from "discord.js";
 import { Command } from "#structures";
-import { ACK_BUTTONS, isMPStaff, youNeedRole } from "#util";
+import { collectAck, isMPStaff, youNeedRole } from "#util";
 
 export default new Command<"chatInput">({
     async run(interaction) {
@@ -49,35 +49,31 @@ export default new Command<"chatInput">({
                     ] });
                 }
 
-                (await interaction.reply({
-                    embeds: [new EmbedBuilder()
-                        .setDescription("You are already subscribed to watchList notifications, do you want to unsubscribe?")
-                        .setColor(interaction.client.config.EMBED_COLOR)
-                    ],
-                    fetchReply: true,
-                    components: ACK_BUTTONS
-                })).createMessageComponentCollector({
-                    filter: x => x.user.id === interaction.user.id,
-                    max: 1,
-                    time: 30_000,
-                    componentType: ComponentType.Button
-                }).on("collect", async int => {
-                    if (int.customId === "cancel") {
-                        return await int.update({
+                await collectAck({
+                    interaction,
+                    payload: {
+                        embeds: [new EmbedBuilder()
+                            .setDescription("You are already subscribed to watchList notifications, do you want to unsubscribe?")
+                            .setColor(interaction.client.config.EMBED_COLOR)
+                        ]
+                    },
+                    async confirm(int) {
+                        await interaction.client.watchListPings.remove(interaction.user.id);
+
+                        await int.update({
+                            embeds: [new EmbedBuilder()
+                                .setDescription("You have successfully unsubscribed from watchList notifications")
+                                .setColor(interaction.client.config.EMBED_COLOR)
+                            ],
+                            components: []
+                        });
+                    },
+                    async cancel(int) {
+                        await int.update({
                             embeds: [new EmbedBuilder().setDescription("Command canceled").setColor(interaction.client.config.EMBED_COLOR)],
                             components: []
                         });
-                    }
-
-                    await interaction.client.watchListPings.remove(interaction.user.id);
-
-                    await int.update({
-                        embeds: [new EmbedBuilder()
-                            .setDescription("You have successfully unsubscribed from watchList notifications")
-                            .setColor(interaction.client.config.EMBED_COLOR)
-                        ],
-                        components: []
-                    });
+                    },
                 });
 
                 break;

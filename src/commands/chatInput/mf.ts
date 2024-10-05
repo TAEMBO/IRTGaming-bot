@@ -1,14 +1,14 @@
 import {
     ApplicationCommandOptionType,
     type CategoryChannel,
-    ComponentType,
     EmbedBuilder,
     OverwriteType,
     type TextChannel,
-    PermissionFlagsBits
+    PermissionFlagsBits,
+    roleMention
 } from "discord.js";
 import { Command } from "#structures";
-import { ACK_BUTTONS, fsServers, onMFFarms, youNeedRole } from "#util";
+import { collectAck, fsServers, onMFFarms, youNeedRole } from "#util";
 
 export default new Command<"chatInput">({
     async autocomplete(interaction) {
@@ -115,41 +115,39 @@ export default new Command<"chatInput">({
                     });
                 }
 
-                const msg = await interaction.reply({
-                    embeds: [new EmbedBuilder()
+                await collectAck({
+                    interaction,
+                    payload: { embeds: [new EmbedBuilder()
                         .setDescription(`This member already has the <@&${roleId}> role, do you want to remove it from them?`)
                         .setColor(interaction.client.config.EMBED_COLOR)
-                    ],
-                    fetchReply: true,
-                    components: ACK_BUTTONS
-                });
-                
-                msg.createMessageComponentCollector({
-                    filter: x => x.user.id === interaction.user.id,
-                    max: 1,
-                    time: 30_000,
-                    componentType: ComponentType.Button
-                }).on("collect", async int => {
-                    if (int.customId === "cancel") {
-                        return await int.update({
+                    ] },
+                    async confirm(int) {
+                        const rolesToRemove = onMFFarms(member, serverAcro).length === 1
+                            ? [roleId, serverObj.roles.member]
+                            : [roleId];
+
+                        await member.roles.remove(rolesToRemove);
+
+                        await int.update({
+                            embeds: [new EmbedBuilder()
+                                .setDescription(`${member} (${member.user.tag}) has been removed from the ${rolesToRemove.map(roleMention).join(" and ")} role(s).`)
+                                .setColor(interaction.client.config.EMBED_COLOR)
+                            ],
+                            components: []
+                        });
+                    },
+                    async cancel(int) {
+                        await int.update({
+                            embeds: [new EmbedBuilder().setDescription("Command canceled").setColor(interaction.client.config.EMBED_COLOR)],
+                            components: []
+                        });
+                    },
+                    async rejection() {
+                        await interaction.editReply({
                             embeds: [new EmbedBuilder().setDescription("Command canceled").setColor(interaction.client.config.EMBED_COLOR)],
                             components: []
                         });
                     }
-
-                    const rolesToRemove = onMFFarms(member, serverAcro).length === 1
-                        ? [roleId, serverObj.roles.member]
-                        : [roleId];
-
-                    await member.roles.remove(rolesToRemove);
-
-                    await int.update({
-                        embeds: [new EmbedBuilder()
-                            .setDescription(`${member} (${member.user.tag}) has been removed from the ${rolesToRemove.map(x => `<@&${x}>`).join(" and ")} role(s).`)
-                            .setColor(interaction.client.config.EMBED_COLOR)
-                        ],
-                        components: []
-                    });
                 });
 
                 break;
@@ -172,37 +170,37 @@ export default new Command<"chatInput">({
                     });
                 }
 
-                const msg = await interaction.reply({
-                    embeds: [new EmbedBuilder()
-                        .setDescription(`This member already has the <@&${serverObj.roles.farmOwner}> role, do you want to remove it from them?`)
-                        .setColor(interaction.client.config.EMBED_COLOR)
-                    ],
-                    fetchReply: true,
-                    components: ACK_BUTTONS
-                });
-                
-                msg.createMessageComponentCollector({
-                    filter: x => x.user.id === interaction.user.id,
-                    max: 1,
-                    time: 30_000,
-                    componentType: ComponentType.Button
-                }).on("collect", async int => {
-                    if (int.customId === "cancel") {
-                        return await int.update({
+                await collectAck({
+                    interaction,
+                    payload: {
+                        embeds: [new EmbedBuilder()
+                            .setDescription(`This member already has the <@&${serverObj.roles.farmOwner}> role, do you want to remove it from them?`)
+                            .setColor(interaction.client.config.EMBED_COLOR)
+                        ],
+                    },
+                    async confirm(int) {
+                        await member.roles.remove(serverObj.roles.farmOwner);
+
+                        await int.update({
+                            embeds: [new EmbedBuilder()
+                                .setDescription(`${member} (${member.user.tag}) has been removed from the <@&${serverObj.roles.farmOwner}> role`)
+                                .setColor(interaction.client.config.EMBED_COLOR)
+                            ],
+                            components: []
+                        });
+                    },
+                    async cancel(int) {
+                        await int.update({
                             embeds: [new EmbedBuilder().setDescription("Command canceled").setColor(interaction.client.config.EMBED_COLOR)],
                             components: []
                         });
-                    }
-
-                    await member.roles.remove(serverObj.roles.farmOwner);
-
-                    await int.update({
-                        embeds: [new EmbedBuilder()
-                            .setDescription(`${member} (${member.user.tag}) has been removed from the <@&${serverObj.roles.farmOwner}> role`)
-                            .setColor(interaction.client.config.EMBED_COLOR)
-                        ],
-                        components: []
-                    });
+                    },
+                    async rejection() {
+                        await interaction.editReply({
+                            embeds: [new EmbedBuilder().setDescription("Command canceled").setColor(interaction.client.config.EMBED_COLOR)],
+                            components: []
+                        });
+                    },
                 });
 
                 break;

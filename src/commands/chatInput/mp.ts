@@ -1,9 +1,9 @@
-import { ApplicationCommandOptionType, AttachmentBuilder, ComponentType, EmbedBuilder } from "discord.js";
+import { ApplicationCommandOptionType, AttachmentBuilder, EmbedBuilder } from "discord.js";
 import { Routes } from "farming-simulator-types/2022";
 import puppeteer from "puppeteer"; // Credits to Trolly for suggesting this package
 import { Command, FTPActions } from "#structures";
 import {
-    ACK_BUTTONS,
+    collectAck,
     fsServers,
     hasRole,
     isMPStaff,
@@ -42,28 +42,23 @@ export default new Command<"chatInput">({
                 ) return await interaction.reply("Server is already online");
 
                 if (cachedServer.players.length) {
-                    const message = await interaction.reply({
-                        content: `There are players currently on **${configServer.fullName}**, are you sure you want to manage its state?`,
-                        components: ACK_BUTTONS,
-                        fetchReply: true
+                    const { state } = await collectAck({
+                        interaction,
+                        payload: {
+                            content: `There are players currently on **${configServer.fullName}**, are you sure you want to manage its state?`
+                        },
+                        async confirm(int) {
+                            await int.update({ content: "Continuing...", components: [] });
+                        },
+                        async cancel(int) {
+                            await int.update({ content: "Command canceled", components: [] });
+                        },
+                        async rejection() {
+                            await interaction.editReply({ content: "Command canceled", components: [] });
+                        },
                     });
 
-                    try {
-                        const collected = await message.awaitMessageComponent({
-                            filter: x => x.user.id === interaction.user.id,
-                            time: 15_000,
-                            componentType: ComponentType.Button
-                        });
-
-                        if (collected.customId === "confirm") {
-                            await collected.update({ content: "Continuing...", components: [] });
-                        } else {
-                            return await collected.update({ content: "Command canceled", components: [] });
-                        }
-                    } catch (err) {
-                        return await interaction.editReply({ content: "Command canceled", components: [] });
-                    }
-                    
+                    if (state !== "confirm") return;
                 } else await interaction.deferReply();
 
                 const browser = await puppeteer.launch({ args: ["--no-sandbox"] });
@@ -262,56 +257,50 @@ export default new Command<"chatInput">({
                 const roles = [...member.roles.cache.keys()];
                 
                 if (member.roles.cache.has(roleId)) {
-                    (await interaction.reply({
-                        embeds: [new EmbedBuilder()
+                    await collectAck({
+                        interaction,
+                        payload: { embeds: [new EmbedBuilder()
                             .setDescription(`This user already has the <@&${roleId}> role, do you want to remove it from them?`)
                             .setColor(interaction.client.config.EMBED_COLOR)
-                        ],
-                        fetchReply: true,
-                        components: ACK_BUTTONS
-                    })).createMessageComponentCollector({
-                        filter: x => x.user.id === interaction.user.id,
-                        max: 1,
-                        time: 30_000,
-                        componentType: ComponentType.Button
-                    }).on("collect", async int => {
-                        if (int.customId === "cancel") {
-                            return await int.update({
+                        ] },
+                        async confirm(int) {
+                            if (roleName !== "trustedFarmer") {
+                                const slicedNick = {
+                                    mpFarmManager: "MP Farm Manager",
+                                    mpJrAdmin: "MP Jr. Admin",
+                                    mpSrAdmin: "MP Sr. Admin"
+                                }[roleName];
+    
+                                await member.edit({
+                                    roles: roles
+                                        .filter(x => x !== roleId && x !== mainRoles.mpStaff)
+                                        .concat([mainRoles.formerStaff, mainRoles.trustedFarmer]),
+                                    nick: member.nickname!.replace(slicedNick, "Former Staff")
+                                });
+                            } else await member.roles.remove(roleId);
+    
+                            await int.update({
+                                embeds: [new EmbedBuilder()
+                                    .setDescription(`${member} has been removed from <@&${roleId}>.`)
+                                    .setColor(interaction.client.config.EMBED_COLOR)
+                                ],
+                                components: []
+                            });
+    
+                            await interaction.client.users.send(
+                                interaction.guild.ownerId,
+                                `**${interaction.user.tag}** has demoted **${member.user.tag}** from **${interaction.client.getRole(roleName).name}**`
+                            );
+                        },
+                        async cancel(int) {
+                            await int.update({
                                 embeds: [new EmbedBuilder()
                                     .setDescription("Command canceled")
                                     .setColor(interaction.client.config.EMBED_COLOR)
                                 ],
                                 components: []
                             });
-                        }
-
-                        if (roleName !== "trustedFarmer") {
-                            const slicedNick = {
-                                mpFarmManager: "MP Farm Manager",
-                                mpJrAdmin: "MP Jr. Admin",
-                                mpSrAdmin: "MP Sr. Admin"
-                            }[roleName];
-
-                            await member.edit({
-                                roles: roles
-                                    .filter(x => x !== roleId && x !== mainRoles.mpStaff)
-                                    .concat([mainRoles.formerStaff, mainRoles.trustedFarmer]),
-                                nick: member.nickname!.replace(slicedNick, "Former Staff")
-                            });
-                        } else await member.roles.remove(roleId);
-
-                        await int.update({
-                            embeds: [new EmbedBuilder()
-                                .setDescription(`${member} has been removed from <@&${roleId}>.`)
-                                .setColor(interaction.client.config.EMBED_COLOR)
-                            ],
-                            components: []
-                        });
-
-                        await interaction.client.users.send(
-                            interaction.guild.ownerId,
-                            `**${interaction.user.tag}** has demoted **${member.user.tag}** from **${interaction.client.getRole(roleName).name}**`
-                        );
+                        },
                     });
                 } else {
                     const newNickname = ({

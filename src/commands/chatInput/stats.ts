@@ -50,24 +50,33 @@ export default new Command<"chatInput">({
 
             const embed = new EmbedBuilder().setColor(interaction.client.config.EMBED_COLOR);
             const failedFooter: string[] = [];
-            const totalCount: number[] = [];
+            const totalUsedCount: number[] = [];
             const watchList = await interaction.client.watchList.data.find();
 
             await Promise.allSettled(fsServers.entries().map(async ([serverAcro, server]) => {
                 const serverAcroUp = serverAcro.toUpperCase();
-                const dss = await fetch(
-                    server.url + Feeds.dedicatedServerStats(server.code, DSSExtension.JSON),
-                    formatRequestInit(4_000, "StatsAll")
-                )
-                    .then(res => res.json() as Promise<DSSResponse>)
-                    .catch(() => {
-                        log("Red", `Stats all; ${serverAcroUp} failed`);
-                        failedFooter.push(`Failed to fetch ${serverAcroUp}`);
-                    });
-                
-                if (!dss || !dss.slots || !dss.slots.used) return;
+                let dss: DSSResponse;
 
-                totalCount.push(dss.slots.used);
+                try {
+                    const res = await fetch(
+                        server.url + Feeds.dedicatedServerStats(server.code, DSSExtension.JSON),
+                        formatRequestInit(4_000, "StatsAll")
+                    );
+
+                    dss = await res.json();
+                } catch (err) {
+                    log("Red", `Stats all ${serverAcroUp};`, err);
+
+                    return void failedFooter.push(`Failed to fetch ${serverAcroUp}`);
+                }
+
+                if (!dss.slots) return;
+
+                if (!dss.server.name) return void failedFooter.push(`${serverAcroUp} offline`);
+
+                if (!dss.slots.used) return;
+
+                totalUsedCount.push(dss.slots.used);
                 
                 const playerInfo: string[] = [];
                 const serverSlots = `${dss.slots.used}/${dss.slots.capacity}`;
@@ -88,19 +97,18 @@ export default new Command<"chatInput">({
             }));
 
             embed
-                .setTitle(`All Servers: ${totalCount.reduce((a, b) => a + b, 0)} players online`)
+                .setTitle(`All Servers: ${totalUsedCount.reduce((a, b) => a + b, 0)} players online`)
                 .setFooter(failedFooter.length ? { text: failedFooter.join(", ") } : null);
 
             await interaction.editReply({ embeds: [embed] });
         } else if (subCmd === "playertimes") {
-            const { getTimeData } = interaction.client.playerTimes;
+            const { getTimeData, doc } = interaction.client.playerTimes;
             const playersData = await interaction.client.playerTimes.data.find();
-            const sortedData = playersData.sort((a, b) => 
+            const sortedPlayersData = playersData.sort((a, b) => 
                 getTimeData(b).reduce((x, y) => x + y[1].time, 0) - getTimeData(a).reduce((x, y) => x + y[1].time, 0)
             );
             const player = interaction.options.getString("name");
-
-            const leaderboard = (data: (typeof interaction.client.playerTimes.doc)[], isFirstField: boolean) => data.map((playerData, i) => [
+            const leaderboard = (data: (typeof doc)[], isFirstField: boolean) => data.map((playerData, i) => [
                 `**${i + (isFirstField ? 1 : 26)}.** \`${playerData._id}\``,
                 interaction.client.fmList.cache.includes(playerData._id) ? FM_ICON : "",
                 interaction.client.tfList.cache.includes(playerData._id) ? TF_ICON : "",
@@ -113,8 +121,8 @@ export default new Command<"chatInput">({
                     .setColor(interaction.client.config.EMBED_COLOR)
                     .setDescription(`Top 50 players with the most time spent on IRTGaming FS22 servers since ${interaction.client.config.PLAYERTIMES_START_DATE}`)
                     .addFields(
-                        { name: "\u200b", value: leaderboard(sortedData.slice(0, 25), true), inline: true },
-                        { name: "\u200b", value: leaderboard(sortedData.slice(25, 50), false) + "\u200b", inline: true })
+                        { name: "\u200b", value: leaderboard(sortedPlayersData.slice(0, 25), true), inline: true },
+                        { name: "\u200b", value: leaderboard(sortedPlayersData.slice(25, 50), false) + "\u200b", inline: true })
                 ] });
             }
 
@@ -123,9 +131,7 @@ export default new Command<"chatInput">({
             if (!playerData) return await interaction.reply(`No data found with that name. [Find out why.](${interaction.client.config.resources.statsNoDataRedirect})`);
 
             const fsKeys = fsServers.keys();
-            const playerTimeData = interaction.client.playerTimes
-                .getTimeData(playerData)
-                .sort((a, b) => fsKeys.indexOf(a[0]) - fsKeys.indexOf(b[0]));
+            const playerTimeData = getTimeData(playerData).sort((a, b) => fsKeys.indexOf(a[0]) - fsKeys.indexOf(b[0]));
             const playerTimeDataTotal = playerTimeData.reduce((x, y) => x + y[1].time, 0);
             const formattedTimeData = playerTimeData
                 .filter(x => interaction.client.fsCache[x[0]])
@@ -141,7 +147,7 @@ export default new Command<"chatInput">({
                 .setColor(interaction.client.config.EMBED_COLOR)
                 .setTitle([
                     `Player - \`${playerData._id}\`${interaction.client.fmList.cache.includes(playerData._id) ? FM_ICON : ""}${interaction.client.tfList.cache.includes(playerData._id) ? TF_ICON : ""}`,
-                    `Leaderboard position - **#${sortedData.indexOf(playerData) + 1}**`,
+                    `Leaderboard position - **#${sortedPlayersData.indexOf(playerData) + 1}**`,
                     `Total time - **${formatTime(playerTimeDataTotal * 60 * 1000, 5, { commas: true })}**`,
                     (isMPStaff(interaction.member) && playerData.uuid) ? `UUID: \`${playerData.uuid}\`` : "",
                     (isMPStaff(interaction.member) && playerData.discordid) ? `Discord user ID - \`${playerData.discordid}\`` : "",

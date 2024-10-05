@@ -4,15 +4,16 @@ import { ADMIN_ICON, FM_ICON, TF_ICON, WL_ICON, log } from "#util";
 
 export async function fsLoopAll(client: TClient, watchList: TClient["watchList"]["doc"][]) {
     const embed = new EmbedBuilder().setColor(client.config.EMBED_COLOR);
-    const pausedStatuses: (boolean | null)[] = [];
+    const throttleList: (boolean | null)[] = [];
     const totalCount: number[] = [];
+    const footerText: string[] = [];
 
     for (const [serverAcro, server] of Object.entries(client.fsCache)) {
         const playerInfo: string[] = [];
         const serverSlots = server.players.length;
 
         totalCount.push(serverSlots);
-        pausedStatuses.push(server.throttled);
+        throttleList.push(server.throttled);
 
         for (const player of server.players) {
             const playTimeHrs = Math.floor(player.uptime / 60);
@@ -28,10 +29,14 @@ export async function fsLoopAll(client: TClient, watchList: TClient["watchList"]
         }
         
         if (playerInfo.length) embed.addFields({ name: `${serverAcro.toUpperCase()} - ${serverSlots}/16`, value: playerInfo.join("\n") });
+
+        if (server.state === 0) footerText.push(`${serverAcro} offline`);
     }
 
-    // Throttle message updating if no changes in cached data
-    if (pausedStatuses.every(x => x)) return;
+    // Throttle message updating if no changes in API data on any servers
+    if (throttleList.every(x => x)) return;
+
+    if (footerText.length) embed.setFooter({ text: footerText.join(", ") });
 
     await client.getChan("juniorAdminChat").messages.edit(client.config.mainServer.fsLoopMsgId, {
         content: `\`\`\`js\n["${client.whitelist.cache.join(", ")}"]\`\`\`Updates every 30 seconds`,

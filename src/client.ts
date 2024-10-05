@@ -59,6 +59,12 @@ export default class TClient extends Client<true> {
                 GuildMessageManager: 500,
                 DMMessageManager: 0
             }),
+            sweepers: {
+                messages: {
+                    interval: 10_800, // 3 hours
+                    filter: () => msg => msg.author.bot && msg.createdTimestamp < Date.now() - 900_000 // 15 minutes
+                }
+            },
             allowedMentions: {
                 repliedUser: false,
                 parse: [

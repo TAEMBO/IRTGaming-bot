@@ -14,7 +14,7 @@ export * from "./isMPStaff.js";
 export * from "./jsonFromXML.js";
 export * from "./log.js";
 export * from "./logColor.js";
-export * from "./onMFFarms.js";
+export * from "./onPrivateFarms.js";
 export * from "./punish.js";
 export * from "./stringifyStream.js";
 export * from "./tempReply.js";

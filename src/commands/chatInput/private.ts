@@ -8,12 +8,11 @@ import {
     roleMention
 } from "discord.js";
 import { Command } from "#structures";
-import { collectAck, fsServers, onMFFarms, youNeedRole } from "#util";
+import { collectAck, fsServers, onPrivateFarms, youNeedRole } from "#util";
 
 export default new Command<"chatInput">({
     async autocomplete(interaction) {
-        const { commandName } = interaction;
-        const serverAcro = commandName + interaction.options.getSubcommandGroup(true);
+        const serverAcro = interaction.options.getSubcommandGroup(true);
         const serverObj = fsServers.getPrivateOne(serverAcro);
         const farmRoles = Object.values(serverObj.roles.farms).map(x => interaction.client.mainGuild().roles.cache.get(x)!);
 
@@ -22,7 +21,7 @@ export default new Command<"chatInput">({
                 const displayedRoles = interaction.member.roles.cache.hasAny(...serverObj.managerRoles)
                     ? farmRoles
                     : interaction.member.roles.cache.has(serverObj.roles.farmOwner)
-                        ? farmRoles.filter(x => onMFFarms(interaction.member, serverAcro).some(y => x.id === y))
+                        ? farmRoles.filter(x => onPrivateFarms(interaction.member, serverAcro).some(y => x.id === y))
                         : [];
 
                 await interaction.respond(displayedRoles.map(({ name, id }) => ({ name, value: id })));
@@ -41,7 +40,7 @@ export default new Command<"chatInput">({
             case "rename-channel": {
                 if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return await interaction.respond([]);
 
-                const regExp = new RegExp(`${commandName}\\d`);
+                const regExp = new RegExp(`${serverAcro}\\d`);
                 const activeFarmChannels = interaction.client.mainGuild()
                     .channels.cache
                     .filter(x => regExp.test(x.name) && x.parentId === serverObj.category);
@@ -63,7 +62,7 @@ export default new Command<"chatInput">({
             case "archive": {
                 if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return await interaction.respond([]);
 
-                const regExp = new RegExp(`${commandName}\\d`);
+                const regExp = new RegExp(`${serverAcro}\\d`);
                 const activeFarmChannels = interaction.client.mainGuild()
                     .channels.cache
                     .filter(x => regExp.test(x.name) && x.parentId === serverObj.category);
@@ -85,8 +84,7 @@ export default new Command<"chatInput">({
         }
     },
     async run(interaction) {
-        const { commandName } = interaction;
-        const serverAcro = commandName + interaction.options.getSubcommandGroup(true);
+        const serverAcro = interaction.options.getSubcommandGroup(true);
         const serverObj = fsServers.getPrivateOne(serverAcro);
 
         switch (interaction.options.getSubcommand()) {
@@ -100,7 +98,9 @@ export default new Command<"chatInput">({
                 const roleId = interaction.options.getString("role", true);
                 const validFarmIds = Object.values(serverObj.roles.farms);
 
-                if (!validFarmIds.includes(roleId)) return await interaction.reply("You need to select a valid MF Farm role from the list provided!");
+                if (!validFarmIds.includes(roleId)) {
+                    return interaction.reply(`You need to select a valid ${serverAcro.toUpperCase()} Farm role from the list provided!`);
+                }
 
                 if (!member) return await interaction.reply({ content: "You need to select a member that's in this server", ephemeral: true });
 
@@ -122,7 +122,7 @@ export default new Command<"chatInput">({
                         .setColor(interaction.client.config.EMBED_COLOR)
                     ] },
                     async confirm(int) {
-                        const rolesToRemove = onMFFarms(member, serverAcro).length === 1
+                        const rolesToRemove = onPrivateFarms(member, serverAcro).length === 1
                             ? [roleId, serverObj.roles.member]
                             : [roleId];
 
@@ -211,7 +211,9 @@ export default new Command<"chatInput">({
                 const roleId = interaction.options.getString("role", true);
                 const isValidRole = Object.values(serverObj.roles.farms).includes(roleId);
 
-                if (!isValidRole) return await interaction.reply("You need to select a valid MF Farm role from the list provided!");
+                if (!isValidRole) {
+                    return interaction.reply(`You need to select a valid ${serverAcro.toUpperCase()} Farm role from the list provided!`);
+                }
 
                 const role = interaction.client.mainGuild().roles.cache.get(roleId)!;
                 const name = interaction.options.getString("name", false);
@@ -229,7 +231,9 @@ export default new Command<"chatInput">({
                 const channelId = interaction.options.getString("channel", true);
                 const channel = interaction.client.channels.cache.get(channelId) as TextChannel | undefined;
 
-                if (!channel || !new RegExp(serverAcro).test(channel.name)) return await interaction.reply("You need to select a channel from the list provided!");
+                if (!channel || !new RegExp(serverAcro).test(channel.name)) {
+                    return interaction.reply("You need to select a channel from the list provided!");
+                }
 
                 const farmNumber = channel.name.match(/\d/)![0];
                 const role = interaction.client.mainGuild().roles.cache.get(serverObj.roles.farms[farmNumber])!;
@@ -247,7 +251,9 @@ export default new Command<"chatInput">({
                 const channelId = interaction.options.getString("channel", true);
                 const channel = interaction.client.channels.cache.get(channelId) as TextChannel | undefined;
 
-                if (!channel || !new RegExp(serverAcro).test(channel.name)) return await interaction.reply("You need to select a channel from the list provided!");
+                if (!channel || !new RegExp(serverAcro).test(channel.name)) {
+                    return interaction.reply("You need to select a channel from the list provided!");
+                }
 
                 const { archived } = interaction.client.config.mainServer.categories;
                 const channelisActive = channel.parentId === serverObj.category;
@@ -308,17 +314,17 @@ export default new Command<"chatInput">({
         }
     },
     data: {
-        name: "mf",
-        description: "MF management",
+        name: "private",
+        description: "Private server management",
         options: fsServers.getPrivateAll().map(([serverAcro, server]) => ({
             type: ApplicationCommandOptionType.SubcommandGroup,
-            name: serverAcro.replace("mf", ""),
+            name: serverAcro,
             description: `${server.fullName} management`,
             options: [
                 {
                     type: ApplicationCommandOptionType.Subcommand,
                     name: "member",
-                    description: "Manage MF farm members",
+                    description: `Manage ${serverAcro.toUpperCase()} farm members`,
                     options: [
                         {
                             type: ApplicationCommandOptionType.User,
@@ -338,12 +344,12 @@ export default new Command<"chatInput">({
                 {
                     type: ApplicationCommandOptionType.Subcommand,
                     name: "owner",
-                    description: "Manage MF farm owners",
+                    description: `Manage ${serverAcro.toUpperCase()} farm owners`,
                     options: [
                         {
                             type: ApplicationCommandOptionType.User,
                             name: "member",
-                            description: "The member to add or remove the MF Farm Owner role from",
+                            description: `The member to add or remove the ${serverAcro.toUpperCase()} Farm Owner role from`,
                             required: true
                         }
                     ]
@@ -351,7 +357,7 @@ export default new Command<"chatInput">({
                 {
                     type: ApplicationCommandOptionType.Subcommand,
                     name: "rename-role",
-                    description: "Rename a given MF Farm role",
+                    description: `Rename a given ${serverAcro.toUpperCase()} Farm role`,
                     options: [
                         {
                             type: ApplicationCommandOptionType.String,
@@ -365,7 +371,7 @@ export default new Command<"chatInput">({
                 {
                     type: ApplicationCommandOptionType.Subcommand,
                     name: "rename-channel",
-                    description: "Update the name of a given MF Farm channel",
+                    description: `Update the name of a given ${serverAcro.toUpperCase()} Farm channel`,
                     options: [
                         {
                             type: ApplicationCommandOptionType.String,
@@ -379,12 +385,12 @@ export default new Command<"chatInput">({
                 {
                     type: ApplicationCommandOptionType.Subcommand,
                     name: "archive",
-                    description: "Manage archivement of MF Farm channels",
+                    description: `Manage archivement of ${serverAcro.toUpperCase()} Farm channels`,
                     options: [
                         {
                             type: ApplicationCommandOptionType.String,
                             name: "channel",
-                            description: "The MF Farm channel to manage archivement of",
+                            description: `The ${serverAcro.toUpperCase()} Farm channel to manage archivement of`,
                             autocomplete: true,
                             required: true
                         }
@@ -393,7 +399,7 @@ export default new Command<"chatInput">({
                 {
                     type: ApplicationCommandOptionType.Subcommand,
                     name: "apply",
-                    description: "Send the Google Form to apply to be an MF Farm Owner"
+                    description: `Send the Google Form to apply to be an ${serverAcro.toUpperCase()} Farm Owner`
                 }
             ]
         }))

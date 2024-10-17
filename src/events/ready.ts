@@ -54,7 +54,7 @@ export default new Event({
         cron.schedule("0 0 * * *", async (date) => {
             if (typeof date === "string") return;
 
-            const formattedDate = Math.floor((Date.now() - client.config.DAILY_MSGS_TIMESTAMP) / 1000 / 60 / 60 / 24);
+            const formattedDate = Math.floor((date.getTime() - client.config.DAILY_MSGS_TIMESTAMP) / 1000 / 60 / 60 / 24);
             const day = date.getDay();
             const channel = client.getChan("general");
             const yesterday = await client.dailyMsgs.data.findById(formattedDate - 1) ?? { _id: formattedDate - 1, count: 0 };

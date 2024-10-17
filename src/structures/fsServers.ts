@@ -1,9 +1,9 @@
 import config from "#config" assert { type: "json" };
-import type { Config, FSServer, FSServerPrivate, FSServerPublic, Prettify } from "#typings";
+import type { FSServer, FSServerPrivate, FSServerPublic } from "#typings";
 
 /** A manager for object data for all Farming Simulator servers */
 export class FSServers {
-    public constructor(public data: Config["fs"] | typeof config.fs) { }
+    public constructor(public data: typeof config.fs) { }
 
     /**
      * @returns An array of server acronyms
@@ -30,7 +30,7 @@ export class FSServers {
      * @returns An array of entries of all public servers
      */
     public getPublicAll() {
-        return this.entries().filter(x => !x[1].isPrivate) as [string, Prettify<FSServerPublic>][];
+        return this.entries().filter((x): x is [string, FSServerPublic] => !x[1].isPrivate);
     }
     
     /**
@@ -45,14 +45,18 @@ export class FSServers {
      * @returns An entry of a public server
      */
     public getPublicOne(serverAcro: string) {
-        return this.entries().find(x => x[0] === serverAcro)?.[1] as Prettify<FSServerPublic>;
+        const server = this.getPublicAll().find(x => x[0] === serverAcro);
+
+        if (!server) throw new Error(`Public FS server entry not found: ${serverAcro}`);
+
+        return server[1];
     }
 
     /**
      * @returns An array of entries of all private servers
      */
     public getPrivateAll() {
-        return this.entries().filter(x => x[1].isPrivate) as [string, Prettify<FSServerPrivate>][];
+        return this.entries().filter((x): x is [string, FSServerPrivate] => x[1].isPrivate);
     }
 
     /**
@@ -67,6 +71,10 @@ export class FSServers {
      * @returns An entry of a private server
      */
     public getPrivateOne(serverAcro: string) {
-        return this.entries().find(x => x[0] === serverAcro)?.[1] as Prettify<FSServerPrivate>;
+        const server = this.getPrivateAll().find(x => x[0] === serverAcro);
+
+        if (!server) throw new Error(`Private FS server data not found: ${serverAcro}`);
+
+        return server[1];
     }
 }

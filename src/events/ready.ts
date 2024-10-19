@@ -54,8 +54,10 @@ export default new Event({
         cron.schedule("0 0 * * *", async (date) => {
             if (typeof date === "string") return;
 
-            const formattedDate = Math.floor((Date.now() - client.config.DAILY_MSGS_TIMESTAMP) / 1000 / 60 / 60 / 24);
-            const day = date.getDay();
+            date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+
+            const formattedDate = Math.floor((date.getTime() - client.config.DAILY_MSGS_TIMESTAMP) / 1_000 / 60 / 60 / 24);
+            const day = date.getUTCDay();
             const channel = client.getChan("general");
             const yesterday = await client.dailyMsgs.data.findById(formattedDate - 1) ?? { _id: formattedDate - 1, count: 0 };
             let total = (await client.userLevels.data.find()).reduce((a, b) => a + b.messages, 0); // sum of all users
@@ -66,6 +68,7 @@ export default new Event({
                 _id: formattedDate,
                 count: total
             });
+
             log("Cyan", `Pushed { ${formattedDate}, ${total} } to dailyMsgs`);
 
             if (!client.config.toggles.autoResponses) return;
@@ -75,7 +78,7 @@ export default new Event({
             } else if (day === 1) {
                 await channel.send(client.config.DAILY_MSGS_MONDAY);
             } else await channel.send(client.config.DAILY_MSGS_DEFAULT);
-        }, { timezone: "UCT" });
+        }, { timezone: "UTC" });
 
         // Farming Simulator stats loop
         if (client.config.toggles.fsLoop) setInterval(async () => {

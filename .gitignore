@@ -4,10 +4,6 @@ node_modules
 
 config.json
 
-databases
-
 dist
-
-gw.js
 
 .DS_Store

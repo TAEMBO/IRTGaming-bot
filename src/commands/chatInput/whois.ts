@@ -152,30 +152,23 @@ export default new Command<"chatInput">({
                     ].join(""))
                 );
             } else {
-                const formatImgURL = (type: "assets" | "icons", path: string | null | undefined) => {
-                    return `https://cdn.discordapp.com/app-${type}/${activity.applicationId}/${path}.png`;
-                };
-
                 const activityImages: Record<string, string> = {
-                    "1129504162200166401": formatImgURL("icons", "469676e3ad37898c0289283c30c2c882"), // Farming Simulator 22
-                    "542474758835535872": formatImgURL("icons", "37b18c2d5633628d936dd3b2b083785b"), // Farming Simulator 19
-                    "363426921612181504": formatImgURL("icons", "61bed87d2da8e32dd8f24423a9e83323"), // Farming Simulator 17
-                    "451556128992657418": formatImgURL("icons", "48cfba535d49560a086fe55de2e2743b"), // Farming Simulator 15
-                    "732565262704050298": formatImgURL("assets", activity.assets?.largeImage), // Visual Studio Code
-                    "383226320970055681": formatImgURL("assets", activity.assets?.largeImage), // Visual Studio Code
-                    "356875570916753438": formatImgURL("icons", "166fbad351ecdd02d11a3b464748f66b"), // Minecraft
-                    "438122941302046720": "https://discord.com/assets/29b4af8bf13fa73258692008d25b4f0d.png", // Xbox
-                    "356876176465199104": formatImgURL("icons", "069d9f4871b5ebd2f62bd342ce6ba77f"), // Grand Theft Auto V
-                    "363445589247131668": formatImgURL("icons", "f2b60e350a2097289b3b0b877495e55f"), // Roblox
-                    "356876590342340608": formatImgURL("icons", "554af7ef210877b5f04fd1b727a3746e"), // Rainbow Six Siege
-                    "445956193924546560": formatImgURL("assets", activity.assets?.largeImage), // Rainbow Six Siege
-                    "432980957394370572": formatImgURL("assets", activity.assets?.largeImage) // Fortnite
+                    "1129504162200166401": "469676e3ad37898c0289283c30c2c882", // Farming Simulator 22
+                    "542474758835535872": "37b18c2d5633628d936dd3b2b083785b", // Farming Simulator 19
+                    "363426921612181504": "61bed87d2da8e32dd8f24423a9e83323", // Farming Simulator 17
+                    "451556128992657418": "48cfba535d49560a086fe55de2e2743b", // Farming Simulator 15
+                    "356875570916753438": "166fbad351ecdd02d11a3b464748f66b", // Minecraft
+                    "356876176465199104": "069d9f4871b5ebd2f62bd342ce6ba77f", // Grand Theft Auto V
+                    "363445589247131668": "f2b60e350a2097289b3b0b877495e55f", // Roblox
+                    "356876590342340608": "554af7ef210877b5f04fd1b727a3746e", // Rainbow Six Siege
+                    "432980957394370572": "c1864b38910c209afd5bf6423b672022", // Fortnite
                 };
 
                 let activityImage: string | null | undefined = activityImages[activity.applicationId ?? ""] as string | undefined;
+
+                if (activityImage) activityImage = `https://cdn.discordapp.com/app-icons/${activity.applicationId}/${activityImage}`;
                 
-                if (!activityImage) activityImage = activity.assets?.largeImageURL(); // PlayStation
-                if (!activityImage) activityImage = activity.assets?.smallImageURL(); // Residual images
+                if (!activityImage) activityImage = activity.assets?.largeImageURL() ?? activity.assets?.smallImageURL();
 
                 embeds.push(new EmbedBuilder()
                     .setTitle(activity.name)

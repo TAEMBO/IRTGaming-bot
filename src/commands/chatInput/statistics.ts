@@ -12,7 +12,7 @@ export default new Command<"chatInput">({
             "No commands have been used yet.\n"
             + `Uptime: ${formatTime(interaction.client.uptime, 2, { commas: true, longNames: true })}`
         );
-        
+
         const nameLength = Math.max(...includedCommands.map(x => x.data.name.length), colunms[0].length) + 2;
         const amountLength = Math.max(...includedCommands.map(x => x.uses.toString().length), colunms[1].length) + 1;
         const rows = [
@@ -34,7 +34,7 @@ export default new Command<"chatInput">({
                 + `Total amount of commands used since last restart: **${interaction.client.chatInputCommands.reduce((a, b) => a + b.uses, 0)}**`
             )
             .setColor(interaction.client.config.EMBED_COLOR);
-            
+
         if (rows.join("").length > 1024) {
             let fieldValue = "";
 
@@ -54,13 +54,13 @@ export default new Command<"chatInput">({
             os.freemem()
         ].map(bytes => {
             if (!bytes) return "0 Bytes";
-        
+
             const sizes = ["Bytes", "KB", "MB", "GB"];
             const i = Math.floor(Math.log(bytes) / Math.log(1_000));
-        
+
             return (bytes / Math.pow(1_000, i)).toFixed(1) + " " + sizes[i];
         }).join("**/**");
-        
+
         embed.addFields({
             name: "Misc. Stats",
             value: [
@@ -71,7 +71,7 @@ export default new Command<"chatInput">({
                 `**Host Uptime:** ${formatTime((os.uptime() * 1000), 2, { commas: true, longNames: true })}`
             ].join("\n")
         });
-        
+
         await interaction.reply({ embeds: [embed] });
     },
     data: {

@@ -29,7 +29,7 @@ export class Punishments extends BaseSchema<typeof model> {
     public setExec(_id: number, timeout: number) {
         setTimeout(async () => {
             if (timeout > 2_147_483_647) return this.setExec(_id, timeout - 2_147_483_647);
-            
+
             const punishment = await this.data.findById(_id);
 
             if (!punishment || punishment.expired) return;
@@ -56,13 +56,13 @@ export class Punishments extends BaseSchema<typeof model> {
             { name: "🔹 Duration", value: formatTime(punishment.duration, 100), inline: true },
             { name: "\u200b", value: "\u200b", inline: true }
         );
-        
+
         if (punishment.cancels) {
             const cancels = await this.data.findById(punishment.cancels);
 
             embed.addFields({ name: "🔹 Overwrites", value: `This case overwrites Case #${cancels?._id} \`${cancels?.reason}\`` });
         }
-    
+
         await this._client.getChan("staffReports").send({ embeds: [embed] });
     }
 
@@ -108,12 +108,12 @@ export class Punishments extends BaseSchema<typeof model> {
         switch (type) {
             case "ban": {
                 const isBanned = await guild.bans.fetch(user).catch(() => null);
-                
+
                 if (isBanned) throw new Error("User is already banned!");
-                
+
                 const parsedTime = duration ? ms(duration) : undefined;
                 const dm = await sendDm(parsedTime);
-                
+
                 await guild.bans.create(user, { reason: auditLogReason })
                     .catch(async err => {
                         await dm?.delete();
@@ -125,7 +125,7 @@ export class Punishments extends BaseSchema<typeof model> {
                     caseData.endTime = now + parsedTime;
                     caseData.duration = parsedTime;
                 }
-                    
+
                 break;
             };
             case "softban": {
@@ -155,7 +155,7 @@ export class Punishments extends BaseSchema<typeof model> {
 
                         throw err;
                     });
-                
+
                 break;
             };
             case "detain": {
@@ -173,7 +173,7 @@ export class Punishments extends BaseSchema<typeof model> {
                 if (member.isCommunicationDisabled()) throw new Error("User is already muted!");
 
                 const parsedTime = duration ? ms(duration) : 2_073_600_000;
-                
+
                 if (parsedTime > 2_073_600_000) throw new Error("Cannot mute user for longer than 24 days!");
 
                 await Promise.all([
@@ -192,7 +192,7 @@ export class Punishments extends BaseSchema<typeof model> {
                 break;
             }
         }
-        
+
         const [caseDoc] = await Promise.all([
             this.data.create(caseData),
             this.makeModlogEntry(caseData)

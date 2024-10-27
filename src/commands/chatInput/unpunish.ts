@@ -13,7 +13,7 @@ export default new Command<"chatInput">({
         if (!["warn", "mute"].includes(punishment.type) && hasRole(interaction.member, "discordHelper")) return await youNeedRole(interaction, "discordModerator");
 
         await interaction.deferReply();
-        
+
         let caseDoc;
 
         try {

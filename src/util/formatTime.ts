@@ -1,5 +1,4 @@
 /**
- * 
  * @param integer The integer in milliseconds to format
  * @param accuracy The number of layers of accuracy to be presented in the return, e.g. `1` for "1h" or `2` for "1h, 1m"
  * @param options `longNames` - whether to display amounts as compact or not, e.g. (`s`) or (`seconds`). `commas` - Whether to space each amount with a comma or not
@@ -49,6 +48,6 @@ export function formatTime(integer: number, accuracy = 1, options: { longNames?:
             text = textArr.join("");
         }
     }
-    
+
     return text.trim();
 }

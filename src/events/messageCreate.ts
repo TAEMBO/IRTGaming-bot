@@ -22,39 +22,39 @@ export default new Event({
             || !message.inGuild()
         ) return;
         // Bot is set to ignore commands and non-dev sent a message, ignore the message
-    
+
         const msg = message.content.replaceAll("\n", " ").toLowerCase();
         let automodded = false;
-    
+
         // Misuse of staff ping
         if (message.mentions.roles.has(message.client.config.mainServer.roles.mpStaff)) {
             log("Purple", `${message.author.tag} mentioned staff role`);
-            
+
             message.channel.createMessageCollector({
                 filter: x => isMPStaff(x.member) && x.content === "y",
                 max: 1,
                 time: 60_000
             }).on("collect", async collected => {
                 log("Purple", `Received "y" from ${collected.author.tag}, indicating to mute`);
-    
+
                 await message.client.punishments.addPunishment("mute", collected.author.id, "Automod; Misuse of staff ping", message.author, "10m")
                     .catch(err => log("Red", "Failed to add punishment", err));
-                    
+
                 await collected.react("✅");
             });
         }
-    
+
         // RepeatedMessages
         const isWhitelisted = message.client.config.whitelist.bannedWords.some(x => [message.channelId, message.channel.parentId].includes(x));
         const possibleInvite = message.content.split(" ").find(x => x.includes("discord.gg/"));
-    
+
         if (message.client.config.toggles.automod && !isDCStaff(message.member) && !isWhitelisted) {
             if (hasProfanity(msg, message.client.bannedWords.cache)) {
                 automodded = true;
-    
+
                 await tempReply(message, { timeout: 10_000, content: "That word is banned here" });
                 await message.delete();
-    
+
                 await message.client.repeatedMessages.increment(message, {
                     thresholdTime: 30_000,
                     thresholdAmt: 4,
@@ -64,13 +64,13 @@ export default new Event({
                 });
             } else if (possibleInvite && !isMPStaff(message.member)) {
                 const validInvite = await message.client.fetchInvite(possibleInvite).catch(() => null);
-    
+
                 if (validInvite && validInvite.guild?.id !== message.client.config.mainServer.id) {
                     automodded = true;
-    
+
                     await tempReply(message, { timeout: 10_000, content: "No advertising other Discord servers" });
                     await message.delete();
-    
+
                     await message.client.repeatedMessages.increment(message, {
                         thresholdTime: 60_000,
                         thresholdAmt: 2,
@@ -89,7 +89,7 @@ export default new Event({
                 });
             }
         }
-    
+
         // Community idea message management
         if (
             message.channelId === message.client.config.mainServer.channels.communityIdeas
@@ -102,15 +102,15 @@ export default new Event({
             });
             await message.delete();
         }
-    
+
         if (automodded) return;
 
         if (message.channelId !== message.client.config.mainServer.channels.spamZone) {
             await message.client.userLevels.incrementUser(message.author.id);
         }
-        
+
         if (!message.client.config.toggles.autoResponses) return;
-    
+
         // MF mod voting
         if (
             fsServers.getPrivateAll().some(x => x[1].modSuggestions === message.channelId)
@@ -119,7 +119,7 @@ export default new Event({
             await message.react("764965325342244915");
             await message.react("764965659423408148");
         }
-    
+
         // Morning message system
         if (
             ["morning all", "morning everyone", "morning guys", "morning people"].some(x => msg.includes(x))
@@ -182,7 +182,7 @@ export default new Event({
                 "Please be sure to put on matching socks!",
                 "Apple for you 🍎"
             ];
-    
+
             await message.reply(`${randomEl(mornRes1)} ${displayName}! ${randomEl(mornRes2)}`);
         }
     }

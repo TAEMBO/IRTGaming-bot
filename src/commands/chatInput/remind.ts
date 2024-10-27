@@ -54,7 +54,7 @@ export default new Command<"chatInput">({
             case "create": {
                 const reminderText = interaction.options.getString("what", true);
                 const reminderTime = ms(interaction.options.getString("when", true)) as number | undefined;
-                
+
                 if (!reminderTime) return await interaction.reply({
                     ephemeral: true,
                     embeds: [new EmbedBuilder()
@@ -109,7 +109,7 @@ export default new Command<"chatInput">({
                             time: timeToRemind,
                             ch: interaction.channelId
                         });
-    
+
                         interaction.client.reminders.setExec(reminder._id, timeToRemind - Date.now());
 
                         await int.update({
@@ -151,7 +151,7 @@ export default new Command<"chatInput">({
                     const index = (i + 1).toString();
 
                     selectMenu.addOptions({ label: `#${index}`, value: index });
-                    
+
                     embed.addFields({
                         name: `#${index}`,
                         value: [
@@ -167,7 +167,7 @@ export default new Command<"chatInput">({
                     components: [new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selectMenu)],
                     fetchReply: true
                 });
-                
+
                 msg.createMessageComponentCollector({
                     filter: x => x.user.id === interaction.user.id,
                     max: 1,

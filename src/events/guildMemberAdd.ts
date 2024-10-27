@@ -12,9 +12,9 @@ export default new Event({
             member.roles.add(member.client.config.mainServer.roles.member).catch(() => log("Red", `Failed to add member role to ${member.id}`))
         ]);
         const usedInvite = newInvites.find(inv => (member.client.inviteCache.get(inv.code)?.uses ?? 0) < (inv.uses ?? 0));
-    
+
         for (const [code, inv] of newInvites) member.client.inviteCache.set(code, { uses: inv.uses ?? 0, creator: inv.inviter?.id ?? "UNKNOWN" });
-     
+
         const embed = new EmbedBuilder()
             .setTitle(`Member Joined: ${member.user.tag}`)
             .setDescription(formatUser(member.user))
@@ -22,14 +22,14 @@ export default new Event({
             .setTimestamp()
             .setThumbnail(member.user.displayAvatarURL({ extension: "png", size: 2048 }))
             .setFields({ name: "🔹 Account Created", value: time(member.user.createdAt, "R") });
-    
+
         if (usedInvite) embed.addFields({
             name: "🔹 Invite Data",
             value: `Invite: \`${usedInvite.code}\`\nCreated by: **${usedInvite.inviter?.tag}**`
         });
-    
+
         if (member.client.config.toggles.logs) await member.client.getChan("botLogs").send({ embeds: [embed] });
-    
+
         if (evadingCase) await member.roles.add(member.client.config.mainServer.roles.detained);
     }
 });

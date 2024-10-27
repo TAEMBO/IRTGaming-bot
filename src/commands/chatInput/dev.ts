@@ -40,7 +40,7 @@ export default new structures.Command<"chatInput">({
                     output = await eval(useAsync ? `(async () => { ${code} })()` : code);
                 } catch (err: any) {
                     console.log(err);
-                    
+
                     embed
                         .setColor("#ff0000")
                         .addFields({
@@ -66,7 +66,7 @@ export default new structures.Command<"chatInput">({
                     })
                         .on("collect", int => void int.reply(codeBlock(err.stack.slice(0, 1950))))
                         .on("end", () => void msg.edit({ components: [] }));
-                    
+
                     return;
                 }
 

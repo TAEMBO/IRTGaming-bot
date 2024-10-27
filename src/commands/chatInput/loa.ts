@@ -18,14 +18,14 @@ export default new Command<"chatInput">({
 
             return await interaction.reply({ content: "LOA status set", ephemeral: true });
         }
-        
+
         const returnedRoles = roles
             .filter(x => x !== configRoles.loa)
             .concat(hasRole(interaction.member, "mpManager")
                 ? [configRoles.mpStaff, configRoles.mpManagement]
                 : [configRoles.mpStaff]
             );
-            
+
         await interaction.member.edit({
             roles: returnedRoles,
             nick: interaction.member.nickname!.replaceAll("[LOA] ", "")

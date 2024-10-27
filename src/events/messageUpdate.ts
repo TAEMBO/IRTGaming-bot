@@ -19,15 +19,15 @@ export default new Event({
             || newMessage.author.bot
             || newMessage.client.config.whitelist.logs.some(x => [newMessage.channelId, newMessage.channel.parentId].includes(x))
         ) return;
-        
+
         if (
             hasProfanity(newMessage.content.replaceAll("\n", " ").toLowerCase(), newMessage.client.bannedWords.cache)
             && (!isMPStaff(newMessage.member) && !isDCStaff(newMessage.member))
             && newMessage.client.config.toggles.automod
         ) await newMessage.delete();
-        
+
         if (!newMessage.client.config.toggles.logs) return;
-        
+
         const { oldText, newText } = formatDiff(oldMessage.content, newMessage.content);
 
         await newMessage.client.getChan("botLogs").send({

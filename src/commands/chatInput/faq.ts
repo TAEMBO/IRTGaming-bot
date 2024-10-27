@@ -75,7 +75,7 @@ export default new Command<"chatInput">({
             };
             case "equipment": {
                 await interaction.reply([
-                    content, 
+                    content,
                     "Purchasing new equipment can cause large impacts, including:",
                     "- Increased slot amounts",
                     "- Increased file sizes, causing larger amounts of lag",

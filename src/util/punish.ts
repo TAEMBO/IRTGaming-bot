@@ -1,8 +1,8 @@
-import { EmbedBuilder, type ChatInputCommandInteraction } from "discord.js"; 
+import { EmbedBuilder, type ChatInputCommandInteraction } from "discord.js";
 import { formatString, formatTime, hasRole, youNeedRole } from "#util";
 
 /**
- * @param interaction 
+ * @param interaction The interaction associated with this command
  * @param type The type of punishment this is
  */
 export async function punish(interaction: ChatInputCommandInteraction<"cached">, type: string) {

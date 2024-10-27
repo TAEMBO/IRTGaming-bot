@@ -11,7 +11,7 @@ export default new Event({
         const guild = client.mainGuild();
 
         if (client.config.toggles.debug) setTimeout(() => log("Yellow", "Uptime - 60 seconds"), 60_000);
-    
+
         if (client.config.toggles.registerCommands) {
             const commands = [
                 ...client.chatInputCommands.map(x => {
@@ -43,13 +43,13 @@ export default new Event({
         });
 
         log("Blue", `Bot active as ${client.user.tag}`);
-    
+
         await client.getChan("taesTestingZone").send([
             ":warning: Bot restarted :warning:",
             `<@${client.config.devWhitelist[0]}>`,
             codeBlock("json", JSON.stringify(client.config.toggles, null, 1).slice(1, -1))
         ].join("\n"));
-    
+
         // DailyMsgs schedule
         cron.schedule("0 0 * * *", async (date) => {
             if (typeof date === "string") return;
@@ -61,9 +61,9 @@ export default new Event({
             const channel = client.getChan("general");
             const yesterday = await client.dailyMsgs.data.findById(formattedDate - 1) ?? { _id: formattedDate - 1, count: 0 };
             let total = (await client.userLevels.data.find()).reduce((a, b) => a + b.messages, 0); // sum of all users
-    
+
             if (total < yesterday.count) total = yesterday.count; // messages went down
-    
+
             await client.dailyMsgs.data.create({
                 _id: formattedDate,
                 count: total
@@ -72,7 +72,7 @@ export default new Event({
             log("Cyan", `Pushed { ${formattedDate}, ${total} } to dailyMsgs`);
 
             if (!client.config.toggles.autoResponses) return;
-        
+
             if (day === 6) {
                 await channel.send(client.config.DAILY_MSGS_WEEKEND);
             } else if (day === 1) {
@@ -83,11 +83,11 @@ export default new Event({
         // Farming Simulator stats loop
         if (client.config.toggles.fsLoop) setInterval(async () => {
             const watchList = await client.watchList.data.find();
-    
+
             for (const [serverAcro, server] of fsServers.entries()) await fsLoop(client, watchList, server, serverAcro);
             await fsLoopAll(client, watchList);
         }, 30_000);
-    
+
         // YouTube upload notifications loop
         if (client.config.toggles.ytLoop) setInterval(ytLoop.bind(client), 1_800_000);
     }

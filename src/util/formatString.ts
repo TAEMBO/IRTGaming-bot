@@ -1,7 +1,6 @@
 /**
  * Formats a string by making every first letter of each word (separated by a space) uppercase
  * @param text The text to format
- * @returns 
  */
 export function formatString(rawText: string) {
     const text = rawText.trim();

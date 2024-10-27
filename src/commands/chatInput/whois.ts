@@ -40,7 +40,7 @@ export default new Command<"chatInput">({
 
             return fields;
         }
-        
+
         function convertStatus(status?: ClientPresenceStatus) {
             return {
                 idle: "🟡",
@@ -49,7 +49,7 @@ export default new Command<"chatInput">({
                 invisible: "⚫"
             }[status ?? "invisible"];
         }
-        
+
         const member = interaction.options.getMember("user");
 
         if (!member) {
@@ -73,7 +73,7 @@ export default new Command<"chatInput">({
         }
 
         await member.user.fetch();
-        
+
         const embeds: EmbedBuilder[] = [];
         const titleText = member.user.bot
             ? "bot"
@@ -167,7 +167,7 @@ export default new Command<"chatInput">({
                 let activityImage: string | null | undefined = activityImages[activity.applicationId ?? ""] as string | undefined;
 
                 if (activityImage) activityImage = `https://cdn.discordapp.com/app-icons/${activity.applicationId}/${activityImage}`;
-                
+
                 if (!activityImage) activityImage = activity.assets?.largeImageURL() ?? activity.assets?.smallImageURL();
 
                 embeds.push(new EmbedBuilder()
@@ -184,7 +184,7 @@ export default new Command<"chatInput">({
                 );
             }
         }
-        
+
         await interaction.reply({ embeds });
     },
     data: {

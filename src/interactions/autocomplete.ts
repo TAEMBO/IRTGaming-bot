@@ -3,7 +3,7 @@ import { log } from "#util";
 
 export async function handleAutocomplete(interaction: AutocompleteInteraction<"cached">) {
     const command = interaction.client.chatInputCommands.get(interaction.commandName);
-    
+
     if (!command) {
         await interaction.respond([]);
         return log("Red", `Autocomplete - missing command: ${interaction.commandName}`);

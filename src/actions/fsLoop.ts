@@ -27,12 +27,12 @@ export async function fsLoop(client: TClient, watchList: TClient["watchList"]["d
 
     function getDecorators(player: PlayerUsed, publicLoc = false) {
         let decorators = player.isAdmin ? ADMIN_ICON : "";
-    
+
         decorators += client.fmList.cache.includes(player.name) ? FM_ICON : "";
         decorators += client.tfList.cache.includes(player.name) ? TF_ICON : "";
         decorators += (client.whitelist.cache.includes(player.name) && !publicLoc) ? ":white_circle:" : ""; // Tag for if player is on whitelist and location is not public
         decorators += watchList?.some(x => x._id === player.name) ? WL_ICON : "";
-    
+
         return decorators;
     }
 
@@ -92,20 +92,20 @@ export async function fsLoop(client: TClient, watchList: TClient["watchList"]["d
         fsCacheServer.completeRes = completeRes;
 
         if (channel?.type !== ChannelType.GuildText) return log("Red", `FSLoop ${serverAcroUp} invalid channel`);
-        
+
         await channel.messages.edit(
             server.messageId,
             { embeds: [embed] }
         ).catch(() => log("Red", `FSLoop ${serverAcroUp} invalid msg`));
     };
-    
+
     // Fetch dedicated-server-stats.json and parse
     const dss = await (async () => {
         const res = await fetch(server.url + Feeds.dedicatedServerStats(server.code, DSSExtension.JSON), init)
             .catch(err => log("Red", `${serverAcroUp} DSS ${err.message}`));
 
         if (!res) return null;
-        
+
         const data: DSSResponse = await res.json();
 
         if (!data.slots) return null;
@@ -143,7 +143,7 @@ export async function fsLoop(client: TClient, watchList: TClient["watchList"]["d
     } else {
         if (fsCacheServer.state === 0) {
             await logChannel.send({ embeds: [serverStatusEmbed("online")] });
-            
+
             justStarted = true;
         }
 
@@ -152,15 +152,15 @@ export async function fsLoop(client: TClient, watchList: TClient["watchList"]["d
 
     const toThrottle = (() => { // Throttle Discord message updating if no changes in API data
         if (!fsCacheServer.completeRes) return false;
-        
+
         if (justStarted || justStopped) return false;
 
         if (JSON.stringify(newPlayerList) !== JSON.stringify(oldPlayerList)) return false;
-        
+
         if (!dss.server.name && fsCacheServer.state === 0) return true;
-        
+
         if (dss.server.name && fsCacheServer.state === 1) return true;
-        
+
         return false;
     })();
 
@@ -168,9 +168,9 @@ export async function fsLoop(client: TClient, watchList: TClient["watchList"]["d
     fsCacheServer.throttled = toThrottle;
 
     if (fsCacheServer.graphPoints.length >= 120) fsCacheServer.graphPoints.shift();
-    
+
     fsCacheServer.graphPoints.push(dss.slots.used);
-    
+
     if (newPlayerList.some(x => x.isAdmin)) fsCacheServer.lastAdmin = now * 1_000;
 
     if (!justStarted) fsCacheServer.players = newPlayerList;
@@ -271,21 +271,21 @@ export async function fsLoop(client: TClient, watchList: TClient["watchList"]["d
                 .setTitle("UNKNOWN ADMIN LOGIN")
                 .setDescription(`\`${player.name}\` on **${serverAcroUp}** on <t:${now}>`)
                 .setColor("#ff4d00")
-            ] }); 
+            ] });
         } else await logChannel.send({ embeds: [new EmbedBuilder()
             .setColor(client.config.EMBED_COLOR_YELLOW)
             .setDescription(`\`${player.name}\`${getDecorators(player)} logged in as admin on **${serverAcroUp}** at <t:${now}:t>`)
         ] });
     }
-    
+
     // Filter for players leaving
     for (const player of oldPlayerList.filter(x => !newPlayerList.some(y => y.name === x.name))) {
         const inWl = watchList.find(x => x._id === player.name);
 
         if (inWl) await wlChannel.send({ embeds: [wlEmbed(inWl, false)] });
-        
+
         if (player.uptime) await client.playerTimes.addPlayerTime(player.name, player.uptime, serverAcro);
-        
+
         await logChannel.send({ embeds: [logEmbed(player, false)] });
     }
 
@@ -300,7 +300,7 @@ export async function fsLoop(client: TClient, watchList: TClient["watchList"]["d
         const inWl = watchList.find(y => y._id === player.name);
 
         if (inWl) {
-            const filterWLPings = client.watchListPings.cache.filter(x => 
+            const filterWLPings = client.watchListPings.cache.filter(x =>
                 !client.mainGuild().members.cache.get(x)?.roles.cache.has(client.config.mainServer.roles.loa)
             );
 

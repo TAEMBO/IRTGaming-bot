@@ -2,7 +2,7 @@ import type { CommandInteraction } from "discord.js";
 import type { Config } from "#typings";
 
 /**
- * @param interaction 
+ * @param interaction The interaction to reply to
  * @param role The role that will be presented in the reply
  * @returns to the given interaction with a standardized message informing the need for the given role
  */

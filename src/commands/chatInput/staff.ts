@@ -11,7 +11,7 @@ export default new Command<"chatInput">({
         }
 
         const embed = new EmbedBuilder();
-        
+
         switch (interaction.options.getSubcommand()) {
             case "mp": {
                 const staff = {
@@ -21,7 +21,7 @@ export default new Command<"chatInput">({
                     mp_farm_manager: interaction.client.getRole("mpFarmManager"),
                     mp_trusted_farmer: interaction.client.getRole("trustedFarmer")
                 };
-         
+
                 embed
                     .setTitle("__MP Staff Members__")
                     .setColor(interaction.client.config.EMBED_COLOR)
@@ -61,7 +61,7 @@ export default new Command<"chatInput">({
                     moderator: interaction.client.getRole("discordModerator"),
                     helper: interaction.client.getRole("discordHelper")
                 };
-         
+
                 embed
                     .setTitle("__Discord Staff Members__")
                     .setColor(interaction.client.config.EMBED_COLOR)

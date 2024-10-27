@@ -23,17 +23,17 @@ export async function loadCommands(client: Client) {
         for (const file of commandFiles) {
             const commandPath = new URL(join("..", "commands", folder, file), import.meta.url);
             const { default: commandFile } = await import(commandPath.toString());
-    
+
             if (!isValidCommand(commandFile)) {
                 log("Red", `${file} not Command`);
-        
+
                 continue;
             }
-    
+
             const collectionType = commandFile.data.description
                 ? "chatInputCommands"
                 : "contextMenuCommands";
-    
+
             client[collectionType].set(commandFile.data.name, commandFile);
         }
     }

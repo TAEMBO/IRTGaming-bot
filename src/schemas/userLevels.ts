@@ -14,14 +14,14 @@ export class UserLevels extends BaseSchema<typeof model> {
     public constructor(private readonly _client: TClient) {
         super(model);
     }
-    
+
     /**
      * Increment a user"s userLevels data, or create a document for them if one not found
      * @param userid The Discord ID of the user to increment
      */
     public async incrementUser(userid: string) {
         const userData = await this.data.findById(userid);
-        
+
         if (!userData) return await this.data.create({ _id: userid, messages: 1, level: 0 });
 
         userData.messages++;
@@ -34,7 +34,7 @@ export class UserLevels extends BaseSchema<typeof model> {
             }
         } else if (userData.messages >= this.algorithm(userData.level + 1)) {
             userData.level++;
-            
+
             await this._client.getChan("botCommands").send(`Well done <@${userid}>, you made it to **level ${userData.level}**!`);
         }
 
@@ -44,7 +44,6 @@ export class UserLevels extends BaseSchema<typeof model> {
     /**
      * Get the message requirement for a given userLevels level
      * @param level The level to get the requirement for
-     * @returns 
      */
     public algorithm(level: number) {
         return level * level * 15;

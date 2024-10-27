@@ -114,18 +114,18 @@ export default class TClient extends Client<true> {
 
     public async errorLog(error: Error) {
         console.error(error);
-    
+
         if (["Request aborted", "getaddrinfo ENOTFOUND discord.com"].includes(error.message)) return;
-    
+
         const dirname = process.cwd().replaceAll("\\", "/");
         const channel = this.channels.cache.get(this.config.mainServer.channels.taesTestingZone) as TextChannel | undefined;
         const formattedErr = error.stack
             ?.replaceAll(" at ", ` ${LogColor.Red}at${LogColor.Reset} `)
             .replaceAll(dirname, LogColor.Yellow + dirname + LogColor.Reset)
             .slice(0, 2500);
-    
+
         if (!channel) return;
-    
+
         await channel.send({
             content: `<@${this.config.devWhitelist[0]}>`,
             embeds: [new EmbedBuilder()

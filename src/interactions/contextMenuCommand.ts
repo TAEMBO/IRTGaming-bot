@@ -3,7 +3,7 @@ import type { CombinedContextMenuCommandInteraction } from "#typings";
 
 export async function handleContextMenuCommand(interaction: CombinedContextMenuCommandInteraction) {
     const command = interaction.client.contextMenuCommands.get(interaction.commandName);
-    
+
     if (!command) {
         await interaction.reply(ERR_TEXT);
         return log("Red", `ContextMenu - missing command: ${interaction.commandName}`);

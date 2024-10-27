@@ -2,7 +2,7 @@ import type { ButtonInteraction } from "discord.js";
 
 export async function handleButton(interaction: ButtonInteraction<"cached">) {
     if (!interaction.customId.includes("-")) return;
-    
+
     const args = interaction.customId.split("-");
 
     switch (args[0]) {
@@ -16,7 +16,7 @@ export async function handleButton(interaction: ButtonInteraction<"cached">) {
                 await interaction.member.roles.add(roleId);
                 await interaction.reply({ content: `You've been added to <@&${roleId}>`, ephemeral: true });
             }
-            
+
             break;
         };
         case "sub": {

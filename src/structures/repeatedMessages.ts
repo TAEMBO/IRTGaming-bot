@@ -35,14 +35,14 @@ export class RepeatedMessages {
 
         // Add this message to the list
         userData.entries.set(msg.createdTimestamp, { identifier: options.identifier, channel: msg.channelId, msg: msg.id });
-    
+
         // Reset timeout
         clearTimeout(userData.timeout);
         userData.timeout = setTimeout(() => delete this._data[msg.author.id], options.thresholdTime);
-    
+
         // Message mustve been sent after (now - threshold), so purge those that were sent earlier
         userData.entries = userData.entries.filter((_, i) => i >= Date.now() - options.thresholdTime);
-    
+
         // A spammed message is one that has been sent within the threshold parameters
         const spammedMessage = userData.entries.find(x => {
             return userData.entries.filter(y => x.identifier === y.identifier).size >= options.thresholdAmt;

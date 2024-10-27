@@ -19,7 +19,7 @@ export async function fsLoopAll(client: TClient, watchList: TClient["watchList"]
             const playTimeHrs = Math.floor(player.uptime / 60);
             const playTimeMins = (player.uptime % 60).toString().padStart(2, "0");
             let decorators = player.isAdmin ? ADMIN_ICON : "";
-            
+
             decorators += client.fmList.cache.includes(player.name) ? FM_ICON : "";
             decorators += client.tfList.cache.includes(player.name) ? TF_ICON : "";
             decorators += client.whitelist.cache.includes(player.name) ? ":white_circle:" : ""; // Tag for if player is on whitelist
@@ -27,7 +27,7 @@ export async function fsLoopAll(client: TClient, watchList: TClient["watchList"]
 
             playerInfo.push(`\`${player.name.slice(0, 46)}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
         }
-        
+
         if (playerInfo.length) embed.addFields({ name: `${serverAcro.toUpperCase()} - ${serverSlots}/16`, value: playerInfo.join("\n") });
 
         if (server.state === 0) footerText.push(`${serverAcro} offline`);

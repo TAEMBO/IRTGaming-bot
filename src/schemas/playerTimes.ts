@@ -25,7 +25,7 @@ export class PlayerTimes extends BaseSchema<typeof model> {
     public constructor(private readonly _client: TClient) {
         super(model);
     }
-    
+
     /**
      * Retrieve an array-ified form of a player's server time data.
      * @param data The MongoDB document for the player
@@ -91,7 +91,7 @@ export class PlayerTimes extends BaseSchema<typeof model> {
             }
 
             if (playerDatabyUuid._id === player._attributes.lastNickname) continue; // PlayerTimes name matches farm name, no need to update playerTimes data
-                
+
             const decorators = (name: string) => {
                 return [
                     this._client.fmList.cache.includes(name) ? FM_ICON : "",
@@ -111,7 +111,7 @@ export class PlayerTimes extends BaseSchema<typeof model> {
             ] });
 
             changedNameCount++;
-                
+
             await this.data.create({ _id: player._attributes.lastNickname, uuid: player._attributes.uniqueUserId, servers: playerDatabyUuid.servers })
                 .then(() => this.data.findByIdAndDelete(playerDatabyUuid._id)) // New name was not occupied, delete old name data
                 .catch(async () => { // New name was occupied
@@ -128,7 +128,7 @@ export class PlayerTimes extends BaseSchema<typeof model> {
                     ); // Add UUID to new name
                 });
         }
-        
+
         await this._client.getChan("fsLogs").send([
             `⚠️ Farm data cruncher ran on ${server.fullName}`,
             `Iterated over ${changedNameCount} changed names`,

@@ -8,7 +8,7 @@ interface BaseQuantity {
     readonly value: number;
 }
 
-interface StandardQuantity extends BaseQuantity { 
+interface StandardQuantity extends BaseQuantity {
     readonly tempMath?: undefined;
 }
 
@@ -244,9 +244,9 @@ export default new Command<"chatInput">({
         `);
 
         const isCurrencyConversion = starter.quantity === "currency";
-        
+
         if (isCurrencyConversion) quantities.currency = await fetchCurrencies();
-        
+
         const valuesToConvert = {
             starter: (isCurrencyConversion ? target : starter).unit.value,
             target: (isCurrencyConversion ? starter : target).unit.value

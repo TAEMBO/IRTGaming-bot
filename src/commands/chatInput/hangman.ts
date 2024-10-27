@@ -157,7 +157,7 @@ export default new Command<"chatInput">({
 
         const interval = setInterval(async () => {
             if (Date.now() <= (latestActivity + 120_000)) return;
-            
+
             await botMsg.reply("The hangman game has ended due to inactivity.");
             guessCollector.stop();
             clearInterval(interval);

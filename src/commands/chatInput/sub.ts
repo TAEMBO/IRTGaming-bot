@@ -8,7 +8,7 @@ export default new Command<"chatInput">({
                 + `you will then receive the <@&${interaction.client.config.mainServer.roles.subscriber}> role.`,
             ephemeral: true
         });
-        
+
         await interaction.client.getChan("helperChat").send({
             content: `${interaction.user} (${interaction.user.tag}) Subscriber role verification`,
             files: [interaction.options.getAttachment("image", true)],

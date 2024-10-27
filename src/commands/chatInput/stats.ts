@@ -77,7 +77,7 @@ export default new Command<"chatInput">({
                 if (!dss.slots.used) return;
 
                 totalUsedCount.push(dss.slots.used);
-                
+
                 const playerInfo: string[] = [];
                 const serverSlots = `${dss.slots.used}/${dss.slots.capacity}`;
 
@@ -89,7 +89,7 @@ export default new Command<"chatInput">({
                     decorators += interaction.client.fmList.cache.includes(player.name) ? FM_ICON : "";
                     decorators += interaction.client.tfList.cache.includes(player.name) ? TF_ICON : "";
                     decorators += inWl ? WL_ICON : "";
-        
+
                     playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
                 }
 
@@ -104,7 +104,7 @@ export default new Command<"chatInput">({
         } else if (subCmd === "playertimes") {
             const { getTimeData, doc } = interaction.client.playerTimes;
             const playersData = await interaction.client.playerTimes.data.find();
-            const sortedPlayersData = playersData.sort((a, b) => 
+            const sortedPlayersData = playersData.sort((a, b) =>
                 getTimeData(b).reduce((x, y) => x + y[1].time, 0) - getTimeData(a).reduce((x, y) => x + y[1].time, 0)
             );
             const player = interaction.options.getString("name");
@@ -163,10 +163,10 @@ export default new Command<"chatInput">({
             if (!dss || !dss.slots) return await interaction.reply("Server did not respond");
 
             const data = interaction.client.fsCache[subCmd].graphPoints;
-        
+
             // handle negative days
             for (const [i, change] of data.entries()) if (change < 0) data[i] = data[i - 1] || data[i + 1] || 0;
-            
+
             const firstGraphTop = 16;
             const secondGraphTop = 16;
             const textSize = 40;
@@ -178,10 +178,10 @@ export default new Command<"chatInput">({
 
             ctx.fillStyle = "#36393f";
             ctx.fillRect(0, 0, img.width, img.height);
-        
+
             // grey horizontal lines
             ctx.lineWidth = 5;
-        
+
             const intervalCandidates: [number, number, number][] = [];
 
             for (let i = 4; i < 10; i++) {
@@ -219,7 +219,7 @@ export default new Command<"chatInput">({
 
                 previousY.push(y, i * chosenInterval[0]);
             }
-        
+
             // 30d mark
             ctx.setLineDash([8, 16]);
             ctx.beginPath();
@@ -231,16 +231,16 @@ export default new Command<"chatInput">({
             ctx.stroke();
             ctx.closePath();
             ctx.setLineDash([]);
-        
+
             // draw points
             ctx.lineWidth = 5;
-            
+
             const gradient = ctx.createLinearGradient(0, graphOrigin[1], 0, graphOrigin[1] + graphSize[1]);
 
             gradient.addColorStop(1 / 16, interaction.client.config.EMBED_COLOR_RED);
             gradient.addColorStop(5 / 16, interaction.client.config.EMBED_COLOR_YELLOW);
             gradient.addColorStop(12 / 16, interaction.client.config.EMBED_COLOR_GREEN);
-            
+
             let lastCoords: number[] = [];
 
             for (const [i, cur /* current player count */] of data.entries()) {
@@ -269,11 +269,11 @@ export default new Command<"chatInput">({
 
                     ctx.lineTo(newX, y);
                 } else ctx.lineTo(x, y);
-                
+
                 lastCoords = [x, y];
                 ctx.stroke();
                 ctx.closePath();
-            
+
                 if (curPC !== prvPC || curPC !== nexPC) { // Ball if vertical different to next or prev point
                     // ball
                     ctx.fillStyle = gradient;
@@ -283,11 +283,11 @@ export default new Command<"chatInput">({
                     ctx.fill();
                 }
             }
-        
+
             // draw text
             ctx.font = "400 " + textSize + "px DejaVu Sans";
             ctx.fillStyle = "white";
-        
+
             // highest value
             if (!isNaN(previousY.at(-2)!)) {
                 const maxx = graphOrigin[0] + graphSize[0] + textSize / 2;
@@ -295,16 +295,16 @@ export default new Command<"chatInput">({
 
                 ctx.fillText((previousY.at(-1)!).toLocaleString("en-US"), maxx, maxy);
             }
-        
+
             // lowest value
             const lowx = graphOrigin[0] + graphSize[0] + textSize / 2;
             const lowy = graphOrigin[1] + graphSize[1] + (textSize / 3);
 
             ctx.fillText("0 players", lowx, lowy);
-            
+
             // 30d
             ctx.fillText("30 min ago", lastMonthStart, graphOrigin[1] - (textSize / 2));
-            
+
             // time ->
             const tx = graphOrigin[0] + (textSize / 2);
             const ty = graphOrigin[1] + graphSize[1] + (textSize);
@@ -314,7 +314,7 @@ export default new Command<"chatInput">({
             const playerInfo: string[] = [];
             const watchList = await interaction.client.watchList.data.find();
             const players = filterUnused(dss.slots.players);
-        
+
             for (const player of players) {
                 const playTimeHrs = Math.floor(player.uptime / 60);
                 const playTimeMins = (player.uptime % 60).toString().padStart(2, "0");
@@ -324,7 +324,7 @@ export default new Command<"chatInput">({
                 decorators += interaction.client.fmList.cache.includes(player.name) ? FM_ICON : "";
                 decorators += interaction.client.tfList.cache.includes(player.name) ? TF_ICON : "";
                 decorators += inWl ? WL_ICON : "";
-        
+
                 playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
             }
 
@@ -346,7 +346,7 @@ export default new Command<"chatInput">({
             if (!players.some(x => x.isAdmin) && interaction.client.fsCache[subCmd].lastAdmin) embed
                 .setTimestamp(interaction.client.fsCache[subCmd].lastAdmin)
                 .setFooter({ text: "Admin last on" });
-        
+
             await interaction.reply({ embeds: [embed], files: [new AttachmentBuilder(img.toBuffer("image/png"), { name: "FSStats.png" })] });
         }
     },

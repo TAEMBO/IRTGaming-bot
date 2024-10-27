@@ -17,7 +17,7 @@ export default new Command<"message">({
             interaction.channelId !== interaction.client.config.mainServer.channels.communityIdeas
             || interaction.targetMessage.embeds[0]?.title !== "Community Idea"
         ) return await interaction.reply({ content: "You need to select a message that is a community idea!", ephemeral: true });
-        
+
         const embed = EmbedBuilder.from(interaction.targetMessage.embeds[0]);
         const msg = await interaction.reply({
             content: "What do you want to mark this community idea as?",
@@ -33,7 +33,7 @@ export default new Command<"message">({
                 )
             ]
         });
-        
+
         msg.createMessageComponentCollector({
             max: 1,
             time: 30_000,
@@ -45,7 +45,7 @@ export default new Command<"message">({
 
                     await interaction.targetMessage.edit({ embeds: [embed] });
                     await int.update({ content: "Community idea updated and marked as liked", components: [] });
-                
+
                     break;
                 };
                 case "dislike": {

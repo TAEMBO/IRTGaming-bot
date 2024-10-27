@@ -47,6 +47,7 @@ export default [
             "semi": ["error", "always"],
             "yoda": "error",
             "@stylistic/js/max-len": ["error", { "code": 150, "ignoreStrings": true, "ignoreTemplateLiterals": true, "ignoreComments": true }],
+            "@stylistic/js/no-trailing-spaces": "error",
             "@stylistic/js/object-curly-spacing": ["error", "always"],
             "@typescript-eslint/consistent-type-imports": "error",
             "@typescript-eslint/explicit-member-accessibility": "error",

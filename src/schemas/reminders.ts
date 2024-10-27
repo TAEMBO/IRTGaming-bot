@@ -24,7 +24,7 @@ export class Reminders extends BaseSchema<typeof model> {
             if (!reminder) return;
 
             const embed = new EmbedBuilder().setTitle("Reminder").setColor(this._client.config.EMBED_COLOR).setDescription(`\`\`\`${reminder.content}\`\`\``);
-        
+
             await this._client.users.send(reminder.userid, { embeds: [embed] })
                 .catch(() => (this._client.channels.resolve(reminder.ch) as GuildTextBasedChannel).send({
                     content: `Reminder <@${reminder.userid}>`,

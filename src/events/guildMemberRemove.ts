@@ -28,19 +28,19 @@ export default new Event({
             .setTimestamp()
             .setColor(member.client.config.EMBED_COLOR_RED)
             .setThumbnail(member.user.displayAvatarURL({ extension: "png", size: 2048 }));
-            
+
         if (rankingData && rankingData.messages) embed.addFields({ name: "🔹 Ranking Total", value: rankingData.messages.toLocaleString("en-US"), inline: true });
-    
+
         if (member.client.config.toggles.logs) {
             await member.client.getChan("botLogs").send({ embeds: [embed] });
-        
+
             await member.client.getChan("leaveLogs").send(`**${member.user.tag}** left the server.`);
         }
-    
+
         if (!rankingData) return;
-        
+
         rankingData.hasLeft = true;
-    
+
         await rankingData.save();
     }
 });

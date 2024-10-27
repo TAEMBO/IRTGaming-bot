@@ -32,7 +32,7 @@ export class FSServers {
     public getPublicAll() {
         return this.entries().filter((x): x is [string, FSServerPublic] => !x[1].isPrivate);
     }
-    
+
     /**
      * @returns An array of all public server names
      */

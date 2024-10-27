@@ -11,7 +11,7 @@ class RPSInstance {
     public constructor(public readonly user: User, public readonly move: Move, public readonly message: Message<true>) {
         setTimeout(async () => {
             if (!rpsInstances.has(this.message.channelId)) return;
-            
+
             await this.message.edit({ embeds: [], content: `This ${possibleMoves.join(" ")} game has ended due to inactivity.` });
             rpsInstances.delete(this.message.channelId);
         }, 60_000);
@@ -41,7 +41,7 @@ export default new Command<"chatInput">({
         if (interaction.user.id === firstMove.user.id) return await interaction.reply("You can't play against yourself");
 
         await interaction.deferReply();
-        
+
         let winner = null;
 
         if (move === "rock") if (firstMove.move === "paper") winner = firstMove.user; else winner = interaction.user;

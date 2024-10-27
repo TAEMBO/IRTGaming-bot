@@ -8,7 +8,7 @@ import { fsServers } from "#util";
  */
 export function onPrivateFarms(guildMember: GuildMember | null, serverAcro: string) {
     if (!guildMember) return [];
-    
+
     const serverObj = fsServers.getPrivateOne(serverAcro);
 
     return Object.values(serverObj.farms).map(x => x.roleId).filter(x => guildMember.roles.cache.has(x));

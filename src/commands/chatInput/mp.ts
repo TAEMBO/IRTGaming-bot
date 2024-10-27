@@ -20,7 +20,7 @@ export default new Command<"chatInput">({
         if (!isMPStaff(interaction.member)) return await youNeedRole(interaction, "mpStaff");
 
         const now = Date.now();
-        
+
         switch (interaction.options.getSubcommand()) {
             case "server": {
                 const chosenServer = interaction.options.getString("server", true);
@@ -28,10 +28,10 @@ export default new Command<"chatInput">({
                 const cachedServer = interaction.client.fsCache[chosenServer];
                 const configServer = interaction.client.config.fs[chosenServer];
 
-                if (!interaction.member.roles.cache.hasAny(...configServer.managerRoles)) return await youNeedRole(interaction, "mpManager");                
+                if (!interaction.member.roles.cache.hasAny(...configServer.managerRoles)) return await youNeedRole(interaction, "mpManager");
 
                 if (cachedServer.state === null) return await interaction.reply("Cache not populated, retry in 30 seconds");
-                
+
                 if (
                     cachedServer.state === 0
                     && ["stop", "restart"].includes(chosenAction)
@@ -63,15 +63,15 @@ export default new Command<"chatInput">({
 
                 const browser = await puppeteer.launch({ args: ["--no-sandbox"] });
                 const page = await browser.newPage();
-                
+
                 try {
                     await page.goto(configServer.url + Routes.webPageLogin(configServer.username, configServer.password), { timeout: 120_000 });
                 } catch (err: any) {
                     return await interaction.editReply(err.message);
                 }
-                
+
                 await interaction.editReply(`Connected to dedi panel for **${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**...`);
-    
+
                 let result = "Successfully ";
                 let uptimeText: string | null | undefined;
 
@@ -101,7 +101,7 @@ export default new Command<"chatInput">({
                         uptimeText = `. Uptime before restarting: **${uptime}**`;
                     }
                 })[chosenAction]();
-    
+
                 await page.waitForSelector(`[name="${chosenAction}_server"]`).then(x => x!.click());
 
                 result += `**${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**`;
@@ -109,7 +109,7 @@ export default new Command<"chatInput">({
                 if (uptimeText) result += uptimeText;
 
                 await interaction.editReply(result);
-                
+
                 setTimeout(() => browser.close(), 5_000);
 
                 break;
@@ -119,9 +119,9 @@ export default new Command<"chatInput">({
 
                 const chosenServer = interaction.options.getString("server", true);
                 const chosenAction = interaction.options.getString("action", true) as "items.xml" | "players.xml";
-                
+
                 if (interaction.client.fsCache[chosenServer].state === 1) return await interaction.reply(`You cannot mop files from **${chosenServer.toUpperCase()}** while it is online`);
-                
+
                 await interaction.deferReply();
 
                 await new FTPActions(fsServers.getPublicOne(chosenServer).ftp).delete(`savegame1/${chosenAction}`);
@@ -134,7 +134,7 @@ export default new Command<"chatInput">({
                 const chosenServer = interaction.options.getString("server", true);
                 const chosenAction = interaction.options.getString("action", true) as "dl" | "ul";
                 const ftpActions = new FTPActions(fsServers.getPublicOne(chosenServer).ftp);
-    
+
                 if (chosenAction === "dl") {
                     await interaction.deferReply();
 
@@ -142,7 +142,7 @@ export default new Command<"chatInput">({
 
                     return await interaction.editReply({ files: [new AttachmentBuilder(Buffer.from(data), { name: "blockedUserIds.xml" })] });
                 }
-                
+
                 if (!hasRole(interaction.member, "mpManager")) return await youNeedRole(interaction, "mpManager");
 
                 await interaction.deferReply();
@@ -151,7 +151,7 @@ export default new Command<"chatInput">({
                 const banAttachment = interaction.options.getAttachment("bans");
 
                 if (!banAttachment) return await interaction.editReply("Canceled: A ban file must be supplied");
-    
+
                 const banData = await (await fetch(banAttachment.url)).text();
 
                 try {
@@ -159,18 +159,18 @@ export default new Command<"chatInput">({
                 } catch (err) {
                     return await interaction.editReply("Canceled: Improper file (not XML)");
                 }
-    
+
                 if (!data.blockedUserIds?.user[0]?._attributes?.displayName) return await interaction.editReply("Canceled: Improper file (data format)");
 
                 await ftpActions.put(banData, "blockedUserIds.xml");
 
                 await interaction.editReply(`Successfully uploaded ban file for ${chosenServer.toUpperCase()} after **${Date.now() - now}ms**`);
-                
+
                 break;
             };
             case "search": {
                 await interaction.deferReply();
-                
+
                 const chosenServer = interaction.options.getString("server", true);
                 const name = interaction.options.getString("name", true);
 
@@ -183,7 +183,7 @@ export default new Command<"chatInput">({
                         const utcDate = new Date(perm);
 
                         utcDate.setMinutes(utcDate.getMinutes() - utcDate.getTimezoneOffset() + fsServers.getPublicOne(chosenServer).utcDiff);
-                        
+
                         return utcDate.toUTCString();
                     } else return perm;
                 }
@@ -255,7 +255,7 @@ export default new Command<"chatInput">({
                 const roleName = interaction.options.getString("role", true) as "trustedFarmer" | "mpFarmManager" | "mpJrAdmin" | "mpSrAdmin";
                 const roleId = mainRoles[roleName];
                 const roles = [...member.roles.cache.keys()];
-                
+
                 if (member.roles.cache.has(roleId)) {
                     await collectAck({
                         interaction,
@@ -270,7 +270,7 @@ export default new Command<"chatInput">({
                                     mpJrAdmin: "MP Jr. Admin",
                                     mpSrAdmin: "MP Sr. Admin"
                                 }[roleName];
-    
+
                                 await member.edit({
                                     roles: roles
                                         .filter(x => x !== roleId && x !== mainRoles.mpStaff)
@@ -278,7 +278,7 @@ export default new Command<"chatInput">({
                                     nick: member.nickname!.replace(slicedNick, "Former Staff")
                                 });
                             } else await member.roles.remove(roleId);
-    
+
                             await int.update({
                                 embeds: [new EmbedBuilder()
                                     .setDescription(`${member} has been removed from <@&${roleId}>.`)
@@ -286,7 +286,7 @@ export default new Command<"chatInput">({
                                 ],
                                 components: []
                             });
-    
+
                             await interaction.client.users.send(
                                 interaction.guild.ownerId,
                                 `**${interaction.user.tag}** has demoted **${member.user.tag}** from **${interaction.client.getRole(roleName).name}**`
@@ -328,7 +328,7 @@ export default new Command<"chatInput">({
                             return member.nickname!.replace("MP Jr. Admin", "MP Sr. Admin");
                         }
                     })[roleName]();
-                    
+
                     await member.edit({ roles, nick: newNickname });
                     await interaction.reply({ embeds: [new EmbedBuilder()
                         .setDescription(`${member} has been given <@&${roleId}>.`)
@@ -352,7 +352,7 @@ export default new Command<"chatInput">({
                     await interaction.client.fmList.add(name);
                     await interaction.reply(`Successfully added \`${name}\``);
                 }
-                
+
                 break;
             };
             case "tf": {

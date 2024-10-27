@@ -18,7 +18,7 @@ export default new Command<"chatInput">({
             PermissionFlagsBits.ManageRoles,
             PermissionFlagsBits.ManageGuildExpressions,
             PermissionFlagsBits.ModerateMembers
-        ];    
+        ];
         const roleMembers = role.members.map(member => `**${member.user.tag}**`).join("\n");
         const includedPermissions = role.permissions.has(PermissionFlagsBits.Administrator)
             ? [PermissionFlagsBits.Administrator]

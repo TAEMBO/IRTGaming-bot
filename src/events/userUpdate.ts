@@ -16,6 +16,6 @@ export default new Event({
             .setFields(
                 { name: "🔹 Old Tag", value: codeBlock(oldUser.tag ?? "") },
                 { name: "🔹 New Tag", value: codeBlock(newUser.tag) })
-        ] }); 
+        ] });
     }
 });

@@ -14,13 +14,14 @@ export default new Command<"chatInput">({
     async autocomplete(interaction) {
         const serverAcro = interaction.options.getSubcommandGroup(true);
         const serverObj = fsServers.getPrivateOne(serverAcro);
-        const farmRoles = Object.values(serverObj.roles.farms).map(x => interaction.client.mainGuild().roles.cache.get(x)!);
+        const farmsData = Object.entries(serverObj.farms);
+        const farmRoles = farmsData.map(x => interaction.client.mainGuild().roles.cache.get(x[1].roleId)!);
 
         switch (interaction.options.getSubcommand()) {
             case "member": {
                 const displayedRoles = interaction.member.roles.cache.hasAny(...serverObj.managerRoles)
                     ? farmRoles
-                    : interaction.member.roles.cache.has(serverObj.roles.farmOwner)
+                    : interaction.member.roles.cache.has(serverObj.farmOwnerRole)
                         ? farmRoles.filter(x => onPrivateFarms(interaction.member, serverAcro).some(y => x.id === y))
                         : [];
 
@@ -37,45 +38,23 @@ export default new Command<"chatInput">({
 
                 break;
             };
-            case "rename-channel": {
-                if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return await interaction.respond([]);
-
-                const regExp = new RegExp(`${serverAcro}\\d`);
-                const activeFarmChannels = interaction.client.mainGuild()
-                    .channels.cache
-                    .filter(x => regExp.test(x.name) && x.parentId === serverObj.category);
-                const archivedFarmChannels = interaction.client.mainGuild()
-                    .channels.cache
-                    .filter(x => regExp.test(x.name) && x.parentId === interaction.client.config.mainServer.categories.archived);
-
-                await interaction.respond([
-                    ...activeFarmChannels.map(x => ({ name: `(Active) ${x.name}`, value: x.id })),
-                    ...archivedFarmChannels.map(x => ({ name: `(Archived) ${x.name}`, value: x.id }))
-                ].sort((a, b) => {
-                    if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
-                    if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
-                    return 0;
-                }));
-
-                break;
-            };
             case "archive": {
-                if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return await interaction.respond([]);
+                if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return interaction.respond([]);
 
-                const regExp = new RegExp(`${serverAcro}\\d`);
-                const activeFarmChannels = interaction.client.mainGuild()
-                    .channels.cache
-                    .filter(x => regExp.test(x.name) && x.parentId === serverObj.category);
-                const archivedFarmChannels = interaction.client.mainGuild()
-                    .channels.cache
-                    .filter(x => regExp.test(x.name) && x.parentId === interaction.client.config.mainServer.categories.archived);
+                const farmChannels = farmsData.map(([farmId, farm]) => {
+                    const channel = interaction.guild.channels.resolve(farm.channelId) as TextChannel;
+                    const isActive = channel.parentId === serverObj.category;
 
-                await interaction.respond([
-                    ...activeFarmChannels.map(x => ({ name: `(Active) ${x.name}`, value: x.id })),
-                    ...archivedFarmChannels.map(x => ({ name: `(Archived) ${x.name}`, value: x.id }))
-                ].sort((a, b) => {
+                    return {
+                        name: `(${isActive ? "Active" : "Archived"}) ${channel.name}`,
+                        value: `${farmId}-${farm.channelId}`
+                    };
+                });
+
+                await interaction.respond(farmChannels.sort((a, b) => {
                     if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
                     if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
+
                     return 0;
                 }));
 
@@ -91,25 +70,25 @@ export default new Command<"chatInput">({
             case "member": {
                 if (
                     !interaction.member.roles.cache.hasAny(...serverObj.managerRoles)
-                    && !interaction.member.roles.cache.has(serverObj.roles.farmOwner)
-                ) return await youNeedRole(interaction, "mpManager");
+                    && !interaction.member.roles.cache.has(serverObj.farmOwnerRole)
+                ) return youNeedRole(interaction, "mpManager");
 
                 const member = interaction.options.getMember("member");
                 const roleId = interaction.options.getString("role", true);
-                const validFarmIds = Object.values(serverObj.roles.farms);
+                const validFarmIds = Object.values(serverObj.farms).map(x => x.roleId);
 
                 if (!validFarmIds.includes(roleId)) {
                     return interaction.reply(`You need to select a valid ${serverAcro.toUpperCase()} Farm role from the list provided!`);
                 }
 
-                if (!member) return await interaction.reply({ content: "You need to select a member that's in this server", ephemeral: true });
+                if (!member) return interaction.reply({ content: "You need to select a member that's in this server", ephemeral: true });
 
                 if (!member.roles.cache.has(roleId)) {
-                    await member.roles.add([roleId, serverObj.roles.member]);
+                    await member.roles.add([roleId, serverObj.memberRole]);
 
-                    return await interaction.reply({
+                    return interaction.reply({
                         embeds: [new EmbedBuilder()
-                            .setDescription(`${member} (${member.user.tag}) has been given the <@&${serverObj.roles.member}> and <@&${roleId}> roles`)
+                            .setDescription(`${member} (${member.user.tag}) has been given the <@&${serverObj.memberRole}> and <@&${roleId}> roles`)
                             .setColor(interaction.client.config.EMBED_COLOR)
                         ]
                     });
@@ -123,14 +102,15 @@ export default new Command<"chatInput">({
                     ] },
                     async confirm(int) {
                         const rolesToRemove = onPrivateFarms(member, serverAcro).length === 1
-                            ? [roleId, serverObj.roles.member]
+                            ? [roleId, serverObj.memberRole]
                             : [roleId];
+                        const displayedRoles = rolesToRemove.map(roleMention).join(" and ");
 
                         await member.roles.remove(rolesToRemove);
 
                         await int.update({
                             embeds: [new EmbedBuilder()
-                                .setDescription(`${member} (${member.user.tag}) has been removed from the ${rolesToRemove.map(roleMention).join(" and ")} role(s).`)
+                                .setDescription(`${member} (${member.user.tag}) has been removed from the ${displayedRoles} role(s).`)
                                 .setColor(interaction.client.config.EMBED_COLOR)
                             ],
                             components: []
@@ -153,18 +133,18 @@ export default new Command<"chatInput">({
                 break;
             };
             case "owner": {
-                if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return await youNeedRole(interaction, "mpManager");
+                if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return youNeedRole(interaction, "mpManager");
 
                 const member = interaction.options.getMember("member");
 
-                if (!member) return await interaction.reply({ content: "You need to select a member that's in this server", ephemeral: true });
+                if (!member) return interaction.reply({ content: "You need to select a member that's in this server!", ephemeral: true });
 
-                if (!member.roles.cache.has(serverObj.roles.farmOwner)) {
-                    await member.roles.add(serverObj.roles.farmOwner);
+                if (!member.roles.cache.has(serverObj.farmOwnerRole)) {
+                    await member.roles.add(serverObj.farmOwnerRole);
 
-                    return await interaction.reply({
+                    return interaction.reply({
                         embeds: [new EmbedBuilder()
-                            .setDescription(`${member} (${member.user.tag}) has been given the <@&${serverObj.roles.farmOwner}> role`)
+                            .setDescription(`${member} (${member.user.tag}) has been given the <@&${serverObj.farmOwnerRole}> role`)
                             .setColor(interaction.client.config.EMBED_COLOR)
                         ]
                     });
@@ -174,16 +154,16 @@ export default new Command<"chatInput">({
                     interaction,
                     payload: {
                         embeds: [new EmbedBuilder()
-                            .setDescription(`This member already has the <@&${serverObj.roles.farmOwner}> role, do you want to remove it from them?`)
+                            .setDescription(`This member already has the <@&${serverObj.farmOwnerRole}> role, do you want to remove it from them?`)
                             .setColor(interaction.client.config.EMBED_COLOR)
                         ],
                     },
                     async confirm(int) {
-                        await member.roles.remove(serverObj.roles.farmOwner);
+                        await member.roles.remove(serverObj.farmOwnerRole);
 
                         await int.update({
                             embeds: [new EmbedBuilder()
-                                .setDescription(`${member} (${member.user.tag}) has been removed from the <@&${serverObj.roles.farmOwner}> role`)
+                                .setDescription(`${member} (${member.user.tag}) has been removed from the <@&${serverObj.farmOwnerRole}> role`)
                                 .setColor(interaction.client.config.EMBED_COLOR)
                             ],
                             components: []
@@ -206,10 +186,10 @@ export default new Command<"chatInput">({
                 break;
             };
             case "rename-role": {
-                if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return await youNeedRole(interaction, "mpManager");
+                if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return youNeedRole(interaction, "mpManager");
 
                 const roleId = interaction.options.getString("role", true);
-                const isValidRole = Object.values(serverObj.roles.farms).includes(roleId);
+                const isValidRole = Object.values(serverObj.farms).map(x => x.roleId).includes(roleId);
 
                 if (!isValidRole) {
                     return interaction.reply(`You need to select a valid ${serverAcro.toUpperCase()} Farm role from the list provided!`);
@@ -225,33 +205,14 @@ export default new Command<"chatInput">({
 
                 break;
             };
-            case "rename-channel": {
-                if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return await youNeedRole(interaction, "mpManager");
-
-                const channelId = interaction.options.getString("channel", true);
-                const channel = interaction.client.channels.cache.get(channelId) as TextChannel | undefined;
-
-                if (!channel || !new RegExp(serverAcro).test(channel.name)) {
-                    return interaction.reply("You need to select a channel from the list provided!");
-                }
-
-                const farmNumber = channel.name.match(/\d/)![0];
-                const role = interaction.client.mainGuild().roles.cache.get(serverObj.roles.farms[farmNumber])!;
-                const farmName = role.name.slice(role.name.indexOf("(") + 1, -1);
-
-                await channel.setName(`${channel.name.slice(0, channel.name.indexOf("-"))}-${farmName}`);
-
-                await interaction.reply(`${channel} name successfully updated`);
-
-                break;
-            };
             case "archive": {
-                if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return await youNeedRole(interaction, "mpManager");
+                if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return youNeedRole(interaction, "mpManager");
 
-                const channelId = interaction.options.getString("channel", true);
+                const [farmId, channelId] = interaction.options.getString("channel", true).split("-");
                 const channel = interaction.client.channels.cache.get(channelId) as TextChannel | undefined;
+                const farm = serverObj.farms[farmId];
 
-                if (!channel || !new RegExp(serverAcro).test(channel.name)) {
+                if (!channel || !farm || farm.channelId !== channel.id) {
                     return interaction.reply("You need to select a channel from the list provided!");
                 }
 
@@ -262,7 +223,7 @@ export default new Command<"chatInput">({
                     await channel.edit({
                         parent: archived,
                         permissionOverwrites: [
-                            ...(interaction.client.channels.cache.get(archived) as CategoryChannel).permissionOverwrites.cache.values(),
+                            ...(interaction.guild.channels.resolve(archived) as CategoryChannel).permissionOverwrites.cache.values(),
                             {
                                 id: interaction.client.config.mainServer.roles.mpManager,
                                 allow: PermissionFlagsBits.ViewChannel,
@@ -282,18 +243,24 @@ export default new Command<"chatInput">({
                                 type: OverwriteType.Role
                             },
                             {
-                                id: serverObj.roles.farmOwner,
+                                id: serverObj.farmOwnerRole,
                                 allow: [PermissionFlagsBits.MentionEveryone, PermissionFlagsBits.ManageMessages],
                                 type: OverwriteType.Role
                             },
                             {
-                                id: serverObj.roles.farms[channel.name.slice(4, 5)],
+                                id: farm.roleId,
                                 allow: PermissionFlagsBits.ViewChannel,
                                 type: OverwriteType.Role
                             },
                             {
                                 id: interaction.client.config.mainServer.roles.mpManager,
-                                allow: PermissionFlagsBits.ViewChannel,
+                                allow: [
+                                    PermissionFlagsBits.ManageChannels,
+                                    PermissionFlagsBits.ManageMessages,
+                                    PermissionFlagsBits.ManageRoles,
+                                    PermissionFlagsBits.MentionEveryone,
+                                    PermissionFlagsBits.ViewChannel,
+                                ],
                                 type: OverwriteType.Role
                             }
                         ]
@@ -305,7 +272,7 @@ export default new Command<"chatInput">({
                 break;
             };
             case "apply": {
-                if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return await youNeedRole(interaction, "mpManager");
+                if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return youNeedRole(interaction, "mpManager");
 
                 await interaction.reply(serverObj.form);
 
@@ -365,20 +332,12 @@ export default new Command<"chatInput">({
                             description: "The role to rename",
                             autocomplete: true,
                             required: true
-                        }
-                    ]
-                },
-                {
-                    type: ApplicationCommandOptionType.Subcommand,
-                    name: "rename-channel",
-                    description: `Update the name of a given ${serverAcro.toUpperCase()} Farm channel`,
-                    options: [
+                        },
                         {
                             type: ApplicationCommandOptionType.String,
-                            name: "channel",
-                            description: "The channel to rename",
-                            autocomplete: true,
-                            required: true
+                            name: "name",
+                            description: "The new name for the role",
+                            required: false
                         }
                     ]
                 },

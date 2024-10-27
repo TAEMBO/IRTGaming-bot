@@ -11,5 +11,5 @@ export function onPrivateFarms(guildMember: GuildMember | null, serverAcro: stri
     
     const serverObj = fsServers.getPrivateOne(serverAcro);
 
-    return Object.values(serverObj.roles.farms).filter(x => guildMember.roles.cache.has(x));
+    return Object.values(serverObj.farms).map(x => x.roleId).filter(x => guildMember.roles.cache.has(x));
 }

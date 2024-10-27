@@ -1,5 +1,5 @@
 import type { Client } from "discord.js";
-import { fsServers } from "#util";
+import { fs22Servers } from "#util";
 
 export function loadCaches(client: Client) {
     Reflect.set(client, "ytCache", Object.fromEntries(
@@ -7,7 +7,7 @@ export function loadCaches(client: Client) {
     ) satisfies Client["ytCache"]);
 
     Reflect.set(client, "fsCache", Object.fromEntries(
-        fsServers.keys().map(x => [x, {
+        fs22Servers.keys().map(x => [x, {
             players: [],
             lastAdmin: null,
             graphPoints: [],

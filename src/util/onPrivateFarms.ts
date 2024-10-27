@@ -1,5 +1,5 @@
 import type { GuildMember } from "discord.js";
-import { fsServers } from "#util";
+import { fs22Servers } from "#util";
 
 /**
  * @param guildMember The member to check
@@ -9,7 +9,7 @@ import { fsServers } from "#util";
 export function onPrivateFarms(guildMember: GuildMember | null, serverAcro: string) {
     if (!guildMember) return [];
 
-    const serverObj = fsServers.getPrivateOne(serverAcro);
+    const serverObj = fs22Servers.getPrivateOne(serverAcro);
 
     return Object.values(serverObj.farms).map(x => x.roleId).filter(x => guildMember.roles.cache.has(x));
 }

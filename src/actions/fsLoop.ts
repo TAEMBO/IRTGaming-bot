@@ -20,9 +20,9 @@ import {
     jsonFromXML,
     log
 } from "#util";
-import type { FSLoopCSG, FSServer } from "#typings";
+import type { FSLoopCSG, FS22Server } from "#typings";
 
-export async function fsLoop(client: TClient, watchList: TClient["watchList"]["doc"][], server: FSServer, serverAcro: string) {
+export async function fsLoop(client: TClient, watchList: TClient["watchList"]["doc"][], server: FS22Server, serverAcro: string) {
     if (client.config.toggles.debug) log("Yellow", "FSLoop", serverAcro);
 
     function getDecorators(player: PlayerUsed, publicLoc = false) {
@@ -284,7 +284,7 @@ export async function fsLoop(client: TClient, watchList: TClient["watchList"]["d
 
         if (inWl) await wlChannel.send({ embeds: [wlEmbed(inWl, false)] });
 
-        if (player.uptime) await client.playerTimes.addPlayerTime(player.name, player.uptime, serverAcro);
+        if (player.uptime) await client.playerTimes22.addPlayerTime(player.name, player.uptime, serverAcro);
 
         await logChannel.send({ embeds: [logEmbed(player, false)] });
     }

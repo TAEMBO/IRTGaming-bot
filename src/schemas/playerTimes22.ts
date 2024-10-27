@@ -2,7 +2,7 @@ import { EmbedBuilder } from "discord.js";
 import mongoose from "mongoose";
 import type TClient from "../client.js";
 import { BaseSchema, FTPActions } from "#structures";
-import { FM_ICON, TF_ICON, fsServers, jsonFromXML, log } from "#util";
+import { FM_ICON, TF_ICON, fs22Servers, jsonFromXML, log } from "#util";
 import type { FarmFormat } from "#typings";
 
 /** The object for each server a player has been on */
@@ -12,16 +12,16 @@ const serverObj = {
 };
 
 /** The object containing all server data for a given player */
-const serversObj = Object.fromEntries(fsServers.keys().map(x => [x, { type: serverObj, _id: false }]));
+const serversObj = Object.fromEntries(fs22Servers.keys().map(x => [x, { type: serverObj, _id: false }]));
 
-const model = mongoose.model("playerTimes", new mongoose.Schema({
+const model = mongoose.model("playerTimes22", new mongoose.Schema({
     _id: { type: String, required: true },
     uuid: { type: String },
     discordid: { type: String },
     servers: { type: serversObj, required: true, _id: false }
 }, { versionKey: false }));
 
-export class PlayerTimes extends BaseSchema<typeof model> {
+export class PlayerTimes22 extends BaseSchema<typeof model> {
     public constructor(private readonly _client: TClient) {
         super(model);
     }
@@ -66,7 +66,7 @@ export class PlayerTimes extends BaseSchema<typeof model> {
 
     public async fetchFarmData(serverAcro: string) {
         const allData = await this.data.find();
-        const server = fsServers.getPublicOne(serverAcro);
+        const server = fs22Servers.getPublicOne(serverAcro);
         const data = await new FTPActions(server.ftp).get("savegame1/farms.xml");
 
         log("Yellow", `Downloaded farms.xml from ${serverAcro}, crunching...`);

@@ -9,7 +9,7 @@ import {
     WL_ICON,
     formatRequestInit,
     formatTime,
-    fsServers,
+    fs22Servers,
     isMPStaff,
     log
 } from "#util";
@@ -18,7 +18,7 @@ export default new Command<"chatInput">({
     async autocomplete(interaction) {
         switch (interaction.options.getSubcommand()) {
             case "playertimes": {
-                const playerData = await interaction.client.playerTimes.data.find();
+                const playerData = await interaction.client.playerTimes22.data.find();
                 const focused = interaction.options.getFocused().toLowerCase().replace(" ", "");
                 const choices = playerData
                     .filter(x => x._id.toLowerCase().replace(" ", "").startsWith(focused))
@@ -53,7 +53,7 @@ export default new Command<"chatInput">({
             const totalUsedCount: number[] = [];
             const watchList = await interaction.client.watchList.data.find();
 
-            await Promise.allSettled(fsServers.entries().map(async ([serverAcro, server]) => {
+            await Promise.allSettled(fs22Servers.entries().map(async ([serverAcro, server]) => {
                 const serverAcroUp = serverAcro.toUpperCase();
                 let dss: DSSResponse;
 
@@ -102,8 +102,8 @@ export default new Command<"chatInput">({
 
             await interaction.editReply({ embeds: [embed] });
         } else if (subCmd === "playertimes") {
-            const { getTimeData, doc } = interaction.client.playerTimes;
-            const playersData = await interaction.client.playerTimes.data.find();
+            const { getTimeData, doc } = interaction.client.playerTimes22;
+            const playersData = await interaction.client.playerTimes22.data.find();
             const sortedPlayersData = playersData.sort((a, b) =>
                 getTimeData(b).reduce((x, y) => x + y[1].time, 0) - getTimeData(a).reduce((x, y) => x + y[1].time, 0)
             );
@@ -130,7 +130,7 @@ export default new Command<"chatInput">({
 
             if (!playerData) return await interaction.reply(`No data found with that name. [Find out why.](${interaction.client.config.resources.statsNoDataRedirect})`);
 
-            const fsKeys = fsServers.keys();
+            const fsKeys = fs22Servers.keys();
             const playerTimeData = getTimeData(playerData).sort((a, b) => fsKeys.indexOf(a[0]) - fsKeys.indexOf(b[0]));
             const playerTimeDataTotal = playerTimeData.reduce((x, y) => x + y[1].time, 0);
             const formattedTimeData = playerTimeData
@@ -155,7 +155,7 @@ export default new Command<"chatInput">({
                 .setFields(formattedTimeData)
             ] });
         } else {
-            const server = interaction.client.config.fs[subCmd];
+            const server = interaction.client.config.fs22[subCmd];
             const dss = await fetch(server.url + Feeds.dedicatedServerStats(server.code, DSSExtension.JSON), formatRequestInit(2_000, "Stats"))
                 .then(res => res.json() as Promise<DSSResponse>)
                 .catch(() => log("Red", `Stats ${subCmd.toUpperCase()} failed`));
@@ -351,7 +351,7 @@ export default new Command<"chatInput">({
         }
     },
     data: {
-        name: "stats",
+        name: "stats-22",
         description: "Get info on an FS server",
         options: [
             {
@@ -373,7 +373,7 @@ export default new Command<"chatInput">({
                     }
                 ]
             },
-            ...fsServers.entries().map(([serverAcro, { fullName }]) => ({
+            ...fs22Servers.entries().map(([serverAcro, { fullName }]) => ({
                 type: ApplicationCommandOptionType.Subcommand,
                 name: serverAcro,
                 description: `${fullName} server stats`

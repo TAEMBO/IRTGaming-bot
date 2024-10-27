@@ -1,10 +1,10 @@
-import { fsServers } from "#util";
+import { fs22Servers } from "#util";
 import type { Client } from "discord.js";
 
 export function loadLoggers(client: Client) {
     console.log(client.config.toggles);
     console.log(client.config.devWhitelist);
-    console.log(fsServers.keys());
+    console.log(fs22Servers.keys());
 
     if (client.config.toggles.debug) client.on("debug", console.log).on("cacheSweep", console.log);
 

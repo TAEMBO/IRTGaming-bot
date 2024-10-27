@@ -4,7 +4,7 @@ import puppeteer from "puppeteer"; // Credits to Trolly for suggesting this pack
 import { Command, FTPActions } from "#structures";
 import {
     collectAck,
-    fsServers,
+    fs22Servers,
     hasRole,
     isMPStaff,
     jsonFromXML,
@@ -12,8 +12,8 @@ import {
 } from "#util";
 import type { BanFormat, DedicatedServerConfig, FarmFormat } from "#typings";
 
-const publicServersChoices = fsServers.getPublicAll().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));
-const allServersChoices = fsServers.entries().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));
+const publicServersChoices = fs22Servers.getPublicAll().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));
+const allServersChoices = fs22Servers.entries().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));
 
 export default new Command<"chatInput">({
     async run(interaction) {
@@ -26,7 +26,7 @@ export default new Command<"chatInput">({
                 const chosenServer = interaction.options.getString("server", true);
                 const chosenAction = interaction.options.getString("action", true) as "start" | "stop" | "restart";
                 const cachedServer = interaction.client.fsCache[chosenServer];
-                const configServer = interaction.client.config.fs[chosenServer];
+                const configServer = interaction.client.config.fs22[chosenServer];
 
                 if (!interaction.member.roles.cache.hasAny(...configServer.managerRoles)) return await youNeedRole(interaction, "mpManager");
 
@@ -124,7 +124,7 @@ export default new Command<"chatInput">({
 
                 await interaction.deferReply();
 
-                await new FTPActions(fsServers.getPublicOne(chosenServer).ftp).delete(`savegame1/${chosenAction}`);
+                await new FTPActions(fs22Servers.getPublicOne(chosenServer).ftp).delete(`savegame1/${chosenAction}`);
 
                 await interaction.editReply(`Successfully deleted **${chosenAction}** from **${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**`);
 
@@ -133,7 +133,7 @@ export default new Command<"chatInput">({
             case "bans": {
                 const chosenServer = interaction.options.getString("server", true);
                 const chosenAction = interaction.options.getString("action", true) as "dl" | "ul";
-                const ftpActions = new FTPActions(fsServers.getPublicOne(chosenServer).ftp);
+                const ftpActions = new FTPActions(fs22Servers.getPublicOne(chosenServer).ftp);
 
                 if (chosenAction === "dl") {
                     await interaction.deferReply();
@@ -182,13 +182,13 @@ export default new Command<"chatInput">({
                     } else if (key === "timeLastConnected") {
                         const utcDate = new Date(perm);
 
-                        utcDate.setMinutes(utcDate.getMinutes() - utcDate.getTimezoneOffset() + fsServers.getPublicOne(chosenServer).utcDiff);
+                        utcDate.setMinutes(utcDate.getMinutes() - utcDate.getTimezoneOffset() + fs22Servers.getPublicOne(chosenServer).utcDiff);
 
                         return utcDate.toUTCString();
                     } else return perm;
                 }
 
-                const data = await new FTPActions(fsServers.getPublicOne(chosenServer).ftp).get("savegame1/farms.xml");
+                const data = await new FTPActions(fs22Servers.getPublicOne(chosenServer).ftp).get("savegame1/farms.xml");
                 const farmData = jsonFromXML<FarmFormat>(data);
                 const playerData = farmData.farms.farm[0].players.player.find(x =>
                     (name.length === 44 ? x._attributes.uniqueUserId : x._attributes.lastNickname) === name
@@ -204,7 +204,7 @@ export default new Command<"chatInput">({
             case "pair": {
                 const uuid = interaction.options.getString("uuid", true);
                 const user = interaction.options.getUser("user", true);
-                const playerData = await interaction.client.playerTimes.data.findOne({ uuid });
+                const playerData = await interaction.client.playerTimes22.data.findOne({ uuid });
 
                 if (!playerData) return await interaction.reply("No playerTimes data found with that UUID");
 
@@ -218,7 +218,7 @@ export default new Command<"chatInput">({
             };
             case "farms": {
                 const chosenServer = interaction.options.getString("server", true);
-                const serverConfig = interaction.client.config.fs[chosenServer];
+                const serverConfig = interaction.client.config.fs22[chosenServer];
 
                 if (!interaction.member.roles.cache.hasAny(...serverConfig.managerRoles)) return await youNeedRole(interaction, "mpManager");
 
@@ -234,7 +234,7 @@ export default new Command<"chatInput">({
                 await interaction.deferReply();
 
                 const chosenServer = interaction.options.getString("server", true);
-                const data = await new FTPActions(fsServers.getPublicOne(chosenServer).ftp).get("dedicated_server/dedicatedServerConfig.xml");
+                const data = await new FTPActions(fs22Servers.getPublicOne(chosenServer).ftp).get("dedicated_server/dedicatedServerConfig.xml");
                 const pw = jsonFromXML<DedicatedServerConfig>(data).gameserver.settings.game_password._text;
 
                 await interaction.editReply(pw
@@ -371,7 +371,7 @@ export default new Command<"chatInput">({
         };
     },
     data: {
-        name: "mp",
+        name: "mp-22",
         description: "MP management",
         options: [
             {

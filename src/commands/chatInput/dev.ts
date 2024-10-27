@@ -76,8 +76,8 @@ export default new structures.Command<"chatInput">({
                     : "\n" + String(output);
 
                 // Hide credentials
-                const fsPub = utilities.fsServers.getPublicAll();
-                const fsObj = utilities.fsServers.values();
+                const fsPub = utilities.fs22Servers.getPublicAll();
+                const fsObj = utilities.fs22Servers.values();
 
                 for (const credential of [
                     client.config.TOKEN,

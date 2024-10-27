@@ -2,7 +2,7 @@ import { codeBlock, Events, InteractionContextType } from "discord.js";
 import cron from "node-cron";
 import { connectMongoDB, fsLoop, fsLoopAll, ytLoop } from "#actions";
 import { Event } from "#structures";
-import { fsServers, log } from "#util";
+import { fs22Servers, log } from "#util";
 
 export default new Event({
     name: Events.ClientReady,
@@ -84,7 +84,7 @@ export default new Event({
         if (client.config.toggles.fsLoop) setInterval(async () => {
             const watchList = await client.watchList.data.find();
 
-            for (const [serverAcro, server] of fsServers.entries()) await fsLoop(client, watchList, server, serverAcro);
+            for (const [serverAcro, server] of fs22Servers.entries()) await fsLoop(client, watchList, server, serverAcro);
             await fsLoopAll(client, watchList);
         }, 30_000);
 

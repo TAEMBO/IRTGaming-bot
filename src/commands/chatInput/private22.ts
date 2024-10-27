@@ -8,12 +8,12 @@ import {
     roleMention
 } from "discord.js";
 import { Command } from "#structures";
-import { collectAck, fsServers, onPrivateFarms, youNeedRole } from "#util";
+import { collectAck, fs22Servers, onPrivateFarms, youNeedRole } from "#util";
 
 export default new Command<"chatInput">({
     async autocomplete(interaction) {
         const serverAcro = interaction.options.getSubcommandGroup(true);
-        const serverObj = fsServers.getPrivateOne(serverAcro);
+        const serverObj = fs22Servers.getPrivateOne(serverAcro);
         const farmsData = Object.entries(serverObj.farms);
         const farmRoles = farmsData.map(x => interaction.client.mainGuild().roles.cache.get(x[1].roleId)!);
 
@@ -64,7 +64,7 @@ export default new Command<"chatInput">({
     },
     async run(interaction) {
         const serverAcro = interaction.options.getSubcommandGroup(true);
-        const serverObj = fsServers.getPrivateOne(serverAcro);
+        const serverObj = fs22Servers.getPrivateOne(serverAcro);
 
         switch (interaction.options.getSubcommand()) {
             case "member": {
@@ -281,9 +281,9 @@ export default new Command<"chatInput">({
         }
     },
     data: {
-        name: "private",
+        name: "private-22",
         description: "Private server management",
-        options: fsServers.getPrivateAll().map(([serverAcro, server]) => ({
+        options: fs22Servers.getPrivateAll().map(([serverAcro, server]) => ({
             type: ApplicationCommandOptionType.SubcommandGroup,
             name: serverAcro,
             description: `${server.fullName} management`,

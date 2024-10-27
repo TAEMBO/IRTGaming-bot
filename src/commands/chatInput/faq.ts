@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ApplicationCommandOptionType, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import { Command } from "#structures";
-import { fsServers } from "#util";
+import { fs22Servers } from "#util";
 
 export default new Command<"chatInput">({
     async run(interaction) {
@@ -26,7 +26,7 @@ export default new Command<"chatInput">({
                     .setColor(interaction.client.config.EMBED_COLOR)
                     .setImage(interaction.client.config.resources.faqTrollEmbedImage)
                     .setDescription([
-                        `If a player is causing problems on a server, ${isFromTicket ? "let us know" : `don't hesitate to send a report to ${fsServers.getPublicAll().map(([_, x]) => `<#${x.channelId}>`).join(" or ")}`} with:`,
+                        `If a player is causing problems on a server, ${isFromTicket ? "let us know" : `don't hesitate to send a report to ${fs22Servers.getPublicAll().map(([_, x]) => `<#${x.channelId}>`).join(" or ")}`} with:`,
                         "",
                         [
                             "- The name of the player",
@@ -59,7 +59,7 @@ export default new Command<"chatInput">({
                     .setFooter({
                         text: "Note that not every task listed might be available to do at the time, so do your due dilligence to see what needs doing in the moment."
                     })
-                    .setFields(...fsServers.getPublicAll().map(([_, x]) => ({ name: x.fullName, value: "- " + x.todo.join("\n- ") })))
+                    .setFields(...fs22Servers.getPublicAll().map(([_, x]) => ({ name: x.fullName, value: "- " + x.todo.join("\n- ") })))
                 ] });
 
                 break;

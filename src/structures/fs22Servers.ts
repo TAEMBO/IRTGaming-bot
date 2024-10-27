@@ -1,9 +1,9 @@
 import config from "#config" assert { type: "json" };
-import type { FSServer, FSServerPrivate, FSServerPublic } from "#typings";
+import type { FS22Server, FS22ServerPrivate, FS22ServerPublic } from "#typings";
 
 /** A manager for object data for all Farming Simulator servers */
-export class FSServers {
-    public constructor(public data: typeof config.fs) { }
+export class FS22Servers {
+    public constructor(public data: typeof config.fs22) { }
 
     /**
      * @returns An array of server acronyms
@@ -16,21 +16,21 @@ export class FSServers {
      * @returns An array of objects of all servers
      */
     public values() {
-        return Object.values(this.data) as FSServer[];
+        return Object.values(this.data) as FS22Server[];
     }
 
     /**
      * @returns An array of entries of all servers
      */
     public entries() {
-        return Object.entries(this.data) as [string, FSServer][];
+        return Object.entries(this.data) as [string, FS22Server][];
     }
 
     /**
      * @returns An array of entries of all public servers
      */
     public getPublicAll() {
-        return this.entries().filter((x): x is [string, FSServerPublic] => !x[1].isPrivate);
+        return this.entries().filter((x): x is [string, FS22ServerPublic] => !x[1].isPrivate);
     }
 
     /**
@@ -56,7 +56,7 @@ export class FSServers {
      * @returns An array of entries of all private servers
      */
     public getPrivateAll() {
-        return this.entries().filter((x): x is [string, FSServerPrivate] => x[1].isPrivate);
+        return this.entries().filter((x): x is [string, FS22ServerPrivate] => x[1].isPrivate);
     }
 
     /**

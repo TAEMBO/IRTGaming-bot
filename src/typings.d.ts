@@ -13,7 +13,7 @@ import type {
     BannedWords,
     DailyMsgs,
     FMList,
-    PlayerTimes,
+    PlayerTimes22,
     Punishments,
     Reminders,
     TFList,
@@ -40,7 +40,7 @@ declare module "discord.js" {
         readonly userLevels: UserLevels;
         readonly punishments: Punishments;
         readonly watchList: WatchList;
-        readonly playerTimes: PlayerTimes;
+        readonly playerTimes22: PlayerTimes22;
         readonly reminders: Reminders;
         readonly dailyMsgs: DailyMsgs;
 
@@ -131,7 +131,7 @@ export interface CachedInvite {
 }
 
 /** The base object data that is always present */
-interface FSServerBase {
+interface FS22ServerBase {
     /** The unabbreviated name of this server */
     readonly fullName: string;
     /** The channel ID for this server's stats embed, used in FSLoop */
@@ -161,7 +161,7 @@ interface FSServerBase {
 }
 
 /** Object data for a public server */
-export interface FSServerPublic extends FSServerBase {
+export interface FS22ServerPublic extends FS22ServerBase {
     readonly isPrivate: false;
     /** The time zone difference between this server's location and UTC in minutes */
     readonly utcDiff: number;
@@ -170,7 +170,7 @@ export interface FSServerPublic extends FSServerBase {
 }
 
 /** Object data for a private server */
-export interface FSServerPrivate extends FSServerBase {
+export interface FS22ServerPrivate extends FS22ServerBase {
     readonly isPrivate: true;
     readonly category: Snowflake;
     readonly form: string;
@@ -180,7 +180,7 @@ export interface FSServerPrivate extends FSServerBase {
     readonly farms: Record<string, { readonly channelId: Snowflake, readonly roleId: Snowflake }>;
 }
 
-export type FSServer = FSServerPrivate | FSServerPublic;
+export type FS22Server = FS22ServerPrivate | FS22ServerPublic;
 
 /** Structure of config.json */
 export interface Config {
@@ -212,7 +212,7 @@ export interface Config {
         buttonRoles: boolean;
     };
     /** An object for managing and communicating with Farming Simulator servers, keyed by their abbreviated acronym */
-    fs: Record<string, FSServer>;
+    fs22: Record<string, FS22Server>;
     /** A list of user IDs that are considered developers of this bot */
     devWhitelist: Snowflake[];
     whitelist: {

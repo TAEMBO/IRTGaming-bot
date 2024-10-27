@@ -33,7 +33,7 @@ export default class TClient extends Client<true> {
     public readonly userLevels = new Schemas.UserLevels(this);
     public readonly punishments = new Schemas.Punishments(this);
     public readonly watchList = new Schemas.WatchList();
-    public readonly playerTimes = new Schemas.PlayerTimes(this);
+    public readonly playerTimes22 = new Schemas.PlayerTimes22(this);
     public readonly reminders = new Schemas.Reminders(this);
     public readonly dailyMsgs = new Schemas.DailyMsgs();
 

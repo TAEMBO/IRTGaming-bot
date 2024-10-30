@@ -1,20 +1,31 @@
 import { LogColor } from "./logColor.js";
 
+type Changes = { row: number; text: string; }[];
+type Sections = Record<string, { n?: string | null; o?: string | null; rows: number[]; }>;
+
+/**
+ * Adds a highlight to a string
+ *
+ * @param string - The string to highlight
+ * @param color - The color of the highlight to add
+ * @returns The highlighted string with a trailing space
+ */
+function highlight(string: string, color: LogColor) {
+    return color + string + " " + LogColor.Reset;
+}
+
 // Credits to [John Resig](https://johnresig.com/projects/javascript-diff-algorithm/)
 /**
  * Find the differences between two strings
  * @returns `oldText` with ANSI red highlights for removed text, `newText` with ANSI green highlights for added text
  */
-export function formatDiff(oldTextRaw: string, newTextRaw: string) {
-    const oldText = oldTextRaw.replace(/\s+$/, "");
-    const newText = newTextRaw.replace(/\s+$/, "");
-
+export function formatDiff(oldText: string, newText: string) {
     let oldTextChanges = "";
     let newTextChanges = "";
-    const ns: Record<string, { rows: number[]; o?: null | string; n?: null | string }> = {};
-    const os: Record<string, { rows: number[]; o?: null | string; n?: null | string }> = {};
-    const oldChanges: { text: string; row: number }[] = oldText.split(/\s+/).map(x => ({ text: x, row: -1 }));
-    const newChanges: { text: string; row: number }[] = newText.split(/\s+/).map(x => ({ text: x, row: -1 }));
+    const ns: Sections = {};
+    const os: Sections = {};
+    const oldChanges: Changes = oldText.trim().split(/\s+/).map(x => ({ text: x, row: -1 }));
+    const newChanges: Changes = newText.trim().split(/\s+/).map(x => ({ text: x, row: -1 }));
 
     for (let i = 0; i < newChanges.length; i++) {
         if (!ns[newChanges[i].text]) ns[newChanges[i].text] = { rows: [], o: null };
@@ -61,22 +72,28 @@ export function formatDiff(oldTextRaw: string, newTextRaw: string) {
     }
 
     if (!newChanges.length) {
-        for (let i = 0; i < oldChanges.length; i++) oldTextChanges += LogColor.Red + oldChanges[i].text + " " + LogColor.Reset;
+        for (let i = 0; i < oldChanges.length; i++) oldTextChanges += highlight(oldChanges[i].text, LogColor.Red);
     } else {
         if (!newChanges[0].text) {
             for (let i = 0; i < oldChanges.length && !oldChanges[i].text; i++) {
-                oldTextChanges += LogColor.Red + oldChanges[i].text + " " + LogColor.Reset;
+                oldTextChanges += highlight(oldChanges[i].text, LogColor.Red);
             }
+        }
+
+        if (oldChanges.every(x => x.row < 0)) {
+            for (const oldChange of oldChanges) oldTextChanges += highlight(oldChange.text, LogColor.Red);
+        } else if (oldChanges[0].row < 0) {
+            oldTextChanges += highlight(oldChanges[0].text, LogColor.Red);
         }
 
         for (let i = 0; i < newChanges.length; i++) {
             if (newChanges[i].row < 0) {
-                newTextChanges += LogColor.Green + newChanges[i].text + " " + LogColor.Reset;
+                newTextChanges += highlight(newChanges[i].text, LogColor.Green);
             } else {
                 let pre = "";
 
                 for (let n = newChanges[i].row + 1; n < oldChanges.length && oldChanges[n].row < 1; n++) {
-                    pre += LogColor.Red + oldChanges[n].text + " " + LogColor.Reset;
+                    pre += highlight(oldChanges[n].text, LogColor.Red);
                 }
 
                 oldTextChanges += newChanges[i].text + " " + pre;

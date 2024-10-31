@@ -1,4 +1,4 @@
-import { codeBlock, Events, InteractionContextType } from "discord.js";
+import { codeBlock, Events, InteractionContextType, type NewsChannel } from "discord.js";
 import cron from "node-cron";
 import { connectMongoDB, fsLoop, fsLoopAll, ytLoop } from "#actions";
 import { Event } from "#structures";
@@ -49,6 +49,17 @@ export default new Event({
             `<@${client.config.devWhitelist[0]}>`,
             codeBlock("json", JSON.stringify(client.config.toggles, null, 1).slice(1, -1))
         ].join("\n"));
+
+        cron.schedule("0 0 * * *", async () => {
+            const timeDiff = Math.round((1731366000000 - Date.now()) / (1_000 * 60 * 60 * 24));
+            const channel = client.channels.cache.get("1274572874589409365") as NewsChannel;
+            const text = timeDiff
+                ? `# __**${timeDiff} ${timeDiff === 1 ? "day <a:_:771815463868956702>" : "days"}**__ until the release of Farming Simulator <:_:1301098202174455820>!`
+                : "# Farming Simulator <:_:1301098202174455820> has released!!! " + "<a:_:868066380447121418>".repeat(3);
+            const msg = await channel.send(text);
+
+            await msg.crosspost();
+        }, { timezone: "CET" });
 
         // DailyMsgs schedule
         cron.schedule("0 0 * * *", async (date) => {

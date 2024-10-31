@@ -102,5 +102,8 @@ export function formatDiff(oldText: string, newText: string) {
         }
     }
 
+    oldTextChanges = oldTextChanges.replaceAll(LogColor.Reset + LogColor.Red, "");
+    newTextChanges = newTextChanges.replaceAll(LogColor.Reset + LogColor.Green, "");
+
     return { oldText: oldTextChanges, newText: newTextChanges };
 }

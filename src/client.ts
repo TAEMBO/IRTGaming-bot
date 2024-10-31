@@ -62,7 +62,7 @@ export default class TClient extends Client<true> {
             sweepers: {
                 messages: {
                     interval: 10_800, // 3 hours
-                    filter: () => msg => msg.author.bot && msg.createdTimestamp < Date.now() - 900_000 // 15 minutes
+                    filter: () => msg => msg.author?.bot && msg.createdTimestamp < Date.now() - 900_000 // 15 minutes
                 }
             },
             allowedMentions: {

@@ -87,7 +87,7 @@ export class PlayerTimes22 extends BaseSchema<typeof model> {
                     addedUuidCount++;
                 }
 
-                return;
+                continue;
             }
 
             if (playerDatabyUuid._id === player._attributes.lastNickname) continue; // PlayerTimes name matches farm name, no need to update playerTimes data

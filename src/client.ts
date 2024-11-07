@@ -19,7 +19,7 @@ import type { CachedInvite, Config, FSCache, YTCache } from "#typings";
 
 export default class TClient extends Client<true> {
     public readonly config = config as Config;
-    public readonly fsCache: FSCache = {};
+    public readonly fs22Cache: FSCache = {};
     public readonly ytCache: YTCache = {};
     public readonly chatInputCommands = new Collection<string, Command<"chatInput">>();
     public readonly contextMenuCommands = new Collection<string, Command<"message" | "user">>();

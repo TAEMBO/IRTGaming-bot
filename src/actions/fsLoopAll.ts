@@ -8,7 +8,7 @@ export async function fsLoopAll(client: TClient, watchList: TClient["watchList"]
     const totalCount: number[] = [];
     const footerText: string[] = [];
 
-    for (const [serverAcro, server] of Object.entries(client.fsCache)) {
+    for (const [serverAcro, server] of Object.entries(client.fs22Cache)) {
         const playerInfo: string[] = [];
         const serverSlots = server.players.length;
 

@@ -6,7 +6,7 @@ export function loadCaches(client: Client) {
         client.config.ytChannels.map(x => [x.id, null])
     ) satisfies Client["ytCache"]);
 
-    Reflect.set(client, "fsCache", Object.fromEntries(
+    Reflect.set(client, "fs22Cache", Object.fromEntries(
         fs22Servers.keys().map(x => [x, {
             players: [],
             lastAdmin: null,
@@ -15,5 +15,5 @@ export function loadCaches(client: Client) {
             state: null,
             throttled: null,
         }])
-    ) satisfies Client["fsCache"]);
+    ) satisfies Client["fs22Cache"]);
 }

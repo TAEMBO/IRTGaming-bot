@@ -76,7 +76,7 @@ export async function fsLoop(client: TClient, watchList: TClient["watchList"]["d
     let justStopped = false;
     const serverAcroUp = serverAcro.toUpperCase();
     const now = Math.round(Date.now() / 1_000);
-    const fsCacheServer = client.fsCache[serverAcro];
+    const fsCacheServer = client.fs22Cache[serverAcro];
     const justInstantiated = fsCacheServer.state === null;
     const failedEmbed = new EmbedBuilder().setTitle("Host not responding").setColor(client.config.EMBED_COLOR_RED);
     const init = formatRequestInit(7_000, "FSLoop");

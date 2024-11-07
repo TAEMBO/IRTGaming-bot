@@ -134,12 +134,12 @@ export default new Command<"chatInput">({
             const playerTimeData = getTimeData(playerData).sort((a, b) => fsKeys.indexOf(a[0]) - fsKeys.indexOf(b[0]));
             const playerTimeDataTotal = playerTimeData.reduce((x, y) => x + y[1].time, 0);
             const formattedTimeData = playerTimeData
-                .filter(x => interaction.client.fsCache[x[0]])
+                .filter(x => interaction.client.fs22Cache[x[0]])
                 .map(([serverAcro, timeData]) => ({
                     name: serverAcro.toUpperCase(),
                     value: [
                         `Time - ${formatTime(timeData.time * 60 * 1000, 5, { commas: true })}`,
-                        `Last on - ${interaction.client.fsCache[serverAcro].players.some(x => x.name === playerData._id) ? "Right now" : `<t:${timeData.lastOn}:R>`}`
+                        `Last on - ${interaction.client.fs22Cache[serverAcro].players.some(x => x.name === playerData._id) ? "Right now" : `<t:${timeData.lastOn}:R>`}`
                     ].join("\n")
                 }));
 
@@ -162,7 +162,7 @@ export default new Command<"chatInput">({
 
             if (!dss || !dss.slots) return await interaction.reply("Server did not respond");
 
-            const data = interaction.client.fsCache[subCmd].graphPoints;
+            const data = interaction.client.fs22Cache[subCmd].graphPoints;
 
             // handle negative days
             for (const [i, change] of data.entries()) if (change < 0) data[i] = data[i - 1] || data[i + 1] || 0;
@@ -343,8 +343,8 @@ export default new Command<"chatInput">({
                         : interaction.client.config.EMBED_COLOR_GREEN
                 );
 
-            if (!players.some(x => x.isAdmin) && interaction.client.fsCache[subCmd].lastAdmin) embed
-                .setTimestamp(interaction.client.fsCache[subCmd].lastAdmin)
+            if (!players.some(x => x.isAdmin) && interaction.client.fs22Cache[subCmd].lastAdmin) embed
+                .setTimestamp(interaction.client.fs22Cache[subCmd].lastAdmin)
                 .setFooter({ text: "Admin last on" });
 
             await interaction.reply({ embeds: [embed], files: [new AttachmentBuilder(img.toBuffer("image/png"), { name: "FSStats.png" })] });

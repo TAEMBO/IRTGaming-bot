@@ -25,7 +25,7 @@ export default new Command<"chatInput">({
             case "server": {
                 const chosenServer = interaction.options.getString("server", true);
                 const chosenAction = interaction.options.getString("action", true) as "start" | "stop" | "restart";
-                const cachedServer = interaction.client.fsCache[chosenServer];
+                const cachedServer = interaction.client.fs22Cache[chosenServer];
                 const configServer = interaction.client.config.fs22[chosenServer];
 
                 if (!interaction.member.roles.cache.hasAny(...configServer.managerRoles)) return await youNeedRole(interaction, "mpManager");
@@ -120,7 +120,7 @@ export default new Command<"chatInput">({
                 const chosenServer = interaction.options.getString("server", true);
                 const chosenAction = interaction.options.getString("action", true) as "items.xml" | "players.xml";
 
-                if (interaction.client.fsCache[chosenServer].state === 1) return await interaction.reply(`You cannot mop files from **${chosenServer.toUpperCase()}** while it is online`);
+                if (interaction.client.fs22Cache[chosenServer].state === 1) return await interaction.reply(`You cannot mop files from **${chosenServer.toUpperCase()}** while it is online`);
 
                 await interaction.deferReply();
 

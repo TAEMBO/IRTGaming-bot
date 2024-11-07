@@ -26,7 +26,7 @@ import type {
 declare module "discord.js" {
     interface Client {
         readonly config: Config;
-        readonly fsCache: FSCache;
+        readonly fs22Cache: FSCache;
         readonly ytCache: YTCache;
         readonly chatInputCommands: Collection<string, Command<"chatInput">>;
         readonly contextMenuCommands: Collection<string, Command<"message" | "user">>;

@@ -319,13 +319,13 @@ export default new Command<"chatInput">({
                             roles.push(roleId);
                             roles.splice(roles.indexOf(mainRoles.mpFarmManager), 1);
 
-                            return member.nickname!.replace("MP Farm Manager", "MP Jr. Admin");
+                            return member.nickname?.replace("MP Farm Manager", "MP Jr. Admin");
                         },
                         mpSrAdmin() {
                             roles.push(roleId);
                             roles.splice(roles.indexOf(mainRoles.mpJrAdmin), 1);
 
-                            return member.nickname!.replace("MP Jr. Admin", "MP Sr. Admin");
+                            return member.nickname?.replace("MP Jr. Admin", "MP Sr. Admin");
                         }
                     })[roleName]();
 

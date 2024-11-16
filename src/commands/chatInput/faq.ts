@@ -1,6 +1,6 @@
-import { ActionRowBuilder, ApplicationCommandOptionType, ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
+import { ActionRowBuilder, ApplicationCommandOptionType, ButtonBuilder, ButtonStyle, channelMention, EmbedBuilder } from "discord.js";
 import { Command } from "#structures";
-import { fs22Servers } from "#util";
+import { fs22Servers, fs25Servers } from "#util";
 
 export default new Command<"chatInput">({
     async run(interaction) {
@@ -21,12 +21,20 @@ export default new Command<"chatInput">({
                 break;
             };
             case "troll": {
+                const channelMentions = [
+                    ...fs22Servers.getPublicAll().map(x => channelMention(x[1].channelId)),
+                    ...fs25Servers.getPublicAll().map(x => channelMention(x[1].channelId))
+                ];
+
+                const { mp22RulesAndInfo, mp25RulesAndInfo } = interaction.client.config.mainServer.channels;
+                const infoChannels = [channelMention(mp22RulesAndInfo), channelMention(mp25RulesAndInfo)];
+
                 await interaction.reply({ content, embeds: [new EmbedBuilder()
                     .setTitle("Reporting trolls")
                     .setColor(interaction.client.config.EMBED_COLOR)
                     .setImage(interaction.client.config.resources.faqTrollEmbedImage)
                     .setDescription([
-                        `If a player is causing problems on a server, ${isFromTicket ? "let us know" : `don't hesitate to send a report to ${fs22Servers.getPublicAll().map(([_, x]) => `<#${x.channelId}>`).join(" or ")}`} with:`,
+                        `If a player is causing problems on a server, ${isFromTicket ? "let us know" : `don't hesitate to send a report to ${channelMentions.join(" or ")}`} with:`,
                         "",
                         [
                             "- The name of the player",
@@ -36,7 +44,7 @@ export default new Command<"chatInput">({
                         ].join("\n"),
                         "",
                         `Please do not ping or DM individual staff members${isFromTicket ? "" : `, use the <@&${interaction.client.config.mainServer.roles.mpStaff}> tag as mentioned above`}.`,
-                        `Check <#${interaction.client.config.mainServer.channels.mpRulesAndInfo}> to see what a good reason could be for a player report.`
+                        `Check ${infoChannels.join(" or ")} to see what a good reason could be for a player report.`
                     ].join("\n"))
                 ] });
 
@@ -59,7 +67,10 @@ export default new Command<"chatInput">({
                     .setFooter({
                         text: "Note that not every task listed might be available to do at the time, so do your due dilligence to see what needs doing in the moment."
                     })
-                    .setFields(...fs22Servers.getPublicAll().map(([_, x]) => ({ name: x.fullName, value: "- " + x.todo.join("\n- ") })))
+                    .setFields(
+                        ...fs22Servers.getPublicAll().map(([_, x]) => ({ name: x.fullName, value: "- " + x.todo.join("\n- ") })),
+                        ...fs25Servers.getPublicAll().map(([_, x]) => ({ name: x.fullName, value: "- " + x.todo.join("\n- ") }))
+                    )
                 ] });
 
                 break;

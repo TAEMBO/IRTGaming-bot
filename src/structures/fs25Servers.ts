@@ -2,8 +2,8 @@ import config from "#config" with { type: "json" };
 import type { FSServer, FSServerPrivate, FSServerPublic } from "#typings";
 
 /** A manager for object data for all Farming Simulator servers */
-export class FS22Servers {
-    public constructor(public data: typeof config.fs22) { }
+export class FS25Servers {
+    public constructor(public data: typeof config.fs25) { }
 
     /**
      * @returns An array of server acronyms

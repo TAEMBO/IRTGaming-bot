@@ -14,6 +14,7 @@ import type {
     DailyMsgs,
     FMList,
     PlayerTimes22,
+    PlayerTimes25,
     Punishments,
     Reminders,
     TFList,
@@ -27,6 +28,7 @@ declare module "discord.js" {
     interface Client {
         readonly config: Config;
         readonly fs22Cache: FSCache;
+        readonly fs25Cache: FSCache;
         readonly ytCache: YTCache;
         readonly chatInputCommands: Collection<string, Command<"chatInput">>;
         readonly contextMenuCommands: Collection<string, Command<"message" | "user">>;
@@ -41,6 +43,7 @@ declare module "discord.js" {
         readonly punishments: Punishments;
         readonly watchList: WatchList;
         readonly playerTimes22: PlayerTimes22;
+        readonly playerTimes25: PlayerTimes25;
         readonly reminders: Reminders;
         readonly dailyMsgs: DailyMsgs;
 
@@ -131,7 +134,7 @@ export interface CachedInvite {
 }
 
 /** The base object data that is always present */
-interface FS22ServerBase {
+interface FSServerBase {
     /** The unabbreviated name of this server */
     readonly fullName: string;
     /** The channel ID for this server's stats embed, used in FSLoop */
@@ -161,7 +164,7 @@ interface FS22ServerBase {
 }
 
 /** Object data for a public server */
-export interface FS22ServerPublic extends FS22ServerBase {
+export interface FSServerPublic extends FSServerBase {
     readonly isPrivate: false;
     /** The time zone difference between this server's location and UTC in minutes */
     readonly utcDiff: number;
@@ -170,7 +173,7 @@ export interface FS22ServerPublic extends FS22ServerBase {
 }
 
 /** Object data for a private server */
-export interface FS22ServerPrivate extends FS22ServerBase {
+export interface FSServerPrivate extends FSServerBase {
     readonly isPrivate: true;
     readonly category: Snowflake;
     readonly form: string;
@@ -180,7 +183,7 @@ export interface FS22ServerPrivate extends FS22ServerBase {
     readonly farms: Record<string, { readonly channelId: Snowflake, readonly roleId: Snowflake }>;
 }
 
-export type FS22Server = FS22ServerPrivate | FS22ServerPublic;
+export type FSServer = FSServerPrivate | FSServerPublic;
 
 /** Structure of config.json */
 export interface Config {
@@ -199,42 +202,45 @@ export interface Config {
     readonly DAILY_MSGS_DEFAULT: `<${"a" | ""}:${string}:${string}>`;
     readonly DAILY_MSGS_MONDAY: `<${"a" | ""}:${string}:${string}>`;
     readonly DAILY_MSGS_WEEKEND: `<${"a" | ""}:${string}:${string}>`;
-    botPresence: PresenceData;
-    toggles: {
-        commands: boolean;
-        automod: boolean;
-        debug: boolean;
-        logs: boolean;
-        registerCommands: boolean;
-        fsLoop: boolean;
-        ytLoop: boolean;
-        autoResponses: boolean;
-        buttonRoles: boolean;
+    readonly botPresence: PresenceData;
+    readonly toggles: {
+        readonly commands: boolean;
+        readonly automod: boolean;
+        readonly debug: boolean;
+        readonly logs: boolean;
+        readonly registerCommands: boolean;
+        readonly fs22Loop: boolean;
+        readonly fs25Loop: boolean;
+        readonly ytLoop: boolean;
+        readonly autoResponses: boolean;
+        readonly buttonRoles: boolean;
     };
     /** An object for managing and communicating with Farming Simulator servers, keyed by their abbreviated acronym */
-    fs22: Record<string, FS22Server>;
+    readonly fs22: Record<string, FSServer>;
+    /** An object for managing and communicating with Farming Simulator servers, keyed by their abbreviated acronym */
+    readonly fs25: Record<string, FSServer>;
     /** A list of user IDs that are considered developers of this bot */
-    devWhitelist: Snowflake[];
-    whitelist: {
+    readonly devWhitelist: Snowflake[];
+    readonly whitelist: {
         /** A list of channel IDs that automod does not apply to */
-        bannedWords: Snowflake[];
+        readonly bannedWords: Snowflake[];
         /** A list of channel IDs that logs do not emit for */
-        logs: Snowflake[];
+        readonly logs: Snowflake[];
     };
-    ytChannels: {
-        id: string,
-        name: string
+    readonly ytChannels: {
+        readonly id: string,
+        readonly name: string
     }[];
-    resources: Record<keyof typeof config.resources, `https://${string}`>;
-    mainServer: {
+    readonly resources: Record<keyof typeof config.resources, `https://${string}`>;
+    readonly mainServer: {
         /** The ID of the guild that this bot is for */
-        id: Snowflake;
-        fsLoopMsgId: Snowflake;
-        mpStaffRoles: Array<keyof Config["mainServer"]["roles"]>;
-        dcStaffRoles: Array<keyof Config["mainServer"]["roles"]>;
-        roles: Record<keyof typeof config.mainServer.roles, Snowflake>;
-        channels: Record<keyof typeof config.mainServer.channels, Snowflake>;
-        categories: Record<keyof typeof config.mainServer.categories, Snowflake>;
+        readonly id: Snowflake;
+        readonly fsLoopMsgId: Snowflake;
+        readonly mpStaffRoles: Array<keyof Config["mainServer"]["roles"]>;
+        readonly dcStaffRoles: Array<keyof Config["mainServer"]["roles"]>;
+        readonly roles: Record<keyof typeof config.mainServer.roles, Snowflake>;
+        readonly channels: Record<keyof typeof config.mainServer.channels, Snowflake>;
+        readonly categories: Record<keyof typeof config.mainServer.categories, Snowflake>;
     };
 }
 

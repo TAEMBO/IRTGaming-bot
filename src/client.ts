@@ -11,15 +11,16 @@ import {
     type TextChannel,
     type PresenceData
 } from "discord.js";
-import config from "#config" assert { type: "json" };
+import config from "#config" with { type: "json" };
 import * as Schemas from "#schemas";
-import { LogColor } from "#util";
+import { fs22Servers, fs25Servers, LogColor } from "#util";
 import { type Command, RepeatedMessages } from "#structures";
 import type { CachedInvite, Config, FSCache, YTCache } from "#typings";
 
 export default class TClient extends Client<true> {
     public readonly config = config as Config;
-    public readonly fs22Cache: FSCache = {};
+    public readonly fs22Cache: FSCache;
+    public readonly fs25Cache: FSCache;
     public readonly ytCache: YTCache = {};
     public readonly chatInputCommands = new Collection<string, Command<"chatInput">>();
     public readonly contextMenuCommands = new Collection<string, Command<"message" | "user">>();
@@ -34,6 +35,7 @@ export default class TClient extends Client<true> {
     public readonly punishments = new Schemas.Punishments(this);
     public readonly watchList = new Schemas.WatchList();
     public readonly playerTimes22 = new Schemas.PlayerTimes22(this);
+    public readonly playerTimes25 = new Schemas.PlayerTimes25();
     public readonly reminders = new Schemas.Reminders(this);
     public readonly dailyMsgs = new Schemas.DailyMsgs();
 
@@ -74,6 +76,24 @@ export default class TClient extends Client<true> {
                 ]
             }
         });
+
+        this.fs22Cache = Object.fromEntries(fs22Servers.keys().map(x => [x, {
+            players: [],
+            lastAdmin: null,
+            graphPoints: [],
+            completeRes: null,
+            state: null,
+            throttled: null,
+        }]));
+
+        this.fs25Cache = Object.fromEntries(fs25Servers.keys().map(x => [x, {
+            players: [],
+            lastAdmin: null,
+            graphPoints: [],
+            completeRes: null,
+            state: null,
+            throttled: null,
+        }]));
     }
 
     public getChan(channelName: keyof typeof this.config.mainServer.channels) {

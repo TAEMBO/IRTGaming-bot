@@ -1,8 +1,14 @@
 import { codeBlock, Events, InteractionContextType } from "discord.js";
 import cron from "node-cron";
-import { connectMongoDB, fsLoop, fsLoopAll, ytLoop } from "#actions";
+import {
+    crunchFarmData,
+    connectMongoDB,
+    fs22Loop,
+    fs25Loop,fsLoopAll,
+    ytLoop
+} from "#actions";
 import { Event } from "#structures";
-import { fs22Servers, log } from "#util";
+import { fs22Servers, fs25Servers, log } from "#util";
 
 export default new Event({
     name: Events.ClientReady,
@@ -78,13 +84,26 @@ export default new Event({
             } else if (day === 1) {
                 await channel.send(client.config.DAILY_MSGS_MONDAY);
             } else await channel.send(client.config.DAILY_MSGS_DEFAULT);
+
+            if (client.config.toggles.fs25Loop) {
+                const playerTimes = await client.playerTimes25.data.find();
+
+                for (const serverAcro of fs25Servers.keys()) await crunchFarmData(client, playerTimes, serverAcro);
+            }
         }, { timezone: "UTC" });
 
         // Farming Simulator stats loop
-        if (client.config.toggles.fsLoop) setInterval(async () => {
+        if (client.config.toggles.fs22Loop || client.config.toggles.fs25Loop) setInterval(async () => {
             const watchList = await client.watchList.data.find();
 
-            for (const [serverAcro, server] of fs22Servers.entries()) await fsLoop(client, watchList, server, serverAcro);
+            if (client.config.toggles.fs22Loop) {
+                for (const [serverAcro, server] of fs22Servers.entries()) await fs22Loop(client, watchList, server, serverAcro);
+            }
+
+            if (client.config.toggles.fs25Loop) {
+                for (const [serverAcro, server] of fs25Servers.entries()) await fs25Loop(client, watchList, server, serverAcro);
+            }
+
             await fsLoopAll(client, watchList);
         }, 30_000);
 

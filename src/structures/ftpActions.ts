@@ -1,9 +1,9 @@
 import FTPClient from "ftp";
-import type { FS22Server } from "#typings";
 import { stringifyStream } from "#util";
+import type { FSServer } from "#typings";
 
 export class FTPActions extends FTPClient {
-    public constructor(private config: FS22Server["ftp"], private keepAlive = false) {
+    public constructor(private config: FSServer["ftp"], private keepAlive = false) {
         super();
     }
 

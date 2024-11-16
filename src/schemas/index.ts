@@ -2,6 +2,7 @@ export * from "./bannedWords.js";
 export * from "./dailyMsgs.js";
 export * from "./fmList.js";
 export * from "./playerTimes22.js";
+export * from "./playerTimes25.js";
 export * from "./punishments.js";
 export * from "./reminders.js";
 export * from "./tfList.js";

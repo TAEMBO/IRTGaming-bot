@@ -153,6 +153,7 @@ export default new Command<"chatInput">({
                 );
             } else {
                 const activityImages: Record<string, string> = {
+                    "1305894906400739378": "b952a4e5908601db1075642680145630", // Farming Simulator 25
                     "1129504162200166401": "469676e3ad37898c0289283c30c2c882", // Farming Simulator 22
                     "542474758835535872": "37b18c2d5633628d936dd3b2b083785b", // Farming Simulator 19
                     "363426921612181504": "61bed87d2da8e32dd8f24423a9e83323", // Farming Simulator 17

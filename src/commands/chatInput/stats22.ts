@@ -48,7 +48,7 @@ export default new Command<"chatInput">({
         if (subCmd === "all") {
             await interaction.deferReply();
 
-            const embed = new EmbedBuilder().setColor(interaction.client.config.EMBED_COLOR);
+            const embed = new EmbedBuilder().setColor("#2ac1ed");
             const failedFooter: string[] = [];
             const totalUsedCount: number[] = [];
             const watchList = await interaction.client.watchList.data.find();
@@ -118,7 +118,7 @@ export default new Command<"chatInput">({
 
             if (!player) {
                 return await interaction.reply({ embeds: [new EmbedBuilder()
-                    .setColor(interaction.client.config.EMBED_COLOR)
+                    .setColor("#2ac1ed")
                     .setDescription(`Top 50 players with the most time spent on IRTGaming FS22 servers since ${interaction.client.config.PLAYERTIMES_START_DATE}`)
                     .addFields(
                         { name: "\u200b", value: leaderboard(sortedPlayersData.slice(0, 25), true), inline: true },
@@ -144,7 +144,7 @@ export default new Command<"chatInput">({
                 }));
 
             await interaction.reply({ embeds: [new EmbedBuilder()
-                .setColor(interaction.client.config.EMBED_COLOR)
+                .setColor("#2ac1ed")
                 .setTitle([
                     `Player - \`${playerData._id}\`${interaction.client.fmList.cache.includes(playerData._id) ? FM_ICON : ""}${interaction.client.tfList.cache.includes(playerData._id) ? TF_ICON : ""}`,
                     `Leaderboard position - **#${sortedPlayersData.indexOf(playerData) + 1}**`,
@@ -329,10 +329,13 @@ export default new Command<"chatInput">({
             }
 
             const serverSlots = `${dss.slots.used}/${dss.slots.capacity}`;
-            const serverTimeHrs = Math.floor(dss.server.dayTime / 3600 / 1000).toString().padStart(2, "0");
-            const serverTimeMins = Math.floor((dss.server.dayTime / 60 / 1000) % 60).toString().padStart(2, "0");
+            const serverTimeHrs = Math.floor(dss.server.dayTime / 3_600 / 1_000).toString().padStart(2, "0");
+            const serverTimeMins = Math.floor((dss.server.dayTime / 60 / 1_000) % 60).toString().padStart(2, "0");
             const embed = new EmbedBuilder()
-                .setAuthor({ name: `${serverSlots} - ${serverTimeHrs}:${serverTimeMins}` })
+                .setAuthor({
+                    iconURL: "https://cdn.discordapp.com/emojis/834725948058107934.png",
+                    name: `${serverSlots} - ${serverTimeHrs}:${serverTimeMins}`
+                })
                 .setTitle(dss.server.name || "Offline")
                 .setDescription(dss.slots.used ? playerInfo.join("\n"): "*No players online*")
                 .setImage("attachment://FSStats.png")

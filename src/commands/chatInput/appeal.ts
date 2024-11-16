@@ -1,6 +1,6 @@
 import { EmbedBuilder } from "discord.js";
 import { Command } from "#structures";
-import { fs22Servers, isMPStaff } from "#util";
+import { fs22Servers, fs25Servers, isMPStaff } from "#util";
 
 export default new Command<"chatInput">({
     async run(interaction) {
@@ -9,6 +9,8 @@ export default new Command<"chatInput">({
             && !isMPStaff(interaction.member)
         ) return await interaction.reply({ content: "You cannot use this command here", ephemeral: true });
 
+        const serverNames = [fs22Servers.getPublicNames(), fs25Servers.getPublicNames()].join(" or ");
+
         await interaction.reply({ embeds: [new EmbedBuilder()
             .setTitle("MP Support - Ban Appeal")
             .setColor(interaction.client.config.EMBED_COLOR)
@@ -16,7 +18,7 @@ export default new Command<"chatInput">({
                 "To appeal a ban on one of our MP servers, please provide the following information:",
                 "- In-game name at the time of being banned",
                 "- Rough time and date",
-                `- Server name (${fs22Servers.getPublicNames().join(" or ")})`,
+                `- Server name (${serverNames})`,
                 "- If applicable; what you were doing at the time of being banned",
                 "- Anything else which could help with the appeal, e.g. additional names you've used",
                 "\u200b",

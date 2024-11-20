@@ -1,5 +1,5 @@
 import config from "#config" with { type: "json" };
-import type { FSServer, FSServerPrivate, FSServerPublic } from "#typings";
+import type { FSCache, FSServer, FSServerPrivate, FSServerPublic } from "#typings";
 
 /** A manager for object data for all Farming Simulator servers */
 export class FS22Servers {
@@ -76,5 +76,25 @@ export class FS22Servers {
         if (!server) throw new Error(`Private FS server data not found: ${serverAcro}`);
 
         return server[1];
+    }
+
+    /**
+     * Template data for cache used by FSLoop
+     */
+    public get cacheInit(): FSCache {
+        return Object.fromEntries(
+            this.keys().map(serverAcro => (
+                [serverAcro,
+                    {
+                        players: [],
+                        lastAdmin: null,
+                        graphPoints: [],
+                        completeRes: null,
+                        state: null,
+                        throttled: null,
+                    }
+                ]
+            ))
+        );
     }
 }

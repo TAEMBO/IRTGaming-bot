@@ -3,7 +3,6 @@ export * from "./connectMongoDB.js";
 export * from "./fs22Loop.js";
 export * from "./fs25Loop.js";
 export * from "./fsLoopAll.js";
-export * from "./loadCaches.js";
 export * from "./loadCommands.js";
 export * from "./loadEvents.js";
 export * from "./loadLoggers.js";

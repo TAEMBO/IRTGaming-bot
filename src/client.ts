@@ -15,13 +15,13 @@ import config from "#config" with { type: "json" };
 import * as Schemas from "#schemas";
 import { fs22Servers, fs25Servers, LogColor } from "#util";
 import { type Command, RepeatedMessages } from "#structures";
-import type { CachedInvite, Config, FSCache, YTCache } from "#typings";
+import type { CachedInvite, Config, YTCache } from "#typings";
 
 export default class TClient extends Client<true> {
     public readonly config = config as Config;
-    public readonly fs22Cache: FSCache;
-    public readonly fs25Cache: FSCache;
-    public readonly ytCache: YTCache = {};
+    public readonly fs22Cache = fs22Servers.cacheInit;
+    public readonly fs25Cache = fs25Servers.cacheInit;
+    public readonly ytCache: YTCache = Object.fromEntries(config.ytChannels.map(x => [x.id, null]));
     public readonly chatInputCommands = new Collection<string, Command<"chatInput">>();
     public readonly contextMenuCommands = new Collection<string, Command<"message" | "user">>();
     public readonly repeatedMessages = new RepeatedMessages(this);
@@ -76,24 +76,6 @@ export default class TClient extends Client<true> {
                 ]
             }
         });
-
-        this.fs22Cache = Object.fromEntries(fs22Servers.keys().map(x => [x, {
-            players: [],
-            lastAdmin: null,
-            graphPoints: [],
-            completeRes: null,
-            state: null,
-            throttled: null,
-        }]));
-
-        this.fs25Cache = Object.fromEntries(fs25Servers.keys().map(x => [x, {
-            players: [],
-            lastAdmin: null,
-            graphPoints: [],
-            completeRes: null,
-            state: null,
-            throttled: null,
-        }]));
     }
 
     public getChan(channelName: keyof typeof this.config.mainServer.channels) {

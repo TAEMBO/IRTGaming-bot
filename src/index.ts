@@ -4,7 +4,6 @@ import * as Actions from "#actions";
 const client = new TClient();
 
 Actions.loadLoggers(client);
-Actions.loadCaches(client);
 await Actions.loadCommands(client);
 await Actions.loadEvents(client);
 

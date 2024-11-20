@@ -1,4 +1,4 @@
-import { codeBlock, Events, InteractionContextType } from "discord.js";
+import { codeBlock, type EmbedBuilder, Events, InteractionContextType } from "discord.js";
 import cron from "node-cron";
 import {
     crunchFarmData,
@@ -95,13 +95,18 @@ export default new Event({
         // Farming Simulator stats loop
         if (client.config.toggles.fs22Loop || client.config.toggles.fs25Loop) setInterval(async () => {
             const watchList = await client.watchList.data.find();
+            const embedBuffer: EmbedBuilder[] = [];
 
             if (client.config.toggles.fs22Loop) {
-                for (const [serverAcro, server] of fs22Servers.entries()) await fs22Loop(client, watchList, server, serverAcro);
+                for (const serverAcro of fs22Servers.keys()) await fs22Loop(client, watchList, serverAcro, embedBuffer);
             }
 
             if (client.config.toggles.fs25Loop) {
-                for (const [serverAcro, server] of fs25Servers.entries()) await fs25Loop(client, watchList, server, serverAcro);
+                for (const serverAcro of fs25Servers.keys()) await fs25Loop(client, watchList, serverAcro, embedBuffer);
+            }
+
+            for (let i = 0; i < embedBuffer.length; i += 10) {
+                await client.getChan("fsLogs").send({ embeds: embedBuffer.slice(i, i + 10) });
             }
 
             await fsLoopAll(client, watchList);

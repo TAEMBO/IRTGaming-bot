@@ -1,6 +1,7 @@
 export * from "./collectAck.js";
 export * from "./constants.js";
 export * from "./formatDiff.js";
+export * from "./formatUptime.js";
 export * from "./formatRequestInit.js";
 export * from "./formatString.js";
 export * from "./formatTime.js";

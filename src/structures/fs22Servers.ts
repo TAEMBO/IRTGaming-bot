@@ -27,6 +27,18 @@ export class FS22Servers {
     }
 
     /**
+     * @param serverAcro Get a single entry based on its serverAcro
+     * @returns A single FSServer entry
+     */
+    public getOne(serverAcro: string) {
+        const server = this.entries().find(([acro]) => acro === serverAcro);
+
+        if (!server) throw new Error(`FS server value not found: ${serverAcro}`);
+
+        return server[1];
+    }
+
+    /**
      * @returns An array of entries of all public servers
      */
     public getPublicAll() {

@@ -1,4 +1,4 @@
-import { ChannelType, EmbedBuilder, userMention } from "discord.js";
+import { ChannelType, EmbedBuilder, time, userMention } from "discord.js";
 import type TClient from "../client.js";
 import {
     DSSExtension,
@@ -16,12 +16,14 @@ import {
     WL_ICON,
     formatRequestInit,
     formatTime,
+    formatUptime,
+    fs25Servers,
     jsonFromXML,
     log
 } from "#util";
-import type { FSLoopCSG, FSServer } from "#typings";
+import type { FSLoopCSG } from "#typings";
 
-export async function fs25Loop(client: TClient, watchList: TClient["watchList"]["doc"][], server: FSServer, serverAcro: string) {
+export async function fs25Loop(client: TClient, watchList: TClient["watchList"]["doc"][], serverAcro: string, embedBuffer: EmbedBuilder[]) {
     if (client.config.toggles.debug) log("Yellow", "FS25Loop", serverAcro);
 
     function getDecorators(player: PlayerUsed, publicLoc = false) {
@@ -29,58 +31,21 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
 
         decorators += client.fmList.cache.includes(player.name) ? FM_ICON : "";
         decorators += client.tfList.cache.includes(player.name) ? TF_ICON : "";
-        decorators += (client.whitelist.cache.includes(player.name) && !publicLoc) ? ":white_circle:" : ""; // Tag for if player is on whitelist and location is not public
+        decorators += (client.whitelist.cache.includes(player.name) && !publicLoc) ? ":white_circle:" : "";
         decorators += watchList?.some(x => x._id === player.name) ? WL_ICON : "";
 
         return decorators;
-    }
-
-    function wlEmbed(document: TClient["watchList"]["doc"], joinLog: boolean) {
-        const embed = new EmbedBuilder()
-            .setTitle(`WatchList - ${document.isSevere ? "ban" : "watch over"}`)
-            .setDescription(`\`${document._id}\` ${joinLog ? "joined" : "left"} **${serverAcroUp}** at <t:${now}:t>`);
-
-        if (joinLog) {
-            embed.setColor(client.config.EMBED_COLOR_GREEN).setFooter({ text: `Reason: ${document.reason}` });
-        } else {
-            embed.setColor(client.config.EMBED_COLOR_RED);
-        }
-
-        return embed;
-    }
-
-    function logEmbed(player: PlayerUsed, joinLog: boolean) {
-        let description = `\`${player.name}\`${getDecorators(player)} ${joinLog ? "joined" : "left"} **${serverAcroUp}** at <t:${now}:t>`;
-        const playTimeHrs = Math.floor(player.uptime / 60);
-        const playTimeMins = (player.uptime % 60).toString().padStart(2, "0");
-        const embed = new EmbedBuilder()
-            .setColor(joinLog ? client.config.EMBED_COLOR_GREEN : client.config.EMBED_COLOR_RED)
-            .setFooter(player.uptime ? { text: `Playtime: ${playTimeHrs}:${playTimeMins}` } : null);
-
-        if (joinLog && player.uptime > 1) {
-            const comparableUptimes = [player.uptime, player.uptime - 1];
-            const candidate = oldPlayerList
-                .filter(x => !newPlayerList.some(y => y.name === x.name))
-                .find(x => comparableUptimes.includes(x.uptime));
-
-            if (candidate) description += `\nPossible name change from \`${candidate.name}\``;
-        }
-
-        embed.setDescription(description);
-
-        return embed;
     }
 
     let justStarted = false;
     let justStopped = false;
     const serverAcroUp = serverAcro.toUpperCase();
     const now = Math.round(Date.now() / 1_000);
-    const fsCacheServer = client.fs25Cache[serverAcro];
-    const justInstantiated = fsCacheServer.state === null;
-    const failedEmbed = new EmbedBuilder().setTitle("Host not responding").setColor(client.config.EMBED_COLOR_RED);
+    const timestamp = time(new Date(), "t");
+    const fsCacheData: Readonly<typeof client.fs25Cache[string]> = structuredClone(client.fs25Cache[serverAcro]);
+    const server = fs25Servers.getOne(serverAcro);
     const init = formatRequestInit(7_000, "FSLoop");
     const wlChannel = client.getChan("watchList");
-    const logChannel = client.getChan("fsLogs");
     const serverStatusEmbed = (status: string) => new EmbedBuilder()
         .setTitle(`${serverAcroUp} now ${status}`)
         .setColor(client.config.EMBED_COLOR_YELLOW)
@@ -88,14 +53,11 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
     const statsMsgEdit = async (embed: EmbedBuilder, completeRes = true) => {
         const channel = client.channels.cache.get(server.channelId);
 
-        fsCacheServer.completeRes = completeRes;
+        client.fs25Cache[serverAcro].completeRes = completeRes;
 
         if (channel?.type !== ChannelType.GuildText) return log("Red", `FSLoop ${serverAcroUp} invalid channel`);
 
-        await channel.messages.edit(
-            server.messageId,
-            { embeds: [embed] }
-        ).catch(() => log("Red", `FSLoop ${serverAcroUp} invalid msg`));
+        await channel.messages.edit(server.messageId, { embeds: [embed] }).catch(() => log("Red", `FSLoop ${serverAcroUp} invalid msg`));
     };
 
     // Fetch dedicated-server-stats.json and parse
@@ -124,63 +86,64 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
         return jsonFromXML<FSLoopCSG>(await res.text()).careerSavegame;
     })();
 
-    if (!dss || !csg) return await statsMsgEdit(failedEmbed, false); // Request(s) failed
+    // Request(s) failed
+    if (!dss || !csg) {
+        return await statsMsgEdit(
+            new EmbedBuilder().setTitle("Host not responding").setColor(client.config.EMBED_COLOR_RED),
+            false
+        );
+    }
 
     const newPlayerList = filterUnused(dss.slots.players);
-    const oldPlayerList = structuredClone(fsCacheServer.players);
+    const oldPlayerList = structuredClone(fsCacheData.players);
 
     if (!dss.server.name) {
-        if (fsCacheServer.state === 1) {
-            await logChannel.send({ embeds: [serverStatusEmbed("offline")] });
+        if (fsCacheData.state === 1) {
+            embedBuffer.push(serverStatusEmbed("offline"));
 
             justStopped = true;
         }
 
-        fsCacheServer.state = 0;
+        client.fs25Cache[serverAcro].state = 0;
     } else {
-        if (fsCacheServer.state === 0) {
-            await logChannel.send({ embeds: [serverStatusEmbed("online")] });
+        if (fsCacheData.state === 0) {
+            embedBuffer.push(serverStatusEmbed("online"));
 
             justStarted = true;
         }
 
-        fsCacheServer.state = 1;
+        client.fs25Cache[serverAcro].state = 1;
     }
 
     const toThrottle = (() => { // Throttle Discord message updating if no changes in API data
-        if (!fsCacheServer.completeRes) return false;
+        if (!fsCacheData.completeRes) return false;
 
         if (justStarted || justStopped) return false;
 
         if (JSON.stringify(newPlayerList) !== JSON.stringify(oldPlayerList)) return false;
 
-        if (!dss.server.name && fsCacheServer.state === 0) return true;
+        if (!dss.server.name && fsCacheData.state === 0) return true;
 
-        if (dss.server.name && fsCacheServer.state === 1) return true;
+        if (dss.server.name && fsCacheData.state === 1) return true;
 
         return false;
     })();
 
     // Update cache
-    fsCacheServer.throttled = toThrottle;
+    client.fs25Cache[serverAcro].throttled = toThrottle;
 
-    if (fsCacheServer.graphPoints.length >= 120) fsCacheServer.graphPoints.shift();
+    if (fsCacheData.graphPoints.length >= 120) client.fs25Cache[serverAcro].graphPoints.shift();
 
-    fsCacheServer.graphPoints.push(dss.slots.used);
+    client.fs25Cache[serverAcro].graphPoints.push(dss.slots.used);
 
-    if (newPlayerList.some(x => x.isAdmin)) fsCacheServer.lastAdmin = now * 1_000;
+    if (newPlayerList.some(x => x.isAdmin)) client.fs25Cache[serverAcro].lastAdmin = now * 1_000;
 
-    if (!justStarted) fsCacheServer.players = newPlayerList;
+    if (!justStarted) client.fs25Cache[serverAcro].players = newPlayerList;
 
     if (toThrottle) return;
 
     // Create list of players with time data
-    const playerInfo = newPlayerList.map(player => {
-        const playTimeHrs = Math.floor(player.uptime / 60);
-        const playTimeMins = (player.uptime % 60).toString().padStart(2, "0");
-
-        return `\`${player.name}\` ${getDecorators(player, true)} **|** ${playTimeHrs}:${playTimeMins}`;
-    });
+    const playerInfo = newPlayerList.map(player => `\`${player.name}\` ${getDecorators(player, true)} **|** ${formatUptime(player)}`);
 
     // Data crunching for stats embed
     const stats = {
@@ -200,13 +163,13 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
             ? parseFloat(csg.settings.timeScale._text) + "x"
             : "`unavailable`",
         playTime: (() => {
-            const time = parseInt(csg.statistics.playTime._text);
+            const serverPlayTime = parseInt(csg.statistics.playTime._text);
 
-            return time
+            return serverPlayTime
                 ? [
-                    (time / 60).toLocaleString("en-US"),
+                    (serverPlayTime / 60).toLocaleString("en-US"),
                     "hrs (",
-                    formatTime(time * 60 * 1_000, 3, { commas: true }),
+                    formatTime(serverPlayTime * 60 * 1_000, 3, { commas: true }),
                     ")"
                 ].join("")
                 : "`unavailable`";
@@ -260,7 +223,7 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
     const leftPlayers = oldPlayerList.filter(x => !newPlayerList.some(y => y.name === x.name));
     const joinedPlayers = oldPlayerList.length
         ? newPlayerList.filter(x => !oldPlayerList.some(y => y.name === x.name))
-        : justInstantiated
+        : fsCacheData.state === null
             ? []
             : newPlayerList;
 
@@ -273,29 +236,54 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
         if (sendLoginAlert) {
             await client.getChan("juniorAdminChat").send({ embeds: [new EmbedBuilder()
                 .setTitle("UNKNOWN ADMIN LOGIN")
-                .setDescription(`\`${player.name}\` on **${serverAcroUp}** on <t:${now}>`)
+                .setDescription(`\`${player.name}\` on **${serverAcroUp}** at ${timestamp}`)
                 .setColor("#ff4d00")
             ] });
         }
 
-        await logChannel.send({ embeds: [new EmbedBuilder()
+        embedBuffer.push(new EmbedBuilder()
             .setColor(client.config.EMBED_COLOR_YELLOW)
-            .setDescription(`\`${player.name}\`${getDecorators(player)} logged in as admin on **${serverAcroUp}** at <t:${now}:t>`)
-        ] });
+            .setDescription(`\`${player.name}\`${getDecorators(player)} logged in as admin on **${serverAcroUp}** at ${timestamp}`)
+        );
     }
 
     for (const player of leftPlayers) {
-        const inWl = watchList.find(x => x._id === player.name);
-
-        if (inWl) await wlChannel.send({ embeds: [wlEmbed(inWl, false)] });
+        const watchListData = watchList.find(x => x._id === player.name);
+        const embed = new EmbedBuilder()
+            .setDescription(`\`${player.name}\`${getDecorators(player)} left **${serverAcroUp}** at ${timestamp}`)
+            .setColor(client.config.EMBED_COLOR_RED)
+            .setFooter(player.uptime ? { text: `Playtime: ${formatUptime(player)}` } : null);
 
         if (player.uptime) await client.playerTimes25.addPlayerTime(player.name, player.uptime, serverAcro);
 
-        await logChannel.send({ embeds: [logEmbed(player, false)] });
+        if (watchListData) {
+            await wlChannel.send({ embeds: [new EmbedBuilder()
+                .setTitle(`WatchList - ${watchListData.isSevere ? "ban" : "watch over"}`)
+                .setDescription(`\`${watchListData._id}\` left **${serverAcroUp}** at ${timestamp}`)
+                .setColor(client.config.EMBED_COLOR_RED)
+            ] });
+        }
+
+        embedBuffer.push(embed);
     }
 
     for (const player of joinedPlayers) {
         const watchListData = watchList.find(y => y._id === player.name);
+        const embed = new EmbedBuilder().setColor(client.config.EMBED_COLOR_GREEN);
+        let description = `\`${player.name}\`${getDecorators(player)} joined **${serverAcroUp}** at ${timestamp}`;
+
+        if (player.uptime) embed.setFooter({ text: `Playtime: ${formatUptime(player)}` });
+
+        if (player.uptime > 1) {
+            const comparableUptimes = [player.uptime, player.uptime - 1];
+            const candidate = oldPlayerList
+                .filter(x => !newPlayerList.some(y => y.name === x.name))
+                .find(x => comparableUptimes.includes(x.uptime));
+
+            if (candidate) description += `\nPossible name change from \`${candidate.name}\``;
+        }
+
+        embed.setDescription(description);
 
         if (watchListData) {
             const filterWLPings = client.watchListPings.cache.filter(x =>
@@ -304,10 +292,15 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
 
             await wlChannel.send({
                 content: watchListData.isSevere ? filterWLPings.map(userMention).join(" ") : undefined,
-                embeds: [wlEmbed(watchListData, true)]
+                embeds: [new EmbedBuilder()
+                    .setTitle(`WatchList - ${watchListData.isSevere ? "ban" : "watch over"}`)
+                    .setDescription(`\`${watchListData._id}\` joined **${serverAcroUp}** at ${timestamp}`)
+                    .setColor(client.config.EMBED_COLOR_GREEN)
+                    .setFooter({ text: `Reason: ${watchListData.reason}` })
+                ]
             });
         }
 
-        await logChannel.send({ embeds: [logEmbed(player, true)] });
+        embedBuffer.push(embed);
     }
 }

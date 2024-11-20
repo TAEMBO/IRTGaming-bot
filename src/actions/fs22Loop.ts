@@ -16,13 +16,16 @@ import {
     WL_ICON,
     formatRequestInit,
     formatTime,
+    fs22Servers,
     jsonFromXML,
     log
 } from "#util";
-import type { FSLoopCSG, FSServer } from "#typings";
+import type { FSLoopCSG } from "#typings";
 
-export async function fs22Loop(client: TClient, watchList: TClient["watchList"]["doc"][], server: FSServer, serverAcro: string) {
+export async function fs22Loop(client: TClient, watchList: TClient["watchList"]["doc"][], serverAcro: string, embedBuffer: EmbedBuilder[]) {
     if (client.config.toggles.debug) log("Yellow", "FS22Loop", serverAcro);
+
+    const server = fs22Servers.getOne(serverAcro);
 
     function getDecorators(player: PlayerUsed, publicLoc = false) {
         let decorators = player.isAdmin ? ADMIN_ICON : "";
@@ -80,7 +83,6 @@ export async function fs22Loop(client: TClient, watchList: TClient["watchList"][
     const failedEmbed = new EmbedBuilder().setTitle("Host not responding").setColor(client.config.EMBED_COLOR_RED);
     const init = formatRequestInit(7_000, "FSLoop");
     const wlChannel = client.getChan("watchList");
-    const logChannel = client.getChan("fsLogs");
     const serverStatusEmbed = (status: string) => new EmbedBuilder()
         .setTitle(`${serverAcroUp} now ${status}`)
         .setColor(client.config.EMBED_COLOR_YELLOW)
@@ -131,7 +133,7 @@ export async function fs22Loop(client: TClient, watchList: TClient["watchList"][
 
     if (!dss.server.name) {
         if (fsCacheServer.state === 1) {
-            await logChannel.send({ embeds: [serverStatusEmbed("offline")] });
+            embedBuffer.push(serverStatusEmbed("offline"));
 
             justStopped = true;
         }
@@ -139,7 +141,7 @@ export async function fs22Loop(client: TClient, watchList: TClient["watchList"][
         fsCacheServer.state = 0;
     } else {
         if (fsCacheServer.state === 0) {
-            await logChannel.send({ embeds: [serverStatusEmbed("online")] });
+            embedBuffer.push(serverStatusEmbed("online"));
 
             justStarted = true;
         }
@@ -269,10 +271,10 @@ export async function fs22Loop(client: TClient, watchList: TClient["watchList"][
                 .setDescription(`\`${player.name}\` on **${serverAcroUp}** on <t:${now}>`)
                 .setColor("#ff4d00")
             ] });
-        } else await logChannel.send({ embeds: [new EmbedBuilder()
+        } else embedBuffer.push(new EmbedBuilder()
             .setColor(client.config.EMBED_COLOR_YELLOW)
             .setDescription(`\`${player.name}\`${getDecorators(player)} logged in as admin on **${serverAcroUp}** at <t:${now}:t>`)
-        ] });
+        );
     }
 
     // Filter for players leaving
@@ -283,7 +285,7 @@ export async function fs22Loop(client: TClient, watchList: TClient["watchList"][
 
         if (player.uptime) await client.playerTimes22.addPlayerTime(player.name, player.uptime, serverAcro);
 
-        await logChannel.send({ embeds: [logEmbed(player, false)] });
+        embedBuffer.push(logEmbed(player, false));
     }
 
     // Filter for players joining
@@ -307,6 +309,6 @@ export async function fs22Loop(client: TClient, watchList: TClient["watchList"][
             });
         }
 
-        await logChannel.send({ embeds: [logEmbed(player, true)] });
+        embedBuffer.push(logEmbed(player, true));
     }
 }

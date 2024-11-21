@@ -255,8 +255,8 @@ export default new Command<"chatInput">({
                                 allow: PermissionFlagsBits.ViewChannel,
                                 type: OverwriteType.Role
                             },
-                            {
-                                id: interaction.client.config.mainServer.roles.mpManager,
+                            ...serverObj.managerRoles.map(roleId => ({
+                                id: roleId,
                                 allow: [
                                     PermissionFlagsBits.ManageChannels,
                                     PermissionFlagsBits.ManageMessages,
@@ -265,7 +265,7 @@ export default new Command<"chatInput">({
                                     PermissionFlagsBits.ViewChannel,
                                 ],
                                 type: OverwriteType.Role
-                            }
+                            }))
                         ]
                     });
 

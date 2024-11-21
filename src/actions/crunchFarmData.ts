@@ -1,9 +1,11 @@
 import { EmbedBuilder, type Client } from "discord.js";
 import { FTPActions } from "#structures";
-import { fs25Servers, jsonFromXML, FM_ICON, TF_ICON } from "#util";
+import { fs25Servers, jsonFromXML, FM_ICON, TF_ICON, log } from "#util";
 import type { FarmFormat } from "#typings";
 
 export async function crunchFarmData(client: Client, playerTimes: Client["playerTimes25"]["doc"][], serverAcro: string) {
+    log("Yellow", `Farm data cruncher running on ${serverAcro.toUpperCase()}`);
+
     const server = fs25Servers.getPublicOne(serverAcro);
     const data = await new FTPActions(server.ftp).get("savegame1/farms.xml");
     const farmData = jsonFromXML<FarmFormat>(data);

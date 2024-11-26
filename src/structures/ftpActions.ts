@@ -7,14 +7,16 @@ export class FTPActions extends FTPClient {
         super();
     }
 
-    private async login() {
+    public async login() {
+        if (!this.keepAlive) throw new Error("`keepAlive` option not enabled, login is automatic");
+
         super.connect(this.config);
 
         await new Promise<void>(res => this.on("ready", res));
     }
 
     public async get(path: string) {
-        await this.login();
+        if (!this.keepAlive) await this.login();
 
         const data = await new Promise<string>((res, rej) => super.get(
             this.config.path + path,
@@ -27,7 +29,7 @@ export class FTPActions extends FTPClient {
     }
 
     public async put(data: NodeJS.ReadableStream | string | Buffer, path: string) {
-        await this.login();
+        if (!this.keepAlive) await this.login();
 
         await new Promise<void>((res, rej) => super.put(
             data,
@@ -39,7 +41,7 @@ export class FTPActions extends FTPClient {
     }
 
     public async delete(path: string) {
-        await this.login();
+        if (!this.keepAlive) await this.login();
 
         await new Promise<void>((res, rej) => super.delete(
             this.config.path + path,

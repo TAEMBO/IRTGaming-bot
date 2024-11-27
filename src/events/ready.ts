@@ -1,14 +1,9 @@
 import { codeBlock, type EmbedBuilder, Events, InteractionContextType } from "discord.js";
 import cron from "node-cron";
-import {
-    crunchFarmData,
-    connectMongoDB,
-    fs22Loop,
-    fs25Loop,fsLoopAll,
-    ytLoop
-} from "#actions";
+import { crunchFarmData, connectMongoDB, fs22Loop, fs25Loop, fsLoopAll } from "#actions";
 import { Event } from "#structures";
 import { fs22Servers, fs25Servers, log } from "#util";
+import { ytFeed } from "#actions";
 
 export default new Event({
     name: Events.ClientReady,
@@ -112,7 +107,7 @@ export default new Event({
             await fsLoopAll(client, watchList);
         }, 30_000);
 
-        // YouTube upload notifications loop
-        if (client.config.toggles.ytLoop) setInterval(ytLoop.bind(client), 1_800_000);
+        // YouTube upload notifications feed
+        if (client.config.toggles.ytFeed) ytFeed(client);
     }
 });

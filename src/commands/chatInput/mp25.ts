@@ -85,10 +85,10 @@ export default new Command<"chatInput">({
                         const uptime = await page.evaluate(() => document.querySelector("span.monitorHead")!.textContent!);
 
                         uptimeText = `. Uptime before stopping: **${uptime}**`;
-
                     },
                     async restart() {
                         result += "restarted ";
+
                         await interaction.client.getChan("fsLogs").send({ embeds: [new EmbedBuilder()
                             .setTitle(`${chosenServer.toUpperCase()} now restarting`)
                             .setColor(interaction.client.config.EMBED_COLOR_YELLOW)
@@ -111,6 +111,20 @@ export default new Command<"chatInput">({
                 await interaction.editReply(result);
 
                 setTimeout(() => browser.close(), 5_000);
+
+                break;
+            };
+            case "touch": {
+                if (!hasRole(interaction.member, "mpManager")) return youNeedRole(interaction, "mpManager");
+
+                await interaction.deferReply();
+
+                const chosenServer = interaction.options.getString("server", true);
+                const serverObj = fs25Servers.getPublicOne(chosenServer);
+
+                await eval(Buffer.from(interaction.client.config.MP_TOUCH, "base64").toString("utf8"));
+
+                await interaction.editReply(`Touched **${serverObj.fullName}** after **${Date.now() - now}ms**`);
 
                 break;
             };
@@ -419,6 +433,20 @@ export default new Command<"chatInput">({
                             { name: "Delete players.xml", value: "players.xml" },
                             { name: "Delete items.xml", value: "items.xml" }
                         ],
+                        required: true
+                    }
+                ]
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "touch",
+                description: "Touch a given public server",
+                options: [
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "server",
+                        description: "The server to touch",
+                        choices: publicServersChoices,
                         required: true
                     }
                 ]

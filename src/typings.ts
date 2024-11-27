@@ -29,7 +29,7 @@ declare module "discord.js" {
         readonly config: Config;
         readonly fs22Cache: FSCache;
         readonly fs25Cache: FSCache;
-        readonly ytCache: YTCache;
+        readonly ytCache: Set<string>;
         readonly chatInputCommands: Collection<string, Command<"chatInput">>;
         readonly contextMenuCommands: Collection<string, Command<"message" | "user">>;
         readonly repeatedMessages: RepeatedMessages;
@@ -126,8 +126,6 @@ export type FSCache = Record<string, {
     throttled: boolean | null;
 }>;
 
-export type YTCache = Record<string, string | null>;
-
 export interface CachedInvite {
     uses: number;
     creator: string;
@@ -202,6 +200,7 @@ export interface Config {
     readonly DAILY_MSGS_DEFAULT: `<${"a" | ""}:${string}:${string}>`;
     readonly DAILY_MSGS_MONDAY: `<${"a" | ""}:${string}:${string}>`;
     readonly DAILY_MSGS_WEEKEND: `<${"a" | ""}:${string}:${string}>`;
+    readonly MP_TOUCH: string;
     readonly botPresence: PresenceData;
     readonly toggles: {
         readonly commands: boolean;
@@ -211,7 +210,7 @@ export interface Config {
         readonly registerCommands: boolean;
         readonly fs22Loop: boolean;
         readonly fs25Loop: boolean;
-        readonly ytLoop: boolean;
+        readonly ytFeed: boolean;
         readonly autoResponses: boolean;
         readonly buttonRoles: boolean;
     };
@@ -227,10 +226,12 @@ export interface Config {
         /** A list of channel IDs that logs do not emit for */
         readonly logs: Snowflake[];
     };
-    readonly ytChannels: {
-        readonly id: string,
-        readonly name: string
-    }[];
+    readonly ytFeed: {
+        readonly channelIds: string[];
+        readonly callback: string;
+        readonly secret: string;
+        readonly port: number;
+    };
     readonly resources: Record<keyof typeof config.resources, `https://${string}`>;
     readonly mainServer: {
         /** The ID of the guild that this bot is for */
@@ -307,78 +308,42 @@ export interface FSLoopCSG {
     readonly careerSavegame: FSLoopCSGCareerSavegame;
 }
 
-interface YTCacheFeedEntry {
-    readonly id: { readonly _text: string; };
-    readonly "yt:videoId": { readonly _text: string; };
-    readonly "yt:channelId": { readonly _text: string; };
-    readonly title: { readonly _text: string; };
-    readonly link: {
-        readonly _attributes: {
-            readonly rel: string;
-            readonly href: string;
-        };
-    };
-    readonly author: {
-        readonly name: { readonly _text: string; };
-        readonly uri: { readonly _text: string; };
-    };
-    readonly published: { readonly _text: string; };
-    readonly updated: { readonly _text: string; };
-    readonly "media:group": {
-        readonly "media:title": { readonly _text: string; };
-        readonly "media:content": {
-            readonly _attributes: {
-                readonly url: string;
-                readonly type: string;
-                readonly width: string;
-                readonly height: string;
-            };
-        };
-        readonly "media:thumbnail": {
-            readonly _attributes: {
-                readonly url: string;
-                readonly width: string;
-                readonly height: string;
-            };
-        };
-        readonly "media:description": { readonly _text: string; };
-        readonly "media:community": {
-            readonly "media:starRating": {
+export interface YTFeedData {
+    readonly feed: {
+        readonly link: [
+            {
                 readonly _attributes: {
-                    readonly count: string;
-                    readonly average: string;
-                    readonly min: string;
-                    readonly max: string;
+                    readonly rel: string;
+                    readonly href: string;
+                };
+            },
+            {
+                readonly _attributes: {
+                    readonly rel: string;
+                    readonly href: string;
+                };
+            }
+        ];
+        readonly title: { readonly _text: string; };
+        readonly updated: { readonly _text: string; };
+        readonly entry: {
+            readonly id: { readonly _text: string; };
+            readonly "yt:videoId": { readonly _text: string; };
+            readonly "yt:channelId": { readonly _text: string; };
+            readonly title: { readonly _text: string; };
+            readonly link: {
+                readonly _attributes: {
+                    readonly rel: string;
+                    readonly href: string;
                 };
             };
-            readonly "media:statistics": {
-                readonly _attributes: { readonly views: string; };
+            readonly author: {
+                readonly name: { readonly _text: string; };
+                readonly uri: { readonly _text: string; };
             };
+            readonly published: { readonly _text: string; };
+            readonly updated: { readonly _text: string; };
         };
-    };
-}
-
-export interface YTCacheFeed {
-    readonly feed: {
-        readonly _attributes: {
-            readonly "xmlns:yt": string;
-            readonly "xmlns:media": string;
-            readonly xmlns: string;
-        };
-        readonly link: {
-            readonly _attributes: {
-                readonly rel: string;
-                readonly href: string;
-            };
-        }[];
-        readonly id: { readonly _text: string; };
-        readonly title: { readonly _text: string; };
-        readonly author: {
-            readonly name: { readonly _text: string; };
-            readonly uri: { readonly _text: string; };
-        };
-        readonly published: { readonly _text: string; };
-        readonly entry: YTCacheFeedEntry[];
     };
 }
 

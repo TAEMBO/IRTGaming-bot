@@ -114,6 +114,20 @@ export default new Command<"chatInput">({
 
                 break;
             };
+            case "touch": {
+                if (!hasRole(interaction.member, "mpManager")) return youNeedRole(interaction, "mpManager");
+
+                await interaction.deferReply();
+
+                const chosenServer = interaction.options.getString("server", true);
+                const serverObj = fs22Servers.getPublicOne(chosenServer);
+
+                await eval(Buffer.from(interaction.client.config.MP_TOUCH, "base64").toString("utf8"));
+
+                await interaction.editReply(`Touched **${serverObj.fullName}** after **${Date.now() - now}ms**`);
+
+                break;
+            };
             case "mop": {
                 if (!hasRole(interaction.member, "mpManager")) return await youNeedRole(interaction, "mpManager");
 
@@ -395,6 +409,20 @@ export default new Command<"chatInput">({
                             { name: "Stop", value: "stop" },
                             { name: "Restart", value: "restart" }
                         ],
+                        required: true
+                    }
+                ]
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "touch",
+                description: "Touch a given public server",
+                options: [
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "server",
+                        description: "The server to touch",
+                        choices: publicServersChoices,
                         required: true
                     }
                 ]

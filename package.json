@@ -25,15 +25,18 @@
     "mongoose": "^8.2.1",
     "ms": "^2.1.3",
     "node-cron": "^3.0.3",
+    "polka": "^0.5.2",
     "puppeteer": "^22.4.0",
     "xml-js": "^1.6.11"
   },
   "devDependencies": {
     "@eslint/js": "9.9.1",
     "@stylistic/eslint-plugin-js": "^2.8.0",
+    "@types/express-serve-static-core": "^5.0.1",
     "@types/ftp": "^0.3.33",
     "@types/ms": "^0.7.31",
     "@types/node-cron": "^3.0.11",
+    "@types/polka": "^0.5.7",
     "@typescript-eslint/eslint-plugin": "8.4.0",
     "@typescript-eslint/parser": "8.4.0",
     "eslint": "9.9.1",

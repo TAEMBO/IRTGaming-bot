@@ -26,13 +26,16 @@ import type { FSLoopCSG } from "#typings";
 export async function fs25Loop(client: TClient, watchList: TClient["watchList"]["doc"][], serverAcro: string, embedBuffer: EmbedBuilder[]) {
     if (client.config.toggles.debug) log("Yellow", "FS25Loop", serverAcro);
 
-    function getDecorators(player: PlayerUsed, publicLoc = false) {
+    function getDecorators(player: PlayerUsed, isStatsEmbed = false) {
         let decorators = player.isAdmin ? ADMIN_ICON : "";
 
         decorators += client.fmList.cache.includes(player.name) ? FM_ICON : "";
         decorators += client.tfList.cache.includes(player.name) ? TF_ICON : "";
-        decorators += (client.whitelist.cache.includes(player.name) && !publicLoc) ? ":white_circle:" : "";
-        decorators += watchList?.some(x => x._id === player.name) ? WL_ICON : "";
+
+        if (!isStatsEmbed) {
+            decorators += client.whitelist.cache.includes(player.name) ? ":white_circle:" : "";
+            decorators += watchList?.some(x => x._id === player.name) ? WL_ICON : "";
+        }
 
         return decorators;
     }

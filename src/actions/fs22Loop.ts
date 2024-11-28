@@ -27,13 +27,16 @@ export async function fs22Loop(client: TClient, watchList: TClient["watchList"][
 
     const server = fs22Servers.getOne(serverAcro);
 
-    function getDecorators(player: PlayerUsed, publicLoc = false) {
+    function getDecorators(player: PlayerUsed, isStatsEmbed = false) {
         let decorators = player.isAdmin ? ADMIN_ICON : "";
 
         decorators += client.fmList.cache.includes(player.name) ? FM_ICON : "";
         decorators += client.tfList.cache.includes(player.name) ? TF_ICON : "";
-        decorators += (client.whitelist.cache.includes(player.name) && !publicLoc) ? ":white_circle:" : ""; // Tag for if player is on whitelist and location is not public
-        decorators += watchList?.some(x => x._id === player.name) ? WL_ICON : "";
+
+        if (!isStatsEmbed) {
+            decorators += client.whitelist.cache.includes(player.name) ? ":white_circle:" : "";
+            decorators += watchList?.some(x => x._id === player.name) ? WL_ICON : "";
+        }
 
         return decorators;
     }

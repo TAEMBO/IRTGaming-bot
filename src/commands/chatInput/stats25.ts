@@ -6,7 +6,6 @@ import {
     ADMIN_ICON,
     FM_ICON,
     TF_ICON,
-    WL_ICON,
     formatRequestInit,
     formatTime,
     fs25Servers,
@@ -51,7 +50,6 @@ export default new Command<"chatInput">({
             const embed = new EmbedBuilder().setColor("#a0c213");
             const failedFooter: string[] = [];
             const totalUsedCount: number[] = [];
-            const watchList = await interaction.client.watchList.data.find();
 
             await Promise.allSettled(fs25Servers.entries().map(async ([serverAcro, server]) => {
                 const serverAcroUp = serverAcro.toUpperCase();
@@ -82,11 +80,9 @@ export default new Command<"chatInput">({
                 for (const player of filterUnused(dss.slots.players)) {
                     const playTimeHrs = Math.floor(player.uptime / 60);
                     const playTimeMins = (player.uptime % 60).toString().padStart(2, "0");
-                    const inWl = watchList.some(x => x._id === player.name);
                     let decorators = player.isAdmin ? ADMIN_ICON : "";
                     decorators += interaction.client.fmList.cache.includes(player.name) ? FM_ICON : "";
                     decorators += interaction.client.tfList.cache.includes(player.name) ? TF_ICON : "";
-                    decorators += inWl ? WL_ICON : "";
 
                     playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
                 }
@@ -310,18 +306,15 @@ export default new Command<"chatInput">({
             ctx.fillText("time ->", tx, ty);
 
             const playerInfo: string[] = [];
-            const watchList = await interaction.client.watchList.data.find();
             const players = filterUnused(dss.slots.players);
 
             for (const player of players) {
                 const playTimeHrs = Math.floor(player.uptime / 60);
                 const playTimeMins = (player.uptime % 60).toString().padStart(2, "0");
-                const inWl = watchList.some(x => x._id === player.name);
                 let decorators = player.isAdmin ? ADMIN_ICON : "";
 
                 decorators += interaction.client.fmList.cache.includes(player.name) ? FM_ICON : "";
                 decorators += interaction.client.tfList.cache.includes(player.name) ? TF_ICON : "";
-                decorators += inWl ? WL_ICON : "";
 
                 playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
             }

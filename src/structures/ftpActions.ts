@@ -8,8 +8,6 @@ export class FTPActions extends FTPClient {
     }
 
     public async login() {
-        if (!this.keepAlive) throw new Error("`keepAlive` option not enabled, login is automatic");
-
         super.connect(this.config);
 
         await new Promise<void>(res => this.on("ready", res));

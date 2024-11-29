@@ -8,7 +8,7 @@ import {
     roleMention
 } from "discord.js";
 import { Command } from "#structures";
-import { collectAck, fs22Servers, onPrivateFarms, youNeedRole } from "#util";
+import { collectAck, fs22Servers, onPrivate22Farms, youNeedRole } from "#util";
 
 export default new Command<"chatInput">({
     async autocomplete(interaction) {
@@ -22,7 +22,7 @@ export default new Command<"chatInput">({
                 const displayedRoles = interaction.member.roles.cache.hasAny(...serverObj.managerRoles)
                     ? farmRoles
                     : interaction.member.roles.cache.has(serverObj.farmOwnerRole)
-                        ? farmRoles.filter(x => onPrivateFarms(interaction.member, serverAcro).some(y => x.id === y))
+                        ? farmRoles.filter(x => onPrivate22Farms(interaction.member, serverAcro).some(y => x.id === y))
                         : [];
 
                 await interaction.respond(displayedRoles.map(({ name, id }) => ({ name, value: id })));
@@ -101,7 +101,7 @@ export default new Command<"chatInput">({
                         .setColor(interaction.client.config.EMBED_COLOR)
                     ] },
                     async confirm(int) {
-                        const rolesToRemove = onPrivateFarms(member, serverAcro).length === 1
+                        const rolesToRemove = onPrivate22Farms(member, serverAcro).length === 1
                             ? [roleId, serverObj.memberRole]
                             : [roleId];
                         const displayedRoles = rolesToRemove.map(roleMention).join(" and ");

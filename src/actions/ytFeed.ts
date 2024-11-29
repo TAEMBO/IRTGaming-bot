@@ -104,5 +104,5 @@ export function ytFeed(client: Client) {
 
             log("Yellow", `YTFeed lease renew for ${channelId}:`, res.status);
         }
-    }, { timezone: "UTC", runOnInit: true });
+    }, { timezone: "UTC" });
 }

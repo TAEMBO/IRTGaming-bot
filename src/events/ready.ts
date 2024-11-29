@@ -83,7 +83,7 @@ export default new Event({
             if (client.config.toggles.fs25Loop) {
                 const playerTimes = await client.playerTimes25.data.find();
 
-                for (const serverAcro of fs25Servers.keys()) await crunchFarmData(client, playerTimes, serverAcro);
+                for (const [serverAcro] of fs25Servers.getPublicAll()) await crunchFarmData(client, playerTimes, serverAcro);
             }
         }, { timezone: "UTC" });
 

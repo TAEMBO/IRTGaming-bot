@@ -1,10 +1,18 @@
-import { ActionRowBuilder, ApplicationCommandOptionType, ButtonBuilder, ButtonStyle, channelMention, EmbedBuilder } from "discord.js";
+import {
+    ActionRowBuilder,
+    ApplicationCommandOptionType,
+    ButtonBuilder,
+    ButtonStyle,
+    channelMention,
+    EmbedBuilder,
+    hyperlink,
+    roleMention
+} from "discord.js";
 import { Command } from "#structures";
 import { fs22Servers, fs25Servers } from "#util";
 
 export default new Command<"chatInput">({
     async run(interaction) {
-        const isFromTicket = interaction.channel!.parentId === interaction.client.config.mainServer.categories.activeTickets;
         const content = interaction.options.getUser("user", false)?.toString() || "";
 
         switch (interaction.options.getString("question", true)) {
@@ -25,38 +33,39 @@ export default new Command<"chatInput">({
                     ...fs22Servers.getPublicAll().map(x => channelMention(x[1].channelId)),
                     ...fs25Servers.getPublicAll().map(x => channelMention(x[1].channelId))
                 ];
-
+                const isFromTicket = interaction.channel!.parentId === interaction.client.config.mainServer.categories.activeTickets;
                 const { mp22RulesAndInfo, mp25RulesAndInfo } = interaction.client.config.mainServer.channels;
                 const infoChannels = [channelMention(mp22RulesAndInfo), channelMention(mp25RulesAndInfo)];
+                const staffMention = roleMention(interaction.client.config.mainServer.roles.mpStaff);
+                const ticketTextOpening = isFromTicket ? "let us know" : `don't hesitate to send a report to ${channelMentions.join(" or ")}`;
+                const ticketTextClosing = isFromTicket ? "" : `, use the ${staffMention} tag as mentioned above`;
 
                 await interaction.reply({ content, embeds: [new EmbedBuilder()
                     .setTitle("Reporting trolls")
                     .setColor(interaction.client.config.EMBED_COLOR)
                     .setImage(interaction.client.config.resources.faqTrollEmbedImage)
-                    .setDescription([
-                        `If a player is causing problems on a server, ${isFromTicket ? "let us know" : `don't hesitate to send a report to ${channelMentions.join(" or ")}`} with:`,
-                        "",
-                        [
-                            "- The name of the player",
-                            "- What they are doing",
-                            "- A picture or video as proof if possible",
-                            isFromTicket ? "" : `- The <@&${interaction.client.config.mainServer.roles.mpStaff}> tag to notify staff`
-                        ].join("\n"),
-                        "",
-                        `Please do not ping or DM individual staff members${isFromTicket ? "" : `, use the <@&${interaction.client.config.mainServer.roles.mpStaff}> tag as mentioned above`}.`,
+                    .setDescription(
+                        `If a player is causing problems on a server, ${ticketTextOpening} with:\n\n` +
+                        "- The name of the player\n" +
+                        "- What they are doing\n" +
+                        "- A picture or video as proof if possible\n" +
+                        (isFromTicket ? "\n\n" : `- The ${staffMention} tag to notify staff\n\n`) +
+                        `Please do not ping or DM individual staff members${ticketTextClosing}.\n` +
                         `Check ${infoChannels.join(" or ")} to see what a good reason could be for a player report.`
-                    ].join("\n"))
+                    )
                 ] });
 
                 break;
             };
             case "appeal": {
-                await interaction.reply([
-                    `${content} `,
-                    "\n",
-                    "If you would like to appeal your ban on our MP servers, ",
-                    `head to <#${interaction.client.config.mainServer.channels.support}> and open an [MP Support](${interaction.client.config.resources.faqAppealSupportMsg}) ticket to privately discuss it with MP Staff.`
-                ].join(""));
+                const channel = channelMention(interaction.client.config.mainServer.channels.support);
+                const supportHyperlink = hyperlink("MP Support", interaction.client.config.resources.faqAppealSupportMsg);
+
+                await interaction.reply(
+                    `${content} \n` +
+                    "If you would like to appeal your ban on our MP servers, " +
+                    `head to ${channel} and open an ${supportHyperlink} ticket to privately discuss it with MP Staff.`
+                );
 
                 break;
             };
@@ -64,8 +73,9 @@ export default new Command<"chatInput">({
                 await interaction.reply({ content, embeds: [new EmbedBuilder()
                     .setTitle("To-do")
                     .setColor(interaction.client.config.EMBED_COLOR)
-                    .setFooter({
-                        text: "Note that not every task listed might be available to do at the time, so do your due dilligence to see what needs doing in the moment."
+                    .setFooter({ text:
+                        "Note that not every task listed might be available to do at the time, " +
+                        "so do your due dilligence to see what needs doing in the moment."
                     })
                     .setFields(
                         ...fs22Servers.getPublicAll().map(([_, x]) => ({ name: x.fullName, value: "- " + x.todo.join("\n- ") })),
@@ -78,20 +88,23 @@ export default new Command<"chatInput">({
             case "filters": {
                 await interaction.reply({ content, embeds: [new EmbedBuilder()
                     .setColor(interaction.client.config.EMBED_COLOR)
-                    .setTitle("Please note that servers may \"ghost\" and not show up until you've refreshed your MP menu several times.")
+                    .setFooter({ text:
+                        "Please note that servers may \"ghost\" and not show up" +
+                        "until you've refreshed your MP menu several times."
+                    })
                     .setImage(interaction.client.config.resources.faqFiltersEmbedImage)
                 ] });
 
                 break;
             };
             case "equipment": {
-                await interaction.reply([
-                    content,
-                    "Purchasing new equipment can cause large impacts, including:",
-                    "- Increased slot amounts",
-                    "- Increased file sizes, causing larger amounts of lag",
-                    "Therefore, we try to refrain from purchasing any new equipment."
-                ].join("\n"));
+                await interaction.reply(
+                    content +
+                    "\nPurchasing new equipment can cause large impacts, including:" +
+                    "\n- Increased slot amounts" +
+                    "\n- Increased file sizes, causing larger amounts of lag" +
+                    "\nTherefore, we try to refrain from purchasing any new equipment."
+                );
 
                 break;
             };

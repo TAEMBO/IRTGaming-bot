@@ -67,7 +67,9 @@ export default new Command<"chatInput">({
                 try {
                     await page.goto(configServer.url + Routes.webPageLogin(configServer.username, configServer.password), { timeout: 120_000 });
                 } catch (err: any) {
-                    return await interaction.editReply(err.message);
+                    await browser.close();
+
+                    return interaction.editReply(err.message);
                 }
 
                 await interaction.editReply(`Connected to dedi panel for **${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**...`);
@@ -108,9 +110,9 @@ export default new Command<"chatInput">({
 
                 if (uptimeText) result += uptimeText;
 
-                await interaction.editReply(result);
+                await browser.close();
 
-                setTimeout(() => browser.close(), 5_000);
+                await interaction.editReply(result);
 
                 break;
             };

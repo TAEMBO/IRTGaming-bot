@@ -49,6 +49,7 @@ export default [
             "@stylistic/js/max-len": ["error", { "code": 150, "ignoreStrings": true, "ignoreTemplateLiterals": true, "ignoreComments": true }],
             "@stylistic/js/no-trailing-spaces": "error",
             "@stylistic/js/object-curly-spacing": ["error", "always"],
+            "@stylistic/js/linebreak-style": "error",
             "@typescript-eslint/consistent-type-imports": "error",
             "@typescript-eslint/explicit-member-accessibility": "error",
             "@typescript-eslint/naming-convention": [

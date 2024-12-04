@@ -1,13 +1,6 @@
-import {
-    ActionRowBuilder,
-    ApplicationCommandType,
-    ButtonBuilder,
-    ButtonStyle,
-    ComponentType,
-    EmbedBuilder
-} from "discord.js";
+import { ApplicationCommandType, ComponentType, EmbedBuilder, TextInputStyle } from "discord.js";
 import { Command } from "#structures";
-import { isDCStaff, isMPStaff, youNeedRole } from "#util";
+import { isDCStaff, isMPStaff, log, youNeedRole } from "#util";
 
 export default new Command<"message">({
     async run(interaction) {
@@ -15,54 +8,45 @@ export default new Command<"message">({
 
         if (
             interaction.channelId !== interaction.client.config.mainServer.channels.communityIdeas
-            || interaction.targetMessage.embeds[0]?.title !== "Community Idea"
+            || !interaction.targetMessage.embeds[0]?.title?.includes("Community Idea")
         ) return await interaction.reply({ content: "You need to select a message that is a community idea!", ephemeral: true });
 
         const embed = EmbedBuilder.from(interaction.targetMessage.embeds[0]);
-        const msg = await interaction.reply({
-            content: "What do you want to mark this community idea as?",
-            ephemeral: true,
-            fetchReply: true,
+        const id = Date.now();
+
+        await interaction.showModal({
+            custom_id: `modal-${id}`,
+            title: "Mark a community idea",
             components: [
-                new ActionRowBuilder<ButtonBuilder>().addComponents(
-                    new ButtonBuilder().setCustomId("like").setStyle(ButtonStyle.Success).setLabel("Liked by staff"),
-                    new ButtonBuilder().setCustomId("dislike").setStyle(ButtonStyle.Danger).setLabel("Disliked by staff")
-                ),
-                new ActionRowBuilder<ButtonBuilder>().addComponents(
-                    new ButtonBuilder().setCustomId("cancel").setStyle(ButtonStyle.Secondary).setLabel("Cancel")
-                )
+                {
+                    type: ComponentType.ActionRow,
+                    components: [
+                        {
+                            custom_id: "marking",
+                            label: "Mark this community idea (exclude \"by staff\")",
+                            style: TextInputStyle.Short,
+                            placeholder: "e.g. Accepted, rejected, liked, disliked",
+                            type: ComponentType.TextInput
+                        }
+                    ]
+                }
             ]
         });
 
-        msg.createMessageComponentCollector({
-            max: 1,
-            time: 30_000,
-            componentType: ComponentType.Button
-        }).on("collect", async int => {
-            switch (int.customId) {
-                case "like": {
-                    embed.setTitle("Community Idea\n__**Acknowledged and liked by staff**__");
+        let modalInt;
 
-                    await interaction.targetMessage.edit({ embeds: [embed] });
-                    await int.update({ content: "Community idea updated and marked as liked", components: [] });
+        try {
+            modalInt = await interaction.awaitModalSubmit({ time: 120_000, filter: int => int.customId === `modal-${id}` });
+        } catch (err) {
+            return log("Yellow", "Modal premateurly closed");
+        }
 
-                    break;
-                };
-                case "dislike": {
-                    embed.setTitle("Community Idea\n__**Acknowledged and disliked by staff**__");
+        const modalResponse = modalInt.fields.getTextInputValue("marking").replace("by staff", "").trim();
 
-                    await interaction.targetMessage.edit({ embeds: [embed] });
-                    await int.update({ content: "Community idea updated and marked as disliked", components: [] });
+        embed.setTitle(`Community Idea\n__**${modalResponse} by staff**__`);
 
-                    break;
-                };
-                case "cancel": {
-                    await int.update({ content: "Command canceled", components: [] });
-
-                    break;
-                }
-            }
-        });
+        await interaction.targetMessage.edit({ embeds: [embed] });
+        await modalInt.reply({ content: `Community idea updated and marked as \`${modalResponse} by staff\``, ephemeral: true });
     },
     data: {
         name: "Mark Suggestion",

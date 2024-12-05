@@ -13,6 +13,19 @@ import { Command } from "#structures";
 import { formatString, formatUser } from "#util";
 import type { ApplicationRPC } from "#typings";
 
+const activityImages: Record<string, string> = {
+    "1305894906400739378": "b952a4e5908601db1075642680145630", // Farming Simulator 25
+    "1129504162200166401": "469676e3ad37898c0289283c30c2c882", // Farming Simulator 22
+    "542474758835535872": "37b18c2d5633628d936dd3b2b083785b", // Farming Simulator 19
+    "363426921612181504": "61bed87d2da8e32dd8f24423a9e83323", // Farming Simulator 17
+    "451556128992657418": "48cfba535d49560a086fe55de2e2743b", // Farming Simulator 15
+    "356875570916753438": "166fbad351ecdd02d11a3b464748f66b", // Minecraft
+    "356876176465199104": "069d9f4871b5ebd2f62bd342ce6ba77f", // Grand Theft Auto V
+    "363445589247131668": "f2b60e350a2097289b3b0b877495e55f", // Roblox
+    "356876590342340608": "554af7ef210877b5f04fd1b727a3746e", // Rainbow Six Siege
+    "432980957394370572": "c1864b38910c209afd5bf6423b672022", // Fortnite
+};
+
 export default new Command<"chatInput">({
     async run(interaction) {
         async function getApplicationData(id: string) {
@@ -152,19 +165,6 @@ export default new Command<"chatInput">({
                     ].join(""))
                 );
             } else {
-                const activityImages: Record<string, string> = {
-                    "1305894906400739378": "b952a4e5908601db1075642680145630", // Farming Simulator 25
-                    "1129504162200166401": "469676e3ad37898c0289283c30c2c882", // Farming Simulator 22
-                    "542474758835535872": "37b18c2d5633628d936dd3b2b083785b", // Farming Simulator 19
-                    "363426921612181504": "61bed87d2da8e32dd8f24423a9e83323", // Farming Simulator 17
-                    "451556128992657418": "48cfba535d49560a086fe55de2e2743b", // Farming Simulator 15
-                    "356875570916753438": "166fbad351ecdd02d11a3b464748f66b", // Minecraft
-                    "356876176465199104": "069d9f4871b5ebd2f62bd342ce6ba77f", // Grand Theft Auto V
-                    "363445589247131668": "f2b60e350a2097289b3b0b877495e55f", // Roblox
-                    "356876590342340608": "554af7ef210877b5f04fd1b727a3746e", // Rainbow Six Siege
-                    "432980957394370572": "c1864b38910c209afd5bf6423b672022", // Fortnite
-                };
-
                 let activityImage: string | null | undefined = activityImages[activity.applicationId ?? ""] as string | undefined;
 
                 if (activityImage) activityImage = `https://cdn.discordapp.com/app-icons/${activity.applicationId}/${activityImage}`;

@@ -1,24 +1,25 @@
 import { ApplicationCommandOptionType, EmbedBuilder, PermissionFlagsBits, PermissionsBitField, time } from "discord.js";
 import { Command } from "#structures";
 
+const keyPermissions = [
+    PermissionFlagsBits.Administrator,
+    PermissionFlagsBits.KickMembers,
+    PermissionFlagsBits.BanMembers,
+    PermissionFlagsBits.ManageChannels,
+    PermissionFlagsBits.ManageGuild,
+    PermissionFlagsBits.ViewAuditLog,
+    PermissionFlagsBits.ManageMessages,
+    PermissionFlagsBits.ManageNicknames,
+    PermissionFlagsBits.MentionEveryone,
+    PermissionFlagsBits.UseExternalEmojis,
+    PermissionFlagsBits.ManageRoles,
+    PermissionFlagsBits.ManageGuildExpressions,
+    PermissionFlagsBits.ModerateMembers
+];
+
 export default new Command<"chatInput">({
     async run(interaction) {
         const role = interaction.options.getRole("role", true);
-        const keyPermissions = [
-            PermissionFlagsBits.Administrator,
-            PermissionFlagsBits.KickMembers,
-            PermissionFlagsBits.BanMembers,
-            PermissionFlagsBits.ManageChannels,
-            PermissionFlagsBits.ManageGuild,
-            PermissionFlagsBits.ViewAuditLog,
-            PermissionFlagsBits.ManageMessages,
-            PermissionFlagsBits.ManageNicknames,
-            PermissionFlagsBits.MentionEveryone,
-            PermissionFlagsBits.UseExternalEmojis,
-            PermissionFlagsBits.ManageRoles,
-            PermissionFlagsBits.ManageGuildExpressions,
-            PermissionFlagsBits.ModerateMembers
-        ];
         const roleMembers = role.members.map(member => `**${member.user.tag}**`).join("\n");
         const includedPermissions = role.permissions.has(PermissionFlagsBits.Administrator)
             ? [PermissionFlagsBits.Administrator]

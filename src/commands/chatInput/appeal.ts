@@ -2,14 +2,14 @@ import { EmbedBuilder } from "discord.js";
 import { Command } from "#structures";
 import { fs22Servers, fs25Servers, isMPStaff } from "#util";
 
+const serverNames = [fs22Servers.getPublicNames(), fs25Servers.getPublicNames()].join(" or ");
+
 export default new Command<"chatInput">({
     async run(interaction) {
         if (
             interaction.channel!.parentId !== interaction.client.config.mainServer.categories.activeTickets
             && !isMPStaff(interaction.member)
         ) return await interaction.reply({ content: "You cannot use this command here", ephemeral: true });
-
-        const serverNames = [fs22Servers.getPublicNames(), fs25Servers.getPublicNames()].join(" or ");
 
         await interaction.reply({ embeds: [new EmbedBuilder()
             .setTitle("MP Support - Ban Appeal")

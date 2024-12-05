@@ -1,9 +1,9 @@
-import { ApplicationCommandOptionType, Collection, EmbedBuilder, type Message, type User } from "discord.js";
+import { ApplicationCommandOptionType, EmbedBuilder, type Message, type User } from "discord.js";
 import { Command } from "#structures";
 import { formatString } from "#util";
 
 const possibleMoves = ["rock", "paper", "scissors"] as const;
-const rpsInstances = new Collection<string, RPSInstance>();
+const rpsInstances = new Map<string, RPSInstance>();
 
 type Move = (typeof possibleMoves)[number];
 

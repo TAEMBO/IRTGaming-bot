@@ -11,6 +11,15 @@ import {
 import { Command } from "#structures";
 import { fs22Servers, fs25Servers } from "#util";
 
+const channelMentions = [
+    ...fs22Servers.getPublicAll().map(x => channelMention(x[1].channelId)),
+    ...fs25Servers.getPublicAll().map(x => channelMention(x[1].channelId))
+];
+const toDoDetails = [
+    ...fs22Servers.getPublicAll().map(([_, x]) => ({ name: x.fullName, value: "- " + x.todo.join("\n- ") })),
+    ...fs25Servers.getPublicAll().map(([_, x]) => ({ name: x.fullName, value: "- " + x.todo.join("\n- ") }))
+];
+
 export default new Command<"chatInput">({
     async run(interaction) {
         const content = interaction.options.getUser("user", false)?.toString() || "";
@@ -29,10 +38,6 @@ export default new Command<"chatInput">({
                 break;
             };
             case "troll": {
-                const channelMentions = [
-                    ...fs22Servers.getPublicAll().map(x => channelMention(x[1].channelId)),
-                    ...fs25Servers.getPublicAll().map(x => channelMention(x[1].channelId))
-                ];
                 const isFromTicket = interaction.channel!.parentId === interaction.client.config.mainServer.categories.activeTickets;
                 const { mp22RulesAndInfo, mp25RulesAndInfo } = interaction.client.config.mainServer.channels;
                 const infoChannels = [channelMention(mp22RulesAndInfo), channelMention(mp25RulesAndInfo)];
@@ -77,10 +82,7 @@ export default new Command<"chatInput">({
                         "Note that not every task listed might be available to do at the time, " +
                         "so do your due dilligence to see what needs doing in the moment."
                     })
-                    .setFields(
-                        ...fs22Servers.getPublicAll().map(([_, x]) => ({ name: x.fullName, value: "- " + x.todo.join("\n- ") })),
-                        ...fs25Servers.getPublicAll().map(([_, x]) => ({ name: x.fullName, value: "- " + x.todo.join("\n- ") }))
-                    )
+                    .setFields(toDoDetails)
                 ] });
 
                 break;

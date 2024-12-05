@@ -2,14 +2,14 @@ import { ApplicationCommandOptionType, EmbedBuilder, type GuildMember } from "di
 import { Command } from "#structures";
 import { FM_ICON, TF_ICON } from "#util";
 
+function sortMembers(a: GuildMember, b: GuildMember) {
+    if (a.displayName.toLowerCase() < b.displayName.toLowerCase()) return -1;
+    if (a.displayName.toLowerCase() > b.displayName.toLowerCase()) return 1;
+    return 0;
+}
+
 export default new Command<"chatInput">({
     async run(interaction) {
-        function sortMembers(a: GuildMember, b: GuildMember) {
-            if (a.displayName.toLowerCase() < b.displayName.toLowerCase()) return -1;
-            if (a.displayName.toLowerCase() > b.displayName.toLowerCase()) return 1;
-            return 0;
-        }
-
         const embed = new EmbedBuilder();
 
         switch (interaction.options.getSubcommand()) {

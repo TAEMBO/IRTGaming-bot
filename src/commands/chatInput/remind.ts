@@ -11,16 +11,16 @@ import ms from "ms";
 import { Command } from "#structures";
 import { collectAck } from "#util";
 
+function formatTime(time: number) {
+    return `<t:${Math.round(time / 1000)}> (<t:${Math.round(time / 1000)}:R>)`;
+}
+
+function rplText(content: string) {
+    return { content, embeds: [], components: [] };
+}
+
 export default new Command<"chatInput">({
     async run(interaction) {
-        function formatTime(time: number) {
-            return `<t:${Math.round(time / 1000)}> (<t:${Math.round(time / 1000)}:R>)`;
-        }
-
-        function rplText(content: string) {
-            return { content, embeds: [], components: [] };
-        }
-
         async function promptDeletion(
             reminder: typeof interaction.client.reminders.doc,
             ackInt: StringSelectMenuInteraction<"cached"> | ChatInputCommandInteraction<"cached">

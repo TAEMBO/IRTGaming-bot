@@ -3,9 +3,10 @@ import os from "node:os";
 import { Command } from "#structures";
 import { formatTime } from "#util";
 
+const colunms = ["Command Name", "Uses"] as const;
+
 export default new Command<"chatInput">({
     async run(interaction) {
-        const colunms = ["Command Name", "Uses"] as const;
         const includedCommands = interaction.client.chatInputCommands.filter(x => x.uses).sort((a, b) => b.uses - a.uses);
 
         if (!includedCommands.size) return await interaction.reply(

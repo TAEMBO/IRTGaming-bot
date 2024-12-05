@@ -1,4 +1,4 @@
-import { EmbedBuilder } from "discord.js";
+import { codeBlock, EmbedBuilder } from "discord.js";
 import type TClient from "../client.js";
 import { ADMIN_ICON, FM_ICON, TF_ICON, WL_ICON, log } from "#util";
 
@@ -75,7 +75,7 @@ export async function fsLoopAll(client: TClient, watchList: TClient["watchList"]
     if (footerText25.length) fs25Embed.setFooter({ text: footerText25.join(", ") });
 
     await client.getChan("juniorAdminChat").messages.edit(client.config.mainServer.fsLoopMsgId, {
-        content: `\`\`\`js\n["${client.whitelist.cache.join(", ")}"]\`\`\`Updates every 30 seconds`,
+        content: `${codeBlock("js", `["${client.whitelist.cache.join(", ")}"]`)}Updates every 30 seconds`,
         embeds: [
             fs22Embed.setTitle(totalCount22.reduce((a, b) => a + b, 0) + " online"),
             fs25Embed.setTitle(totalCount25.reduce((a, b) => a + b, 0) + " online")

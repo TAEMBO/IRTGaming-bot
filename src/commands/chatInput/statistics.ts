@@ -1,4 +1,4 @@
-import { EmbedBuilder, version } from "discord.js";
+import { codeBlock, EmbedBuilder, version } from "discord.js";
 import os from "node:os";
 import { Command } from "#structures";
 import { formatTime } from "#util";
@@ -46,8 +46,8 @@ export default new Command<"chatInput">({
                 } else fieldValue += row;
             }
 
-            embed.addFields({ name: "\u200b", value: `\`\`\`\n${fieldValue}\`\`\`` });
-        } else embed.addFields({ name: "\u200b", value: `\`\`\`\n${rows.join("")}\`\`\`` });
+            embed.addFields({ name: "\u200b", value: codeBlock(fieldValue) });
+        } else embed.addFields({ name: "\u200b", value: codeBlock(rows.join("")) });
 
         const ramUsage = [
             process.memoryUsage().heapUsed,

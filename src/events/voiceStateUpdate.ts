@@ -1,4 +1,4 @@
-import { EmbedBuilder, Events } from "discord.js";
+import { channelMention, EmbedBuilder, Events } from "discord.js";
 import { formatUser } from "#util";
 import { Event } from "#structures";
 
@@ -20,14 +20,14 @@ export default new Event({
             embed
                 .setTitle("Member Joined VC")
                 .setColor(newState.client.config.EMBED_COLOR_GREEN)
-                .addFields({ name: "🔹 Channel", value: `<#${newState.channelId}>` });
+                .addFields({ name: "🔹 Channel", value: channelMention(newState.channelId) });
 
             await channel.send({ embeds: [embed] });
         } else if (oldState.channelId && !newState.channelId) { // Left VC
             embed
                 .setTitle("Member Left VC")
                 .setColor(newState.client.config.EMBED_COLOR_RED)
-                .addFields({ name: "🔹 Channel", value: `<#${oldState.channelId}>` });
+                .addFields({ name: "🔹 Channel", value: channelMention(oldState.channelId) });
 
             await channel.send({ embeds: [embed] });
         } else if (oldState.channelId && newState.channelId && newState.channelId !== oldState.channelId) { // Moved VC
@@ -35,8 +35,8 @@ export default new Event({
                 .setTitle("Member Moved VC")
                 .setColor(newState.client.config.EMBED_COLOR)
                 .addFields(
-                    { name: "🔹 Old Channel", value: `<#${oldState.channelId}>` },
-                    { name: "🔹 New Channel", value: `<#${newState.channelId}>` }
+                    { name: "🔹 Old Channel", value: channelMention(oldState.channelId) },
+                    { name: "🔹 New Channel", value: channelMention(newState.channelId) }
                 );
 
             await channel.send({ embeds: [embed] });

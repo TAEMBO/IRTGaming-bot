@@ -1,4 +1,4 @@
-import type { CommandInteraction } from "discord.js";
+import { type CommandInteraction, roleMention } from "discord.js";
 import type { Config } from "#typings";
 
 /**
@@ -8,7 +8,7 @@ import type { Config } from "#typings";
  */
 export function youNeedRole(interaction: CommandInteraction, role: keyof Config["mainServer"]["roles"]) {
     return interaction.reply({
-        content: `You need the <@&${interaction.client.config.mainServer.roles[role]}> role to use this command`,
+        content: `You need the ${roleMention(interaction.client.config.mainServer.roles[role])} role to use this command`,
         ephemeral: true
     });
 }

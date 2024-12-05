@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, AttachmentBuilder, EmbedBuilder } from "discord.js";
+import { ApplicationCommandOptionType, AttachmentBuilder, EmbedBuilder, userMention } from "discord.js";
 import canvas from "@napi-rs/canvas";
 import { Command } from "#structures";
 
@@ -185,7 +185,7 @@ export default new Command<"chatInput">({
             .sort((a, b) => b.messages - a.messages)
             .filter((x) => !x.hasLeft)
             .slice(0, 10)
-            .map((x, i) => `\`${i + 1}.\` <@${x._id}>: ${x.messages.toLocaleString("en-US")}`)
+            .map((x, i) => `\`${i + 1}.\` ${userMention(x._id)}: ${x.messages.toLocaleString("en-US")}`)
             .join("\n");
 
         await interaction.reply({

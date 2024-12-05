@@ -9,7 +9,9 @@ import {
     Options,
     Partials,
     type TextChannel,
-    type PresenceData
+    type PresenceData,
+    userMention,
+    codeBlock
 } from "discord.js";
 import config from "#config" with { type: "json" };
 import * as Schemas from "#schemas";
@@ -129,11 +131,11 @@ export default class TClient extends Client<true> {
         if (!channel) return;
 
         await channel.send({
-            content: `<@${this.config.devWhitelist[0]}>`,
+            content: userMention(this.config.devWhitelist[0]),
             embeds: [new EmbedBuilder()
-                .setTitle(`Error Caught - ${error.message.slice(0, 240)}`)
+                .setTitle(error.message.slice(0, 255))
                 .setColor("#420420")
-                .setDescription(`\`\`\`ansi\n${formattedErr}\`\`\``)
+                .setDescription(codeBlock("ansi", formattedErr!))
                 .setTimestamp()
             ]
         });

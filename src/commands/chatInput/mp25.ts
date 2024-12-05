@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, AttachmentBuilder, EmbedBuilder } from "discord.js";
+import { ApplicationCommandOptionType, AttachmentBuilder, codeBlock, EmbedBuilder } from "discord.js";
 import { Routes } from "farming-simulator-types/2025";
 import puppeteer from "puppeteer"; // Credits to Trolly for suggesting this package
 import { Command, FTPActions } from "#structures";
@@ -211,7 +211,7 @@ export default new Command<"chatInput">({
                 );
 
                 await interaction.editReply(playerData
-                    ? "```\n" + Object.entries(playerData._attributes).map(x => x[0].padEnd(18, " ") + permIcon(x[1], x[0])).join("\n") + "```"
+                    ? codeBlock(Object.entries(playerData._attributes).map(x => x[0].padEnd(18, " ") + permIcon(x[1], x[0])).join("\n"))
                     : "No green farm data found with that name/UUID"
                 );
 

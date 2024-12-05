@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, EmbedBuilder, PermissionFlagsBits } from "discord.js";
+import { ApplicationCommandOptionType, EmbedBuilder, PermissionFlagsBits, userMention } from "discord.js";
 import { Command } from "#structures";
 import { formatString, formatTime, formatUser } from "#util";
 
@@ -61,7 +61,7 @@ export default new Command<"chatInput">({
                     value: [
                         `> Reason: \`${punishment.reason}\``,
                         punishment.duration ? `\n> Duration: ${formatTime(punishment.duration, 3)}` : "",
-                        `\n> Moderator: <@${punishment.moderator}>`,
+                        `\n> Moderator: ${userMention(punishment.moderator)}`,
                         punishment.expired ? `\n> __Overwritten by Case #${punishments.find(x => x.cancels === punishment._id)?._id}__` : "",
                         punishment.cancels ? `\n> __Overwrites Case #${punishment.cancels}__` : ""].join("")
                 }));

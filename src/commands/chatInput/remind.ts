@@ -3,6 +3,7 @@ import {
     type StringSelectMenuInteraction,
     ActionRowBuilder,
     ApplicationCommandOptionType,
+    codeBlock,
     ComponentType,
     EmbedBuilder,
     StringSelectMenuBuilder,
@@ -116,7 +117,7 @@ export default new Command<"chatInput">({
                             components: [],
                             embeds: [new EmbedBuilder()
                                 .setTitle("Reminder set")
-                                .setDescription(`\n\`\`\`${reminderText}\`\`\`\n${formatTime(timeToRemind)}`)
+                                .setDescription(codeBlock(reminderText) + "\n" + formatTime(timeToRemind))
                                 .setColor(interaction.client.config.EMBED_COLOR)
                             ]
                         });

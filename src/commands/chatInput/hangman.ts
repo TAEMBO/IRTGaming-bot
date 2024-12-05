@@ -13,7 +13,7 @@ export default new Command<"chatInput">({
         const phrase = interaction.options.getString("phrase", true).toLowerCase();
         const wordOrPhrase = phrase.includes(" ") ? "phrase" : "word";
         const botMsg = await interaction.followUp({
-            content: `A hangman game has been started by *${interaction.user.tag}*!\nAnyone can guess letters${phrase.includes(" ") ? ", a word, or the full phrase": " or the full word"} by doing \`guess [letter${phrase.includes(" ") ? ", word, or phrase" : " or word"}]\`\nThe ${wordOrPhrase} is:\n\`\`\`\n${hidePhrase()}\n\`\`\``,
+            content: `A hangman game has been started by *${interaction.user.tag}*!\nAnyone can guess letters${phrase.includes(" ") ? ", a word, or the full phrase": " or the full word"} by doing \`guess [letter${phrase.includes(" ") ? ", word, or phrase" : " or word"}]\`\nThe ${wordOrPhrase} is:\n${codeBlock(hidePhrase())}`,
             fetchReply: true
         });
         const guessCollector = interaction.channel!.createMessageCollector({ filter: msg => !msg.author.bot && msg.content.toLowerCase().startsWith("guess") });
@@ -22,7 +22,7 @@ export default new Command<"chatInput">({
 
         async function phraseUpdate() {
             const hideWordResult = hidePhrase();
-            let text = `A part of the ${wordOrPhrase} has been revealed, this is what it looks like now:\n\`\`\`\n${hideWordResult}\n\`\`\``;
+            let text = `A part of the ${wordOrPhrase} has been revealed, this is what it looks like now:\n${codeBlock(hideWordResult)}`;
 
             if (!hiddenLetters) {
                 text = `The whole ${wordOrPhrase} has been revealed! The hangman game ends with the ${wordOrPhrase} being:\n${codeBlock(phrase)}`;
@@ -135,7 +135,7 @@ export default new Command<"chatInput">({
             ];
 
             if (fouls === 7) {
-                loseText = `\nThe poor fella got hung. You lost the game. The ${wordOrPhrase} was:\n\`\`\`\n${phrase}\n\`\`\``;
+                loseText = `\nThe poor fella got hung. You lost the game. The ${wordOrPhrase} was:\n${codeBlock(phrase)}`;
                 guessCollector.stop();
                 clearInterval(interval);
             }

@@ -1,15 +1,14 @@
-import { ApplicationCommandOptionType, EmbedBuilder, ThreadAutoArchiveDuration } from "discord.js";
+import { ApplicationCommandOptionType, channelMention, EmbedBuilder, ThreadAutoArchiveDuration } from "discord.js";
 import { Command } from "#structures";
 
 export default new Command<"chatInput">({
     async run(interaction) {
         const suggestion = interaction.options.getString("suggestion", true);
+        const { communityIdeas } = interaction.client.config.mainServer.channels;
 
-        if (interaction.channelId !== interaction.client.config.mainServer.channels.communityIdeas)
-            return await interaction.reply({
-                content: `This command only works in <#${interaction.client.config.mainServer.channels.communityIdeas}>`,
-                ephemeral: true
-            });
+        if (interaction.channelId !== communityIdeas) {
+            return interaction.reply({ content: "This command only works in " + channelMention(communityIdeas), ephemeral: true });
+        }
 
         const msg = await interaction.reply({ embeds: [new EmbedBuilder()
             .setAuthor({

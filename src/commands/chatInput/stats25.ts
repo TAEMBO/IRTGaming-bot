@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, AttachmentBuilder, EmbedBuilder } from "discord.js";
+import { ApplicationCommandOptionType, AttachmentBuilder, channelMention, EmbedBuilder, hyperlink } from "discord.js";
 import canvas from "@napi-rs/canvas";
 import { DSSExtension, type DSSResponse, Feeds, filterUnused } from "farming-simulator-types/2025";
 import { Command } from "#structures";
@@ -33,16 +33,21 @@ export default new Command<"chatInput">({
     async run(interaction) {
         const subCmd = interaction.options.getSubcommand();
 
-        if ((
-            interaction.channel!.parentId === interaction.client.config.mainServer.categories.fs25PublicMP
-            || interaction.channelId === interaction.client.config.mainServer.channels.mfPublicChat
-        ) && !isMPStaff(interaction.member)) return await interaction.reply({
-            content: [
-                `This command has [restrictions](${interaction.client.config.resources.statsRestrictionRedirect}) set`,
-                ` please use <#${interaction.client.config.mainServer.channels.botCommands}> for ${interaction.client.getCommandMention("stats")} commands.`
-            ].join(),
-            ephemeral: true
-        });
+        if (
+            (
+                interaction.channel!.parentId === interaction.client.config.mainServer.categories.fs25PublicMP ||
+                interaction.channelId === interaction.client.config.mainServer.channels.mfPublicChat
+            ) &&
+            !isMPStaff(interaction.member)
+        ) {
+            const link = hyperlink("restrictions", interaction.client.config.resources.statsRestrictionRedirect);
+            const channel = channelMention(interaction.client.config.mainServer.channels.botCommands);
+
+            return interaction.reply({
+                content: `This command has ${link} set, please use ${channel} for ${interaction.client.getCommandMention("stats")} commands.`,
+                ephemeral: true
+            });
+        }
 
         if (subCmd === "all") {
             await interaction.deferReply();

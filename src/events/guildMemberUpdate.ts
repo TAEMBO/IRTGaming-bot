@@ -1,4 +1,4 @@
-import { EmbedBuilder, Events } from "discord.js";
+import { codeBlock, EmbedBuilder, Events } from "discord.js";
 import { Event } from "#structures";
 import { formatUser } from "#util";
 
@@ -20,8 +20,8 @@ export default new Event({
             changes = true;
 
             embed.addFields(
-                { name: "🔹 Old Nickname", value: oldMember.nickname ? `\`\`\`${oldMember.nickname}\`\`\`` : "*No nickname*" },
-                { name: "🔹 New Nickname", value: newMember.nickname ? `\`\`\`${newMember.nickname}\`\`\`` : "*No nickname*" }
+                { name: "🔹 Old Nickname", value: oldMember.nickname ? codeBlock(oldMember.nickname) : "*No nickname*" },
+                { name: "🔹 New Nickname", value: newMember.nickname ? codeBlock(newMember.nickname) : "*No nickname*" }
             );
         }
 

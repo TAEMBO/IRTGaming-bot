@@ -1,4 +1,4 @@
-import { codeBlock, type EmbedBuilder, Events, InteractionContextType } from "discord.js";
+import { codeBlock, type EmbedBuilder, Events, InteractionContextType, userMention } from "discord.js";
 import cron from "node-cron";
 import { crunchFarmData, connectMongoDB, fs22Loop, fs25Loop, fsLoopAll } from "#actions";
 import { Event } from "#structures";
@@ -47,7 +47,7 @@ export default new Event({
 
         await client.getChan("taesTestingZone").send([
             ":warning: Bot restarted :warning:",
-            `<@${client.config.devWhitelist[0]}>`,
+            userMention(client.config.devWhitelist[0]),
             codeBlock("json", JSON.stringify(client.config.toggles, null, 1).slice(1, -1))
         ].join("\n"));
 

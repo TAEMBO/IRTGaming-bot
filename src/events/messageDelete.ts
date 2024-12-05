@@ -1,4 +1,4 @@
-import { EmbedBuilder, Events, time } from "discord.js";
+import { codeBlock, EmbedBuilder, Events, time } from "discord.js";
 import { Event } from "#structures";
 import { formatUser } from "#util";
 
@@ -20,7 +20,7 @@ export default new Event({
             .setColor(message.client.config.EMBED_COLOR_RED)
             .setTimestamp();
 
-        if (message.content.length) embed.addFields({ name: "🔹 Content", value: `\`\`\`\n${message.content.slice(0, 1000)}\n\`\`\`` });
+        if (message.content.length) embed.addFields({ name: "🔹 Content", value: codeBlock(message.content.slice(0, 1000)) });
 
         embed.addFields(
             { name: "🔹 Channel", value: message.channel.toString() },

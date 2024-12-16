@@ -43,6 +43,18 @@ export default new Event({
             creator: inv.inviter?.id ?? "UNKNOWN"
         });
 
+        async function playerTimesCacheUpdate() {
+            const playerTimes22Data = await client.playerTimes22.data.find();
+            const playerTimes25Data = await client.playerTimes25.data.find();
+
+            Reflect.set(client.playerTimes22, "cache", playerTimes22Data.map(x => x.toObject()));
+            Reflect.set(client.playerTimes25, "cache", playerTimes25Data.map(x => x.toObject()));
+        }
+
+        await playerTimesCacheUpdate();
+
+        setInterval(playerTimesCacheUpdate, 3_600_000);
+
         log("Blue", `Bot active as ${client.user.tag}`);
 
         await client.getChan("taesTestingZone").send([

@@ -22,6 +22,8 @@ const model = mongoose.model("playerTimes22", new mongoose.Schema({
 }, { versionKey: false }));
 
 export class PlayerTimes22 extends BaseSchema<typeof model> {
+    public readonly cache: typeof this.obj[] = [];
+
     public constructor(private readonly _client: TClient) {
         super(model);
     }
@@ -31,8 +33,8 @@ export class PlayerTimes22 extends BaseSchema<typeof model> {
      * @param data The MongoDB document for the player
      * @returns An array of all server time objects from the player, with the first element for each being the server's acronym
      */
-    public getTimeData(data: typeof this.doc) {
-        return Object.entries(data.toObject().servers).filter((x): x is [string, NonNullable<typeof x[1]>] => x[1] !== null);
+    public getTimeData(data: typeof this.obj) {
+        return Object.entries(data.servers).filter((x): x is [string, NonNullable<typeof x[1]>] => x[1] !== null);
     }
 
     /**

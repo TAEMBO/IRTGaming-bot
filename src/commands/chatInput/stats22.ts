@@ -7,22 +7,31 @@ import {
     FM_ICON,
     TF_ICON,
     formatRequestInit,
-    formatTime,
+    formatUptime,
     fs22Servers,
     isMPStaff,
     log
 } from "#util";
 
+function formatPlayerTime(time: number) {
+    const hours = Math.floor(time / 60);
+    const minutes = (time % 60).toString();
+    let text = hours ? hours + "h" : "";
+
+    text += " " + minutes + "min";
+
+    return text;
+}
+
 export default new Command<"chatInput">({
     async autocomplete(interaction) {
         switch (interaction.options.getSubcommand()) {
             case "playertimes": {
-                const playerData = await interaction.client.playerTimes22.data.find();
                 const focused = interaction.options.getFocused().toLowerCase().replace(" ", "");
-                const choices = playerData
+                const choices = interaction.client.playerTimes22.cache
                     .filter(x => x._id.toLowerCase().replace(" ", "").startsWith(focused))
-                    .map(x => ({ name: x._id, value: x._id }))
-                    .slice(0, 24);
+                    .slice(0, 24)
+                    .map(x => ({ name: x._id, value: x._id }));
 
                 await interaction.respond(choices);
 
@@ -98,21 +107,21 @@ export default new Command<"chatInput">({
 
             await interaction.editReply({ embeds: [embed] });
         } else if (subCmd === "playertimes") {
-            const { getTimeData, doc } = interaction.client.playerTimes22;
-            const playersData = await interaction.client.playerTimes22.data.find();
+            const { getTimeData, obj } = interaction.client.playerTimes22;
+            const playersData = structuredClone(interaction.client.playerTimes22.cache);
             const sortedPlayersData = playersData.sort((a, b) =>
                 getTimeData(b).reduce((x, y) => x + y[1].time, 0) - getTimeData(a).reduce((x, y) => x + y[1].time, 0)
             );
-            const player = interaction.options.getString("name");
-            const leaderboard = (data: (typeof doc)[], isFirstField: boolean) => data.map((playerData, i) => [
+            const playerName = interaction.options.getString("name");
+            const leaderboard = (data: (typeof obj)[], isFirstField: boolean) => data.map((playerData, i) => [
                 `**${i + (isFirstField ? 1 : 26)}.** \`${playerData._id}\``,
                 interaction.client.fmList.cache.includes(playerData._id) ? FM_ICON : "",
                 interaction.client.tfList.cache.includes(playerData._id) ? TF_ICON : "",
                 " - ",
-                formatTime((getTimeData(playerData).reduce((x, y) => x + y[1].time, 0) * 60 * 1_000), 3, { commas: true })
+                formatPlayerTime((getTimeData(playerData).reduce((x, y) => x + y[1].time, 0)))
             ].join("")).join("\n");
 
-            if (!player) {
+            if (!playerName) {
                 return await interaction.reply({ embeds: [new EmbedBuilder()
                     .setColor("#2ac1ed")
                     .setDescription(`Top 50 players with the most time spent on IRTGaming FS22 servers since ${interaction.client.config.PLAYERTIMES_START_DATE}`)
@@ -122,7 +131,7 @@ export default new Command<"chatInput">({
                 ] });
             }
 
-            const playerData = playersData.find(x => x._id === player);
+            const playerData = (await interaction.client.playerTimes22.data.findById(playerName))?.toObject();
 
             if (!playerData) return await interaction.reply(`No data found with that name. [Find out why.](${interaction.client.config.resources.statsNoDataRedirect})`);
 
@@ -134,7 +143,7 @@ export default new Command<"chatInput">({
                 .map(([serverAcro, timeData]) => ({
                     name: serverAcro.toUpperCase(),
                     value: [
-                        `Time - ${formatTime(timeData.time * 60 * 1000, 5, { commas: true })}`,
+                        `Time - ${formatPlayerTime(timeData.time)}`,
                         `Last on - ${interaction.client.fs22Cache[serverAcro].players.some(x => x.name === playerData._id) ? "Right now" : `<t:${timeData.lastOn}:R>`}`
                     ].join("\n")
                 }));
@@ -143,8 +152,8 @@ export default new Command<"chatInput">({
                 .setColor("#2ac1ed")
                 .setTitle([
                     `Player - \`${playerData._id}\`${interaction.client.fmList.cache.includes(playerData._id) ? FM_ICON : ""}${interaction.client.tfList.cache.includes(playerData._id) ? TF_ICON : ""}`,
-                    `Leaderboard position - **#${sortedPlayersData.indexOf(playerData) + 1}**`,
-                    `Total time - **${formatTime(playerTimeDataTotal * 60 * 1000, 5, { commas: true })}**`,
+                    `Leaderboard position - **#${sortedPlayersData.findIndex(x => x._id === playerData._id) + 1}**`,
+                    `Total time - **${formatPlayerTime(playerTimeDataTotal)}**`,
                     (isMPStaff(interaction.member) && playerData.uuid) ? `UUID: \`${playerData.uuid}\`` : "",
                     (isMPStaff(interaction.member) && playerData.discordid) ? `Discord user ID - \`${playerData.discordid}\`` : "",
                 ].join("\n"))
@@ -311,14 +320,12 @@ export default new Command<"chatInput">({
             const players = filterUnused(dss.slots.players);
 
             for (const player of players) {
-                const playTimeHrs = Math.floor(player.uptime / 60);
-                const playTimeMins = (player.uptime % 60).toString().padStart(2, "0");
                 let decorators = player.isAdmin ? ADMIN_ICON : "";
 
                 decorators += interaction.client.fmList.cache.includes(player.name) ? FM_ICON : "";
                 decorators += interaction.client.tfList.cache.includes(player.name) ? TF_ICON : "";
 
-                playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
+                playerInfo.push(`\`${player.name}\` ${decorators} **|** ${formatUptime(player)}`);
             }
 
             const serverSlots = `${dss.slots.used}/${dss.slots.capacity}`;

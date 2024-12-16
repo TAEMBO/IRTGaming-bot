@@ -7,22 +7,31 @@ import {
     FM_ICON,
     TF_ICON,
     formatRequestInit,
-    formatTime,
+    formatUptime,
     fs25Servers,
     isMPStaff,
     log
 } from "#util";
 
+function formatPlayerTime(time: number) {
+    const hours = Math.floor(time / 60);
+    const minutes = (time % 60).toString();
+    let text = hours ? hours + "h" : "";
+
+    text += " " + minutes + "min";
+
+    return text;
+}
+
 export default new Command<"chatInput">({
     async autocomplete(interaction) {
         switch (interaction.options.getSubcommand()) {
             case "playertimes": {
-                const playerData = await interaction.client.playerTimes25.data.find();
                 const focused = interaction.options.getFocused().toLowerCase().replace(" ", "");
-                const choices = playerData
+                const choices = interaction.client.playerTimes25.cache
                     .filter(x => x._id.toLowerCase().replace(" ", "").startsWith(focused))
-                    .map(x => ({ name: x._id, value: x._id }))
-                    .slice(0, 24);
+                    .slice(0, 24)
+                    .map(x => ({ name: x._id, value: x._id }));
 
                 await interaction.respond(choices);
 
@@ -101,21 +110,21 @@ export default new Command<"chatInput">({
 
             await interaction.editReply({ embeds: [embed] });
         } else if (subCmd === "playertimes") {
-            const { getTimeData, doc } = interaction.client.playerTimes25;
-            const playersData = await interaction.client.playerTimes25.data.find();
+            const { getTimeData, obj } = interaction.client.playerTimes25;
+            const playersData = structuredClone(interaction.client.playerTimes25.cache);
             const sortedPlayersData = playersData.sort((a, b) =>
                 getTimeData(b).reduce((x, y) => x + y[1].time, 0) - getTimeData(a).reduce((x, y) => x + y[1].time, 0)
             );
-            const player = interaction.options.getString("name");
-            const leaderboard = (data: (typeof doc)[], isFirstField: boolean) => data.map((playerData, i) => [
+            const playerName = interaction.options.getString("name");
+            const leaderboard = (data: (typeof obj)[], isFirstField: boolean) => data.map((playerData, i) => [
                 `**${i + (isFirstField ? 1 : 26)}.** \`${playerData._id}\``,
                 interaction.client.fmList.cache.includes(playerData._id) ? FM_ICON : "",
                 interaction.client.tfList.cache.includes(playerData._id) ? TF_ICON : "",
                 " - ",
-                formatTime((getTimeData(playerData).reduce((x, y) => x + y[1].time, 0) * 60 * 1_000), 3, { commas: true })
+                formatPlayerTime(getTimeData(playerData).reduce((x, y) => x + y[1].time, 0))
             ].join("")).join("\n");
 
-            if (!player) {
+            if (!playerName) {
                 return await interaction.reply({ embeds: [new EmbedBuilder()
                     .setColor("#a0c213")
                     .setDescription("Top 50 players with the most time spent on IRTGaming FS25 servers since <t:1731416400:R>")
@@ -125,9 +134,14 @@ export default new Command<"chatInput">({
                 ] });
             }
 
-            const playerData = playersData.find(x => x._id === player);
+            const playerData = (await interaction.client.playerTimes25.data.findById(playerName))?.toObject();
 
-            if (!playerData) return await interaction.reply(`No data found with that name. [Find out why.](${interaction.client.config.resources.statsNoDataRedirect})`);
+            if (!playerData) {
+                return interaction.reply(
+                    "No data found with that name. " +
+                    hyperlink("Find out why.", interaction.client.config.resources.statsNoDataRedirect)
+                );
+            }
 
             const fsKeys = fs25Servers.keys();
             const playerTimeData = getTimeData(playerData).sort((a, b) => fsKeys.indexOf(a[0]) - fsKeys.indexOf(b[0]));
@@ -137,7 +151,7 @@ export default new Command<"chatInput">({
                 .map(([serverAcro, timeData]) => ({
                     name: serverAcro.toUpperCase(),
                     value: [
-                        `Time - ${formatTime(timeData.time * 60 * 1000, 5, { commas: true })}`,
+                        `Time - ${formatPlayerTime(timeData.time,)}`,
                         `Last on - ${interaction.client.fs25Cache[serverAcro].players.some(x => x.name === playerData._id) ? "Right now" : `<t:${timeData.lastOn}:R>`}`
                     ].join("\n")
                 }));
@@ -146,8 +160,8 @@ export default new Command<"chatInput">({
                 .setColor("#a0c213")
                 .setTitle([
                     `Player - \`${playerData._id}\`${interaction.client.fmList.cache.includes(playerData._id) ? FM_ICON : ""}${interaction.client.tfList.cache.includes(playerData._id) ? TF_ICON : ""}`,
-                    `Leaderboard position - **#${sortedPlayersData.indexOf(playerData) + 1}**`,
-                    `Total time - **${formatTime(playerTimeDataTotal * 60 * 1000, 5, { commas: true })}**`,
+                    `Leaderboard position - **#${sortedPlayersData.findIndex(x => x._id === playerData._id) + 1}**`,
+                    `Total time - **${formatPlayerTime(playerTimeDataTotal)}**`,
                     (isMPStaff(interaction.member) && playerData.uuid) ? `UUID: \`${playerData.uuid}\`` : "",
                     (isMPStaff(interaction.member) && playerData.discordid) ? `Discord user ID - \`${playerData.discordid}\`` : "",
                 ].join("\n"))
@@ -314,14 +328,12 @@ export default new Command<"chatInput">({
             const players = filterUnused(dss.slots.players);
 
             for (const player of players) {
-                const playTimeHrs = Math.floor(player.uptime / 60);
-                const playTimeMins = (player.uptime % 60).toString().padStart(2, "0");
                 let decorators = player.isAdmin ? ADMIN_ICON : "";
 
                 decorators += interaction.client.fmList.cache.includes(player.name) ? FM_ICON : "";
                 decorators += interaction.client.tfList.cache.includes(player.name) ? TF_ICON : "";
 
-                playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
+                playerInfo.push(`\`${player.name}\` ${decorators} **|** ${formatUptime(player)}`);
             }
 
             const serverSlots = `${dss.slots.used}/${dss.slots.capacity}`;

@@ -1,4 +1,4 @@
-import { ChannelType, EmbedBuilder } from "discord.js";
+import { ChannelType, EmbedBuilder, userMention } from "discord.js";
 import type TClient from "../client.js";
 import {
     DSSExtension,
@@ -56,7 +56,9 @@ export async function fs22Loop(client: TClient, watchList: TClient["watchList"][
     }
 
     function logEmbed(player: PlayerUsed, joinLog: boolean) {
-        let description = `\`${player.name}\`${getDecorators(player)} ${joinLog ? "joined" : "left"} **${serverAcroUp}** at <t:${now}:t>`;
+        const playerTimesData = client.playerTimes22.cache.find(x => x._id === player.name);
+        const playerDiscordMention = playerTimesData ? userMention(playerTimesData._id) : "";
+        let description = `\`${player.name}\`${getDecorators(player)}${playerDiscordMention} ${joinLog ? "joined" : "left"} **${serverAcroUp}** at <t:${now}:t>`;
         const playTimeHrs = Math.floor(player.uptime / 60);
         const playTimeMins = (player.uptime % 60).toString().padStart(2, "0");
         const embed = new EmbedBuilder()

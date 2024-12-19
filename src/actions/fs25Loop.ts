@@ -252,8 +252,10 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
 
     for (const player of leftPlayers) {
         const watchListData = watchList.find(x => x._id === player.name);
+        const playerTimesData = client.playerTimes25.cache.find(x => x._id === player.name);
+        const playerDiscordMention = playerTimesData ? userMention(playerTimesData._id) : "";
         const embed = new EmbedBuilder()
-            .setDescription(`\`${player.name}\`${getDecorators(player)} left **${serverAcroUp}** at ${timestamp}`)
+            .setDescription(`\`${player.name}\`${getDecorators(player)}${playerDiscordMention} left **${serverAcroUp}** at ${timestamp}`)
             .setColor(client.config.EMBED_COLOR_RED)
             .setFooter(player.uptime ? { text: `Playtime: ${formatUptime(player)}` } : null);
 
@@ -263,6 +265,7 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
             await wlChannel.send({ embeds: [new EmbedBuilder()
                 .setTitle(`WatchList - ${watchListData.isSevere ? "ban" : "watch over"}`)
                 .setDescription(`\`${watchListData._id}\` left **${serverAcroUp}** at ${timestamp}`)
+                .setFooter(player.uptime ? { text: `Playtime: ${formatUptime(player)}` } : null)
                 .setColor(client.config.EMBED_COLOR_RED)
             ] });
         }
@@ -273,7 +276,9 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
     for (const player of joinedPlayers) {
         const watchListData = watchList.find(y => y._id === player.name);
         const embed = new EmbedBuilder().setColor(client.config.EMBED_COLOR_GREEN);
-        let description = `\`${player.name}\`${getDecorators(player)} joined **${serverAcroUp}** at ${timestamp}`;
+        const playerTimesData = client.playerTimes25.cache.find(x => x._id === player.name);
+        const playerDiscordMention = playerTimesData ? " " + userMention(playerTimesData._id) : "";
+        let description = `\`${player.name}\`${getDecorators(player)}${playerDiscordMention} joined **${serverAcroUp}** at ${timestamp}`;
 
         if (player.uptime) embed.setFooter({ text: `Playtime: ${formatUptime(player)}` });
 

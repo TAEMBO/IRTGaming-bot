@@ -29,7 +29,7 @@ export default new Command<"chatInput">({
             case "playertimes": {
                 const focused = interaction.options.getFocused().toLowerCase().replace(" ", "");
                 const choices = interaction.client.playerTimes22.cache
-                    .filter(x => x._id.toLowerCase().replace(" ", "").startsWith(focused))
+                    .filter(x => x._id.toLowerCase().replace(" ", "").includes(focused))
                     .slice(0, 24)
                     .map(x => ({ name: x._id, value: x._id }));
 
@@ -122,13 +122,17 @@ export default new Command<"chatInput">({
             ].join("")).join("\n");
 
             if (!playerName) {
-                return await interaction.reply({ embeds: [new EmbedBuilder()
+                await interaction.reply({ embeds: [new EmbedBuilder()
                     .setColor("#2ac1ed")
                     .setDescription(`Top 50 players with the most time spent on IRTGaming FS22 servers since ${interaction.client.config.PLAYERTIMES_START_DATE}`)
                     .addFields(
                         { name: "\u200b", value: leaderboard(sortedPlayersData.slice(0, 25), true), inline: true },
                         { name: "\u200b", value: leaderboard(sortedPlayersData.slice(25, 50), false) + "\u200b", inline: true })
                 ] });
+
+                await interaction.client.playerTimes22.refreshCache();
+
+                return;
             }
 
             const playerData = (await interaction.client.playerTimes22.data.findById(playerName))?.toObject();

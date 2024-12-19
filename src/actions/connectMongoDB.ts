@@ -21,7 +21,9 @@ export async function connectMongoDB(client: Client) {
         client.fmList.fillCache(),
         client.tfList.fillCache(),
         client.watchListPings.fillCache(),
-        client.whitelist.fillCache()
+        client.whitelist.fillCache(),
+        client.playerTimes22.refreshCache(),
+        client.playerTimes25.refreshCache()
     ]);
 
     for (const reminder of await client.reminders.data.find()) {

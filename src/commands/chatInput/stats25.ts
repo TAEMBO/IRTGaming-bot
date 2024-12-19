@@ -29,7 +29,7 @@ export default new Command<"chatInput">({
             case "playertimes": {
                 const focused = interaction.options.getFocused().toLowerCase().replace(" ", "");
                 const choices = interaction.client.playerTimes25.cache
-                    .filter(x => x._id.toLowerCase().replace(" ", "").startsWith(focused))
+                    .filter(x => x._id.toLowerCase().replace(" ", "").includes(focused))
                     .slice(0, 24)
                     .map(x => ({ name: x._id, value: x._id }));
 
@@ -92,13 +92,11 @@ export default new Command<"chatInput">({
                 const serverSlots = `${dss.slots.used}/${dss.slots.capacity}`;
 
                 for (const player of filterUnused(dss.slots.players)) {
-                    const playTimeHrs = Math.floor(player.uptime / 60);
-                    const playTimeMins = (player.uptime % 60).toString().padStart(2, "0");
                     let decorators = player.isAdmin ? ADMIN_ICON : "";
                     decorators += interaction.client.fmList.cache.includes(player.name) ? FM_ICON : "";
                     decorators += interaction.client.tfList.cache.includes(player.name) ? TF_ICON : "";
 
-                    playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
+                    playerInfo.push(`\`${player.name}\` ${decorators} **|** ${formatUptime(player)}`);
                 }
 
                 embed.addFields({ name: `${server.fullName} - ${serverSlots}`, value: playerInfo.join("\n"), inline: true });
@@ -125,13 +123,17 @@ export default new Command<"chatInput">({
             ].join("")).join("\n");
 
             if (!playerName) {
-                return await interaction.reply({ embeds: [new EmbedBuilder()
+                await interaction.reply({ embeds: [new EmbedBuilder()
                     .setColor("#a0c213")
                     .setDescription("Top 50 players with the most time spent on IRTGaming FS25 servers since <t:1731416400:R>")
                     .addFields(
                         { name: "\u200b", value: leaderboard(sortedPlayersData.slice(0, 25), true), inline: true },
                         { name: "\u200b", value: leaderboard(sortedPlayersData.slice(25, 50), false) + "\u200b", inline: true })
                 ] });
+
+                await interaction.client.playerTimes25.refreshCache();
+
+                return;
             }
 
             const playerData = (await interaction.client.playerTimes25.data.findById(playerName))?.toObject();

@@ -28,6 +28,12 @@ export class PlayerTimes22 extends BaseSchema<typeof model> {
         super(model);
     }
 
+    public async refreshCache() {
+        const data = await this.data.find();
+
+        Reflect.set(this, "cache", data.map(x => x.toObject()));
+    }
+
     /**
      * Retrieve an array-ified form of a player's server time data.
      * @param data The MongoDB document for the player

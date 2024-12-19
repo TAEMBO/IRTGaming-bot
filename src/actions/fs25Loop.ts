@@ -1,19 +1,9 @@
 import { ChannelType, EmbedBuilder, time, userMention } from "discord.js";
 import type TClient from "../client.js";
-import {
-    DSSExtension,
-    DSSFile,
-    type DSSResponse,
-    Feeds,
-    filterUnused,
-    type PlayerUsed
-} from "farming-simulator-types/2025";
+import { DSSExtension, DSSFile, type DSSResponse, Feeds, filterUnused } from "farming-simulator-types/2025";
 import { constants } from "http2";
 import {
-    ADMIN_ICON,
-    FM_ICON,
-    TF_ICON,
-    WL_ICON,
+    formatDecorators,
     formatRequestInit,
     formatTime,
     formatUptime,
@@ -25,20 +15,6 @@ import type { FSLoopCSG } from "#typings";
 
 export async function fs25Loop(client: TClient, watchList: TClient["watchList"]["doc"][], serverAcro: string, embedBuffer: EmbedBuilder[]) {
     if (client.config.toggles.debug) log("Yellow", "FS25Loop", serverAcro);
-
-    function getDecorators(player: PlayerUsed, isStatsEmbed = false) {
-        let decorators = player.isAdmin ? ADMIN_ICON : "";
-
-        decorators += client.fmList.cache.includes(player.name) ? FM_ICON : "";
-        decorators += client.tfList.cache.includes(player.name) ? TF_ICON : "";
-
-        if (!isStatsEmbed) {
-            decorators += client.whitelist.cache.includes(player.name) ? ":white_circle:" : "";
-            decorators += watchList?.some(x => x._id === player.name) ? WL_ICON : "";
-        }
-
-        return decorators;
-    }
 
     let justStarted = false;
     let justStopped = false;
@@ -146,7 +122,7 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
     if (toThrottle) return;
 
     // Create list of players with time data
-    const playerInfo = newPlayerList.map(player => `\`${player.name}\` ${getDecorators(player, true)} **|** ${formatUptime(player)}`);
+    const playerInfo = newPlayerList.map(player => `\`${player.name}\` ${formatDecorators(client, player)} **|** ${formatUptime(player)}`);
 
     // Data crunching for stats embed
     const stats = {
@@ -235,6 +211,7 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
             !client.whitelist.cache.includes(player.name) &&
             !client.fmList.cache.includes(player.name) &&
             !server.isPrivate;
+        const decorators = formatDecorators(client, player, watchList);
 
         if (sendLoginAlert) {
             await client.getChan("juniorAdminChat").send({ embeds: [new EmbedBuilder()
@@ -246,16 +223,17 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
 
         embedBuffer.push(new EmbedBuilder()
             .setColor(client.config.EMBED_COLOR_YELLOW)
-            .setDescription(`\`${player.name}\`${getDecorators(player)} logged in as admin on **${serverAcroUp}** at ${timestamp}`)
+            .setDescription(`\`${player.name}\`${decorators} logged in as admin on **${serverAcroUp}** at ${timestamp}`)
         );
     }
 
     for (const player of leftPlayers) {
         const watchListData = watchList.find(x => x._id === player.name);
         const playerTimesData = client.playerTimes25.cache.find(x => x._id === player.name);
-        const playerDiscordMention = playerTimesData ? userMention(playerTimesData._id) : "";
+        const playerDiscordMention = playerTimesData?.discordid ? userMention(playerTimesData.discordid) : "";
+        const decorators = formatDecorators(client, player, watchList);
         const embed = new EmbedBuilder()
-            .setDescription(`\`${player.name}\`${getDecorators(player)}${playerDiscordMention} left **${serverAcroUp}** at ${timestamp}`)
+            .setDescription(`\`${player.name}\`${decorators}${playerDiscordMention} left **${serverAcroUp}** at ${timestamp}`)
             .setColor(client.config.EMBED_COLOR_RED)
             .setFooter(player.uptime ? { text: `Playtime: ${formatUptime(player)}` } : null);
 
@@ -277,8 +255,9 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
         const watchListData = watchList.find(y => y._id === player.name);
         const embed = new EmbedBuilder().setColor(client.config.EMBED_COLOR_GREEN);
         const playerTimesData = client.playerTimes25.cache.find(x => x._id === player.name);
-        const playerDiscordMention = playerTimesData ? " " + userMention(playerTimesData._id) : "";
-        let description = `\`${player.name}\`${getDecorators(player)}${playerDiscordMention} joined **${serverAcroUp}** at ${timestamp}`;
+        const playerDiscordMention = playerTimesData?.discordid ? " " + userMention(playerTimesData.discordid) : "";
+        const decorators = formatDecorators(client, player, watchList);
+        let description = `\`${player.name}\`${decorators}${playerDiscordMention} joined **${serverAcroUp}** at ${timestamp}`;
 
         if (player.uptime) embed.setFooter({ text: `Playtime: ${formatUptime(player)}` });
 

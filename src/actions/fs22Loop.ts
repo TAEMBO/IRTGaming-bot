@@ -10,12 +10,10 @@ import {
 } from "farming-simulator-types/2022";
 import { constants } from "http2";
 import {
-    ADMIN_ICON,
-    FM_ICON,
-    TF_ICON,
-    WL_ICON,
+    formatDecorators,
     formatRequestInit,
     formatTime,
+    formatUptime,
     fs22Servers,
     jsonFromXML,
     log
@@ -26,20 +24,6 @@ export async function fs22Loop(client: TClient, watchList: TClient["watchList"][
     if (client.config.toggles.debug) log("Yellow", "FS22Loop", serverAcro);
 
     const server = fs22Servers.getOne(serverAcro);
-
-    function getDecorators(player: PlayerUsed, isStatsEmbed = false) {
-        let decorators = player.isAdmin ? ADMIN_ICON : "";
-
-        decorators += client.fmList.cache.includes(player.name) ? FM_ICON : "";
-        decorators += client.tfList.cache.includes(player.name) ? TF_ICON : "";
-
-        if (!isStatsEmbed) {
-            decorators += client.whitelist.cache.includes(player.name) ? ":white_circle:" : "";
-            decorators += watchList?.some(x => x._id === player.name) ? WL_ICON : "";
-        }
-
-        return decorators;
-    }
 
     function wlEmbed(document: TClient["watchList"]["doc"], joinLog: boolean) {
         const embed = new EmbedBuilder()
@@ -57,8 +41,9 @@ export async function fs22Loop(client: TClient, watchList: TClient["watchList"][
 
     function logEmbed(player: PlayerUsed, joinLog: boolean) {
         const playerTimesData = client.playerTimes22.cache.find(x => x._id === player.name);
-        const playerDiscordMention = playerTimesData ? userMention(playerTimesData._id) : "";
-        let description = `\`${player.name}\`${getDecorators(player)}${playerDiscordMention} ${joinLog ? "joined" : "left"} **${serverAcroUp}** at <t:${now}:t>`;
+        const playerDiscordMention = playerTimesData?.discordid ? userMention(playerTimesData.discordid) : "";
+        const decorators = formatDecorators(client, player, watchList);
+        let description = `\`${player.name}\`${decorators}${playerDiscordMention} ${joinLog ? "joined" : "left"} **${serverAcroUp}** at <t:${now}:t>`;
         const playTimeHrs = Math.floor(player.uptime / 60);
         const playTimeMins = (player.uptime % 60).toString().padStart(2, "0");
         const embed = new EmbedBuilder()
@@ -182,12 +167,7 @@ export async function fs22Loop(client: TClient, watchList: TClient["watchList"][
     if (toThrottle) return;
 
     // Create list of players with time data
-    const playerInfo = newPlayerList.map(player => {
-        const playTimeHrs = Math.floor(player.uptime / 60);
-        const playTimeMins = (player.uptime % 60).toString().padStart(2, "0");
-
-        return `\`${player.name}\` ${getDecorators(player, true)} **|** ${playTimeHrs}:${playTimeMins}`;
-    });
+    const playerInfo = newPlayerList.map(player => `\`${player.name}\` ${formatDecorators(client, player)} **|** ${formatUptime(player)}`);
 
     // Data crunching for stats embed
     const stats = {
@@ -278,7 +258,7 @@ export async function fs22Loop(client: TClient, watchList: TClient["watchList"][
             ] });
         } else embedBuffer.push(new EmbedBuilder()
             .setColor(client.config.EMBED_COLOR_YELLOW)
-            .setDescription(`\`${player.name}\`${getDecorators(player)} logged in as admin on **${serverAcroUp}** at <t:${now}:t>`)
+            .setDescription(`\`${player.name}\`${formatDecorators(client, player, watchList)} logged in as admin on **${serverAcroUp}** at <t:${now}:t>`)
         );
     }
 

@@ -3,9 +3,9 @@ import canvas from "@napi-rs/canvas";
 import { DSSExtension, type DSSResponse, Feeds, filterUnused } from "farming-simulator-types/2022";
 import { Command } from "#structures";
 import {
-    ADMIN_ICON,
     FM_ICON,
     TF_ICON,
+    formatDecorators,
     formatRequestInit,
     formatUptime,
     fs22Servers,
@@ -89,13 +89,9 @@ export default new Command<"chatInput">({
                 const serverSlots = `${dss.slots.used}/${dss.slots.capacity}`;
 
                 for (const player of filterUnused(dss.slots.players)) {
-                    const playTimeHrs = Math.floor(player.uptime / 60);
-                    const playTimeMins = (player.uptime % 60).toString().padStart(2, "0");
-                    let decorators = player.isAdmin ? ADMIN_ICON : "";
-                    decorators += interaction.client.fmList.cache.includes(player.name) ? FM_ICON : "";
-                    decorators += interaction.client.tfList.cache.includes(player.name) ? TF_ICON : "";
+                    const decorators = formatDecorators(interaction.client, player);
 
-                    playerInfo.push(`\`${player.name}\` ${decorators} **|** ${playTimeHrs}:${playTimeMins}`);
+                    playerInfo.push(`\`${player.name}\` ${decorators} **|** ${formatPlayerTime(player.uptime)}`);
                 }
 
                 embed.addFields({ name: `${server.fullName} - ${serverSlots}`, value: playerInfo.join("\n"), inline: true });
@@ -151,11 +147,16 @@ export default new Command<"chatInput">({
                         `Last on - ${interaction.client.fs22Cache[serverAcro].players.some(x => x.name === playerData._id) ? "Right now" : `<t:${timeData.lastOn}:R>`}`
                     ].join("\n")
                 }));
+            let decorators = "";
+
+            if (interaction.client.fmList.cache.includes(playerData._id)) decorators += FM_ICON;
+
+            if (interaction.client.tfList.cache.includes(playerData._id)) decorators += TF_ICON;
 
             await interaction.reply({ embeds: [new EmbedBuilder()
                 .setColor("#2ac1ed")
                 .setTitle([
-                    `Player - \`${playerData._id}\`${interaction.client.fmList.cache.includes(playerData._id) ? FM_ICON : ""}${interaction.client.tfList.cache.includes(playerData._id) ? TF_ICON : ""}`,
+                    `Player - \`${playerData._id}\`${decorators}`,
                     `Leaderboard position - **#${sortedPlayersData.findIndex(x => x._id === playerData._id) + 1}**`,
                     `Total time - **${formatPlayerTime(playerTimeDataTotal)}**`,
                     (isMPStaff(interaction.member) && playerData.uuid) ? `UUID: \`${playerData.uuid}\`` : "",
@@ -324,10 +325,7 @@ export default new Command<"chatInput">({
             const players = filterUnused(dss.slots.players);
 
             for (const player of players) {
-                let decorators = player.isAdmin ? ADMIN_ICON : "";
-
-                decorators += interaction.client.fmList.cache.includes(player.name) ? FM_ICON : "";
-                decorators += interaction.client.tfList.cache.includes(player.name) ? TF_ICON : "";
+                const decorators = formatDecorators(interaction.client, player);
 
                 playerInfo.push(`\`${player.name}\` ${decorators} **|** ${formatUptime(player)}`);
             }

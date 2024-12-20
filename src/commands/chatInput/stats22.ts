@@ -91,7 +91,7 @@ export default new Command<"chatInput">({
                 for (const player of filterUnused(dss.slots.players)) {
                     const decorators = formatDecorators(interaction.client, player);
 
-                    playerInfo.push(`\`${player.name}\` ${decorators} **|** ${formatPlayerTime(player.uptime)}`);
+                    playerInfo.push(`\`${player.name}\` ${decorators} **|** ${formatUptime(player)}`);
                 }
 
                 embed.addFields({ name: `${server.fullName} - ${serverSlots}`, value: playerInfo.join("\n"), inline: true });

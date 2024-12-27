@@ -110,9 +110,9 @@ export default new Command<"chatInput">({
 
                 if (uptimeText) result += uptimeText;
 
-                await browser.close();
-
                 await interaction.editReply(result);
+
+                setTimeout(browser.close.bind(browser), 5_000);
 
                 break;
             };

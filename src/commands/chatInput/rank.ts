@@ -11,7 +11,7 @@ export default new Command<"chatInput">({
             const member = interaction.options.getMember("member") ?? interaction.member;
 
             // information about users progress on level roles
-            const userData = await interaction.client.userLevels.data.findById(member.user.id);
+            const userData = (await interaction.client.userLevels.data.findById(member.user.id))?.toObject();
 
             const pronounBool = (you: string, they: string) => { // takes 2 words and chooses which to use based on if user did this command on themself
                 if (interaction.user.id === member.user.id) return you || true;
@@ -21,30 +21,131 @@ export default new Command<"chatInput">({
             if (!userData) return await interaction.reply(`${pronounBool("You", "They")} currently don't have a level, send some messages to level up.`);
 
             const { algorithm } = interaction.client.userLevels;
-            const index = allData.sort((a, b) => b.messages - a.messages).map((x) => x._id).indexOf(member.id) + 1;
+            const index = allData.sort((a, b) => b.messages - a.messages).map(x => x._id).indexOf(member.id) + 1;
             const memberDifference = userData.messages - interaction.client.userLevels.algorithm(userData.level);
             const levelDifference = algorithm(userData.level + 1) - algorithm(userData.level);
+            const img = canvas.createCanvas(1000, 250);
+            const ctx = img.getContext("2d");
 
-            return await interaction.reply({
-                embeds: [new EmbedBuilder()
-                    .setTitle(
-                        [
-                            `Level: **${userData.level}**`,
-                            `Rank: **${index ? "#" + index : "last"}**`,
-                            `Progress: **${memberDifference.toLocaleString("en-US")}/${levelDifference.toLocaleString("en-US")} (${((memberDifference / levelDifference) * 100).toFixed(
-                                2
-                            )}%)**`,
-                            `Total: **${userData.messages.toLocaleString("en-US")}**`,
-                        ].join("\n")
-                    )
-                    .setColor(member.displayColor)
-                    .setThumbnail(member.user.displayAvatarURL({ extension: "png", size: 2048 }))
-                    .setAuthor({ name: `Ranking for ${member.user.tag}` })
-                ]
-            });
+            // Border radius
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(1000, 250);
+            ctx.arcTo(0, 250, 0, 0, 30);
+            ctx.arcTo(0, 0, 1000, 0, 30);
+            ctx.arcTo(1000, 0, 1000, 250, 30);
+            ctx.arcTo(1000, 250, 0, 250, 30);
+            ctx.clip();
+
+            // Background
+            ctx.fillStyle = "#36393f";
+            ctx.fillRect(0, 0, img.width, img.height);
+            ctx.restore();
+
+            // Avatar
+            ctx.beginPath();
+            ctx.arc(105, 125, 75, 0, Math.PI * 2, true);
+            ctx.closePath();
+            ctx.save();
+            ctx.clip();
+            ctx.drawImage(await canvas.loadImage(member.displayAvatarURL({ extension: "png" })), 30, 50, 150, 150);
+            ctx.restore();
+
+            // Progress bar back
+            ctx.save();
+            ctx.beginPath();
+            ctx.globalAlpha = 0.5;
+            ctx.fillStyle = interaction.client.config.EMBED_COLOR;
+            ctx.arc(img.width - 47.5, 182.5, 17.5, Math.PI * 1.5, Math.PI * 0.5);
+            ctx.arc(227.5, 182.5, 17.5, Math.PI * 0.5, Math.PI * 1.5);
+            ctx.fill();
+            ctx.clip();
+            ctx.closePath();
+
+            // Progress bar front
+            const currentPercentXP = Math.floor((memberDifference / levelDifference) * 100);
+
+            if (currentPercentXP >= 1) {
+                ctx.beginPath();
+                const onePercentBar = (img.width - 30 - 210) / 100;
+                const pxBar = onePercentBar * currentPercentXP;
+
+                ctx.globalAlpha = 1;
+                ctx.fillStyle = interaction.client.config.EMBED_COLOR;
+                ctx.arc(192.5 + pxBar, 182.5, 17.5, Math.PI * 1.5, Math.PI * 0.5);
+                ctx.arc(227.5, 182.5, 17.5, Math.PI * 0.5, Math.PI * 1.5);
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            ctx.restore();
+
+            let offsetLvlXP = img.width - 30;
+            const smallFont = "600 35px Nunito";
+            const largeFont = "600 50px Nunito";
+            const progressYOffset = 150;
+            const detailsYOffset = 70;
+
+            // Progress details
+            ctx.save();
+            ctx.font = smallFont;
+            ctx.textAlign = "right";
+            ctx.fillStyle = "#7F8384";
+            ctx.fillText(`${levelDifference.toLocaleString("en-US")} messages`, offsetLvlXP, progressYOffset);
+            offsetLvlXP -= ctx.measureText(`${levelDifference.toLocaleString("en-US")} messages`).width + 3;
+            ctx.fillText("/", offsetLvlXP, progressYOffset);
+            ctx.fillStyle = interaction.client.config.EMBED_COLOR;
+            offsetLvlXP -= ctx.measureText("/").width + 3;
+            ctx.fillText(memberDifference.toLocaleString("en-US"), offsetLvlXP, progressYOffset);
+            offsetLvlXP -= ctx.measureText(memberDifference.toLocaleString("en-US")).width;
+            ctx.restore();
+
+            // Display name
+            ctx.font = largeFont;
+            ctx.fillStyle = interaction.client.config.EMBED_COLOR;
+            ctx.fillText(member.user.displayName, 210, progressYOffset, offsetLvlXP - 210 - 15);
+
+            // Header details
+            ctx.save();
+            let offsetRankX = img.width - 30;
+            ctx.textAlign = "right";
+
+            // Rank value
+            ctx.font = largeFont;
+            ctx.fillText(index.toString(), offsetRankX, detailsYOffset);
+            offsetRankX -= ctx.measureText(index.toString()).width;
+
+            // Rank label
+            ctx.font = smallFont;
+            ctx.fillText(" RANK ", offsetRankX, detailsYOffset);
+            offsetRankX -= ctx.measureText(" RANK ").width;
+
+            // Level value
+            ctx.font = largeFont;
+            ctx.fillText(userData.level.toString(), offsetRankX, detailsYOffset);
+            offsetRankX -= ctx.measureText(userData.level.toString()).width;
+
+            // Level label
+            ctx.font = smallFont;
+            ctx.fillText(" LEVEL ", offsetRankX, detailsYOffset);
+            offsetRankX -= ctx.measureText(" LEVEL ").width;
+
+            // Total value
+            ctx.fillStyle = "#7F8384";
+            ctx.font = largeFont;
+            ctx.fillText(userData.messages.toLocaleString("en-US"), offsetRankX, detailsYOffset);
+            offsetRankX -= ctx.measureText(userData.messages.toLocaleString("en-US")).width;
+
+            // Total label
+            ctx.font = smallFont;
+            ctx.fillText("TOTAL ", offsetRankX, detailsYOffset);
+            ctx.restore();
+
+            await interaction.reply({ files: [new AttachmentBuilder(img.toBuffer("image/png"), { name: "rank.png" })] });
+
+            return;
         }
 
-        const messageCountsTotal = allData.reduce((a, b) => a + b.messages, 0);
         const data = (await interaction.client.dailyMsgs.data.find())
             .map((x, i, a) => {
                 const yesterday = a[i - 1] || [];
@@ -191,9 +292,8 @@ export default new Command<"chatInput">({
         await interaction.reply({
             files: [new AttachmentBuilder(img.toBuffer("image/png"), { name: "dailyMsgs.png" })],
             embeds: [new EmbedBuilder()
-                .setTitle("Ranking leaderboard")
-                .setDescription(`A total of **${messageCountsTotal.toLocaleString("en-US")}** messages have been recorded in this server.`)
-                .addFields({ name: "Top users by messages sent:", value: topUsers })
+                .setTitle("Top users by messages sent")
+                .setDescription(topUsers)
                 .setImage("attachment://dailyMsgs.png")
                 .setColor(interaction.client.config.EMBED_COLOR)
             ]

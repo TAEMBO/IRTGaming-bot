@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, AttachmentBuilder, EmbedBuilder } from "discord.js";
+import { ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
 import { Command } from "#structures";
 import { collectAck, isMPStaff, youNeedRole } from "#util";
 
@@ -32,9 +32,10 @@ export default new Command<"chatInput">({
                 break;
             };
             case "view": {
-                await interaction.reply({ files: [
-                    new AttachmentBuilder(Buffer.from(JSON.stringify(await interaction.client.watchList.data.find(), null, 2)), { name: "watchListCache.json" })
-                ] });
+                await interaction.reply({ files: [{
+                    attachment: Buffer.from(JSON.stringify(await interaction.client.watchList.data.find(), null, 2)),
+                    name: "watchListCache.json"
+                }] });
 
                 break;
             };

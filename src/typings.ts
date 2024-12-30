@@ -197,9 +197,9 @@ export interface Config {
     readonly PLAYERTIMES_START_DATE: string;
     /** Unix timestamp used for calculating when each day for daily msgs loop to be called */
     readonly DAILY_MSGS_TIMESTAMP: number;
-    readonly DAILY_MSGS_DEFAULT: `<${"a" | ""}:${string}:${string}>`;
-    readonly DAILY_MSGS_MONDAY: `<${"a" | ""}:${string}:${string}>`;
-    readonly DAILY_MSGS_WEEKEND: `<${"a" | ""}:${string}:${string}>`;
+    readonly DAILY_MSGS_DEFAULT: string;
+    readonly DAILY_MSGS_MONDAY: string;
+    readonly DAILY_MSGS_WEEKEND: string;
     readonly MP_TOUCH: string;
     readonly botPresence: PresenceData;
     readonly toggles: {

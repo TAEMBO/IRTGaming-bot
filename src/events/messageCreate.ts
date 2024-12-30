@@ -2,6 +2,7 @@ import { Events } from "discord.js";
 import { Event } from "#structures";
 import {
     fs22Servers,
+    fs25Servers,
     hasProfanity,
     isDCStaff,
     isMPStaff,
@@ -68,7 +69,7 @@ const mornRes2 = [
     "Please be sure to put on matching socks!",
     "Apple for you 🍎"
 ];
-const privateServers = fs22Servers.getPrivateAll();
+const privateServers = [...fs22Servers.getPrivateAll(), ...fs25Servers.getPrivateAll()];
 
 export default new Event({
     name: Events.MessageCreate,
@@ -182,7 +183,7 @@ export default new Event({
         }
 
         // Morning message system
-        if (morningPrefixes.some(x => msg.includes(x)) && message.channelId === message.client.config.mainServer.channels.general) {
+        if (message.channelId === message.client.config.mainServer.channels.general && morningPrefixes.some(x => msg.includes(x))) {
             const staffTag = (message.member!.displayName.indexOf(" | ") ?? NaN) < 0
                 ? undefined
                 : message.member!.displayName.indexOf(" | ");

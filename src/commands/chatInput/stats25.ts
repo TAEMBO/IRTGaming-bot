@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, AttachmentBuilder, channelMention, EmbedBuilder, hyperlink } from "discord.js";
+import { ApplicationCommandOptionType, channelMention, EmbedBuilder, hyperlink, time } from "discord.js";
 import canvas from "@napi-rs/canvas";
 import { DSSExtension, type DSSResponse, Feeds, filterUnused } from "farming-simulator-types/2025";
 import { Command } from "#structures";
@@ -13,9 +13,9 @@ import {
     log
 } from "#util";
 
-function formatPlayerTime(time: number) {
-    const hours = Math.floor(time / 60);
-    const minutes = (time % 60).toString();
+function formatPlayerTime(playerTime: number) {
+    const hours = Math.floor(playerTime / 60);
+    const minutes = (playerTime % 60).toString();
     let text = hours ? hours + "h" : "";
 
     text += " " + minutes + "min";
@@ -146,14 +146,12 @@ export default new Command<"chatInput">({
             const fsKeys = fs25Servers.keys();
             const playerTimeData = getTimeData(playerData).sort((a, b) => fsKeys.indexOf(a[0]) - fsKeys.indexOf(b[0]));
             const playerTimeDataTotal = playerTimeData.reduce((x, y) => x + y[1].time, 0);
+            const isInCache = (serverAcro: string) => interaction.client.fs25Cache[serverAcro].players.some(x => x.name === playerData._id);
             const formattedTimeData = playerTimeData
                 .filter(x => interaction.client.fs25Cache[x[0]])
                 .map(([serverAcro, timeData]) => ({
                     name: serverAcro.toUpperCase(),
-                    value: [
-                        `Time - ${formatPlayerTime(timeData.time,)}`,
-                        `Last on - ${interaction.client.fs25Cache[serverAcro].players.some(x => x.name === playerData._id) ? "Right now" : `<t:${timeData.lastOn}:R>`}`
-                    ].join("\n")
+                    value: `Time - ${formatPlayerTime(timeData.time)}\nLast on - ${isInCache(serverAcro) ? "Right now" : time(timeData.lastOn, "R")}`
                 }));
             let decorators = "";
 
@@ -163,13 +161,13 @@ export default new Command<"chatInput">({
 
             await interaction.reply({ embeds: [new EmbedBuilder()
                 .setColor("#a0c213")
-                .setTitle([
-                    `Player - \`${playerData._id}\`${decorators}`,
-                    `Leaderboard position - **#${sortedPlayersData.findIndex(x => x._id === playerData._id) + 1}**`,
-                    `Total time - **${formatPlayerTime(playerTimeDataTotal)}**`,
-                    (isMPStaff(interaction.member) && playerData.uuid) ? `UUID: \`${playerData.uuid}\`` : "",
-                    (isMPStaff(interaction.member) && playerData.discordid) ? `Discord user ID - \`${playerData.discordid}\`` : "",
-                ].join("\n"))
+                .setTitle(
+                    `Player - \`${playerData._id}\`${decorators}\n` +
+                    `Leaderboard position - **#${sortedPlayersData.findIndex(x => x._id === playerData._id) + 1}**\n` +
+                    `Total time - **${formatPlayerTime(playerTimeDataTotal)}**\n` +
+                    ((isMPStaff(interaction.member) && playerData.uuid) ? `UUID: \`${playerData.uuid}\`\n` : "") +
+                    ((isMPStaff(interaction.member) && playerData.discordid) ? `Discord user ID - \`${playerData.discordid}\`\n` : "")
+                )
                 .setFields(formattedTimeData)
             ] });
         } else {
@@ -207,7 +205,10 @@ export default new Command<"chatInput">({
 
                 if (Number.isInteger(interval)) {
                     const intervalString = interval.toString();
-                    const referenceNumber = i * Math.max(intervalString.split("").filter(x => x === "0").length / intervalString.length, 0.3) * (["1", "2", "4", "5", "6", "8"].includes(intervalString[0]) ? 1.5 : 0.67);
+                    const referenceNumber =
+                        i *
+                        Math.max(intervalString.split("").filter(x => x === "0").length / intervalString.length, 0.3) *
+                        (["1", "2", "4", "5", "6", "8"].includes(intervalString[0]) ? 1.5 : 0.67);
 
                     intervalCandidates.push([interval, i, referenceNumber]);
                 }
@@ -360,7 +361,12 @@ export default new Command<"chatInput">({
                 .setTimestamp(interaction.client.fs25Cache[subCmd].lastAdmin)
                 .setFooter({ text: "Admin last on" });
 
-            await interaction.reply({ embeds: [embed], files: [new AttachmentBuilder(img.toBuffer("image/png"), { name: "FSStats.png" })] });
+            await interaction.reply({
+                embeds: [embed],
+                files: [{
+                    attachment: img.toBuffer("image/png"),
+                    name: "FSStats.png"
+                }] });
         }
     },
     data: {

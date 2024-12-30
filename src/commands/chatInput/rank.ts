@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, AttachmentBuilder, EmbedBuilder, userMention } from "discord.js";
+import { ApplicationCommandOptionType, EmbedBuilder, userMention } from "discord.js";
 import canvas from "@napi-rs/canvas";
 import { Command } from "#structures";
 
@@ -141,7 +141,10 @@ export default new Command<"chatInput">({
             ctx.fillText("TOTAL ", offsetRankX, detailsYOffset);
             ctx.restore();
 
-            await interaction.reply({ files: [new AttachmentBuilder(img.toBuffer("image/png"), { name: "rank.png" })] });
+            await interaction.reply({ files: [{
+                attachment: img.toBuffer("image/png"),
+                name: "rank.png"
+            }] });
 
             return;
         }
@@ -290,7 +293,10 @@ export default new Command<"chatInput">({
             .join("\n");
 
         await interaction.reply({
-            files: [new AttachmentBuilder(img.toBuffer("image/png"), { name: "dailyMsgs.png" })],
+            files: [{
+                attachment: img.toBuffer("image/png"),
+                name: "dailyMsgs.png"
+            }],
             embeds: [new EmbedBuilder()
                 .setTitle("Top users by messages sent")
                 .setDescription(topUsers)

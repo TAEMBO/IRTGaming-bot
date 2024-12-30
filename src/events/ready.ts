@@ -1,9 +1,15 @@
 import { codeBlock, type EmbedBuilder, Events, InteractionContextType, userMention } from "discord.js";
 import cron from "node-cron";
-import { crunchFarmData, connectMongoDB, fs22Loop, fs25Loop, fsLoopAll } from "#actions";
+import {
+    crunchFarmData,
+    connectMongoDB,
+    fs22Loop,
+    fs25Loop,
+    fsLoopAll,
+    ytFeed
+} from "#actions";
 import { Event } from "#structures";
 import { fs22Servers, fs25Servers, log } from "#util";
-import { ytFeed } from "#actions";
 
 export default new Event({
     name: Events.ClientReady,
@@ -43,7 +49,7 @@ export default new Event({
             creator: inv.inviter?.id ?? "UNKNOWN"
         });
 
-        log("Blue", `Bot active as ${client.user.tag}`);
+        log("Blue", "Bot active as", client.user.tag);
 
         await client.getChan("taesTestingZone").send([
             ":warning: Bot restarted :warning:",
@@ -51,7 +57,7 @@ export default new Event({
             codeBlock("json", JSON.stringify(client.config.toggles, null, 1).slice(1, -1))
         ].join("\n"));
 
-        // DailyMsgs schedule
+        // Daily jobs
         cron.schedule("0 0 * * *", async (date) => {
             if (typeof date === "string") return;
 
@@ -72,13 +78,15 @@ export default new Event({
 
             log("Cyan", `Pushed { ${formattedDate}, ${total} } to dailyMsgs`);
 
-            if (!client.config.toggles.autoResponses) return;
+            if (client.config.toggles.autoResponses) {
+                const dailyMsgsMsg = day === 6
+                    ? client.config.DAILY_MSGS_WEEKEND
+                    : day === 1
+                        ? client.config.DAILY_MSGS_MONDAY
+                        : client.config.DAILY_MSGS_DEFAULT;
 
-            if (day === 6) {
-                await channel.send(client.config.DAILY_MSGS_WEEKEND);
-            } else if (day === 1) {
-                await channel.send(client.config.DAILY_MSGS_MONDAY);
-            } else await channel.send(client.config.DAILY_MSGS_DEFAULT);
+                await channel.send(dailyMsgsMsg);
+            }
 
             if (client.config.toggles.fs25Loop) {
                 const playerTimes = await client.playerTimes25.data.find();

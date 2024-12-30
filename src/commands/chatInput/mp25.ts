@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, AttachmentBuilder, codeBlock, EmbedBuilder } from "discord.js";
+import { ApplicationCommandOptionType, codeBlock, EmbedBuilder } from "discord.js";
 import { Routes } from "farming-simulator-types/2025";
 import puppeteer from "puppeteer"; // Credits to Trolly for suggesting this package
 import { Command, FTPActions } from "#structures";
@@ -156,7 +156,12 @@ export default new Command<"chatInput">({
 
                     const data = await ftpActions.get("blockedUserIds.xml");
 
-                    return await interaction.editReply({ files: [new AttachmentBuilder(Buffer.from(data), { name: "blockedUserIds.xml" })] });
+                    await interaction.editReply({ files: [{
+                        attachment: Buffer.from(data),
+                        name: "blockedUserIds.xml"
+                    }] });
+
+                    return;
                 }
 
                 if (!hasRole(interaction.member, "mpManager")) return await youNeedRole(interaction, "mpManager");
@@ -242,7 +247,10 @@ export default new Command<"chatInput">({
 
                 const data = await new FTPActions(serverConfig.ftp).get("savegame1/farms.xml");
 
-                await interaction.editReply({ files: [new AttachmentBuilder(Buffer.from(data), { name: "farms.xml" })] });
+                await interaction.editReply({ files: [{
+                    attachment: Buffer.from(data),
+                    name: "farms.xml"
+                }] });
 
                 break;
             };

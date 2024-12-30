@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, AttachmentBuilder, EmbedBuilder } from "discord.js";
+import { ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
 import canvas from "@napi-rs/canvas";
 import { DSSExtension, type DSSResponse, Feeds, filterUnused } from "farming-simulator-types/2022";
 import { Command } from "#structures";
@@ -352,7 +352,12 @@ export default new Command<"chatInput">({
                 .setTimestamp(interaction.client.fs22Cache[subCmd].lastAdmin)
                 .setFooter({ text: "Admin last on" });
 
-            await interaction.reply({ embeds: [embed], files: [new AttachmentBuilder(img.toBuffer("image/png"), { name: "FSStats.png" })] });
+            await interaction.reply({
+                embeds: [embed],
+                files: [{
+                    attachment: img.toBuffer("image/png"),
+                    name: "FSStats.png"
+                }] });
         }
     },
     data: {

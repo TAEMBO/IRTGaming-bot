@@ -120,10 +120,16 @@ export class PlayerTimes22 extends BaseSchema<typeof model> {
 
             changedNameCount++;
 
-            await this.data.create({ _id: player._attributes.lastNickname, uuid: player._attributes.uniqueUserId, servers: playerDatabyUuid.servers })
+            await this.data.create({
+                _id: player._attributes.lastNickname,
+                uuid: player._attributes.uniqueUserId,
+                servers: playerDatabyUuid.servers,
+                discordid: playerDatabyUuid.discordid
+            })
                 .then(() => this.data.findByIdAndDelete(playerDatabyUuid._id)) // New name was not occupied, delete old name data
                 .catch(async () => { // New name was occupied
                     playerDatabyUuid.uuid = undefined; // Remove UUID from old name
+                    playerDatabyUuid.discordid = undefined; // Remove Discord ID from old name
 
                     await playerDatabyUuid.save();
                     await this.data.findByIdAndUpdate(
@@ -131,9 +137,8 @@ export class PlayerTimes22 extends BaseSchema<typeof model> {
                         {
                             uuid: player._attributes.uniqueUserId,
                             discordid: playerDatabyUuid.discordid
-                        },
-                        { new: true }
-                    ); // Add UUID to new name
+                        }
+                    ); // Add UUID and Discord ID to new name
                 });
         }
 

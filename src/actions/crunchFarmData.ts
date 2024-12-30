@@ -63,6 +63,7 @@ export async function crunchFarmData(client: Client, playerTimes: Client["player
         } catch (err) {
             // Name occupied, modify data instead
             playerDatabyUuid.uuid = undefined;
+            playerDatabyUuid.discordid = undefined;
 
             await playerDatabyUuid.save();
 

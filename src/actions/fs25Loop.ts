@@ -252,14 +252,14 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
     }
 
     for (const player of joinedPlayers) {
-        const watchListData = watchList.find(y => y._id === player.name);
+        const watchListData = watchList.find(y => y._id === player.name)?.toObject();
         const embed = new EmbedBuilder().setColor(client.config.EMBED_COLOR_GREEN);
         const playerTimesData = client.playerTimes25.cache.find(x => x._id === player.name);
         const playerDiscordMention = playerTimesData?.discordid ? " " + userMention(playerTimesData.discordid) : "";
         const decorators = formatDecorators(client, player, watchList);
         let description = `\`${player.name}\`${decorators}${playerDiscordMention} joined **${serverAcroUp}** at ${timestamp}`;
 
-        if (player.uptime) embed.setFooter({ text: `Playtime: ${formatUptime(player)}` });
+        if (player.uptime) embed.setFooter({ text: "Playtime: " + formatUptime(player) });
 
         if (player.uptime > 1) {
             const comparableUptimes = [player.uptime, player.uptime - 1];
@@ -273,6 +273,7 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
         embed.setDescription(description);
 
         if (watchListData) {
+            const watchListReference = watchListData.reference ? "\nReference: " + watchListData.reference : "";
             const filterWLPings = client.watchListPings.cache.filter(x =>
                 !client.mainGuild().members.cache.get(x)?.roles.cache.has(client.config.mainServer.roles.loa)
             );
@@ -281,9 +282,9 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
                 content: watchListData.isSevere ? filterWLPings.map(userMention).join(" ") : undefined,
                 embeds: [new EmbedBuilder()
                     .setTitle(`WatchList - ${watchListData.isSevere ? "ban" : "watch over"}`)
-                    .setDescription(`\`${watchListData._id}\` joined **${serverAcroUp}** at ${timestamp}`)
+                    .setDescription(`\`${watchListData._id}\` joined **${serverAcroUp}** at ` + timestamp + watchListReference)
                     .setColor(client.config.EMBED_COLOR_GREEN)
-                    .setFooter({ text: `Reason: ${watchListData.reason}` })
+                    .setFooter({ text: "Reason: " + watchListData.reason })
                 ]
             });
         }

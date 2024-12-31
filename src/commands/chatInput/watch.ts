@@ -11,12 +11,26 @@ export default new Command<"chatInput">({
                 const reason = interaction.options.getString("reason", true);
                 const name = interaction.options.getString("username", true);
                 const severity = interaction.options.getString("severity", true) as "ban" | "watch";
+                const reference = interaction.options.getString("reference", false);
                 const wlData = await interaction.client.watchList.data.findById(name);
 
                 if (wlData) return await interaction.reply(`\`${name}\` already exists for reason \`${wlData.reason}\``);
 
-                await interaction.client.watchList.data.create({ _id: name, reason, isSevere: severity === "ban" });
-                await interaction.reply(`Successfully added \`${name}\` who needs to be **${severity === "ban" ? "banned" : "watched over"}** with reason \`${reason}\``);
+                const regExp = new RegExp(/https?:\/\/(?:canary\.|ptb\.)?discord(?:app)?\.com\/channels\/(\d{17,19})?\/(\d{17,20})\/(\d{17,20})/);
+
+                if (reference && !regExp.test(reference)) return interaction.reply("Invalid reference, must be a message link!");
+
+                await interaction.client.watchList.data.create({
+                    _id: name,
+                    reason,
+                    isSevere: severity === "ban",
+                    reference: reference ?? undefined
+                });
+
+                const severityText = severity === "ban" ? "banned" : "watched over";
+                const referenceText = reference ? `\nReference: ${reference}` : "";
+
+                await interaction.reply(`Successfully added \`${name}\` who needs to be **${severityText}** with reason \`${reason}\`${referenceText}`);
 
                 break;
             };
@@ -111,7 +125,13 @@ export default new Command<"chatInput">({
                             { name: "Needs to be watched over", value: "watch" }
                         ],
                         required: true
-                    }
+                    },
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "reference",
+                        description: "An optional reference (message link) to attach",
+                        required: false
+                    },
                 ]
             },
             {

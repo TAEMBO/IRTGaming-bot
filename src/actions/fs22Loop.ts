@@ -26,9 +26,10 @@ export async function fs22Loop(client: TClient, watchList: TClient["watchList"][
     const server = fs22Servers.getOne(serverAcro);
 
     function wlEmbed(document: TClient["watchList"]["doc"], joinLog: boolean) {
+        const watchListReference = document.reference ? `\nReference: ${document.reference}` : "";
         const embed = new EmbedBuilder()
             .setTitle(`WatchList - ${document.isSevere ? "ban" : "watch over"}`)
-            .setDescription(`\`${document._id}\` ${joinLog ? "joined" : "left"} **${serverAcroUp}** at <t:${now}:t>`);
+            .setDescription(`\`${document._id}\` ${joinLog ? "joined" : "left"} **${serverAcroUp}** at <t:${now}:t>` + watchListReference);
 
         if (joinLog) {
             embed.setColor(client.config.EMBED_COLOR_GREEN).setFooter({ text: `Reason: ${document.reason}` });

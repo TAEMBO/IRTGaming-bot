@@ -1,9 +1,10 @@
 import { ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
 import { Routes } from "farming-simulator-types/2022";
-import puppeteer from "puppeteer"; // Credits to Trolly for suggesting this package
 import { Command, FTPActions } from "#structures";
 import {
     collectAck,
+    formatRequestInit,
+    formatString,
     fs22Servers,
     hasRole,
     isMPStaff,
@@ -61,56 +62,57 @@ export default new Command<"chatInput">({
                     if (state !== "confirm") return;
                 } else await interaction.deferReply();
 
-                const browser = await puppeteer.launch({ args: ["--no-sandbox"] });
-                const page = await browser.newPage();
+                let result = "Successfully ";
+                let queryParameters = "";
 
-                try {
-                    await page.goto(configServer.url + Routes.webPageLogin(configServer.username, configServer.password), { timeout: 120_000 });
-                } catch (err: any) {
-                    return await interaction.editReply(err.message);
+                if (chosenAction === "start") {
+                    const configData = await new FTPActions(configServer.ftp).get("dedicated_server/dedicatedServerConfig.xml");
+                    const parsedConfigData = Object.entries(jsonFromXML<DedicatedServerConfig>(configData).gameserver.settings);
+
+                    for (let [key, { _text: value }] of parsedConfigData) {
+                        value ??= "";
+
+                        if (key === "savegame_index") key = "savegame";
+
+                        if (key === "language") key = "mp_language";
+
+                        if (key === "port") key = "server_port";
+
+                        if (key === "crossplay_allowed" && value === "false") continue;
+
+                        queryParameters += "&" + key + "=" + value;
+                    }
                 }
 
-                await interaction.editReply(`Connected to dedi panel for **${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**...`);
+                queryParameters += `&${chosenAction}_server=${formatString(chosenAction)}`;
+                result += {
+                    start: "started ",
+                    stop: "stopped ",
+                    restart: "restarted "
+                }[chosenAction];
 
-                let result = "Successfully ";
-                let uptimeText: string | null | undefined;
-
-                await ({
-                    start() {
-                        result += "started ";
-                    },
-                    async stop() {
-                        result += "stopped ";
-
-                        const uptime = await page.evaluate(() => document.querySelector("span.monitorHead")!.textContent!);
-
-                        uptimeText = `. Uptime before stopping: **${uptime}**`;
-
-                    },
-                    async restart() {
-                        result += "restarted ";
-                        await interaction.client.getChan("fsLogs").send({ embeds: [new EmbedBuilder()
-                            .setTitle(`${chosenServer.toUpperCase()} now restarting`)
-                            .setColor(interaction.client.config.EMBED_COLOR_YELLOW)
-                            .setTimestamp()
-                            .setFooter({ text: "\u200b", iconURL: interaction.user.displayAvatarURL() })
-                        ] });
-
-                        const uptime = await page.evaluate(() => document.querySelector("span.monitorHead")!.textContent!);
-
-                        uptimeText = `. Uptime before restarting: **${uptime}**`;
-                    }
-                })[chosenAction]();
-
-                await page.waitForSelector(`[name="${chosenAction}_server"]`).then(x => x!.click());
+                try {
+                    await fetch(
+                        configServer.url + Routes.webPageLogin(configServer.username, configServer.password) + queryParameters,
+                        {
+                            redirect: "manual",
+                            ...formatRequestInit(10_000, formatString(chosenAction) + "-server")
+                        }
+                    );
+                } catch (err: any) {
+                    return interaction.editReply(`Failed to ${chosenAction} **${chosenServer.toUpperCase()}** - ${err.message}`);
+                }
 
                 result += `**${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**`;
 
-                if (uptimeText) result += uptimeText;
-
                 await interaction.editReply(result);
 
-                setTimeout(() => browser.close(), 5_000);
+                if (chosenAction === "restart") await interaction.client.getChan("fsLogs").send({ embeds: [new EmbedBuilder()
+                    .setTitle(`${chosenServer.toUpperCase()} now restarting`)
+                    .setColor(interaction.client.config.EMBED_COLOR_YELLOW)
+                    .setTimestamp()
+                    .setFooter({ text: "\u200b", iconURL: interaction.user.displayAvatarURL() })
+                ] });
 
                 break;
             };

@@ -2,6 +2,8 @@ import { ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
 import { Command } from "#structures";
 import { collectAck, isMPStaff, youNeedRole } from "#util";
 
+const regExp = new RegExp(/https?:\/\/(?:canary\.|ptb\.)?discord(?:app)?\.com\/channels\/(\d{17,19})?\/(\d{17,20})\/(\d{17,20})/);
+
 export default new Command<"chatInput">({
     async run(interaction) {
         if (!isMPStaff(interaction.member)) return await youNeedRole(interaction, "mpStaff");
@@ -15,8 +17,6 @@ export default new Command<"chatInput">({
                 const wlData = await interaction.client.watchList.data.findById(name);
 
                 if (wlData) return await interaction.reply(`\`${name}\` already exists for reason \`${wlData.reason}\``);
-
-                const regExp = new RegExp(/https?:\/\/(?:canary\.|ptb\.)?discord(?:app)?\.com\/channels\/(\d{17,19})?\/(\d{17,20})\/(\d{17,20})/);
 
                 if (reference && !regExp.test(reference)) return interaction.reply("Invalid reference, must be a message link!");
 
@@ -34,6 +34,29 @@ export default new Command<"chatInput">({
 
                 break;
             };
+            case "update": {
+                const reason = interaction.options.getString("reason", false);
+                const name = interaction.options.getString("username", true);
+                const severity = interaction.options.getString("severity", false) as "ban" | "watch" | null;
+                const reference = interaction.options.getString("reference", false);
+                const wlData = await interaction.client.watchList.data.findById(name);
+
+                if (!wlData) return interaction.reply(`\`${name}\` doesn't exist on watchList`);
+
+                if (reference && !regExp.test(reference)) return interaction.reply("Invalid reference, must be a message link!");
+
+                if (reason) wlData.reason = reason;
+
+                if (severity) wlData.isSevere = severity === "ban";
+
+                if (reference) wlData.reference = reference;
+
+                await wlData.save();
+
+                await interaction.reply(`Successfully updated watchList details for \`${name}\``);
+
+                break;
+            }
             case "remove": {
                 const name = interaction.options.getString("username", true);
                 const wlData = await interaction.client.watchList.data.findById(name);
@@ -53,13 +76,13 @@ export default new Command<"chatInput">({
 
                 break;
             };
-            case "subscription": {
+            case "notifications": {
                 if (!interaction.client.watchListPings.cache.includes(interaction.user.id)) {
                     await interaction.client.watchListPings.add(interaction.user.id);
 
                     return await interaction.reply({ embeds: [new EmbedBuilder()
                         .setDescription("You have successfully subscribed to watchList notifications")
-                        .setFooter({ text: "Run this command again if this was a mistake" })
+                        .setFooter({ text: "Run this command again to unsubscribe" })
                         .setColor(interaction.client.config.EMBED_COLOR)
                     ] });
                 }
@@ -136,6 +159,41 @@ export default new Command<"chatInput">({
             },
             {
                 type: ApplicationCommandOptionType.Subcommand,
+                name: "update",
+                description: "Update the details of a watchList entry",
+                options: [
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "username",
+                        description: "The player name to update the details for",
+                        required: true
+                    },
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "reason",
+                        description: "The updated reason for adding the player",
+                        required: false
+                    },
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "severity",
+                        description: "Update whether this player needs to be banned or watched over",
+                        choices: [
+                            { name: "Needs to be banned", value: "ban" },
+                            { name: "Needs to be watched over", value: "watch" }
+                        ],
+                        required: false
+                    },
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "reference",
+                        description: "An optional updated reference (message link) to attach",
+                        required: false
+                    },
+                ]
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
                 name: "remove",
                 description: "Remove a player from watchList",
                 options: [
@@ -154,7 +212,7 @@ export default new Command<"chatInput">({
             },
             {
                 type: ApplicationCommandOptionType.Subcommand,
-                name: "subscription",
+                name: "notifications",
                 description: "Manage your subscription to watchList notifications"
             }
         ]

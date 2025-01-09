@@ -9,9 +9,7 @@ function isValidCommand(obj: unknown) {
         && "run" in obj
         && typeof obj.run === "function"
         && "data" in obj
-        && typeof obj.data === "object"
-        && "uses" in obj
-        && typeof obj.uses === "number";
+        && typeof obj.data === "object";
 }
 
 export async function loadCommands(client: Client) {

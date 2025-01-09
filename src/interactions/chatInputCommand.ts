@@ -19,7 +19,6 @@ export async function handleChatInputCommand(interaction: ChatInputCommandIntera
 
     try {
         await command.run(interaction);
-        command.uses++;
     } catch (err: any) {
         await interaction.client.errorLog(err);
 

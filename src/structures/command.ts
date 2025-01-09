@@ -33,10 +33,8 @@ export class Command<
     public run: (interaction: TInteraction) => Promise<any>;
     /** The data for this command */
     public readonly data: TData;
-    /** The amount of times this command has been used */
-    public uses = 0;
 
-    public constructor(commandData: Omit<Command<TCommand, TData, TInteraction, TAutocomplete>, "uses">) {
+    public constructor(commandData: Command<TCommand, TData, TInteraction, TAutocomplete>) {
         this.autocomplete = commandData.autocomplete;
         this.run = commandData.run;
         this.data = commandData.data;

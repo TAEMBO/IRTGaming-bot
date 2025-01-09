@@ -18,7 +18,6 @@ export async function handleContextMenuCommand(interaction: CombinedContextMenuC
 
     try {
         await command.run(interaction);
-        command.uses++;
     } catch (err: any) {
         await interaction.client.errorLog(err);
 

@@ -31,6 +31,12 @@ export default new Command<"chatInput">({
                 const choices = interaction.client.playerTimes22.cache
                     .filter(x => x._id.toLowerCase().replace(" ", "").includes(focused))
                     .slice(0, 24)
+                    .sort((a, b) => {
+                        if (a._id < b._id) return -1;
+                        if (a._id > b._id) return 1;
+
+                        return 0;
+                    })
                     .map(x => ({ name: x._id, value: x._id }));
 
                 await interaction.respond(choices);

@@ -1,4 +1,4 @@
-import { codeBlock, EmbedBuilder } from "discord.js";
+import { EmbedBuilder } from "discord.js";
 import type TClient from "../client.js";
 import { formatDecorators, formatUptime, log } from "#util";
 
@@ -60,11 +60,10 @@ export async function fsLoopAll(client: TClient, watchList: TClient["watchList"]
 
     if (footerText25.length) fs25Embed.setFooter({ text: footerText25.join(", ") });
 
-    await client.getChan("juniorAdminChat").messages.edit(client.config.mainServer.fsLoopMsgId, {
-        content: `${codeBlock("js", `["${client.whitelist.cache.join(", ")}"]`)}Updates every 30 seconds`,
-        embeds: [
+    await client.getChan("juniorAdminChat").messages
+        .edit(client.config.mainServer.fsLoopMsgId, { embeds: [
             fs22Embed.setTitle(totalCount22.reduce((a, b) => a + b, 0) + " online"),
             fs25Embed.setTitle(totalCount25.reduce((a, b) => a + b, 0) + " online")
-        ]
-    }).catch(() => log("Red", "FSLoopAll invalid msg"));
+        ] })
+        .catch(() => log("Red", "FSLoopAll invalid msg"));
 }

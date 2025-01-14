@@ -136,8 +136,6 @@ export default new Command<"chatInput">({
                 const chosenServer = interaction.options.getString("server", true);
                 const chosenAction = interaction.options.getString("action", true) as "items.xml" | "players.xml";
 
-                if (interaction.client.fs25Cache[chosenServer].state === 1) return await interaction.reply(`You cannot mop files from **${chosenServer.toUpperCase()}** while it is online`);
-
                 await interaction.deferReply();
 
                 await new FTPActions(fs25Servers.getPublicOne(chosenServer).ftp).delete(`savegame1/${chosenAction}`);

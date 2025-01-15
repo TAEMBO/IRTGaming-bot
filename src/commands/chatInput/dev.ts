@@ -11,9 +11,9 @@ import {
 import { exec } from "child_process";
 import fs from "node:fs";
 import { setTimeout as sleep } from "node:timers/promises";
-import util from "node:util";
+import { formatWithOptions } from "node:util";
 import * as structures from "#structures";
-import * as utilities from "#util";
+import * as util from "#util";
 
 export default new structures.Command<"chatInput">({
     async run(interaction) {
@@ -30,8 +30,7 @@ export default new structures.Command<"chatInput">({
                 const depth = interaction.options.getInteger("depth") ?? 1;
                 const useAsync = Boolean(interaction.options.getBoolean("async", false));
                 const embed = new EmbedBuilder()
-                    .setTitle("__Eval__")
-                    .setColor(interaction.client.config.EMBED_COLOR)
+                    .setColor(client.config.EMBED_COLOR)
                     .addFields({ name: "Input", value: codeBlock("js", code.slice(0, 1010)) });
                 const now = performance.now();
                 let output;
@@ -44,7 +43,7 @@ export default new structures.Command<"chatInput">({
                     embed
                         .setColor("#ff0000")
                         .addFields({
-                            name: `Output • ${(performance.now() - now).toFixed(5)}ms`,
+                            name: `Output • ${(performance.now() - now).toFixed(5)}ms • ${util.formatString(typeof output)}`,
                             value: codeBlock(err)
                         });
 
@@ -71,24 +70,13 @@ export default new structures.Command<"chatInput">({
                 }
 
                 // Output manipulation
+                const outputType = util.formatString(typeof output);
                 output = typeof output === "object"
-                    ? "js\n" + util.formatWithOptions({ depth }, "%O", output)
+                    ? "js\n" + formatWithOptions({ depth }, "%O", output)
                     : "\n" + String(output);
 
-                // Hide credentials
-                const fsPub = utilities.fs22Servers.getPublicAll();
-                const fsObj = utilities.fs22Servers.values();
-
-                for (const credential of [
-                    client.config.TOKEN,
-                    ...fsObj.map(x => x.password),
-                    ...fsObj.map(x => x.code),
-                    ...fsPub.map(x => x[1].ftp.host),
-                    ...fsPub.map(x => x[1].ftp.password)
-                ]) output = output.replace(credential, "CREDENTIAL_LEAK");
-
                 embed.addFields({
-                    name: `Output • ${(performance.now() - now).toFixed(5)}ms`,
+                    name: `Output • ${(performance.now() - now).toFixed(5)}ms • ${outputType}`,
                     value: `\`\`\`${output.slice(0, 1016)}\n\`\`\``
                 });
 

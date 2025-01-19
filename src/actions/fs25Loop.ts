@@ -42,13 +42,13 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
     // Fetch dedicated-server-stats.json and parse
     const dss = await (async () => {
         const res = await fetch(server.url + Feeds.dedicatedServerStats(server.code, DSSExtension.JSON), init)
-            .catch(err => log("Red", `${serverAcroUp} DSS ${err.message}`));
+            .catch(err => log("Red", serverAcroUp, "DSS Fetch:", err.message));
 
-        if (!res) return null;
+        if (!res || res.status !== constants.HTTP_STATUS_OK) return null;
 
-        const data: DSSResponse = await res.json();
+        const data: DSSResponse | void = await res.json().catch(err => log("Red", serverAcroUp, "DSS Parse:", err.message));
 
-        if (!data.slots) return null;
+        if (!data?.slots) return null;
 
         return data;
     })();
@@ -58,11 +58,15 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
         if (!dss) return null;
 
         const res = await fetch(server.url + Feeds.dedicatedServerSavegame(server.code, DSSFile.CareerSavegame), init)
-            .catch(err => log("Red", `${serverAcroUp} CSG ${err.message}`));
+            .catch(err => log("Red", serverAcroUp, "CSG Fetch:", err.message));
 
-        if (!res || res.status === constants.HTTP_STATUS_NO_CONTENT) return null;
+        if (!res || res.status !== constants.HTTP_STATUS_OK) return null;
 
-        return jsonFromXML<FSLoopCSG>(await res.text()).careerSavegame;
+        const body = await res.text().catch(err => log("Red", serverAcroUp, "CSG Parse:", err.message));
+
+        if (!body) return null;
+
+        return jsonFromXML<FSLoopCSG>(body).careerSavegame;
     })();
 
     // Request(s) failed

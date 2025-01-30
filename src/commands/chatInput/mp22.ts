@@ -63,7 +63,7 @@ export default new Command<"chatInput">({
                 } else await interaction.deferReply();
 
                 let result = "Successfully ";
-                let queryParameters = "";
+                const queryParameters = new URLSearchParams();
 
                 if (chosenAction === "start") {
                     const configData = await new FTPActions(configServer.ftp).get("dedicated_server/dedicatedServerConfig.xml");
@@ -80,11 +80,13 @@ export default new Command<"chatInput">({
 
                         if (key === "crossplay_allowed" && value === "false") continue;
 
-                        queryParameters += "&" + key + "=" + value;
+                        if (key === "stats_interval") value = "45";
+
+                        queryParameters.append(key, value);
                     }
                 }
 
-                queryParameters += `&${chosenAction}_server=${formatString(chosenAction)}`;
+                queryParameters.append(`${chosenAction}_server`, formatString(chosenAction));
                 result += {
                     start: "started ",
                     stop: "stopped ",
@@ -93,7 +95,7 @@ export default new Command<"chatInput">({
 
                 try {
                     await fetch(
-                        configServer.url + Routes.webPageLogin(configServer.username, configServer.password) + queryParameters,
+                        configServer.url + Routes.webPageLogin(configServer.username, configServer.password) + "&" + queryParameters.toString(),
                         {
                             redirect: "manual",
                             ...formatRequestInit(10_000, formatString(chosenAction) + "-server")

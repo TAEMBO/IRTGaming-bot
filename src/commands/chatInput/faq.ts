@@ -88,14 +88,12 @@ export default new Command<"chatInput">({
                 break;
             };
             case "filters": {
-                await interaction.reply({ content, embeds: [new EmbedBuilder()
-                    .setColor(interaction.client.config.EMBED_COLOR)
-                    .setFooter({ text:
-                        "Please note that servers may \"ghost\" and not show up" +
-                        "until you've refreshed your MP menu several times."
-                    })
-                    .setImage(interaction.client.config.resources.faqFiltersEmbedImage)
-                ] });
+                await interaction.reply(
+                    content +
+                    "\n-# Please note that servers may \"ghost\" and not show up " +
+                    "until you've refreshed your MP menu several times" +
+                    hyperlink(".", interaction.client.config.resources.faqFiltersEmbedImage)
+                );
 
                 break;
             };

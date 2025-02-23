@@ -128,10 +128,6 @@ export class PlayerTimes22 extends BaseSchema<typeof model> {
             })
                 .then(() => this.data.findByIdAndDelete(playerDatabyUuid._id)) // New name was not occupied, delete old name data
                 .catch(async () => { // New name was occupied
-                    playerDatabyUuid.uuid = undefined; // Remove UUID from old name
-                    playerDatabyUuid.discordid = undefined; // Remove Discord ID from old name
-
-                    await playerDatabyUuid.save();
                     await this.data.findByIdAndUpdate(
                         player._attributes.lastNickname,
                         {
@@ -139,6 +135,11 @@ export class PlayerTimes22 extends BaseSchema<typeof model> {
                             discordid: playerDatabyUuid.discordid
                         }
                     ); // Add UUID and Discord ID to new name
+
+                    playerDatabyUuid.uuid = undefined; // Remove UUID from old name
+                    playerDatabyUuid.discordid = undefined; // Remove Discord ID from old name
+
+                    await playerDatabyUuid.save();
                 });
         }
 

@@ -100,19 +100,6 @@ export type Empty<T> = {
     [K in keyof T]: undefined;
 };
 
-export type RepeatedMessagesIdentifiers = "bw" | "adv" | "spam";
-
-export interface RepeatedMessagesEntry {
-    identifier: RepeatedMessagesIdentifiers;
-    channel: string;
-    msg: string;
-}
-
-export type RepeatedMessagesData = Record<string, {
-    entries: Collection<number, RepeatedMessagesEntry>;
-    timeout: NodeJS.Timeout;
-}>;
-
 export type CombinedContextMenuCommandInteraction =
     MessageContextMenuCommandInteraction<"cached">
     | UserContextMenuCommandInteraction<"cached">;

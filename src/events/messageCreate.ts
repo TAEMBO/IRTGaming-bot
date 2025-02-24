@@ -1,14 +1,6 @@
 import { Events } from "discord.js";
 import { Event } from "#structures";
-import {
-    fs22Servers,
-    fs25Servers,
-    hasProfanity,
-    isDCStaff,
-    isMPStaff,
-    log,
-    tempReply
-} from "#util";
+import { fs22Servers, fs25Servers, isDCStaff, tempReply } from "#util";
 
 function dayReaction() {
     const date = new Date();
@@ -88,68 +80,11 @@ export default new Event({
         const msg = message.content.replaceAll("\n", " ").toLowerCase();
         let automodded = false;
 
-        // Misuse of staff ping
-        if (message.mentions.roles.has(message.client.config.mainServer.roles.mpStaff)) {
-            log("Purple", `${message.author.tag} mentioned staff role`);
-
-            message.channel.createMessageCollector({
-                filter: x => isMPStaff(x.member) && x.content === "y",
-                max: 1,
-                time: 60_000
-            }).on("collect", async collected => {
-                log("Purple", `Received "y" from ${collected.author.tag}, indicating to mute`);
-
-                await message.client.punishments.addPunishment("mute", collected.author.id, "Automod; Misuse of staff ping", message.author, "10m")
-                    .catch(err => log("Red", "Failed to add punishment", err));
-
-                await collected.react("✅");
-            });
-        }
-
         // RepeatedMessages
         const isWhitelisted = message.client.config.whitelist.bannedWords.some(x => [message.channelId, message.channel.parentId].includes(x));
-        const possibleInvite = message.content.split(" ").find(x => x.includes("discord.gg/"));
 
         if (message.client.config.toggles.automod && !isDCStaff(message.member) && !isWhitelisted) {
-            if (hasProfanity(msg, message.client.bannedWords.cache)) {
-                automodded = true;
-
-                await tempReply(message, { timeout: 10_000, content: "That word is banned here" });
-                await message.delete();
-
-                await message.client.repeatedMessages.increment(message, {
-                    thresholdTime: 30_000,
-                    thresholdAmt: 4,
-                    identifier: "bw",
-                    muteTime: "30m",
-                    muteReason: "Banned words"
-                });
-            } else if (possibleInvite && !isMPStaff(message.member)) {
-                const validInvite = await message.client.fetchInvite(possibleInvite).catch(() => null);
-
-                if (validInvite && validInvite.guild?.id !== message.client.config.mainServer.id) {
-                    automodded = true;
-
-                    await tempReply(message, { timeout: 10_000, content: "No advertising other Discord servers" });
-                    await message.delete();
-
-                    await message.client.repeatedMessages.increment(message, {
-                        thresholdTime: 60_000,
-                        thresholdAmt: 2,
-                        identifier: "adv",
-                        muteTime: "1h",
-                        muteReason: "Discord advertisement"
-                    });
-                }
-            } else if (message.channelId !== message.client.config.mainServer.channels.spamZone && !isMPStaff(message.member)) {
-                await message.client.repeatedMessages.increment(message, {
-                    thresholdTime: 5_000,
-                    thresholdAmt: 5,
-                    identifier: "spam",
-                    muteTime: "1h",
-                    muteReason: "Repeated messages"
-                });
-            }
+            automodded = await message.client.repeatedMessages.triageMessage(message);
         }
 
         // Community idea message management
@@ -158,6 +93,8 @@ export default new Event({
             && message.author.id !== message.client.user.id
             && !isDCStaff(message.member)
         ) {
+            automodded = true;
+
             await tempReply(message, {
                 timeout: 10_000,
                 content: `You can only post community ideas in this channel using the ${message.client.getCommandMention("suggest")} command!`

@@ -138,6 +138,7 @@ interface FSServerBase {
     readonly isPrivate: boolean;
     /** A list of Discord role IDs considered as those who manager this server */
     readonly managerRoles: Snowflake[];
+    readonly crunchable?: boolean;
     /** The FTP details for this server */
     readonly ftp: {
         readonly host: string;

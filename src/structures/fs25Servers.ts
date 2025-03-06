@@ -38,6 +38,10 @@ export class FS25Servers {
         return server[1];
     }
 
+    public getCrunchable() {
+        return this.entries().filter((x): x is [string, FSServerPublic] => Boolean(x[1].crunchable));
+    }
+
     /**
      * @returns An array of entries of all public servers
      */

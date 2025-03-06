@@ -88,10 +88,14 @@ export default new Event({
                 await channel.send(dailyMsgsMsg);
             }
 
+            if (client.config.toggles.fs22Loop) {
+                for (const [serverAcro, server] of fs22Servers.getCrunchable()) await client.playerTimes22.fetchFarmData(serverAcro, server);
+            }
+
             if (client.config.toggles.fs25Loop) {
                 const playerTimes = await client.playerTimes25.data.find();
 
-                for (const [serverAcro] of fs25Servers.getPublicAll()) await crunchFarmData(client, playerTimes, serverAcro);
+                for (const [serverAcro] of fs25Servers.getCrunchable()) await crunchFarmData(client, playerTimes, serverAcro);
             }
         }, { timezone: "UTC" });
 

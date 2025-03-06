@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import type TClient from "../client.js";
 import { BaseSchema, FTPActions } from "#structures";
 import { FM_ICON, TF_ICON, fs22Servers, jsonFromXML, log } from "#util";
-import type { FarmFormat } from "#typings";
+import type { FarmFormat, FSServerPublic } from "#typings";
 
 /** The object for each server a player has been on */
 const serverObj = {
@@ -72,9 +72,8 @@ export class PlayerTimes22 extends BaseSchema<typeof model> {
         return await playerData.save();
     }
 
-    public async fetchFarmData(serverAcro: string) {
+    public async fetchFarmData(serverAcro: string, server: FSServerPublic) {
         const allData = await this.data.find();
-        const server = fs22Servers.getPublicOne(serverAcro);
         const data = await new FTPActions(server.ftp).get("savegame1/farms.xml");
 
         log("Yellow", `Downloaded farms.xml from ${serverAcro}, crunching...`);
@@ -113,8 +112,8 @@ export class PlayerTimes22 extends BaseSchema<typeof model> {
                 .setTimestamp()
                 .setDescription([
                     `**UUID:** \`${playerDatabyUuid.uuid}\``,
-                    `**Old name:** ${playerDatabyUuid._id} ${decorators(playerDatabyUuid._id)}`,
-                    `**New name:** ${player._attributes.lastNickname} ${decorators(player._attributes.lastNickname)}`
+                    `**Old name:** \`${playerDatabyUuid._id}\` ${decorators(playerDatabyUuid._id)}`,
+                    `**New name:** \`${player._attributes.lastNickname}\` ${decorators(player._attributes.lastNickname)}`
                 ].join("\n"))
             ] });
 

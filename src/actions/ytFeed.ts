@@ -79,10 +79,10 @@ export function ytFeed(client: Client) {
 
             setTimeout(() => client.ytCache.delete(videoId), 300_000);
 
-            await client.getChan("videosAndLiveStreams").send(
-                `**${data.feed.entry.author.name._text}** just posted a new video!\n` +
-                data.feed.entry.link._attributes.href
-            );
+            const linkData = data.feed.entry.link;
+            const videoURL = Array.isArray(linkData) ? linkData[0]._attributes.href : linkData._attributes.href;
+
+            await client.getChan("videosAndLiveStreams").send(`**${data.feed.entry.author.name._text}** just posted a new video!\n${videoURL}`);
         }
     });
 

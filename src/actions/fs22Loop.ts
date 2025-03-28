@@ -273,7 +273,7 @@ export async function fs22Loop(client: TClient, watchList: TClient["watchList"][
 
         if (inWl) await wlChannel.send({ embeds: [wlEmbed(inWl, false)] });
 
-        if (player.uptime) await client.playerTimes22.addPlayerTime(player.name, player.uptime, serverAcro);
+        await client.playerTimes22.addPlayerTime(player.name, player.uptime, serverAcro);
 
         embedBuffer.push(logEmbed(player, false));
     }

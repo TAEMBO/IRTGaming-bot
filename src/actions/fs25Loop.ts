@@ -241,7 +241,7 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
             .setColor(client.config.EMBED_COLOR_RED)
             .setFooter(player.uptime ? { text: `Playtime: ${formatUptime(player)}` } : null);
 
-        if (player.uptime) await client.playerTimes25.addPlayerTime(player.name, player.uptime, serverAcro);
+        await client.playerTimes25.addPlayerTime(player.name, player.uptime, serverAcro);
 
         if (watchListData) {
             await wlChannel.send({ embeds: [new EmbedBuilder()

@@ -138,6 +138,6 @@ export default class TClient extends Client<true> {
                 .setDescription(codeBlock("ansi", formattedErr!))
                 .setTimestamp()
             ]
-        });
+        }).catch(console.error);
     }
 }

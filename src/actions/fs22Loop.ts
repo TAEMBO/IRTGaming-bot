@@ -9,6 +9,7 @@ import {
     type PlayerUsed
 } from "farming-simulator-types/2022";
 import { constants } from "http2";
+import lodash from "lodash";
 import {
     formatDecorators,
     formatRequestInit,
@@ -149,7 +150,7 @@ export async function fs22Loop(client: TClient, watchList: TClient["watchList"][
 
         if (justStarted || justStopped) return false;
 
-        if (JSON.stringify(newPlayerList) !== JSON.stringify(oldPlayerList)) return false;
+        if (!lodash.isEqual(newPlayerList, oldPlayerList)) return false;
 
         if (!dss.server.name && fsCacheServer.state === 0) return true;
 

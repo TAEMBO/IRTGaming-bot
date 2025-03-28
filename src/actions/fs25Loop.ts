@@ -2,6 +2,7 @@ import { ChannelType, EmbedBuilder, time, userMention } from "discord.js";
 import type TClient from "../client.js";
 import { DSSExtension, DSSFile, type DSSResponse, Feeds, filterUnused } from "farming-simulator-types/2025";
 import { constants } from "http2";
+import lodash from "lodash";
 import {
     formatDecorators,
     formatRequestInit,
@@ -103,7 +104,7 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
 
         if (justStarted || justStopped) return false;
 
-        if (JSON.stringify(newPlayerList) !== JSON.stringify(oldPlayerList)) return false;
+        if (!lodash.isEqual(newPlayerList, oldPlayerList)) return false;
 
         if (!dss.server.name && fsCacheData.state === 0) return true;
 

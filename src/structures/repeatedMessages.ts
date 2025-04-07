@@ -77,7 +77,7 @@ export class RepeatedMessages {
         this.data.delete(message.author.id);
 
         await this._client.punishments
-            .addPunishment("warn", this._client.user.id, `Automod; ${options.muteReason}`, message.author, options.muteTime)
+            .addPunishment("mute", this._client.user.id, `Automod; ${options.muteReason}`, message.author, options.muteTime)
             .catch(err => log("Red", "Failed to add punishment:", err));
 
         const spamMsgIds = userData.entries.filter(x => x.type === RepeatedMessagesType.Spam).map(x => x.msgId);

@@ -15,6 +15,8 @@ async function parseBody(req: Request) {
     return data;
 }
 
+const MAX_CACHE_AGE = 86_400_000;
+
 export function ytFeed(client: Client) {
     const server = polka();
 
@@ -70,20 +72,18 @@ export function ytFeed(client: Client) {
         const videoId = data.feed.entry["yt:videoId"]._text;
         const publishUnix = new Date(data.feed.entry.published._text).getTime();
 
-        if ((Date.now() - publishUnix) > 300_000) {
-            log("Yellow", `Skipped ${videoId}; age over 5 minutes`);
-        } else if (client.ytCache.has(videoId)) {
-            log("Yellow", `Skipped ${videoId}; already cached`);
-        } else {
-            client.ytCache.add(videoId);
+        if ((Date.now() - publishUnix) > MAX_CACHE_AGE) return log("Yellow", `Skipped ${videoId}; age over ${MAX_CACHE_AGE.toLocaleString()}ms`);
 
-            setTimeout(() => client.ytCache.delete(videoId), 300_000);
+        if (client.ytCache.has(videoId)) return log("Yellow", `Skipped ${videoId}; already cached`);
 
-            const linkData = data.feed.entry.link;
-            const videoURL = Array.isArray(linkData) ? linkData[0]._attributes.href : linkData._attributes.href;
+        client.ytCache.add(videoId);
 
-            await client.getChan("videosAndLiveStreams").send(`**${data.feed.entry.author.name._text}** just posted a new video!\n${videoURL}`);
-        }
+        setTimeout(() => client.ytCache.delete(videoId), MAX_CACHE_AGE);
+
+        const linkData = data.feed.entry.link;
+        const videoURL = Array.isArray(linkData) ? linkData[0]._attributes.href : linkData._attributes.href;
+
+        await client.getChan("videosAndLiveStreams").send(`**${data.feed.entry.author.name._text}** just posted a new video!\n${videoURL}`);
     });
 
     server.listen(client.config.ytFeed.port, () => log("Purple", "YTFeed listening on port", client.config.ytFeed.port));

@@ -20,7 +20,7 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
     let justStarted = false;
     let justStopped = false;
     const serverAcroUp = serverAcro.toUpperCase();
-    const now = Math.round(Date.now() / 1_000);
+    const now = Date.now();
     const timestamp = time(new Date(), "t");
     const fsCacheData: Readonly<typeof client.fs25Cache[string]> = structuredClone(client.fs25Cache[serverAcro]);
     const server = fs25Servers.getOne(serverAcro);
@@ -81,7 +81,7 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
     const newPlayerList = filterUnused(dss.slots.players);
     const oldPlayerList = structuredClone(fsCacheData.players);
 
-    if (!dss.server.name) {
+    if (dss.slots.capacity === 0) {
         if (fsCacheData.state === 1) {
             embedBuffer.push(serverStatusEmbed("offline"));
 
@@ -94,6 +94,14 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
             embedBuffer.push(serverStatusEmbed("online"));
 
             justStarted = true;
+
+            if (newPlayerList.length) {
+                client.fs25Cache[serverAcro].faultyStart = true;
+
+                setTimeout(() => {
+                    client.fs25Cache[serverAcro].faultyStart = false;
+                }, 105_000);
+            }
         }
 
         client.fs25Cache[serverAcro].state = 1;
@@ -120,9 +128,11 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
 
     client.fs25Cache[serverAcro].graphPoints.push(dss.slots.used);
 
-    if (newPlayerList.some(x => x.isAdmin)) client.fs25Cache[serverAcro].lastAdmin = now * 1_000;
+    if (newPlayerList.some(x => x.isAdmin)) client.fs25Cache[serverAcro].lastAdmin = now;
 
-    if (!justStarted) client.fs25Cache[serverAcro].players = newPlayerList;
+    if (fsCacheData.faultyStart && !newPlayerList.length) client.fs25Cache[serverAcro].faultyStart = false;
+
+    if (!justStarted && !fsCacheData.faultyStart) client.fs25Cache[serverAcro].players = newPlayerList;
 
     if (toThrottle) return;
 
@@ -201,7 +211,7 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
         )
     );
 
-    if (justStarted) return;
+    if (justStarted || fsCacheData.faultyStart) return;
 
     const newAdmins = newPlayerList.filter(x => oldPlayerList.some(y => x.isAdmin && !y.isAdmin && y.name === x.name));
     const leftPlayers = oldPlayerList.filter(x => !newPlayerList.some(y => y.name === x.name));

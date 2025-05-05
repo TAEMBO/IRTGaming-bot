@@ -110,6 +110,7 @@ export type FSCache = Record<string, {
     graphPoints: number[];
     completeRes: boolean | null;
     state: 0 | 1 | null;
+    faultyStart: boolean | null;
     throttled: boolean | null;
 }>;
 

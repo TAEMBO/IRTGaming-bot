@@ -107,6 +107,7 @@ export class FS22Servers {
                         graphPoints: [],
                         completeRes: null,
                         state: null,
+                        faultyStart: null,
                         throttled: null,
                     }
                 ]

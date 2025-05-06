@@ -12,7 +12,7 @@ import {
     jsonFromXML,
     log
 } from "#util";
-import type { FSLoopCSG, FSCache } from "#typings";
+import type { FSLoopCSG, FS25Cache } from "#typings";
 
 enum ServerState {
     Offline,
@@ -33,11 +33,11 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
             .setTimestamp();
     }
 
-    function getCacheValue<Key extends keyof FSCache[string]>(key: Key) {
+    function getCacheValue<Key extends keyof FS25Cache[string]>(key: Key) {
         return client.fs25Cache[serverAcro][key];
     }
 
-    function setCacheValue<Key extends keyof FSCache[string]>(key: Key, value: FSCache[string][Key]) {
+    function setCacheValue<Key extends keyof FS25Cache[string]>(key: Key, value: FS25Cache[string][Key]) {
         client.fs25Cache[serverAcro][key] = value;
     }
 

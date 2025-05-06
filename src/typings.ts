@@ -27,8 +27,8 @@ import type {
 declare module "discord.js" {
     interface Client {
         readonly config: Config;
-        readonly fs22Cache: FSCache;
-        readonly fs25Cache: FSCache;
+        readonly fs22Cache: FS22Cache;
+        readonly fs25Cache: FS25Cache;
         readonly ytCache: Set<string>;
         readonly chatInputCommands: Collection<string, Command<"chatInput">>;
         readonly contextMenuCommands: Collection<string, Command<"message" | "user">>;
@@ -104,14 +104,23 @@ export type CombinedContextMenuCommandInteraction =
     MessageContextMenuCommandInteraction<"cached">
     | UserContextMenuCommandInteraction<"cached">;
 
-export type FSCache = Record<string, {
+export type FS22Cache = Record<string, {
     players: PlayerUsed[];
     lastAdmin: number | null;
     graphPoints: number[];
     completeRes: boolean | null;
     state: 0 | 1 | null;
-    faultyStartData: PlayerUsed[];
     throttled: boolean | null;
+}>;
+
+export type FS25Cache = Record<string, {
+    readonly players: PlayerUsed[];
+    readonly lastAdmin: number | null;
+    readonly graphPoints: number[];
+    readonly completeRes: boolean | null;
+    readonly state: 0 | 1 | null;
+    readonly faultyStartData: PlayerUsed[];
+    readonly throttled: boolean | null;
 }>;
 
 export interface CachedInvite {

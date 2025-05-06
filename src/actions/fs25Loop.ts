@@ -12,33 +12,51 @@ import {
     jsonFromXML,
     log
 } from "#util";
-import type { FSLoopCSG } from "#typings";
+import type { FSLoopCSG, FSCache } from "#typings";
+
+enum ServerState {
+    Offline,
+    Online,
+}
 
 export async function fs25Loop(client: TClient, watchList: TClient["watchList"]["doc"][], serverAcro: string, embedBuffer: EmbedBuilder[]) {
     if (client.config.toggles.debug) log("Yellow", "FS25Loop", serverAcro);
 
-    let justStarted = false;
-    let justStopped = false;
     const serverAcroUp = serverAcro.toUpperCase();
     const now = Date.now();
     const timestamp = time(new Date(), "t");
-    const fsCacheData: Readonly<typeof client.fs25Cache[string]> = structuredClone(client.fs25Cache[serverAcro]);
-    const server = fs25Servers.getOne(serverAcro);
-    const init = formatRequestInit(7_000, "FSLoop");
-    const wlChannel = client.getChan("watchList");
-    const serverStatusEmbed = (status: string) => new EmbedBuilder()
-        .setTitle(`${serverAcroUp} now ${status}`)
-        .setColor(client.config.EMBED_COLOR_YELLOW)
-        .setTimestamp();
-    const statsMsgEdit = async (embed: EmbedBuilder, completeRes = true) => {
+
+    function serverStatusEmbed(status: string) {
+        return new EmbedBuilder()
+            .setTitle(`${serverAcroUp} now ${status}`)
+            .setColor(client.config.EMBED_COLOR_YELLOW)
+            .setTimestamp();
+    }
+
+    function getCacheValue<Key extends keyof FSCache[string]>(key: Key) {
+        return client.fs25Cache[serverAcro][key];
+    }
+
+    function setCacheValue<Key extends keyof FSCache[string]>(key: Key, value: FSCache[string][Key]) {
+        client.fs25Cache[serverAcro][key] = value;
+    }
+
+    async function statsMsgEdit(embed: EmbedBuilder, completeRes = true) {
         const channel = client.channels.cache.get(server.channelId);
 
-        client.fs25Cache[serverAcro].completeRes = completeRes;
+        setCacheValue("completeRes", completeRes);
 
         if (channel?.type !== ChannelType.GuildText) return log("Red", `FSLoop ${serverAcroUp} invalid channel`);
 
         await channel.messages.edit(server.messageId, { embeds: [embed] }).catch(() => log("Red", `FSLoop ${serverAcroUp} invalid msg`));
-    };
+    }
+
+    let justStarted = false;
+    let justStopped = false;
+    const oldCacheData: Readonly<typeof client.fs25Cache[string]> = structuredClone(client.fs25Cache[serverAcro]);
+    const server = fs25Servers.getOne(serverAcro);
+    const init = formatRequestInit(7_000, "FSLoop");
+    const wlChannel = client.getChan("watchList");
 
     // Fetch dedicated-server-stats.json and parse
     const dss = await (async () => {
@@ -78,61 +96,63 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
         );
     }
 
+    if (dss.slots.capacity === 1) return;
+
     const newPlayerList = filterUnused(dss.slots.players);
-    const oldPlayerList = structuredClone(fsCacheData.players);
+    const oldPlayerList = structuredClone(oldCacheData.players);
 
     if (dss.slots.capacity === 0) {
-        if (fsCacheData.state === 1) {
+        if (oldCacheData.state === ServerState.Online) {
             embedBuffer.push(serverStatusEmbed("offline"));
 
             justStopped = true;
         }
 
-        client.fs25Cache[serverAcro].state = 0;
+        setCacheValue("state", ServerState.Offline);
     } else {
-        if (fsCacheData.state === 0) {
+        if (oldCacheData.state === ServerState.Offline) {
             embedBuffer.push(serverStatusEmbed("online"));
 
             justStarted = true;
 
-            if (newPlayerList.length) {
-                client.fs25Cache[serverAcro].faultyStart = true;
-
-                setTimeout(() => {
-                    client.fs25Cache[serverAcro].faultyStart = false;
-                }, 105_000);
-            }
+            if (newPlayerList.length) setCacheValue("faultyStartData", newPlayerList);
         }
 
-        client.fs25Cache[serverAcro].state = 1;
+        setCacheValue("state", ServerState.Online);
     }
 
     const toThrottle = (() => { // Throttle Discord message updating if no changes in API data
-        if (!fsCacheData.completeRes) return false;
+        if (!oldCacheData.completeRes) return false;
 
         if (justStarted || justStopped) return false;
 
         if (!lodash.isEqual(newPlayerList, oldPlayerList)) return false;
 
-        if (!dss.server.name && fsCacheData.state === 0) return true;
+        if (dss.slots.capacity === 0 && oldCacheData.state === ServerState.Offline) return true;
 
-        if (dss.server.name && fsCacheData.state === 1) return true;
+        if (dss.slots.capacity !== 0 && oldCacheData.state === ServerState.Online) return true;
 
         return false;
     })();
 
     // Update cache
-    client.fs25Cache[serverAcro].throttled = toThrottle;
+    setCacheValue("throttled", toThrottle);
 
-    if (fsCacheData.graphPoints.length >= 120) client.fs25Cache[serverAcro].graphPoints.shift();
+    if (oldCacheData.graphPoints.length >= 120) client.fs25Cache[serverAcro].graphPoints.shift();
 
     client.fs25Cache[serverAcro].graphPoints.push(dss.slots.used);
 
-    if (newPlayerList.some(x => x.isAdmin)) client.fs25Cache[serverAcro].lastAdmin = now;
+    if (newPlayerList.some(x => x.isAdmin)) setCacheValue("lastAdmin", now);
 
-    if (fsCacheData.faultyStart && !newPlayerList.length) client.fs25Cache[serverAcro].faultyStart = false;
+    if (oldCacheData.faultyStartData.length) {
+        if (lodash.isEqual(oldCacheData.faultyStartData, newPlayerList)) {
+            return;
+        } else {
+            setCacheValue("faultyStartData", []);
+        }
+    }
 
-    if (!justStarted && !fsCacheData.faultyStart) client.fs25Cache[serverAcro].players = newPlayerList;
+    if (!getCacheValue("faultyStartData").length) setCacheValue("players", newPlayerList);
 
     if (toThrottle) return;
 
@@ -211,13 +231,13 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
         )
     );
 
-    if (justStarted || fsCacheData.faultyStart) return;
+    if (justStarted) return;
 
     const newAdmins = newPlayerList.filter(x => oldPlayerList.some(y => x.isAdmin && !y.isAdmin && y.name === x.name));
     const leftPlayers = oldPlayerList.filter(x => !newPlayerList.some(y => y.name === x.name));
     const joinedPlayers = oldPlayerList.length
         ? newPlayerList.filter(x => !oldPlayerList.some(y => y.name === x.name))
-        : fsCacheData.state === null
+        : oldCacheData.state === null
             ? []
             : newPlayerList;
 

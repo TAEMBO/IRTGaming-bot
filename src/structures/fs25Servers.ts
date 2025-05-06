@@ -107,7 +107,7 @@ export class FS25Servers {
                         graphPoints: [],
                         completeRes: null,
                         state: null,
-                        faultyStart: null,
+                        faultyStartData: [],
                         throttled: null,
                     }
                 ]

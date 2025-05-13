@@ -69,8 +69,12 @@ export function ytFeed(client: Client) {
         res.writeHead(200).end();
 
         const data = jsonFromXML<YTFeedData>(rawBody);
-        const videoId = data.feed.entry["yt:videoId"]._text;
-        const publishUnix = new Date(data.feed.entry.published._text).getTime();
+        const { entry } = data.feed;
+
+        if (!entry) return log("Yellow", "Missing entry data");
+
+        const videoId = entry["yt:videoId"]._text;
+        const publishUnix = new Date(entry.published._text).getTime();
 
         if ((Date.now() - publishUnix) > MAX_CACHE_AGE) return log("Yellow", `Skipped ${videoId}; age over ${MAX_CACHE_AGE.toLocaleString()}ms`);
 
@@ -80,10 +84,9 @@ export function ytFeed(client: Client) {
 
         setTimeout(() => client.ytCache.delete(videoId), MAX_CACHE_AGE);
 
-        const linkData = data.feed.entry.link;
-        const videoURL = Array.isArray(linkData) ? linkData[0]._attributes.href : linkData._attributes.href;
+        const videoURL = (Array.isArray(entry.link) ? entry.link[0] : entry.link)._attributes.href;
 
-        await client.getChan("videosAndLiveStreams").send(`**${data.feed.entry.author.name._text}** just posted a new video!\n${videoURL}`);
+        await client.getChan("videosAndLiveStreams").send(`**${entry.author.name._text}** just posted a new video!\n${videoURL}`);
     });
 
     server.listen(client.config.ytFeed.port, () => log("Purple", "YTFeed listening on port", client.config.ytFeed.port));

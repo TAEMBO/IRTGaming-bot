@@ -331,7 +331,7 @@ export interface YTFeedData {
         ];
         readonly title: { readonly _text: string; };
         readonly updated: { readonly _text: string; };
-        readonly entry: {
+        readonly entry?: {
             readonly id: { readonly _text: string; };
             readonly "yt:videoId": { readonly _text: string; };
             readonly "yt:channelId": { readonly _text: string; };

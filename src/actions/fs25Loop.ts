@@ -33,10 +33,6 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
             .setTimestamp();
     }
 
-    function getCacheValue<Key extends keyof FS25Cache[string]>(key: Key) {
-        return client.fs25Cache[serverAcro][key];
-    }
-
     function setCacheValue<Key extends keyof FS25Cache[string]>(key: Key, value: FS25Cache[string][Key]) {
         client.fs25Cache[serverAcro][key] = value;
     }
@@ -51,12 +47,13 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
         await channel.messages.edit(server.messageId, { embeds: [embed] }).catch(() => log("Red", `FSLoop ${serverAcroUp} invalid msg`));
     }
 
-    let justStarted = false;
-    let justStopped = false;
-    const oldCacheData: Readonly<typeof client.fs25Cache[string]> = structuredClone(client.fs25Cache[serverAcro]);
+    const oldCacheData = structuredClone(client.fs25Cache[serverAcro]);
     const server = fs25Servers.getOne(serverAcro);
     const init = formatRequestInit(7_000, "FSLoop");
     const wlChannel = client.getChan("watchList");
+    let isFaultyStart = Boolean(oldCacheData.faultyStartData.length);
+    let justStopped = false;
+    let justStarted = false;
 
     // Fetch dedicated-server-stats.json and parse
     const dss = await (async () => {
@@ -115,7 +112,11 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
 
             justStarted = true;
 
-            if (newPlayerList.length) setCacheValue("faultyStartData", newPlayerList);
+            if (newPlayerList.length) {
+                setCacheValue("faultyStartData", newPlayerList);
+
+                isFaultyStart = true;
+            }
         }
 
         setCacheValue("state", ServerState.Online);
@@ -124,7 +125,7 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
     const toThrottle = (() => { // Throttle Discord message updating if no changes in API data
         if (!oldCacheData.completeRes) return false;
 
-        if (justStarted || justStopped) return false;
+        if (justStarted || justStopped || isFaultyStart) return false;
 
         if (!lodash.isEqual(newPlayerList, oldPlayerList)) return false;
 
@@ -144,15 +145,13 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
 
     if (newPlayerList.some(x => x.isAdmin)) setCacheValue("lastAdmin", now);
 
-    if (oldCacheData.faultyStartData.length) {
-        if (lodash.isEqual(oldCacheData.faultyStartData, newPlayerList)) {
-            return;
-        } else {
-            setCacheValue("faultyStartData", []);
-        }
+    if (!justStarted && isFaultyStart && !lodash.isEqual(oldCacheData.faultyStartData, newPlayerList)) {
+        setCacheValue("faultyStartData", []);
+
+        isFaultyStart = false;
     }
 
-    if (!getCacheValue("faultyStartData").length) setCacheValue("players", newPlayerList);
+    if (!isFaultyStart) setCacheValue("players", newPlayerList);
 
     if (toThrottle) return;
 
@@ -231,7 +230,7 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
         )
     );
 
-    if (justStarted) return;
+    if (justStarted || isFaultyStart) return;
 
     const newAdmins = newPlayerList.filter(x => oldPlayerList.some(y => x.isAdmin && !y.isAdmin && y.name === x.name));
     const leftPlayers = oldPlayerList.filter(x => !newPlayerList.some(y => y.name === x.name));

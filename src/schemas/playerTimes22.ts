@@ -70,6 +70,8 @@ export class PlayerTimes22 extends BaseSchema<typeof model> {
 
         log("Yellow", `Downloaded farms.xml from ${serverAcro}, crunching...`);
 
+        Reflect.set(this, "cache", allData.map(x => x.toObject()));
+
         const farmData = jsonFromXML<FarmFormat>(data);
         let changedNameCount = 0;
         let addedUuidCount = 0;

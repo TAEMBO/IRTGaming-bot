@@ -129,7 +129,7 @@ export default new Command<"chatInput">({
             if (!playerName) {
                 await interaction.reply({ embeds: [new EmbedBuilder()
                     .setColor("#a0c213")
-                    .setDescription("Top 50 players with the most time spent on IRTGaming FS25 servers since <t:1731416400:R>")
+                    .setDescription(`Top 50 players with the most time spent on IRTGaming FS25 servers since ${interaction.client.config.PLAYERTIMES_START_DATE}`)
                     .addFields(
                         { name: "\u200b", value: leaderboard(sortedPlayersData.slice(0, 25), true), inline: true },
                         { name: "\u200b", value: leaderboard(sortedPlayersData.slice(25, 50), false) + "\u200b", inline: true })

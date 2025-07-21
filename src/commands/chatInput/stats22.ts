@@ -344,7 +344,7 @@ export default new Command<"chatInput">({
                     iconURL: "https://cdn.discordapp.com/emojis/834725948058107934.png",
                     name: `${serverSlots} - ${serverTimeHrs}:${serverTimeMins}`
                 })
-                .setTitle(dss.server.name || "Offline")
+                .setTitle(dss.server.name ? server.fullName : "Offline")
                 .setDescription(dss.slots.used ? playerInfo.join("\n"): "*No players online*")
                 .setImage("attachment://FSStats.png")
                 .setColor(dss.slots.used === dss.slots.capacity

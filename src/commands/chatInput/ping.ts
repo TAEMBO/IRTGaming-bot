@@ -13,12 +13,12 @@ function formatBytes(bytes: number) {
 
 export default new Command<"chatInput">({
     async run(interaction) {
-        const msg = await interaction.deferReply({ fetchReply: true });
+        const response = await interaction.deferReply({ withResponse: true });
         const { heapUsed, heapTotal, rss } = memoryUsage();
 
         await interaction.editReply(
             `Websocket: \`${interaction.client.ws.ping}\`ms\n` +
-            `Round-trip: \`${msg.createdTimestamp - interaction.createdTimestamp}\`ms\n` +
+            `Round-trip: \`${response.resource!.message!.createdTimestamp - interaction.createdTimestamp}\`ms\n` +
             `-# Memory: ${formatBytes(heapUsed)} **|** ${formatBytes(heapTotal)} **|** ${formatBytes(rss)}\n` +
             `-# Uptime: ${formatTime(interaction.client.uptime, 2, { longNames: true })}`
         );

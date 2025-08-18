@@ -16,7 +16,10 @@ export default new Event({
         const embed = new EmbedBuilder()
             .setTitle("Message Deleted")
             .setDescription(formatUser(message.author))
-            .setAuthor({ name: message.author.tag, iconURL: message.author.displayAvatarURL({ extension: "png", size: 128 }) })
+            .setAuthor({
+                name: message.author.tag,
+                iconURL: message.author.displayAvatarURL({ extension: "png", size: 128 })
+            })
             .setColor(message.client.config.EMBED_COLOR_RED)
             .setTimestamp();
 
@@ -27,6 +30,9 @@ export default new Event({
             { name: "🔹 Sent", value: time(message.createdAt, "R") }
         );
 
-        await message.client.getChan("botLogs").send({ embeds: [embed], files: [...message.attachments.values()] });
+        await message.client.getChan("botLogs").send({
+            embeds: [embed],
+            files: [...message.attachments.values()]
+        });
     }
 });

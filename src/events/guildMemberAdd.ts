@@ -1,16 +1,30 @@
 import { EmbedBuilder, Events, time } from "discord.js";
+import { and, eq } from "drizzle-orm";
+import { db, punishmentsTable, userLevelsTable } from "#db";
 import { Event } from "#structures";
 import { formatUser, log } from "#util";
 
 export default new Event({
     name: Events.GuildMemberAdd,
     async run(member) {
-        const [newInvites, evadingCase] = await Promise.all([
-            member.guild.invites.fetch(),
-            member.client.punishments.data.findOne({ "member._id": member.user.id, type: "detain", expired: undefined }),
-            member.client.userLevels.data.findByIdAndUpdate(member.id, { hasLeft: false }),
-            member.roles.add(member.client.config.mainServer.roles.member).catch(() => log("Red", `Failed to add member role to ${member.id}`))
-        ]);
+        const newInvitesPromise = member.guild.invites.fetch();
+        const evadingCasePromise = db
+            .select()
+            .from(punishmentsTable)
+            .where(and(
+                eq(punishmentsTable.userId, member.id),
+                eq(punishmentsTable.type, "detain"),
+                eq(punishmentsTable.overwritten, false)
+            ));
+        const userLevelsUpdatePromise = db
+            .update(userLevelsTable)
+            .set({ hasLeft: false })
+            .where(eq(userLevelsTable.userId, member.id));
+        const memberRoleAddPromise = member.roles.add(member.client.config.mainServer.roles.member)
+            .catch(() => log("red", `Failed to add member role to ${member.id}`));
+
+        const [newInvites, evadingCase] = await Promise.all([newInvitesPromise, evadingCasePromise, userLevelsUpdatePromise, memberRoleAddPromise]);
+
         const usedInvite = newInvites.find(inv => (member.client.inviteCache.get(inv.code)?.uses ?? 0) < (inv.uses ?? 0));
 
         for (const [code, inv] of newInvites) member.client.inviteCache.set(code, { uses: inv.uses ?? 0, creator: inv.inviter?.id ?? "UNKNOWN" });

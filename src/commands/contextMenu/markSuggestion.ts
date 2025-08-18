@@ -38,7 +38,7 @@ export default new Command<"message">({
         try {
             modalInt = await interaction.awaitModalSubmit({ time: 120_000, filter: int => int.customId === `modal-${id}` });
         } catch (err) {
-            return log("Yellow", "Modal premateurly closed");
+            return log("yellow", "Modal premateurly closed");
         }
 
         const modalResponse = modalInt.fields.getTextInputValue("marking").replace("by staff", "").trim();

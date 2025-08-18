@@ -1,8 +1,8 @@
-import { EmbedBuilder } from "discord.js";
-import type TClient from "../client.js";
+import { type Client, EmbedBuilder } from "discord.js";
 import { formatDecorators, formatUptime, log } from "#util";
+import type { DBData } from "#typings";
 
-export async function fsLoopAll(client: TClient, watchList: TClient["watchList"]["doc"][]) {
+export async function fsLoopAll(client: Client, dbData: DBData) {
     const fs22Embed = new EmbedBuilder().setColor("#2ac1ed");
     const fs25Embed = new EmbedBuilder().setColor("#a0c213");
     const throttleList: (boolean | null)[] = [];
@@ -19,7 +19,7 @@ export async function fsLoopAll(client: TClient, watchList: TClient["watchList"]
         throttleList.push(server.throttled);
 
         for (const player of server.players) {
-            const decorators = formatDecorators(client, player, watchList);
+            const decorators = formatDecorators(player, dbData, false);
 
             playerInfo.push(`\`${player.name.slice(0, 46)}\` ${decorators} **|** ${formatUptime(player)}`);
         }
@@ -40,7 +40,7 @@ export async function fsLoopAll(client: TClient, watchList: TClient["watchList"]
         throttleList.push(server.throttled);
 
         for (const player of server.players) {
-            const decorators = formatDecorators(client, player, watchList);
+            const decorators = formatDecorators(player, dbData, false);
 
             playerInfo.push(`\`${player.name.slice(0, 46)}\` ${decorators} **|** ${formatUptime(player)}`);
         }
@@ -65,5 +65,5 @@ export async function fsLoopAll(client: TClient, watchList: TClient["watchList"]
             fs22Embed.setTitle(totalCount22.reduce((a, b) => a + b, 0) + " online"),
             fs25Embed.setTitle(totalCount25.reduce((a, b) => a + b, 0) + " online")
         ] })
-        .catch(() => log("Red", "FSLoopAll invalid msg"));
+        .catch(() => log("red", "FSLoopAll invalid msg"));
 }

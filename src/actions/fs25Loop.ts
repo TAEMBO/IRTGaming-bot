@@ -1,8 +1,8 @@
-import { ChannelType, EmbedBuilder, time, userMention } from "discord.js";
-import type TClient from "../client.js";
+import { ChannelType, type Client, EmbedBuilder, time, userMention } from "discord.js";
 import { DSSExtension, DSSFile, type DSSResponse, Feeds, filterUnused } from "farming-simulator-types/2025";
 import { constants } from "http2";
 import lodash from "lodash";
+import { addPlayerTime25 } from "#db";
 import {
     formatDecorators,
     formatRequestInit,
@@ -12,15 +12,15 @@ import {
     jsonFromXML,
     log
 } from "#util";
-import type { FSLoopCSG, FS25Cache } from "#typings";
+import type { FSLoopCSG, FS25Cache, FS25LoopDBData } from "#typings";
 
 enum ServerState {
     Offline,
     Online,
 }
 
-export async function fs25Loop(client: TClient, watchList: TClient["watchList"]["doc"][], serverAcro: string, embedBuffer: EmbedBuilder[]) {
-    if (client.config.toggles.debug) log("Yellow", "FS25Loop", serverAcro);
+export async function fs25Loop(client: Client, dbData: FS25LoopDBData, serverAcro: string, embedBuffer: EmbedBuilder[]) {
+    if (client.config.toggles.debug) log("yellow", `FS25Loop ${serverAcro}`);
 
     const serverAcroUp = serverAcro.toUpperCase();
     const now = Date.now();
@@ -42,9 +42,9 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
 
         setCacheValue("completeRes", completeRes);
 
-        if (channel?.type !== ChannelType.GuildText) return log("Red", `FSLoop ${serverAcroUp} invalid channel`);
+        if (channel?.type !== ChannelType.GuildText) return log("red", `FSLoop ${serverAcroUp} invalid channel`);
 
-        await channel.messages.edit(server.messageId, { embeds: [embed] }).catch(() => log("Red", `FSLoop ${serverAcroUp} invalid msg`));
+        await channel.messages.edit(server.messageId, { embeds: [embed] }).catch(() => log("red", `FSLoop ${serverAcroUp} invalid msg`));
     }
 
     const oldCacheData = structuredClone(client.fs25Cache[serverAcro]);
@@ -58,11 +58,11 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
     // Fetch dedicated-server-stats.json and parse
     const dss = await (async () => {
         const res = await fetch(server.url + Feeds.dedicatedServerStats(server.code, DSSExtension.JSON), init)
-            .catch(err => log("Red", serverAcroUp, "DSS Fetch:", err.message));
+            .catch(err => log("red", `${serverAcroUp} DSS Fetch: ${err}`));
 
         if (!res || res.status !== constants.HTTP_STATUS_OK) return null;
 
-        const data: DSSResponse | void = await res.json().catch(err => log("Red", serverAcroUp, "DSS Parse:", err.message));
+        const data: DSSResponse | void = await res.json().catch(err => log("red", `${serverAcroUp} DSS Parse: ${err}`));
 
         if (!data?.slots) return null;
 
@@ -74,11 +74,11 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
         if (!dss) return null;
 
         const res = await fetch(server.url + Feeds.dedicatedServerSavegame(server.code, DSSFile.CareerSavegame), init)
-            .catch(err => log("Red", serverAcroUp, "CSG Fetch:", err.message));
+            .catch(err => log("red", `${serverAcroUp} CSG Fetch: ${err}`));
 
         if (!res || res.status !== constants.HTTP_STATUS_OK) return null;
 
-        const body = await res.text().catch(err => log("Red", serverAcroUp, "CSG Parse:", err.message));
+        const body = await res.text().catch(err => log("red", `${serverAcroUp} CSG Parse: ${err}`));
 
         if (!body) return null;
 
@@ -156,7 +156,7 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
     if (toThrottle) return;
 
     // Create list of players with time data
-    const playerInfo = newPlayerList.map(player => `\`${player.name}\` ${formatDecorators(client, player)} **|** ${formatUptime(player)}`);
+    const playerInfo = newPlayerList.map(player => `\`${player.name}\` ${formatDecorators(player, dbData, true)} **|** ${formatUptime(player)}`);
 
     // Data crunching for stats embed
     const stats = {
@@ -242,10 +242,10 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
 
     for (const player of newAdmins) {
         const sendLoginAlert =
-            !client.whitelist.cache.includes(player.name) &&
-            !client.fmList.cache.includes(player.name) &&
+            !dbData.whitelistData.some(x => x.name === player.name) &&
+            !dbData.fmNamesData.some(x => x.name === player.name) &&
             !server.isPrivate;
-        const decorators = formatDecorators(client, player, watchList);
+        const decorators = formatDecorators(player, dbData, false);
 
         if (sendLoginAlert) {
             await client.getChan("juniorAdminChat").send({ embeds: [new EmbedBuilder()
@@ -262,21 +262,21 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
     }
 
     for (const player of leftPlayers) {
-        const watchListData = watchList.find(x => x._id === player.name);
-        const playerTimesData = client.playerTimes25.cache.find(x => x._id === player.name);
-        const playerDiscordMention = playerTimesData?.discordid ? userMention(playerTimesData.discordid) : "";
-        const decorators = formatDecorators(client, player, watchList);
+        const watchListData = dbData.watchListData.find(x => x.name === player.name);
+        const playerTimesData = dbData.playerTimesData.find(x => x.name === player.name);
+        const playerDiscordMention = playerTimesData?.discordId ? userMention(playerTimesData.discordId) : "";
+        const decorators = formatDecorators(player, dbData, false);
         const embed = new EmbedBuilder()
             .setDescription(`\`${player.name}\`${decorators}${playerDiscordMention} left **${serverAcroUp}** at ${timestamp}`)
             .setColor(client.config.EMBED_COLOR_RED)
             .setFooter(player.uptime ? { text: `Playtime: ${formatUptime(player)}` } : null);
 
-        await client.playerTimes25.addPlayerTime(player.name, player.uptime, serverAcro);
+        await addPlayerTime25(player.name, player.uptime, serverAcro);
 
         if (watchListData) {
             await wlChannel.send({ embeds: [new EmbedBuilder()
                 .setTitle(`WatchList - ${watchListData.isSevere ? "ban" : "watch over"}`)
-                .setDescription(`\`${watchListData._id}\` left **${serverAcroUp}** at ${timestamp}`)
+                .setDescription(`\`${watchListData.name}\` left **${serverAcroUp}** at ${timestamp}`)
                 .setFooter(player.uptime ? { text: `Playtime: ${formatUptime(player)}` } : null)
                 .setColor(client.config.EMBED_COLOR_RED)
             ] });
@@ -286,11 +286,11 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
     }
 
     for (const player of joinedPlayers) {
-        const watchListData = watchList.find(y => y._id === player.name)?.toObject();
+        const watchListData = dbData.watchListData.find(y => y.name === player.name);
         const embed = new EmbedBuilder().setColor(client.config.EMBED_COLOR_GREEN);
-        const playerTimesData = client.playerTimes25.cache.find(x => x._id === player.name);
-        const playerDiscordMention = playerTimesData?.discordid ? " " + userMention(playerTimesData.discordid) : "";
-        const decorators = formatDecorators(client, player, watchList);
+        const playerTimesData = dbData.playerTimesData.find(x => x.name === player.name);
+        const playerDiscordMention = playerTimesData?.discordId ? " " + userMention(playerTimesData.discordId) : "";
+        const decorators = formatDecorators(player, dbData, false);
         let description = `\`${player.name}\`${decorators}${playerDiscordMention} joined **${serverAcroUp}** at ${timestamp}`;
 
         if (player.uptime) embed.setFooter({ text: "Playtime: " + formatUptime(player) });
@@ -308,15 +308,15 @@ export async function fs25Loop(client: TClient, watchList: TClient["watchList"][
 
         if (watchListData) {
             const watchListReference = watchListData.reference ? "\nReference: " + watchListData.reference : "";
-            const filterWLPings = client.watchListPings.cache.filter(x =>
-                !client.mainGuild().members.cache.get(x)?.roles.cache.has(client.config.mainServer.roles.loa)
+            const filterWLPings = dbData.watchListPingsData.filter(x =>
+                !client.mainGuild().members.cache.get(x.userId)?.roles.cache.has(client.config.mainServer.roles.loa)
             );
 
             await wlChannel.send({
-                content: watchListData.isSevere ? filterWLPings.map(userMention).join(" ") : undefined,
+                content: watchListData.isSevere ? filterWLPings.map(x => userMention(x.userId)).join(" ") : undefined,
                 embeds: [new EmbedBuilder()
                     .setTitle(`WatchList - ${watchListData.isSevere ? "ban" : "watch over"}`)
-                    .setDescription(`\`${watchListData._id}\` joined **${serverAcroUp}** at ` + timestamp + watchListReference)
+                    .setDescription(`\`${watchListData.name}\` joined **${serverAcroUp}** at ` + timestamp + watchListReference)
                     .setColor(client.config.EMBED_COLOR_GREEN)
                     .setFooter({ text: "Reason: " + watchListData.reason })
                 ]

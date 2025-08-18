@@ -1,10 +1,13 @@
 import { ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
+import { eq, ilike } from "drizzle-orm";
 import canvas from "@napi-rs/canvas";
 import { DSSExtension, type DSSResponse, Feeds, filterUnused } from "farming-simulator-types/2022";
+import { db, playerTimes22Table, getTimeData22 } from "#db";
 import { Command } from "#structures";
 import {
     FM_ICON,
     TF_ICON,
+    fetchDBData,
     formatDecorators,
     formatRequestInit,
     formatUptime,
@@ -27,19 +30,15 @@ export default new Command<"chatInput">({
     async autocomplete(interaction) {
         switch (interaction.options.getSubcommand()) {
             case "playertimes": {
-                const focused = interaction.options.getFocused().toLowerCase().replace(" ", "");
-                const choices = interaction.client.playerTimes22.cache
-                    .filter(x => x._id.toLowerCase().replace(" ", "").includes(focused))
-                    .slice(0, 24)
-                    .sort((a, b) => {
-                        if (a._id < b._id) return -1;
-                        if (a._id > b._id) return 1;
+                const focused = interaction.options.getFocused().trim();
+                const data = await db
+                    .select()
+                    .from(playerTimes22Table)
+                    .where(ilike(playerTimes22Table.name, `%${focused}%`))
+                    .orderBy(playerTimes22Table.name)
+                    .limit(25);
 
-                        return 0;
-                    })
-                    .map(x => ({ name: x._id, value: x._id }));
-
-                await interaction.respond(choices);
+                await interaction.respond(data.map(x => ({ name: x.name, value: x.name })));
 
                 break;
             };
@@ -47,6 +46,7 @@ export default new Command<"chatInput">({
     },
     async run(interaction) {
         const subCmd = interaction.options.getSubcommand();
+        const dbData = await fetchDBData("22");
 
         if ((
             interaction.channel!.parentId === interaction.client.config.mainServer.categories.fs22PublicMP
@@ -78,7 +78,7 @@ export default new Command<"chatInput">({
 
                     dss = await res.json();
                 } catch (err) {
-                    log("Red", `Stats all ${serverAcroUp};`, err);
+                    log("red", `Stats all ${serverAcroUp}; ${err}`);
 
                     return void failedFooter.push(`Failed to fetch ${serverAcroUp}`);
                 }
@@ -95,7 +95,7 @@ export default new Command<"chatInput">({
                 const serverSlots = `${dss.slots.used}/${dss.slots.capacity}`;
 
                 for (const player of filterUnused(dss.slots.players)) {
-                    const decorators = formatDecorators(interaction.client, player);
+                    const decorators = formatDecorators(player, dbData, true);
 
                     playerInfo.push(`\`${player.name}\` ${decorators} **|** ${formatUptime(player)}`);
                 }
@@ -109,18 +109,17 @@ export default new Command<"chatInput">({
 
             await interaction.editReply({ embeds: [embed] });
         } else if (subCmd === "playertimes") {
-            const { getTimeData, obj } = interaction.client.playerTimes22;
-            const playersData = structuredClone(interaction.client.playerTimes22.cache);
+            const playersData = await db.select().from(playerTimes22Table);
             const sortedPlayersData = playersData.sort((a, b) =>
-                getTimeData(b).reduce((x, y) => x + y[1].time, 0) - getTimeData(a).reduce((x, y) => x + y[1].time, 0)
+                getTimeData22(b).reduce((x, y) => x + y[1].time, 0) - getTimeData22(a).reduce((x, y) => x + y[1].time, 0)
             );
             const playerName = interaction.options.getString("name");
-            const leaderboard = (data: (typeof obj)[], isFirstField: boolean) => data.map((playerData, i) => [
-                `**${i + (isFirstField ? 1 : 26)}.** \`${playerData._id}\``,
-                interaction.client.fmList.cache.includes(playerData._id) ? FM_ICON : "",
-                interaction.client.tfList.cache.includes(playerData._id) ? TF_ICON : "",
+            const leaderboard = (data: (typeof playerTimes22Table.$inferSelect)[], isFirstField: boolean) => data.map((playerData, i) => [
+                `**${i + (isFirstField ? 1 : 26)}.** \`${playerData.name}\``,
+                dbData.fmNamesData.some(x => x.name === playerData.name) ? FM_ICON : "",
+                dbData.tfNamesData.some(x => x.name === playerData.name) ? TF_ICON : "",
                 " - ",
-                formatPlayerTime((getTimeData(playerData).reduce((x, y) => x + y[1].time, 0)))
+                formatPlayerTime((getTimeData22(playerData).reduce((x, y) => x + y[1].time, 0)))
             ].join("")).join("\n");
 
             if (!playerName) {
@@ -132,17 +131,15 @@ export default new Command<"chatInput">({
                         { name: "\u200b", value: leaderboard(sortedPlayersData.slice(25, 50), false) + "\u200b", inline: true })
                 ] });
 
-                await interaction.client.playerTimes22.refreshCache();
-
                 return;
             }
 
-            const playerData = (await interaction.client.playerTimes22.data.findById(playerName))?.toObject();
+            const playerData = (await db.select().from(playerTimes22Table).where(eq(playerTimes22Table.name, playerName))).at(0);
 
             if (!playerData) return await interaction.reply(`No data found with that name. [Find out why.](${interaction.client.config.resources.statsNoDataRedirect})`);
 
             const fsKeys = fs22Servers.keys();
-            const playerTimeData = getTimeData(playerData).sort((a, b) => fsKeys.indexOf(a[0]) - fsKeys.indexOf(b[0]));
+            const playerTimeData = getTimeData22(playerData).sort((a, b) => fsKeys.indexOf(a[0]) - fsKeys.indexOf(b[0]));
             const playerTimeDataTotal = playerTimeData.reduce((x, y) => x + y[1].time, 0);
             const formattedTimeData = playerTimeData
                 .filter(x => interaction.client.fs22Cache[x[0]])
@@ -150,23 +147,23 @@ export default new Command<"chatInput">({
                     name: serverAcro.toUpperCase(),
                     value: [
                         `Time - ${formatPlayerTime(timeData.time)}`,
-                        `Last on - ${interaction.client.fs22Cache[serverAcro].players.some(x => x.name === playerData._id) ? "Right now" : `<t:${timeData.lastOn}:R>`}`
+                        `Last on - ${interaction.client.fs22Cache[serverAcro].players.some(x => x.name === playerData.name) ? "Right now" : `<t:${timeData.lastOn}:R>`}`
                     ].join("\n")
                 }));
             let decorators = "";
 
-            if (interaction.client.fmList.cache.includes(playerData._id)) decorators += FM_ICON;
+            if (dbData.fmNamesData.some(x => x.name === playerData.name)) decorators += FM_ICON;
 
-            if (interaction.client.tfList.cache.includes(playerData._id)) decorators += TF_ICON;
+            if (dbData.tfNamesData.some(x => x.name === playerData.name)) decorators += TF_ICON;
 
             await interaction.reply({ embeds: [new EmbedBuilder()
                 .setColor("#2ac1ed")
                 .setTitle([
-                    `Player - \`${playerData._id}\`${decorators}`,
-                    `Leaderboard position - **#${sortedPlayersData.findIndex(x => x._id === playerData._id) + 1}**`,
+                    `Player - \`${playerData.name}\`${decorators}`,
+                    `Leaderboard position - **#${sortedPlayersData.findIndex(x => x.name === playerData.name) + 1}**`,
                     `Total time - **${formatPlayerTime(playerTimeDataTotal)}**`,
                     (isMPStaff(interaction.member) && playerData.uuid) ? `UUID: \`${playerData.uuid}\`` : "",
-                    (isMPStaff(interaction.member) && playerData.discordid) ? `Discord user ID - \`${playerData.discordid}\`` : "",
+                    (isMPStaff(interaction.member) && playerData.discordId) ? `Discord user ID - \`${playerData.discordId}\`` : "",
                 ].join("\n"))
                 .setFields(formattedTimeData)
             ] });
@@ -174,7 +171,7 @@ export default new Command<"chatInput">({
             const server = interaction.client.config.fs22[subCmd];
             const dss = await fetch(server.url + Feeds.dedicatedServerStats(server.code, DSSExtension.JSON), formatRequestInit(2_000, "Stats"))
                 .then(res => res.json() as Promise<DSSResponse>)
-                .catch(() => log("Red", `Stats ${subCmd.toUpperCase()} failed`));
+                .catch(() => log("red", `Stats ${subCmd.toUpperCase()} failed`));
 
             if (!dss || !dss.slots) return await interaction.reply("Server did not respond");
 
@@ -331,7 +328,7 @@ export default new Command<"chatInput">({
             const players = filterUnused(dss.slots.players);
 
             for (const player of players) {
-                const decorators = formatDecorators(interaction.client, player);
+                const decorators = formatDecorators(player, dbData, true);
 
                 playerInfo.push(`\`${player.name}\` ${decorators} **|** ${formatUptime(player)}`);
             }

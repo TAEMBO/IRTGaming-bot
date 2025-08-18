@@ -20,11 +20,12 @@ export default new Event({
             || newMessage.client.config.whitelist.logs.some(x => [newMessage.channelId, newMessage.channel.parentId].includes(x))
         ) return;
 
-        if (
-            hasProfanity(newMessage.content.replaceAll("\n", " ").toLowerCase(), newMessage.client.bannedWords.cache)
-            && (!isMPStaff(newMessage.member) && !isDCStaff(newMessage.member))
-            && newMessage.client.config.toggles.automod
-        ) await newMessage.delete();
+        // Handle case of users editing profanity into their message
+        if ((!isMPStaff(newMessage.member) && !isDCStaff(newMessage.member)) && newMessage.client.config.toggles.automod) {
+            const msg = newMessage.content.replaceAll("\n", " ").toLowerCase();
+
+            if (hasProfanity(msg)) await newMessage.delete();
+        }
 
         if (!newMessage.client.config.toggles.logs) return;
 
@@ -39,7 +40,10 @@ export default new Event({
                         { name: "🔹 Old Content", value: codeBlock("ansi", oldText.slice(0, 1000)) },
                         { name: "🔹 New Content", value: codeBlock("ansi", newText.slice(0, 1000)) },
                         { name: "🔹 Channel", value: newMessage.channel.toString() })
-                    .setAuthor({ name: newMessage.author.tag, iconURL: newMessage.author.displayAvatarURL({ extension: "png", size: 128 }) })
+                    .setAuthor({
+                        name: newMessage.author.tag,
+                        iconURL: newMessage.author.displayAvatarURL({ extension: "png", size: 128 })
+                    })
                     .setColor(newMessage.client.config.EMBED_COLOR)
                     .setTimestamp()
             ],

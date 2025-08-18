@@ -29,3 +29,5 @@ export const ADMIN_ICON = ":detective:";
 
 /** Icon used for those who are on watchList */
 export const WL_ICON = ":no_entry:";
+
+export const REMINDERS_INTERVAL = 3_600_000;

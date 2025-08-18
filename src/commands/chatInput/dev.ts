@@ -12,6 +12,8 @@ import { exec } from "child_process";
 import fs from "node:fs";
 import { setTimeout as sleep } from "node:timers/promises";
 import { formatWithOptions } from "node:util";
+import * as actions from "#actions";
+import * as db from "#db";
 import * as structures from "#structures";
 import * as util from "#util";
 
@@ -24,7 +26,7 @@ export default new structures.Command<"chatInput">({
         switch (interaction.options.getSubcommand()) {
             case "eval": {
                 // eslint-disable-next-line no-unused-expressions
-                sleep; fs; Discord; // Imports possibly used in eval
+                sleep; fs; Discord; actions; db; // Imports possibly used in eval
                 const { client } = interaction;
                 const code = interaction.options.getString("code", true);
                 const depth = interaction.options.getInteger("depth") ?? 1;
@@ -47,15 +49,22 @@ export default new structures.Command<"chatInput">({
                             value: codeBlock(err)
                         });
 
+                    let msg;
                     const msgPayload = {
                         embeds: [embed],
                         components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
                             new ButtonBuilder().setCustomId("stack").setStyle(ButtonStyle.Primary).setLabel("Stack")
                         )],
-                        fetchReply: true as const
+                        withResponse: true as const
                     };
 
-                    const msg = await interaction.reply(msgPayload).catch(() => interaction.channel!.send(msgPayload));
+                    try {
+                        const response = await interaction.reply(msgPayload);
+
+                        msg = response.resource!.message!;
+                    } catch (replyErr) {
+                        msg = await interaction.channel!.send(msgPayload);
+                    }
 
                     msg.createMessageComponentCollector({
                         filter: x => x.user.id === interaction.user.id,

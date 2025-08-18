@@ -1,15 +1,15 @@
 {
     "compilerOptions": {
-        "target": "ES2021",
+        "target": "esnext",
         "baseUrl": "./",
-        "module": "ESNext",
+        "module": "nodenext",
         "forceConsistentCasingInFileNames": true,
         "strict": true,
         "strictNullChecks": true,
         "strictFunctionTypes": true,
         "strictPropertyInitialization": true,
         "skipLibCheck": true,
-        "moduleResolution": "Bundler",
+        "moduleResolution": "nodenext",
         "resolveJsonModule": true,
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
@@ -23,7 +23,7 @@
             "#actions": ["src/actions/index.js"],
             "#util": ["src/util/index.js"],
             "#structures": ["src/structures/index.js"],
-            "#schemas": ["src/schemas/index.js"],
+            "#db": ["src/db/index.js"],
             "#typings": ["src/typings.js"],
             "#config": ["src/config.json"]
         }

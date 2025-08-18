@@ -10,20 +10,23 @@ export default new Command<"chatInput">({
             return interaction.reply({ content: "This command only works in " + channelMention(communityIdeas), ephemeral: true });
         }
 
-        const msg = await interaction.reply({ embeds: [new EmbedBuilder()
-            .setAuthor({
-                name: `${interaction.member.displayName} (${interaction.user.id})`,
-                iconURL: interaction.user.displayAvatarURL({ extension: "png", size: 128 })
-            })
-            .setTitle("Community Idea")
-            .setDescription(suggestion)
-            .setTimestamp()
-            .setColor(interaction.client.config.EMBED_COLOR)
-        ], fetchReply: true });
+        const response = await interaction.reply({
+            embeds: [new EmbedBuilder()
+                .setAuthor({
+                    name: `${interaction.member.displayName} (${interaction.user.id})`,
+                    iconURL: interaction.user.displayAvatarURL({ extension: "png", size: 128 })
+                })
+                .setTitle("Community Idea")
+                .setDescription(suggestion)
+                .setTimestamp()
+                .setColor(interaction.client.config.EMBED_COLOR)
+            ],
+            withResponse: true,
+        });
 
-        await msg.react("✅");
-        await msg.react("❌");
-        await msg.startThread({
+        await response.resource!.message!.react("✅");
+        await response.resource!.message!.react("❌");
+        await response.resource!.message!.startThread({
             name: `Discussion of ${interaction.member.displayName}'s Community Idea`,
             autoArchiveDuration: ThreadAutoArchiveDuration.OneWeek
         });

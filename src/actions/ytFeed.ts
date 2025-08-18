@@ -27,14 +27,14 @@ export function ytFeed(client: Client) {
             !req.query["hub.challenge"] ||
             typeof req.query["hub.lease_seconds"] !== "string"
         ) {
-            log("Yellow", "YTFeed invalid GET");
+            log("yellow", "YTFeed invalid GET");
 
             return void res.writeHead(400).end();
         }
 
         const leaseTime = formatTime(parseInt(req.query["hub.lease_seconds"], 10) * 1_000, 5);
 
-        log("Green", `YTFeed valid GET with ${leaseTime} lease time, echoing`);
+        log("green", `YTFeed valid GET with ${leaseTime} lease time, echoing`);
 
         res.writeHead(200).end(req.query["hub.challenge"]);
     });
@@ -44,7 +44,7 @@ export function ytFeed(client: Client) {
         const signatureHeader = req.headers["x-hub-signature"];
 
         if (!signatureHeader || Array.isArray(signatureHeader)) {
-            log("Yellow", "YTFeed invalid header");
+            log("yellow", "YTFeed invalid header");
 
             return void res.writeHead(403).end();
         }
@@ -55,13 +55,13 @@ export function ytFeed(client: Client) {
         try {
             hmac = createHmac(algo, client.config.ytFeed.secret);
         } catch (e) {
-            log("Yellow", "YTFeed invalid sig");
+            log("yellow", "YTFeed invalid sig");
 
             return void res.writeHead(403).end();
         }
 
         if (hmac.update(rawBody).digest("hex").toLowerCase() !== signature) {
-            log("Yellow", "YTFeed mismatched sig");
+            log("yellow", "YTFeed mismatched sig");
 
             return void res.writeHead(403).end();
         }
@@ -71,14 +71,14 @@ export function ytFeed(client: Client) {
         const data = jsonFromXML<YTFeedData>(rawBody);
         const { entry } = data.feed;
 
-        if (!entry) return log("Yellow", "Missing entry data");
+        if (!entry) return log("yellow", "Missing entry data");
 
         const videoId = entry["yt:videoId"]._text;
         const publishUnix = new Date(entry.published._text).getTime();
 
-        if ((Date.now() - publishUnix) > MAX_CACHE_AGE) return log("Yellow", `Skipped ${videoId}; age over ${MAX_CACHE_AGE.toLocaleString()}ms`);
+        if ((Date.now() - publishUnix) > MAX_CACHE_AGE) return log("yellow", `Skipped ${videoId}; age over ${MAX_CACHE_AGE.toLocaleString()}ms`);
 
-        if (client.ytCache.has(videoId)) return log("Yellow", `Skipped ${videoId}; already cached`);
+        if (client.ytCache.has(videoId)) return log("yellow", `Skipped ${videoId}; already cached`);
 
         client.ytCache.add(videoId);
 
@@ -89,7 +89,7 @@ export function ytFeed(client: Client) {
         await client.getChan("videosAndLiveStreams").send(`**${entry.author.name._text}** just posted a new video!\n${videoURL}`);
     });
 
-    server.listen(client.config.ytFeed.port, () => log("Purple", "YTFeed listening on port", client.config.ytFeed.port));
+    server.listen(client.config.ytFeed.port, () => log("magenta", `YTFeed listening on port ${client.config.ytFeed.port}`));
 
     cron.schedule("0 0 * * WED", async () => {
         const body = new URLSearchParams({
@@ -105,7 +105,7 @@ export function ytFeed(client: Client) {
 
             const res = await fetch("https://pubsubhubbub.appspot.com/subscribe", { method: "POST", body });
 
-            log("Yellow", `YTFeed lease renew for ${channelId}:`, res.status);
+            log("yellow", `YTFeed lease renew for ${channelId}: ${res.status}`);
         }
     }, { timezone: "UTC" });
 }

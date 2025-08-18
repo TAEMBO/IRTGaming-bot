@@ -1,10 +1,12 @@
 import { time } from "discord.js";
+import { eq } from "drizzle-orm";
+import { db, userLevelsTable } from "#db";
 import { Command } from "#structures";
 
 export default new Command<"chatInput">({
     async run(interaction) {
         const applicationLogs = interaction.client.getChan("mpApplicationLogs");
-        const userData = await interaction.client.userLevels.data.findById(interaction.user.id);
+        const userData = (await db.select().from(userLevelsTable).where(eq(userLevelsTable.userId, interaction.user.id))).at(0);
         const eligibleTime = (Date.now() - interaction.member.joinedTimestamp!) > (1000 * 60 * 60 * 24 * 14);
         const eligibleMsgs = userData?.level ? userData.level > 3 : false;
         const deniedMsgs: string[] = [];

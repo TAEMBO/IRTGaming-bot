@@ -1,7 +1,11 @@
-import { LogColor } from "./logColor.js";
-
 type Changes = { row: number; text: string; }[];
 type Sections = Record<string, { n?: string | null; o?: string | null; rows: number[]; }>;
+
+enum ANSIColor {
+    Red = "\x1b[31m",
+    Green = "\x1b[32m",
+    Reset = "\x1b[0m"
+}
 
 /**
  * Adds a highlight to a string
@@ -10,13 +14,12 @@ type Sections = Record<string, { n?: string | null; o?: string | null; rows: num
  * @param color - The color of the highlight to add
  * @returns The highlighted string with a trailing space
  */
-function highlight(string: string, color: LogColor) {
-    return color + string + " " + LogColor.Reset;
+function highlight(string: string, color: ANSIColor) {
+    return color + string + " " + ANSIColor.Reset;
 }
 
-// Credits to [John Resig](https://johnresig.com/projects/javascript-diff-algorithm/)
 /**
- * Find the differences between two strings
+ * Find the differences between two strings. Credits to [John Resig](https://johnresig.com/projects/javascript-diff-algorithm/)
  * @returns `oldText` with ANSI red highlights for removed text, `newText` with ANSI green highlights for added text
  */
 export function formatDiff(oldText: string, newText: string) {
@@ -72,28 +75,28 @@ export function formatDiff(oldText: string, newText: string) {
     }
 
     if (!newChanges.length) {
-        for (let i = 0; i < oldChanges.length; i++) oldTextChanges += highlight(oldChanges[i].text, LogColor.Red);
+        for (let i = 0; i < oldChanges.length; i++) oldTextChanges += highlight(oldChanges[i].text, ANSIColor.Red);
     } else {
         if (!newChanges[0].text) {
             for (let i = 0; i < oldChanges.length && !oldChanges[i].text; i++) {
-                oldTextChanges += highlight(oldChanges[i].text, LogColor.Red);
+                oldTextChanges += highlight(oldChanges[i].text, ANSIColor.Red);
             }
         }
 
         if (oldChanges.every(x => x.row < 0)) {
-            for (const oldChange of oldChanges) oldTextChanges += highlight(oldChange.text, LogColor.Red);
+            for (const oldChange of oldChanges) oldTextChanges += highlight(oldChange.text, ANSIColor.Red);
         } else if (oldChanges[0].row < 0) {
-            oldTextChanges += highlight(oldChanges[0].text, LogColor.Red);
+            oldTextChanges += highlight(oldChanges[0].text, ANSIColor.Red);
         }
 
         for (let i = 0; i < newChanges.length; i++) {
             if (newChanges[i].row < 0) {
-                newTextChanges += highlight(newChanges[i].text, LogColor.Green);
+                newTextChanges += highlight(newChanges[i].text, ANSIColor.Green);
             } else {
                 let pre = "";
 
                 for (let n = newChanges[i].row + 1; n < oldChanges.length && oldChanges[n].row < 1; n++) {
-                    pre += highlight(oldChanges[n].text, LogColor.Red);
+                    pre += highlight(oldChanges[n].text, ANSIColor.Red);
                 }
 
                 oldTextChanges += newChanges[i].text + " " + pre;
@@ -102,8 +105,8 @@ export function formatDiff(oldText: string, newText: string) {
         }
     }
 
-    oldTextChanges = oldTextChanges.replaceAll(LogColor.Reset + LogColor.Red, "");
-    newTextChanges = newTextChanges.replaceAll(LogColor.Reset + LogColor.Green, "");
+    oldTextChanges = oldTextChanges.replaceAll(ANSIColor.Reset + ANSIColor.Red, "");
+    newTextChanges = newTextChanges.replaceAll(ANSIColor.Reset + ANSIColor.Green, "");
 
     return { oldText: oldTextChanges, newText: newTextChanges };
 }

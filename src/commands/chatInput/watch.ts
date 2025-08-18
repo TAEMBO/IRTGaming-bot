@@ -1,4 +1,6 @@
 import { ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
+import { eq } from "drizzle-orm";
+import { db, watchListPingsTable, watchListTable } from "#db";
 import { Command } from "#structures";
 import { collectAck, isMPStaff, youNeedRole } from "#util";
 
@@ -14,17 +16,17 @@ export default new Command<"chatInput">({
                 const name = interaction.options.getString("username", true);
                 const severity = interaction.options.getString("severity", true) as "ban" | "watch";
                 const reference = interaction.options.getString("reference", false);
-                const wlData = await interaction.client.watchList.data.findById(name);
+                const watchListData = (await db.select().from(watchListTable).where(eq(watchListTable.name, name))).at(0);
 
-                if (wlData) return await interaction.reply(`\`${name}\` already exists for reason \`${wlData.reason}\``);
+                if (watchListData) return await interaction.reply(`\`${name}\` already exists for reason \`${watchListData.reason}\``);
 
                 if (reference && !regExp.test(reference)) return interaction.reply("Invalid reference, must be a message link!");
 
-                await interaction.client.watchList.data.create({
-                    _id: name,
+                await db.insert(watchListTable).values({
+                    name,
                     reason,
                     isSevere: severity === "ban",
-                    reference: reference ?? undefined
+                    reference
                 });
 
                 const severityText = severity === "ban" ? "banned" : "watched over";
@@ -39,19 +41,20 @@ export default new Command<"chatInput">({
                 const name = interaction.options.getString("username", true);
                 const severity = interaction.options.getString("severity", false) as "ban" | "watch" | null;
                 const reference = interaction.options.getString("reference", false);
-                const wlData = await interaction.client.watchList.data.findById(name);
+                const watchListData = (await db.select().from(watchListTable).where(eq(watchListTable.name, name))).at(0);
 
-                if (!wlData) return interaction.reply(`\`${name}\` doesn't exist on watchList`);
+                if (!watchListData) return interaction.reply(`\`${name}\` doesn't exist on watchList`);
 
                 if (reference && !regExp.test(reference)) return interaction.reply("Invalid reference, must be a message link!");
 
-                if (reason) wlData.reason = reason;
-
-                if (severity) wlData.isSevere = severity === "ban";
-
-                if (reference) wlData.reference = reference;
-
-                await wlData.save();
+                await db
+                    .update(watchListTable)
+                    .set({
+                        reason: reason ?? undefined,
+                        isSevere: severity ? severity === "ban" : undefined,
+                        reference: reference ?? undefined
+                    })
+                    .where(eq(watchListTable.name, name));
 
                 await interaction.reply(`Successfully updated watchList details for \`${name}\``);
 
@@ -59,26 +62,31 @@ export default new Command<"chatInput">({
             }
             case "remove": {
                 const name = interaction.options.getString("username", true);
-                const wlData = await interaction.client.watchList.data.findById(name);
+                const watchListData = (await db.select().from(watchListTable).where(eq(watchListTable.name, name))).at(0);
 
-                if (!wlData) return await interaction.reply(`\`${name}\` doesn't exist on watchList`);
+                if (!watchListData) return await interaction.reply(`\`${name}\` doesn't exist on watchList`);
 
-                await interaction.client.watchList.data.findByIdAndDelete(name);
+                await db.delete(watchListTable).where(eq(watchListTable.name, name));
+
                 await interaction.reply(`Successfully removed \`${name}\` from watchList`);
 
                 break;
             };
             case "view": {
+                const watchListData = await db.select().from(watchListTable);
+
                 await interaction.reply({ files: [{
-                    attachment: Buffer.from(JSON.stringify(await interaction.client.watchList.data.find(), null, 2)),
+                    attachment: Buffer.from(JSON.stringify(watchListData, null, 2)),
                     name: "watchListCache.json"
                 }] });
 
                 break;
             };
             case "notifications": {
-                if (!interaction.client.watchListPings.cache.includes(interaction.user.id)) {
-                    await interaction.client.watchListPings.add(interaction.user.id);
+                const watchListPingsData = await db.select().from(watchListPingsTable);
+
+                if (!watchListPingsData.some(x => x.userId === interaction.user.id)) {
+                    await db.insert(watchListPingsTable).values({ userId: interaction.user.id });
 
                     return await interaction.reply({ embeds: [new EmbedBuilder()
                         .setDescription("You have successfully subscribed to watchList notifications")
@@ -96,7 +104,7 @@ export default new Command<"chatInput">({
                         ]
                     },
                     async confirm(int) {
-                        await interaction.client.watchListPings.remove(interaction.user.id);
+                        await db.delete(watchListPingsTable).where(eq(watchListPingsTable.userId, interaction.user.id));
 
                         await int.update({
                             embeds: [new EmbedBuilder()

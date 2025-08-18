@@ -1,28 +1,38 @@
 import { ApplicationCommandOptionType, EmbedBuilder, PermissionFlagsBits, userMention } from "discord.js";
+import { eq } from "drizzle-orm";
+import { db, punishmentsTable } from "#db";
 import { Command } from "#structures";
 import { formatString, formatTime, formatUser } from "#util";
 
 export default new Command<"chatInput">({
     async run(interaction) {
-        const caseid = interaction.options.getInteger("id");
-
         switch (interaction.options.getSubcommand()) {
             case "view": {
-                const punishment = await interaction.client.punishments.data.findById(caseid);
+                const caseId = interaction.options.getInteger("id", true);
+                const punishment = (await db.select().from(punishmentsTable).where(eq(punishmentsTable.id, caseId))).at(0);
 
                 if (!punishment) return await interaction.reply("A case with that ID wasn't found!");
 
-                const cancelledBy = punishment.expired ? await interaction.client.punishments.data.findOne({ cancels: punishment.id }) : null;
-                const cancels = punishment.cancels ? await interaction.client.punishments.data.findOne({ _id: punishment.cancels }) : null;
+                const user = await interaction.client.users.fetch(punishment.userId);
+
+                // If the current punishment was overwritten by another
+                const overwrittenBy = punishment.overwritten
+                    ? (await db.select().from(punishmentsTable).where(eq(punishmentsTable.overwrites, punishment.id))).at(0)
+                    : null;
+
+                // If the current punishment overwrites another
+                const overwrites = punishment.overwrites
+                    ? (await db.select().from(punishmentsTable).where(eq(punishmentsTable.id, punishment.overwrites))).at(0)
+                    : null;
                 const embed = new EmbedBuilder()
                     .setTitle(`${formatString(punishment.type)} | Case #${punishment.id}`)
                     .addFields(
-                        { name: "🔹 User", value: `${punishment.member.tag}\n<@${punishment.member._id}> \`${punishment.member._id}\``, inline: true },
-                        { name: "🔹 Moderator", value: `<@${punishment.moderator}> \`${punishment.moderator}\``, inline: true },
+                        { name: "🔹 User", value: `${user.tag}\n<@${punishment.userId}> \`${punishment.userId}\``, inline: true },
+                        { name: "🔹 Moderator", value: `<@${punishment.moderatorId}> \`${punishment.moderatorId}\``, inline: true },
                         { name: "\u200b", value: "\u200b", inline: true },
                         { name: "🔹 Reason", value: `\`${punishment.reason || "unspecified"}\``, inline: true })
                     .setColor(interaction.client.config.EMBED_COLOR)
-                    .setTimestamp(punishment.time);
+                    .setTimestamp(punishment.timestamp);
 
                 if (punishment.duration) embed.addFields(
                     {
@@ -37,14 +47,14 @@ export default new Command<"chatInput">({
                     }
                 );
 
-                if (punishment.expired) embed.addFields({
+                if (punishment.overwritten) embed.addFields({
                     name: "🔹 Expired",
-                    value: `This case has been overwritten by Case #${cancelledBy?.id} for reason \`${cancelledBy?.reason}\``
+                    value: `This case has been overwritten by Case #${overwrittenBy?.id} for reason \`${overwrittenBy?.reason}\``
                 });
 
-                if (punishment.cancels) embed.addFields({
+                if (punishment.overwrites) embed.addFields({
                     name: "🔹 Overwrites",
-                    value: `This case overwrites Case #${cancels?.id} \`${cancels?.reason}\``
+                    value: `This case overwrites Case #${overwrites?.id} \`${overwrites?.reason}\``
                 });
 
                 await interaction.reply({ embeds: [embed] });
@@ -54,19 +64,19 @@ export default new Command<"chatInput">({
             case "member": {
                 const user = interaction.options.getUser("user", true);
                 const pageNumber = interaction.options.getInteger("page") ?? 1;
-                const punishments = await interaction.client.punishments.data.find();
-                const userPunishmentsData = punishments.filter(x => x.member._id === user.id);
-                const formattedPuns = userPunishmentsData.sort((a, b) => a.time - b.time).map(punishment => ({
+                const punishmentsData = await db.select().from(punishmentsTable);
+                const userPunishmentsData = punishmentsData.filter(x => x.userId === user.id);
+                const formattedPuns = userPunishmentsData.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime()).map(punishment => ({
                     name: `${formatString(punishment.type)} | Case #${punishment.id}`,
                     value: [
                         `> Reason: \`${punishment.reason}\``,
                         punishment.duration ? `\n> Duration: ${formatTime(punishment.duration, 3)}` : "",
-                        `\n> Moderator: ${userMention(punishment.moderator)}`,
-                        punishment.expired ? `\n> __Overwritten by Case #${punishments.find(x => x.cancels === punishment._id)?._id}__` : "",
-                        punishment.cancels ? `\n> __Overwrites Case #${punishment.cancels}__` : ""].join("")
+                        `\n> Moderator: ${userMention(punishment.moderatorId)}`,
+                        punishment.overwritten ? `\n> __Overwritten by Case #${punishmentsData.find(x => x.overwrites === punishment.id)?.id}__` : "",
+                        punishment.overwrites ? `\n> __Overwrites Case #${punishment.overwrites}__` : ""].join("")
                 }));
 
-                if (!formattedPuns || !formattedPuns.length) return await interaction.reply("No punishments found with that user ID");
+                if (!formattedPuns || !formattedPuns.length) return interaction.reply("No punishments found with that user ID");
 
                 await interaction.reply({ embeds: [new EmbedBuilder()
                     .setTitle(`Punishments for ${user.tag}`)
@@ -81,13 +91,14 @@ export default new Command<"chatInput">({
                 break;
             };
             case "update": {
+                const caseId = interaction.options.getInteger("id", true);
                 const reason = interaction.options.getString("reason", true);
 
-                await interaction.client.punishments.data.findByIdAndUpdate(caseid, { reason });
+                await db.update(punishmentsTable).set({ reason }).where(eq(punishmentsTable.id, caseId));
 
                 await interaction.reply({ embeds: [new EmbedBuilder()
                     .setColor(interaction.client.config.EMBED_COLOR)
-                    .setTitle(`Case #${caseid} updated`)
+                    .setTitle(`Case #${caseId} updated`)
                     .setDescription(`**New reason:** ${reason}`)
                 ] });
                 break;

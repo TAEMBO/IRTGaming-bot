@@ -1,17 +1,18 @@
 import { ApplicationCommandOptionType, EmbedBuilder, userMention } from "discord.js";
 import canvas from "@napi-rs/canvas";
+import { algorithm, dailyMsgsTable, db, userLevelsTable } from "#db";
 import { Command } from "#structures";
 
 export default new Command<"chatInput">({
     async run(interaction) {
-        const allData = await interaction.client.userLevels.data.find();
+        const userLevelsData = await db.select().from(userLevelsTable);
 
         if (interaction.options.getSubcommand() === "view") {
             // fetch user or user interaction sender
             const member = interaction.options.getMember("member") ?? interaction.member;
 
             // information about users progress on level roles
-            const userData = (await interaction.client.userLevels.data.findById(member.user.id))?.toObject();
+            const userData = userLevelsData.find(x => x.userId === member.id);
 
             const pronounBool = (you: string, they: string) => { // takes 2 words and chooses which to use based on if user did this command on themself
                 if (interaction.user.id === member.user.id) return you || true;
@@ -20,9 +21,8 @@ export default new Command<"chatInput">({
 
             if (!userData) return await interaction.reply(`${pronounBool("You", "They")} currently don't have a level, send some messages to level up.`);
 
-            const { algorithm } = interaction.client.userLevels;
-            const index = allData.sort((a, b) => b.messages - a.messages).map(x => x._id).indexOf(member.id) + 1;
-            const memberDifference = userData.messages - interaction.client.userLevels.algorithm(userData.level);
+            const index = userLevelsData.sort((a, b) => b.messageCount - a.messageCount).map(x => x.userId).indexOf(member.id) + 1;
+            const memberDifference = userData.messageCount - algorithm(userData.level);
             const levelDifference = algorithm(userData.level + 1) - algorithm(userData.level);
             const img = canvas.createCanvas(1000, 250);
             const ctx = img.getContext("2d");
@@ -133,8 +133,8 @@ export default new Command<"chatInput">({
             // Total value
             ctx.fillStyle = "#7F8384";
             ctx.font = largeFont;
-            ctx.fillText(userData.messages.toLocaleString("en-US"), offsetRankX, detailsYOffset);
-            offsetRankX -= ctx.measureText(userData.messages.toLocaleString("en-US")).width;
+            ctx.fillText(userData.messageCount.toLocaleString("en-US"), offsetRankX, detailsYOffset);
+            offsetRankX -= ctx.measureText(userData.messageCount.toLocaleString("en-US")).width;
 
             // Total label
             ctx.font = smallFont;
@@ -149,7 +149,7 @@ export default new Command<"chatInput">({
             return;
         }
 
-        const data = (await interaction.client.dailyMsgs.data.find())
+        const data = (await db.select().from(dailyMsgsTable))
             .map((x, i, a) => {
                 const yesterday = a[i - 1] || [];
 
@@ -285,11 +285,11 @@ export default new Command<"chatInput">({
 
         ctx.fillText("time ->", tx, ty);
 
-        const topUsers = allData
-            .sort((a, b) => b.messages - a.messages)
+        const topUsers = userLevelsData
+            .sort((a, b) => b.messageCount - a.messageCount)
             .filter((x) => !x.hasLeft)
             .slice(0, 10)
-            .map((x, i) => `\`${i + 1}.\` ${userMention(x._id)}: ${x.messages.toLocaleString("en-US")}`)
+            .map((x, i) => `\`${i + 1}.\` ${userMention(x.userId)}: ${x.messageCount.toLocaleString("en-US")}`)
             .join("\n");
 
         await interaction.reply({

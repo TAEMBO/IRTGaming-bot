@@ -8,9 +8,11 @@ import {
     EmbedBuilder,
     StringSelectMenuBuilder,
 } from "discord.js";
+import { eq } from "drizzle-orm";
 import ms from "ms";
+import { db, executeReminder, remindersTable } from "#db";
 import { Command } from "#structures";
-import { collectAck } from "#util";
+import { collectAck, REMINDERS_INTERVAL } from "#util";
 
 function formatTime(time: number) {
     return `<t:${Math.round(time / 1000)}> (<t:${Math.round(time / 1000)}:R>)`;
@@ -23,7 +25,7 @@ function rplText(content: string) {
 export default new Command<"chatInput">({
     async run(interaction) {
         async function promptDeletion(
-            reminder: typeof interaction.client.reminders.doc,
+            reminder: typeof remindersTable.$inferSelect,
             ackInt: StringSelectMenuInteraction<"cached"> | ChatInputCommandInteraction<"cached">
         ) {
             await collectAck({
@@ -38,7 +40,7 @@ export default new Command<"chatInput">({
                     ephemeral: true
                 },
                 async confirm(int) {
-                    await interaction.client.reminders.data.findByIdAndDelete(reminder);
+                    await db.delete(remindersTable).where(eq(remindersTable.id, reminder.id));
 
                     await int.update(rplText(`Successfully deleted reminder \`${reminder.content}\``));
                 },
@@ -56,7 +58,7 @@ export default new Command<"chatInput">({
                 const reminderText = interaction.options.getString("what", true);
                 const reminderTime = ms(interaction.options.getString("when", true)) as number | undefined;
 
-                if (!reminderTime) return await interaction.reply({
+                if (!reminderTime) return interaction.reply({
                     ephemeral: true,
                     embeds: [new EmbedBuilder()
                         .setTitle("Incorrect timestamp")
@@ -76,15 +78,15 @@ export default new Command<"chatInput">({
                     ]
                 });
 
-                if (reminderTime < 10_000) return await interaction.reply({
+                if (reminderTime < 60_000) return interaction.reply({
                     ephemeral: true,
-                    content: "You cannot set a reminder to expire in less than 10 seconds."
+                    content: "You cannot set a 1 minute reminder."
                 });
 
                 const timeToRemind = Date.now() + reminderTime;
-                const currentReminders = await interaction.client.reminders.data.find({ userid: interaction.user.id });
+                const remindersData = await db.select().from(remindersTable).where(eq(remindersTable.userId, interaction.user.id));
 
-                if (currentReminders.length > 25) return await interaction.reply({
+                if (remindersData.length > 25) return interaction.reply({
                     content: "You can only have up to 25 reminders at a time",
                     ephemeral: true
                 });
@@ -104,14 +106,18 @@ export default new Command<"chatInput">({
                         ephemeral: true
                     },
                     async confirm(int) {
-                        const reminder = await interaction.client.reminders.data.create({
-                            userid: interaction.user.id,
+                        const [reminder] = await db.insert(remindersTable).values({
+                            userId: interaction.user.id,
                             content: reminderText,
-                            time: timeToRemind,
-                            ch: interaction.channelId
-                        });
+                            time: new Date(timeToRemind),
+                            channelId: interaction.channelId
+                        }).returning();
 
-                        interaction.client.reminders.setExec(reminder._id, timeToRemind - Date.now());
+                        if (reminderTime < REMINDERS_INTERVAL) {
+                            interaction.client.remindersCache.set(reminder.id, reminder);
+
+                            setTimeout(() => executeReminder(interaction.client, reminder), reminderTime);
+                        }
 
                         await int.update({
                             components: [],
@@ -133,11 +139,11 @@ export default new Command<"chatInput">({
                 break;
             };
             case "delete": {
-                const userReminders = await interaction.client.reminders.data.find({ userid: interaction.user.id });
+                const remidnersData = await db.select().from(remindersTable).where(eq(remindersTable.userId, interaction.user.id));
 
-                if (userReminders.length === 0) return await interaction.reply({ content: "You have no active current reminders", ephemeral: true });
+                if (remidnersData.length === 0) return await interaction.reply({ content: "You have no active current reminders", ephemeral: true });
 
-                if (userReminders.length === 1) return await promptDeletion(userReminders[0], interaction);
+                if (remidnersData.length === 1) return await promptDeletion(remidnersData[0], interaction);
 
                 const selectMenu = new StringSelectMenuBuilder()
                     .setCustomId("reminders")
@@ -145,10 +151,10 @@ export default new Command<"chatInput">({
 
                 const embed = new EmbedBuilder()
                     .setColor(interaction.client.config.EMBED_COLOR)
-                    .setTitle(`You have ${userReminders.length} active reminder(s)`)
+                    .setTitle(`You have ${remidnersData.length} active reminder(s)`)
                     .setFooter({ text: "Select a reminder to delete, 60s to respond" });
 
-                for (const [i, x] of userReminders.entries()) {
+                for (const [i, x] of remidnersData.entries()) {
                     const index = (i + 1).toString();
 
                     selectMenu.addOptions({ label: `#${index}`, value: index });
@@ -157,25 +163,28 @@ export default new Command<"chatInput">({
                         name: `#${index}`,
                         value: [
                             `> Content: \`${x.content}\``,
-                            `> Time to remind: ${formatTime(x.time)}`
+                            `> Time to remind: ${formatTime(x.time.getTime())}`
                         ].join("\n")
                     });
                 }
 
-                const msg = await interaction.reply({
+                const response = await interaction.reply({
                     embeds: [embed],
                     ephemeral: true,
                     components: [new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selectMenu)],
-                    fetchReply: true
+                    withResponse: true
                 });
 
-                msg.createMessageComponentCollector({
+                response.resource!.message!.createMessageComponentCollector({
                     filter: x => x.user.id === interaction.user.id,
                     max: 1,
                     time: 60_000,
                     componentType: ComponentType.StringSelect
                 })
-                    .on("collect", int => promptDeletion(userReminders[parseInt(int.values[0]) - 1], int))
+
+                // TODO: Remove upon d.js v14.22 release
+                // @ts-expect-error d.js typings issue
+                    .on("collect", int => promptDeletion(remidnersData[parseInt(int.values[0]) - 1], int))
                     .on("end", async ints => {
                         if (!ints.size) await interaction.editReply(rplText("No response given, command canceled"));
                     });

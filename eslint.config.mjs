@@ -43,6 +43,7 @@ export default [
             "no-unneeded-ternary": "error",
             "no-unused-expressions": "error",
             "no-unused-vars": "off",
+            "no-warning-comments": "warn",
             "quotes": ["error", "double"],
             "semi": ["error", "always"],
             "yoda": "error",

@@ -13,10 +13,11 @@ import {
     userMention,
     codeBlock
 } from "discord.js";
+import { styleText } from "node:util";
 import config from "#config" with { type: "json" };
-import * as Schemas from "#schemas";
-import { fs22Servers, fs25Servers, LogColor } from "#util";
+import type { remindersTable } from "#db";
 import { type Command, RepeatedMessages } from "#structures";
+import { fs22Servers, fs25Servers } from "#util";
 import type { CachedInvite, Config } from "#typings";
 
 export default class TClient extends Client<true> {
@@ -28,18 +29,7 @@ export default class TClient extends Client<true> {
     public readonly contextMenuCommands = new Collection<string, Command<"message" | "user">>();
     public readonly repeatedMessages = new RepeatedMessages(this);
     public readonly inviteCache = new Collection<string, CachedInvite>();
-    public readonly bannedWords = new Schemas.BannedWords();
-    public readonly tfList = new Schemas.TFList();
-    public readonly fmList = new Schemas.FMList();
-    public readonly whitelist = new Schemas.Whitelist();
-    public readonly watchListPings = new Schemas.WatchListPings();
-    public readonly userLevels = new Schemas.UserLevels(this);
-    public readonly punishments = new Schemas.Punishments(this);
-    public readonly watchList = new Schemas.WatchList();
-    public readonly playerTimes22 = new Schemas.PlayerTimes22(this);
-    public readonly playerTimes25 = new Schemas.PlayerTimes25();
-    public readonly reminders = new Schemas.Reminders(this);
-    public readonly dailyMsgs = new Schemas.DailyMsgs();
+    public readonly remindersCache = new Collection<typeof remindersTable.$inferSelect.id, typeof remindersTable.$inferSelect>();
 
     public constructor() {
         super({
@@ -124,8 +114,8 @@ export default class TClient extends Client<true> {
         const dirname = process.cwd().replaceAll("\\", "/");
         const channel = this.channels.cache.get(this.config.mainServer.channels.taesTestingZone) as TextChannel | undefined;
         const formattedErr = error.stack
-            ?.replaceAll(" at ", ` ${LogColor.Red}at${LogColor.Reset} `)
-            .replaceAll(dirname, LogColor.Yellow + dirname + LogColor.Reset)
+            ?.replaceAll(" at ", styleText("red", " at "))
+            .replaceAll(dirname, styleText("yellow", dirname))
             .slice(0, 2500);
 
         if (!channel) return;

@@ -1,6 +1,7 @@
 import type { Message, MessageCollector } from "discord.js";
 import type TClient from "../client.js";
 import { hasProfanity, isMPStaff, log, tempReply } from "#util";
+import { addPunishment } from "#db";
 
 const inviteRegExp = new RegExp(/discord.gg/);
 
@@ -32,7 +33,7 @@ export class RepeatedMessages {
     private readonly data = new Map<string, RepeatedMessagesData>();
     private staffPingCollector?: MessageCollector;
 
-    public constructor(private readonly _client: TClient) {}
+    public constructor(private readonly client: TClient) {}
 
     private async increment(message: Message<true>, options: IncrementOptions) {
         const userData = this.data.get(message.author.id);
@@ -76,9 +77,8 @@ export class RepeatedMessages {
 
         this.data.delete(message.author.id);
 
-        await this._client.punishments
-            .addPunishment("mute", this._client.user.id, `Automod; ${options.muteReason}`, message.author, options.muteTime)
-            .catch(err => log("Red", "Failed to add punishment:", err));
+        await addPunishment(this.client, "mute", this.client.user.id, `Automod; ${options.muteReason}`, message.author.id, options.muteTime)
+            .catch(err => log("red", `Failed to add punishment: ${err}`));
 
         const spamMsgIds = userData.entries.filter(x => x.type === RepeatedMessagesType.Spam).map(x => x.msgId);
 
@@ -89,8 +89,8 @@ export class RepeatedMessages {
         let automodded = false;
 
         // Misuse of staff ping
-        if (message.mentions.roles.has(this._client.config.mainServer.roles.mpStaff)) {
-            log("Purple", `${message.author.tag} mentioned staff role`);
+        if (message.mentions.roles.has(this.client.config.mainServer.roles.mpStaff)) {
+            log("magenta", `${message.author.tag} mentioned staff role`);
 
             if (this.staffPingCollector && !this.staffPingCollector.ended) this.staffPingCollector.stop();
 
@@ -99,20 +99,20 @@ export class RepeatedMessages {
                 max: 1,
                 time: 60_000
             }).on("collect", async collected => {
-                log("Purple", `Received "y" from ${collected.author.tag}, indicating to mute`);
+                log("magenta", `Received "y" from ${collected.author.tag}, indicating to mute`);
 
                 try {
-                    await this._client.punishments.addPunishment("mute", collected.author.id, "Automod; Misuse of staff ping", message.author, "12h");
+                    await addPunishment(this.client, "mute", collected.author.id, "Automod; Misuse of staff ping", message.author.id, "12h");
                     await collected.react("✅");
-                } catch (error) {
-                    log("Red", "Failed to add punishment:", error);
+                } catch (err) {
+                    log("red", `Failed to add punishment: ${err}`);
 
                     await collected.react("❗");
                 }
             });
         }
 
-        if (hasProfanity(message.content.toLowerCase(), this._client.bannedWords.cache)) {
+        if (hasProfanity(message.content.toLowerCase())) {
             automodded = true;
 
             await tempReply(message, { timeout: 10_000, content: "That word is banned here" });
@@ -128,9 +128,9 @@ export class RepeatedMessages {
         } else if (inviteRegExp.test(message.content) && !isMPStaff(message.member)) {
             const foundInviteCode = message.content.split(" ").find(x => x.includes("discord.gg"))!;
             const parsedInviteCode = foundInviteCode.slice(foundInviteCode.indexOf("discord.gg"));
-            const validInvite = await this._client.fetchInvite(parsedInviteCode).catch(() => null);
+            const validInvite = await this.client.fetchInvite(parsedInviteCode).catch(() => null);
 
-            if (validInvite && validInvite.guild?.id !== this._client.config.mainServer.id) {
+            if (validInvite && validInvite.guild?.id !== this.client.config.mainServer.id) {
                 automodded = true;
 
                 await tempReply(message, { timeout: 10_000, content: "No advertising other Discord servers" });
@@ -144,7 +144,7 @@ export class RepeatedMessages {
                     muteReason: "Discord advertisement",
                 });
             }
-        } else if (message.channelId !== this._client.config.mainServer.channels.spamZone && !isMPStaff(message.member)) {
+        } else if (message.channelId !== this.client.config.mainServer.channels.spamZone && !isMPStaff(message.member)) {
             await this.increment(message, {
                 thresholdTime: 5_000,
                 thresholdAmt: 5,

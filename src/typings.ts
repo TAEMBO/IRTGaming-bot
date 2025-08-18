@@ -8,21 +8,8 @@ import type {
 import type config from "#config";
 import type TClient from "./client.js";
 import { type PlayerUsed } from "farming-simulator-types/2022";
+import type { fmNamesTable, playerTimes22Table, playerTimes25Table, remindersTable, tfNamesTable, watchListPingsTable, watchListTable, whitelistTable } from "#db";
 import type { Command, RepeatedMessages } from "#structures";
-import type {
-    BannedWords,
-    DailyMsgs,
-    FMList,
-    PlayerTimes22,
-    PlayerTimes25,
-    Punishments,
-    Reminders,
-    TFList,
-    UserLevels,
-    WatchList,
-    WatchListPings,
-    Whitelist
-} from "#schemas";
 
 declare module "discord.js" {
     interface Client {
@@ -34,18 +21,7 @@ declare module "discord.js" {
         readonly contextMenuCommands: Collection<string, Command<"message" | "user">>;
         readonly repeatedMessages: RepeatedMessages;
         readonly inviteCache: Collection<string, CachedInvite>;
-        readonly bannedWords: BannedWords;
-        readonly tfList: TFList;
-        readonly fmList: FMList;
-        readonly whitelist: Whitelist;
-        readonly watchListPings: WatchListPings;
-        readonly userLevels: UserLevels;
-        readonly punishments: Punishments;
-        readonly watchList: WatchList;
-        readonly playerTimes22: PlayerTimes22;
-        readonly playerTimes25: PlayerTimes25;
-        readonly reminders: Reminders;
-        readonly dailyMsgs: DailyMsgs;
+        readonly remindersCache: Collection<typeof remindersTable.$inferSelect.id, typeof remindersTable.$inferSelect>;
 
         /**
          * Get a text channel via config
@@ -99,6 +75,25 @@ export type Prettify<T> = {
 export type Empty<T> = {
     [K in keyof T]: undefined;
 };
+
+export interface DBData {
+    readonly fmNamesData: (typeof fmNamesTable.$inferSelect)[];
+    readonly tfNamesData: (typeof tfNamesTable.$inferSelect)[];
+    readonly watchListData: (typeof watchListTable.$inferSelect)[];
+    readonly whitelistData: (typeof whitelistTable.$inferSelect)[];
+}
+
+export type FS22LoopDBData = Required<DBData> & {
+    readonly watchListPingsData: (typeof watchListPingsTable.$inferSelect)[];
+    readonly playerTimesData: (typeof playerTimes22Table.$inferSelect)[];
+};
+
+export type FS25LoopDBData = Required<DBData> & {
+    readonly watchListPingsData: (typeof watchListPingsTable.$inferSelect)[];
+    readonly playerTimesData: (typeof playerTimes25Table.$inferSelect)[];
+}
+
+export type PunishmentType = "mute" | "detain" | "kick" | "softban" | "ban";
 
 export type CombinedContextMenuCommandInteraction =
     MessageContextMenuCommandInteraction<"cached">
@@ -185,8 +180,7 @@ export type FSServer = FSServerPrivate | FSServerPublic;
 export interface Config {
     /** The Discord bot client token */
     readonly TOKEN: string;
-    /** The URI for connecting to a MongoDB server */
-    readonly MONGO_URI: string;
+    readonly PG_URI: string;
     readonly USER_AGENT_HEADER: string;
     readonly EMBED_COLOR: `#${string}`;
     readonly EMBED_COLOR_GREEN: `#${string}`;

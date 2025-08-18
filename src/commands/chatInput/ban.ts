@@ -4,7 +4,7 @@ import { punish } from "#util";
 
 export default new Command<"chatInput">({
     async run(interaction) {
-        await punish(interaction, this.data.name);
+        await punish(interaction, "ban");
     },
     data: {
         name: "ban",
@@ -16,12 +16,6 @@ export default new Command<"chatInput">({
                 name: "member",
                 description: "The member to ban",
                 required: true
-            },
-            {
-                type: ApplicationCommandOptionType.String,
-                name: "time",
-                description: "The duration of the ban",
-                required: false
             },
             {
                 type: ApplicationCommandOptionType.String,

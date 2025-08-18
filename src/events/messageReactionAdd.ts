@@ -20,7 +20,7 @@ export default new Event({
             await reaction.users.remove(user.id);
             await tempReply(reaction.message, { content: `You cannot vote on your own suggestion, ${user}!`, timeout: 10_000 });
 
-            log("Purple", `Blocked self-vote from ${user.tag} in ${reaction.message.channelId}`);
+            log("magenta", `Blocked self-vote from ${user.tag} in ${reaction.message.channelId}`);
         }
     }
 });

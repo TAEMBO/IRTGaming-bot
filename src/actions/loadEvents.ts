@@ -12,7 +12,7 @@ export async function loadEvents(client: Client) {
         const { default: eventFile } = await import(eventPath.toString());
 
         if (!(eventFile instanceof Event)) {
-            log("Red", `${file} not Event`);
+            log("red", `${file} not Event`);
 
             continue;
         }

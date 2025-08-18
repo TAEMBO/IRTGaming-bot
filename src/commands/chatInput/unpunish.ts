@@ -1,36 +1,40 @@
 import { ApplicationCommandOptionType, EmbedBuilder, PermissionFlagsBits } from "discord.js";
+import { eq } from "drizzle-orm";
+import { db, punishmentsTable, overwritePunishment } from "#db";
 import { Command } from "#structures";
 import { formatString, hasRole, youNeedRole } from "#util";
 
 export default new Command<"chatInput">({
     async run(interaction) {
         const caseId = interaction.options.getInteger("id", true);
-        const punishment = await interaction.client.punishments.data.findById(caseId);
+        const punishmentData = (await db.select().from(punishmentsTable).where(eq(punishmentsTable.id, caseId))).at(0);
         const reason = interaction.options.getString("reason") ?? "Unspecified";
 
-        if (!punishment) return await interaction.reply("No case found with that ID!");
-        if (punishment.expired) return await interaction.reply(`Case #${caseId} has already been overwritten!`);
-        if (!["warn", "mute"].includes(punishment.type) && hasRole(interaction.member, "discordHelper")) return await youNeedRole(interaction, "discordModerator");
+        if (!punishmentData) return interaction.reply("No case found with that ID!");
+
+        if (punishmentData.overwritten) return interaction.reply(`Case #${caseId} has already been overwritten!`);
+
+        if (punishmentData.type !== "mute" && hasRole(interaction.member, "discordHelper")) return youNeedRole(interaction, "discordModerator");
 
         await interaction.deferReply();
 
         let caseDoc;
 
         try {
-            caseDoc = await interaction.client.punishments.removePunishment(punishment, interaction.user.id, reason);
+            caseDoc = await overwritePunishment(interaction.client, punishmentData, interaction.user.id, reason);
         } catch (err: any) {
-            return await interaction.editReply(err.message);
+            return interaction.editReply(err.message);
         }
 
-        const user = await interaction.client.users.fetch(caseDoc.member._id);
+        const user = await interaction.client.users.fetch(caseDoc.userId);
 
         await interaction.editReply({ embeds: [new EmbedBuilder()
             .setColor(interaction.client.config.EMBED_COLOR)
-            .setTitle(`Case #${caseDoc._id}: ${formatString(caseDoc.type)}`)
+            .setTitle(`Case #${caseDoc.id}: ${formatString(caseDoc.type)}`)
             .setDescription(`${user.tag}\n${user}\n(\`${user.id}\`)`)
             .addFields(
                 { name: "Reason", value: reason },
-                { name: "Overwrites", value: `Case #${punishment._id}` })
+                { name: "Overwrites", value: `Case #${punishmentData.id}` })
         ] });
     },
     data: {

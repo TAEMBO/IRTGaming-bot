@@ -1,4 +1,5 @@
-import { ApplicationCommandOptionType, EmbedBuilder, type GuildMember } from "discord.js";
+import { ApplicationCommandOptionType, EmbedBuilder, inlineCode, type GuildMember } from "discord.js";
+import { db, fmNamesTable, tfNamesTable } from "#db";
 import { Command } from "#structures";
 import { FM_ICON, TF_ICON } from "#util";
 
@@ -45,35 +46,38 @@ export default new Command<"chatInput">({
                 break;
             };
             case "fs": {
+                const fmNames = (await db.select().from(fmNamesTable)).map(x => x.name).join("`\n`");
+                const tfNames = (await db.select().from(tfNamesTable)).map(x => x.name).join("`\n`");
+
                 embed
                     .setTitle("__MP Staff Usernames__")
                     .setColor(interaction.client.config.EMBED_COLOR)
                     .addFields(
-                        { name: `Farm Managers ${FM_ICON}`, value: `\`${interaction.client.fmList.cache.join("`\n`")}\`` },
-                        { name: `Trusted Farmers ${TF_ICON}`, value: `\`${interaction.client.tfList.cache.join("`\n`")}\`` }
+                        { name: `Farm Managers ${FM_ICON}`, value: inlineCode(fmNames) },
+                        { name: `Trusted Farmers ${TF_ICON}`, value: inlineCode(tfNames) }
                     );
 
                 break;
             };
             case "discord": {
                 const staff = {
-                    admin: interaction.client.getRole("discordAdmin"),
-                    moderator: interaction.client.getRole("discordModerator"),
-                    helper: interaction.client.getRole("discordHelper")
+                    admins: interaction.client.getRole("discordAdmin"),
+                    moderators: interaction.client.getRole("discordModerator"),
+                    helpers: interaction.client.getRole("discordHelper")
                 };
 
                 embed
                     .setTitle("__Discord Staff Members__")
                     .setColor(interaction.client.config.EMBED_COLOR)
                     .setDescription([
-                        staff.admin.toString(),
-                        staff.admin.members.sort(sortMembers).map(x => x.toString()).join("\n") || "None",
+                        staff.admins.toString(),
+                        staff.admins.members.sort(sortMembers).map(x => x.toString()).join("\n") || "None",
                         "",
-                        staff.moderator.toString(),
-                        staff.moderator.members.sort(sortMembers).map(x => x.toString()).join("\n") || "None",
+                        staff.moderators.toString(),
+                        staff.moderators.members.sort(sortMembers).map(x => x.toString()).join("\n") || "None",
                         "",
-                        staff.helper.toString(),
-                        staff.helper.members.sort(sortMembers).map(x => x.toString()).join("\n") || "None"
+                        staff.helpers.toString(),
+                        staff.helpers.members.sort(sortMembers).map(x => x.toString()).join("\n") || "None"
                     ].join("\n"));
 
                 break;

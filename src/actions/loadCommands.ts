@@ -23,7 +23,7 @@ export async function loadCommands(client: Client) {
             const { default: commandFile } = await import(commandPath.toString());
 
             if (!isValidCommand(commandFile)) {
-                log("Red", `${file} not Command`);
+                log("red", `${file} not Command`);
 
                 continue;
             }

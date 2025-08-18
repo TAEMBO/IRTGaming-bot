@@ -1,16 +1,19 @@
 import { EmbedBuilder, type Client } from "discord.js";
+import { eq } from "drizzle-orm";
+import { db, playerTimes25Table } from "#db";
 import { FTPActions } from "#structures";
 import { fs25Servers, jsonFromXML, FM_ICON, TF_ICON, log } from "#util";
-import type { FarmFormat } from "#typings";
+import type { DBData, FarmFormat } from "#typings";
 
-export async function crunchFarmData(client: Client, playerTimes: Client["playerTimes25"]["doc"][], serverAcro: string) {
-    log("Yellow", `Farm data cruncher running on ${serverAcro.toUpperCase()}`);
+type CrunchFarmDataDBData = DBData & { playerTimesData: (typeof playerTimes25Table.$inferSelect)[] }
+
+export async function crunchFarmData(client: Client, dbData: CrunchFarmDataDBData, serverAcro: string) {
+    log("yellow", `Farm data cruncher running on ${serverAcro.toUpperCase()}`);
 
     const server = fs25Servers.getPublicOne(serverAcro);
-    const data = await new FTPActions(server.ftp).get("savegame1/farms.xml");
-    const farmData = jsonFromXML<FarmFormat>(data);
+    const farmData = jsonFromXML<FarmFormat>(await new FTPActions(server.ftp).get("savegame1/farms.xml"));
     const decorators = (name: string) => {
-        return (client.fmList.cache.includes(name) ? FM_ICON : "") + (client.tfList.cache.includes(name) ? TF_ICON : "");
+        return (dbData.fmNamesData.some(x => x.name === name) ? FM_ICON : "") + (dbData.tfNamesData.some(x => x.name === name) ? TF_ICON : "");
     };
     const channel = client.getChan("fsLogs");
     const embed = new EmbedBuilder()
@@ -21,16 +24,18 @@ export async function crunchFarmData(client: Client, playerTimes: Client["player
     let addedUuidCount = 0;
 
     for (const player of farmData.farms.farm[0].players.player) {
-        const playerDatabyUuid = playerTimes.find(x => x.uuid === player._attributes.uniqueUserId);
+        const playerDatabyUuid = dbData.playerTimesData.find(x => x.uuid === player._attributes.uniqueUserId);
 
         if (!playerDatabyUuid) {
-            const playerDataByName = playerTimes.find(x => x._id === player._attributes.lastNickname);
+            const playerDataByName = dbData.playerTimesData.find(x => x.name === player._attributes.lastNickname);
 
             if (playerDataByName && !playerDataByName.uuid) {
-                await client.playerTimes25.data.findByIdAndUpdate(
-                    player._attributes.lastNickname,
-                    { uuid: player._attributes.uniqueUserId }
-                );
+                await db
+                    .update(playerTimes25Table)
+                    .set({
+                        uuid: player._attributes.uniqueUserId
+                    })
+                    .where(eq(playerTimes25Table.name, player._attributes.lastNickname));
 
                 addedUuidCount++;
             }
@@ -38,48 +43,58 @@ export async function crunchFarmData(client: Client, playerTimes: Client["player
             continue;
         }
 
-        // PlayerTimes name matches farm name, no need to update playerTimes data
-        if (playerDatabyUuid._id === player._attributes.lastNickname) continue;
+        // PlayerTimes name matches farm data name, no need to update playerTimes data
+        if (playerDatabyUuid.name === player._attributes.lastNickname) continue;
 
-        await channel.send({ embeds: [embed.setDescription([
-            `**UUID:** \`${playerDatabyUuid.uuid}\``,
-            `**Old name:** ${playerDatabyUuid._id} ${decorators(playerDatabyUuid._id)}`,
-            `**New name:** ${player._attributes.lastNickname} ${decorators(player._attributes.lastNickname)}`
-        ].join("\n"))] });
+        await channel.send({
+            embeds: [embed.setDescription(
+                `**UUID:** \`${playerDatabyUuid.uuid}\`` +
+                `**Old name:** \`${playerDatabyUuid.name}\` ${decorators(playerDatabyUuid.name)}` +
+                `**New name:** \`${player._attributes.lastNickname}\` ${decorators(player._attributes.lastNickname)}`
+            )]
+        });
 
         changedNameCount++;
 
-        try {
-            // Will reject if name (_id) exists
-            await client.playerTimes25.data.create({
-                _id: player._attributes.lastNickname,
+        const rowExists = Boolean((await db
+            .select()
+            .from(playerTimes25Table)
+            .where(eq(playerTimes25Table.name, player._attributes.lastNickname))
+        ).at(0));
+
+        if (rowExists) {
+            // Name occupied, transfer data to new name
+            await db
+                .update(playerTimes25Table)
+                .set({
+                    uuid: null,
+                    discordId: null
+                })
+                .where(eq(playerTimes25Table.name, playerDatabyUuid.name));
+
+            await db
+                .update(playerTimes25Table)
+                .set({
+                    uuid: player._attributes.uniqueUserId,
+                    discordId: playerDatabyUuid.discordId
+                })
+                .where(eq(playerTimes25Table.name, player._attributes.lastNickname));
+        } else {
+            // Name not occupied, create data with new name and delete old data
+            await db.insert(playerTimes25Table).values({
+                name: player._attributes.lastNickname,
                 uuid: player._attributes.uniqueUserId,
                 servers: playerDatabyUuid.servers,
-                discordid: playerDatabyUuid.discordid
+                discordId: playerDatabyUuid.discordId
             });
 
-            // Name not occupied, delete old data
-            await client.playerTimes25.data.findByIdAndDelete(playerDatabyUuid._id);
-        } catch (err) {
-            // Name occupied, modify data instead
-            playerDatabyUuid.uuid = undefined;
-            playerDatabyUuid.discordid = undefined;
-
-            await playerDatabyUuid.save();
-
-            await client.playerTimes25.data.findByIdAndUpdate(
-                player._attributes.lastNickname,
-                {
-                    uuid: player._attributes.uniqueUserId,
-                    discordid: playerDatabyUuid.discordid
-                }
-            );
+            await db.delete(playerTimes25Table).where(eq(playerTimes25Table.name, playerDatabyUuid.name));
         }
     }
 
-    await channel.send([
-        `⚠️ Farm data cruncher ran on ${server.fullName}`,
-        `Iterated over ${changedNameCount} changed names`,
-        `Added playerTimes UUID data to ${addedUuidCount} names`
-    ].join("\n"));
+    await channel.send(
+        `⚠️ Farm data cruncher ran on **${server.fullName}**\n` +
+        `Found ${changedNameCount} changed names\n` +
+        `Added UUIDs to ${addedUuidCount} names`
+    );
 };

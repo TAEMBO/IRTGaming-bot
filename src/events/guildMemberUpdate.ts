@@ -1,10 +1,25 @@
 import { codeBlock, EmbedBuilder, Events } from "discord.js";
+import { and, eq } from "drizzle-orm";
+import { db, punishmentsTable, overwritePunishment } from "#db";
 import { Event } from "#structures";
 import { formatUser } from "#util";
 
 export default new Event({
     name: Events.GuildMemberUpdate,
     async run(oldMember, newMember) {
+        if (oldMember.isCommunicationDisabled() && !newMember.isCommunicationDisabled()) {
+            const activeMuteCases = await db
+                .select()
+                .from(punishmentsTable)
+                .where(and(
+                    eq(punishmentsTable.userId, newMember.id),
+                    eq(punishmentsTable.type, "mute"),
+                    eq(punishmentsTable.overwritten, false)
+                ));
+
+            if (activeMuteCases.at(0)) await overwritePunishment(newMember.client, activeMuteCases.at(0)!, newMember.client.user.id, "Timeout ended!");
+        }
+
         if (!newMember.client.config.toggles.logs) return;
 
         let changes = false;

@@ -1,5 +1,7 @@
 import { ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
+import { eq } from "drizzle-orm";
 import { Routes } from "farming-simulator-types/2022";
+import { db, fmNamesTable, playerTimes22Table, tfNamesTable } from "#db";
 import { Command, FTPActions } from "#structures";
 import {
     collectAck,
@@ -226,15 +228,13 @@ export default new Command<"chatInput">({
             case "pair": {
                 const uuid = interaction.options.getString("uuid", true);
                 const user = interaction.options.getUser("user", true);
-                const playerData = await interaction.client.playerTimes22.data.findOne({ uuid });
+                const playerData = (await db.select().from(playerTimes22Table).where(eq(playerTimes22Table.uuid, uuid))).at(0);
 
                 if (!playerData) return await interaction.reply("No playerTimes data found with that UUID");
 
-                playerData.discordid = user.id;
+                await db.update(playerTimes22Table).set({ discordId: user.id }).where(eq(playerTimes22Table.uuid, uuid));
 
-                await playerData.save();
-
-                await interaction.reply(`Successfully paired Discord account \`${user.tag}\` to in-game UUID \`${playerData.uuid}\` (${playerData._id})`);
+                await interaction.reply(`Successfully paired Discord account \`${user.tag}\` to in-game UUID \`${playerData.uuid}\` (${playerData.name})`);
 
                 break;
             };
@@ -369,12 +369,13 @@ export default new Command<"chatInput">({
             };
             case "fm": {
                 const name = interaction.options.getString("name", true);
+                const fmData = await db.select().from(fmNamesTable);
 
-                if (interaction.client.fmList.cache.includes(name)) {
-                    await interaction.client.fmList.remove(name);
+                if (fmData.some(x => x.name === name)) {
+                    await db.delete(fmNamesTable).where(eq(fmNamesTable.name, name));
                     await interaction.reply(`Successfully removed \`${name}\``);
                 } else {
-                    await interaction.client.fmList.add(name);
+                    await db.insert(fmNamesTable).values({ name });
                     await interaction.reply(`Successfully added \`${name}\``);
                 }
 
@@ -382,12 +383,13 @@ export default new Command<"chatInput">({
             };
             case "tf": {
                 const name = interaction.options.getString("name", true);
+                const tfData = await db.select().from(tfNamesTable);
 
-                if (interaction.client.tfList.cache.includes(name)) {
-                    await interaction.client.tfList.remove(name);
+                if (tfData.some(x => x.name === name)) {
+                    await db.delete(tfNamesTable).where(eq(tfNamesTable.name, name));
                     await interaction.reply(`Successfully removed \`${name}\``);
                 } else {
-                    await interaction.client.tfList.add(name);
+                    await db.insert(tfNamesTable).values({ name });
                     await interaction.reply(`Successfully added \`${name}\``);
                 }
 

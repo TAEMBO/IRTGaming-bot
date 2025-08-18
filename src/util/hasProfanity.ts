@@ -1,9 +1,13 @@
+import { bannedWordsTable, db } from "#db";
+
+const bannedWordsData = await db.select().from(bannedWordsTable);
+
 /**
  * Checks whether a given text has profanity or not
  * @param text The text to analyze for profanity
  * @param profanityList A list of words considered profanity
  */
-export function hasProfanity(rawText: string, profanityList: string[]) {
+export function hasProfanity(rawText: string) {
     let loopCount = 0;
     let text = rawText.replace(/[^a-zA-Z\s]/g, "");
 
@@ -69,5 +73,5 @@ export function hasProfanity(rawText: string, profanityList: string[]) {
         .replace(/ +(?= )/g, "")
         .split(" ");
 
-    return profanityList.some(word => parsedText.includes(word));
+    return bannedWordsData.some(x => parsedText.includes(x.word));
 }

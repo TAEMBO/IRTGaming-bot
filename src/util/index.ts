@@ -1,5 +1,6 @@
 export * from "./collectAck.js";
 export * from "./constants.js";
+export * from "./fetchDBData.js";
 export * from "./formatDecorators.js";
 export * from "./formatDiff.js";
 export * from "./formatUptime.js";
@@ -15,7 +16,6 @@ export * from "./isDCStaff.js";
 export * from "./isMPStaff.js";
 export * from "./jsonFromXML.js";
 export * from "./log.js";
-export * from "./logColor.js";
 export * from "./onPrivate22Farms.js";
 export * from "./onPrivate25Farms.js";
 export * from "./punish.js";

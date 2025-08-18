@@ -1,11 +1,13 @@
 import { EmbedBuilder, Events, time } from "discord.js";
+import { eq } from "drizzle-orm";
+import { db, userLevelsTable } from "#db";
 import { Event } from "#structures";
 import { formatUser } from "#util";
 
 export default new Event({
     name: Events.GuildMemberRemove,
     async run(member) {
-        const rankingData = await member.client.userLevels.data.findById(member.id);
+        const userLevelsData = (await db.select().from(userLevelsTable).where(eq(userLevelsTable.userId, member.id))).at(0);
         const embed = new EmbedBuilder()
             .setTitle(`Member Left: ${member.user.tag}`)
             .setDescription(formatUser(member.user))
@@ -29,18 +31,25 @@ export default new Event({
             .setColor(member.client.config.EMBED_COLOR_RED)
             .setThumbnail(member.user.displayAvatarURL({ extension: "png", size: 2048 }));
 
-        if (rankingData && rankingData.messages) embed.addFields({ name: "🔹 Ranking Total", value: rankingData.messages.toLocaleString("en-US"), inline: true });
+        if (userLevelsData) {
+            await db
+                .update(userLevelsTable)
+                .set({ hasLeft: true })
+                .where(eq(userLevelsTable.userId, member.id));
+
+            if (userLevelsData.messageCount) {
+                embed.addFields({
+                    name: "🔹 Ranking Total",
+                    value: userLevelsData.messageCount.toLocaleString("en-US"),
+                    inline: true
+                });
+            }
+        }
 
         if (member.client.config.toggles.logs) {
             await member.client.getChan("botLogs").send({ embeds: [embed] });
 
             await member.client.getChan("leaveLogs").send(`**${member.user.tag}** left the server.`);
         }
-
-        if (!rankingData) return;
-
-        rankingData.hasLeft = true;
-
-        await rankingData.save();
     }
 });

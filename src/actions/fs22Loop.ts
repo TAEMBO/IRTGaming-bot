@@ -1,5 +1,4 @@
-import { ChannelType, EmbedBuilder, userMention } from "discord.js";
-import type TClient from "../client.js";
+import { ChannelType, type Client, EmbedBuilder, userMention } from "discord.js";
 import {
     DSSExtension,
     DSSFile,
@@ -10,6 +9,7 @@ import {
 } from "farming-simulator-types/2022";
 import { constants } from "http2";
 import lodash from "lodash";
+import { addPlayerTime22, type watchListTable } from "#db";
 import {
     formatDecorators,
     formatRequestInit,
@@ -19,18 +19,18 @@ import {
     jsonFromXML,
     log
 } from "#util";
-import type { FSLoopCSG } from "#typings";
+import type { FS22LoopDBData, FSLoopCSG } from "#typings";
 
-export async function fs22Loop(client: TClient, watchList: TClient["watchList"]["doc"][], serverAcro: string, embedBuffer: EmbedBuilder[]) {
-    if (client.config.toggles.debug) log("Yellow", "FS22Loop", serverAcro);
+export async function fs22Loop(client: Client, dbData: FS22LoopDBData, serverAcro: string, embedBuffer: EmbedBuilder[]) {
+    if (client.config.toggles.debug) log("yellow", `FS22Loop ${serverAcro}`);
 
     const server = fs22Servers.getOne(serverAcro);
 
-    function wlEmbed(document: TClient["watchList"]["doc"], joinLog: boolean) {
+    function wlEmbed(document: typeof watchListTable.$inferSelect, joinLog: boolean) {
         const watchListReference = document.reference ? `\nReference: ${document.reference}` : "";
         const embed = new EmbedBuilder()
             .setTitle(`WatchList - ${document.isSevere ? "ban" : "watch over"}`)
-            .setDescription(`\`${document._id}\` ${joinLog ? "joined" : "left"} **${serverAcroUp}** at <t:${now}:t>` + watchListReference);
+            .setDescription(`\`${document.name}\` ${joinLog ? "joined" : "left"} **${serverAcroUp}** at <t:${now}:t>` + watchListReference);
 
         if (joinLog) {
             embed.setColor(client.config.EMBED_COLOR_GREEN).setFooter({ text: `Reason: ${document.reason}` });
@@ -42,9 +42,9 @@ export async function fs22Loop(client: TClient, watchList: TClient["watchList"][
     }
 
     function logEmbed(player: PlayerUsed, joinLog: boolean) {
-        const playerTimesData = client.playerTimes22.cache.find(x => x._id === player.name);
-        const playerDiscordMention = playerTimesData?.discordid ? userMention(playerTimesData.discordid) : "";
-        const decorators = formatDecorators(client, player, watchList);
+        const playerTimesData = dbData.playerTimesData.find(x => x.name === player.name);
+        const playerDiscordMention = playerTimesData?.discordId ? userMention(playerTimesData.discordId) : "";
+        const decorators = formatDecorators(player, dbData, false);
         let description = `\`${player.name}\`${decorators}${playerDiscordMention} ${joinLog ? "joined" : "left"} **${serverAcroUp}** at <t:${now}:t>`;
         const playTimeHrs = Math.floor(player.uptime / 60);
         const playTimeMins = (player.uptime % 60).toString().padStart(2, "0");
@@ -84,22 +84,22 @@ export async function fs22Loop(client: TClient, watchList: TClient["watchList"][
 
         fsCacheServer.completeRes = completeRes;
 
-        if (channel?.type !== ChannelType.GuildText) return log("Red", `FSLoop ${serverAcroUp} invalid channel`);
+        if (channel?.type !== ChannelType.GuildText) return log("red", `FSLoop ${serverAcroUp} invalid channel`);
 
         await channel.messages.edit(
             server.messageId,
             { embeds: [embed] }
-        ).catch(() => log("Red", `FSLoop ${serverAcroUp} invalid msg`));
+        ).catch(() => log("red", `FSLoop ${serverAcroUp} invalid msg`));
     };
 
     // Fetch dedicated-server-stats.json and parse
     const dss = await (async () => {
         const res = await fetch(server.url + Feeds.dedicatedServerStats(server.code, DSSExtension.JSON), init)
-            .catch(err => log("Red", serverAcroUp, "DSS Fetch:", err.message));
+            .catch(err => log("red", `${serverAcroUp} DSS Fetch: ${err}`));
 
         if (!res || res.status !== constants.HTTP_STATUS_OK) return null;
 
-        const data: DSSResponse | void = await res.json().catch(err => log("Red", serverAcroUp, "DSS Parse:", err.message));
+        const data: DSSResponse | void = await res.json().catch(err => log("red", `${serverAcroUp} DSS Parse: ${err}`));
 
         if (!data?.slots) return null;
 
@@ -111,11 +111,11 @@ export async function fs22Loop(client: TClient, watchList: TClient["watchList"][
         if (!dss) return null;
 
         const res = await fetch(server.url + Feeds.dedicatedServerSavegame(server.code, DSSFile.CareerSavegame), init)
-            .catch(err => log("Red", serverAcroUp, "CSG Fetch:", err.message));
+            .catch(err => log("red", `${serverAcroUp} CSG Fetch: ${err}`));
 
         if (!res || res.status !== constants.HTTP_STATUS_OK) return null;
 
-        const body = await res.text().catch(err => log("Red", serverAcroUp, "CSG Parse:", err.message));
+        const body = await res.text().catch(err => log("red", `${serverAcroUp} CSG Parse: ${err}`));
 
         if (!body) return null;
 
@@ -173,7 +173,11 @@ export async function fs22Loop(client: TClient, watchList: TClient["watchList"][
     if (toThrottle) return;
 
     // Create list of players with time data
-    const playerInfo = newPlayerList.map(player => `\`${player.name}\` ${formatDecorators(client, player)} **|** ${formatUptime(player)}`);
+    const playerInfo = newPlayerList.map(player => {
+        const decorators = formatDecorators(player, dbData, true);
+
+        return `\`${player.name}\` ${decorators} **|** ${formatUptime(player)}`;
+    });
 
     // Data crunching for stats embed
     const stats = {
@@ -253,8 +257,8 @@ export async function fs22Loop(client: TClient, watchList: TClient["watchList"][
         oldPlayerList.some(y => x.isAdmin && !y.isAdmin && y.name === x.name)
     )) {
         if (
-            !client.whitelist.cache.includes(player.name)
-            && !client.fmList.cache.includes(player.name)
+            !dbData.whitelistData.some(x => x.name === player.name)
+            && !dbData.fmNamesData.some(x => x.name === player.name)
             && !server.isPrivate
         ) {
             await client.getChan("juniorAdminChat").send({ embeds: [new EmbedBuilder()
@@ -262,19 +266,21 @@ export async function fs22Loop(client: TClient, watchList: TClient["watchList"][
                 .setDescription(`\`${player.name}\` on **${serverAcroUp}** on <t:${now}>`)
                 .setColor("#ff4d00")
             ] });
-        } else embedBuffer.push(new EmbedBuilder()
-            .setColor(client.config.EMBED_COLOR_YELLOW)
-            .setDescription(`\`${player.name}\`${formatDecorators(client, player, watchList)} logged in as admin on **${serverAcroUp}** at <t:${now}:t>`)
-        );
+        } else {
+            embedBuffer.push(new EmbedBuilder()
+                .setColor(client.config.EMBED_COLOR_YELLOW)
+                .setDescription(`\`${player.name}\`${formatDecorators(player, dbData, false)} logged in as admin on **${serverAcroUp}** at <t:${now}:t>`)
+            );
+        }
     }
 
     // Filter for players leaving
     for (const player of oldPlayerList.filter(x => !newPlayerList.some(y => y.name === x.name))) {
-        const inWl = watchList.find(x => x._id === player.name);
+        const inWl = dbData.watchListData.find(x => x.name === player.name);
 
         if (inWl) await wlChannel.send({ embeds: [wlEmbed(inWl, false)] });
 
-        await client.playerTimes22.addPlayerTime(player.name, player.uptime, serverAcro);
+        await addPlayerTime22(player.name, player.uptime, serverAcro);
 
         embedBuffer.push(logEmbed(player, false));
     }
@@ -287,11 +293,11 @@ export async function fs22Loop(client: TClient, watchList: TClient["watchList"][
             : newPlayerList;
 
     for (const player of joinedPlayers) {
-        const inWl = watchList.find(y => y._id === player.name);
+        const inWl = dbData.watchListData.find(y => y.name === player.name);
 
         if (inWl) {
-            const filterWLPings = client.watchListPings.cache.filter(x =>
-                !client.mainGuild().members.cache.get(x)?.roles.cache.has(client.config.mainServer.roles.loa)
+            const filterWLPings = dbData.watchListPingsData.filter(x =>
+                !client.mainGuild().members.cache.get(x.userId)?.roles.cache.has(client.config.mainServer.roles.loa)
             );
 
             await wlChannel.send({

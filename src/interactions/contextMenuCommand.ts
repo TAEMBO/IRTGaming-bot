@@ -1,15 +1,22 @@
-import { ERR_TEXT, log } from "#util";
 import type { CombinedContextMenuCommandInteraction } from "#typings";
+import { styleText } from "node:util";
+import { ERR_TEXT, log } from "#util";
 
 export async function handleContextMenuCommand(interaction: CombinedContextMenuCommandInteraction) {
     const command = interaction.client.contextMenuCommands.get(interaction.commandName);
 
     if (!command) {
         await interaction.reply(ERR_TEXT);
-        return log("Red", `ContextMenu - missing command: ${interaction.commandName}`);
+        return log("red", `ContextMenu - missing command: ${interaction.commandName}`);
     }
 
-    log("White", `\x1b[32m${interaction.user.tag}\x1b[37m used \x1b[32m${interaction.commandName}\x1b[37m in \x1b[32m#${interaction.channel!.name}`);
+    log("white",
+        styleText("green", interaction.user.tag) +
+        " used " +
+        styleText("green", interaction.commandName) +
+        " in " +
+        styleText("green", "#" + interaction.channel!.name)
+    );
 
     if (
         !interaction.client.config.toggles.commands

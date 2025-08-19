@@ -48,8 +48,8 @@ export async function crunchFarmData(client: Client, dbData: CrunchFarmDataDBDat
 
         await channel.send({
             embeds: [embed.setDescription(
-                `**UUID:** \`${playerDatabyUuid.uuid}\`` +
-                `**Old name:** \`${playerDatabyUuid.name}\` ${decorators(playerDatabyUuid.name)}` +
+                `**UUID:** \`${playerDatabyUuid.uuid}\`\n` +
+                `**Old name:** \`${playerDatabyUuid.name}\` ${decorators(playerDatabyUuid.name)}\n` +
                 `**New name:** \`${player._attributes.lastNickname}\` ${decorators(player._attributes.lastNickname)}`
             )]
         });

@@ -23,7 +23,7 @@ export default new Event({
         const memberRoleAddPromise = member.roles.add(member.client.config.mainServer.roles.member)
             .catch(() => log("red", `Failed to add member role to ${member.id}`));
 
-        const [newInvites, evadingCase] = await Promise.all([newInvitesPromise, evadingCasePromise, userLevelsUpdatePromise, memberRoleAddPromise]);
+        const [newInvites, evadingCases] = await Promise.all([newInvitesPromise, evadingCasePromise, userLevelsUpdatePromise, memberRoleAddPromise]);
 
         const usedInvite = newInvites.find(inv => (member.client.inviteCache.get(inv.code)?.uses ?? 0) < (inv.uses ?? 0));
 
@@ -44,6 +44,6 @@ export default new Event({
 
         if (member.client.config.toggles.logs) await member.client.getChan("botLogs").send({ embeds: [embed] });
 
-        if (evadingCase) await member.roles.add(member.client.config.mainServer.roles.detained);
+        if (evadingCases.at(0)) await member.roles.add(member.client.config.mainServer.roles.detained);
     }
 });

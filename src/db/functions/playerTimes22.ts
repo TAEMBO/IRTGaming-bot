@@ -98,15 +98,6 @@ export async function fetchFarmData(client: Client, serverAcro: string, server: 
         ).at(0));
 
         if (rowExists) {
-            await db.insert(playerTimes22Table).values({
-                name: player._attributes.lastNickname,
-                uuid: player._attributes.uniqueUserId,
-                servers: playerDatabyUuid.servers,
-                discordId: playerDatabyUuid.discordId
-            });
-
-            await db.delete(playerTimes22Table).where(eq(playerTimes22Table.name, playerDatabyUuid.name));
-        } else {
             await db
                 .update(playerTimes22Table)
                 .set({
@@ -122,6 +113,15 @@ export async function fetchFarmData(client: Client, serverAcro: string, server: 
                     discordId: null
                 })
                 .where(eq(playerTimes22Table.name, playerDatabyUuid.name));
+        } else {
+            await db.insert(playerTimes22Table).values({
+                name: player._attributes.lastNickname,
+                uuid: player._attributes.uniqueUserId,
+                servers: playerDatabyUuid.servers,
+                discordId: playerDatabyUuid.discordId
+            }).catch(console.error);
+
+            await db.delete(playerTimes22Table).where(eq(playerTimes22Table.name, playerDatabyUuid.name));
         }
     }
 

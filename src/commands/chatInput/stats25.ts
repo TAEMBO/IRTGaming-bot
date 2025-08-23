@@ -194,7 +194,7 @@ export default new Command<"chatInput">({
             const ctx = img.getContext("2d");
             const graphOrigin = [15, 65];
             const graphSize = [1275, 630];
-            const nodeWidth = graphSize[0] / (graphPoints.length - 1);
+            const nodeWidth = graphSize[0] / (graphPoints.length - 1 || 1);
 
             ctx.fillStyle = "#36393f";
             ctx.fillRect(0, 0, img.width, img.height);

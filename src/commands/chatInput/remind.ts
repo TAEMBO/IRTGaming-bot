@@ -182,8 +182,6 @@ export default new Command<"chatInput">({
                     componentType: ComponentType.StringSelect
                 })
 
-                // TODO: Remove upon d.js v14.22 release
-                // @ts-expect-error d.js typings issue
                     .on("collect", int => promptDeletion(remidnersData[parseInt(int.values[0]) - 1], int))
                     .on("end", async ints => {
                         if (!ints.size) await interaction.editReply(rplText("No response given, command canceled"));

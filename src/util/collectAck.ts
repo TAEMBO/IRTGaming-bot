@@ -42,23 +42,18 @@ export async function collectAck({
     } catch (err) {
         if (rejection) await rejection();
 
-        // TODO: Remove upon d.js v14.22 release
-        // @ts-expect-error d.js typings issue
         return { msg: response.resource!.message!, state: "rejection" };
     }
 
     if (collected.customId === "confirm") {
         state = "confirm";
 
-        // @ts-expect-error d.js typings issue
         await confirm(collected);
     } else {
         state = "cancel";
 
-        // @ts-expect-error d.js typings issue
         await cancel(collected);
     }
 
-    // @ts-expect-error d.js typings issue
     return { msg: response.resource!.message!, state };
 }

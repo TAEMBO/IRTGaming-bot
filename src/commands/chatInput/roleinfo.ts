@@ -38,7 +38,7 @@ export default new Command<"chatInput">({
                     `Members: \`${role.members.size}\`\n${role.members.size < 21 ? roleMembers : ""}`
                 ].join("\n"), inline: true },
                 { name: "🔹 Key Permissions", value: new PermissionsBitField(includedPermissions).toArray().join(", ") || "None", inline: true })
-            .setColor(role.color || "#ffffff")
+            .setColor(role.hexColor || "#ffffff")
             .setThumbnail(role.iconURL())
         ] });
     },

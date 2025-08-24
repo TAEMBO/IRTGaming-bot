@@ -1,12 +1,11 @@
 import { ApplicationCommandOptionType, codeBlock, EmbedBuilder } from "discord.js";
 import { eq } from "drizzle-orm";
-import { Routes } from "farming-simulator-types/2025";
+import { Routes, WebAPIJSONAction, type WebAPIJSONResponse } from "farming-simulator-types/2025";
 import { db, fmNamesTable, playerTimes25Table, tfNamesTable } from "#db";
 import { Command, FTPActions } from "#structures";
 import {
     collectAck,
     formatRequestInit,
-    formatString,
     fs25Servers,
     hasRole,
     isMPStaff,
@@ -27,22 +26,23 @@ export default new Command<"chatInput">({
         switch (interaction.options.getSubcommand()) {
             case "server": {
                 const chosenServer = interaction.options.getString("server", true);
-                const chosenAction = interaction.options.getString("action", true) as "start" | "stop" | "restart";
+                const chosenAction = interaction.options.getString("action", true) as WebAPIJSONAction;
                 const cachedServer = interaction.client.fs25Cache[chosenServer];
                 const configServer = interaction.client.config.fs25[chosenServer];
+                const chosenActionText = {
+                    [WebAPIJSONAction.StartServer]: "started",
+                    [WebAPIJSONAction.StopServer]: "stopped",
+                    [WebAPIJSONAction.RestartServer]: "restarted",
+                    [WebAPIJSONAction.Ping]: "PINGUNUSED"
+                }[chosenAction];
 
-                if (!interaction.member.roles.cache.hasAny(...configServer.managerRoles)) return await youNeedRole(interaction, "mpManager");
+                if (!interaction.member.roles.cache.hasAny(...configServer.managerRoles)) return youNeedRole(interaction, "mpManager");
 
-                if (cachedServer.state === null) return await interaction.reply("Cache not populated, retry in 30 seconds");
+                if (cachedServer.state === null) return interaction.reply("Cache not populated, retry in 30 seconds");
 
-                if (
-                    cachedServer.state === 0
-                    && ["stop", "restart"].includes(chosenAction)
-                ) return await interaction.reply("Server is already offline");
-                if (
-                    cachedServer.state === 1
-                    && chosenAction === "start"
-                ) return await interaction.reply("Server is already online");
+                if (cachedServer.state === 0 && chosenAction !== WebAPIJSONAction.StartServer) return interaction.reply("Server is already offline");
+
+                if (cachedServer.state === 1 && chosenAction === WebAPIJSONAction.StartServer) return interaction.reply("Server is already online");
 
                 if (cachedServer.players.length) {
                     const { state } = await collectAck({
@@ -64,59 +64,32 @@ export default new Command<"chatInput">({
                     if (state !== "confirm") return;
                 } else await interaction.deferReply();
 
-                let result = "Successfully ";
-                const queryParameters = new URLSearchParams();
+                const [sessionCookie] = await fetch(configServer.url + Routes.webPageLogin(configServer.username, configServer.password))
+                    .then(res => res.headers.getSetCookie());
 
-                if (chosenAction === "start") {
-                    const configData = await new FTPActions(configServer.ftp).get("dedicated_server/dedicatedServerConfig.xml");
-                    const parsedConfigData = Object.entries(jsonFromXML<DedicatedServerConfig>(configData).gameserver.settings);
+                const response = await fetch(
+                    configServer.url + Routes.webApiJson(chosenAction),
+                    formatRequestInit(10_000, chosenAction, {
+                        Cookie: sessionCookie
+                    })
+                );
 
-                    for (let [key, { _text: value }] of parsedConfigData) {
-                        value ??= "";
+                const { result } = await response.json() as WebAPIJSONResponse;
 
-                        if (key === "savegame_index") key = "savegame";
+                if (result === "failed") return interaction.editReply(`Failed to ${chosenAction.slice(0, -6)} **${chosenServer.toUpperCase()}**`);
 
-                        if (key === "language") key = "mp_language";
+                await interaction.editReply(`Successfully ${chosenActionText} **${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**`);
 
-                        if (key === "port") key = "server_port";
-
-                        if (key === "crossplay_allowed" && value === "false") continue;
-
-                        if (key === "stats_interval") value = "45";
-
-                        queryParameters.append(key, value);
-                    }
+                if (chosenAction === WebAPIJSONAction.RestartServer) {
+                    await interaction.client.getChan("fsLogs").send({
+                        embeds: [new EmbedBuilder()
+                            .setTitle(`${chosenServer.toUpperCase()} now restarting`)
+                            .setColor(interaction.client.config.EMBED_COLOR_YELLOW)
+                            .setTimestamp()
+                            .setFooter({ text: "\u200b", iconURL: interaction.user.displayAvatarURL() })
+                        ]
+                    });
                 }
-
-                queryParameters.append(`${chosenAction}_server`, formatString(chosenAction));
-                result += {
-                    start: "started ",
-                    stop: "stopped ",
-                    restart: "restarted "
-                }[chosenAction];
-
-                try {
-                    await fetch(
-                        configServer.url + Routes.webPageLogin(configServer.username, configServer.password) + "&" + queryParameters.toString(),
-                        {
-                            redirect: "manual",
-                            ...formatRequestInit(10_000, chosenAction + "-server")
-                        }
-                    );
-                } catch (err: any) {
-                    return interaction.editReply(`Failed to ${chosenAction} **${chosenServer.toUpperCase()}** - ${err.message}`);
-                }
-
-                result += `**${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**`;
-
-                await interaction.editReply(result);
-
-                if (chosenAction === "restart") await interaction.client.getChan("fsLogs").send({ embeds: [new EmbedBuilder()
-                    .setTitle(`${chosenServer.toUpperCase()} now restarting`)
-                    .setColor(interaction.client.config.EMBED_COLOR_YELLOW)
-                    .setTimestamp()
-                    .setFooter({ text: "\u200b", iconURL: interaction.user.displayAvatarURL() })
-                ] });
 
                 break;
             };
@@ -417,9 +390,9 @@ export default new Command<"chatInput">({
                         name: "action",
                         description: "The action to perform on the given server",
                         choices: [
-                            { name: "Start", value: "start" },
-                            { name: "Stop", value: "stop" },
-                            { name: "Restart", value: "restart" }
+                            { name: "Start", value: "startServer" },
+                            { name: "Stop", value: "stopServer" },
+                            { name: "Restart", value: "restartServer" }
                         ],
                         required: true
                     }

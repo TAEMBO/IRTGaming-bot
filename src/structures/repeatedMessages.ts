@@ -3,7 +3,7 @@ import type TClient from "../client.js";
 import { hasProfanity, isMPStaff, log, tempReply } from "#util";
 import { addPunishment } from "#db";
 
-const inviteRegExp = new RegExp(/discord.gg/);
+const inviteRegEx = new RegExp(/(https?:\/\/)?(www\.)?((discordapp\.com\/invite)|(discord\.gg))\/(?<code>\w+)/m);
 
 enum RepeatedMessagesType {
     Advertisement,
@@ -112,6 +112,8 @@ export class RepeatedMessages {
             });
         }
 
+        const regexResult = inviteRegEx.exec(message.content);
+
         if (hasProfanity(message.content.toLowerCase())) {
             automodded = true;
 
@@ -125,10 +127,10 @@ export class RepeatedMessages {
                 muteTime: "12h",
                 muteReason: "Banned words",
             });
-        } else if (inviteRegExp.test(message.content) && !isMPStaff(message.member)) {
-            const foundInviteCode = message.content.split(" ").find(x => x.includes("discord.gg"))!;
-            const parsedInviteCode = foundInviteCode.slice(foundInviteCode.indexOf("discord.gg"));
-            const validInvite = await this.client.fetchInvite(parsedInviteCode).catch(() => null);
+        } else if (regexResult && !isMPStaff(message.member)) {
+            const validInvite = regexResult?.groups?.code
+                ? await this.client.fetchInvite(regexResult.groups.code).catch(() => null)
+                : null;
 
             if (validInvite && validInvite.guild?.id !== this.client.config.mainServer.id) {
                 automodded = true;

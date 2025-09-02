@@ -4,7 +4,7 @@ import { punish } from "#util";
 
 export default new Command<"chatInput">({
     async run(interaction) {
-        await punish(interaction, "detain");
+        await punish(interaction, "kick");
     },
     data: {
         name: "kick",

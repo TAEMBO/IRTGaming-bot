@@ -141,7 +141,7 @@ export async function fs25Loop(client: Client, dbData: FS25LoopDBData, serverAcr
 
     if (oldCacheData.graphPoints.length >= 120) client.fs25Cache[serverAcro].graphPoints.shift();
 
-    client.fs25Cache[serverAcro].graphPoints.push(dss.slots.used);
+    client.fs25Cache[serverAcro].graphPoints.push(isFaultyStart ? 0 : dss.slots.used);
 
     if (newPlayerList.some(x => x.isAdmin)) setCacheValue("lastAdmin", now);
 

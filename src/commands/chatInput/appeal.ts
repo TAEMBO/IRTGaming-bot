@@ -1,4 +1,4 @@
-import { EmbedBuilder } from "discord.js";
+import { EmbedBuilder, MessageFlags } from "discord.js";
 import { Command } from "#structures";
 import { fs22Servers, fs25Servers, isMPStaff } from "#util";
 
@@ -9,7 +9,7 @@ export default new Command<"chatInput">({
         if (
             interaction.channel!.parentId !== interaction.client.config.mainServer.categories.activeTickets
             && !isMPStaff(interaction.member)
-        ) return await interaction.reply({ content: "You cannot use this command here", ephemeral: true });
+        ) return await interaction.reply({ content: "You cannot use this command here", flags: MessageFlags.Ephemeral });
 
         await interaction.reply({ embeds: [new EmbedBuilder()
             .setTitle("MP Support - Ban Appeal")

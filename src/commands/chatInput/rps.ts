@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, EmbedBuilder, type Message, type User } from "discord.js";
+import { ApplicationCommandOptionType, EmbedBuilder, MessageFlags, type Message, type User } from "discord.js";
 import { Command } from "#structures";
 import { formatString } from "#util";
 
@@ -24,7 +24,7 @@ export default new Command<"chatInput">({
         const firstMove = rpsInstances.get(interaction.channelId);
 
         if (!firstMove) {
-            await interaction.deferReply({ ephemeral: true }).then(() => interaction.deleteReply());
+            await interaction.deferReply({ flags: MessageFlags.Ephemeral }).then(() => interaction.deleteReply());
 
             const message = await interaction.channel!.send({ embeds: [new EmbedBuilder()
                 .setTitle("Rock paper scissors game started!")

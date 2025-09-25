@@ -1,5 +1,6 @@
 import { Command } from "#structures";
 import { hasRole, isMPStaff, youNeedRole } from "#util";
+import { MessageFlags } from "discord.js";
 
 export default new Command<"chatInput">({
     async run(interaction) {
@@ -16,7 +17,7 @@ export default new Command<"chatInput">({
                 nick: `[LOA] ${interaction.member.nickname}`
             }).catch(() => interaction.member.roles.set(takenRoles));
 
-            return await interaction.reply({ content: "LOA status set", ephemeral: true });
+            return await interaction.reply({ content: "LOA status set", flags: MessageFlags.Ephemeral });
         }
 
         const returnedRoles = roles
@@ -31,7 +32,7 @@ export default new Command<"chatInput">({
             nick: interaction.member.nickname!.replaceAll("[LOA] ", "")
         }).catch(() => interaction.member.roles.set(returnedRoles));
 
-        await interaction.reply({ content: "LOA status removed", ephemeral: true });
+        await interaction.reply({ content: "LOA status removed", flags: MessageFlags.Ephemeral });
     },
     data: {
         name: "loa",

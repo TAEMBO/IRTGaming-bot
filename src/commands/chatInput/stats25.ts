@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, channelMention, EmbedBuilder, hyperlink, time } from "discord.js";
+import { ApplicationCommandOptionType, channelMention, EmbedBuilder, hyperlink, MessageFlags, time } from "discord.js";
 import { eq, ilike } from "drizzle-orm";
 import canvas from "@napi-rs/canvas";
 import { DSSExtension, type DSSResponse, Feeds, filterUnused } from "farming-simulator-types/2025";
@@ -49,7 +49,7 @@ export default new Command<"chatInput">({
 
             return interaction.reply({
                 content: `This command has ${link} set, please use ${channel} for ${interaction.client.getCommandMention("stats")} commands.`,
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 

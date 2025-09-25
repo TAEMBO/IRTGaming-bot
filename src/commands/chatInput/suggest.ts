@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, channelMention, EmbedBuilder, ThreadAutoArchiveDuration } from "discord.js";
+import { ApplicationCommandOptionType, channelMention, EmbedBuilder, MessageFlags, ThreadAutoArchiveDuration } from "discord.js";
 import { Command } from "#structures";
 
 export default new Command<"chatInput">({
@@ -7,7 +7,7 @@ export default new Command<"chatInput">({
         const { communityIdeas } = interaction.client.config.mainServer.channels;
 
         if (interaction.channelId !== communityIdeas) {
-            return interaction.reply({ content: "This command only works in " + channelMention(communityIdeas), ephemeral: true });
+            return interaction.reply({ content: "This command only works in " + channelMention(communityIdeas), flags: MessageFlags.Ephemeral });
         }
 
         const response = await interaction.reply({

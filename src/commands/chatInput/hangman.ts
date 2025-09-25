@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, codeBlock } from "discord.js";
+import { ApplicationCommandOptionType, codeBlock, MessageFlags } from "discord.js";
 import { Command } from "#structures";
 
 const stages = [
@@ -62,7 +62,7 @@ const stages = [
 
 export default new Command<"chatInput">({
     async run(interaction) {
-        await interaction.reply({ content: "Game started!", ephemeral: true });
+        await interaction.reply({ content: "Game started!", flags: MessageFlags.Ephemeral });
 
         let hiddenLetters = true;
         let fouls = 0;

@@ -21,15 +21,15 @@ export async function collectAck({
     rejection,
 }: {
     interaction: CommandInteraction<"cached"> | MessageComponentInteraction<"cached">
-    payload: InteractionReplyOptions & InteractionUpdateOptions;
+    payload: InteractionReplyOptions & Omit<InteractionUpdateOptions, "flags">;
     time?: number;
     confirm: (int: ButtonInteraction<"cached">) => Promise<any>;
     cancel: (int: ButtonInteraction<"cached">) => Promise<any>;
     rejection?: () => Promise<any>;
 }): Promise<{ msg: Message<true>; state: "cancel" | "confirm" | "rejection" }> {
     const response = interaction.isCommand()
-        ? await interaction.reply({ ...payload, withResponse: true, components: ACK_BUTTONS })
-        : await interaction.update({ ...payload, withResponse: true, components: ACK_BUTTONS });
+        ? await interaction.reply({ ...(payload as InteractionReplyOptions), withResponse: true, components: ACK_BUTTONS })
+        : await interaction.update({ ...(payload as InteractionUpdateOptions), withResponse: true, components: ACK_BUTTONS });
     let collected;
     let state: "cancel" | "confirm";
 

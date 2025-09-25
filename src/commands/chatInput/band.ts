@@ -1,11 +1,11 @@
-import { ApplicationCommandOptionType } from "discord.js";
+import { ApplicationCommandOptionType, MessageFlags } from "discord.js";
 import { Command } from "#structures";
 
 export default new Command<"chatInput">({
     async run(interaction) {
         const user = interaction.options.getUser("member", true);
 
-        await interaction.deferReply({ ephemeral: true }).then(() => interaction.deleteReply());
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral }).then(() => interaction.deleteReply());
         await interaction.channel!.send(`${user} has received an honorary ban!`);
     },
     data: {

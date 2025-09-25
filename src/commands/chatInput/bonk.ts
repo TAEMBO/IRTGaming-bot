@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
+import { ApplicationCommandOptionType, EmbedBuilder, MessageFlags } from "discord.js";
 import { Command } from "#structures";
 
 export default new Command<"chatInput">({
@@ -6,7 +6,7 @@ export default new Command<"chatInput">({
         const member = interaction.options.getMember("member");
         let reason = interaction.options.getString("reason", false);
 
-        if (!member) return await interaction.reply({ content: "You cannot bonk someone who's not in the server!", ephemeral: true });
+        if (!member) return await interaction.reply({ content: "You cannot bonk someone who's not in the server!", flags: MessageFlags.Ephemeral });
         if (reason?.startsWith("for ")) reason = reason.replace("for ", "");
 
         await interaction.reply({ embeds: [new EmbedBuilder()

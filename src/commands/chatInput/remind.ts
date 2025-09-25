@@ -6,6 +6,7 @@ import {
     codeBlock,
     ComponentType,
     EmbedBuilder,
+    MessageFlags,
     StringSelectMenuBuilder,
 } from "discord.js";
 import { eq } from "drizzle-orm";
@@ -37,7 +38,7 @@ export default new Command<"chatInput">({
                         .setDescription(`Are you sure you want to delete the reminder \`${reminder.content}\`?`)
                         .setFooter({ text: "60s to respond" })
                     ],
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 },
                 async confirm(int) {
                     await db.delete(remindersTable).where(eq(remindersTable.id, reminder.id));
@@ -59,7 +60,7 @@ export default new Command<"chatInput">({
                 const reminderTime = ms(interaction.options.getString("when", true)) as number | undefined;
 
                 if (!reminderTime) return interaction.reply({
-                    ephemeral: true,
+                    flags: MessageFlags.Ephemeral,
                     embeds: [new EmbedBuilder()
                         .setTitle("Incorrect timestamp")
                         .setColor(interaction.client.config.EMBED_COLOR)
@@ -79,7 +80,7 @@ export default new Command<"chatInput">({
                 });
 
                 if (reminderTime < 60_000) return interaction.reply({
-                    ephemeral: true,
+                    flags: MessageFlags.Ephemeral,
                     content: "You cannot set a 1 minute reminder."
                 });
 
@@ -88,7 +89,7 @@ export default new Command<"chatInput">({
 
                 if (remindersData.length > 25) return interaction.reply({
                     content: "You can only have up to 25 reminders at a time",
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
 
                 await collectAck({
@@ -103,7 +104,7 @@ export default new Command<"chatInput">({
                             ].join("\n"))
                             .setFooter({ text: "60s to respond" })
                         ],
-                        ephemeral: true
+                        flags: MessageFlags.Ephemeral
                     },
                     async confirm(int) {
                         const [reminder] = await db.insert(remindersTable).values({
@@ -141,7 +142,7 @@ export default new Command<"chatInput">({
             case "delete": {
                 const remidnersData = await db.select().from(remindersTable).where(eq(remindersTable.userId, interaction.user.id));
 
-                if (remidnersData.length === 0) return await interaction.reply({ content: "You have no active current reminders", ephemeral: true });
+                if (remidnersData.length === 0) return await interaction.reply({ content: "You have no active current reminders", flags: MessageFlags.Ephemeral });
 
                 if (remidnersData.length === 1) return await promptDeletion(remidnersData[0], interaction);
 
@@ -170,7 +171,7 @@ export default new Command<"chatInput">({
 
                 const response = await interaction.reply({
                     embeds: [embed],
-                    ephemeral: true,
+                    flags: MessageFlags.Ephemeral,
                     components: [new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selectMenu)],
                     withResponse: true
                 });

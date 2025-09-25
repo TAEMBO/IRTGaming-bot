@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
+import { ApplicationCommandOptionType, EmbedBuilder, MessageFlags } from "discord.js";
 import { eq, ilike } from "drizzle-orm";
 import canvas from "@napi-rs/canvas";
 import { DSSExtension, type DSSResponse, Feeds, filterUnused } from "farming-simulator-types/2022";
@@ -56,7 +56,7 @@ export default new Command<"chatInput">({
                 `This command has [restrictions](${interaction.client.config.resources.statsRestrictionRedirect}) set`,
                 ` please use <#${interaction.client.config.mainServer.channels.botCommands}> for ${interaction.client.getCommandMention("stats")} commands.`
             ].join(),
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
         if (subCmd === "all") {

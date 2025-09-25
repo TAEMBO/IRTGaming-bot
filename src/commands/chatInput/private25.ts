@@ -5,7 +5,8 @@ import {
     OverwriteType,
     type TextChannel,
     PermissionFlagsBits,
-    roleMention
+    roleMention,
+    MessageFlags
 } from "discord.js";
 import { Command } from "#structures";
 import { collectAck, fs25Servers, onPrivate25Farms, youNeedRole } from "#util";
@@ -65,7 +66,7 @@ export default new Command<"chatInput">({
     async run(interaction) {
         const serverAcro = interaction.options.getSubcommandGroup();
 
-        if (!serverAcro) return interaction.reply({ content: "Incomplete command", ephemeral: true });
+        if (!serverAcro) return interaction.reply({ content: "Incomplete command", flags: MessageFlags.Ephemeral });
 
         const serverObj = fs25Servers.getPrivateOne(serverAcro);
 
@@ -84,7 +85,7 @@ export default new Command<"chatInput">({
                     return interaction.reply(`You need to select a valid ${serverAcro.toUpperCase()} Farm role from the list provided!`);
                 }
 
-                if (!member) return interaction.reply({ content: "You need to select a member that's in this server", ephemeral: true });
+                if (!member) return interaction.reply({ content: "You need to select a member that's in this server", flags: MessageFlags.Ephemeral });
 
                 if (!member.roles.cache.has(roleId)) {
                     await member.roles.add([roleId, serverObj.memberRole]);
@@ -140,7 +141,7 @@ export default new Command<"chatInput">({
 
                 const member = interaction.options.getMember("member");
 
-                if (!member) return interaction.reply({ content: "You need to select a member that's in this server!", ephemeral: true });
+                if (!member) return interaction.reply({ content: "You need to select a member that's in this server!", flags: MessageFlags.Ephemeral });
 
                 if (!member.roles.cache.has(serverObj.farmOwnerRole)) {
                     await member.roles.add(serverObj.farmOwnerRole);

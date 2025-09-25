@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ApplicationCommandOptionType, ButtonBuilder, ButtonStyle, roleMention } from "discord.js";
+import { ActionRowBuilder, ApplicationCommandOptionType, ButtonBuilder, ButtonStyle, MessageFlags, roleMention } from "discord.js";
 import { Command } from "#structures";
 
 export default new Command<"chatInput">({
@@ -7,7 +7,7 @@ export default new Command<"chatInput">({
             content:
                 "Verification sent. Please wait for someone to verify your subscription, " +
                 `you will then receive the ${roleMention(interaction.client.config.mainServer.roles.subscriber)} role.`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
         await interaction.client.getChan("helperChat").send({

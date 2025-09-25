@@ -1,4 +1,4 @@
-import { ApplicationCommandType, ComponentType, EmbedBuilder, TextInputStyle } from "discord.js";
+import { ApplicationCommandType, ComponentType, EmbedBuilder, MessageFlags, TextInputStyle } from "discord.js";
 import { Command } from "#structures";
 import { isDCStaff, isMPStaff, log, youNeedRole } from "#util";
 
@@ -9,7 +9,7 @@ export default new Command<"message">({
         if (
             interaction.channelId !== interaction.client.config.mainServer.channels.communityIdeas
             || !interaction.targetMessage.embeds[0]?.title?.includes("Community Idea")
-        ) return await interaction.reply({ content: "You need to select a message that is a community idea!", ephemeral: true });
+        ) return await interaction.reply({ content: "You need to select a message that is a community idea!", flags: MessageFlags.Ephemeral });
 
         const embed = EmbedBuilder.from(interaction.targetMessage.embeds[0]);
         const id = Date.now();
@@ -46,7 +46,7 @@ export default new Command<"message">({
         embed.setTitle(`Community Idea\n__**${modalResponse} by staff**__`);
 
         await interaction.targetMessage.edit({ embeds: [embed] });
-        await modalInt.reply({ content: `Community idea updated and marked as \`${modalResponse} by staff\``, ephemeral: true });
+        await modalInt.reply({ content: `Community idea updated and marked as \`${modalResponse} by staff\``, flags: MessageFlags.Ephemeral });
     },
     data: {
         name: "Mark Suggestion",

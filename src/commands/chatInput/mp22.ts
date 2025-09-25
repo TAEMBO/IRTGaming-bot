@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
+import { ApplicationCommandOptionType, EmbedBuilder, MessageFlags } from "discord.js";
 import { eq } from "drizzle-orm";
 import { Routes } from "farming-simulator-types/2022";
 import { db, fmNamesTable, playerTimes22Table, tfNamesTable } from "#db";
@@ -275,7 +275,7 @@ export default new Command<"chatInput">({
                 const member = interaction.options.getMember("member");
                 const mainRoles = interaction.client.config.mainServer.roles;
 
-                if (!member) return await interaction.reply({ content: "You need to select a member that is in this server", ephemeral: true });
+                if (!member) return await interaction.reply({ content: "You need to select a member that is in this server", flags: MessageFlags.Ephemeral });
 
                 const roleName = interaction.options.getString("role", true) as "trustedFarmer" | "mpFarmManager" | "mpJrAdmin" | "mpSrAdmin";
                 const roleId = mainRoles[roleName];

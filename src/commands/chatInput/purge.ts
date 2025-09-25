@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, PermissionFlagsBits } from "discord.js";
+import { ApplicationCommandOptionType, MessageFlags, PermissionFlagsBits } from "discord.js";
 import { Command } from "#structures";
 
 export default new Command<"chatInput">({
@@ -8,7 +8,7 @@ export default new Command<"chatInput">({
         const msgs = (await interaction.channel!.messages.fetch({ limit })).filter(msg => user ? msg.author.id === user.id : true);
 
         await interaction.channel!.bulkDelete(msgs, true);
-        await interaction.reply({ content: `Successfully deleted ${msgs.size} messages${user ? ` from ${user}` : ""}.`, ephemeral: true });
+        await interaction.reply({ content: `Successfully deleted ${msgs.size} messages${user ? ` from ${user}` : ""}.`, flags: MessageFlags.Ephemeral });
     },
     data: {
         name: "purge",

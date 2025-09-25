@@ -9,6 +9,7 @@ import {
     EmbedBuilder
 } from "discord.js";
 import { exec } from "child_process";
+import * as drizzle from "drizzle-orm";
 import fs from "node:fs";
 import { setTimeout as sleep } from "node:timers/promises";
 import { formatWithOptions } from "node:util";
@@ -26,7 +27,7 @@ export default new structures.Command<"chatInput">({
         switch (interaction.options.getSubcommand()) {
             case "eval": {
                 // eslint-disable-next-line no-unused-expressions
-                sleep; fs; Discord; actions; db; // Imports possibly used in eval
+                sleep; fs; Discord; actions; db; drizzle; // Imports possibly used in eval
                 const { client } = interaction;
                 const code = interaction.options.getString("code", true);
                 const depth = interaction.options.getInteger("depth") ?? 1;

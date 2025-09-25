@@ -1,6 +1,65 @@
 import { ApplicationCommandOptionType, codeBlock } from "discord.js";
 import { Command } from "#structures";
 
+const stages = [
+    [
+        "      ",
+        "      ",
+        "      ",
+        "      ",
+        "╭────╮",
+        "╯    ╰"
+    ],
+    [
+        "      ",
+        "      ",
+        "  ┃   ",
+        "  ┃   ",
+        "╭─┸──╮",
+        "╯    ╰"
+    ],
+    [
+        "  ┏   ",
+        "  ┃   ",
+        "  ┃   ",
+        "  ┃   ",
+        "╭─┸──╮",
+        "╯    ╰"
+    ],
+    [
+        "  ┏   ",
+        "  ┃   ",
+        "  ┃   ",
+        " ┌┨   ",
+        "╭┴┸──╮",
+        "╯    ╰"
+    ],
+    [
+        "  ┏━┓ ",
+        "  ┃   ",
+        "  ┃   ",
+        " ┌┨   ",
+        "╭┴┸──╮",
+        "╯    ╰"
+    ],
+    [
+        "  ┏━┓ ",
+        "  ┃ ⎔ ",
+        "  ┃   ",
+        " ┌┨   ",
+        "╭┴┸──╮",
+        "╯    ╰"
+    ],
+    [
+        "  ┏━┓ ",
+        "  ┃ ⎔ ",
+        "  ┃╶╂╴",
+        " ┌┨ ^ ",
+        "╭┴┸──╮",
+        "╯    ╰"
+    ],
+];
+
 export default new Command<"chatInput">({
     async run(interaction) {
         await interaction.reply({ content: "Game started!", ephemeral: true });
@@ -12,26 +71,14 @@ export default new Command<"chatInput">({
         const guessedWordsIndices: number[] = [];
         const phrase = interaction.options.getString("phrase", true).toLowerCase();
         const wordOrPhrase = phrase.includes(" ") ? "phrase" : "word";
-        const botMsg = await interaction.followUp({
-            content: `A hangman game has been started by *${interaction.user.tag}*!\nAnyone can guess letters${phrase.includes(" ") ? ", a word, or the full phrase": " or the full word"} by doing \`guess [letter${phrase.includes(" ") ? ", word, or phrase" : " or word"}]\`\nThe ${wordOrPhrase} is:\n${codeBlock(hidePhrase())}`,
-            fetchReply: true
-        });
+        const botMsg = await interaction.followUp(
+            `A hangman game has been started by *${interaction.user.tag}*!\n` +
+            `Anyone can guess letters${phrase.includes(" ") ? ", a word, or the full phrase": " or the full word"} by doing \`guess [letter${phrase.includes(" ") ? ", word, or phrase" : " or word"}]\`\n` +
+            `The ${wordOrPhrase} is:\n${codeBlock(hidePhrase())}`,
+        );
         const guessCollector = interaction.channel!.createMessageCollector({ filter: msg => !msg.author.bot && msg.content.toLowerCase().startsWith("guess") });
 
         await interaction.deleteReply();
-
-        async function phraseUpdate() {
-            const hideWordResult = hidePhrase();
-            let text = `A part of the ${wordOrPhrase} has been revealed, this is what it looks like now:\n${codeBlock(hideWordResult)}`;
-
-            if (!hiddenLetters) {
-                text = `The whole ${wordOrPhrase} has been revealed! The hangman game ends with the ${wordOrPhrase} being:\n${codeBlock(phrase)}`;
-                guessCollector.stop();
-                clearInterval(interval);
-            }
-
-            await botMsg.reply(text);
-        }
 
         function hidePhrase() {
             hiddenLetters = false;
@@ -46,93 +93,8 @@ export default new Command<"chatInput">({
             }).join(" ");
         }
 
-        async function guessLetter(letter: string) {
-            latestActivity = Date.now();
-
-            if (guesses.includes(letter)) return await interaction.channel!.send("That letter has been guessed already.");
-
-            guesses.push(letter);
-
-            if (!phrase.includes(letter)) {
-                fouls++;
-                await checkFouls(false);
-            }
-        }
-
-        async function guessWord(text: string) {
-            latestActivity = Date.now();
-
-            if (!phrase.includes(text)) {
-                fouls++;
-                await checkFouls(true);
-                return;
-            }
-
-            const guessedTextStartIndex = phrase.indexOf(text);
-            const guessedTextCharIndices = Array.from(Array(text.length).keys());
-            guessedWordsIndices.push(...guessedTextCharIndices.map(x => x + guessedTextStartIndex));
-        }
-
         async function checkFouls(isWord: boolean) {
             let loseText = "";
-            const stages = [
-                [
-                    "      ",
-                    "      ",
-                    "      ",
-                    "      ",
-                    "╭────╮",
-                    "╯    ╰"
-                ],
-                [
-                    "      ",
-                    "      ",
-                    "  ┃   ",
-                    "  ┃   ",
-                    "╭─┸──╮",
-                    "╯    ╰"
-                ],
-                [
-                    "  ┏   ",
-                    "  ┃   ",
-                    "  ┃   ",
-                    "  ┃   ",
-                    "╭─┸──╮",
-                    "╯    ╰"
-                ],
-                [
-                    "  ┏   ",
-                    "  ┃   ",
-                    "  ┃   ",
-                    " ┌┨   ",
-                    "╭┴┸──╮",
-                    "╯    ╰"
-                ],
-                [
-                    "  ┏━┓ ",
-                    "  ┃   ",
-                    "  ┃   ",
-                    " ┌┨   ",
-                    "╭┴┸──╮",
-                    "╯    ╰"
-                ],
-                [
-                    "  ┏━┓ ",
-                    "  ┃ ⎔ ",
-                    "  ┃   ",
-                    " ┌┨   ",
-                    "╭┴┸──╮",
-                    "╯    ╰"
-                ],
-                [
-                    "  ┏━┓ ",
-                    "  ┃ ⎔ ",
-                    "  ┃╶╂╴",
-                    " ┌┨ ^ ",
-                    "╭┴┸──╮",
-                    "╯    ╰"
-                ],
-            ];
 
             if (fouls === 7) {
                 loseText = `\nThe poor fella got hung. You lost the game. The ${wordOrPhrase} was:\n${codeBlock(phrase)}`;
@@ -140,19 +102,53 @@ export default new Command<"chatInput">({
                 clearInterval(interval);
             }
 
-            await botMsg.reply(`The ${wordOrPhrase} doesn't include that ${isWord ? "piece of text" : "letter"}.\nAn incorrect guess leads to the addition of things to the drawing. It now looks like this:\n\`\`\`\n${stages[fouls - 1].join("\n")}\n\`\`\`` + loseText);
+            await botMsg.reply(
+                `The ${wordOrPhrase} doesn't include that ${isWord ? "piece of text" : "letter"}.\n` +
+                "An incorrect guess leads to the addition of things to the drawing. It now looks like this:\n" +
+                codeBlock(stages[fouls - 1].join("\n")) + loseText);
         }
 
         guessCollector.on("collect", async guessMessage => {
             const guess = guessMessage.content.slice(6).toLowerCase();
 
-            if (!guess || !guess.length) return void await guessMessage.reply("You're using the `guess` command wrong. Get good.");
+            if (!guess || !guess.length) return guessMessage.reply("You're using the `guess` command wrong. Get good.");
 
             if (guess.length > 1) {
-                await guessWord(guess);
-            } else await guessLetter(guess);
+                latestActivity = Date.now();
 
-            await phraseUpdate();
+                if (!phrase.includes(guess)) {
+                    fouls++;
+                    await checkFouls(true);
+                    return;
+                }
+
+                const guessedTextStartIndex = phrase.indexOf(guess);
+                const guessedTextCharIndices = Array.from(Array(guess.length).keys());
+
+                guessedWordsIndices.push(...guessedTextCharIndices.map(x => x + guessedTextStartIndex));
+            } else {
+                latestActivity = Date.now();
+
+                if (guesses.includes(guess)) return await interaction.channel!.send("That letter has been guessed already.");
+
+                guesses.push(guess);
+
+                if (!phrase.includes(guess)) {
+                    fouls++;
+                    await checkFouls(false);
+                }
+            }
+
+            const hideWordResult = hidePhrase();
+            let text = `A part of the ${wordOrPhrase} has been revealed, this is what it looks like now:\n${codeBlock(hideWordResult)}`;
+
+            if (!hiddenLetters) {
+                text = `The whole ${wordOrPhrase} has been revealed! The hangman game ends with the ${wordOrPhrase} being:\n${codeBlock(phrase)}`;
+                guessCollector.stop();
+                clearInterval(interval);
+            }
+
+            await botMsg.reply(text);
         });
 
         const interval = setInterval(async () => {

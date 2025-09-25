@@ -28,35 +28,24 @@ function formatPlayerTime(playerTime: number) {
 
 export default new Command<"chatInput">({
     async autocomplete(interaction) {
-        switch (interaction.options.getSubcommand()) {
-            case "playertimes": {
-                const focused = interaction.options.getFocused().trim();
-                const data = await db
-                    .select()
-                    .from(playerTimes25Table)
-                    .where(ilike(playerTimes25Table.name, `%${focused}%`))
-                    .orderBy(playerTimes25Table.name)
-                    .limit(25);
+        const focused = interaction.options.getFocused().trim();
+        const data = await db
+            .select()
+            .from(playerTimes25Table)
+            .where(ilike(playerTimes25Table.name, `%${focused}%`))
+            .orderBy(playerTimes25Table.name)
+            .limit(25);
 
-                await interaction.respond(data.map(x => ({ name: x.name, value: x.name })));
-
-                break;
-            };
-        }
+        await interaction.respond(data.map(x => ({ name: x.name, value: x.name })));
     },
     async run(interaction) {
         const subCmd = interaction.options.getSubcommand();
         const dbData = await fetchDBData("25");
+        const { categories, channels } = interaction.client.config.mainServer;
 
-        if (
-            (
-                interaction.channel!.parentId === interaction.client.config.mainServer.categories.fs25PublicMP ||
-                interaction.channelId === interaction.client.config.mainServer.channels.mfPublicChat
-            ) &&
-            !isMPStaff(interaction.member)
-        ) {
+        if (interaction.channel!.parentId === categories.fs25PublicMP && !isMPStaff(interaction.member)) {
             const link = hyperlink("restrictions", interaction.client.config.resources.statsRestrictionRedirect);
-            const channel = channelMention(interaction.client.config.mainServer.channels.botCommands);
+            const channel = channelMention(channels.botCommands);
 
             return interaction.reply({
                 content: `This command has ${link} set, please use ${channel} for ${interaction.client.getCommandMention("stats")} commands.`,
@@ -113,8 +102,7 @@ export default new Command<"chatInput">({
 
             await interaction.editReply({ embeds: [embed] });
         } else if (subCmd === "playertimes") {
-            const playersData = await db.select().from(playerTimes25Table);
-            const sortedPlayersData = playersData.sort((a, b) =>
+            const sortedPlayersData = dbData.playerTimesData.sort((a, b) =>
                 getTimeData25(b).reduce((x, y) => x + y[1].time, 0) - getTimeData25(a).reduce((x, y) => x + y[1].time, 0)
             );
             const playerName = interaction.options.getString("name");
@@ -127,18 +115,20 @@ export default new Command<"chatInput">({
             ].join("")).join("\n");
 
             if (!playerName) {
-                await interaction.reply({ embeds: [new EmbedBuilder()
+                return interaction.reply({ embeds: [new EmbedBuilder()
                     .setColor("#a0c213")
                     .setDescription(`Top 50 players with the most time spent on IRTGaming FS25 servers since ${interaction.client.config.PLAYERTIMES_START_DATE}`)
                     .addFields(
                         { name: "\u200b", value: leaderboard(sortedPlayersData.slice(0, 25), true), inline: true },
                         { name: "\u200b", value: leaderboard(sortedPlayersData.slice(25, 50), false) + "\u200b", inline: true })
                 ] });
-
-                return;
             }
 
-            const playerData = (await db.select().from(playerTimes25Table).where(eq(playerTimes25Table.name, playerName))).at(0);
+            const dbQuery = playerName.length === 44 && isMPStaff(interaction.member)
+                ? playerTimes25Table.uuid
+                : playerTimes25Table.name;
+
+            const playerData = (await db.select().from(playerTimes25Table).where(eq(dbQuery, playerName))).at(0);
 
             if (!playerData) {
                 return interaction.reply(

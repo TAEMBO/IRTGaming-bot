@@ -171,6 +171,7 @@ export interface FSServerPrivate extends FSServerBase {
     readonly modSuggestions: Snowflake;
     readonly farmOwnerRole: Snowflake;
     readonly memberRole: Snowflake;
+    readonly supportRole: Snowflake;
     readonly farms: Record<string, { readonly channelId: Snowflake, readonly roleId: Snowflake }>;
 }
 

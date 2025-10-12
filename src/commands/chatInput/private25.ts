@@ -8,8 +8,11 @@ import {
     roleMention,
     MessageFlags
 } from "discord.js";
+import { Routes } from "farming-simulator-types/2025";
 import { Command } from "#structures";
-import { collectAck, fs25Servers, onPrivate25Farms, youNeedRole } from "#util";
+import { collectAck, formatRequestInit, fs25Servers, onPrivate25Farms, youNeedRole } from "#util";
+
+const modLinkRegex = new RegExp(/https:\/\/(www\.)?farming-simulator\.com\/mod\.php\?mod_id=(?<code>\d+)/);
 
 export default new Command<"chatInput">({
     async autocomplete(interaction) {
@@ -189,6 +192,38 @@ export default new Command<"chatInput">({
 
                 break;
             };
+            case "install-mod": {
+                if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return youNeedRole(interaction, "mpManager");
+
+                if (interaction.client.fs25Cache[serverAcro].state === 1) return interaction.reply({
+                    content: "Cannot install mod while server is online!",
+                    flags: MessageFlags.Ephemeral
+                });
+
+                const modLink = interaction.options.getString("link", true);
+                const regexResult = modLinkRegex.exec(modLink);
+                const foundModId = regexResult?.groups?.code;
+
+                if (!regexResult || !foundModId) return interaction.reply({
+                    content: "Invalid link provided! Must be ModHub link from <https://farming-simulator.com/mods.php>",
+                    flags: MessageFlags.Ephemeral
+                });
+
+                await interaction.deferReply();
+
+                const res = await fetch(
+                    serverObj.url + Routes.startModDownload(serverObj.username, serverObj.password, foundModId),
+                    formatRequestInit(10_000, `ModInstall-${foundModId}`)
+                ).catch(() => null);
+
+                if (res?.status === 200) {
+                    await interaction.editReply("Successfully started installing mod");
+                } else {
+                    await interaction.editReply("Failed to start installing mod");
+                }
+
+                break;
+            }
             case "rename-role": {
                 if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return youNeedRole(interaction, "mpManager");
 
@@ -321,6 +356,19 @@ export default new Command<"chatInput">({
                             type: ApplicationCommandOptionType.User,
                             name: "member",
                             description: `The member to add or remove the ${serverAcro.toUpperCase()} Farm Owner role from`,
+                            required: true
+                        }
+                    ]
+                },
+                {
+                    type: ApplicationCommandOptionType.Subcommand,
+                    name: "install-mod",
+                    description: "Install a ModHub mod onto the server",
+                    options: [
+                        {
+                            type: ApplicationCommandOptionType.String,
+                            name: "link",
+                            description: "The ModHub mod link",
                             required: true
                         }
                     ]

@@ -65,7 +65,7 @@ export default new Command<"chatInput">({
                     if (state !== "confirm") return;
                 } else await interaction.deferReply();
 
-                const [sessionCookie] = await fetch(configServer.url + Routes.webPageLogin(configServer.username, configServer.password))
+                const [sessionCookie] = await fetch(configServer.url + Routes.webInterfaceLogin(configServer.username, configServer.password))
                     .then(res => res.headers.getSetCookie());
 
                 const response = await fetch(

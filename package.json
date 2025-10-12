@@ -21,9 +21,9 @@
   },
   "dependencies": {
     "@napi-rs/canvas": "^0.1.77",
-    "discord.js": "^14.22.1",
+    "discord.js": "^14.23.0",
     "drizzle-orm": "^0.44.4",
-    "farming-simulator-types": "^2.0.1",
+    "farming-simulator-types": "^3.0.0",
     "ftp": "^0.3.10",
     "lodash": "^4.17.21",
     "ms": "^2.1.3",

@@ -12,14 +12,14 @@ importers:
         specifier: ^0.1.77
         version: 0.1.77
       discord.js:
-        specifier: ^14.22.1
-        version: 14.22.1
+        specifier: ^14.23.0
+        version: 14.23.0
       drizzle-orm:
         specifier: ^0.44.4
         version: 0.44.4(postgres@3.4.7)
       farming-simulator-types:
-        specifier: ^2.0.1
-        version: 2.0.1
+        specifier: ^3.0.0
+        version: 3.0.0
       ftp:
         specifier: ^0.3.10
         version: 0.3.10
@@ -94,8 +94,8 @@ packages:
     resolution: {integrity: sha512-UQFQ6SgyJ6LX42W8rHCs8KVc0JS0tzVL9ct4XYedJukskYVWTo49tNiMEK9C2HTyarbNiT/RVIRSY82vH+6sTg==}
     engines: {node: '>=4'}
 
-  '@discordjs/builders@1.11.3':
-    resolution: {integrity: sha512-p3kf5eV49CJiRTfhtutUCeivSyQ/l2JlKodW1ZquRwwvlOWmG9+6jFShX6x8rUiYhnP6wKI96rgN/SXMy5e5aw==}
+  '@discordjs/builders@1.12.0':
+    resolution: {integrity: sha512-jQ0m/fVOg6j3w2Rrzrg5VfqPpkslYNnpdTAyQzQXQ7S/5y0iScBnMlVZfu/AFLP9C34shQ4I+EpTGZV1VlN7RQ==}
     engines: {node: '>=16.11.0'}
 
   '@discordjs/collection@1.5.3':
@@ -772,11 +772,11 @@ packages:
   deep-is@0.1.4:
     resolution: {integrity: sha512-oIPzksmTg4/MriiaYGO+okXDT7ztn/w3Eptv/+gSIdMdKsJo0u4CfYNFJPy+4SKMuCqGw2wxnA+URMg3t8a/bQ==}
 
-  discord-api-types@0.38.20:
-    resolution: {integrity: sha512-wJSmFFi8eoFL/jIosUQLoXeCv7YK+l7joKmFCsnkx7HWSFt5xScNQdhvILLxC0oU6J5bK0ppR7GZ1d4NJScSNQ==}
+  discord-api-types@0.38.29:
+    resolution: {integrity: sha512-+5BfrjLJN1hrrcK0MxDQli6NSv5lQH7Y3/qaOfk9+k7itex8RkA/UcevVMMLe8B4IKIawr4ITBTb2fBB2vDORg==}
 
-  discord.js@14.22.1:
-    resolution: {integrity: sha512-3k+Kisd/v570Jr68A1kNs7qVhNehDwDJAPe4DZ2Syt+/zobf9zEcuYFvsfIaAOgCa0BiHMfOOKQY4eYINl0z7w==}
+  discord.js@14.23.0:
+    resolution: {integrity: sha512-0oYtQnsEnqabRAq4aiNA2+cmJ2MZ8+KiU2d0BJbUih8ZK+fn7qO/UUyINapjDvNMN1F/Al7D3lPGvPxsKc8e0w==}
     engines: {node: '>=18'}
 
   drizzle-kit@0.31.4:
@@ -936,8 +936,8 @@ packages:
     resolution: {integrity: sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==}
     engines: {node: '>=0.10.0'}
 
-  farming-simulator-types@2.0.1:
-    resolution: {integrity: sha512-cp6YmFElxg5cZeBIQkItbUmhJGsbRSF16/0KCf+e1z4NZqdhRxvnNoQKoS6bJkKnKrdreAYEqLZZ1T97HLdAag==}
+  farming-simulator-types@3.0.0:
+    resolution: {integrity: sha512-kIdLMIyKJpTpEWot9YEU63sLN8OlGC392vFb98mNqugI04OQdRzdTtlzUzgTCnI5nT5JK8C9nWV+lxmR1cH72A==}
 
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
@@ -1282,12 +1282,12 @@ snapshots:
 
   '@arr/every@1.0.1': {}
 
-  '@discordjs/builders@1.11.3':
+  '@discordjs/builders@1.12.0':
     dependencies:
       '@discordjs/formatters': 0.6.1
       '@discordjs/util': 1.1.1
       '@sapphire/shapeshift': 4.0.0
-      discord-api-types: 0.38.20
+      discord-api-types: 0.38.29
       fast-deep-equal: 3.1.3
       ts-mixer: 6.0.4
       tslib: 2.8.1
@@ -1298,7 +1298,7 @@ snapshots:
 
   '@discordjs/formatters@0.6.1':
     dependencies:
-      discord-api-types: 0.38.20
+      discord-api-types: 0.38.29
 
   '@discordjs/rest@2.6.0':
     dependencies:
@@ -1307,7 +1307,7 @@ snapshots:
       '@sapphire/async-queue': 1.5.5
       '@sapphire/snowflake': 3.5.3
       '@vladfrangu/async_event_emitter': 2.4.6
-      discord-api-types: 0.38.20
+      discord-api-types: 0.38.29
       magic-bytes.js: 1.12.1
       tslib: 2.8.1
       undici: 6.21.3
@@ -1322,7 +1322,7 @@ snapshots:
       '@sapphire/async-queue': 1.5.5
       '@types/ws': 8.18.1
       '@vladfrangu/async_event_emitter': 2.4.6
-      discord-api-types: 0.38.20
+      discord-api-types: 0.38.29
       tslib: 2.8.1
       ws: 8.18.3
     transitivePeerDependencies:
@@ -1846,18 +1846,18 @@ snapshots:
 
   deep-is@0.1.4: {}
 
-  discord-api-types@0.38.20: {}
+  discord-api-types@0.38.29: {}
 
-  discord.js@14.22.1:
+  discord.js@14.23.0:
     dependencies:
-      '@discordjs/builders': 1.11.3
+      '@discordjs/builders': 1.12.0
       '@discordjs/collection': 1.5.3
       '@discordjs/formatters': 0.6.1
       '@discordjs/rest': 2.6.0
       '@discordjs/util': 1.1.1
       '@discordjs/ws': 1.2.3
       '@sapphire/snowflake': 3.5.3
-      discord-api-types: 0.38.20
+      discord-api-types: 0.38.29
       fast-deep-equal: 3.1.3
       lodash.snakecase: 4.1.1
       magic-bytes.js: 1.12.1
@@ -2010,7 +2010,7 @@ snapshots:
 
   esutils@2.0.3: {}
 
-  farming-simulator-types@2.0.1: {}
+  farming-simulator-types@3.0.0: {}
 
   fast-deep-equal@3.1.3: {}
 

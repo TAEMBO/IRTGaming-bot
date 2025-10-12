@@ -31,3 +31,5 @@ export const ADMIN_ICON = ":detective:";
 export const WL_ICON = ":no_entry:";
 
 export const REMINDERS_INTERVAL = 3_600_000;
+
+export const UUID_LENGTH = 44;

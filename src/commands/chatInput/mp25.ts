@@ -10,6 +10,7 @@ import {
     hasRole,
     isMPStaff,
     jsonFromXML,
+    UUID_LENGTH,
     youNeedRole
 } from "#util";
 import type { BanFormat, DedicatedServerConfig, FarmFormat } from "#typings";
@@ -19,7 +20,7 @@ const allServersChoices = fs25Servers.entries().map(([serverAcro, { fullName }])
 
 export default new Command<"chatInput">({
     async run(interaction) {
-        if (!isMPStaff(interaction.member)) return await youNeedRole(interaction, "mpStaff");
+        if (!isMPStaff(interaction.member)) return youNeedRole(interaction, "mpStaff");
 
         const now = Date.now();
 
@@ -108,7 +109,7 @@ export default new Command<"chatInput">({
                 break;
             };
             case "mop": {
-                if (!hasRole(interaction.member, "mpManager")) return await youNeedRole(interaction, "mpManager");
+                if (!hasRole(interaction.member, "mpManager")) return youNeedRole(interaction, "mpManager");
 
                 const chosenServer = interaction.options.getString("server", true);
                 const chosenAction = interaction.options.getString("action", true) as "items.xml" | "players.xml";
@@ -139,24 +140,24 @@ export default new Command<"chatInput">({
                     return;
                 }
 
-                if (!hasRole(interaction.member, "mpManager")) return await youNeedRole(interaction, "mpManager");
+                if (!hasRole(interaction.member, "mpManager")) return youNeedRole(interaction, "mpManager");
 
                 await interaction.deferReply();
 
                 let data;
                 const banAttachment = interaction.options.getAttachment("bans");
 
-                if (!banAttachment) return await interaction.editReply("Canceled: A ban file must be supplied");
+                if (!banAttachment) return interaction.editReply("Canceled: A ban file must be supplied");
 
                 const banData = await (await fetch(banAttachment.url)).text();
 
                 try {
                     data = jsonFromXML<BanFormat>(banData);
                 } catch (err) {
-                    return await interaction.editReply("Canceled: Improper file (not XML)");
+                    return interaction.editReply("Canceled: Improper file (not XML)");
                 }
 
-                if (!data.blockedUserIds?.user[0]?._attributes?.displayName) return await interaction.editReply("Canceled: Improper file (data format)");
+                if (!data.blockedUserIds?.user[0]?._attributes?.displayName) return interaction.editReply("Canceled: Improper file (data format)");
 
                 await ftpActions.put(banData, "blockedUserIds.xml");
 
@@ -170,30 +171,30 @@ export default new Command<"chatInput">({
                 const chosenServer = interaction.options.getString("server", true);
                 const name = interaction.options.getString("name", true);
 
-                function permIcon(perm: string, key: string) {
-                    if (perm === "true") {
+                function formatPermission(key: string, value: string) {
+                    if (value === "true") {
                         return "✅";
-                    } else if (perm === "false") {
+                    } else if (value === "false") {
                         return "❌";
                     } else if (key === "timeLastConnected") {
-                        const utcDate = new Date(perm);
+                        const utcDate = new Date(value);
 
                         utcDate.setMinutes(utcDate.getMinutes() - utcDate.getTimezoneOffset() + fs25Servers.getPublicOne(chosenServer).utcDiff);
 
                         return utcDate.toUTCString();
-                    } else return perm;
+                    } else return value;
                 }
 
                 const data = await new FTPActions(fs25Servers.getPublicOne(chosenServer).ftp).get("savegame1/farms.xml");
                 const farmData = jsonFromXML<FarmFormat>(data);
                 const playerData = farmData.farms.farm[0].players.player.find(x =>
-                    (name.length === 44 ? x._attributes.uniqueUserId : x._attributes.lastNickname) === name
+                    (name.length === UUID_LENGTH ? x._attributes.uniqueUserId : x._attributes.lastNickname) === name
                 );
+                const resultText = playerData
+                    ? codeBlock(Object.entries(playerData._attributes).map(x => x[0].padEnd(18, " ") + formatPermission(x[0], x[1])).join("\n"))
+                    : "No green farm data found with that name/UUID";
 
-                await interaction.editReply(playerData
-                    ? codeBlock(Object.entries(playerData._attributes).map(x => x[0].padEnd(18, " ") + permIcon(x[1], x[0])).join("\n"))
-                    : "No green farm data found with that name/UUID"
-                );
+                await interaction.editReply(resultText);
 
                 break;
             };
@@ -202,7 +203,7 @@ export default new Command<"chatInput">({
                 const user = interaction.options.getUser("user", true);
                 const playerData = (await db.select().from(playerTimes25Table).where(eq(playerTimes25Table.uuid, uuid))).at(0);
 
-                if (!playerData) return await interaction.reply("No playerTimes data found with that UUID");
+                if (!playerData) return interaction.reply("No playerTimes data found with that UUID");
 
                 await db.update(playerTimes25Table).set({ discordId: user.id }).where(eq(playerTimes25Table.uuid, uuid));
 
@@ -214,7 +215,7 @@ export default new Command<"chatInput">({
                 const chosenServer = interaction.options.getString("server", true);
                 const serverConfig = interaction.client.config.fs25[chosenServer];
 
-                if (!interaction.member.roles.cache.hasAny(...serverConfig.managerRoles)) return await youNeedRole(interaction, "mpManager");
+                if (!interaction.member.roles.cache.hasAny(...serverConfig.managerRoles)) return youNeedRole(interaction, "mpManager");
 
                 await interaction.deferReply();
 
@@ -232,22 +233,22 @@ export default new Command<"chatInput">({
 
                 const chosenServer = interaction.options.getString("server", true);
                 const data = await new FTPActions(fs25Servers.getPublicOne(chosenServer).ftp).get("dedicated_server/dedicatedServerConfig.xml");
-                const pw = jsonFromXML<DedicatedServerConfig>(data).gameserver.settings.game_password._text;
+                const password = jsonFromXML<DedicatedServerConfig>(data).gameserver.settings.game_password._text;
+                const resultText = password
+                    ? `Current password for **${chosenServer.toUpperCase()}** is \`${password}\``
+                    : `Password not set for **${chosenServer.toUpperCase()}**`;
 
-                await interaction.editReply(pw
-                    ? `Current password for **${chosenServer.toUpperCase()}**  \`${pw}\``
-                    : `Password not set for **${chosenServer.toUpperCase()}**`
-                );
+                await interaction.editReply(resultText);
 
                 break;
             };
             case "roles": {
-                if (!hasRole(interaction.member, "mpManager")) return await youNeedRole(interaction, "mpManager");
+                if (!hasRole(interaction.member, "mpManager")) return youNeedRole(interaction, "mpManager");
 
                 const member = interaction.options.getMember("member");
                 const mainRoles = interaction.client.config.mainServer.roles;
 
-                if (!member) return await interaction.reply({ content: "You need to select a member that is in this server", flags: MessageFlags.Ephemeral });
+                if (!member) return interaction.reply({ content: "You need to select a member that is in this server", flags: MessageFlags.Ephemeral });
 
                 const roleName = interaction.options.getString("role", true) as "trustedFarmer" | "mpFarmManager" | "mpJrAdmin" | "mpSrAdmin";
                 const roleId = mainRoles[roleName];
@@ -261,7 +262,9 @@ export default new Command<"chatInput">({
                             .setColor(interaction.client.config.EMBED_COLOR)
                         ] },
                         async confirm(int) {
-                            if (roleName !== "trustedFarmer") {
+                            if (roleName === "trustedFarmer") {
+                                await member.roles.remove(roleId);
+                            } else {
                                 const slicedNick = {
                                     mpFarmManager: "MP Farm Manager",
                                     mpJrAdmin: "MP Jr. Admin",
@@ -272,9 +275,9 @@ export default new Command<"chatInput">({
                                     roles: roles
                                         .filter(x => x !== roleId && x !== mainRoles.mpStaff)
                                         .concat([mainRoles.formerStaff, mainRoles.trustedFarmer]),
-                                    nick: member.nickname!.replace(slicedNick, "Former Staff")
+                                    nick: member.nickname?.replace(slicedNick, "Former Staff")
                                 });
-                            } else await member.roles.remove(roleId);
+                            }
 
                             await int.update({
                                 embeds: [new EmbedBuilder()

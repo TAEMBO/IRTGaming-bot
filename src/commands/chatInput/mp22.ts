@@ -11,6 +11,7 @@ import {
     hasRole,
     isMPStaff,
     jsonFromXML,
+    UUID_LENGTH,
     youNeedRole
 } from "#util";
 import type { BanFormat, DedicatedServerConfig, FarmFormat } from "#typings";
@@ -215,7 +216,7 @@ export default new Command<"chatInput">({
                 const data = await new FTPActions(fs22Servers.getPublicOne(chosenServer).ftp).get("savegame1/farms.xml");
                 const farmData = jsonFromXML<FarmFormat>(data);
                 const playerData = farmData.farms.farm[0].players.player.find(x =>
-                    (name.length === 44 ? x._attributes.uniqueUserId : x._attributes.lastNickname) === name
+                    (name.length === UUID_LENGTH ? x._attributes.uniqueUserId : x._attributes.lastNickname) === name
                 );
 
                 await interaction.editReply(playerData

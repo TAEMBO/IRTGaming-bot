@@ -7,6 +7,7 @@ import { Command } from "#structures";
 import {
     FM_ICON,
     TF_ICON,
+    UUID_LENGTH,
     fetchDBData,
     formatDecorators,
     formatRequestInit,
@@ -124,7 +125,7 @@ export default new Command<"chatInput">({
                 ] });
             }
 
-            const dbQuery = playerName.length === 44 && isMPStaff(interaction.member)
+            const dbQuery = playerName.length === UUID_LENGTH && isMPStaff(interaction.member)
                 ? playerTimes25Table.uuid
                 : playerTimes25Table.name;
 

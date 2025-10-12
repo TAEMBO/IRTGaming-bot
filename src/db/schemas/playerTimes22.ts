@@ -1,4 +1,5 @@
 import { jsonb, pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { UUID_LENGTH } from "#util";
 
 interface PlayerTimes22Server {
     time: number;
@@ -7,7 +8,7 @@ interface PlayerTimes22Server {
 
 export const playerTimes22Table = pgTable("playerTimes22", {
     name: text("name").primaryKey(),
-    uuid: varchar("uuid", { length: 44 }),
+    uuid: varchar("uuid", { length: UUID_LENGTH }),
     discordId: text("discord_id"),
     servers: jsonb("servers").$type<Record<string, PlayerTimes22Server>>().notNull(),
 });

@@ -80,15 +80,13 @@ export async function crunchFarmData(client: Client, dbData: CrunchFarmDataDBDat
                 })
                 .where(eq(playerTimes25Table.name, player._attributes.lastNickname));
         } else {
-            // Name not occupied, create data with new name and delete old data
+            // Name not occupied, create data with new name
             await db.insert(playerTimes25Table).values({
                 name: player._attributes.lastNickname,
                 uuid: player._attributes.uniqueUserId,
                 servers: playerDatabyUuid.servers,
                 discordId: playerDatabyUuid.discordId
             });
-
-            await db.delete(playerTimes25Table).where(eq(playerTimes25Table.name, playerDatabyUuid.name));
         }
     }
 

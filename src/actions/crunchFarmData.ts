@@ -1,6 +1,6 @@
 import { EmbedBuilder, type Client } from "discord.js";
 import { eq } from "drizzle-orm";
-import { db, playerTimes25Table } from "#db";
+import { db, getPlayerTimesRow, playerTimes25Table } from "#db";
 import { FTPActions } from "#structures";
 import { fs25Servers, jsonFromXML, FM_ICON, TF_ICON, log } from "#util";
 import type { DBData, FarmFormat } from "#typings";
@@ -56,11 +56,7 @@ export async function crunchFarmData(client: Client, dbData: CrunchFarmDataDBDat
 
         changedNameCount++;
 
-        const rowExists = Boolean((await db
-            .select()
-            .from(playerTimes25Table)
-            .where(eq(playerTimes25Table.name, player._attributes.lastNickname))
-        ).at(0));
+        const rowExists = await getPlayerTimesRow(player._attributes.lastNickname);
 
         if (rowExists) {
             // Name occupied, transfer data to new name

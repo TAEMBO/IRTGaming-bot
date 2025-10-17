@@ -7,7 +7,7 @@ export function getTimeData(data: typeof playerTimes25Table.$inferSelect) {
 
 export async function addPlayerTime(playerName: string, playerTime: number, serverAcro: string) {
     const now = Math.floor(Date.now() / 1_000);
-    const playerTimesData = (await db.select().from(playerTimes25Table).where(eq(playerTimes25Table.name, playerName))).at(0);
+    const playerTimesData = await getPlayerTimesRow(playerName);
 
     if (!playerTimesData) {
         await db.insert(playerTimes25Table).values({
@@ -35,4 +35,14 @@ export async function addPlayerTime(playerName: string, playerTime: number, serv
             }
         })
         .where(eq(playerTimes25Table.name, playerName));
+}
+
+export async function getPlayerTimesRow(playerName: string) {
+    const rows = await db
+        .select()
+        .from(playerTimes25Table)
+        .limit(1)
+        .where(eq(playerTimes25Table.name, playerName));
+
+    return rows.at(0) ?? null;
 }

@@ -9,7 +9,7 @@ import {
 } from "farming-simulator-types/2022";
 import { constants } from "http2";
 import lodash from "lodash";
-import { addPlayerTime22, type watchListTable } from "#db";
+import { addPlayerTime22, db, playerTimes22Table, watchListPingsTable, type watchListTable } from "#db";
 import {
     formatDecorators,
     formatRequestInit,
@@ -19,9 +19,10 @@ import {
     jsonFromXML,
     log
 } from "#util";
-import type { FS22LoopDBData, FSLoopCSG } from "#typings";
+import type { DBData, FSLoopCSG } from "#typings";
+import { eq } from "drizzle-orm";
 
-export async function fs22Loop(client: Client, dbData: FS22LoopDBData, serverAcro: string, embedBuffer: EmbedBuilder[]) {
+export async function fs22Loop(client: Client, dbData: DBData, serverAcro: string, embedBuffer: EmbedBuilder[]) {
     if (client.config.toggles.debug) log("yellow", `FS22Loop ${serverAcro}`);
 
     const server = fs22Servers.getOne(serverAcro);
@@ -41,8 +42,12 @@ export async function fs22Loop(client: Client, dbData: FS22LoopDBData, serverAcr
         return embed;
     }
 
-    function logEmbed(player: PlayerUsed, joinLog: boolean) {
-        const playerTimesData = dbData.playerTimesData.find(x => x.name === player.name);
+    async function logEmbed(player: PlayerUsed, joinLog: boolean) {
+        const playerTimesData = await db
+            .select()
+            .from(playerTimes22Table)
+            .where(eq(playerTimes22Table.name, player.name))
+            .then(x => x.at(0));
         const playerDiscordMention = playerTimesData?.discordId ? userMention(playerTimesData.discordId) : "";
         const decorators = formatDecorators(player, dbData, false);
         let description = `\`${player.name}\`${decorators}${playerDiscordMention} ${joinLog ? "joined" : "left"} **${serverAcroUp}** at <t:${now}:t>`;
@@ -282,7 +287,7 @@ export async function fs22Loop(client: Client, dbData: FS22LoopDBData, serverAcr
 
         await addPlayerTime22(player.name, player.uptime, serverAcro);
 
-        embedBuffer.push(logEmbed(player, false));
+        embedBuffer.push(await logEmbed(player, false));
     }
 
     // Filter for players joining
@@ -296,16 +301,21 @@ export async function fs22Loop(client: Client, dbData: FS22LoopDBData, serverAcr
         const inWl = dbData.watchListData.find(y => y.name === player.name);
 
         if (inWl) {
-            const filterWLPings = dbData.watchListPingsData.filter(x =>
-                !client.mainGuild().members.cache.get(x.userId)?.roles.cache.has(client.config.mainServer.roles.loa)
-            );
+            const wlPings = (await db
+                .select()
+                .from(watchListPingsTable))
+                .filter(x =>
+                    !client.mainGuild().members.cache.get(x.userId)?.roles.cache.has(client.config.mainServer.roles.loa)
+                )
+                .map(x => userMention(x.userId))
+                .join(" ");
 
             await wlChannel.send({
-                content: inWl.isSevere ? filterWLPings.map(x => `<@${x}>`).join(" ") : undefined,
+                content: inWl.isSevere ? wlPings : undefined,
                 embeds: [wlEmbed(inWl, true)]
             });
         }
 
-        embedBuffer.push(logEmbed(player, true));
+        embedBuffer.push(await logEmbed(player, true));
     }
 }

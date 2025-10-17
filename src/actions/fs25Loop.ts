@@ -2,7 +2,7 @@ import { ChannelType, type Client, EmbedBuilder, time, userMention } from "disco
 import { DSSExtension, DSSFile, type DSSResponse, Feeds, filterUnused } from "farming-simulator-types/2025";
 import { constants } from "http2";
 import lodash from "lodash";
-import { addPlayerTime25 } from "#db";
+import { addPlayerTime25, db, getPlayerTimesRow, watchListPingsTable } from "#db";
 import {
     formatDecorators,
     formatRequestInit,
@@ -12,14 +12,14 @@ import {
     jsonFromXML,
     log
 } from "#util";
-import type { FSLoopCSG, FS25Cache, FS25LoopDBData } from "#typings";
+import type { FSLoopCSG, FS25Cache, DBData } from "#typings";
 
 enum ServerState {
     Offline,
     Online,
 }
 
-export async function fs25Loop(client: Client, dbData: FS25LoopDBData, serverAcro: string, embedBuffer: EmbedBuilder[]) {
+export async function fs25Loop(client: Client, dbData: DBData, serverAcro: string, embedBuffer: EmbedBuilder[]) {
     if (client.config.toggles.debug) log("yellow", `FS25Loop ${serverAcro}`);
 
     const serverAcroUp = serverAcro.toUpperCase();
@@ -263,7 +263,7 @@ export async function fs25Loop(client: Client, dbData: FS25LoopDBData, serverAcr
 
     for (const player of leftPlayers) {
         const watchListData = dbData.watchListData.find(x => x.name === player.name);
-        const playerTimesData = dbData.playerTimesData.find(x => x.name === player.name);
+        const playerTimesData = await getPlayerTimesRow(player.name);
         const playerDiscordMention = playerTimesData?.discordId ? userMention(playerTimesData.discordId) : "";
         const decorators = formatDecorators(player, dbData, false);
         const embed = new EmbedBuilder()
@@ -288,7 +288,7 @@ export async function fs25Loop(client: Client, dbData: FS25LoopDBData, serverAcr
     for (const player of joinedPlayers) {
         const watchListData = dbData.watchListData.find(y => y.name === player.name);
         const embed = new EmbedBuilder().setColor(client.config.EMBED_COLOR_GREEN);
-        const playerTimesData = dbData.playerTimesData.find(x => x.name === player.name);
+        const playerTimesData = await getPlayerTimesRow(player.name);
         const playerDiscordMention = playerTimesData?.discordId ? " " + userMention(playerTimesData.discordId) : "";
         const decorators = formatDecorators(player, dbData, false);
         let description = `\`${player.name}\`${decorators}${playerDiscordMention} joined **${serverAcroUp}** at ${timestamp}`;
@@ -308,12 +308,17 @@ export async function fs25Loop(client: Client, dbData: FS25LoopDBData, serverAcr
 
         if (watchListData) {
             const watchListReference = watchListData.reference ? "\nReference: " + watchListData.reference : "";
-            const filterWLPings = dbData.watchListPingsData.filter(x =>
-                !client.mainGuild().members.cache.get(x.userId)?.roles.cache.has(client.config.mainServer.roles.loa)
-            );
+            const wlPings = (await db
+                .select()
+                .from(watchListPingsTable))
+                .filter(x =>
+                    !client.mainGuild().members.cache.get(x.userId)?.roles.cache.has(client.config.mainServer.roles.loa)
+                )
+                .map(x => userMention(x.userId))
+                .join(" ");
 
             await wlChannel.send({
-                content: watchListData.isSevere ? filterWLPings.map(x => userMention(x.userId)).join(" ") : undefined,
+                content: watchListData.isSevere ? wlPings : undefined,
                 embeds: [new EmbedBuilder()
                     .setTitle(`WatchList - ${watchListData.isSevere ? "ban" : "watch over"}`)
                     .setDescription(`\`${watchListData.name}\` joined **${serverAcroUp}** at ` + timestamp + watchListReference)

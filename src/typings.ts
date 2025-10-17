@@ -8,7 +8,7 @@ import type {
 import type config from "#config";
 import type TClient from "./client.js";
 import { type PlayerUsed } from "farming-simulator-types/2022";
-import type { fmNamesTable, playerTimes22Table, playerTimes25Table, remindersTable, tfNamesTable, watchListPingsTable, watchListTable, whitelistTable } from "#db";
+import type { fmNamesTable, remindersTable, tfNamesTable, watchListTable, whitelistTable } from "#db";
 import type { Command, RepeatedMessages } from "#structures";
 
 declare module "discord.js" {
@@ -81,16 +81,6 @@ export interface DBData {
     readonly tfNamesData: (typeof tfNamesTable.$inferSelect)[];
     readonly watchListData: (typeof watchListTable.$inferSelect)[];
     readonly whitelistData: (typeof whitelistTable.$inferSelect)[];
-}
-
-export type FS22LoopDBData = Required<DBData> & {
-    readonly watchListPingsData: (typeof watchListPingsTable.$inferSelect)[];
-    readonly playerTimesData: (typeof playerTimes22Table.$inferSelect)[];
-};
-
-export type FS25LoopDBData = Required<DBData> & {
-    readonly watchListPingsData: (typeof watchListPingsTable.$inferSelect)[];
-    readonly playerTimesData: (typeof playerTimes25Table.$inferSelect)[];
 }
 
 export type PunishmentType = "mute" | "detain" | "kick" | "softban" | "ban";

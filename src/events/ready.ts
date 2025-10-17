@@ -7,12 +7,9 @@ import {
     executeReminder,
     fetchFarmData,
     fmNamesTable,
-    playerTimes22Table,
-    playerTimes25Table,
     remindersTable,
     tfNamesTable,
     userLevelsTable,
-    watchListPingsTable,
     watchListTable,
     whitelistTable
 } from "#db";
@@ -108,25 +105,16 @@ export default new Event({
                 fmNamesData: await db.select().from(fmNamesTable),
                 tfNamesData: await db.select().from(tfNamesTable),
                 watchListData: await db.select().from(watchListTable),
-                watchListPingsData: await db.select().from(watchListPingsTable),
                 whitelistData: await db.select().from(whitelistTable)
             };
             const embedBuffer: EmbedBuilder[] = [];
 
             if (client.config.toggles.fs22Loop) {
-                const playerTimesData = await db.select().from(playerTimes22Table);
-
-                for (const serverAcro of fs22Servers.keys()) {
-                    await fs22Loop(client, { ...dbData, playerTimesData }, serverAcro, embedBuffer);
-                }
+                for (const serverAcro of fs22Servers.keys()) await fs22Loop(client, dbData, serverAcro, embedBuffer);
             }
 
             if (client.config.toggles.fs25Loop) {
-                const playerTimesData = await db.select().from(playerTimes25Table);
-
-                for (const serverAcro of fs25Servers.keys()) {
-                    await fs25Loop(client, { ...dbData, playerTimesData }, serverAcro, embedBuffer);
-                }
+                for (const serverAcro of fs25Servers.keys()) await fs25Loop(client, dbData, serverAcro, embedBuffer);
             }
 
             for (let i = 0; i < embedBuffer.length; i += 10) {

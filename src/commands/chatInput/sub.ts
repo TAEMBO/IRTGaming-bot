@@ -1,12 +1,24 @@
-import { ActionRowBuilder, ApplicationCommandOptionType, ButtonBuilder, ButtonStyle, MessageFlags, roleMention } from "discord.js";
+import {
+    ActionRowBuilder,
+    ApplicationCommandOptionType,
+    ButtonBuilder,
+    ButtonStyle,
+    MessageFlags,
+    roleMention
+} from "discord.js";
 import { Command } from "#structures";
+import { hasRole } from "#util";
 
 export default new Command<"chatInput">({
     async run(interaction) {
+        const mention = roleMention(interaction.client.config.mainServer.roles.subscriber);
+
+        if (hasRole(interaction.member, "subscriber")) {
+            return interaction.reply({ content: `You already have the ${mention} role!`, flags: MessageFlags.Ephemeral });
+        }
+
         await interaction.reply({
-            content:
-                "Verification sent. Please wait for someone to verify your subscription, " +
-                `you will then receive the ${roleMention(interaction.client.config.mainServer.roles.subscriber)} role.`,
+            content: `Verification sent. Please wait for someone to verify your subscription - you will then receive the ${mention} role.`,
             flags: MessageFlags.Ephemeral
         });
 

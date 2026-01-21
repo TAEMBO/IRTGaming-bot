@@ -71,14 +71,12 @@ export function ytFeed(client: Client) {
         const data = jsonFromXML<YTFeedData>(rawBody);
         const { entry } = data.feed;
 
-        if (!entry) return log("yellow", "Missing entry data");
+        if (!entry) return;
 
         const videoId = entry["yt:videoId"]._text;
         const publishUnix = new Date(entry.published._text).getTime();
 
-        if ((Date.now() - publishUnix) > MAX_CACHE_AGE) return log("yellow", `Skipped ${videoId}; age over ${MAX_CACHE_AGE.toLocaleString()}ms`);
-
-        if (client.ytCache.has(videoId)) return log("yellow", `Skipped ${videoId}; already cached`);
+        if (((Date.now() - publishUnix) > MAX_CACHE_AGE) || client.ytCache.has(videoId)) return;
 
         client.ytCache.add(videoId);
 

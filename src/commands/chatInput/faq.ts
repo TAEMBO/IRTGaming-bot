@@ -54,7 +54,7 @@ export default new Command<"chatInput">({
                         "- The name of the player\n" +
                         "- What they are doing\n" +
                         "- A picture or video as proof if possible\n" +
-                        (isFromTicket ? "\n\n" : `- The ${staffMention} tag to notify staff\n\n`) +
+                        (isFromTicket ? "\n" : `- The ${staffMention} tag to notify staff\n\n`) +
                         `Please do not ping or DM individual staff members${ticketTextClosing}.\n` +
                         `Check ${infoChannels.join(" or ")} to see what a good reason could be for a player report.`
                     )
@@ -80,7 +80,7 @@ export default new Command<"chatInput">({
                     .setColor(interaction.client.config.EMBED_COLOR)
                     .setFooter({ text:
                         "Note that not every task listed might be available to do at the time, " +
-                        "so do your due dilligence to see what needs doing in the moment."
+                        "so do your due dilligence to see what may need doing in the moment."
                     })
                     .setFields(toDoDetails)
                 ] });
@@ -88,22 +88,29 @@ export default new Command<"chatInput">({
                 break;
             };
             case "filters": {
-                await interaction.reply(
-                    content +
-                    "\n-# Please note that servers may \"ghost\" and not show up " +
-                    "until you've refreshed your MP menu several times" +
-                    hyperlink(".", interaction.client.config.resources.faqFiltersEmbedImage)
-                );
+                await interaction.reply(interaction.client.config.resources.faqFiltersEmbedImage);
 
                 break;
             };
+            case "passwords": {
+                await interaction.reply(
+                    "MP Staff may sometimes need to lock our public servers for any number of reasons." +
+                    "\nIf this is ever the case, we may use a password that Discord members can access," +
+                    ` found in the pinned messages of ${channelMentions.join(" or ")}.` +
+                    "\n-# For mobile users, tap the channel name at the top of your screen" +
+                    "\nIf that password doesn't work, the server may be locked to a separate password that only MP Staff have access to."
+                );
+
+                break;
+            }
             case "equipment": {
                 await interaction.reply(
                     content +
-                    "\nPurchasing new equipment can cause large impacts, including:" +
+                    "\nPurchasing new equipment while beneficial can also come with inverse consequences, including:" +
                     "\n- Increased slot amounts" +
-                    "\n- Increased file sizes, causing larger amounts of lag" +
-                    "\nTherefore, we try to refrain from purchasing any new equipment."
+                    "\n- More vehicles needing to be handled by the game, degrading gameplay performance" +
+                    "\n- Unnecessary clutter around the map and yard" +
+                    "\nTherefore, we try to keep equipment purchases to a minimum where possible."
                 );
 
                 break;
@@ -124,6 +131,7 @@ export default new Command<"chatInput">({
                     { name: "Appeal an MP ban", value: "appeal" },
                     { name: "What to do on MP servers", value: "todo" },
                     { name: "MP filters to join", value: "filters" },
+                    { name: "Server passwords", value: "passwords" },
                     { name: "Buying equipment", value: "equipment" }
                 ],
                 required: true

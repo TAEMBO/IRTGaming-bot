@@ -112,8 +112,8 @@ export default new Command<"chatInput">({
 
             // Rank value
             ctx.font = largeFont;
-            ctx.fillText(index.toString(), offsetRankX, detailsYOffset);
-            offsetRankX -= ctx.measureText(index.toString()).width;
+            ctx.fillText("#" + index.toString(), offsetRankX, detailsYOffset);
+            offsetRankX -= ctx.measureText("#" + index.toString()).width;
 
             // Rank label
             ctx.font = smallFont;

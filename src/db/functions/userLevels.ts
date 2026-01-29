@@ -1,5 +1,5 @@
 import { db, userLevelsTable } from "#db";
-import { type Client, userMention } from "discord.js";
+import { type Client, subtext, userMention } from "discord.js";
 import { eq } from "drizzle-orm";
 
 export async function incrementUser(client: Client, userId: string) {
@@ -18,7 +18,11 @@ export async function incrementUser(client: Client, userId: string) {
     } else if (userLevelsdata.messageCount >= algorithm(userLevelsdata.level + 1)) {
         updatedLevel++;
 
-        await client.getChan("botCommands").send(`Well done ${userMention(userId)}, you made it to **level ${updatedLevel}**!`);
+        let levelUpText = `Well done ${userMention(userId)}, you made it to **level ${updatedLevel}**!`;
+
+        if (updatedLevel === 1) levelUpText += "\n" + subtext(`You can check your current rank via ${client.getCommandMention("rank", "view")}`);
+
+        await client.getChan("botCommands").send(levelUpText);
     }
 
     await db

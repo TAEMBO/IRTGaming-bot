@@ -75,7 +75,7 @@ export default new Command<"chatInput">({
                 } catch (err) {
                     log("red", `Stats all ${serverAcroUp}; ${err}`);
 
-                    return void failedFooter.push(`Failed to fetch ${serverAcroUp}`);
+                    return void failedFooter.push(serverAcroUp);
                 }
 
                 if (!dss.slots || !dss.slots.used) return;
@@ -97,9 +97,9 @@ export default new Command<"chatInput">({
                 });
             }));
 
-            embed
-                .setTitle(`All Servers: ${totalUsedCount.reduce((a, b) => a + b, 0)} players online`)
-                .setFooter(failedFooter.length ? { text: failedFooter.join(", ") } : null);
+            embed.setTitle(`All Servers: ${totalUsedCount.reduce((a, b) => a + b, 0)} players online`);
+
+            if (failedFooter.length) embed.setFooter({ text: "Failed to connect to " + failedFooter.join(" & ") });
 
             await interaction.editReply({ embeds: [embed] });
         } else if (subCmd === "playertimes") {

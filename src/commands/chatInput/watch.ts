@@ -73,12 +73,28 @@ export default new Command<"chatInput">({
                 break;
             };
             case "view": {
+                const username = interaction.options.getString("username", false);
                 const watchListData = await db.select().from(watchListTable);
 
-                await interaction.reply({ files: [{
-                    attachment: Buffer.from(JSON.stringify(watchListData, null, 2)),
-                    name: "watchListCache.json"
-                }] });
+                if (username) {
+                    const playerData = watchListData.find(x => x.name === username);
+
+                    if (playerData) {
+                        await interaction.reply(
+                            `Player name: \`${playerData.name}\`` +
+                            `\nReason: **${playerData.reason}**` +
+                            "\nSeverity: " + (playerData.isSevere ? "**Needs banning**" : "**Needs watching over**") +
+                            (playerData.reference ? `\nReference: ${playerData.reference}` : "")
+                        );
+                    } else {
+                        await interaction.reply(`No watch list details found with username \`${username}\``);
+                    }
+                } else {
+                    await interaction.reply({ files: [{
+                        attachment: Buffer.from(JSON.stringify(watchListData, null, 2)),
+                        name: "watch_List.json"
+                    }] });
+                }
 
                 break;
             };
@@ -216,7 +232,15 @@ export default new Command<"chatInput">({
             {
                 type: ApplicationCommandOptionType.Subcommand,
                 name: "view",
-                description: "View the entire watch list"
+                description: "View watch list details",
+                options: [
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "username",
+                        description: "The player name to view details of",
+                        required: false
+                    }
+                ]
             },
             {
                 type: ApplicationCommandOptionType.Subcommand,

@@ -1,8 +1,8 @@
 import { EmbedBuilder, MessageFlags } from "discord.js";
 import { Command } from "#structures";
-import { fs22Servers, fs25Servers, isMPStaff } from "#util";
+import { fsServers, isMPStaff } from "#util";
 
-const serverNames = [fs22Servers.getPublicNames(), fs25Servers.getPublicNames()].join(" or ");
+const serverNames = fsServers.getPublicNames().join(" or ");
 
 export default new Command<"chatInput">({
     async run(interaction) {

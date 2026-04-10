@@ -1,16 +1,16 @@
 import { EmbedBuilder, type Client } from "discord.js";
 import { eq } from "drizzle-orm";
-import { db, getPlayerTimesRow, playerTimes25Table } from "#db";
+import { db, getPlayerTimesRow, playerTimesTable } from "#db";
 import { FTPActions } from "#structures";
-import { fs25Servers, jsonFromXML, FM_ICON, TF_ICON, log } from "#util";
+import { fsServers, jsonFromXML, FM_ICON, TF_ICON, log } from "#util";
 import type { DBData, FarmFormat } from "#typings";
 
-type CrunchFarmDataDBData = DBData & { playerTimesData: (typeof playerTimes25Table.$inferSelect)[] }
+type CrunchFarmDataDBData = DBData & { playerTimesData: (typeof playerTimesTable.$inferSelect)[] }
 
 export async function crunchFarmData(client: Client, dbData: CrunchFarmDataDBData, serverAcro: string) {
     log("yellow", `Farm data cruncher running on ${serverAcro.toUpperCase()}`);
 
-    const server = fs25Servers.getPublicOne(serverAcro);
+    const server = fsServers.getPublicOne(serverAcro);
     const farmData = jsonFromXML<FarmFormat>(await new FTPActions(server.ftp).get("savegame1/farms.xml"));
     const decorators = (name: string) => {
         return (dbData.fmNamesData.some(x => x.name === name) ? FM_ICON : "") + (dbData.tfNamesData.some(x => x.name === name) ? TF_ICON : "");
@@ -31,11 +31,11 @@ export async function crunchFarmData(client: Client, dbData: CrunchFarmDataDBDat
 
             if (playerDataByName && !playerDataByName.uuid) {
                 await db
-                    .update(playerTimes25Table)
+                    .update(playerTimesTable)
                     .set({
                         uuid: player._attributes.uniqueUserId
                     })
-                    .where(eq(playerTimes25Table.name, player._attributes.lastNickname));
+                    .where(eq(playerTimesTable.name, player._attributes.lastNickname));
 
                 addedUuidCount++;
             }
@@ -61,23 +61,23 @@ export async function crunchFarmData(client: Client, dbData: CrunchFarmDataDBDat
         if (rowExists) {
             // Name occupied, transfer data to new name
             await db
-                .update(playerTimes25Table)
+                .update(playerTimesTable)
                 .set({
                     uuid: null,
                     discordId: null
                 })
-                .where(eq(playerTimes25Table.name, playerDatabyUuid.name));
+                .where(eq(playerTimesTable.name, playerDatabyUuid.name));
 
             await db
-                .update(playerTimes25Table)
+                .update(playerTimesTable)
                 .set({
                     uuid: player._attributes.uniqueUserId,
                     discordId: playerDatabyUuid.discordId
                 })
-                .where(eq(playerTimes25Table.name, player._attributes.lastNickname));
+                .where(eq(playerTimesTable.name, player._attributes.lastNickname));
         } else {
             // Name not occupied, create data with new name
-            await db.insert(playerTimes25Table).values({
+            await db.insert(playerTimesTable).values({
                 name: player._attributes.lastNickname,
                 uuid: player._attributes.uniqueUserId,
                 servers: playerDatabyUuid.servers,

@@ -9,16 +9,10 @@ import {
     roleMention
 } from "discord.js";
 import { Command } from "#structures";
-import { fs22Servers, fs25Servers } from "#util";
+import { fsServers } from "#util";
 
-const channelMentions = [
-    ...fs22Servers.getPublicAll().map(x => channelMention(x[1].channelId)),
-    ...fs25Servers.getPublicAll().map(x => channelMention(x[1].channelId))
-];
-const toDoDetails = [
-    ...fs22Servers.getPublicAll().map(([_, x]) => ({ name: x.fullName, value: "- " + x.todo.join("\n- ") })),
-    ...fs25Servers.getPublicAll().map(([_, x]) => ({ name: x.fullName, value: "- " + x.todo.join("\n- ") }))
-];
+const channelMentions = fsServers.getPublicAll().map(x => channelMention(x[1].channelId));
+const toDoDetails = fsServers.getPublicAll().map(([_, x]) => ({ name: x.fullName, value: "- " + x.todo.join("\n- ") }));
 
 export default new Command<"chatInput">({
     async run(interaction) {
@@ -39,8 +33,6 @@ export default new Command<"chatInput">({
             };
             case "troll": {
                 const isFromTicket = interaction.channel!.parentId === interaction.client.config.mainServer.categories.activeTickets;
-                const { mp22RulesAndInfo, mp25RulesAndInfo } = interaction.client.config.mainServer.channels;
-                const infoChannels = [channelMention(mp22RulesAndInfo), channelMention(mp25RulesAndInfo)];
                 const staffMention = roleMention(interaction.client.config.mainServer.roles.mpStaff);
                 const ticketTextOpening = isFromTicket ? "let us know" : `don't hesitate to send a report to ${channelMentions.join(" or ")}`;
                 const ticketTextClosing = isFromTicket ? "" : `, use the ${staffMention} tag as mentioned above`;
@@ -56,7 +48,7 @@ export default new Command<"chatInput">({
                         "- A picture or video as proof if possible\n" +
                         (isFromTicket ? "\n" : `- The ${staffMention} tag to notify staff\n\n`) +
                         `Please do not ping or DM individual staff members${ticketTextClosing}.\n` +
-                        `Check ${infoChannels.join(" or ")} to see what a good reason could be for a player report.`
+                        `Check ${channelMention(interaction.client.config.mainServer.channels.mpRulesAndInfo)} to see what a good reason could be for a player report.`
                     )
                 ] });
 

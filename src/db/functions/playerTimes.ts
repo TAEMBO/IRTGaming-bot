@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
-import { db, playerTimes25Table } from "#db";
+import { db, playerTimesTable } from "#db";
 import { log } from "#util";
 
-export function getTimeData(data: typeof playerTimes25Table.$inferSelect) {
+export function getTimeData(data: typeof playerTimesTable.$inferSelect) {
     return Object.entries(data.servers).filter((x): x is [string, NonNullable<typeof x[1]>] => x[1] !== null);
 }
 
@@ -13,7 +13,7 @@ export async function addPlayerTime(playerName: string, playerTime: number, serv
     const playerTimesData = await getPlayerTimesRow(playerName);
 
     if (!playerTimesData) {
-        await db.insert(playerTimes25Table).values({
+        await db.insert(playerTimesTable).values({
             name: playerName,
             servers: {
                 [serverAcro]: {
@@ -27,7 +27,7 @@ export async function addPlayerTime(playerName: string, playerTime: number, serv
     }
 
     await db
-        .update(playerTimes25Table)
+        .update(playerTimesTable)
         .set({
             servers: {
                 ...playerTimesData.servers,
@@ -37,15 +37,15 @@ export async function addPlayerTime(playerName: string, playerTime: number, serv
                 }
             }
         })
-        .where(eq(playerTimes25Table.name, playerName));
+        .where(eq(playerTimesTable.name, playerName));
 }
 
 export async function getPlayerTimesRow(playerName: string) {
     const rows = await db
         .select()
-        .from(playerTimes25Table)
+        .from(playerTimesTable)
         .limit(1)
-        .where(eq(playerTimes25Table.name, playerName));
+        .where(eq(playerTimesTable.name, playerName));
 
     return rows.at(0) ?? null;
 }

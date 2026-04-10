@@ -2,25 +2,25 @@ import { ChannelType, type Client, EmbedBuilder, time, userMention } from "disco
 import { DSSExtension, DSSFile, type DSSResponse, Feeds, filterUnused } from "farming-simulator-types/2025";
 import { constants } from "http2";
 import lodash from "lodash";
-import { addPlayerTime25, db, getPlayerTimesRow, watchListPingsTable } from "#db";
+import { addPlayerTime, db, getPlayerTimesRow, watchListPingsTable } from "#db";
 import {
     formatDecorators,
     formatRequestInit,
     formatTime,
     formatUptime,
-    fs25Servers,
+    fsServers,
     jsonFromXML,
     log
 } from "#util";
-import type { FSLoopCSG, FS25Cache, DBData } from "#typings";
+import type { FSLoopCSG, FSCache, DBData } from "#typings";
 
 enum ServerState {
     Offline,
     Online,
 }
 
-export async function fs25Loop(client: Client, dbData: DBData, serverAcro: string, embedBuffer: EmbedBuilder[]) {
-    if (client.config.toggles.debug) log("yellow", `FS25Loop ${serverAcro}`);
+export async function fsLoop(client: Client, dbData: DBData, serverAcro: string, embedBuffer: EmbedBuilder[]) {
+    if (client.config.toggles.debug) log("yellow", `FSLoop ${serverAcro}`);
 
     const serverAcroUp = serverAcro.toUpperCase();
     const now = Date.now();
@@ -33,8 +33,8 @@ export async function fs25Loop(client: Client, dbData: DBData, serverAcro: strin
             .setTimestamp();
     }
 
-    function setCacheValue<Key extends keyof FS25Cache[string]>(key: Key, value: FS25Cache[string][Key]) {
-        client.fs25Cache[serverAcro][key] = value;
+    function setCacheValue<Key extends keyof FSCache[string]>(key: Key, value: FSCache[string][Key]) {
+        client.fsCache[serverAcro][key] = value;
     }
 
     async function statsMsgEdit(embed: EmbedBuilder, completeRes = true) {
@@ -47,8 +47,8 @@ export async function fs25Loop(client: Client, dbData: DBData, serverAcro: strin
         await channel.messages.edit(server.messageId, { embeds: [embed] }).catch(() => log("red", `FSLoop ${serverAcroUp} invalid msg`));
     }
 
-    const oldCacheData = structuredClone(client.fs25Cache[serverAcro]);
-    const server = fs25Servers.getOne(serverAcro);
+    const oldCacheData = structuredClone(client.fsCache[serverAcro]);
+    const server = fsServers.getOne(serverAcro);
     const init = formatRequestInit(7_000, "FSLoop");
     const wlChannel = client.getChan("watchList");
     let isFaultyStart = Boolean(oldCacheData.faultyStartData.length);
@@ -139,9 +139,9 @@ export async function fs25Loop(client: Client, dbData: DBData, serverAcro: strin
     // Update cache
     setCacheValue("throttled", toThrottle);
 
-    if (oldCacheData.graphPoints.length >= 120) client.fs25Cache[serverAcro].graphPoints.shift();
+    if (oldCacheData.graphPoints.length >= 120) client.fsCache[serverAcro].graphPoints.shift();
 
-    client.fs25Cache[serverAcro].graphPoints.push(isFaultyStart ? 0 : dss.slots.used);
+    client.fsCache[serverAcro].graphPoints.push(isFaultyStart ? 0 : dss.slots.used);
 
     if (newPlayerList.some(x => x.isAdmin)) setCacheValue("lastAdmin", now);
 
@@ -271,7 +271,7 @@ export async function fs25Loop(client: Client, dbData: DBData, serverAcro: strin
             .setColor(client.config.EMBED_COLOR_RED)
             .setFooter(player.uptime ? { text: `Playtime: ${formatUptime(player)}` } : null);
 
-        await addPlayerTime25(player.name, player.uptime, serverAcro);
+        await addPlayerTime(player.name, player.uptime, serverAcro);
 
         if (watchListData) {
             await wlChannel.send({ embeds: [new EmbedBuilder()

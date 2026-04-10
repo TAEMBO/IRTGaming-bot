@@ -3,19 +3,16 @@ import { formatDecorators, formatUptime, log } from "#util";
 import type { DBData } from "#typings";
 
 export async function fsLoopAll(client: Client, dbData: DBData) {
-    const fs22Embed = new EmbedBuilder().setColor("#2ac1ed");
-    const fs25Embed = new EmbedBuilder().setColor("#a0c213");
+    const embed = new EmbedBuilder().setColor(client.config.EMBED_COLOR);
     const throttleList: (boolean | null)[] = [];
-    const totalCount22: number[] = [];
-    const totalCount25: number[] = [];
-    const footerText22: string[] = [];
-    const footerText25: string[] = [];
+    const totalCount: number[] = [];
+    const footerText: string[] = [];
 
-    for (const [serverAcro, server] of Object.entries(client.fs22Cache)) {
+    for (const [serverAcro, server] of Object.entries(client.fsCache)) {
         const playerInfo: string[] = [];
         const serverSlots = server.players.length;
 
-        totalCount22.push(serverSlots);
+        totalCount.push(serverSlots);
         throttleList.push(server.throttled);
 
         for (const player of server.players) {
@@ -24,46 +21,20 @@ export async function fsLoopAll(client: Client, dbData: DBData) {
             playerInfo.push(`\`${player.name.slice(0, 46)}\` ${decorators} **|** ${formatUptime(player)}`);
         }
 
-        if (playerInfo.length) fs22Embed.addFields({
+        if (playerInfo.length) embed.addFields({
             name: `${serverAcro.toUpperCase()} - ${serverSlots}/16`,
             value: playerInfo.join("\n")
         });
 
-        if (server.state === 0) footerText22.push(`${serverAcro.toUpperCase()} offline`);
-    }
-
-    for (const [serverAcro, server] of Object.entries(client.fs25Cache)) {
-        const playerInfo: string[] = [];
-        const serverSlots = server.players.length;
-
-        totalCount25.push(serverSlots);
-        throttleList.push(server.throttled);
-
-        for (const player of server.players) {
-            const decorators = formatDecorators(player, dbData, false);
-
-            playerInfo.push(`\`${player.name.slice(0, 46)}\` ${decorators} **|** ${formatUptime(player)}`);
-        }
-
-        if (playerInfo.length) fs25Embed.addFields({
-            name: `${serverAcro.toUpperCase()} - ${serverSlots}/16`,
-            value: playerInfo.join("\n")
-        });
-
-        if (server.state === 0) footerText25.push(`${serverAcro.toUpperCase()} offline`);
+        if (server.state === 0) footerText.push(`${serverAcro.toUpperCase()} offline`);
     }
 
     // Throttle message updating if no changes in API data on any servers
     if (throttleList.every(x => x)) return;
 
-    if (footerText22.length) fs22Embed.setFooter({ text: footerText22.join(", ") });
-
-    if (footerText25.length) fs25Embed.setFooter({ text: footerText25.join(", ") });
+    if (footerText.length) embed.setFooter({ text: footerText.join(", ") });
 
     await client.getChan("juniorAdminChat").messages
-        .edit(client.config.mainServer.fsLoopMsgId, { embeds: [
-            fs22Embed.setTitle(totalCount22.reduce((a, b) => a + b, 0) + " online"),
-            fs25Embed.setTitle(totalCount25.reduce((a, b) => a + b, 0) + " online")
-        ] })
+        .edit(client.config.mainServer.fsLoopMsgId, { embeds: [embed.setTitle(totalCount.reduce((a, b) => a + b, 0) + " online")] })
         .catch(() => log("red", "FSLoopAll invalid msg"));
 }

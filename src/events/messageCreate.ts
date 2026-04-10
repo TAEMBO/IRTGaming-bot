@@ -1,9 +1,9 @@
 import { Events } from "discord.js";
 import { incrementUser } from "#db";
 import { Event } from "#structures";
-import { fs22Servers, fs25Servers, isDCStaff, tempReply } from "#util";
+import { fsServers, isDCStaff, tempReply } from "#util";
 
-const privateServers = [...fs22Servers.getPrivateAll(), ...fs25Servers.getPrivateAll()];
+const privateServers = fsServers.getPrivateAll();
 
 export default new Event({
     name: Events.MessageCreate,

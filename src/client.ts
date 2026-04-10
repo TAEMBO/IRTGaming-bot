@@ -17,13 +17,12 @@ import { styleText } from "node:util";
 import config from "#config" with { type: "json" };
 import type { remindersTable } from "#db";
 import { type Command, RepeatedMessages } from "#structures";
-import { fs22Servers, fs25Servers } from "#util";
+import { fsServers } from "#util";
 import type { CachedInvite, Config } from "#typings";
 
 export default class TClient extends Client<true> {
     public readonly config = config as Config;
-    public readonly fs22Cache = fs22Servers.cacheInit;
-    public readonly fs25Cache = fs25Servers.cacheInit;
+    public readonly fsCache = fsServers.cacheInit;
     public readonly ytCache = new Set<string>();
     public readonly chatInputCommands = new Collection<string, Command<"chatInput">>();
     public readonly contextMenuCommands = new Collection<string, Command<"message" | "user">>();

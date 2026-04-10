@@ -7,15 +7,14 @@ import type {
 } from "discord.js";
 import type config from "#config";
 import type TClient from "./client.js";
-import { type PlayerUsed } from "farming-simulator-types/2022";
+import { type PlayerUsed } from "farming-simulator-types/2025";
 import type { fmNamesTable, remindersTable, tfNamesTable, watchListTable, whitelistTable } from "#db";
 import type { Command, RepeatedMessages } from "#structures";
 
 declare module "discord.js" {
     interface Client {
         readonly config: Config;
-        readonly fs22Cache: FS22Cache;
-        readonly fs25Cache: FS25Cache;
+        readonly fsCache: FSCache;
         readonly ytCache: Set<string>;
         readonly chatInputCommands: Collection<string, Command<"chatInput">>;
         readonly contextMenuCommands: Collection<string, Command<"message" | "user">>;
@@ -89,16 +88,7 @@ export type CombinedContextMenuCommandInteraction =
     MessageContextMenuCommandInteraction<"cached">
     | UserContextMenuCommandInteraction<"cached">;
 
-export type FS22Cache = Record<string, {
-    players: PlayerUsed[];
-    lastAdmin: number | null;
-    graphPoints: number[];
-    completeRes: boolean | null;
-    state: 0 | 1 | null;
-    throttled: boolean | null;
-}>;
-
-export type FS25Cache = Record<string, {
+export type FSCache = Record<string, {
     readonly players: PlayerUsed[];
     readonly lastAdmin: number | null;
     readonly graphPoints: number[];
@@ -191,16 +181,13 @@ export interface Config {
         readonly debug: boolean;
         readonly logs: boolean;
         readonly registerCommands: boolean;
-        readonly fs22Loop: boolean;
-        readonly fs25Loop: boolean;
+        readonly fsLoop: boolean;
         readonly ytFeed: boolean;
         readonly autoResponses: boolean;
         readonly buttonRoles: boolean;
     };
     /** An object for managing and communicating with Farming Simulator servers, keyed by their abbreviated acronym */
-    readonly fs22: Record<string, FSServer>;
-    /** An object for managing and communicating with Farming Simulator servers, keyed by their abbreviated acronym */
-    readonly fs25: Record<string, FSServer>;
+    readonly fs: Record<string, FSServer>;
     /** A list of user IDs that are considered developers of this bot */
     readonly devWhitelist: Snowflake[];
     readonly whitelist: {

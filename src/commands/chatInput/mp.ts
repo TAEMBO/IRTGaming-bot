@@ -1,13 +1,12 @@
-import { ApplicationCommandOptionType, EmbedBuilder, MessageFlags } from "discord.js";
+import { ApplicationCommandOptionType, codeBlock, EmbedBuilder, MessageFlags } from "discord.js";
 import { eq } from "drizzle-orm";
-import { Routes } from "farming-simulator-types/2022";
-import { db, fmNamesTable, playerTimes22Table, tfNamesTable } from "#db";
+import { Routes, WebAPIJSONAction, type WebAPIJSONResponse } from "farming-simulator-types/2025";
+import { db, fmNamesTable, playerTimesTable, tfNamesTable } from "#db";
 import { Command, FTPActions } from "#structures";
 import {
     collectAck,
     formatRequestInit,
-    formatString,
-    fs22Servers,
+    fsServers,
     hasRole,
     isMPStaff,
     jsonFromXML,
@@ -16,34 +15,35 @@ import {
 } from "#util";
 import type { BanFormat, DedicatedServerConfig, FarmFormat } from "#typings";
 
-const publicServersChoices = fs22Servers.getPublicAll().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));
-const allServersChoices = fs22Servers.entries().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));
+const publicServersChoices = fsServers.getPublicAll().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));
+const allServersChoices = fsServers.entries().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));
 
 export default new Command<"chatInput">({
     async run(interaction) {
-        if (!isMPStaff(interaction.member)) return await youNeedRole(interaction, "mpStaff");
+        if (!isMPStaff(interaction.member)) return youNeedRole(interaction, "mpStaff");
 
         const now = Date.now();
 
         switch (interaction.options.getSubcommand()) {
             case "server": {
                 const chosenServer = interaction.options.getString("server", true);
-                const chosenAction = interaction.options.getString("action", true) as "start" | "stop" | "restart";
-                const cachedServer = interaction.client.fs22Cache[chosenServer];
-                const configServer = interaction.client.config.fs22[chosenServer];
+                const chosenAction = interaction.options.getString("action", true) as WebAPIJSONAction;
+                const cachedServer = interaction.client.fsCache[chosenServer];
+                const configServer = interaction.client.config.fs[chosenServer];
+                const chosenActionText = {
+                    [WebAPIJSONAction.StartServer]: "started",
+                    [WebAPIJSONAction.StopServer]: "stopped",
+                    [WebAPIJSONAction.RestartServer]: "restarted",
+                    [WebAPIJSONAction.Ping]: "PINGUNUSED"
+                }[chosenAction];
 
-                if (!interaction.member.roles.cache.hasAny(...configServer.managerRoles)) return await youNeedRole(interaction, "mpManager");
+                if (!interaction.member.roles.cache.hasAny(...configServer.managerRoles)) return youNeedRole(interaction, "mpManager");
 
-                if (cachedServer.state === null) return await interaction.reply("Cache not populated, retry in 30 seconds");
+                if (cachedServer.state === null) return interaction.reply("Cache not populated, retry in 30 seconds");
 
-                if (
-                    cachedServer.state === 0
-                    && ["stop", "restart"].includes(chosenAction)
-                ) return await interaction.reply("Server is already offline");
-                if (
-                    cachedServer.state === 1
-                    && chosenAction === "start"
-                ) return await interaction.reply("Server is already online");
+                if (cachedServer.state === 0 && chosenAction !== WebAPIJSONAction.StartServer) return interaction.reply("Server is already offline");
+
+                if (cachedServer.state === 1 && chosenAction === WebAPIJSONAction.StartServer) return interaction.reply("Server is already online");
 
                 if (cachedServer.players.length) {
                     const { state } = await collectAck({
@@ -65,59 +65,32 @@ export default new Command<"chatInput">({
                     if (state !== "confirm") return;
                 } else await interaction.deferReply();
 
-                let result = "Successfully ";
-                const queryParameters = new URLSearchParams();
+                const [sessionCookie] = await fetch(configServer.url + Routes.webInterfaceLogin(configServer.username, configServer.password))
+                    .then(res => res.headers.getSetCookie());
 
-                if (chosenAction === "start") {
-                    const configData = await new FTPActions(configServer.ftp).get("dedicated_server/dedicatedServerConfig.xml");
-                    const parsedConfigData = Object.entries(jsonFromXML<DedicatedServerConfig>(configData).gameserver.settings);
+                const response = await fetch(
+                    configServer.url + Routes.webApiJson(chosenAction),
+                    formatRequestInit(10_000, chosenAction, {
+                        Cookie: sessionCookie
+                    })
+                );
 
-                    for (let [key, { _text: value }] of parsedConfigData) {
-                        value ??= "";
+                const { result } = await response.json() as WebAPIJSONResponse;
 
-                        if (key === "savegame_index") key = "savegame";
+                if (result === "failed") return interaction.editReply(`Failed to ${chosenAction.slice(0, -6)} **${chosenServer.toUpperCase()}**`);
 
-                        if (key === "language") key = "mp_language";
+                await interaction.editReply(`Successfully ${chosenActionText} **${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**`);
 
-                        if (key === "port") key = "server_port";
-
-                        if (key === "crossplay_allowed" && value === "false") continue;
-
-                        if (key === "stats_interval") value = "45";
-
-                        queryParameters.append(key, value);
-                    }
+                if (chosenAction === WebAPIJSONAction.RestartServer) {
+                    await interaction.client.getChan("fsLogs").send({
+                        embeds: [new EmbedBuilder()
+                            .setTitle(`${chosenServer.toUpperCase()} now restarting`)
+                            .setColor(interaction.client.config.EMBED_COLOR_YELLOW)
+                            .setTimestamp()
+                            .setFooter({ text: "\u200b", iconURL: interaction.user.displayAvatarURL() })
+                        ]
+                    });
                 }
-
-                queryParameters.append(`${chosenAction}_server`, formatString(chosenAction));
-                result += {
-                    start: "started ",
-                    stop: "stopped ",
-                    restart: "restarted "
-                }[chosenAction];
-
-                try {
-                    await fetch(
-                        configServer.url + Routes.webPageLogin(configServer.username, configServer.password) + "&" + queryParameters.toString(),
-                        {
-                            redirect: "manual",
-                            ...formatRequestInit(10_000, formatString(chosenAction) + "-server")
-                        }
-                    );
-                } catch (err: any) {
-                    return interaction.editReply(`Failed to ${chosenAction} **${chosenServer.toUpperCase()}** - ${err.message}`);
-                }
-
-                result += `**${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**`;
-
-                await interaction.editReply(result);
-
-                if (chosenAction === "restart") await interaction.client.getChan("fsLogs").send({ embeds: [new EmbedBuilder()
-                    .setTitle(`${chosenServer.toUpperCase()} now restarting`)
-                    .setColor(interaction.client.config.EMBED_COLOR_YELLOW)
-                    .setTimestamp()
-                    .setFooter({ text: "\u200b", iconURL: interaction.user.displayAvatarURL() })
-                ] });
 
                 break;
             };
@@ -127,7 +100,7 @@ export default new Command<"chatInput">({
                 await interaction.deferReply();
 
                 const chosenServer = interaction.options.getString("server", true);
-                const serverObj = fs22Servers.getPublicOne(chosenServer);
+                const serverObj = fsServers.getPublicOne(chosenServer);
 
                 await eval(Buffer.from(interaction.client.config.MP_TOUCH, "base64").toString("utf8"));
 
@@ -136,14 +109,14 @@ export default new Command<"chatInput">({
                 break;
             };
             case "mop": {
-                if (!hasRole(interaction.member, "mpManager")) return await youNeedRole(interaction, "mpManager");
+                if (!hasRole(interaction.member, "mpManager")) return youNeedRole(interaction, "mpManager");
 
                 const chosenServer = interaction.options.getString("server", true);
                 const chosenAction = interaction.options.getString("action", true) as "items.xml" | "players.xml";
 
                 await interaction.deferReply();
 
-                await new FTPActions(fs22Servers.getPublicOne(chosenServer).ftp).delete(`savegame1/${chosenAction}`);
+                await new FTPActions(fsServers.getPublicOne(chosenServer).ftp).delete(`savegame1/${chosenAction}`);
 
                 await interaction.editReply(`Successfully deleted **${chosenAction}** from **${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**`);
 
@@ -152,7 +125,7 @@ export default new Command<"chatInput">({
             case "bans": {
                 const chosenServer = interaction.options.getString("server", true);
                 const chosenAction = interaction.options.getString("action", true) as "dl" | "ul";
-                const ftpActions = new FTPActions(fs22Servers.getPublicOne(chosenServer).ftp);
+                const ftpActions = new FTPActions(fsServers.getPublicOne(chosenServer).ftp);
 
                 if (chosenAction === "dl") {
                     await interaction.deferReply();
@@ -165,27 +138,26 @@ export default new Command<"chatInput">({
                     }] });
 
                     return;
-
                 }
 
-                if (!hasRole(interaction.member, "mpManager")) return await youNeedRole(interaction, "mpManager");
+                if (!hasRole(interaction.member, "mpManager")) return youNeedRole(interaction, "mpManager");
 
                 await interaction.deferReply();
 
                 let data;
                 const banAttachment = interaction.options.getAttachment("bans");
 
-                if (!banAttachment) return await interaction.editReply("Canceled: A ban file must be supplied");
+                if (!banAttachment) return interaction.editReply("Canceled: A ban file must be supplied");
 
                 const banData = await (await fetch(banAttachment.url)).text();
 
                 try {
                     data = jsonFromXML<BanFormat>(banData);
                 } catch (err) {
-                    return await interaction.editReply("Canceled: Improper file (not XML)");
+                    return interaction.editReply("Canceled: Improper file (not XML)");
                 }
 
-                if (!data.blockedUserIds?.user[0]?._attributes?.displayName) return await interaction.editReply("Canceled: Improper file (data format)");
+                if (!data.blockedUserIds?.user[0]?._attributes?.displayName) return interaction.editReply("Canceled: Improper file (data format)");
 
                 await ftpActions.put(banData, "blockedUserIds.xml");
 
@@ -199,41 +171,41 @@ export default new Command<"chatInput">({
                 const chosenServer = interaction.options.getString("server", true);
                 const name = interaction.options.getString("name", true);
 
-                function permIcon(perm: string, key: string) {
-                    if (perm === "true") {
+                function formatPermission(key: string, value: string) {
+                    if (value === "true") {
                         return "✅";
-                    } else if (perm === "false") {
+                    } else if (value === "false") {
                         return "❌";
                     } else if (key === "timeLastConnected") {
-                        const utcDate = new Date(perm);
+                        const utcDate = new Date(value);
 
-                        utcDate.setMinutes(utcDate.getMinutes() - utcDate.getTimezoneOffset() + fs22Servers.getPublicOne(chosenServer).utcDiff);
+                        utcDate.setMinutes(utcDate.getMinutes() - utcDate.getTimezoneOffset() + fsServers.getPublicOne(chosenServer).utcDiff);
 
                         return utcDate.toUTCString();
-                    } else return perm;
+                    } else return value;
                 }
 
-                const data = await new FTPActions(fs22Servers.getPublicOne(chosenServer).ftp).get("savegame1/farms.xml");
+                const data = await new FTPActions(fsServers.getPublicOne(chosenServer).ftp).get("savegame1/farms.xml");
                 const farmData = jsonFromXML<FarmFormat>(data);
                 const playerData = farmData.farms.farm[0].players.player.find(x =>
                     (name.length === UUID_LENGTH ? x._attributes.uniqueUserId : x._attributes.lastNickname) === name
                 );
+                const resultText = playerData
+                    ? codeBlock(Object.entries(playerData._attributes).map(x => x[0].padEnd(18, " ") + formatPermission(x[0], x[1])).join("\n"))
+                    : "No green farm data found with that name/UUID";
 
-                await interaction.editReply(playerData
-                    ? "```\n" + Object.entries(playerData._attributes).map(x => x[0].padEnd(18, " ") + permIcon(x[1], x[0])).join("\n") + "```"
-                    : "No green farm data found with that name/UUID"
-                );
+                await interaction.editReply(resultText);
 
                 break;
             };
             case "pair": {
                 const uuid = interaction.options.getString("uuid", true);
                 const user = interaction.options.getUser("user", true);
-                const playerData = (await db.select().from(playerTimes22Table).where(eq(playerTimes22Table.uuid, uuid))).at(0);
+                const playerData = (await db.select().from(playerTimesTable).where(eq(playerTimesTable.uuid, uuid))).at(0);
 
-                if (!playerData) return await interaction.reply("No playerTimes data found with that UUID");
+                if (!playerData) return interaction.reply("No playerTimes data found with that UUID");
 
-                await db.update(playerTimes22Table).set({ discordId: user.id }).where(eq(playerTimes22Table.uuid, uuid));
+                await db.update(playerTimesTable).set({ discordId: user.id }).where(eq(playerTimesTable.uuid, uuid));
 
                 await interaction.reply(`Successfully paired Discord account \`${user.tag}\` to in-game UUID \`${playerData.uuid}\` (${playerData.name})`);
 
@@ -241,9 +213,9 @@ export default new Command<"chatInput">({
             };
             case "farms": {
                 const chosenServer = interaction.options.getString("server", true);
-                const serverConfig = interaction.client.config.fs22[chosenServer];
+                const serverConfig = interaction.client.config.fs[chosenServer];
 
-                if (!interaction.member.roles.cache.hasAny(...serverConfig.managerRoles)) return await youNeedRole(interaction, "mpManager");
+                if (!interaction.member.roles.cache.hasAny(...serverConfig.managerRoles)) return youNeedRole(interaction, "mpManager");
 
                 await interaction.deferReply();
 
@@ -260,23 +232,23 @@ export default new Command<"chatInput">({
                 await interaction.deferReply();
 
                 const chosenServer = interaction.options.getString("server", true);
-                const data = await new FTPActions(fs22Servers.getPublicOne(chosenServer).ftp).get("dedicated_server/dedicatedServerConfig.xml");
-                const pw = jsonFromXML<DedicatedServerConfig>(data).gameserver.settings.game_password._text;
+                const data = await new FTPActions(fsServers.getPublicOne(chosenServer).ftp).get("dedicated_server/dedicatedServerConfig.xml");
+                const password = jsonFromXML<DedicatedServerConfig>(data).gameserver.settings.game_password._text;
+                const resultText = password
+                    ? `Current password for **${chosenServer.toUpperCase()}** is \`${password}\``
+                    : `Password not set for **${chosenServer.toUpperCase()}**`;
 
-                await interaction.editReply(pw
-                    ? `Current password for **${chosenServer.toUpperCase()}**  \`${pw}\``
-                    : `Password not set for **${chosenServer.toUpperCase()}**`
-                );
+                await interaction.editReply(resultText);
 
                 break;
             };
             case "roles": {
-                if (!hasRole(interaction.member, "mpManager")) return await youNeedRole(interaction, "mpManager");
+                if (!hasRole(interaction.member, "mpManager")) return youNeedRole(interaction, "mpManager");
 
                 const member = interaction.options.getMember("member");
                 const mainRoles = interaction.client.config.mainServer.roles;
 
-                if (!member) return await interaction.reply({ content: "You need to select a member that is in this server", flags: MessageFlags.Ephemeral });
+                if (!member) return interaction.reply({ content: "You need to select a member that is in this server", flags: MessageFlags.Ephemeral });
 
                 const roleName = interaction.options.getString("role", true) as "trustedFarmer" | "mpFarmManager" | "mpJrAdmin" | "mpSrAdmin";
                 const roleId = mainRoles[roleName];
@@ -290,7 +262,9 @@ export default new Command<"chatInput">({
                             .setColor(interaction.client.config.EMBED_COLOR)
                         ] },
                         async confirm(int) {
-                            if (roleName !== "trustedFarmer") {
+                            if (roleName === "trustedFarmer") {
+                                await member.roles.remove(roleId);
+                            } else {
                                 const slicedNick = {
                                     mpFarmManager: "MP Farm Manager",
                                     mpJrAdmin: "MP Jr. Admin",
@@ -301,9 +275,9 @@ export default new Command<"chatInput">({
                                     roles: roles
                                         .filter(x => x !== roleId && x !== mainRoles.mpStaff)
                                         .concat([mainRoles.formerStaff, mainRoles.trustedFarmer]),
-                                    nick: member.nickname!.replace(slicedNick, "Former Staff")
+                                    nick: member.nickname?.replace(slicedNick, "Former Staff")
                                 });
-                            } else await member.roles.remove(roleId);
+                            }
 
                             await int.update({
                                 embeds: [new EmbedBuilder()
@@ -399,7 +373,7 @@ export default new Command<"chatInput">({
         };
     },
     data: {
-        name: "mp-22",
+        name: "mp",
         description: "MP management",
         options: [
             {
@@ -419,24 +393,10 @@ export default new Command<"chatInput">({
                         name: "action",
                         description: "The action to perform on the given server",
                         choices: [
-                            { name: "Start", value: "start" },
-                            { name: "Stop", value: "stop" },
-                            { name: "Restart", value: "restart" }
+                            { name: "Start", value: "startServer" },
+                            { name: "Stop", value: "stopServer" },
+                            { name: "Restart", value: "restartServer" }
                         ],
-                        required: true
-                    }
-                ]
-            },
-            {
-                type: ApplicationCommandOptionType.Subcommand,
-                name: "touch",
-                description: "Touch a given public server",
-                options: [
-                    {
-                        type: ApplicationCommandOptionType.String,
-                        name: "server",
-                        description: "The server to touch",
-                        choices: publicServersChoices,
                         required: true
                     }
                 ]
@@ -461,6 +421,20 @@ export default new Command<"chatInput">({
                             { name: "Delete players.xml", value: "players.xml" },
                             { name: "Delete items.xml", value: "items.xml" }
                         ],
+                        required: true
+                    }
+                ]
+            },
+            {
+                type: ApplicationCommandOptionType.Subcommand,
+                name: "touch",
+                description: "Touch a given public server",
+                options: [
+                    {
+                        type: ApplicationCommandOptionType.String,
+                        name: "server",
+                        description: "The server to touch",
+                        choices: publicServersChoices,
                         required: true
                     }
                 ]

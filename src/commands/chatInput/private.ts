@@ -8,13 +8,16 @@ import {
     roleMention,
     MessageFlags
 } from "discord.js";
+import { Routes } from "farming-simulator-types/2025";
 import { Command } from "#structures";
-import { collectAck, fs22Servers, onPrivate22Farms, youNeedRole } from "#util";
+import { collectAck, formatRequestInit, fsServers, onPrivateFarms, youNeedRole } from "#util";
+
+const modLinkRegex = new RegExp(/https:\/\/(www\.)?farming-simulator\.com\/mod\.php\?mod_id=(?<code>\d+)/);
 
 export default new Command<"chatInput">({
     async autocomplete(interaction) {
         const serverAcro = interaction.options.getSubcommandGroup(true);
-        const serverObj = fs22Servers.getPrivateOne(serverAcro);
+        const serverObj = fsServers.getPrivateOne(serverAcro);
         const farmsData = Object.entries(serverObj.farms);
         const farmRoles = farmsData.map(x => interaction.client.mainGuild().roles.cache.get(x[1].roleId)!);
 
@@ -23,7 +26,7 @@ export default new Command<"chatInput">({
                 const displayedRoles = interaction.member.roles.cache.hasAny(...serverObj.managerRoles)
                     ? farmRoles
                     : interaction.member.roles.cache.has(serverObj.farmOwnerRole)
-                        ? farmRoles.filter(x => onPrivate22Farms(interaction.member, serverAcro).some(y => x.id === y))
+                        ? farmRoles.filter(x => onPrivateFarms(interaction.member, serverAcro).some(y => x.id === y))
                         : [];
 
                 await interaction.respond(displayedRoles.map(({ name, id }) => ({ name, value: id })));
@@ -64,8 +67,11 @@ export default new Command<"chatInput">({
         }
     },
     async run(interaction) {
-        const serverAcro = interaction.options.getSubcommandGroup(true);
-        const serverObj = fs22Servers.getPrivateOne(serverAcro);
+        const serverAcro = interaction.options.getSubcommandGroup();
+
+        if (!serverAcro) return interaction.reply({ content: "Incomplete command", flags: MessageFlags.Ephemeral });
+
+        const serverObj = fsServers.getPrivateOne(serverAcro);
 
         switch (interaction.options.getSubcommand()) {
             case "member": {
@@ -102,7 +108,7 @@ export default new Command<"chatInput">({
                         .setColor(interaction.client.config.EMBED_COLOR)
                     ] },
                     async confirm(int) {
-                        const rolesToRemove = onPrivate22Farms(member, serverAcro).length === 1
+                        const rolesToRemove = onPrivateFarms(member, serverAcro).length === 1
                             ? [roleId, serverObj.memberRole]
                             : [roleId];
                         const displayedRoles = rolesToRemove.map(roleMention).join(" and ");
@@ -186,6 +192,38 @@ export default new Command<"chatInput">({
 
                 break;
             };
+            case "install-mod": {
+                if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return youNeedRole(interaction, "mpManager");
+
+                if (interaction.client.fsCache[serverAcro].state === 1) return interaction.reply({
+                    content: "Cannot install mod while server is online!",
+                    flags: MessageFlags.Ephemeral
+                });
+
+                const modLink = interaction.options.getString("link", true);
+                const regexResult = modLinkRegex.exec(modLink);
+                const foundModId = regexResult?.groups?.code;
+
+                if (!regexResult || !foundModId) return interaction.reply({
+                    content: "Invalid link provided! Must be ModHub link from <https://farming-simulator.com/mods.php>",
+                    flags: MessageFlags.Ephemeral
+                });
+
+                await interaction.deferReply();
+
+                const res = await fetch(
+                    serverObj.url + Routes.startModDownload(serverObj.username, serverObj.password, foundModId),
+                    formatRequestInit(10_000, `ModInstall-${foundModId}`)
+                ).catch(() => null);
+
+                if (res?.status === 200) {
+                    await interaction.editReply("Successfully started installing mod");
+                } else {
+                    await interaction.editReply("Failed to start installing mod");
+                }
+
+                break;
+            }
             case "rename-role": {
                 if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return youNeedRole(interaction, "mpManager");
 
@@ -253,8 +291,8 @@ export default new Command<"chatInput">({
                                 allow: PermissionFlagsBits.ViewChannel,
                                 type: OverwriteType.Role
                             },
-                            {
-                                id: interaction.client.config.mainServer.roles.mpManager,
+                            ...serverObj.managerRoles.map(roleId => ({
+                                id: roleId,
                                 allow: [
                                     PermissionFlagsBits.ManageChannels,
                                     PermissionFlagsBits.ManageMessages,
@@ -263,7 +301,7 @@ export default new Command<"chatInput">({
                                     PermissionFlagsBits.ViewChannel,
                                 ],
                                 type: OverwriteType.Role
-                            }
+                            }))
                         ]
                     });
 
@@ -282,9 +320,9 @@ export default new Command<"chatInput">({
         }
     },
     data: {
-        name: "private-22",
+        name: "private",
         description: "Private server management",
-        options: fs22Servers.getPrivateAll().map(([serverAcro, server]) => ({
+        options: fsServers.getPrivateAll().map(([serverAcro, server]) => ({
             type: ApplicationCommandOptionType.SubcommandGroup,
             name: serverAcro,
             description: `${server.fullName} management`,
@@ -318,6 +356,19 @@ export default new Command<"chatInput">({
                             type: ApplicationCommandOptionType.User,
                             name: "member",
                             description: `The member to add or remove the ${serverAcro.toUpperCase()} Farm Owner role from`,
+                            required: true
+                        }
+                    ]
+                },
+                {
+                    type: ApplicationCommandOptionType.Subcommand,
+                    name: "install-mod",
+                    description: "Install a ModHub mod onto the server",
+                    options: [
+                        {
+                            type: ApplicationCommandOptionType.String,
+                            name: "link",
+                            description: "The ModHub mod link",
                             required: true
                         }
                     ]

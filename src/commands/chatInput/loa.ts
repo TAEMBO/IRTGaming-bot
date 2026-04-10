@@ -1,5 +1,5 @@
 import { Command } from "#structures";
-import { fs25Servers, hasRole, isMPStaff, youNeedRole } from "#util";
+import { fsServers, hasRole, isMPStaff, youNeedRole } from "#util";
 import { MessageFlags } from "discord.js";
 
 export default new Command<"chatInput">({
@@ -14,7 +14,7 @@ export default new Command<"chatInput">({
 
             if (hasRole(interaction.member, "mpManager")) returnedRoles.push(configRoles.mpManagement);
 
-            for (const [_, server] of fs25Servers.getPrivateAll()) {
+            for (const [_, server] of fsServers.getPrivateAll()) {
                 if (currentRoles.some(x => server.managerRoles.includes(x))) returnedRoles.push(server.supportRole);
             }
 
@@ -30,7 +30,7 @@ export default new Command<"chatInput">({
             const takenRoles = [
                 configRoles.mpStaff,
                 configRoles.mpManagement,
-                ...fs25Servers.getPrivateAll().map(x => x[1].supportRole)
+                ...fsServers.getPrivateAll().map(x => x[1].supportRole)
             ];
             const finalRoles = currentRoles.filter(x => !takenRoles.includes(x)).concat(configRoles.loa);
 

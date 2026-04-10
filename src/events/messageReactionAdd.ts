@@ -1,8 +1,8 @@
 import { Events } from "discord.js";
 import { Event } from "#structures";
-import { fs22Servers, fs25Servers, log, tempReply } from "#util";
+import { fsServers, log, tempReply } from "#util";
 
-const privateServers = [...fs22Servers.getPrivateAll(), ...fs25Servers.getPrivateAll()];
+const privateServers = fsServers.getPrivateAll();
 
 export default new Event({
     name: Events.MessageReactionAdd,

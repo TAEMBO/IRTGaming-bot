@@ -2,7 +2,7 @@ import { ApplicationCommandOptionType, channelMention, EmbedBuilder, hyperlink, 
 import { eq, ilike } from "drizzle-orm";
 import canvas from "@napi-rs/canvas";
 import { DSSExtension, type DSSResponse, Feeds, filterUnused } from "farming-simulator-types/2025";
-import { db, getTimeData25, playerTimes25Table } from "#db";
+import { db, getTimeData, playerTimesTable } from "#db";
 import { Command } from "#structures";
 import {
     FM_ICON,
@@ -12,7 +12,7 @@ import {
     formatDecorators,
     formatRequestInit,
     formatUptime,
-    fs25Servers,
+    fsServers,
     isMPStaff,
     log
 } from "#util";
@@ -32,19 +32,19 @@ export default new Command<"chatInput">({
         const focused = interaction.options.getFocused().trim();
         const data = await db
             .select()
-            .from(playerTimes25Table)
-            .where(ilike(playerTimes25Table.name, `%${focused}%`))
-            .orderBy(playerTimes25Table.name)
+            .from(playerTimesTable)
+            .where(ilike(playerTimesTable.name, `%${focused}%`))
+            .orderBy(playerTimesTable.name)
             .limit(25);
 
         await interaction.respond(data.map(x => ({ name: x.name, value: x.name })));
     },
     async run(interaction) {
         const subCmd = interaction.options.getSubcommand();
-        const dbData = await fetchDBData("25");
+        const dbData = await fetchDBData();
         const { categories, channels } = interaction.client.config.mainServer;
 
-        if (interaction.channel!.parentId === categories.fs25PublicMP && !isMPStaff(interaction.member)) {
+        if (interaction.channel!.parentId === categories.fsPublicMP && !isMPStaff(interaction.member)) {
             const link = hyperlink("restrictions", interaction.client.config.resources.statsRestrictionRedirect);
             const channel = channelMention(channels.botCommands);
 
@@ -57,11 +57,11 @@ export default new Command<"chatInput">({
         if (subCmd === "all") {
             await interaction.deferReply();
 
-            const embed = new EmbedBuilder().setColor("#a0c213");
+            const embed = new EmbedBuilder().setColor(interaction.client.config.EMBED_COLOR);
             const failedFooter: string[] = [];
             const totalUsedCount: number[] = [];
 
-            await Promise.allSettled(fs25Servers.entries().map(async ([serverAcro, server]) => {
+            await Promise.allSettled(fsServers.entries().map(async ([serverAcro, server]) => {
                 const serverAcroUp = serverAcro.toUpperCase();
                 let dss: DSSResponse;
 
@@ -104,21 +104,21 @@ export default new Command<"chatInput">({
             await interaction.editReply({ embeds: [embed] });
         } else if (subCmd === "playertimes") {
             const sortedPlayersData = dbData.playerTimesData.sort((a, b) =>
-                getTimeData25(b).reduce((x, y) => x + y[1].time, 0) - getTimeData25(a).reduce((x, y) => x + y[1].time, 0)
+                getTimeData(b).reduce((x, y) => x + y[1].time, 0) - getTimeData(a).reduce((x, y) => x + y[1].time, 0)
             );
             const playerName = interaction.options.getString("name");
-            const leaderboard = (data: (typeof playerTimes25Table.$inferSelect)[], isFirstField: boolean) => data.map((playerData, i) => [
+            const leaderboard = (data: (typeof playerTimesTable.$inferSelect)[], isFirstField: boolean) => data.map((playerData, i) => [
                 `**${i + (isFirstField ? 1 : 26)}.** \`${playerData.name}\``,
                 dbData.fmNamesData.some(x => x.name === playerData.name) ? FM_ICON : "",
                 dbData.tfNamesData.some(x => x.name === playerData.name) ? TF_ICON : "",
                 " - ",
-                formatPlayerTime(getTimeData25(playerData).reduce((x, y) => x + y[1].time, 0))
+                formatPlayerTime(getTimeData(playerData).reduce((x, y) => x + y[1].time, 0))
             ].join("")).join("\n");
 
             if (!playerName) {
                 return interaction.reply({ embeds: [new EmbedBuilder()
-                    .setColor("#a0c213")
-                    .setDescription(`Top 50 players with the most time spent on IRTGaming FS25 servers since ${interaction.client.config.PLAYERTIMES_START_DATE}`)
+                    .setColor(interaction.client.config.EMBED_COLOR)
+                    .setDescription(`Top 50 players with the most time spent on IRTGaming FS servers since ${interaction.client.config.PLAYERTIMES_START_DATE}`)
                     .addFields(
                         { name: "\u200b", value: leaderboard(sortedPlayersData.slice(0, 25), true), inline: true },
                         { name: "\u200b", value: leaderboard(sortedPlayersData.slice(25, 50), false) + "\u200b", inline: true })
@@ -126,10 +126,10 @@ export default new Command<"chatInput">({
             }
 
             const dbQuery = playerName.length === UUID_LENGTH && isMPStaff(interaction.member)
-                ? playerTimes25Table.uuid
-                : playerTimes25Table.name;
+                ? playerTimesTable.uuid
+                : playerTimesTable.name;
 
-            const playerData = (await db.select().from(playerTimes25Table).where(eq(dbQuery, playerName))).at(0);
+            const playerData = (await db.select().from(playerTimesTable).where(eq(dbQuery, playerName))).at(0);
 
             if (!playerData) {
                 return interaction.reply(
@@ -138,12 +138,12 @@ export default new Command<"chatInput">({
                 );
             }
 
-            const fsKeys = fs25Servers.keys();
-            const playerTimeData = getTimeData25(playerData).sort((a, b) => fsKeys.indexOf(a[0]) - fsKeys.indexOf(b[0]));
+            const fsKeys = fsServers.keys();
+            const playerTimeData = getTimeData(playerData).sort((a, b) => fsKeys.indexOf(a[0]) - fsKeys.indexOf(b[0]));
             const playerTimeDataTotal = playerTimeData.reduce((x, y) => x + y[1].time, 0);
-            const isInCache = (serverAcro: string) => interaction.client.fs25Cache[serverAcro].players.some(x => x.name === playerData.name);
+            const isInCache = (serverAcro: string) => interaction.client.fsCache[serverAcro].players.some(x => x.name === playerData.name);
             const formattedTimeData = playerTimeData
-                .filter(x => interaction.client.fs25Cache[x[0]])
+                .filter(x => interaction.client.fsCache[x[0]])
                 .map(([serverAcro, timeData]) => ({
                     name: serverAcro.toUpperCase(),
                     value: `Time - ${formatPlayerTime(timeData.time)}\nLast on - ${isInCache(serverAcro) ? "Right now" : time(timeData.lastOn, "R")}`
@@ -155,7 +155,7 @@ export default new Command<"chatInput">({
             if (dbData.tfNamesData.some(x => x.name === playerData.name)) decorators += TF_ICON;
 
             await interaction.reply({ embeds: [new EmbedBuilder()
-                .setColor("#a0c213")
+                .setColor(interaction.client.config.EMBED_COLOR)
                 .setTitle(
                     `Player - \`${playerData.name}\`${decorators}\n` +
                     `Leaderboard position - **#${sortedPlayersData.findIndex(x => x.name === playerData.name) + 1}**\n` +
@@ -166,14 +166,14 @@ export default new Command<"chatInput">({
                 .setFields(formattedTimeData)
             ] });
         } else {
-            const server = interaction.client.config.fs25[subCmd];
+            const server = interaction.client.config.fs[subCmd];
             const dss = await fetch(server.url + Feeds.dedicatedServerStats(server.code, DSSExtension.JSON), formatRequestInit(2_000, "Stats"))
                 .then(res => res.json() as Promise<DSSResponse>)
                 .catch(() => log("red", `Stats ${subCmd.toUpperCase()} failed`));
 
             if (!dss || !dss.slots) return await interaction.reply("Server did not respond");
 
-            const { graphPoints } = interaction.client.fs25Cache[subCmd];
+            const { graphPoints } = interaction.client.fsCache[subCmd];
 
             // handle negative days
             for (const [i, change] of graphPoints.entries()) if (change < 0) graphPoints[i] = graphPoints[i - 1] || graphPoints[i + 1] || 0;
@@ -331,10 +331,7 @@ export default new Command<"chatInput">({
             const serverTimeHrs = Math.floor(dss.server.dayTime / 3_600 / 1_000).toString().padStart(2, "0");
             const serverTimeMins = Math.floor((dss.server.dayTime / 60 / 1_000) % 60).toString().padStart(2, "0");
             const embed = new EmbedBuilder()
-                .setAuthor({
-                    iconURL: "https://cdn.discordapp.com/emojis/1255156362296426516.png",
-                    name: `${dss.slots.used}/${dss.slots.capacity} - ${serverTimeHrs}:${serverTimeMins}`
-                })
+                .setAuthor({ name: `${dss.slots.used}/${dss.slots.capacity} - ${serverTimeHrs}:${serverTimeMins}` })
                 .setTitle(dss.server.name ? server.fullName : "Offline")
                 .setDescription(dss.slots.used ? playerInfo.join("\n"): "*No players online*")
                 .setImage("attachment://FSStats.png")
@@ -345,8 +342,8 @@ export default new Command<"chatInput">({
                         : interaction.client.config.EMBED_COLOR_GREEN
                 );
 
-            if (!players.some(x => x.isAdmin) && interaction.client.fs25Cache[subCmd].lastAdmin) embed
-                .setTimestamp(interaction.client.fs25Cache[subCmd].lastAdmin)
+            if (!players.some(x => x.isAdmin) && interaction.client.fsCache[subCmd].lastAdmin) embed
+                .setTimestamp(interaction.client.fsCache[subCmd].lastAdmin)
                 .setFooter({ text: "Admin last on" });
 
             await interaction.reply({
@@ -359,7 +356,7 @@ export default new Command<"chatInput">({
         }
     },
     data: {
-        name: "stats-25",
+        name: "stats",
         description: "Get info on an FS server",
         options: [
             {
@@ -381,7 +378,7 @@ export default new Command<"chatInput">({
                     }
                 ]
             },
-            ...fs25Servers.entries().map(([serverAcro, { fullName }]) => ({
+            ...fsServers.entries().map(([serverAcro, { fullName }]) => ({
                 type: ApplicationCommandOptionType.Subcommand,
                 name: serverAcro,
                 description: `${fullName} server stats`

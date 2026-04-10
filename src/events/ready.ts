@@ -1,11 +1,10 @@
 import { codeBlock, type EmbedBuilder, Events, InteractionContextType, userMention } from "discord.js";
 import cron from "node-cron";
-import { crunchFarmData, fs22Loop, fs25Loop, fsLoopAll, ytFeed } from "#actions";
+import { crunchFarmData, fsLoop, fsLoopAll, ytFeed } from "#actions";
 import {
     dailyMsgsTable,
     db,
     executeReminder,
-    fetchFarmData,
     fmNamesTable,
     remindersTable,
     tfNamesTable,
@@ -14,7 +13,7 @@ import {
     whitelistTable
 } from "#db";
 import { Event } from "#structures";
-import { fetchDBData, fs22Servers, fs25Servers, log, REMINDERS_INTERVAL } from "#util";
+import { fetchDBData, fsServers, log, REMINDERS_INTERVAL } from "#util";
 
 export default new Event({
     name: Events.ClientReady,
@@ -88,19 +87,15 @@ export default new Event({
                 await channel.send(dailyMsgsMsg);
             }
 
-            if (client.config.toggles.fs22Loop) {
-                for (const [serverAcro, server] of fs22Servers.getCrunchable()) await fetchFarmData(client, serverAcro, server);
-            }
+            if (client.config.toggles.fsLoop) {
+                const dbData = await fetchDBData();
 
-            if (client.config.toggles.fs25Loop) {
-                const dbData = await fetchDBData("25");
-
-                for (const [serverAcro] of fs25Servers.getCrunchable()) await crunchFarmData(client, dbData, serverAcro);
+                for (const [serverAcro] of fsServers.getCrunchable()) await crunchFarmData(client, dbData, serverAcro);
             }
         }, { timezone: "UTC" });
 
         // Farming Simulator stats loop
-        if (client.config.toggles.fs22Loop || client.config.toggles.fs25Loop) setInterval(async () => {
+        if (client.config.toggles.fsLoop) setInterval(async () => {
             const dbData = {
                 fmNamesData: await db.select().from(fmNamesTable),
                 tfNamesData: await db.select().from(tfNamesTable),
@@ -109,13 +104,7 @@ export default new Event({
             };
             const embedBuffer: EmbedBuilder[] = [];
 
-            if (client.config.toggles.fs22Loop) {
-                for (const serverAcro of fs22Servers.keys()) await fs22Loop(client, dbData, serverAcro, embedBuffer);
-            }
-
-            if (client.config.toggles.fs25Loop) {
-                for (const serverAcro of fs25Servers.keys()) await fs25Loop(client, dbData, serverAcro, embedBuffer);
-            }
+            for (const serverAcro of fsServers.keys()) await fsLoop(client, dbData, serverAcro, embedBuffer);
 
             for (let i = 0; i < embedBuffer.length; i += 10) {
                 await client.getChan("fsLogs").send({ embeds: embedBuffer.slice(i, i + 10) });

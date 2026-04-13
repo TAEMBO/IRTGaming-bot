@@ -1,6 +1,10 @@
 import type { ChatInputCommandInteraction } from "discord.js";
 import { styleText } from "node:util";
+<<<<<<< HEAD
 import { ERR_TEXT, log } from "#util";
+=======
+import { ERR_TEXT, getConfigErrorMessage, log } from "#util";
+>>>>>>> e0ae159 (clean: config validation + crash fixes)
 
 export async function handleChatInputCommand(interaction: ChatInputCommandInteraction<"cached">) {
     const subCmd = interaction.options.getSubcommand(false);
@@ -29,6 +33,7 @@ export async function handleChatInputCommand(interaction: ChatInputCommandIntera
     } catch (err: any) {
         await interaction.client.errorLog(err);
 
+<<<<<<< HEAD
         if (interaction.replied || interaction.deferred) {
             await interaction.followUp(ERR_TEXT);
         } else {
@@ -36,3 +41,14 @@ export async function handleChatInputCommand(interaction: ChatInputCommandIntera
         }
     }
 }
+=======
+        const configErrorMessage = getConfigErrorMessage(err);
+
+        if (interaction.replied || interaction.deferred) {
+            await interaction.followUp(configErrorMessage ?? ERR_TEXT);
+        } else {
+            await interaction.reply(configErrorMessage ?? ERR_TEXT);
+        }
+    }
+}
+>>>>>>> e0ae159 (clean: config validation + crash fixes)

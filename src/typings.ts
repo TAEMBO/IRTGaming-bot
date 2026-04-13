@@ -5,7 +5,10 @@ import type {
     Snowflake,
     UserContextMenuCommandInteraction
 } from "discord.js";
+<<<<<<< HEAD
 import type config from "#config";
+=======
+>>>>>>> e0ae159 (clean: config validation + crash fixes)
 import type TClient from "./client.js";
 import { type PlayerUsed } from "farming-simulator-types/2025";
 import type { fmNamesTable, remindersTable, tfNamesTable, watchListTable, whitelistTable } from "#db";
@@ -202,16 +205,26 @@ export interface Config {
         readonly secret: string;
         readonly port: number;
     };
+<<<<<<< HEAD
     readonly resources: Record<keyof typeof config.resources, `https://${string}`>;
+=======
+    readonly resources: Record<string, string>;
+>>>>>>> e0ae159 (clean: config validation + crash fixes)
     readonly mainServer: {
         /** The ID of the guild that this bot is for */
         readonly id: Snowflake;
         readonly fsLoopMsgId: Snowflake;
         readonly mpStaffRoles: Array<keyof Config["mainServer"]["roles"]>;
         readonly dcStaffRoles: Array<keyof Config["mainServer"]["roles"]>;
+<<<<<<< HEAD
         readonly roles: Record<keyof typeof config.mainServer.roles, Snowflake>;
         readonly channels: Record<keyof typeof config.mainServer.channels, Snowflake>;
         readonly categories: Record<keyof typeof config.mainServer.categories, Snowflake>;
+=======
+        readonly roles: Record<string, Snowflake>;
+        readonly channels: Record<string, Snowflake>;
+        readonly categories: Record<string, Snowflake>;
+>>>>>>> e0ae159 (clean: config validation + crash fixes)
     };
 }
 
@@ -417,4 +430,8 @@ export interface DedicatedServerConfig {
             readonly mapFilename: { readonly _text: string; };
         };
     };
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> e0ae159 (clean: config validation + crash fixes)

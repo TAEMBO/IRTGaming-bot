@@ -9,7 +9,18 @@ import {
     roleMention
 } from "discord.js";
 import { Command } from "#structures";
+<<<<<<< HEAD
 import { fsServers } from "#util";
+=======
+import {
+    fsServers,
+    getEmbedColor,
+    requireConfigCategoryId,
+    requireConfigChannelId,
+    requireConfigResource,
+    requireConfigRoleId
+} from "#util";
+>>>>>>> e0ae159 (clean: config validation + crash fixes)
 
 const channelMentions = fsServers.getPublicAll().map(x => channelMention(x[1].channelId));
 const toDoDetails = fsServers.getPublicAll().map(([_, x]) => ({ name: x.fullName, value: "- " + x.todo.join("\n- ") }));
@@ -20,11 +31,20 @@ export default new Command<"chatInput">({
 
         switch (interaction.options.getString("question", true)) {
             case "staff": {
+<<<<<<< HEAD
+=======
+                const staffButtonRedirect = requireConfigResource(interaction.client, "faqStaffButtonRedirect");
+
+>>>>>>> e0ae159 (clean: config validation + crash fixes)
                 await interaction.reply({ content, components: [
                     new ActionRowBuilder<ButtonBuilder>().setComponents(
                         new ButtonBuilder()
                             .setStyle(ButtonStyle.Link)
+<<<<<<< HEAD
                             .setURL(interaction.client.config.resources.faqStaffButtonRedirect)
+=======
+                            .setURL(staffButtonRedirect)
+>>>>>>> e0ae159 (clean: config validation + crash fixes)
                             .setLabel("Apply for MP Staff")
                     )
                 ] });
@@ -32,15 +52,29 @@ export default new Command<"chatInput">({
                 break;
             };
             case "troll": {
+<<<<<<< HEAD
                 const isFromTicket = interaction.channel!.parentId === interaction.client.config.mainServer.categories.activeTickets;
                 const staffMention = roleMention(interaction.client.config.mainServer.roles.mpStaff);
+=======
+                const activeTickets = requireConfigCategoryId(interaction.client, "activeTickets");
+                const mpStaffRoleId = requireConfigRoleId(interaction.client, "mpStaff");
+                const mpRulesAndInfo = requireConfigChannelId(interaction.client, "mpRulesAndInfo");
+                const trollEmbedImage = requireConfigResource(interaction.client, "faqTrollEmbedImage");
+                const isFromTicket = interaction.channel!.parentId === activeTickets;
+                const staffMention = roleMention(mpStaffRoleId);
+>>>>>>> e0ae159 (clean: config validation + crash fixes)
                 const ticketTextOpening = isFromTicket ? "let us know" : `don't hesitate to send a report to ${channelMentions.join(" or ")}`;
                 const ticketTextClosing = isFromTicket ? "" : `, use the ${staffMention} tag as mentioned above`;
 
                 await interaction.reply({ content, embeds: [new EmbedBuilder()
                     .setTitle("Reporting trolls")
+<<<<<<< HEAD
                     .setColor(interaction.client.config.EMBED_COLOR)
                     .setImage(interaction.client.config.resources.faqTrollEmbedImage)
+=======
+                    .setColor(getEmbedColor(interaction.client))
+                    .setImage(trollEmbedImage)
+>>>>>>> e0ae159 (clean: config validation + crash fixes)
                     .setDescription(
                         `If a player is causing problems on a server, ${ticketTextOpening} with:\n\n` +
                         "- The name of the player\n" +
@@ -48,15 +82,26 @@ export default new Command<"chatInput">({
                         "- A picture or video as proof if possible\n" +
                         (isFromTicket ? "\n" : `- The ${staffMention} tag to notify staff\n\n`) +
                         `Please do not ping or DM individual staff members${ticketTextClosing}.\n` +
+<<<<<<< HEAD
                         `Check ${channelMention(interaction.client.config.mainServer.channels.mpRulesAndInfo)} to see what a good reason could be for a player report.`
+=======
+                        `Check ${channelMention(mpRulesAndInfo)} to see what a good reason could be for a player report.`
+>>>>>>> e0ae159 (clean: config validation + crash fixes)
                     )
                 ] });
 
                 break;
             };
             case "appeal": {
+<<<<<<< HEAD
                 const channel = channelMention(interaction.client.config.mainServer.channels.support);
                 const supportHyperlink = hyperlink("MP Support", interaction.client.config.resources.faqAppealSupportMsg);
+=======
+                const supportChannelId = requireConfigChannelId(interaction.client, "support");
+                const appealSupportMsg = requireConfigResource(interaction.client, "faqAppealSupportMsg");
+                const channel = channelMention(supportChannelId);
+                const supportHyperlink = hyperlink("MP Support", appealSupportMsg);
+>>>>>>> e0ae159 (clean: config validation + crash fixes)
 
                 await interaction.reply(
                     `${content} \n` +
@@ -69,7 +114,11 @@ export default new Command<"chatInput">({
             case "todo": {
                 await interaction.reply({ content, embeds: [new EmbedBuilder()
                     .setTitle("To-do")
+<<<<<<< HEAD
                     .setColor(interaction.client.config.EMBED_COLOR)
+=======
+                    .setColor(getEmbedColor(interaction.client))
+>>>>>>> e0ae159 (clean: config validation + crash fixes)
                     .setFooter({ text:
                         "Note that not every task listed might be available to do at the time, " +
                         "so do your due dilligence to see what may need doing in the moment."
@@ -80,7 +129,11 @@ export default new Command<"chatInput">({
                 break;
             };
             case "filters": {
+<<<<<<< HEAD
                 await interaction.reply(interaction.client.config.resources.faqFiltersEmbedImage);
+=======
+                await interaction.reply(requireConfigResource(interaction.client, "faqFiltersEmbedImage"));
+>>>>>>> e0ae159 (clean: config validation + crash fixes)
 
                 break;
             };

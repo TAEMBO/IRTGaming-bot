@@ -1,4 +1,8 @@
 export * from "./collectAck.js";
+<<<<<<< HEAD
+=======
+export * from "./config.js";
+>>>>>>> e0ae159 (clean: config validation + crash fixes)
 export * from "./constants.js";
 export * from "./fetchDBData.js";
 export * from "./formatDecorators.js";

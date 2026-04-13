@@ -13,6 +13,11 @@ import {
     formatRequestInit,
     formatUptime,
     fsServers,
+<<<<<<< HEAD
+=======
+    getConfigCategoryId,
+    getEmbedColor,
+>>>>>>> e0ae159 (clean: config validation + crash fixes)
     isMPStaff,
     log
 } from "#util";
@@ -42,11 +47,34 @@ export default new Command<"chatInput">({
     async run(interaction) {
         const subCmd = interaction.options.getSubcommand();
         const dbData = await fetchDBData();
+<<<<<<< HEAD
         const { categories, channels } = interaction.client.config.mainServer;
 
         if (interaction.channel!.parentId === categories.fsPublicMP && !isMPStaff(interaction.member)) {
             const link = hyperlink("restrictions", interaction.client.config.resources.statsRestrictionRedirect);
             const channel = channelMention(channels.botCommands);
+=======
+        const { channels } = interaction.client.config.mainServer;
+        const embedColor = getEmbedColor(interaction.client);
+        const embedColorDanger = getEmbedColor(interaction.client, "danger");
+        const embedColorWarning = getEmbedColor(interaction.client, "warning");
+        const embedColorSuccess = getEmbedColor(interaction.client, "success");
+        const fsPublicMP = getConfigCategoryId(interaction.client, "fsPublicMP");
+
+        if (fsPublicMP && interaction.channel!.parentId === fsPublicMP && !isMPStaff(interaction.member)) {
+            const restrictionRedirect = interaction.client.config.resources.statsRestrictionRedirect;
+            const botCommandsChannel = channels.botCommands;
+
+            if (!restrictionRedirect || !botCommandsChannel) {
+                return interaction.reply({
+                    content: "This command is restricted here, but the required restriction config is missing.",
+                    flags: MessageFlags.Ephemeral
+                });
+            }
+
+            const link = hyperlink("restrictions", restrictionRedirect);
+            const channel = channelMention(botCommandsChannel);
+>>>>>>> e0ae159 (clean: config validation + crash fixes)
 
             return interaction.reply({
                 content: `This command has ${link} set, please use ${channel} for ${interaction.client.getCommandMention("stats")} commands.`,
@@ -57,7 +85,11 @@ export default new Command<"chatInput">({
         if (subCmd === "all") {
             await interaction.deferReply();
 
+<<<<<<< HEAD
             const embed = new EmbedBuilder().setColor(interaction.client.config.EMBED_COLOR);
+=======
+            const embed = new EmbedBuilder().setColor(embedColor);
+>>>>>>> e0ae159 (clean: config validation + crash fixes)
             const failedFooter: string[] = [];
             const totalUsedCount: number[] = [];
 
@@ -117,7 +149,11 @@ export default new Command<"chatInput">({
 
             if (!playerName) {
                 return interaction.reply({ embeds: [new EmbedBuilder()
+<<<<<<< HEAD
                     .setColor(interaction.client.config.EMBED_COLOR)
+=======
+                    .setColor(embedColor)
+>>>>>>> e0ae159 (clean: config validation + crash fixes)
                     .setDescription(`Top 50 players with the most time spent on IRTGaming FS servers since ${interaction.client.config.PLAYERTIMES_START_DATE}`)
                     .addFields(
                         { name: "\u200b", value: leaderboard(sortedPlayersData.slice(0, 25), true), inline: true },
@@ -133,8 +169,14 @@ export default new Command<"chatInput">({
 
             if (!playerData) {
                 return interaction.reply(
+<<<<<<< HEAD
                     "No data found with that name. " +
                     hyperlink("Find out why.", interaction.client.config.resources.statsNoDataRedirect)
+=======
+                    interaction.client.config.resources.statsNoDataRedirect
+                        ? "No data found with that name. " + hyperlink("Find out why.", interaction.client.config.resources.statsNoDataRedirect)
+                        : "No data found with that name."
+>>>>>>> e0ae159 (clean: config validation + crash fixes)
                 );
             }
 
@@ -155,7 +197,11 @@ export default new Command<"chatInput">({
             if (dbData.tfNamesData.some(x => x.name === playerData.name)) decorators += TF_ICON;
 
             await interaction.reply({ embeds: [new EmbedBuilder()
+<<<<<<< HEAD
                 .setColor(interaction.client.config.EMBED_COLOR)
+=======
+                .setColor(embedColor)
+>>>>>>> e0ae159 (clean: config validation + crash fixes)
                 .setTitle(
                     `Player - \`${playerData.name}\`${decorators}\n` +
                     `Leaderboard position - **#${sortedPlayersData.findIndex(x => x.name === playerData.name) + 1}**\n` +
@@ -251,9 +297,15 @@ export default new Command<"chatInput">({
 
             const gradient = ctx.createLinearGradient(0, graphOrigin[1], 0, graphOrigin[1] + graphSize[1]);
 
+<<<<<<< HEAD
             gradient.addColorStop(1 / 16, interaction.client.config.EMBED_COLOR_RED);
             gradient.addColorStop(5 / 16, interaction.client.config.EMBED_COLOR_YELLOW);
             gradient.addColorStop(12 / 16, interaction.client.config.EMBED_COLOR_GREEN);
+=======
+            gradient.addColorStop(1 / 16, String(embedColorDanger));
+            gradient.addColorStop(5 / 16, String(embedColorWarning));
+            gradient.addColorStop(12 / 16, String(embedColorSuccess));
+>>>>>>> e0ae159 (clean: config validation + crash fixes)
 
             let lastCoords: [number, number] | [] = [];
 
@@ -336,10 +388,17 @@ export default new Command<"chatInput">({
                 .setDescription(dss.slots.used ? playerInfo.join("\n"): "*No players online*")
                 .setImage("attachment://FSStats.png")
                 .setColor(dss.slots.used === dss.slots.capacity
+<<<<<<< HEAD
                     ? interaction.client.config.EMBED_COLOR_RED
                     : dss.slots.used > (dss.slots.capacity / 2)
                         ? interaction.client.config.EMBED_COLOR_YELLOW
                         : interaction.client.config.EMBED_COLOR_GREEN
+=======
+                    ? embedColorDanger
+                    : dss.slots.used > (dss.slots.capacity / 2)
+                        ? embedColorWarning
+                        : embedColorSuccess
+>>>>>>> e0ae159 (clean: config validation + crash fixes)
                 );
 
             if (!players.some(x => x.isAdmin) && interaction.client.fsCache[subCmd].lastAdmin) embed

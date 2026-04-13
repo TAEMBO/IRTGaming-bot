@@ -2,6 +2,10 @@ import { MessageFlags, time } from "discord.js";
 import { eq } from "drizzle-orm";
 import { db, userLevelsTable } from "#db";
 import { Command } from "#structures";
+<<<<<<< HEAD
+=======
+import { requireConfigResource } from "#util";
+>>>>>>> e0ae159 (clean: config validation + crash fixes)
 
 export default new Command<"chatInput">({
     async run(interaction) {
@@ -15,7 +19,11 @@ export default new Command<"chatInput">({
         if (!eligibleMsgs) deniedMsgs.push("be more active on the Discord server");
 
         if (!deniedMsgs.length) {
+<<<<<<< HEAD
             await interaction.reply({ content: interaction.client.config.resources.applyGoogleForm, flags: MessageFlags.Ephemeral });
+=======
+            await interaction.reply({ content: requireConfigResource(interaction.client, "applyGoogleForm"), flags: MessageFlags.Ephemeral });
+>>>>>>> e0ae159 (clean: config validation + crash fixes)
             await applicationLogs.send(`${interaction.user} (${interaction.user.tag}) opened an MP Staff application on ${time()}`);
         } else {
             await interaction.reply({ content: `You need to ${deniedMsgs.join(" and ")} before applying`, flags: MessageFlags.Ephemeral });

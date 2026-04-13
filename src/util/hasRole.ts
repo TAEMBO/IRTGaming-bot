@@ -9,5 +9,12 @@ import type { Config } from "#typings";
 export function hasRole(guildMember: GuildMember | null, role: keyof Config["mainServer"]["roles"]) {
     if (!guildMember) return false;
 
+<<<<<<< HEAD
     return guildMember.roles.cache.has(guildMember.client.config.mainServer.roles[role]);
 }
+=======
+    const roleId = guildMember.client.config.mainServer.roles[role];
+
+    return typeof roleId === "string" && guildMember.roles.cache.has(roleId);
+}
+>>>>>>> e0ae159 (clean: config validation + crash fixes)

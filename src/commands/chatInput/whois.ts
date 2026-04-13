@@ -10,7 +10,11 @@ import {
     ApplicationCommandOptionType
 } from "discord.js";
 import { Command } from "#structures";
+<<<<<<< HEAD
 import { formatString, formatUser } from "#util";
+=======
+import { formatString, formatUser, getConfigResource, getEmbedColor } from "#util";
+>>>>>>> e0ae159 (clean: config validation + crash fixes)
 import type { ApplicationRPC } from "#typings";
 
 const activityImages: Record<string, string> = {
@@ -77,7 +81,11 @@ export default new Command<"chatInput">({
                 .setURL(`https://discord.com/users/${user.id}`)
                 .setDescription(formatUser(user))
                 .addFields({ name: `🔹 ${user.bot ? "Bot" : "Account"} created`, value: time(user.createdAt, "R") })
+<<<<<<< HEAD
                 .setColor(interaction.client.config.EMBED_COLOR)
+=======
+                .setColor(getEmbedColor(interaction.client))
+>>>>>>> e0ae159 (clean: config validation + crash fixes)
                 .setImage(user.bannerURL({ extension: "png", size: 1024 }) ?? null);
 
             if (appData) embed.addFields(...appData);
@@ -143,8 +151,14 @@ export default new Command<"chatInput">({
 
         for (const activity of member.presence.activities) {
             if (activity.type === ActivityType.Listening && activity.details && activity.assets && activity.name === "Spotify") {
+<<<<<<< HEAD
                 embeds.push(new EmbedBuilder()
                     .setAuthor({ name: activity.name, iconURL: interaction.client.config.resources.whoisSpotifyEmbedAuthorImage })
+=======
+                const spotifyAuthorImage = getConfigResource(interaction.client, "whoisSpotifyEmbedAuthorImage");
+                embeds.push(new EmbedBuilder()
+                    .setAuthor(spotifyAuthorImage ? { name: activity.name, iconURL: spotifyAuthorImage } : { name: activity.name })
+>>>>>>> e0ae159 (clean: config validation + crash fixes)
                     .setColor("#1DB954")
                     .setTitle(activity.details)
                     .setURL(`https://open.spotify.com/track/${activity.syncId}`)

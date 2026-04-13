@@ -1,6 +1,10 @@
 import type { CombinedContextMenuCommandInteraction } from "#typings";
 import { styleText } from "node:util";
+<<<<<<< HEAD
 import { ERR_TEXT, log } from "#util";
+=======
+import { ERR_TEXT, getConfigErrorMessage, log } from "#util";
+>>>>>>> e0ae159 (clean: config validation + crash fixes)
 
 export async function handleContextMenuCommand(interaction: CombinedContextMenuCommandInteraction) {
     const command = interaction.client.contextMenuCommands.get(interaction.commandName);
@@ -28,6 +32,7 @@ export async function handleContextMenuCommand(interaction: CombinedContextMenuC
     } catch (err: any) {
         await interaction.client.errorLog(err);
 
+<<<<<<< HEAD
         if (interaction.replied || interaction.deferred) {
             await interaction.followUp(ERR_TEXT);
         } else {
@@ -35,3 +40,14 @@ export async function handleContextMenuCommand(interaction: CombinedContextMenuC
         }
     }
 }
+=======
+        const configErrorMessage = getConfigErrorMessage(err);
+
+        if (interaction.replied || interaction.deferred) {
+            await interaction.followUp(configErrorMessage ?? ERR_TEXT);
+        } else {
+            await interaction.reply(configErrorMessage ?? ERR_TEXT);
+        }
+    }
+}
+>>>>>>> e0ae159 (clean: config validation + crash fixes)

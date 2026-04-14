@@ -5,10 +5,6 @@ import type {
     Snowflake,
     UserContextMenuCommandInteraction
 } from "discord.js";
-<<<<<<< HEAD
-import type config from "#config";
-=======
->>>>>>> e0ae159 (clean: config validation + crash fixes)
 import type TClient from "./client.js";
 import { type PlayerUsed } from "farming-simulator-types/2025";
 import type { fmNamesTable, remindersTable, tfNamesTable, watchListTable, whitelistTable } from "#db";
@@ -25,34 +21,10 @@ declare module "discord.js" {
         readonly inviteCache: Collection<string, CachedInvite>;
         readonly remindersCache: Collection<typeof remindersTable.$inferSelect.id, typeof remindersTable.$inferSelect>;
 
-        /**
-         * Get a text channel via config
-         * @param channelName
-         */
         getChan(...args: Parameters<TClient["getChan"]>): ReturnType<TClient["getChan"]>;
-
-        /**
-         * Get a role via config
-         * @param roleName
-         */
         getRole(...args: Parameters<TClient["getRole"]>): ReturnType<TClient["getRole"]>;
-
-        /**
-         * Get the main guild this client is designed for
-         */
         mainGuild(): ReturnType<TClient["mainGuild"]>;
-
-        /**
-         * Get the mention of a given slash command
-         * @param name The name of the command
-         * @param subcommand The optional subcommand to add
-         */
         getCommandMention(...args: Parameters<TClient["getCommandMention"]>): ReturnType<TClient["getCommandMention"]>;
-
-        /**
-         * Error logger
-         * @param error The error to log
-         */
         errorLog(...args: Parameters<TClient["errorLog"]>): ReturnType<TClient["errorLog"]>;
     }
 }
@@ -106,47 +78,31 @@ export interface CachedInvite {
     creator: string;
 }
 
-/** The base object data that is always present */
 interface FSServerBase {
-    /** The unabbreviated name of this server */
     readonly fullName: string;
-    /** The channel ID for this server's stats embed, used in FSLoop */
     readonly channelId: string;
-    /** The message ID for this server"s stats embed, used in FSLoop */
     readonly messageId: string;
-    /** The username to login to the server's panel */
     readonly username: string;
-    /** The password to login to the server's panel */
     readonly password: string;
-    /** The base URL to access the server's API & webserver panel (e.g. `http://192.168.0.1:8080` or `https://example.com`) */
     readonly url: string;
-    /** The API code to gain access to the API for the server (e.g. `a1b2c3d4e5f6g7h8i9`) */
     readonly code: string;
-    /** Whether or not this server is a private server with a password */
     readonly isPrivate: boolean;
-    /** A list of Discord role IDs considered as those who manager this server */
     readonly managerRoles: Snowflake[];
     readonly crunchable?: boolean;
-    /** The FTP details for this server */
     readonly ftp: {
         readonly host: string;
         readonly user: string;
         readonly password: string;
-        /** The path to navigate to the game's profile folder */
         readonly path: string;
     };
 }
 
-/** Object data for a public server */
 export interface FSServerPublic extends FSServerBase {
     readonly isPrivate: false;
-    /** The time zone difference between this server's location and UTC in minutes */
     readonly utcDiff: number;
-    /** An array of activities that can be done on this server */
     readonly todo: string[];
 }
 
-/** Object data for a private server */
 export interface FSServerPrivate extends FSServerBase {
     readonly isPrivate: true;
     readonly category: Snowflake;
@@ -160,9 +116,7 @@ export interface FSServerPrivate extends FSServerBase {
 
 export type FSServer = FSServerPrivate | FSServerPublic;
 
-/** Structure of config.json */
 export interface Config {
-    /** The Discord bot client token */
     readonly TOKEN: string;
     readonly PG_URI: string;
     readonly USER_AGENT_HEADER: string;
@@ -171,7 +125,6 @@ export interface Config {
     readonly EMBED_COLOR_RED: `#${string}`;
     readonly EMBED_COLOR_YELLOW: `#${string}`;
     readonly PLAYERTIMES_START_DATE: string;
-    /** Unix timestamp used for calculating when each day for daily msgs loop to be called */
     readonly DAILY_MSGS_TIMESTAMP: number;
     readonly DAILY_MSGS_DEFAULT: string;
     readonly DAILY_MSGS_MONDAY: string;
@@ -189,14 +142,10 @@ export interface Config {
         readonly autoResponses: boolean;
         readonly buttonRoles: boolean;
     };
-    /** An object for managing and communicating with Farming Simulator servers, keyed by their abbreviated acronym */
     readonly fs: Record<string, FSServer>;
-    /** A list of user IDs that are considered developers of this bot */
     readonly devWhitelist: Snowflake[];
     readonly whitelist: {
-        /** A list of channel IDs that automod does not apply to */
         readonly bannedWords: Snowflake[];
-        /** A list of channel IDs that logs do not emit for */
         readonly logs: Snowflake[];
     };
     readonly ytFeed: {
@@ -205,26 +154,15 @@ export interface Config {
         readonly secret: string;
         readonly port: number;
     };
-<<<<<<< HEAD
-    readonly resources: Record<keyof typeof config.resources, `https://${string}`>;
-=======
     readonly resources: Record<string, string>;
->>>>>>> e0ae159 (clean: config validation + crash fixes)
     readonly mainServer: {
-        /** The ID of the guild that this bot is for */
         readonly id: Snowflake;
         readonly fsLoopMsgId: Snowflake;
         readonly mpStaffRoles: Array<keyof Config["mainServer"]["roles"]>;
         readonly dcStaffRoles: Array<keyof Config["mainServer"]["roles"]>;
-<<<<<<< HEAD
-        readonly roles: Record<keyof typeof config.mainServer.roles, Snowflake>;
-        readonly channels: Record<keyof typeof config.mainServer.channels, Snowflake>;
-        readonly categories: Record<keyof typeof config.mainServer.categories, Snowflake>;
-=======
         readonly roles: Record<string, Snowflake>;
         readonly channels: Record<string, Snowflake>;
         readonly categories: Record<string, Snowflake>;
->>>>>>> e0ae159 (clean: config validation + crash fixes)
     };
 }
 
@@ -430,8 +368,4 @@ export interface DedicatedServerConfig {
             readonly mapFilename: { readonly _text: string; };
         };
     };
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> e0ae159 (clean: config validation + crash fixes)

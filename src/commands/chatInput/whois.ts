@@ -10,24 +10,20 @@ import {
     ApplicationCommandOptionType
 } from "discord.js";
 import { Command } from "#structures";
-<<<<<<< HEAD
-import { formatString, formatUser } from "#util";
-=======
 import { formatString, formatUser, getConfigResource, getEmbedColor } from "#util";
->>>>>>> e0ae159 (clean: config validation + crash fixes)
 import type { ApplicationRPC } from "#typings";
 
 const activityImages: Record<string, string> = {
-    "1305894906400739378": "b952a4e5908601db1075642680145630", // Farming Simulator 25
-    "1129504162200166401": "469676e3ad37898c0289283c30c2c882", // Farming Simulator 22
-    "542474758835535872": "37b18c2d5633628d936dd3b2b083785b", // Farming Simulator 19
-    "363426921612181504": "61bed87d2da8e32dd8f24423a9e83323", // Farming Simulator 17
-    "451556128992657418": "48cfba535d49560a086fe55de2e2743b", // Farming Simulator 15
-    "356875570916753438": "166fbad351ecdd02d11a3b464748f66b", // Minecraft
-    "356876176465199104": "069d9f4871b5ebd2f62bd342ce6ba77f", // Grand Theft Auto V
-    "363445589247131668": "f2b60e350a2097289b3b0b877495e55f", // Roblox
-    "356876590342340608": "554af7ef210877b5f04fd1b727a3746e", // Rainbow Six Siege
-    "432980957394370572": "c1864b38910c209afd5bf6423b672022", // Fortnite
+    "1305894906400739378": "b952a4e5908601db1075642680145630",
+    "1129504162200166401": "469676e3ad37898c0289283c30c2c882",
+    "542474758835535872": "37b18c2d5633628d936dd3b2b083785b",
+    "363426921612181504": "61bed87d2da8e32dd8f24423a9e83323",
+    "451556128992657418": "48cfba535d49560a086fe55de2e2743b",
+    "356875570916753438": "166fbad351ecdd02d11a3b464748f66b",
+    "356876176465199104": "069d9f4871b5ebd2f62bd342ce6ba77f",
+    "363445589247131668": "f2b60e350a2097289b3b0b877495e55f",
+    "356876590342340608": "554af7ef210877b5f04fd1b727a3746e",
+    "432980957394370572": "c1864b38910c209afd5bf6423b672022",
 };
 
 export default new Command<"chatInput">({
@@ -39,31 +35,31 @@ export default new Command<"chatInput">({
             if (!applicationData) return;
 
             if (applicationData.description) fields.push({
-                name: "🔹 Bot description",
+                name: "ðŸ”¹ Bot description",
                 value: applicationData.description
             });
 
             if (applicationData.tags?.length) fields.push({
-                name: "🔹 Bot tags",
+                name: "ðŸ”¹ Bot tags",
                 value: applicationData.tags.map(inlineCode).join()
             });
 
             if (applicationData.flags) fields.push({
-                name: "🔹 Bot flags",
+                name: "ðŸ”¹ Bot flags",
                 value: new ApplicationFlagsBitField(applicationData.flags).toArray().map(inlineCode).join()
             });
 
-            fields.push({ name: "🔹 Bot is public", value: applicationData.bot_public ? "Yes" : "No" });
+            fields.push({ name: "ðŸ”¹ Bot is public", value: applicationData.bot_public ? "Yes" : "No" });
 
             return fields;
         }
 
         function convertStatus(status?: ClientPresenceStatus) {
             return {
-                idle: "🟡",
-                dnd: "🔴",
-                online: "🟢",
-                invisible: "⚫"
+                idle: "ðŸŸ¡",
+                dnd: "ðŸ”´",
+                online: "ðŸŸ¢",
+                invisible: "âš«"
             }[status ?? "invisible"];
         }
 
@@ -80,12 +76,8 @@ export default new Command<"chatInput">({
                 .setTitle(`${user.bot ? "Bot" : "User"} info: ${escapeItalic(user.tag)}`)
                 .setURL(`https://discord.com/users/${user.id}`)
                 .setDescription(formatUser(user))
-                .addFields({ name: `🔹 ${user.bot ? "Bot" : "Account"} created`, value: time(user.createdAt, "R") })
-<<<<<<< HEAD
-                .setColor(interaction.client.config.EMBED_COLOR)
-=======
+                .addFields({ name: `ðŸ”¹ ${user.bot ? "Bot" : "Account"} created`, value: time(user.createdAt, "R") })
                 .setColor(getEmbedColor(interaction.client))
->>>>>>> e0ae159 (clean: config validation + crash fixes)
                 .setImage(user.bannerURL({ extension: "png", size: 1024 }) ?? null);
 
             if (appData) embed.addFields(...appData);
@@ -108,10 +100,10 @@ export default new Command<"chatInput">({
             .setURL(`https://discord.com/users/${member.user.id}`)
             .setDescription(formatUser(member.user))
             .addFields(
-                { name: "🔹 Account created", value: time(member.user.createdAt, "R"), inline: true },
-                { name: "🔹 Joined server", value: time(member.joinedAt!, "R"), inline: true },
+                { name: "ðŸ”¹ Account created", value: time(member.user.createdAt, "R"), inline: true },
+                { name: "ðŸ”¹ Joined server", value: time(member.joinedAt!, "R"), inline: true },
                 {
-                    name: `🔹 Roles: ${member.roles.cache.size - 1}`,
+                    name: `ðŸ”¹ Roles: ${member.roles.cache.size - 1}`,
                     value: member.roles.cache.size > 1
                         ? member.roles.cache
                             .filter(x => x.id !== interaction.guildId)
@@ -127,7 +119,7 @@ export default new Command<"chatInput">({
         );
 
         if (member.premiumSince) embeds[0].addFields({
-            name: "🔹 Server Boosting Since",
+            name: "ðŸ”¹ Server Boosting Since",
             value: time(member.premiumSince, "R"),
             inline: true
         });
@@ -143,7 +135,7 @@ export default new Command<"chatInput">({
         if (!member.presence) return await interaction.reply({ embeds });
 
         embeds[0].addFields({
-            name: `🔹 Status: ${member.presence.status}`,
+            name: `ðŸ”¹ Status: ${member.presence.status}`,
             value: member.presence.status === "offline"
                 ? "\u200b"
                 : Object.entries(member.presence.clientStatus ?? {}).map(x => `${formatString(x[0])}: ${convertStatus(x[1])}`).join("\n")
@@ -151,14 +143,9 @@ export default new Command<"chatInput">({
 
         for (const activity of member.presence.activities) {
             if (activity.type === ActivityType.Listening && activity.details && activity.assets && activity.name === "Spotify") {
-<<<<<<< HEAD
-                embeds.push(new EmbedBuilder()
-                    .setAuthor({ name: activity.name, iconURL: interaction.client.config.resources.whoisSpotifyEmbedAuthorImage })
-=======
                 const spotifyAuthorImage = getConfigResource(interaction.client, "whoisSpotifyEmbedAuthorImage");
                 embeds.push(new EmbedBuilder()
                     .setAuthor(spotifyAuthorImage ? { name: activity.name, iconURL: spotifyAuthorImage } : { name: activity.name })
->>>>>>> e0ae159 (clean: config validation + crash fixes)
                     .setColor("#1DB954")
                     .setTitle(activity.details)
                     .setURL(`https://open.spotify.com/track/${activity.syncId}`)

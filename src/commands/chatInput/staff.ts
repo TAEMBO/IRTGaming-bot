@@ -1,11 +1,7 @@
 import { ApplicationCommandOptionType, EmbedBuilder, inlineCode, type GuildMember } from "discord.js";
 import { db, fmNamesTable, tfNamesTable } from "#db";
 import { Command } from "#structures";
-<<<<<<< HEAD
-import { FM_ICON, TF_ICON } from "#util";
-=======
 import { FM_ICON, TF_ICON, getEmbedColor } from "#util";
->>>>>>> e0ae159 (clean: config validation + crash fixes)
 
 function sortMembers(a: GuildMember, b: GuildMember) {
     if (a.displayName.toLowerCase() < b.displayName.toLowerCase()) return -1;
@@ -29,11 +25,7 @@ export default new Command<"chatInput">({
 
                 embed
                     .setTitle("__MP Staff Members__")
-<<<<<<< HEAD
-                    .setColor(interaction.client.config.EMBED_COLOR)
-=======
                     .setColor(getEmbedColor(interaction.client))
->>>>>>> e0ae159 (clean: config validation + crash fixes)
                     .setDescription([
                         staff.mp_manager.toString(),
                         staff.mp_manager.members.sort(sortMembers).map(x => x.toString()).join("\n") || "None",
@@ -59,11 +51,7 @@ export default new Command<"chatInput">({
 
                 embed
                     .setTitle("__MP Staff Usernames__")
-<<<<<<< HEAD
-                    .setColor(interaction.client.config.EMBED_COLOR)
-=======
                     .setColor(getEmbedColor(interaction.client))
->>>>>>> e0ae159 (clean: config validation + crash fixes)
                     .addFields(
                         { name: `Farm Managers ${FM_ICON}`, value: inlineCode(fmNames) },
                         { name: `Trusted Farmers ${TF_ICON}`, value: inlineCode(tfNames) }
@@ -80,11 +68,7 @@ export default new Command<"chatInput">({
 
                 embed
                     .setTitle("__Discord Staff Members__")
-<<<<<<< HEAD
-                    .setColor(interaction.client.config.EMBED_COLOR)
-=======
                     .setColor(getEmbedColor(interaction.client))
->>>>>>> e0ae159 (clean: config validation + crash fixes)
                     .setDescription([
                         staff.admins.toString(),
                         staff.admins.members.sort(sortMembers).map(x => x.toString()).join("\n") || "None",
@@ -103,11 +87,7 @@ export default new Command<"chatInput">({
 
                 embed
                     .setTitle("__IRTMC Staff Members__")
-<<<<<<< HEAD
-                    .setColor(interaction.client.config.EMBED_COLOR)
-=======
                     .setColor(getEmbedColor(interaction.client))
->>>>>>> e0ae159 (clean: config validation + crash fixes)
                     .setDescription(`${staff.toString()}\n${staff.members.sort(sortMembers).map(x => x.toString()).join("\n") || "None"}`);
 
                 break;

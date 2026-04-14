@@ -7,12 +7,6 @@ import type { GuildMember } from "discord.js";
 export function isMPStaff(guildMember: GuildMember | null) {
     if (!guildMember) return false;
 
-<<<<<<< HEAD
-    return guildMember.client.config.mainServer.mpStaffRoles
-        .map(x => guildMember.client.config.mainServer.roles[x])
-        .some(x => guildMember.roles.cache.has(x));
-}
-=======
     const mpStaffRoles = Array.isArray(guildMember.client.config.mainServer.mpStaffRoles)
         ? guildMember.client.config.mainServer.mpStaffRoles
         : [];
@@ -22,4 +16,3 @@ export function isMPStaff(guildMember: GuildMember | null) {
         .filter((x): x is string => typeof x === "string" && Boolean(x))
         .some(x => guildMember.roles.cache.has(x));
 }
->>>>>>> e0ae159 (clean: config validation + crash fixes)

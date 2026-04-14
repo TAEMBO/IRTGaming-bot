@@ -9,13 +9,6 @@ export function formatRequestInit<
     TIdentifier extends string,
     THeaders extends Record<string, string>
 >(timeout: number, identifier: TIdentifier, headers: THeaders = {} as THeaders) {
-<<<<<<< HEAD
-    return {
-        signal: AbortSignal.timeout(timeout),
-        headers: { "User-Agent": `${config.USER_AGENT_HEADER}/${identifier}` as const, ...headers }
-    };
-}
-=======
     const configData = config as Record<string, unknown>;
     const userAgentHeader = typeof configData.USER_AGENT_HEADER === "string" && configData.USER_AGENT_HEADER
         ? configData.USER_AGENT_HEADER
@@ -26,4 +19,3 @@ export function formatRequestInit<
         headers: { "User-Agent": `${userAgentHeader}/${identifier}` as const, ...headers }
     };
 }
->>>>>>> e0ae159 (clean: config validation + crash fixes)

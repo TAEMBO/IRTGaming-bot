@@ -7,13 +7,6 @@ import type { Config } from "#typings";
  * @returns to the given interaction with a standardized message informing the need for the given role
  */
 export function youNeedRole(interaction: CommandInteraction, role: keyof Config["mainServer"]["roles"]) {
-<<<<<<< HEAD
-    return interaction.reply({
-        content: `You need the ${roleMention(interaction.client.config.mainServer.roles[role])} role to use this command`,
-        flags: MessageFlags.Ephemeral
-    });
-}
-=======
     const roleId = interaction.client.config.mainServer.roles[role];
 
     return interaction.reply({
@@ -23,4 +16,3 @@ export function youNeedRole(interaction: CommandInteraction, role: keyof Config[
         flags: MessageFlags.Ephemeral
     });
 }
->>>>>>> e0ae159 (clean: config validation + crash fixes)

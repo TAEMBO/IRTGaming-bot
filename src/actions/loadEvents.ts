@@ -17,11 +17,6 @@ export async function loadEvents(client: Client) {
             continue;
         }
 
-<<<<<<< HEAD
-        client[eventFile.once ? "once" : "on"](eventFile.name, eventFile.run);
-    }
-}
-=======
         client[eventFile.once ? "once" : "on"](eventFile.name, async (...args) => {
             try {
                 await eventFile.run(...args);
@@ -31,4 +26,3 @@ export async function loadEvents(client: Client) {
         });
     }
 }
->>>>>>> e0ae159 (clean: config validation + crash fixes)

@@ -1,14 +1,16 @@
-import type { Message, MessageCollector } from "discord.js";
+import { createHash } from "node:crypto";
+import type { Message, MessageCollector, Snowflake } from "discord.js";
 import type TClient from "../client.js";
-import { hasProfanity, isMPStaff, log, tempReply } from "#util";
 import { addPunishment } from "#db";
+import { hasProfanity, isMPStaff, log, tempReply } from "#util";
 
 const inviteRegEx = new RegExp(/(https?:\/\/)?(www\.)?((discordapp\.com\/invite)|(discord\.gg))\/(?<code>\w+)/m);
 
 enum RepeatedMessagesType {
     Advertisement,
     BannedWords,
-    Spam,
+    ContentSpam,
+    AttachmentSpam,
 }
 
 interface IncrementOptions {
@@ -19,70 +21,77 @@ interface IncrementOptions {
     muteReason: string;
 }
 
-interface RepeatedMessagesData {
-    entries: {
-        type: RepeatedMessagesType;
-        channel: string;
-        msgId: string;
-        timestamp: number;
-    }[];
+interface RMMessageEntry {
+    contentHash: string;
+    type: RepeatedMessagesType;
+    channelId: Snowflake;
+    messageId: Snowflake;
+    timestamp: number;
+}
+
+interface RMUserData {
+    msgEntries: RMMessageEntry[];
     timeout: NodeJS.Timeout;
 }
 
 export class RepeatedMessages {
-    private readonly data = new Map<string, RepeatedMessagesData>();
+    private readonly userEntries = new Map<string, RMUserData>();
     private staffPingCollector?: MessageCollector;
 
     public constructor(private readonly client: TClient) {}
 
     private async increment(message: Message<true>, options: IncrementOptions) {
-        const userData = this.data.get(message.author.id);
+        const userEntry = this.userEntries.get(message.author.id);
+        const contentHash = createHash("md5").update(message.content.trim()).digest("hex");
+        const newEntry: RMMessageEntry = {
+            contentHash,
+            type: options.type,
+            channelId: message.channelId,
+            messageId: message.id,
+            timestamp: message.createdTimestamp,
+        };
 
         // Create user data if none already exists
-        if (!userData) {
-            this.data.set(message.author.id, {
-                entries: [{
-                    type: options.type,
-                    channel: message.channelId,
-                    msgId: message.id,
-                    timestamp: message.createdTimestamp,
-                }],
-                timeout: setTimeout(() => this.data.delete(message.author.id), options.thresholdTime),
+        if (!userEntry) {
+            this.userEntries.set(message.author.id, {
+                msgEntries: [newEntry],
+                timeout: setTimeout(() => this.userEntries.delete(message.author.id), options.thresholdTime),
             });
 
             return;
         }
 
         // Add this message to the list
-        userData.entries.push({
-            type: options.type,
-            channel: message.channelId,
-            msgId: message.id,
-            timestamp: message.createdTimestamp,
-        });
+        userEntry.msgEntries.push(newEntry);
 
         // Reset timeout
-        clearTimeout(userData.timeout);
-        userData.timeout = setTimeout(() => this.data.delete(message.author.id), options.thresholdTime);
+        clearTimeout(userEntry.timeout);
+        userEntry.timeout = setTimeout(() => this.userEntries.delete(message.author.id), options.thresholdTime);
 
         // Message must've been sent after (now - threshold), so purge those that were sent earlier
-        userData.entries = userData.entries.filter(entry => entry.timestamp >= Date.now() - options.thresholdTime);
+        userEntry.msgEntries = userEntry.msgEntries.filter(entry => entry.timestamp >= Date.now() - options.thresholdTime);
 
-        // A spammed message is one that has been sent within the threshold parameters
-        const spammedMessage = userData.entries.find(x => {
-            return userData.entries.filter(y => x.type === y.type).length >= options.thresholdAmt;
-        });
+        const filteredMsgEntries = options.type === RepeatedMessagesType.ContentSpam
+            ? userEntry.msgEntries.filter(entry => entry.contentHash === contentHash)
+            : userEntry.msgEntries.filter(entry => entry.type === options.type);
 
-        if (!spammedMessage) return;
+        // Check if threshold was met for this increment type
+        const thresholdMet = filteredMsgEntries.length >= options.thresholdAmt;
 
-        this.data.delete(message.author.id);
+        if (!thresholdMet) return;
+
+        this.userEntries.delete(message.author.id);
 
         await addPunishment(this.client, "mute", this.client.user.id, `Automod; ${options.muteReason}`, message.author.id, options.muteTime)
             .catch(err => log("red", `Failed to add punishment: ${err}`));
 
-        const spamMsgIds = userData.entries.filter(x => x.type === RepeatedMessagesType.Spam).map(x => x.msgId);
+        const uniqueChannelIds = new Set([...userEntry.msgEntries.map(x => x.channelId)]);
 
-        if (spamMsgIds.length) await message.channel.bulkDelete(spamMsgIds);
+        for (const channelId of uniqueChannelIds) {
+            const channel = this.client.mainGuild().channels.resolve(channelId);
+
+            if (channel?.isTextBased()) await channel.bulkDelete(userEntry.msgEntries.map(x => x.messageId));
+        }
     }
 
     public async triageMessage(message: Message<true>) {
@@ -117,7 +126,7 @@ export class RepeatedMessages {
         if (hasProfanity(message.content.toLowerCase())) {
             automodded = true;
 
-            await tempReply(message, { timeout: 10_000, content: "That word is banned here" });
+            await tempReply(message, { timeout: 10_000, content: "Watch your language" });
             await message.delete();
 
             await this.increment(message, {
@@ -147,13 +156,25 @@ export class RepeatedMessages {
                 });
             }
         } else if (message.channelId !== this.client.config.mainServer.channels.spamZone && !isMPStaff(message.member)) {
-            await this.increment(message, {
-                thresholdTime: 5_000,
-                thresholdAmt: 5,
-                type: RepeatedMessagesType.Spam,
-                muteTime: "24h",
-                muteReason: "Spam",
-            });
+            const filteredAttachments = message.attachments.filter(x => x.contentType?.startsWith("image/"));
+
+            if (filteredAttachments.size >= 4) {
+                await this.increment(message, {
+                    thresholdTime: 30_000,
+                    thresholdAmt: 4,
+                    type: RepeatedMessagesType.AttachmentSpam,
+                    muteTime: "24h",
+                    muteReason: "Attachment spam",
+                });
+            } else {
+                await this.increment(message, {
+                    thresholdTime: 30_000,
+                    thresholdAmt: 4,
+                    type: RepeatedMessagesType.ContentSpam,
+                    muteTime: "24h",
+                    muteReason: "Spam",
+                });
+            }
         }
 
         return automodded;

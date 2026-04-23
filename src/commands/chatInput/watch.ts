@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
+import { ApplicationCommandOptionType } from "discord.js";
 import { eq } from "drizzle-orm";
 import { db, watchListPingsTable, watchListTable } from "#db";
 import { Command } from "#structures";
@@ -18,7 +18,7 @@ export default new Command<"chatInput">({
                 const reference = interaction.options.getString("reference", false);
                 const watchListData = (await db.select().from(watchListTable).where(eq(watchListTable.name, name))).at(0);
 
-                if (watchListData) return await interaction.reply(`\`${name}\` already exists for reason \`${watchListData.reason}\``);
+                if (watchListData) return interaction.reply(`\`${name}\` already exists for reason \`${watchListData.reason}\``);
 
                 if (reference && !regExp.test(reference)) return interaction.reply("Invalid reference, must be a message link!");
 
@@ -29,21 +29,25 @@ export default new Command<"chatInput">({
                     reference
                 });
 
-                const severityText = severity === "ban" ? "banned" : "watched over";
-                const referenceText = reference ? `\nReference: ${reference}` : "";
+                let resultText = `Successfully added \`${name}\``;
 
-                await interaction.reply(`Successfully added \`${name}\` who needs to be **${severityText}** with reason \`${reason}\`${referenceText}`);
+                resultText += `\nReason: ${reason}`;
+                resultText += `\nSeverity: **${severity === "ban" ? "Needs banning" : "Needs watching over"}**`;
+
+                if (reference) resultText += `\nReference: ${reference}`;
+
+                await interaction.reply(resultText);
 
                 break;
             };
             case "update": {
-                const reason = interaction.options.getString("reason", false);
                 const name = interaction.options.getString("username", true);
+                const reason = interaction.options.getString("reason", false);
                 const severity = interaction.options.getString("severity", false) as "ban" | "watch" | null;
                 const reference = interaction.options.getString("reference", false);
                 const watchListData = (await db.select().from(watchListTable).where(eq(watchListTable.name, name))).at(0);
 
-                if (!watchListData) return interaction.reply(`\`${name}\` doesn't exist on watchList`);
+                if (!watchListData) return interaction.reply(`\`${name}\` doesn't exist on watch list`);
 
                 if (reference && !regExp.test(reference)) return interaction.reply("Invalid reference, must be a message link!");
 
@@ -56,7 +60,15 @@ export default new Command<"chatInput">({
                     })
                     .where(eq(watchListTable.name, name));
 
-                await interaction.reply(`Successfully updated watchList details for \`${name}\``);
+                let resultContent = `Successfully updated watch list details for \`${name}\``;
+
+                if (reason) resultContent += `\nReason: \`${reason}\``;
+
+                if (severity) resultContent += `\nSeverity: **${severity === "ban" ? "Needs banning" : "Needs watching over"}**`;
+
+                if (reference) resultContent += `\nReference: \`${reference}\``;
+
+                await interaction.reply(resultContent);
 
                 break;
             }
@@ -64,11 +76,11 @@ export default new Command<"chatInput">({
                 const name = interaction.options.getString("username", true);
                 const watchListData = (await db.select().from(watchListTable).where(eq(watchListTable.name, name))).at(0);
 
-                if (!watchListData) return await interaction.reply(`\`${name}\` doesn't exist on watchList`);
+                if (!watchListData) return interaction.reply(`\`${name}\` doesn't exist on watch list`);
 
                 await db.delete(watchListTable).where(eq(watchListTable.name, name));
 
-                await interaction.reply(`Successfully removed \`${name}\` from watchList`);
+                await interaction.reply(`Successfully removed \`${name}\` from watch list`);
 
                 break;
             };
@@ -82,17 +94,17 @@ export default new Command<"chatInput">({
                     if (playerData) {
                         await interaction.reply(
                             `Player name: \`${playerData.name}\`` +
-                            `\nReason: **${playerData.reason}**` +
-                            "\nSeverity: " + (playerData.isSevere ? "**Needs banning**" : "**Needs watching over**") +
+                            `\nReason: ${playerData.reason}` +
+                            `\nSeverity: **${(playerData.isSevere ? "Needs banning" : "Needs watching over")}**` +
                             (playerData.reference ? `\nReference: ${playerData.reference}` : "")
                         );
                     } else {
-                        await interaction.reply(`No watch list details found with username \`${username}\``);
+                        await interaction.reply(`\`${username}\` doesn't exist on watch list`);
                     }
                 } else {
                     await interaction.reply({ files: [{
                         attachment: Buffer.from(JSON.stringify(watchListData, null, 2)),
-                        name: "watch_List.json"
+                        name: "watch_list.json"
                     }] });
                 }
 
@@ -104,37 +116,24 @@ export default new Command<"chatInput">({
                 if (!watchListPingsData.some(x => x.userId === interaction.user.id)) {
                     await db.insert(watchListPingsTable).values({ userId: interaction.user.id });
 
-                    return await interaction.reply({ embeds: [new EmbedBuilder()
-                        .setDescription("You have successfully subscribed to watchList notifications")
-                        .setFooter({ text: "Run this command again to unsubscribe" })
-                        .setColor(interaction.client.config.EMBED_COLOR)
-                    ] });
+                    return interaction.reply(
+                        "Successfully subscribed to watch list notifications for players needing banning" +
+                        "\n-# Run this command again to unsubscribe"
+                    );
                 }
 
                 await collectAck({
                     interaction,
                     payload: {
-                        embeds: [new EmbedBuilder()
-                            .setDescription("You are already subscribed to watchList notifications, do you want to unsubscribe?")
-                            .setColor(interaction.client.config.EMBED_COLOR)
-                        ]
+                        content: "You are already subscribed to watch list notifications. Do you want to unsubscribe?"
                     },
                     async confirm(int) {
                         await db.delete(watchListPingsTable).where(eq(watchListPingsTable.userId, interaction.user.id));
 
-                        await int.update({
-                            embeds: [new EmbedBuilder()
-                                .setDescription("You have successfully unsubscribed from watchList notifications")
-                                .setColor(interaction.client.config.EMBED_COLOR)
-                            ],
-                            components: []
-                        });
+                        await int.update({ content: "Successfully unsubscribed from watch list notifications", components: [] });
                     },
                     async cancel(int) {
-                        await int.update({
-                            embeds: [new EmbedBuilder().setDescription("Command canceled").setColor(interaction.client.config.EMBED_COLOR)],
-                            components: []
-                        });
+                        await int.update({ content: "Command canceled", components: [] });
                     },
                 });
 
@@ -149,7 +148,7 @@ export default new Command<"chatInput">({
             {
                 type: ApplicationCommandOptionType.Subcommand,
                 name: "add",
-                description: "Add a player to watchList",
+                description: "Add a player to watch list",
                 options: [
                     {
                         type: ApplicationCommandOptionType.String,
@@ -169,7 +168,7 @@ export default new Command<"chatInput">({
                         description: "Whether this player needs to be banned or watched over",
                         choices: [
                             { name: "Needs to be banned", value: "ban" },
-                            { name: "Needs to be watched over", value: "watch" }
+                            { name: "Needs watching over", value: "watch" }
                         ],
                         required: true
                     },
@@ -184,7 +183,7 @@ export default new Command<"chatInput">({
             {
                 type: ApplicationCommandOptionType.Subcommand,
                 name: "update",
-                description: "Update the details of a watchList entry",
+                description: "Update the details of a watch list entry",
                 options: [
                     {
                         type: ApplicationCommandOptionType.String,
@@ -204,7 +203,7 @@ export default new Command<"chatInput">({
                         description: "Update whether this player needs to be banned or watched over",
                         choices: [
                             { name: "Needs to be banned", value: "ban" },
-                            { name: "Needs to be watched over", value: "watch" }
+                            { name: "Needs watching over", value: "watch" }
                         ],
                         required: false
                     },
@@ -219,7 +218,7 @@ export default new Command<"chatInput">({
             {
                 type: ApplicationCommandOptionType.Subcommand,
                 name: "remove",
-                description: "Remove a player from watchList",
+                description: "Remove a player from watch list",
                 options: [
                     {
                         type: ApplicationCommandOptionType.String,
@@ -245,7 +244,7 @@ export default new Command<"chatInput">({
             {
                 type: ApplicationCommandOptionType.Subcommand,
                 name: "notifications",
-                description: "Manage your subscription to watchList notifications"
+                description: "Manage your subscription to watch list notifications"
             }
         ]
     }

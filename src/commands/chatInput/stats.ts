@@ -1,4 +1,15 @@
-import { ApplicationCommandOptionType, channelMention, EmbedBuilder, hyperlink, MessageFlags, time } from "discord.js";
+import {
+    ApplicationCommandOptionType,
+    channelMention,
+    ContainerBuilder,
+    EmbedBuilder,
+    hyperlink,
+    MessageFlags,
+    resolveColor,
+    SeparatorSpacingSize,
+    time,
+    userMention
+} from "discord.js";
 import { eq, ilike } from "drizzle-orm";
 import canvas from "@napi-rs/canvas";
 import { DSSExtension, type DSSResponse, Feeds, filterUnused } from "farming-simulator-types/2025";
@@ -141,30 +152,37 @@ export default new Command<"chatInput">({
             const fsKeys = fsServers.keys();
             const playerTimeData = getTimeData(playerData).sort((a, b) => fsKeys.indexOf(a[0]) - fsKeys.indexOf(b[0]));
             const playerTimeDataTotal = playerTimeData.reduce((x, y) => x + y[1].time, 0);
-            const isInCache = (serverAcro: string) => interaction.client.fsCache[serverAcro].players.some(x => x.name === playerData.name);
-            const formattedTimeData = playerTimeData
-                .filter(x => interaction.client.fsCache[x[0]])
-                .map(([serverAcro, timeData]) => ({
-                    name: serverAcro.toUpperCase(),
-                    value: `Time - ${formatPlayerTime(timeData.time)}\nLast on - ${isInCache(serverAcro) ? "Right now" : time(timeData.lastOn, "R")}`
-                }));
+            const leaderboardIndex = sortedPlayersData.findIndex(x => x.name === playerData.name) + 1;
             let decorators = "";
+
+            const container = new ContainerBuilder().setAccentColor(resolveColor(interaction.client.config.EMBED_COLOR));
 
             if (dbData.fmNamesData.some(x => x.name === playerData.name)) decorators += FM_ICON;
 
             if (dbData.tfNamesData.some(x => x.name === playerData.name)) decorators += TF_ICON;
 
-            await interaction.reply({ embeds: [new EmbedBuilder()
-                .setColor(interaction.client.config.EMBED_COLOR)
-                .setTitle(
-                    `Player - \`${playerData.name}\`${decorators}\n` +
-                    `Leaderboard position - **#${sortedPlayersData.findIndex(x => x.name === playerData.name) + 1}**\n` +
-                    `Total time - **${formatPlayerTime(playerTimeDataTotal)}**\n` +
-                    ((isMPStaff(interaction.member) && playerData.uuid) ? `UUID: \`${playerData.uuid}\`\n` : "") +
-                    ((isMPStaff(interaction.member) && playerData.discordId) ? `Discord user ID - \`${playerData.discordId}\`\n` : "")
-                )
-                .setFields(formattedTimeData)
-            ] });
+            container.addTextDisplayComponents(textDisplay => textDisplay.setContent(
+                `Player: \`${playerData.name}\` ${decorators}\n` +
+                `Leaderboard position: **#${leaderboardIndex}**\n` +
+                `Total time: **${formatPlayerTime(playerTimeDataTotal)}**\n` +
+                (playerData.discordId ? `Discord user: ${userMention(playerData.discordId)}\n` : "") +
+                ((isMPStaff(interaction.member) && playerData.uuid) ? `-# UUID: \`${playerData.uuid}\`` : "")
+            ));
+
+            for (const [serverAcro, timeData] of playerTimeData) {
+                const { fullName } = fsServers.getOne(serverAcro);
+                container.addSeparatorComponents(separator => separator.setSpacing(SeparatorSpacingSize.Small));
+
+                const isInCache = interaction.client.fsCache[serverAcro].players.some(x => x.name === playerData.name);
+
+                container.addTextDisplayComponents(textDisplay => textDisplay.setContent(
+                    `**${fullName}**\n` +
+                    `Time: ${formatPlayerTime(timeData.time)}\n` +
+                    `Last on: ${isInCache ? "Right now" : time(timeData.lastOn, "R")}`
+                ));
+            }
+
+            await interaction.reply({ components: [container], flags: MessageFlags.IsComponentsV2 });
         } else {
             const server = interaction.client.config.fs[subCmd];
             const dss = await fetch(server.url + Feeds.dedicatedServerStats(server.code, DSSExtension.JSON), formatRequestInit(2_000, "Stats"))

@@ -1,4 +1,14 @@
-import { codeBlock, type EmbedBuilder, Events, InteractionContextType, userMention } from "discord.js";
+import {
+    channelMention,
+    ChannelType,
+    codeBlock,
+    type EmbedBuilder,
+    Events,
+    InteractionContextType,
+    MessageFlags,
+    time,
+    userMention
+} from "discord.js";
 import cron from "node-cron";
 import { crunchFarmData, fsLoop, fsLoopAll, ytFeed } from "#actions";
 import {
@@ -66,7 +76,7 @@ export default new Event({
             date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
 
             const day = date.getUTCDay();
-            const channel = client.getChan("general");
+            const generalChannel = client.getChan("general");
             const dailyMsgsData = await db.select().from(dailyMsgsTable);
             const yesterday = dailyMsgsData.at(-1) ?? { count: 0 };
             let total = (await db.select().from(userLevelsTable)).reduce((a, b) => a + b.messageCount, 0); // Sum of all users
@@ -84,13 +94,31 @@ export default new Event({
                         ? client.config.DAILY_MSGS_MONDAY
                         : client.config.DAILY_MSGS_DEFAULT;
 
-                await channel.send(dailyMsgsMsg);
+                await generalChannel.send(dailyMsgsMsg);
             }
 
             if (client.config.toggles.fsLoop) {
                 const dbData = await fetchDBData();
 
                 for (const [serverAcro] of fsServers.getCrunchable()) await crunchFarmData(client, dbData, serverAcro);
+
+                setTimeout(async () => {
+                    for (const [_, server] of fsServers.getPublicAll()) {
+                        const fsChannel = client.channels.resolve(server.channelId);
+                        const unlockTimestamp = Date.now() + client.config.FS_UNLOCK_DELTA;
+
+                        if (fsChannel?.type !== ChannelType.GuildText) return;
+
+                        let content = `${server.fullName} will be locked by staff shortly to **Discord members only**, `;
+
+                        content += `and will be unlocked ${time(Math.floor(unlockTimestamp / 1_000), "R")}. `;
+                        content += `The password to the server can be found in ${channelMention(client.config.mainServer.channels.ourServers)}`;
+
+                        const msg = await fsChannel.send({ content, flags: MessageFlags.SuppressNotifications });
+
+                        setTimeout(msg.delete.bind(msg), client.config.FS_UNLOCK_DELTA);
+                    }
+                }, client.config.FS_LOCK_UTC_DELTA);
             }
         }, { timezone: "UTC" });
 

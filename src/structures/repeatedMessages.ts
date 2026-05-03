@@ -4,7 +4,7 @@ import type TClient from "../client.js";
 import { addPunishment } from "#db";
 import { hasProfanity, isMPStaff, log, tempReply } from "#util";
 
-const inviteRegEx = new RegExp(/(https?:\/\/)?(www\.)?((discordapp\.com\/invite)|(discord\.gg))\/(?<code>\w+)/m);
+const inviteRegEx = new RegExp(/(https?:\/\/)?(www\.)?((discordapp\.com\/invite)|(discord\.gg))\/(?<code>\S+)/m);
 
 enum RepeatedMessagesType {
     Advertisement,

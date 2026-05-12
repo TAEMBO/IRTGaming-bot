@@ -192,6 +192,7 @@ export interface Config {
     readonly fs: Record<string, FSServer>;
     /** A list of user IDs that are considered developers of this bot */
     readonly devWhitelist: Snowflake[];
+    readonly userLevelsBlacklist: Snowflake[];
     readonly whitelist: {
         /** A list of channel IDs that automod does not apply to */
         readonly bannedWords: Snowflake[];

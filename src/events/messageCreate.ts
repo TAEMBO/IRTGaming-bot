@@ -45,7 +45,7 @@ export default new Event({
 
         if (automodded) return;
 
-        if (message.channelId !== message.client.config.mainServer.channels.spamZone) {
+        if (!message.client.config.userLevelsBlacklist.includes(message.channelId)) {
             await incrementUser(message.client, message.author.id);
         }
 

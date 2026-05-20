@@ -158,7 +158,15 @@ export class RepeatedMessages {
         } else if (message.channelId !== this.client.config.mainServer.channels.spamZone && !isMPStaff(message.member)) {
             const filteredAttachments = message.attachments.filter(x => x.contentType?.startsWith("image/"));
 
-            if (filteredAttachments.size >= 4) {
+            if (message.channelId === message.client.config.mainServer.channels.communityIdeas) {
+                automodded = true;
+
+                await tempReply(message, {
+                    timeout: 10_000,
+                    content: `You can only post community ideas in this channel using the ${message.client.getCommandMention("suggest")} command!`
+                });
+                await message.delete();
+            } else if (filteredAttachments.size >= 4) {
                 await this.increment(message, {
                     thresholdTime: 30_000,
                     thresholdAmt: 4,

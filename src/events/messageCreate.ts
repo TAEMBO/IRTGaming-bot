@@ -1,7 +1,7 @@
-import { Events } from "discord.js";
+import { channelMention, Events, MessageType, time } from "discord.js";
 import { incrementUser } from "#db";
 import { Event } from "#structures";
-import { fsServers, isDCStaff, tempReply } from "#util";
+import { fsServers, isDCStaff } from "#util";
 
 const privateServers = fsServers.getPrivateAll();
 
@@ -13,7 +13,6 @@ export default new Event({
                 !message.client.config.toggles.commands
                 && !message.client.config.devWhitelist.includes(message.author.id)
             )
-            || message.system
             || message.author.bot
             || !message.inGuild()
         ) return;
@@ -28,28 +27,28 @@ export default new Event({
             automodded = await message.client.repeatedMessages.triageMessage(message);
         }
 
-        // Community idea message management
-        if (
-            message.channelId === message.client.config.mainServer.channels.communityIdeas
-            && message.author.id !== message.client.user.id
-            && !isDCStaff(message.member)
-        ) {
-            automodded = true;
-
-            await tempReply(message, {
-                timeout: 10_000,
-                content: `You can only post community ideas in this channel using the ${message.client.getCommandMention("suggest")} command!`
-            });
-            await message.delete();
-        }
-
         if (automodded) return;
 
-        if (!message.client.config.userLevelsBlacklist.includes(message.channelId)) {
+        if (!message.system && !message.client.config.userLevelsBlacklist.includes(message.channelId)) {
             await incrementUser(message.client, message.author.id);
         }
 
         if (!message.client.config.toggles.autoResponses) return;
+
+        // Temporary welcome message
+        if (message.type === MessageType.UserJoin) {
+            const now = Date.now();
+            const offset = 300_000;
+            const content = "<:IRTLogo:552606592298909745> Welcome to IRTGaming!\n" +
+                `- Be sure to read through ${channelMention(message.client.config.mainServer.channels.discordRules)}\n` +
+                `- If you've come from our public FS25 servers, please see ${channelMention(message.client.config.mainServer.channels.mpRulesAndInfo)}\n` +
+                "- Enjoy your stay!\n" +
+                `-# Message will be hidden ${time(Math.floor((now + offset) / 1_000), "R")}`;
+
+            const msg = await message.reply({ content, allowedMentions: { repliedUser: true } });
+
+            setTimeout(msg.delete.bind(msg), offset);
+        }
 
         // Private server mod voting
         if (

@@ -395,29 +395,3 @@ interface FarmPlayer {
         readonly manageContracting: "true" | "false";
     };
 }
-
-export interface DedicatedServerConfig {
-    readonly gameserver: {
-        readonly settings: {
-            readonly game_name: { readonly _text: string; };
-            readonly admin_password: { readonly _text?: string; };
-            readonly game_password: { readonly _text?: string; };
-            readonly savegame_index: { readonly _text: "1" | "2" | "3"| "4"| "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "13" | "14" | "15" | "16" | "18" | "19" | "20"; };
-            readonly max_player: { readonly _text: "2" | "3"| "4"| "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "13" | "14" | "15" | "16"; };
-            readonly ip?: { readonly _text: string; };
-            readonly port: { readonly _text: string; };
-            readonly language: { readonly _text: "en" | "de" | "jp" | "pl" | "cz" | "fr" | "es" | "ru" | "it" | "pt" | "hu" | "nl" | "cs" | "ct" | "br" | "tr" | "ro" | "kr" | "da" | "fi" | "no" | "sv"; };
-            readonly auto_save_interval: { readonly _text: `${string}.000000`; };
-            readonly stats_interval: { readonly _text: `${string}.000000`; };
-            readonly use_upnp?: { readonly _text: "true" | "false"; };
-            readonly crossplay_allowed: { readonly _text: "true" | "false"; };
-            readonly initialMoney?: { readonly _text: string; };
-            readonly initialLoan?: { readonly _text: string; };
-            readonly difficulty?: { readonly _text: "2" | "3"; };
-            readonly economicDifficulty?: { readonly _text: "1" | "2" | "3"; };
-            readonly pause_game_if_empty: { readonly _text: "1" | "2"; };
-            readonly mapID: { readonly _text: string; };
-            readonly mapFilename: { readonly _text: string; };
-        };
-    };
-}

@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionType, codeBlock, EmbedBuilder, MessageFlags } from "discord.js";
 import { eq } from "drizzle-orm";
-import { Routes, WebAPIJSONAction, type WebAPIJSONResponse } from "farming-simulator-types/2025";
+import { DSSExtension, type DSSResponse, Feeds, Routes, WebAPIJSONAction, type WebAPIJSONResponse } from "farming-simulator-types/2025";
 import { db, fmNamesTable, playerTimesTable, tfNamesTable } from "#db";
 import { Command, FTPActions } from "#structures";
 import {
@@ -13,7 +13,7 @@ import {
     UUID_LENGTH,
     youNeedRole
 } from "#util";
-import type { BanFormat, DedicatedServerConfig, FarmFormat } from "#typings";
+import type { BanFormat, FarmFormat } from "#typings";
 
 const publicServersChoices = fsServers.getPublicAll().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));
 const allServersChoices = fsServers.entries().map(([serverAcro, { fullName }]) => ({ name: fullName, value: serverAcro }));
@@ -229,16 +229,18 @@ export default new Command<"chatInput">({
                 break;
             };
             case "password": {
-                await interaction.deferReply();
-
                 const chosenServer = interaction.options.getString("server", true);
-                const data = await new FTPActions(fsServers.getPublicOne(chosenServer).ftp).get("dedicated_server/dedicatedServerConfig.xml");
-                const password = jsonFromXML<DedicatedServerConfig>(data).gameserver.settings.game_password._text;
-                const resultText = password
-                    ? `Current password for **${chosenServer.toUpperCase()}** is \`${password}\``
-                    : `Password not set for **${chosenServer.toUpperCase()}**`;
+                const serverConfig = interaction.client.config.fs[chosenServer];
 
-                await interaction.editReply(resultText);
+                const res = await fetch(serverConfig.url + Feeds.dedicatedServerStats(serverConfig.code, DSSExtension.JSON, true));
+                const data: DSSResponse = await res.json();
+                const gamePassword = data.configuration?.gamePassword;
+
+                if (gamePassword) {
+                    await interaction.reply(`The current password for **${serverConfig.fullName}** is \`${gamePassword}\``);
+                } else {
+                    await interaction.reply(`Password not set for **${serverConfig.fullName}**`);
+                }
 
                 break;
             };

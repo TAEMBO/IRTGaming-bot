@@ -156,7 +156,7 @@ export async function fsLoop(client: Client, dbData: DBData, serverAcro: string,
     if (toThrottle) return;
 
     // Create list of players with time data
-    const playerInfo = newPlayerList.map(player => `\`${player.name}\` ${formatDecorators(player, dbData, true)} **|** ${formatUptime(player)}`);
+    const playerInfo = newPlayerList.map(player => `\`${player.name}\` ${formatDecorators(player, dbData, true)} **|** ${formatUptime(player.uptime)}`);
 
     // Data crunching for stats embed
     const stats = {
@@ -166,11 +166,7 @@ export async function fsLoop(client: Client, dbData: DBData, serverAcro: string,
             return Number.isNaN(num) ? "`unavailable`" : num.toLocaleString("en-US");
         })(),
         ingameTime: dss.server.dayTime
-            ? [
-                Math.floor(dss.server.dayTime / 3_600 / 1_000).toString().padStart(2, "0"),
-                ":",
-                Math.floor((dss.server.dayTime / 60 / 1_000) % 60).toString().padStart(2, "0")
-            ].join("")
+            ? formatUptime(dss.server.dayTime / 60_000)
             : "`unavailable`",
         timescale: csg.settings?.timeScale._text
             ? parseFloat(csg.settings.timeScale._text) + "x"
@@ -269,7 +265,7 @@ export async function fsLoop(client: Client, dbData: DBData, serverAcro: string,
         const embed = new EmbedBuilder()
             .setDescription(`\`${player.name}\`${decorators}${playerDiscordMention} left **${serverAcroUp}** at ${timestamp}`)
             .setColor(client.config.EMBED_COLOR_RED)
-            .setFooter(player.uptime ? { text: `Playtime: ${formatUptime(player)}` } : null);
+            .setFooter(player.uptime ? { text: `Playtime: ${formatUptime(player.uptime)}` } : null);
 
         await addPlayerTime(player.name, player.uptime, serverAcro);
 
@@ -277,7 +273,7 @@ export async function fsLoop(client: Client, dbData: DBData, serverAcro: string,
             await wlChannel.send({ embeds: [new EmbedBuilder()
                 .setTitle(`WatchList - ${watchListData.isSevere ? "ban" : "watch over"}`)
                 .setDescription(`\`${watchListData.name}\` left **${serverAcroUp}** at ${timestamp}`)
-                .setFooter(player.uptime ? { text: `Playtime: ${formatUptime(player)}` } : null)
+                .setFooter(player.uptime ? { text: `Playtime: ${formatUptime(player.uptime)}` } : null)
                 .setColor(client.config.EMBED_COLOR_RED)
             ] });
         }
@@ -293,7 +289,7 @@ export async function fsLoop(client: Client, dbData: DBData, serverAcro: string,
         const decorators = formatDecorators(player, dbData, false);
         let description = `\`${player.name}\`${decorators}${playerDiscordMention} joined **${serverAcroUp}** at ${timestamp}`;
 
-        if (player.uptime) embed.setFooter({ text: "Playtime: " + formatUptime(player) });
+        if (player.uptime) embed.setFooter({ text: "Playtime: " + formatUptime(player.uptime) });
 
         if (player.uptime > 1) {
             const comparableUptimes = [player.uptime, player.uptime - 1];

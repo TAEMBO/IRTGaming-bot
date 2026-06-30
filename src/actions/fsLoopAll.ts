@@ -18,7 +18,7 @@ export async function fsLoopAll(client: Client, dbData: DBData) {
         for (const player of server.players) {
             const decorators = formatDecorators(player, dbData, false);
 
-            playerInfo.push(`\`${player.name.slice(0, 46)}\` ${decorators} **|** ${formatUptime(player)}`);
+            playerInfo.push(`\`${player.name.slice(0, 46)}\` ${decorators} **|** ${formatUptime(player.uptime)}`);
         }
 
         if (playerInfo.length) embed.addFields({

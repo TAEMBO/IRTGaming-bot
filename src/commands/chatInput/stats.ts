@@ -98,7 +98,7 @@ export default new Command<"chatInput">({
                 const playerInfo = filterUnused(dss.slots.players).map(player => {
                     const decorators = formatDecorators(player, dbData, true);
 
-                    return `\`${player.name}\` ${decorators} **|** ${formatUptime(player)}`;
+                    return `\`${player.name}\` ${decorators} **|** ${formatUptime(player.uptime)}`;
                 });
 
                 embed.addFields({
@@ -185,7 +185,7 @@ export default new Command<"chatInput">({
             await interaction.reply({ components: [container], flags: MessageFlags.IsComponentsV2 });
         } else {
             const server = interaction.client.config.fs[subCmd];
-            const dss = await fetch(server.url + Feeds.dedicatedServerStats(server.code, DSSExtension.JSON), formatRequestInit(2_000, "Stats"))
+            const dss = await fetch(server.url + Feeds.dedicatedServerStats(server.code, DSSExtension.JSON, true), formatRequestInit(2_000, "Stats"))
                 .then(res => res.json() as Promise<DSSResponse>)
                 .catch(() => log("red", `Stats ${subCmd.toUpperCase()} failed`));
 
@@ -344,25 +344,49 @@ export default new Command<"chatInput">({
             const playerInfo = players.map(player => {
                 const decorators = formatDecorators(player, dbData, true);
 
-                return `\`${player.name}\` ${decorators} **|** ${formatUptime(player)}`;
+                return `\`${player.name}\` ${decorators} **|** ${formatUptime(player.uptime)}`;
             });
-            const serverTimeHrs = Math.floor(dss.server.dayTime / 3_600 / 1_000).toString().padStart(2, "0");
-            const serverTimeMins = Math.floor((dss.server.dayTime / 60 / 1_000) % 60).toString().padStart(2, "0");
-            const embed = new EmbedBuilder()
-                .setAuthor({ name: `${dss.slots.used}/${dss.slots.capacity} - ${serverTimeHrs}:${serverTimeMins}` })
-                .setTitle(dss.server.name ? server.fullName : "Offline")
-                .setDescription(dss.slots.used ? playerInfo.join("\n"): "*No players online*")
-                .setImage("attachment://FSStats.png")
-                .setColor(dss.slots.used === dss.slots.capacity
-                    ? interaction.client.config.EMBED_COLOR_RED
-                    : dss.slots.used > (dss.slots.capacity / 2)
-                        ? interaction.client.config.EMBED_COLOR_YELLOW
-                        : interaction.client.config.EMBED_COLOR_GREEN
-                );
 
-            if (!players.some(x => x.isAdmin) && interaction.client.fsCache[subCmd].lastAdmin) embed
-                .setTimestamp(interaction.client.fsCache[subCmd].lastAdmin)
-                .setFooter({ text: "Admin last on" });
+            const footerItems: string[] = [];
+
+            const embedColor = dss.slots.used === dss.slots.capacity
+                ? interaction.client.config.EMBED_COLOR_RED
+                : dss.slots.used > (dss.slots.capacity / 2)
+                    ? interaction.client.config.EMBED_COLOR_YELLOW
+                    : interaction.client.config.EMBED_COLOR_GREEN;
+
+            const embed = new EmbedBuilder()
+                .setTitle(dss.server.name ? server.fullName : "Offline")
+                .setImage("attachment://FSStats.png")
+                .setColor(embedColor);
+
+            footerItems.push(`Slots: \`${dss.slots.used}/${dss.slots.capacity}\``);
+
+            footerItems.push(`In-game time: \`${formatUptime(dss.server.dayTime / 60_000)}\``);
+
+            if (dss.statistics) footerItems.push(`Uptime: \`${formatUptime(dss.statistics.uptime / 60_000)}\``);
+
+            if (!players.some(x => x.isAdmin) && interaction.client.fsCache[subCmd].lastAdmin) {
+                const timestamp = time(Math.floor(interaction.client.fsCache[subCmd].lastAdmin / 1_000), "R");
+
+                footerItems.push(`Admin last: ${timestamp}`);
+            }
+
+            if (dss.slots.used) {
+                embed.addFields({
+                    name: "",
+                    value: playerInfo.join("\n"),
+                    inline: true
+                });
+            }
+
+            if (dss.statistics?.uptime) {
+                embed.addFields({
+                    name: "Statistics",
+                    value: footerItems.join("\n"),
+                    inline: true
+                });
+            }
 
             await interaction.reply({
                 embeds: [embed],

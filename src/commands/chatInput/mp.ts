@@ -108,20 +108,6 @@ export default new Command<"chatInput">({
 
                 break;
             };
-            case "mop": {
-                if (!hasRole(interaction.member, "mpManager")) return youNeedRole(interaction, "mpManager");
-
-                const chosenServer = interaction.options.getString("server", true);
-                const chosenAction = interaction.options.getString("action", true) as "items.xml" | "players.xml";
-
-                await interaction.deferReply();
-
-                await new FTPActions(fsServers.getPublicOne(chosenServer).ftp).delete(`savegame1/${chosenAction}`);
-
-                await interaction.editReply(`Successfully deleted **${chosenAction}** from **${chosenServer.toUpperCase()}** after **${Date.now() - now}ms**`);
-
-                break;
-            };
             case "bans": {
                 const chosenServer = interaction.options.getString("server", true);
                 const chosenAction = interaction.options.getString("action", true) as "dl" | "ul";
@@ -398,30 +384,6 @@ export default new Command<"chatInput">({
                             { name: "Start", value: "startServer" },
                             { name: "Stop", value: "stopServer" },
                             { name: "Restart", value: "restartServer" }
-                        ],
-                        required: true
-                    }
-                ]
-            },
-            {
-                type: ApplicationCommandOptionType.Subcommand,
-                name: "mop",
-                description: "Delete cached data from a given server to improve performance",
-                options: [
-                    {
-                        type: ApplicationCommandOptionType.String,
-                        name: "server",
-                        description: "The server to manage",
-                        choices: publicServersChoices,
-                        required: true
-                    },
-                    {
-                        type: ApplicationCommandOptionType.String,
-                        name: "action",
-                        description: "The action to perform on the given server",
-                        choices: [
-                            { name: "Delete players.xml", value: "players.xml" },
-                            { name: "Delete items.xml", value: "items.xml" }
                         ],
                         required: true
                     }

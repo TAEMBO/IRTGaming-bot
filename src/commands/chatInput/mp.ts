@@ -37,7 +37,13 @@ export default new Command<"chatInput">({
                     [WebAPIJSONAction.Ping]: "PINGUNUSED"
                 }[chosenAction];
 
-                if (!interaction.member.roles.cache.hasAny(...configServer.managerRoles)) return youNeedRole(interaction, "mpManager");
+                const isSrAdminWithPublicRestart = hasRole(interaction.member, "mpSrAdmin")
+                    && chosenAction === WebAPIJSONAction.RestartServer
+                    && !configServer.isPrivate;
+
+                if (!isSrAdminWithPublicRestart && !interaction.member.roles.cache.hasAny(...configServer.managerRoles)) {
+                    return youNeedRole(interaction, "mpManager");
+                }
 
                 if (cachedServer.state === null) return interaction.reply("Cache not populated, retry in 30 seconds");
 

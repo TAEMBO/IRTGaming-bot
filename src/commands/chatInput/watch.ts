@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType } from "discord.js";
+import { ApplicationCommandOptionType, time } from "discord.js";
 import { eq } from "drizzle-orm";
 import { db, watchListPingsTable, watchListTable } from "#db";
 import { Command } from "#structures";
@@ -26,7 +26,8 @@ export default new Command<"chatInput">({
                     name,
                     reason,
                     isSevere: severity === "ban",
-                    reference
+                    reference,
+                    timestamp: new Date()
                 });
 
                 let resultText = `Successfully added \`${name}\``;
@@ -96,7 +97,8 @@ export default new Command<"chatInput">({
                             `Player name: \`${playerData.name}\`` +
                             `\nReason: ${playerData.reason}` +
                             `\nSeverity: **${(playerData.isSevere ? "Needs banning" : "Needs watching over")}**` +
-                            (playerData.reference ? `\nReference: ${playerData.reference}` : "")
+                            (playerData.reference ? `\nReference: ${playerData.reference}` : "") +
+                            (playerData.timestamp ? `\nAdded: ${time(playerData.timestamp, "R")}` : "")
                         );
                     } else {
                         await interaction.reply(`\`${username}\` doesn't exist on watch list`);

@@ -1,0 +1,1 @@
+ALTER TABLE "watchList" ADD COLUMN "time" timestamp with time zone;

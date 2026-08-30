@@ -303,10 +303,15 @@ export async function fsLoop(client: Client, dbData: DBData, serverAcro: string,
         embed.setDescription(description);
 
         if (watchListData) {
-            const watchListReference = watchListData.reference ? "\nReference: " + watchListData.reference : "";
-            const wlPings = (await db
-                .select()
-                .from(watchListPingsTable))
+            let wlDescription = `\`${watchListData.name}\` joined **${serverAcroUp}** at ` + timestamp + "\n";
+
+            wlDescription += "\nReason: " + watchListData.reason;
+
+            if (watchListData.reference) wlDescription += "\nReference: " + watchListData.reference;
+
+            if (watchListData.timestamp) wlDescription += "\nAdded: " + time(watchListData.timestamp, "R");
+
+            const wlPings = (await db.select().from(watchListPingsTable))
                 .filter(x =>
                     !client.mainGuild().members.cache.get(x.userId)?.roles.cache.has(client.config.mainServer.roles.loa)
                 )
@@ -317,7 +322,7 @@ export async function fsLoop(client: Client, dbData: DBData, serverAcro: string,
                 content: watchListData.isSevere ? wlPings : undefined,
                 embeds: [new EmbedBuilder()
                     .setTitle(`WatchList - ${watchListData.isSevere ? "ban" : "watch over"}`)
-                    .setDescription(`\`${watchListData.name}\` joined **${serverAcroUp}** at ` + timestamp + watchListReference)
+                    .setDescription(wlDescription)
                     .setColor(client.config.EMBED_COLOR_GREEN)
                     .setFooter({ text: "Reason: " + watchListData.reason })
                 ]

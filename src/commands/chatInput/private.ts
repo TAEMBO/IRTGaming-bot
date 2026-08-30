@@ -283,7 +283,11 @@ export default new Command<"chatInput">({
                             },
                             {
                                 id: serverObj.farmOwnerRole,
-                                allow: [PermissionFlagsBits.MentionEveryone, PermissionFlagsBits.ManageMessages],
+                                allow: [
+                                    PermissionFlagsBits.MentionEveryone,
+                                    PermissionFlagsBits.ManageMessages,
+                                    PermissionFlagsBits.PinMessages
+                                ],
                                 type: OverwriteType.Role
                             },
                             {
@@ -296,6 +300,7 @@ export default new Command<"chatInput">({
                                 allow: [
                                     PermissionFlagsBits.ManageChannels,
                                     PermissionFlagsBits.ManageMessages,
+                                    PermissionFlagsBits.PinMessages,
                                     PermissionFlagsBits.ManageRoles,
                                     PermissionFlagsBits.MentionEveryone,
                                     PermissionFlagsBits.ViewChannel,

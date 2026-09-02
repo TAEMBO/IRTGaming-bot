@@ -324,7 +324,6 @@ export async function fsLoop(client: Client, dbData: DBData, serverAcro: string,
                     .setTitle(`WatchList - ${watchListData.isSevere ? "ban" : "watch over"}`)
                     .setDescription(wlDescription)
                     .setColor(client.config.EMBED_COLOR_GREEN)
-                    .setFooter({ text: "Reason: " + watchListData.reason })
                 ]
             });
         }

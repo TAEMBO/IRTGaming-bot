@@ -19,8 +19,8 @@ export default new Command<"chatInput">({
                 "- In-game name at the time of being banned",
                 "- Rough time and date",
                 `- Server name (${serverNames})`,
-                "- If applicable; what you were doing at the time of being banned",
-                "- Anything else which could help with the appeal, e.g. additional names you've used",
+                "- What you were doing at the time of being banned",
+                "- Anything else which could help with the appeal, such as additional names you've used, or additional context from your perspective",
                 "\u200b",
                 "Once you have done so, we will review your ban as soon as possible. Please be patient as we may have to wait for staff in other time zones before making a decision."
             ].join("\n"))

@@ -167,10 +167,10 @@ export default new Command<"chatInput">({
                     {
                         type: ApplicationCommandOptionType.String,
                         name: "severity",
-                        description: "Whether this player needs to be banned or watched over",
+                        description: "Whether this player needs to be watched over or banned",
                         choices: [
-                            { name: "Needs to be banned", value: "ban" },
-                            { name: "Needs watching over", value: "watch" }
+                            { name: "Needs watching over", value: "watch" },
+                            { name: "Needs to be banned", value: "ban" }
                         ],
                         required: true
                     },

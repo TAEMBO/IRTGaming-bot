@@ -2,7 +2,7 @@ import { EmbedBuilder, type Client } from "discord.js";
 import { eq } from "drizzle-orm";
 import { db, getPlayerTimesRow, playerTimesTable } from "#db";
 import { FTPActions } from "#structures";
-import { fsServers, jsonFromXML, FM_ICON, TF_ICON, log } from "#util";
+import { fsServers, jsonFromXML, FM_ICON, TF_ICON, log, WL_ICON } from "#util";
 import type { DBData, FarmFormat } from "#typings";
 
 type CrunchFarmDataDBData = DBData & { playerTimesData: (typeof playerTimesTable.$inferSelect)[] }
@@ -13,7 +13,12 @@ export async function crunchFarmData(client: Client, dbData: CrunchFarmDataDBDat
     const server = fsServers.getPublicOne(serverAcro);
     const farmData = jsonFromXML<FarmFormat>(await new FTPActions(server.ftp).get("savegame1/farms.xml"));
     const decorators = (name: string) => {
-        return (dbData.fmNamesData.some(x => x.name === name) ? FM_ICON : "") + (dbData.tfNamesData.some(x => x.name === name) ? TF_ICON : "");
+        let content = dbData.watchListData.some(x => x.name === name) ? WL_ICON : "";
+
+        content += dbData.fmNamesData.some(x => x.name === name) ? FM_ICON : "";
+        content += dbData.tfNamesData.some(x => x.name === name) ? TF_ICON : "";
+
+        return content;
     };
     const channel = client.getChan("fsLogs");
     const embed = new EmbedBuilder()

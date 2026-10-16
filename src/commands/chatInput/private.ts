@@ -8,7 +8,7 @@ import {
     roleMention,
     MessageFlags
 } from "discord.js";
-import { Routes } from "farming-simulator-types/2025";
+import { type ModhubDownloadProgressResponse, Routes } from "farming-simulator-types/2025";
 import { Command } from "#structures";
 import { collectAck, formatRequestInit, fsServers, onPrivateFarms, youNeedRole } from "#util";
 
@@ -195,11 +195,6 @@ export default new Command<"chatInput">({
             case "install-mod": {
                 if (!interaction.member.roles.cache.hasAny(...serverObj.managerRoles)) return youNeedRole(interaction, "mpManager");
 
-                if (interaction.client.fsCache[serverAcro].state === 1) return interaction.reply({
-                    content: "Cannot install mod while server is online!",
-                    flags: MessageFlags.Ephemeral
-                });
-
                 const modLink = interaction.options.getString("link", true);
                 const regexResult = modLinkRegex.exec(modLink);
                 const foundModId = regexResult?.groups?.code;
@@ -211,12 +206,19 @@ export default new Command<"chatInput">({
 
                 await interaction.deferReply();
 
-                const res = await fetch(
-                    serverObj.url + Routes.startModDownload(serverObj.username, serverObj.password, foundModId),
-                    formatRequestInit(10_000, `ModInstall-${foundModId}`)
-                ).catch(() => null);
+                const { url, username, password } = serverObj;
 
-                if (res?.status === 200) {
+                const [sessionCookie] = await fetch(url + Routes.webInterfaceLogin(username, password)).then(res => res.headers.getSetCookie());
+
+                const init = formatRequestInit(10_000, `ModInstall-${foundModId}`, { Cookie: sessionCookie });
+
+                await fetch(url + Routes.startModDownload(username, password, foundModId, false), init);
+
+                const res = await fetch(url + Routes.modhubDownloadProgress(foundModId), init);
+
+                const downloadProgress: ModhubDownloadProgressResponse = await res.json();
+
+                if (downloadProgress.downloaded > 0) {
                     await interaction.editReply("Successfully started installing mod");
                 } else {
                     await interaction.editReply("Failed to start installing mod");

@@ -51,6 +51,8 @@ export default new Command<"chatInput">({
         await interaction.respond(data.map(x => ({ name: x.name, value: x.name })));
     },
     async run(interaction) {
+        await interaction.deferReply();
+
         const subCmd = interaction.options.getSubcommand();
         const dbData = await fetchDBData();
         const { categories, channels } = interaction.client.config.mainServer;
@@ -59,10 +61,11 @@ export default new Command<"chatInput">({
             const link = hyperlink("restrictions", interaction.client.config.resources.statsRestrictionRedirect);
             const channel = channelMention(channels.botCommands);
 
-            return interaction.reply({
-                content: `This command has ${link} set, please use ${channel} for ${interaction.client.getCommandMention("stats")} commands.`,
-                flags: MessageFlags.Ephemeral
-            });
+            await interaction.editReply(
+                `This command has ${link} set, please use ${channel} for ${interaction.client.getCommandMention("stats")} commands.`,
+            );
+
+            setTimeout(() => interaction.deleteReply(), 10_000);
         }
 
         if (subCmd === "all") {
@@ -79,7 +82,7 @@ export default new Command<"chatInput">({
                 try {
                     const res = await fetch(
                         server.url + Feeds.dedicatedServerStats(server.code, DSSExtension.JSON),
-                        formatRequestInit(4_000, "StatsAll")
+                        formatRequestInit(6_000, "StatsAll")
                     );
 
                     dss = await res.json();
@@ -127,7 +130,7 @@ export default new Command<"chatInput">({
             ].join("")).join("\n");
 
             if (!playerName) {
-                return interaction.reply({ embeds: [new EmbedBuilder()
+                return interaction.editReply({ embeds: [new EmbedBuilder()
                     .setColor(interaction.client.config.EMBED_COLOR)
                     .setDescription(`Top 50 players with the most time spent on IRTGaming FS servers since ${interaction.client.config.PLAYERTIMES_START_DATE}`)
                     .addFields(
@@ -143,7 +146,7 @@ export default new Command<"chatInput">({
             const playerData = (await db.select().from(playerTimesTable).where(eq(dbQuery, playerName))).at(0);
 
             if (!playerData) {
-                return interaction.reply(
+                return interaction.editReply(
                     "No data found with that name. " +
                     hyperlink("Find out why.", interaction.client.config.resources.statsNoDataRedirect)
                 );
@@ -182,14 +185,14 @@ export default new Command<"chatInput">({
                 ));
             }
 
-            await interaction.reply({ components: [container], flags: MessageFlags.IsComponentsV2 });
+            await interaction.editReply({ components: [container], flags: MessageFlags.IsComponentsV2 });
         } else {
             const server = interaction.client.config.fs[subCmd];
-            const dss = await fetch(server.url + Feeds.dedicatedServerStats(server.code, DSSExtension.JSON, true), formatRequestInit(2_000, "Stats"))
+            const dss = await fetch(server.url + Feeds.dedicatedServerStats(server.code, DSSExtension.JSON, true), formatRequestInit(5_000, "Stats"))
                 .then(res => res.json() as Promise<DSSResponse>)
                 .catch(() => log("red", `Stats ${subCmd.toUpperCase()} failed`));
 
-            if (!dss || !dss.slots) return await interaction.reply("Server did not respond");
+            if (!dss || !dss.slots) return interaction.editReply("Server did not respond");
 
             const { graphPoints } = interaction.client.fsCache[subCmd];
 
@@ -388,7 +391,7 @@ export default new Command<"chatInput">({
                 });
             }
 
-            await interaction.reply({
+            await interaction.editReply({
                 embeds: [embed],
                 files: [{
                     attachment: img.toBuffer("image/png"),

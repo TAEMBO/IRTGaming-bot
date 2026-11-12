@@ -44,12 +44,12 @@ export async function fsLoop(client: Client, dbData: DBData, serverAcro: string,
 
         if (channel?.type !== ChannelType.GuildText) return log("red", `FSLoop ${serverAcroUp} invalid channel`);
 
-        await channel.messages.edit(server.messageId, { embeds: [embed] }).catch(() => log("red", `FSLoop ${serverAcroUp} invalid msg`));
+        await channel.messages.edit(server.messageId, { embeds: [embed] }).catch((err) => log("red", `FSLoop ${serverAcroUp} ${err.message}`));
     }
 
     const oldCacheData = structuredClone(client.fsCache[serverAcro]);
     const server = fsServers.getOne(serverAcro);
-    const init = formatRequestInit(7_000, "FSLoop");
+    const init = formatRequestInit(10_000, "FSLoop");
     const wlChannel = client.getChan("watchList");
     let isFaultyStart = Boolean(oldCacheData.faultyStartData.length);
     let justStopped = false;

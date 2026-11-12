@@ -7,14 +7,16 @@ export async function handleButton(interaction: ButtonInteraction<"cached">) {
 
     switch (args[0]) {
         case "reaction": {
+            await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
             const roleId = args[1];
 
             if (interaction.member.roles.cache.has(roleId)) {
                 await interaction.member.roles.remove(roleId);
-                await interaction.reply({ content: "You've been removed from " + roleMention(roleId), flags: MessageFlags.Ephemeral });
+                await interaction.editReply("You've been removed from " + roleMention(roleId));
             } else {
                 await interaction.member.roles.add(roleId);
-                await interaction.reply({ content: "You've been added to " + roleMention(roleId), flags: MessageFlags.Ephemeral });
+                await interaction.editReply("You've been added to " + roleMention(roleId));
             }
 
             break;

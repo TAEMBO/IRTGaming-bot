@@ -5,6 +5,8 @@ import { Command } from "#structures";
 
 export default new Command<"chatInput">({
     async run(interaction) {
+        await interaction.deferReply();
+
         const userLevelsData = await db.select().from(userLevelsTable);
 
         if (interaction.options.getSubcommand() === "view") {
@@ -19,7 +21,7 @@ export default new Command<"chatInput">({
                 else return they || false;
             };
 
-            if (!userData) return await interaction.reply(`${pronounBool("You", "They")} currently don't have a level, send some messages to level up.`);
+            if (!userData) return interaction.editReply(`${pronounBool("You", "They")} currently don't have a level, send some messages to level up.`);
 
             const index = userLevelsData.sort((a, b) => b.messageCount - a.messageCount).map(x => x.userId).indexOf(member.id) + 1;
             const memberDifference = userData.messageCount - algorithm(userData.level);
@@ -141,7 +143,7 @@ export default new Command<"chatInput">({
             ctx.fillText("TOTAL ", offsetRankX, detailsYOffset);
             ctx.restore();
 
-            await interaction.reply({ files: [{
+            await interaction.editReply({ files: [{
                 attachment: img.toBuffer("image/png"),
                 name: "rank.png"
             }] });
@@ -292,7 +294,7 @@ export default new Command<"chatInput">({
             .map((x, i) => `\`${i + 1}.\` ${userMention(x.userId)}: ${x.messageCount.toLocaleString("en-US")}`)
             .join("\n");
 
-        await interaction.reply({
+        await interaction.editReply({
             files: [{
                 attachment: img.toBuffer("image/png"),
                 name: "dailyMsgs.png"

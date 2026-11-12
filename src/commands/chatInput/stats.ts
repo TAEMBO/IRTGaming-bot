@@ -69,8 +69,6 @@ export default new Command<"chatInput">({
         }
 
         if (subCmd === "all") {
-            await interaction.deferReply();
-
             const embed = new EmbedBuilder().setColor(interaction.client.config.EMBED_COLOR);
             const failedFooter: string[] = [];
             const totalUsedCount: number[] = [];

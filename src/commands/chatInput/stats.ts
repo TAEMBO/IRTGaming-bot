@@ -13,7 +13,7 @@ import {
 import { eq, ilike } from "drizzle-orm";
 import canvas from "@napi-rs/canvas";
 import { DSSExtension, type DSSResponse, Feeds, filterUnused } from "farming-simulator-types/2025";
-import { db, getTimeData, playerTimesTable } from "#db";
+import { db, getPlayerTimesLeaderboard, getTimeData, playerTimesTable, type RankedPlayerTimesPlayer } from "#db";
 import { Command } from "#structures";
 import {
     FM_ICON,
@@ -115,25 +115,25 @@ export default new Command<"chatInput">({
 
             await interaction.editReply({ embeds: [embed] });
         } else if (subCmd === "playertimes") {
-            const sortedPlayersData = dbData.playerTimesData.sort((a, b) =>
-                getTimeData(b).reduce((x, y) => x + y[1].time, 0) - getTimeData(a).reduce((x, y) => x + y[1].time, 0)
-            );
             const playerName = interaction.options.getString("name");
-            const leaderboard = (data: (typeof playerTimesTable.$inferSelect)[], isFirstField: boolean) => data.map((playerData, i) => [
-                `**${i + (isFirstField ? 1 : 26)}.** \`${playerData.name}\``,
-                dbData.fmNamesData.some(x => x.name === playerData.name) ? FM_ICON : "",
-                dbData.tfNamesData.some(x => x.name === playerData.name) ? TF_ICON : "",
-                " - ",
-                formatPlayerTime(getTimeData(playerData).reduce((x, y) => x + y[1].time, 0))
-            ].join("")).join("\n");
+
+            const leaderboardData = await getPlayerTimesLeaderboard();
 
             if (!playerName) {
+                const formatLeaderboard = (data: RankedPlayerTimesPlayer[]) => data.map(playerData => [
+                    `**${playerData.rank}.** \`${playerData.name}\``,
+                    dbData.fmNamesData.some(x => x.name === playerData.name) ? FM_ICON : "",
+                    dbData.tfNamesData.some(x => x.name === playerData.name) ? TF_ICON : "",
+                    " - ",
+                    formatPlayerTime(playerData.totalTime)
+                ].join("")).join("\n");
+
                 return interaction.editReply({ embeds: [new EmbedBuilder()
                     .setColor(interaction.client.config.EMBED_COLOR)
                     .setDescription(`Top 50 players with the most time spent on IRTGaming FS servers since ${interaction.client.config.PLAYERTIMES_START_DATE}`)
                     .addFields(
-                        { name: "\u200b", value: leaderboard(sortedPlayersData.slice(0, 25), true), inline: true },
-                        { name: "\u200b", value: leaderboard(sortedPlayersData.slice(25, 50), false) + "\u200b", inline: true })
+                        { name: "\u200b", value: formatLeaderboard(leaderboardData.slice(0, 25)), inline: true },
+                        { name: "\u200b", value: formatLeaderboard(leaderboardData.slice(25)) + "\u200b", inline: true })
                 ] });
             }
 
@@ -152,8 +152,7 @@ export default new Command<"chatInput">({
 
             const fsKeys = fsServers.keys();
             const playerTimeData = getTimeData(playerData).sort((a, b) => fsKeys.indexOf(a[0]) - fsKeys.indexOf(b[0]));
-            const playerTimeDataTotal = playerTimeData.reduce((x, y) => x + y[1].time, 0);
-            const leaderboardIndex = sortedPlayersData.findIndex(x => x.name === playerData.name) + 1;
+            const { rank, totalTime } = await getPlayerTimesLeaderboard(playerData.name).then(x => x[0]);
             let decorators = "";
 
             const container = new ContainerBuilder().setAccentColor(resolveColor(interaction.client.config.EMBED_COLOR));
@@ -164,8 +163,8 @@ export default new Command<"chatInput">({
 
             container.addTextDisplayComponents(textDisplay => textDisplay.setContent(
                 `Player: \`${playerData.name}\` ${decorators}\n` +
-                `Leaderboard position: **#${leaderboardIndex}**\n` +
-                `Total time: **${formatPlayerTime(playerTimeDataTotal)}**\n` +
+                `Leaderboard position: **#${rank}**\n` +
+                `Total time: **${formatPlayerTime(totalTime)}**\n` +
                 (playerData.discordId ? `Discord user: ${userMention(playerData.discordId)}\n` : "") +
                 ((isMPStaff(interaction.member) && playerData.uuid) ? `-# UUID: \`${playerData.uuid}\`` : "")
             ));

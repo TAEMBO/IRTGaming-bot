@@ -1,6 +1,12 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db, playerTimesTable } from "#db";
 import { log } from "#util";
+
+export type RankedPlayerTimesPlayer = {
+    rank: number;
+    name: string;
+    totalTime: number;
+};
 
 export function getTimeData(data: typeof playerTimesTable.$inferSelect) {
     return Object.entries(data.servers).filter((x): x is [string, NonNullable<typeof x[1]>] => x[1] !== null);
@@ -48,4 +54,45 @@ export async function getPlayerTimesRow(playerName: string) {
         .where(eq(playerTimesTable.name, playerName));
 
     return rows.at(0) ?? null;
+}
+
+export async function getPlayerTimesLeaderboard(playerName?: string) {
+    const leaderboard = db.$with("leaderboard").as(
+        db.select({
+            name: playerTimesTable.name,
+            totalTime: sql<number>`
+                (
+                    SELECT COALESCE(SUM((server.value->>'time')::bigint), 0)
+                    FROM jsonb_each(${playerTimesTable.servers}) AS server
+                )
+            `.mapWith(Number).as("total_time"),
+        })
+            .from(playerTimesTable)
+    );
+
+    const ranked = db.$with("ranked").as(
+        db.with(leaderboard)
+            .select({
+                rank: sql<number>`
+                    ROW_NUMBER() OVER (ORDER BY ${leaderboard.totalTime} DESC)
+                `.mapWith(Number).as("rank"),
+                name: leaderboard.name,
+                totalTime: leaderboard.totalTime,
+            })
+            .from(leaderboard)
+    );
+
+    if (playerName) {
+        return await db
+            .with(leaderboard, ranked)
+            .select()
+            .from(ranked)
+            .where(eq(ranked.name, playerName));
+    } else {
+        return await db
+            .with(leaderboard, ranked)
+            .select()
+            .from(ranked)
+            .limit(50);
+    }
 }

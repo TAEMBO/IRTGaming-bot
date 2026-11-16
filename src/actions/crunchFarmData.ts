@@ -5,13 +5,12 @@ import { FTPActions } from "#structures";
 import { fsServers, jsonFromXML, FM_ICON, TF_ICON, log, WL_ICON } from "#util";
 import type { DBData, FarmFormat } from "#typings";
 
-type CrunchFarmDataDBData = DBData & { playerTimesData: (typeof playerTimesTable.$inferSelect)[] }
-
-export async function crunchFarmData(client: Client, dbData: CrunchFarmDataDBData, serverAcro: string) {
+export async function crunchFarmData(client: Client, dbData: DBData, serverAcro: string) {
     log("yellow", `Farm data cruncher running on ${serverAcro.toUpperCase()}`);
 
     const server = fsServers.getPublicOne(serverAcro);
     const farmData = jsonFromXML<FarmFormat>(await new FTPActions(server.ftp).get("savegame1/farms.xml"));
+    const playerTimesData = await db.select().from(playerTimesTable);
     const decorators = (name: string) => {
         let content = dbData.watchListData.some(x => x.name === name) ? WL_ICON : "";
 
@@ -29,10 +28,10 @@ export async function crunchFarmData(client: Client, dbData: CrunchFarmDataDBDat
     let addedUuidCount = 0;
 
     for (const player of farmData.farms.farm[0].players.player) {
-        const playerDatabyUuid = dbData.playerTimesData.find(x => x.uuid === player._attributes.uniqueUserId);
+        const playerDatabyUuid = playerTimesData.find(x => x.uuid === player._attributes.uniqueUserId);
 
         if (!playerDatabyUuid) {
-            const playerDataByName = dbData.playerTimesData.find(x => x.name === player._attributes.lastNickname);
+            const playerDataByName = playerTimesData.find(x => x.name === player._attributes.lastNickname);
 
             if (playerDataByName && !playerDataByName.uuid) {
                 await db

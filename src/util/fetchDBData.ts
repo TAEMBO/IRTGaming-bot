@@ -5,7 +5,6 @@ import {
     whitelistTable,
     watchListTable,
     watchListPingsTable,
-    playerTimesTable
 } from "#db";
 
 export async function fetchDBData() {
@@ -15,7 +14,6 @@ export async function fetchDBData() {
         whitelistData: await db.select().from(whitelistTable),
         watchListData: await db.select().from(watchListTable),
         watchlistPingsData: await db.select().from(watchListPingsTable),
-        playerTimesData: await db.select().from(playerTimesTable)
     };
 
     return dbData;

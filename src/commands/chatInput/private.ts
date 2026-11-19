@@ -8,7 +8,7 @@ import {
     roleMention,
     MessageFlags
 } from "discord.js";
-import { type ModhubDownloadProgressResponse, Routes } from "farming-simulator-types/2025";
+import { Routes } from "farming-simulator-types/2025";
 import { Command } from "#structures";
 import { collectAck, formatRequestInit, fsServers, onPrivateFarms, youNeedRole } from "#util";
 
@@ -212,13 +212,9 @@ export default new Command<"chatInput">({
 
                 const init = formatRequestInit(10_000, `ModInstall-${foundModId}`, { Cookie: sessionCookie });
 
-                await fetch(url + Routes.startModDownload(username, password, foundModId, false), init);
+                const res = await fetch(url + Routes.startModDownload(username, password, foundModId, false), init);
 
-                const res = await fetch(url + Routes.modhubDownloadProgress(foundModId), init);
-
-                const downloadProgress: ModhubDownloadProgressResponse = await res.json();
-
-                if (downloadProgress.downloaded > 0) {
+                if (res.status === 200) {
                     await interaction.editReply("Successfully started installing mod");
                 } else {
                     await interaction.editReply("Failed to start installing mod");
